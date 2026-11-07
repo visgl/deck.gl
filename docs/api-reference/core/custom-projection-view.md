@@ -24,13 +24,13 @@ The view resolves its CRS descriptor asynchronously using `projectionEngine.getC
 ## math.gl projection adapter
 
 The optional `@deck.gl/core/projection` entry point prepares a synchronous converter using
-`@math.gl/projection` alpha.15. Install that peer dependency when using this entry point.
+``@math.gl/geospatial`. The packages are already installed by `@deck.gl/core`.
 Only the selected projection algorithms are loaded; the regular core entry point does not
 import the projection engine.
 
 ```js
 import {createProjectionConverter} from '@deck.gl/core/projection';
-import {equalEarth} from '@math.gl/projection/projections/eqearth';
+import {equalEarth} from '@math.gl/geospatial/projection/projections/eqearth';
 
 const fromCrs = 'EPSG:4326';
 const toCrs = '+proj=eqearth +datum=WGS84 +units=m';
@@ -39,7 +39,7 @@ const projection = await createProjectionConverter({
   to: toCrs,
   projections: [equalEarth]
 });
-const view = new CustomProjectionView({fromCrs, toCrs, projection});
+const view = new CustomProjectionView({crs: toCrs, projection});
 ```
 
 `from` and `to` also accept math.gl spatial-reference descriptors, including normalized
@@ -62,6 +62,7 @@ Inherits [View options](./view.md#constructor), including layout, padding and co
 | Option | Default | Description |
 | --- | --- | --- |
 | `crs` | Required | A supported planar CRS definition: an identifier such as `EPSG:3857`, a PROJ string, WKT, PROJJSON object, or math.gl spatial-reference object. Linear axis units are read from the descriptor. |
+| `projection` | `undefined` | Optional prepared converter. When omitted, the view adapts its resolved CRS descriptor. |
 | `resolution` | `0` | Subdivision intervals around the earth for paths, polygons and bitmaps. The step is `EarthCircumference / resolution`, converted to source CRS units. Higher values generate more detailed geometry. Zero disables subdivision. |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
 

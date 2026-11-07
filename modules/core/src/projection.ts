@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {normalizeCRS, ProjectionTransform} from '@math.gl/projection/core';
-import type {ProjectionTransformCreateOptions, NormalizedCRS} from '@math.gl/projection/core';
+import {normalizeCRS, ProjectionTransform} from '@math.gl/geospatial/projection/core';
+import type {ProjectionTransformCreateOptions, NormalizedCRS} from '@math.gl/geospatial/projection/core';
 import type {ProjectionConverter} from './viewports/custom-projection-viewport';
 
 /** Options for a prepared planar converter. Source coordinates use longitude/latitude or

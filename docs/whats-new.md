@@ -4,11 +4,18 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### ScreenGrid compute aggregation
+
+`ScreenGridLayer` can aggregate on WebGPU using an explicit `colorDomain`, with
+picking and extensions disabled. SUM, MEAN, MIN, MAX, and COUNT produce GPUVector
+outputs consumed directly by the cell layer. See [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#compute-aggregation).
+
 ### Custom aggregators and GPUVector inputs
 
 GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer now accept custom aggregator
 instances. Custom aggregators can consume GPUVector position/weight columns and publish
-GPUVector cell results without copying them to the CPU. Existing defaults remain unchanged. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
+GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and
+channel values. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
 result layouts, and supported scales and contours.
 
 ### luma.gl v10 alpha.10
@@ -32,11 +39,13 @@ Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md)
 
 ### Custom projections (Experimental)
 
-[`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/geospatial/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs. The optional [`@deck.gl/core/projection`](./api-reference/core/custom-projection-view.md) entry point prepares math.gl CRS converters for custom projection views, including source-unit-aware meter sizing for radians and projected feet.
+[`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/geospatial/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
 
 ### Layer source CRS (Experimental)
 
 Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
+
+The optional [`@deck.gl/core/projection`](./api-reference/core/custom-projection-view.md) entry point prepares math.gl CRS converters for custom projection views. Source coordinate units and ellipsoids guide meter sizing, including radians and projected feet. CRS identifiers use deck.gl longitude/latitude or easting/northing order; explicit stored-order metadata must match.
 
 ## deck.gl v9.4
 

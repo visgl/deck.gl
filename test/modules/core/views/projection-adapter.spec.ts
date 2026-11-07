@@ -3,8 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {createSpatialReference} from '@math.gl/crs';
-import {mercator} from '@math.gl/projection/projections/merc';
+import {createSpatialReference} from '@math.gl/geospatial/crs';
+import {mercator} from '@math.gl/geospatial/projection/projections/merc';
 import {createProjectionConverter} from '@deck.gl/core/projection';
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 

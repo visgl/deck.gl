@@ -45,6 +45,11 @@ export class AttributeWithScale {
     this.attribute = this.input;
   }
 
+  /** Whether this scale has the current number of aggregation bins. */
+  matchesLength(length: number): boolean {
+    return this.inputLength === length;
+  }
+
   private getScalePercentile() {
     if (!this._percentile) {
       const value = getAttributeValue(this.input, this.inputLength);

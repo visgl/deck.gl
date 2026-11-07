@@ -10,7 +10,7 @@ import {
   altitudeToFovy,
   pixelsToWorld
 } from '@math.gl/web-mercator';
-import {PROJECTION_MODE} from '../lib/constants';
+import {PROJECTION_MODE} from '../shaderlib/project/constants';
 
 const EC = 40075016.6855;
 const NORMALIZATION_SCALE = 512 / EC;
@@ -86,6 +86,8 @@ export default class CustomProjectionViewport extends Viewport {
   /** Map-meter XY to sampler XY: scale followed by translation. */
   readonly sizeScaleTransform: [number, number, number, number];
   private projectionOptions: CustomProjectionViewportOptions;
+  private preproject!: (position: number[]) => [number, number, number];
+  private postUnproject!: (position: number[]) => [number, number, number] | null;
 
   constructor(opts: CustomProjectionViewportOptions) {
     const {
@@ -165,8 +167,6 @@ export default class CustomProjectionViewport extends Viewport {
       ...opts,
       width,
       height,
-      longitude: undefined,
-      latitude: undefined,
       modelMatrix: null,
       position,
       distanceScales: {
@@ -189,6 +189,8 @@ export default class CustomProjectionViewport extends Viewport {
         farZMultiplier: 1.01
       })
     });
+    this.preproject = preproject;
+    this.postUnproject = postUnproject;
     this.projectionOptions = {...opts, toBounds};
     this.sizeScaleSignature = JSON.stringify([fromCrs, toCrs, fromBounds, toBounds]);
     const scaleX = 512 / (toBounds[2] - toBounds[0]);
@@ -197,8 +199,13 @@ export default class CustomProjectionViewport extends Viewport {
     this.pitch = pitch;
     this.isGeospatial = true;
     this.bearing = bearing;
-    this.resolution = resolution;
     this.signature = JSON.stringify([fromCrs, toCrs, resolution]);
+  }
+
+  protected _getCenter(options: ViewportOptions, position: number[]): number[] {
+    const preproject = (options as ViewportOptions & {preproject?: (position: number[]) => number[]})
+      .preproject;
+    return preproject ? preproject(position) : super._getCenter(options, position);
   }
 
   get projectionSignature(): string {
