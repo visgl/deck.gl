@@ -9,19 +9,18 @@ import {
   PickingInfo,
   UpdateParameters,
   GetPickingInfoParams,
-  Viewport,
-  COORDINATE_SYSTEM,
   DefaultProps
 } from '@deck.gl/core';
 import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
+import type {ClipExtensionProps} from '@deck.gl/extensions';
 
-import {Matrix4} from '@math.gl/core';
-import {MVTWorkerLoader} from '@loaders.gl/mvt';
-import {binaryToGeojson} from '@loaders.gl/gis';
+import {Matrix4, equals} from '@math.gl/core';
+import {MVTWorkerLoader} from '@loaders.gl/tiles/mvt';
+import {convertBinaryFeatureCollectionToGeojson} from '@loaders.gl/core/geoarrow';
 
-import type {Loader} from '@loaders.gl/loader-utils';
-import type {BinaryFeatureCollection} from '@loaders.gl/schema';
+import type {Loader} from '@loaders.gl/core/loader-utils';
+import type {BinaryFeatureCollection} from '@loaders.gl/core/schema';
 import type {Feature, Geometry} from 'geojson';
 
 import {transform} from './coordinate-transform';
@@ -44,6 +43,7 @@ const WORLD_SIZE = 512;
 
 const defaultProps: DefaultProps<MVTLayerProps> = {
   ...GeoJsonLayer.defaultProps,
+  coordinateSystem: 'OSMTile512',
   data: urlType,
   onDataLoad: {type: 'function', value: null, optional: true, compare: false},
   uniqueIdProperty: '',
@@ -101,7 +101,7 @@ export type _MVTLayerProps<FeaturePropertiesT> = Omit<
   /**
    * Loaders used to transform tiles into `data` property passed to `renderSubLayers`.
    *
-   * @default [MVTWorkerLoader] from `@loaders.gl/mvt`
+   * @default [MVTWorkerLoader] from `@loaders.gl/tiles/mvt`
    */
   loaders?: Loader[];
 };
@@ -109,6 +109,10 @@ export type _MVTLayerProps<FeaturePropertiesT> = Omit<
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 
 /** Render data formatted as [Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/). */
+/**
+ * Compatibility MVT layer retaining binary data, TileJSON, and rendered-feature APIs.
+ * Remains supported while MVT2DLayer gains equivalent feature coverage.
+ */
 export default class MVTLayer<
   FeaturePropertiesT = any,
   ExtraProps extends {} = {}
@@ -127,10 +131,8 @@ export default class MVTLayer<
 
   initializeState(): void {
     super.initializeState();
-    // GlobeView doesn't work well with binary data
-    const binary = this.context.viewport.resolution !== undefined ? false : this.props.binary;
     this.setState({
-      binary,
+      binary: this.useBinary(),
       data: null,
       tileJSON: null,
       hoveredFeatureId: null,
@@ -138,12 +140,29 @@ export default class MVTLayer<
     });
   }
 
+  /** Select the tile data format; subclasses with fixed-format loaders can override it. */
+  protected useBinary(): boolean {
+    // Prepared binary geometry bypasses subdivision, so request GeoJSON when needed.
+    return this.getSubdivisionStep() > 0 ? false : this.props.binary;
+  }
+
   get isLoaded(): boolean {
     return Boolean(this.state?.data && super.isLoaded);
   }
 
   updateState({props, oldProps, context, changeFlags}: UpdateParameters<this>) {
-    if (changeFlags.dataChanged) {
+    const dataChanged = changeFlags.dataChanged;
+    const binary = this.useBinary();
+    if (binary !== this.state.binary) {
+      this.setState({binary});
+      // The tile representation must change when subdivision is enabled/disabled.
+      changeFlags = {
+        ...changeFlags,
+        dataChanged: 'tile geometry format changed',
+        propsOrDataChanged: true
+      };
+    }
+    if (dataChanged) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this._updateTileData();
     }
@@ -233,7 +252,7 @@ export default class MVTLayer<
       mvt: {
         ...loadOptions?.mvt,
         shape: binary ? 'binary-geometry' : 'geojson-table',
-        coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
+        coordinates: 'local',
         tileIndex: index
         // Local worker debug
         // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
@@ -247,30 +266,51 @@ export default class MVTLayer<
   }
 
   renderSubLayers(
-    props: TileLayer['props'] & {
-      id: string;
-      data: ParsedMvtTile;
-      _offset: number;
-      tile: Tile2DHeader<ParsedMvtTile>;
-    }
+    props: TileLayer['props'] &
+      ClipExtensionProps & {
+        id: string;
+        data: ParsedMvtTile;
+        _offset: number;
+        tile: Tile2DHeader<ParsedMvtTile>;
+      }
   ): Layer | null | LayersList {
     const {x, y, z} = props.tile.index;
     const worldScale = Math.pow(2, z);
 
     const xScale = WORLD_SIZE / worldScale;
-    const yScale = -xScale;
+    const yScale = xScale;
 
     const xOffset = (WORLD_SIZE * x) / worldScale;
-    const yOffset = WORLD_SIZE * (1 - y / worldScale);
+    const yOffset = (WORLD_SIZE * y) / worldScale;
 
     const modelMatrix = new Matrix4().scale([xScale, yScale, 1]);
 
     props.autoHighlight = false;
 
-    if (!this.context.viewport.resolution) {
-      props.modelMatrix = modelMatrix;
-      props.coordinateOrigin = [xOffset, yOffset, 0];
-      props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
+    // Tile-local data stays viewport-independent. Sublayers convert the declared
+    // southward-Y world coordinates to the active viewport's attribute CRS.
+    props.modelMatrix = modelMatrix;
+    props.coordinateOrigin = [xOffset, yOffset, 0];
+    props.coordinateSystem = 'OSMTile512';
+
+    // A tiler writes a feature into the buffer of every tile it touches, so each tile must paint
+    // only its own area or the shared geometry is drawn once per tile. This applies to the point
+    // sub layers too: a point inside a neighbor's buffer is emitted by both tiles. `ClipExtension`
+    // clips those by anchor rather than by geometry, so a label or icon still overhangs the edge.
+    // `clip_isInBounds` is half-open, so a feature exactly on a shared edge is drawn by one tile
+    // rather than both.
+    // The tile, in tile-local coordinates
+    const tileClipBounds: [number, number, number, number] = [0, 0, 1, 1];
+    // ClipExtension's default clipBounds is the same unit square, so only other bounds were set
+    // by the caller
+    if (props.clipBounds && !equals(props.clipBounds, tileClipBounds)) {
+      log.warn(
+        `${this.id}: clipBounds is reserved by MVTLayer, which clips each sub layer to its tile`
+      )();
+    }
+    props.clipBounds = tileClipBounds;
+    // A second ClipExtension would inject the same shader declarations twice and fail to compile
+    if (!props.extensions?.some(extension => extension instanceof ClipExtension)) {
       props.extensions = [...(props.extensions || []), new ClipExtension()];
     }
 
@@ -313,7 +353,8 @@ export default class MVTLayer<
   }
 
   protected _isWGS84(): boolean {
-    return Boolean(this.context.viewport.resolution);
+    // Subclasses with geographic loaders (e.g. CARTO) override this picking contract.
+    return false;
   }
 
   getPickingInfo(params: GetPickingInfoParams): MVTLayerPickingInfo<FeaturePropertiesT> {
@@ -321,15 +362,14 @@ export default class MVTLayer<
 
     if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer!.props;
-      info.object = binaryToGeojson(data as BinaryFeatureCollection, {
+      info.object = convertBinaryFeatureCollectionToGeojson(data as BinaryFeatureCollection, {
         globalFeatureId: info.index
       }) as Feature;
     }
     if (info.object && !this._isWGS84()) {
       info.object = transformTileCoordsToWGS84(
         info.object,
-        info.tile!.bbox as GeoBoundingBox, // eslint-disable-line
-        this.context.viewport
+        info.tile!.bbox as GeoBoundingBox // eslint-disable-line
       );
     }
 
@@ -428,7 +468,7 @@ export default class MVTLayer<
             }
 
             if (this.state.binary && Array.isArray(tile.content) && !tile.content.length) {
-              // TODO: @loaders.gl/mvt returns [] when no content. It should return a valid empty binary.
+              // TODO: @loaders.gl/tiles/mvt returns [] when no content. It should return a valid empty binary.
               // https://github.com/visgl/loaders.gl/pull/1137
               return [];
             }
@@ -437,9 +477,11 @@ export default class MVTLayer<
             if (tile._contentWGS84 === undefined && isGeoBoundingBox(bbox)) {
               // Create a cache to transform only once
 
-              const content = this.state.binary ? binaryToGeojson(tile.content) : tile.content;
+              const content = this.state.binary
+                ? convertBinaryFeatureCollectionToGeojson(tile.content)
+                : tile.content;
               tile._contentWGS84 = content.map(feature =>
-                transformTileCoordsToWGS84(feature, bbox, this.context.viewport)
+                transformTileCoordsToWGS84(feature, bbox)
               );
             }
             return tile._contentWGS84;
@@ -470,11 +512,7 @@ function isFeatureIdDefined(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
 }
 
-function transformTileCoordsToWGS84(
-  object: Feature,
-  bbox: GeoBoundingBox,
-  viewport: Viewport
-): Feature {
+function transformTileCoordsToWGS84(object: Feature, bbox: GeoBoundingBox): Feature {
   const feature = {
     ...object,
     geometry: {
@@ -485,7 +523,7 @@ function transformTileCoordsToWGS84(
   // eslint-disable-next-line accessor-pairs
   Object.defineProperty(feature.geometry, 'coordinates', {
     get: () => {
-      const wgs84Geom = transform(object.geometry, bbox, viewport);
+      const wgs84Geom = transform(object.geometry, bbox);
       return wgs84Geom.coordinates;
     }
   });

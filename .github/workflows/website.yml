@@ -78,6 +78,20 @@ jobs:
           WEBSITE_BASE_URL: ${{ needs.check_branch.outputs.website_base_url }}
         run: (cd website && yarn build)
 
+      # Pages checks the branch root, even when the site lives under /next/.
+      - name: Prepare Pages marker
+        run: |
+          mkdir -p "website-pages-marker"
+          touch "website-pages-marker/.nojekyll"
+
+      - name: Disable Jekyll at the Pages branch root
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # 4.9.0
+        with:
+          token: ${{ secrets.WEBSITE_DEPLOY_TOKEN }}
+          branch: gh-pages
+          folder: website-pages-marker
+          clean: false
+
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # 4.9.0
         with:
@@ -88,3 +102,4 @@ jobs:
           clean: true
           clean-exclude: |
             next
+            .nojekyll

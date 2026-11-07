@@ -5,7 +5,7 @@
 import {Texture} from '@luma.gl/core';
 import {log} from '@deck.gl/core';
 
-import {terrainModule, TerrainModuleProps} from './shader-module';
+import {terrainPlugin, TerrainModuleProps} from './shader-module';
 import {TerrainCover} from './terrain-cover';
 import {TerrainPass} from './terrain-pass';
 import {TerrainPickingPass, TerrainPickingPassRenderOptions} from './terrain-picking-pass';
@@ -48,7 +48,7 @@ export class TerrainEffect implements Effect {
       log.warn('Terrain offset mode is not supported by this browser')();
     }
 
-    deck._addDefaultShaderModule(terrainModule);
+    deck._addDefaultShaderPlugin(terrainPlugin);
   }
 
   preRender(opts: PreRenderOptions): void {
@@ -145,7 +145,7 @@ export class TerrainEffect implements Effect {
     }
     this.terrainCovers.clear();
 
-    deck._removeDefaultShaderModule(terrainModule);
+    deck._removeDefaultShaderPlugin(terrainPlugin);
   }
 
   private _updateHeightMap(terrainLayers: Layer[], viewport: Viewport, opts: PreRenderOptions) {

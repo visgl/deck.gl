@@ -116,9 +116,6 @@ export default class OrbitViewport extends Viewport {
 
     super({
       ...props,
-      // in case viewState contains longitude/latitude values,
-      // make sure that the base Viewport class does not treat this as a geospatial viewport
-      longitude: undefined,
       viewMatrix: getViewMatrix({
         height: height || 1,
         focalDistance,

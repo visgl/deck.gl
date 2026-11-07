@@ -3,13 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable camelcase */
-import {fp64} from '@luma.gl/shadertools';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import {fp64} from '@luma.gl/shaders';
+import type {ShaderModule} from '@luma.gl/shaders';
 const {fp64ify, fp64ifyMatrix4} = fp64;
 import {project, _memoize as memoize} from '@deck.gl/core';
 
 import type {Viewport} from '@deck.gl/core';
 import project64Shader from './project64.glsl';
+import source from './project64.wgsl';
 
 type Project64ModuleProps = {
   viewport: Viewport;
@@ -19,6 +20,7 @@ export default {
   name: 'project64',
   dependencies: [project, fp64],
   vs: project64Shader,
+  source,
   getUniforms,
   uniformTypes: {
     scale: 'vec2<f32>',

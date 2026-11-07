@@ -12,6 +12,8 @@
 
  Create as many sidebars as you want.
  */
+const v10Sections = require('./examples/v10/examples.json');
+
 const sidebars = {
   examplesSidebar: [
     {
@@ -24,11 +26,12 @@ const sidebars = {
       label: 'Layers',
       items: [
         'arc-layer',
+        'bitmap-layer',
         'contour-layer',
         'geojson-layer-polygons',
         'geojson-layer-paths',
         'global-grids',
-        // 'grid-layer',
+        'grid-layer',
         'heatmap-layer',
         'hexagon-layer',
         'icon-layer',
@@ -46,6 +49,18 @@ const sidebars = {
         'tile-3d-layer',
         'trips-layer',
         'wms-layer'
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Proposals',
+      items: [
+        'shared-tile-2d-layer',
+        ...v10Sections.map(({label, examples}) => ({
+          type: 'category',
+          label,
+          items: examples.map(({id}) => `v10/${id}`)
+        }))
       ]
     },
     {

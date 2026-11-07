@@ -7,20 +7,37 @@ import {_CustomProjectionView as CustomProjectionView, WebMercatorViewport} from
 import {CustomProjectionState} from '@deck.gl/core/controllers/custom-projection-controller';
 import {MapState} from '@deck.gl/core/controllers/map-controller';
 import testController, {createTestController} from './test-controller';
-import {Projection} from '@math.gl/projection';
+import {createTestViewport} from '../viewports/test-crs';
 import {lngLatToWorld, worldToLngLat, pixelsToWorld, worldToPixels} from '@math.gl/web-mercator';
 
-const view = new CustomProjectionView({
-  projection: {forward: p => p.slice(), inverse: p => p.slice()}
+// Synthetic converters keep controller edge cases independent of CRS resolution.
+class TestProjectionView extends CustomProjectionView {
+  constructor(props = {}) {
+    super({crs: 'test', ...props});
+  }
+  initialize() {
+    return Promise.resolve();
+  }
+  makeViewport(options) {
+    return createTestViewport({
+      ...this.filterViewState(options.viewState),
+      ...this.props,
+      ...this.getDimensions(options)
+    });
+  }
+}
+
+const view = new TestProjectionView({
+  converter: {forward: p => p.slice(), inverse: p => p.slice()}
 });
 const makeViewport = props => view.makeViewport({width: 800, height: 600, viewState: props})!;
 const options = {width: 800, height: 600, makeViewport};
 
-test('CustomProjectionState projects world maxBounds without changing stored bounds', () => {
-  const converter = new Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
+test('CustomProjectionState projects world maxBounds without changing stored bounds', async () => {
   const mapView = new CustomProjectionView({
-    projection: {forward: converter.project, inverse: converter.unproject}
+    crs: 'EPSG:3857'
   });
+  await mapView.initialize();
   const maxBounds: [[number, number], [number, number]] = [
     [-120, 30],
     [-60, 60]
@@ -61,12 +78,12 @@ test('CustomProjectionState projects world maxBounds without changing stored bou
 });
 
 test('CustomProjectionState bounds include curved edges and reversed projected axes', () => {
-  const curvedView = new CustomProjectionView({
-    projection: {
+  const curvedView = new TestProjectionView({
+    converter: {
       forward: ([x, y, z = 0]) => [-x * 1000000, (y + 1 - x * x) * 1000000, z],
       inverse: ([x, y, z = 0]) => [-x / 1000000, y / 1000000 - 1 + (x / 1000000) ** 2, z]
     },
-    getDistanceScale: () => [1, 1]
+    distanceScale: () => [1, 1, 1]
   });
   const state = new CustomProjectionState({
     ...options,
@@ -89,15 +106,6 @@ test('CustomProjectionState bounds include curved edges and reversed projected a
   expect(state.getViewportProps().center[0]).toBeCloseTo(0, 8);
   expect(state.getViewportProps().center[1]).toBeCloseTo(0, 8);
 });
-
-class TestProjectionView extends CustomProjectionView {
-  constructor(props = {}) {
-    super({
-      projection: {forward: p => p.slice(), inverse: p => p.slice()},
-      ...props
-    });
-  }
-}
 
 for (const inertia of [false, true]) {
   test(`CustomProjectionController shared gesture suite, inertia=${inertia}`, async () => {
@@ -294,8 +302,8 @@ test('CustomProjectionState returns world centers while anchoring pan and contin
 });
 
 test('CustomProjectionState retains the world center when navigation cannot be inverted', () => {
-  const invalidInverseView = new CustomProjectionView({
-    projection: {forward: p => p.slice(), inverse: () => null}
+  const invalidInverseView = new TestProjectionView({
+    converter: {forward: p => p.slice(), inverse: () => null}
   });
   const state = new CustomProjectionState({
     ...options,

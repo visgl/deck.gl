@@ -7,7 +7,7 @@ import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
+
 import {points} from 'deck.gl-test/data';
 
 const testCases = [
@@ -116,7 +116,7 @@ const testCases = [
         id: 'heatmap-lnglat-offset',
         data: points,
         opacity: 0.8,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        coordinateSystem: 'lnglat-offsets',
         coordinateOrigin: [-122.42, 37.76],
         getPosition: d => [d.COORDINATES[0] + 122.42, d.COORDINATES[1] - 37.76],
         getWeight: d => d.SPACES,

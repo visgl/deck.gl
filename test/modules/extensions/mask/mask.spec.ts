@@ -2,10 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
+import {LayerManager, WebMercatorViewport} from '@deck.gl/core';
+import {Matrix4} from '@math.gl/core';
+import {createTestViewport} from '../../core/viewports/test-crs';
 import {MaskExtension} from '@deck.gl/extensions';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils/vitest';
+import {testLayer, device} from '@deck.gl/test-utils/vitest';
 
 import {geojson} from 'deck.gl-test/data';
 
@@ -25,9 +28,7 @@ test('MaskExtension', () => {
         maskChannels: {
           mask: {
             index: 0,
-            bounds: [0, 10, 5, 20],
-            coordinateOrigin: [0, 0, 0],
-            coordinateSystem: 'default'
+            bounds: [0, 10, 5, 20]
           }
         }
       },
@@ -114,4 +115,42 @@ test('MaskExtension#maskByInstance', () => {
   ];
 
   testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test.each([
+  new WebMercatorViewport({longitude: 30, latitude: 40, zoom: 8}),
+  new WebMercatorViewport({longitude: 30, latitude: 40, zoom: 14}),
+  createTestViewport({longitude: 30, latitude: 40, zoom: 4})
+])('MaskExtension aligns viewport bounds with the receiving shader', viewport => {
+  const manager = new LayerManager(device, {viewport});
+  const layer = new ScatterplotLayer({
+    data: [],
+    maskId: 'mask',
+    coordinateSystem: 'meter-offsets',
+    coordinateOrigin: [10, 20, 0],
+    modelMatrix: new Matrix4().scale([2, 3, 4])
+  });
+  try {
+    manager.setLayers([layer]);
+    const setProps = vi.spyOn(layer, 'setShaderModuleProps');
+    new MaskExtension().draw.call(layer, {
+      context: layer.context,
+      shaderModuleProps: {
+        project: {viewport, ...layer.props, sourceCrs: layer.internalState!.sourceCrs},
+        mask: {maskChannels: {mask: {index: 0, bounds: [11, 21, 12, 22]}}}
+      }
+    });
+    const origin = viewport.projectPosition([10, 20, 0]);
+    const lower = viewport.projectPosition([11, 21, 0]);
+    const upper = viewport.projectPosition([12, 22, 0]);
+    expect(setProps.mock.lastCall![0].mask.bounds).toEqual([
+      lower[0] - origin[0],
+      lower[1] - origin[1],
+      upper[0] - origin[0],
+      upper[1] - origin[1]
+    ]);
+  } finally {
+    manager.finalize();
+    vi.restoreAllMocks();
+  }
 });

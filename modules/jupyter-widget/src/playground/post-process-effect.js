@@ -23,7 +23,7 @@ import {
   vibrance,
   vignette,
   zoomBlur
-} from '@luma.gl/effects';
+} from '@luma.gl/engine/effects';
 
 const POST_PROCESS_EFFECTS = {
   brightnessContrast,
