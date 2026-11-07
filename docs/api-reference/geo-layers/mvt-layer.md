@@ -366,6 +366,10 @@ new MVTLayer({
 })
 ```
 
+## Remarks
+
+- `clipBounds` has no effect. Sub layers are always clipped to their own tile. Use [`extent`](./tile-layer.md#extent) to limit the area that is rendered.
+
 ## Source
 
 [modules/geo-layers/src/mvt-layer](https://github.com/visgl/deck.gl/tree/9.4-release/modules/geo-layers/src/mvt-layer)
