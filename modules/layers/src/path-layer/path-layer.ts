@@ -20,6 +20,7 @@ import {
 import {Geometry} from '@luma.gl/engine';
 import type {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
+import {getMetersPerUnit} from '../utils';
 
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
@@ -42,6 +43,14 @@ import type {PathGeometry} from './path';
 
 type _PathLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
+  /** Sampled edge error in map meters for a projected or geocentric preprojecting viewport.
+   * Zero disables refinement.
+   * Requires normalized geometry, finite samples and pre-split projection seams.
+   * Throws when math.gl refinement limits are exhausted.
+   * @experimental
+   * @default 0
+   */
+  _projectionTolerance?: number;
   /** The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`
    * @default 'meters'
    */
@@ -131,6 +140,7 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   antialiasing: false,
   billboard: false,
   _pathType: null,
+  _projectionTolerance: {type: 'number', value: 0, min: 0},
 
   getPath: {type: 'accessor', value: (object: any) => object.path},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -327,6 +337,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         noAlloc
       },
       instanceStrokeWidths: {
+        transform: null,
         size: 1,
         accessor: 'getWidth',
         transition: isWebGPU ? false : ATTRIBUTE_TRANSITION,
@@ -334,6 +345,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         bufferGroup: 'path-instance-data'
       },
       instanceColors: {
+        transform: null,
         size: this.props.colorFormat.length,
         type: 'unorm8',
         accessor: 'getColor',
@@ -367,6 +379,16 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {props, oldProps, changeFlags} = params;
 
     const attributeManager = this.getAttributeManager();
+    // An inactive transform still forces CPU conversion of binary attributes.
+    // Attach refinement validators only while refinement is enabled.
+    // Transition attributes have separate settings; update the source descriptors.
+    const attributes = attributeManager!.attributes;
+    attributes.instanceStrokeWidths.settings.transform = props._projectionTolerance
+      ? transformRefinedWidth
+      : null;
+    attributes.instanceColors.settings.transform = props._projectionTolerance
+      ? transformRefinedColor
+      : null;
     const {viewport} = this.context;
     const subdivisionStepChanged = this.state.subdivisionStep !== this.getSubdivisionStep();
     const pathProjectionScale = this.getPathProjectionScale(viewport);
@@ -384,6 +406,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
           !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1))) ||
       getPathChanged ||
+      props._projectionTolerance !== oldProps._projectionTolerance ||
       props._pathType !== oldProps._pathType ||
       props.positionFormat !== oldProps.positionFormat ||
       props.wrapLongitude !== oldProps.wrapLongitude ||
@@ -393,6 +416,19 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     if (geometryChanged) {
       const {pathTesselator} = this.state;
       const buffers = (props.data as any).attributes || {};
+      const projectionToleranceScale = getMetersPerUnit(this.state.packedCrs);
+      if (
+        props._projectionTolerance &&
+        (!projectionToleranceScale ||
+          !this.usePositionTransforms().transform ||
+          props._pathType ||
+          (buffers.getPath && !ArrayBuffer.isView(buffers.getPath.value ?? buffers.getPath)) ||
+          Object.keys(buffers).some(key => key !== 'getPath'))
+      ) {
+        throw new Error(
+          'Projection refinement requires a projected or geocentric target CRS with linear units, normalized paths and per-object attributes'
+        );
+      }
 
       pathTesselator.updateGeometry({
         data: props.data,
@@ -410,6 +446,8 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           this.state.sourceCrs?.signature === 'WGS84',
         // Subdivision runs in accessor coordinates before the source CRS transform.
         resolution: this.getSubdivisionStep(),
+        projectionTolerance: props._projectionTolerance,
+        projectionToleranceScale: projectionToleranceScale ?? undefined,
         // A partial data diff is only valid while normalization inputs remain unchanged.
         dataChanged: geometryConfigurationChanged ? undefined : changeFlags.dataChanged
       });
@@ -603,4 +641,21 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     attribute.startIndices = pathTesselator.vertexStarts;
     attribute.value = result;
   }
+}
+
+function transformRefinedWidth(this: PathLayer, value) {
+  if (this.props._projectionTolerance && typeof value !== 'number') {
+    throw new Error('Projection refinement requires per-object widths');
+  }
+  return value;
+}
+
+function transformRefinedColor(this: PathLayer, value) {
+  if (this.props._projectionTolerance && (typeof value?.[0] === 'object' || value?.length > 4)) {
+    throw new Error('Projection refinement requires per-object colors');
+  }
+  // RGB attributes must not treat a single RGBA color as packed vertex data.
+  return this.props._projectionTolerance && this.props.colorFormat === 'RGB' && value?.length === 4
+    ? value.slice(0, 3)
+    : value;
 }
