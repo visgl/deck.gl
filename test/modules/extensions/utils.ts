@@ -17,6 +17,7 @@ export class LifecycleTester {
     this.effectContext = {
       device,
       deck: {
+        props: {layerFilter: null},
         _addDefaultShaderPlugin: layerManager.addDefaultShaderPlugin.bind(layerManager),
         _removeDefaultShaderPlugin: layerManager.removeDefaultShaderPlugin.bind(layerManager)
       }
