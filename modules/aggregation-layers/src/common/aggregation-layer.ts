@@ -61,10 +61,8 @@ export default abstract class AggregationLayer<
       return;
     }
     const {positions, weights, aggregator, extensions} = this.props;
-    if (!aggregator || extensions.length || !weights) {
-      throw new Error(
-        'GPU aggregation columns require a custom aggregator, weights, and no extensions'
-      );
+    if ((!aggregator && this.state.aggregatorType !== 'webgpu') || extensions.length || !weights) {
+      throw new Error('GPU columns require a compatible aggregator, weights, and no extensions');
     }
     if (
       this.getNumInstances() > positions.length ||
