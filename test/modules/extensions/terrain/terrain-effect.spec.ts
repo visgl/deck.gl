@@ -613,6 +613,58 @@ webglTest('TerrainEffect#picks layers draped over external terrain', async () =>
   }
 });
 
+webglTest('TerrainEffect#raises offset layers by the ground height at their latitude', async () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 600;
+  canvas.height = 300;
+  const webglContext = canvas.getContext('webgl2', {preserveDrawingBuffer: true});
+  // High enough to tell the meters at 35° of latitude apart from those at the center of the view, at 50°
+  const groundHeight = 1000000;
+  const externalTerrain = {
+    id: 'terrain',
+    renderHeightMap: ({target}: {target: Framebuffer}) => {
+      target.device
+        .beginRenderPass({framebuffer: target, clearColor: [groundHeight, 0, 0, 1]})
+        .end();
+    }
+  };
+  const deck = new Deck({
+    gl: webglContext!,
+    width: 600,
+    height: 300,
+    useDevicePixels: false,
+    controller: false,
+    viewState: {longitude: 0, latitude: 50, zoom: 3, pitch: 60, bearing: 0},
+    layers: [
+      new ExternalTerrainLayer({id: 'external-terrain', externalTerrain}),
+      new ScatterplotLayer({
+        id: 'south',
+        data: [[0, 0]],
+        coordinateSystem: 'meter-offsets',
+        coordinateOrigin: [0, 35, 0],
+        getPosition: d => d,
+        getRadius: 10,
+        radiusUnits: 'pixels',
+        pickable: true,
+        extensions: [new TerrainExtension()]
+      })
+    ]
+  });
+
+  try {
+    await waitForRender(deck);
+    const viewport = deck.getViewports()[0];
+    // Viewport.project scales the height by the meters at the point's latitude
+    const [x, y] = viewport.project([0, 35, groundHeight]);
+    expect(deck.pickObject({x, y})?.layer?.id, 'Point on the terrain far from the center').toBe(
+      'south'
+    );
+  } finally {
+    deck.finalize();
+    webglContext!.getExtension('WEBGL_lose_context')?.loseContext();
+  }
+});
+
 test('TerrainEffect#draped layers without terrain', async () => {
   const terrainEffect = new TerrainEffect();
   const glacierLayer = createGlacierLayer();

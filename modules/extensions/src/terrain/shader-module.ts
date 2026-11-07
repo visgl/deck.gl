@@ -92,6 +92,11 @@ vec2 terrain_globe_to_mercator(vec3 globePosition) {
   float y = atanh(sinLat);
   return (vec2(x, y) + PI) * WORLD_SCALE;
 }
+
+// Common space units per meter at a Web Mercator y in common space, which grow by 1 / cos(latitude)
+float terrain_mercator_units_per_meter(float commonY) {
+  return TILE_SIZE / (2.0 * PI * EARTH_RADIUS) * cosh(commonY / WORLD_SCALE - PI);
+}
 `,
   fs: `${uniformBlock}in vec2 terrainMercPos;\nin float terrainHeight;`,
 
@@ -212,11 +217,12 @@ if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP || terrain.mode == TERRAIN_MODE_
   if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
     float terrainZ = texture(terrain_map, texCoords).r;
     if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP_METERS) {
-      // Raise the object by the ground height, which the layer's modelMatrix does not scale
-      vec3 up = (project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)
-        ? normalize(geometry.position.xyz)
-        : vec3(0.0, 0.0, 1.0);
-      geometry.position.xyz += up * project_size(terrainZ);
+      // Raise the object by the ground height at its anchor, which the layer's modelMatrix does not scale
+      if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+        geometry.position.xyz += normalize(geometry.position.xyz) * project_size(terrainZ);
+      } else {
+        geometry.position.z += terrainZ * terrain_mercator_units_per_meter(anchorMercPos.y + project.commonOrigin.y);
+      }
     } else if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
       // Height map is written in Mercator common space (units = TILE_SIZE / EARTH_CIRCUMFERENCE / cos(lat))
       // Convert to globe radial units (units = GLOBE_RADIUS / EARTH_RADIUS)
