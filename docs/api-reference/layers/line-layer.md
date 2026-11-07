@@ -209,6 +209,34 @@ When enabled, this prop computes edge coverage in the shader. When disabled, the
 Other antialiasing techniques have different trade-offs; see [Antialiasing and Multisampling](https://luma.gl/docs/api-guide/gpu/gpu-antialiasing) in the luma.gl docs.
 
 
+### Arrow Columns
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
+
+#### `sourcePositions` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric XY or XYZ fixed-size lists specifying source positions. Overrides [`getSourcePosition`](#getsourceposition).
+
+#### `targetPositions` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric XY or XYZ fixed-size lists specifying target positions. Overrides [`getTargetPosition`](#gettargetposition).
+
+#### `colors` (Arrow Vector, optional)
+
+* Default: `null`
+
+RGB or RGBA fixed-size lists specifying line colors. Overrides [`getColor`](#getcolor).
+
+#### `widths` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric scalar widths in `widthUnits`. Overrides [`getWidth`](#getwidth).
+
 ### Data Accessors
 
 #### `getSourcePosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsourceposition}
@@ -240,19 +268,6 @@ The line width of each object, in units specified by `widthUnits` (default pixel
 
 * If a number is provided, it is used as the line width for all objects.
 * If a function is provided, it is called on each object to retrieve its line width.
-
-## Remarks
-
-### Using with GlobeView
-
-When using this layer with [GlobeView](../core/globe-view.md) or MapLibre's globe projection, lines may be invisible when viewed from certain angles because `GlobeView` enables back-face culling by default. To ensure lines are visible from both sides, set:
-
-```js
-new LineLayer({
-  // ...other props
-  parameters: {cullMode: 'none'}
-});
-```
 
 ## Source
 

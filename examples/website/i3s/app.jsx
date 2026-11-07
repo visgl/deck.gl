@@ -6,7 +6,7 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
-import {I3SLoader} from '@loaders.gl/i3s';
+import {I3SLoader} from '@loaders.gl/tiles-3d/i3s';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 const TILESET_URL =
@@ -31,7 +31,7 @@ const INITIAL_VIEW_STATE = {
 export default function App({
   device,
   data = TILESET_URL,
-  mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+  mapStyle = 'https://tiles.openfreemap.org/styles/dark'
 }) {
   const layers = [
     new Tile3DLayer({

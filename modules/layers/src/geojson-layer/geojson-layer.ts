@@ -17,7 +17,7 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 
-import type {BinaryFeatureCollection} from '@loaders.gl/schema';
+import type {BinaryFeatureCollection} from '@loaders.gl/core/schema';
 import type {Feature, Geometry, GeoJSON} from 'geojson';
 
 import {replaceInRange} from '../utils';

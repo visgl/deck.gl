@@ -7,7 +7,8 @@ import DeckGL from '@deck.gl/react';
 import {Map} from 'react-map-gl/maplibre';
 import styled from 'styled-components';
 import {useColorMode} from '@docusaurus/theme-common';
-import {MAPBOX_STYLES} from '../constants/defaults';
+import {cloneMapStyle, MAPBOX_STYLES} from '../constants/defaults';
+import OpenFreeMapAttribution from '../components/openfreemap-attribution';
 import {gotoLayerSource} from './codepen-automation';
 
 const INITIAL_VIEW_STATE = {
@@ -89,14 +90,17 @@ function evalObject(source, globals, output) {
   })`)(globals);
 }
 
+/** Creates an inline layer demo; sourceLink replaces Codepen for repository-only examples. */
 export function makeLayerDemo(config) {
   const {
     Layer,
     getTooltip,
     props,
     mapStyle = true,
+    attribution = false,
     initialViewState = INITIAL_VIEW_STATE,
-    imports
+    imports,
+    sourceLink
   } = config;
   config.initialViewState = initialViewState;
 
@@ -118,7 +122,10 @@ export function makeLayerDemo(config) {
 
     const layer = new Layer(layerProps);
 
-    const mapStyleSheet = colorMode === 'dark' ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT;
+    const mapStyleSheet = React.useMemo(
+      () => cloneMapStyle(colorMode === 'dark' ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT),
+      [colorMode]
+    );
 
     return (
       <DemoPlaceholder>
@@ -137,8 +144,15 @@ export function makeLayerDemo(config) {
               />
             )}
           </DeckGL>
+          {attribution && <OpenFreeMapAttribution />}
         </DemoContainer>
-        <DemoSourceLink onClick={() => gotoLayerSource(config, layer)}>
+        <DemoSourceLink
+          as={sourceLink ? 'a' : 'div'}
+          href={sourceLink}
+          target={sourceLink ? '_blank' : undefined}
+          rel={sourceLink ? 'noreferrer' : undefined}
+          onClick={sourceLink ? undefined : () => gotoLayerSource(config, layer)}
+        >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M0 0h24v24H0V0z" fill="none" />
             <path
@@ -146,7 +160,7 @@ export function makeLayerDemo(config) {
               d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"
             />
           </svg>
-          Edit on Codepen
+          {sourceLink ? 'View source' : 'Edit on Codepen'}
         </DemoSourceLink>
       </DemoPlaceholder>
     );

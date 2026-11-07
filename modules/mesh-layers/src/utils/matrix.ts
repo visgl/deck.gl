@@ -54,6 +54,22 @@ function getExtendedMat3FromMat4(mat4) {
   return mat4.subarray(0, 12);
 }
 
+/** Computes the four shader vectors for a mesh instance using the normal transform math. */
+export function getMeshInstanceTransform(
+  matrix: readonly number[],
+  orientation: readonly number[],
+  scale: readonly number[],
+  translation: readonly number[]
+): Float32Array {
+  if (matrix?.length === 16) {
+    return getExtendedMat3FromMat4(new Float32Array(matrix));
+  }
+  const result = new Float32Array(12);
+  calculateTransformMatrix(result, orientation, scale);
+  result.set(translation, 9);
+  return result;
+}
+
 export const MATRIX_ATTRIBUTES = {
   size: 12,
   accessor: ['getOrientation', 'getScale', 'getTranslation', 'getTransformMatrix'],
@@ -158,8 +174,13 @@ export const MATRIX_ATTRIBUTES = {
 // with `composeModelMatrix` enabled, the rotation part of the layer's modelMatrix will be composed to instance's transformations
 // since rotating latitude and longitude can not provide meaningful results, hence `composeModelMatrix` is disabled
 // when in LNGLAT and LNGLAT_OFFSET coordinates.
-export function shouldComposeModelMatrix(viewport, coordinateSystem) {
+export function shouldComposeModelMatrix(viewport, coordinateSystem, preproject = false) {
+  if (preproject) {
+    // Cartesian anchors bypass preprojection, so model transforms also apply to mesh offsets.
+    return coordinateSystem === 'cartesian';
+  }
   return (
+    coordinateSystem === viewport.crs?.signature ||
     coordinateSystem === 'cartesian' ||
     coordinateSystem === 'meter-offsets' ||
     (coordinateSystem === 'default' && !viewport.isGeospatial)

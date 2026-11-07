@@ -2,27 +2,24 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {
-  Layer,
-  Viewport,
-  Effect,
-  EffectContext,
-  PreRenderOptions,
-  CoordinateSystem,
-  log
-} from '@deck.gl/core';
+import {Layer, Viewport, Effect, EffectContext, PreRenderOptions, log} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
 import MaskPass from './mask-pass';
-import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
+import {
+  joinLayerBounds,
+  getRenderBounds,
+  makeViewport,
+  getMercatorReferenceViewport,
+  Bounds
+} from '../utils/projection-utils';
 // import {debugFBO} from '../utils/debug';
 
 type Mask = {
   /** The channel index */
   index: 0 | 1 | 2 | 3;
+  /** Mask viewport bounds: WGS84 for geospatial views, local coordinates otherwise. */
   bounds: Bounds;
-  coordinateOrigin: [number, number, number];
-  coordinateSystem: CoordinateSystem;
 };
 
 type Channel = {
@@ -32,8 +29,6 @@ type Channel = {
   bounds: Bounds | null;
   maskBounds: Bounds;
   layerBounds: Bounds[];
-  coordinateOrigin: [number, number, number];
-  coordinateSystem: CoordinateSystem;
 };
 
 export type MaskPreRenderStats = {
@@ -93,11 +88,6 @@ export default class MaskEffect implements Effect {
     // TODO - support multiple views
     const viewport = viewports[0];
     const viewportChanged = !this.lastViewport || !this.lastViewport.equals(viewport);
-
-    if (viewport.resolution !== undefined) {
-      log.warn('MaskExtension is not supported in GlobeView')();
-      return {didRender};
-    }
 
     for (const maskId in channelMap) {
       const result = this._renderChannel(channelMap[maskId], {
@@ -166,7 +156,12 @@ export default class MaskEffect implements Effect {
       // Recalculate mask bounds
       this.lastViewport = viewport;
 
-      const layerBounds = joinLayerBounds(channelInfo.layers, viewport);
+      // The mask texture is rendered flat (absolute Mercator for geospatial views); layers read
+      // it back through projectToFlatCommon / project_common_position_to_flat, not the active viewport.
+      const layerBounds = joinLayerBounds(
+        channelInfo.layers,
+        getMercatorReferenceViewport(viewport)
+      );
       channelInfo.bounds = layerBounds && getRenderBounds(layerBounds, viewport);
 
       if (maskChanged || !equals(channelInfo.bounds, oldChannelInfo.bounds)) {
@@ -209,9 +204,7 @@ export default class MaskEffect implements Effect {
     // @ts-ignore (2532) This method is only called from preRender where masks is defined
     this.masks[channelInfo.id] = {
       index: channelInfo.index,
-      bounds: channelInfo.maskBounds,
-      coordinateOrigin: channelInfo.coordinateOrigin,
-      coordinateSystem: channelInfo.coordinateSystem
+      bounds: channelInfo.maskBounds
     };
 
     return didRender;
@@ -239,9 +232,7 @@ export default class MaskEffect implements Effect {
           id,
           index: this.channels.findIndex(c => c?.id === id),
           layers: [],
-          layerBounds: [],
-          coordinateOrigin: layer.root.props.coordinateOrigin,
-          coordinateSystem: layer.root.props.coordinateSystem
+          layerBounds: []
         };
         channelMap[id] = channelInfo;
       }

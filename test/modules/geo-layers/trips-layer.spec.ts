@@ -4,16 +4,20 @@
 
 import {test, expect} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
-import {LayerManager, MapView} from '@deck.gl/core';
+import {
+  LayerManager,
+  MapView,
+  _pathShaderWGSL as pathShaderWGSL,
+  _pathShaderPlugin as pathShaderPlugin
+} from '@deck.gl/core';
 import {TripsLayer} from '@deck.gl/geo-layers';
-import {WGSLShaderAssembler} from '@luma.gl/shadertools';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {WGSLShaderAssembler, resolveShaderPlugins} from '@luma.gl/shaders';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {trips} from 'deck.gl-test/data';
-import {shaderWGSL as pathShaderWGSL} from '@deck.gl/layers/path-layer/path-layer.wgsl';
 import {tripsUniforms} from '@deck.gl/geo-layers/trips-layer/trips-layer-uniforms';
 import {
   packTripTimestamps,
-  tripsShaderInjectionsWGSL
+  tripsShaderPluginWGSL
 } from '@deck.gl/geo-layers/trips-layer/trips-layer.wgsl';
 
 class DashArclengthTripsLayer extends TripsLayer {
@@ -45,10 +49,11 @@ test('TripsLayer#packTripTimestamps follows closed path padding', () => {
 });
 
 test('TripsLayer#WebGPU shader extends PathLayer', () => {
-  for (const insertionPoint of Object.keys(tripsShaderInjectionsWGSL)) {
-    expect(pathShaderWGSL).toContain(insertionPoint);
+  for (const target of Object.keys(tripsShaderPluginWGSL.injections!)) {
+    expect(pathShaderWGSL).toContain(target.split(':').pop());
   }
 
+  const resolvedPlugins = resolveShaderPlugins([pathShaderPlugin, tripsShaderPluginWGSL], 'wgsl');
   const assembleShader = (defines?: Record<string, number>) =>
     new WGSLShaderAssembler().assembleWGSLShader({
       platformInfo: {
@@ -61,27 +66,36 @@ test('TripsLayer#WebGPU shader extends PathLayer', () => {
       source: pathShaderWGSL,
       defines,
       modules: [tripsUniforms],
-      inject: tripsShaderInjectionsWGSL
+      pluginInjectionTargets: resolvedPlugins.injectionTargets,
+      pluginInjections: resolvedPlugins.injections,
+      pluginVertexInputs: resolvedPlugins.vertexInputs,
+      pluginInterStageVariables: resolvedPlugins.interStageVariables
     }).source;
   const source = assembleShader();
   const dashSource = assembleShader({DASH_ENABLED: 1});
 
-  expect(source).toContain('@location(13) instanceTimestamps: vec2<f32>');
+  expect(source).toContain('@location(13) _luma_instanceTimestamps: vec2<f32>');
   expect(source).toContain('@location(6) vTime: f32');
-  expect(source).toContain('attributes.instanceTimestamps.x');
-  expect(source).toContain('attributes.instanceTimestamps.y');
-  expect(source).toContain('varyings.vTime > trips.currentTime');
+  expect(source).toContain('instanceTimestamps.x');
+  expect(source).toContain('instanceTimestamps.y');
+  expect(source).toContain('vTime > trips.currentTime');
   expect(source).toContain('trips.fadeTrail > 0.5');
   expect(source).toContain('var<uniform> trips: TripsUniforms');
   expect(source).not.toContain('in float instanceTimestamps');
-  expect(source).toContain('varyings.vPathPosition.y / varyings.vPathLength');
+  expect(source).toContain(
+    'DECKGL_FILTER_PATH_COLOR_VERTEX(&varyings.vColor, varyings.vPathPosition, varyings.vPathLength)'
+  );
   expect(source).not.toContain('vDashSegment');
+  // With dashes, trip time follows the source segment even where camera clipping shortens it
   expect(dashSource).toContain('@location(8) vDashSegment: vec2<f32>');
-  expect(dashSource).toContain('varyings.vDashSegment.x / varyings.vDashSegment.y');
-  expect(dashSource).not.toContain('varyings.vPathPosition.y / varyings.vPathLength');
+  expect(dashSource).toContain('vec2<f32>(varyings.vPathPosition.x, varyings.vDashSegment.x)');
+  expect(dashSource).not.toContain(
+    'DECKGL_FILTER_PATH_COLOR_VERTEX(&varyings.vColor, varyings.vPathPosition, varyings.vPathLength)'
+  );
 });
 
 test('TripsLayer#time-window discard follows PathLayer coverage derivatives', () => {
+  const resolvedPlugins = resolveShaderPlugins([pathShaderPlugin, tripsShaderPluginWGSL], 'wgsl');
   const shaderAssembler = new WGSLShaderAssembler();
   const {source} = shaderAssembler.assembleWGSLShader({
     platformInfo: {
@@ -94,11 +108,14 @@ test('TripsLayer#time-window discard follows PathLayer coverage derivatives', ()
     source: pathShaderWGSL,
     defines: {ANTIALIASING: 1},
     modules: [tripsUniforms],
-    inject: tripsShaderInjectionsWGSL
+    pluginInjectionTargets: resolvedPlugins.injectionTargets,
+    pluginInjections: resolvedPlugins.injections,
+    pluginVertexInputs: resolvedPlugins.vertexInputs,
+    pluginInterStageVariables: resolvedPlugins.interStageVariables
   });
 
   expect(source.indexOf('fwidth(bodyCoord)')).toBeGreaterThan(-1);
-  expect(source.indexOf('varyings.vTime > trips.currentTime')).toBeGreaterThan(
+  expect(source.lastIndexOf('DECKGL_FILTER_PATH_COLOR();')).toBeGreaterThan(
     source.indexOf('fwidth(bodyCoord)')
   );
 });

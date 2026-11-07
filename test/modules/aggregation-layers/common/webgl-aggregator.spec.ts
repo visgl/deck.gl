@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 import {test, expect} from 'vitest';
 import {Attribute} from '@deck.gl/core';
 import {WebGLAggregator} from '@deck.gl/aggregation-layers';

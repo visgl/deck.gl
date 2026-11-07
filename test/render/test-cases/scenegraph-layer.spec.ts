@@ -10,11 +10,10 @@ import {describe} from 'vitest';
 import {runPersistentRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {Matrix4} from '@math.gl/core';
 import {registerLoaders} from '@loaders.gl/core';
-import {GLTFLoader} from '@loaders.gl/gltf';
+import {GLTFLoader} from '@loaders.gl/scene/gltf';
 
 // Register the proper loader for scenegraph.gltf
 registerLoaders(GLTFLoader);
@@ -22,6 +21,7 @@ registerLoaders(GLTFLoader);
 import {meshSampleData} from 'deck.gl-test/data';
 
 const testCases = [
+  // Golden: Animated boxes at frame 1 with directional PBR lighting.
   {
     name: 'scenegraph-layer-frame-1',
     viewState: {
@@ -41,7 +41,7 @@ const testCases = [
         data: meshSampleData,
         scenegraph: '/test/data/BoxAnimated.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        coordinateSystem: 'lnglat-offsets',
         getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
         getOrientation: d => d.orientation,
         _animations: {
@@ -53,6 +53,7 @@ const testCases = [
     ],
     goldenImage: './test/render/golden-images/scenegraph-layer-frame-1.png'
   },
+  // Golden: Animated boxes at frame 2 with directional PBR lighting.
   {
     name: 'scenegraph-layer-frame-2',
     viewState: {
@@ -72,7 +73,7 @@ const testCases = [
         data: meshSampleData,
         scenegraph: '/test/data/BoxAnimated.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        coordinateSystem: 'lnglat-offsets',
         getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
         getOrientation: d => d.orientation,
         _animations: {
@@ -84,6 +85,7 @@ const testCases = [
     ],
     goldenImage: './test/render/golden-images/scenegraph-layer-frame-2.png'
   },
+  // Golden: Animated boxes at frame 3 with directional PBR lighting.
   {
     name: 'scenegraph-layer-frame-3',
     viewState: {
@@ -103,7 +105,7 @@ const testCases = [
         data: meshSampleData,
         scenegraph: '/test/data/BoxAnimated.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        coordinateSystem: 'lnglat-offsets',
         getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
         getOrientation: d => d.orientation,
         _animations: {
@@ -115,6 +117,7 @@ const testCases = [
     ],
     goldenImage: './test/render/golden-images/scenegraph-layer-frame-3.png'
   },
+  // Golden: Rotated duck models with flat or directional PBR lighting.
   ...['flat', 'pbr'].map(lighting => ({
     name: `scenegraph-layer-duck-${lighting}`,
     viewState: {
@@ -131,7 +134,7 @@ const testCases = [
         scenegraph:
           'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        coordinateSystem: 'lnglat-offsets',
         getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
         getOrientation: (d, {index}) => [-3 * index, -0.5 * index, 0],
         sizeScale: 50,

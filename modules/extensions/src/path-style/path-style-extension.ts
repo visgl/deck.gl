@@ -2,21 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {getPathStylePlugin, getSDFDashPlugin} from './shaders.wgsl';
+import {LayerExtension, WebMercatorViewport, project, _deepEqual as deepEqual} from '@deck.gl/core';
+import {vec3} from '@math.gl/core';
+import {vec4} from '@math.gl/core';
 import {
-  LayerExtension,
-  WebMercatorViewport,
-  project,
-  _deepEqual as deepEqual,
-  _mergeShaders as mergeShaders
-} from '@deck.gl/core';
-import {vec3, vec4} from '@math.gl/core';
-import {
-  dashShaders,
+  dashInjections,
   Defines,
-  offsetShaders,
-  pathStylePipelineShaders,
-  scatterplotDashShaders,
-  textBackgroundDashShaders
+  offsetInjections,
+  pathStylePipelineInjections,
+  scatterplotDashInjections,
+  textBackgroundDashInjections
 } from './shaders.glsl';
 
 import type {
@@ -27,7 +23,6 @@ import type {
   ProjectUniforms,
   UpdateParameters
 } from '@deck.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
@@ -138,14 +133,16 @@ const PATH_STYLE_ATTRIBUTES = ['instanceDashArrays', 'instanceDashOffsets', 'ins
 
 function dashMetricsProjectionPropsChanged({
   props,
-  oldProps
+  oldProps,
+  changeFlags
 }: UpdateParameters<Layer<PathStyleExtensionProps>>): boolean {
   // Data, accessors, and tessellation configuration invalidate through AttributeManager and
   // PathLayer. PathLayer separately tracks viewport projection scale. These are the remaining
-  // layer props consumed by the project uniforms used to calculate dash metrics.
+  // layer props consumed by the project uniforms used to calculate dash metrics. Core owns
+  // CRS comparison and reports it through projectionChanged.
   return (
     !deepEqual(props.modelMatrix, oldProps.modelMatrix, 2) ||
-    props.coordinateSystem !== oldProps.coordinateSystem ||
+    changeFlags.projectionChanged ||
     !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1)
   );
 }
@@ -157,7 +154,18 @@ function projectRenderedPathPosition(
 ): [number, number, number] {
   const viewport = layer.context.viewport;
   if (!(viewport instanceof WebMercatorViewport) || viewport.zoom < 12) {
-    return layer.projectPosition(position, {autoOffset: false});
+    return layer.projectPosition(
+      position,
+      layer.state.preproject
+        ? {
+            // Tessellated positions have already consumed source conversion and transforms.
+            sourceCrs: layer.internalState!.packedCrs!,
+            modelMatrix: null,
+            coordinateOrigin: [0, 0, 0],
+            autoOffset: false
+          }
+        : {autoOffset: false}
+    );
   }
 
   // High-zoom Web Mercator shaders use a center-relative Taylor projection for precision.
@@ -168,25 +176,28 @@ function projectRenderedPathPosition(
     [position[0], position[1], position[2] || 0, 1],
     projectUniforms.modelMatrix
   );
-  const coordinateSystem =
-    layer.props.coordinateSystem === 'default' ? 'lnglat' : layer.props.coordinateSystem;
-
-  if (coordinateSystem === 'lnglat') {
-    if (Math.abs(positionWorld[1] - projectUniforms.coordinateOrigin[1]) > 0.25) {
-      let longitude = positionWorld[0];
-      if (projectUniforms.wrapLongitude) {
-        longitude = ((((longitude + 180) % 360) + 360) % 360) - 180;
+  switch (layer.props.coordinateSystem) {
+    case 'meter-offsets':
+    case 'lnglat-offsets':
+      // Offset attributes are already relative to the shader's geographic origin.
+      break;
+    default:
+      if (
+        layer.internalState!.packedCrs?.signature === 'WGS84' &&
+        Math.abs(positionWorld[1] - projectUniforms.coordinateOrigin[1]) > 0.25
+      ) {
+        let longitude = positionWorld[0];
+        if (projectUniforms.wrapLongitude) {
+          longitude = ((((longitude + 180) % 360) + 360) % 360) - 180;
+        }
+        const commonPosition = viewport.projectPosition([longitude, positionWorld[1], 0]);
+        return [
+          commonPosition[0] - projectUniforms.commonOrigin[0],
+          commonPosition[1] - projectUniforms.commonOrigin[1],
+          positionWorld[2] * projectUniforms.commonUnitsPerMeter[2]
+        ];
       }
-      const commonPosition = viewport.projectPosition([longitude, positionWorld[1], 0]);
-      return [
-        commonPosition[0] - projectUniforms.commonOrigin[0],
-        commonPosition[1] - projectUniforms.commonOrigin[1],
-        positionWorld[2] * projectUniforms.commonUnitsPerMeter[2]
-      ];
-    }
-    vec3.sub(positionWorld, positionWorld, projectUniforms.coordinateOrigin);
-  } else if (coordinateSystem === 'cartesian') {
-    vec3.sub(positionWorld, positionWorld, projectUniforms.coordinateOrigin);
+      vec3.sub(positionWorld, positionWorld, projectUniforms.coordinateOrigin);
   }
 
   const deltaLatitude = positionWorld[1];
@@ -305,54 +316,30 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       if (!extension.opts.dash) {
         return null;
       }
-      const inject =
-        layerType === 'scatterplot'
-          ? scatterplotDashShaders.inject
-          : textBackgroundDashShaders.inject;
-      const pathStyle: ShaderModule<SDFDashStyleProps> = {
-        name: 'pathStyle',
-        inject,
-        uniformTypes: {
-          dashGapPickable: 'i32'
-        }
-      };
-      return {modules: [pathStyle]};
+      const injections =
+        layerType === 'scatterplot' ? scatterplotDashInjections : textBackgroundDashInjections;
+      return {plugins: [getSDFDashPlugin(layerType === 'textBackground', injections)]};
     }
 
     // PathLayer: one ordered coordinate stage plus capability-specific declarations and setup.
-    let result = {} as {inject: Record<string, string>};
-    if (extension.opts.dash || extension.opts.offset) {
-      result = mergeShaders(result, pathStylePipelineShaders);
-    }
     const defines: Defines = {};
     if (extension.opts.dash) {
-      result = mergeShaders(result, dashShaders);
       defines.DASH_ENABLED = true;
       if (extension.opts.dashMode === 'path') {
         defines.HIGH_PRECISION_DASH = true;
       }
     }
     if (extension.opts.offset) {
-      result = mergeShaders(result, offsetShaders);
       defines.PATH_STYLE_OFFSET = true;
     }
 
-    const {inject} = result;
-    const pathStyle: ShaderModule<PathStyleProps> = {
-      name: 'pathStyle',
-      inject
+    const {dash, offset, dashMode} = extension.opts;
+    const injections = {
+      ...((dash || offset) && pathStylePipelineInjections),
+      ...(dash && dashInjections),
+      ...(offset && offsetInjections)
     };
-    if (extension.opts.dash) {
-      pathStyle.uniformTypes = {
-        dashAlignMode: 'f32',
-        dashGapPickable: 'i32',
-        dashUnits: 'i32'
-      };
-    }
-    return {
-      modules: [pathStyle],
-      defines
-    };
+    return {defines, plugins: [getPathStylePlugin(dash, offset, dashMode === 'path', injections)]};
   }
 
   initializeState(this: Layer<PathStyleExtensionProps>, context: LayerContext, extension: this) {
@@ -460,6 +447,7 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       viewport: this.context.viewport,
       modelMatrix: this.props.modelMatrix,
       coordinateSystem: this.props.coordinateSystem,
+      sourceCrs: this.internalState!.sourceCrs,
       coordinateOrigin: this.props.coordinateOrigin,
       // PathLayer normalizes/cuts wrapped paths on the CPU; its shader never wraps again.
       autoWrapLongitude: this.wrapLongitude

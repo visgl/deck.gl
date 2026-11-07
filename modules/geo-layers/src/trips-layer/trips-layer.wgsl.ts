@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ShaderPlugin} from '@luma.gl/shaders';
+import {tripsUniforms} from './trips-layer-uniforms';
+
 import type {NumericArray} from '@math.gl/core';
 
 /** Pack timestamps in the same padded instance order used by PathTesselator. */
@@ -32,40 +35,22 @@ export function packTripTimestamps(
   return packedTimestamps;
 }
 
-/** Extend PathLayer's WGSL without duplicating its path geometry or changing its GLSL hooks. */
-export const tripsShaderInjectionsWGSL = {
-  '  @location(12) rowIndexes: u32,': /* wgsl */ `
-  @location(13) instanceTimestamps: vec2<f32>,`,
-
-  '  @location(5) vJointType: f32,': /* wgsl */ `
-  @location(6) vTime: f32,`,
-
-  '    attributes.instanceColors.a * layer.opacity\n  );': /* wgsl */ `
-
-  let tripsPathProgress =
-#ifdef DASH_ENABLED
-    // Camera clipping shortens the visible geometry, but trip time still follows the original segment.
-    varyings.vDashSegment.x / varyings.vDashSegment.y;
-#else
-    varyings.vPathPosition.y / varyings.vPathLength;
-#endif
-
-  varyings.vTime = mix(
-    attributes.instanceTimestamps.x,
-    attributes.instanceTimestamps.y,
-    tripsPathProgress
-  );
-
+/** Extend PathLayer through native WGSL plugin inputs, varyings, and named injection targets. */
+export const tripsShaderPluginWGSL: ShaderPlugin = {
+  name: 'trips',
+  module: tripsUniforms,
+  vertexInputs: {instanceTimestamps: 'vec2<f32>'},
+  interStageVariables: {vTime: {type: 'f32'}},
+  injections: {
+    'wgsl:vs:DECKGL_FILTER_PATH_COLOR_VERTEX': /* wgsl */ `
+  vTime = mix(instanceTimestamps.x, instanceTimestamps.y, pathPosition.y / pathLength);
   if (trips.fadeTrail > 0.5) {
-    varyings.vColor.a *=
-      1.0 - (trips.currentTime - varyings.vTime) / trips.trailLength;
+    (*color).a *= 1.0 - (trips.currentTime - vTime) / trips.trailLength;
   }`,
-
-  '  // DECKGL_FILTER_COLOR': /* wgsl */ `
-  if (
-    varyings.vTime > trips.currentTime ||
-    (trips.fadeTrail > 0.5 && varyings.vTime < trips.currentTime - trips.trailLength)
-  ) {
+    'wgsl:fs:DECKGL_FILTER_PATH_COLOR': /* wgsl */ `
+  if (vTime > trips.currentTime ||
+      (trips.fadeTrail > 0.5 && vTime < trips.currentTime - trips.trailLength)) {
     discard;
   }`
-} as const;
+  }
+};
