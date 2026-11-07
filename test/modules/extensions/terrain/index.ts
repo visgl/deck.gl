@@ -5,4 +5,5 @@
 import './height-map-builder.spec';
 import './terrain-cover.spec';
 import './terrain-effect.spec';
+import './terrain-picking-surface.spec';
 // import './terrain.spec';

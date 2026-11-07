@@ -14,8 +14,11 @@ import type {Device, Framebuffer, Parameters, RenderPass, Texture} from '@luma.g
 import type {ProjectProps} from '@deck.gl/core';
 import type {Bounds} from '../utils/projection-utils';
 
-/** Vertices along each side of the grid */
-const GRID_SIZE = 256;
+/**
+ * Vertices along each side of the grid, which keeps its `uint16` indices below 65535, the index at
+ * which WebGL 2 always restarts primitives
+ */
+const GRID_SIZE = 255;
 
 const vs = /* glsl */ `\
 #version 300 es
