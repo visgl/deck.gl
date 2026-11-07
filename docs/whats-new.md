@@ -4,11 +4,18 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### ScreenGrid compute aggregation
+
+`ScreenGridLayer` can aggregate on WebGPU using an explicit `colorDomain`, with
+picking and extensions disabled. SUM, MEAN, MIN, MAX, and COUNT produce GPUVector
+outputs consumed directly by the cell layer. See [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#compute-aggregation).
+
 ### Custom aggregators and GPUVector inputs
 
 GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer now accept custom aggregator
 instances. Custom aggregators can consume GPUVector position/weight columns and publish
-GPUVector cell results without copying them to the CPU. Existing defaults remain unchanged. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
+GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and
+channel values. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
 result layouts, and supported scales and contours.
 
 ### luma.gl v10 alpha.10
