@@ -183,6 +183,10 @@ test('project#getUniforms CARTESIAN z scale is continuous across zoom 12', () =>
       uniforms.commonUnitsPerMeter[2] / unitsPerMeter,
       `sizes are scaled at the viewport latitude at zoom ${zoom}`
     ).toBeCloseTo(1, 6);
+    expect(
+      uniforms.commonUnitsPerWorldUnit2,
+      `no second-order z correction, which would step at zoom 12, at zoom ${zoom}`
+    ).toEqual([0, 0, 0]);
   }
 });
 
