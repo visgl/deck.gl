@@ -109,10 +109,13 @@ export class TerrainEffect implements Effect {
     if (!isPicking) {
       // Includes terrain layers that have not loaded yet, which keep the draped layers hidden
       const allTerrainLayers = opts.layers.filter(l => l.props.operation.includes('terrain'));
-      // Visible terrain layers that deck.gl draws take precedence over terrain drawn by another renderer
+      // Visible terrain layers take precedence over hidden ones, and those that deck.gl draws over
+      // terrain drawn by another renderer
       const visibleTerrainLayers = allTerrainLayers.filter(l => l.props.visible);
-      const externalTerrainLayer = visibleTerrainLayers.every(getExternalTerrain)
-        ? visibleTerrainLayers[0]
+      const leadingTerrainLayers =
+        visibleTerrainLayers.length > 0 ? visibleTerrainLayers : allTerrainLayers;
+      const externalTerrainLayer = leadingTerrainLayers.every(getExternalTerrain)
+        ? leadingTerrainLayers[0]
         : undefined;
       this._setExternalTerrain(
         externalTerrainLayer ? getExternalTerrain(externalTerrainLayer) : null

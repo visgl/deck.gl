@@ -475,6 +475,19 @@ test('TerrainEffect#external terrain', async () => {
     TERRAIN_MODE.USE_HEIGHT_MAP_METERS
   );
 
+  // A hidden external terrain layer, with no other terrain layer, still stands for the terrain
+  await lifecycle.update({
+    layers: [
+      new ExternalTerrainLayer({id: 'external-terrain', externalTerrain, visible: false}),
+      summitLayer,
+      glacierLayer
+    ]
+  });
+  expect(externalTerrain.setDrapeRenderer).toHaveBeenLastCalledWith(renderDrape);
+  expect(getLayerUniforms(summitLayer).mode, 'Hidden external terrain').toBe(
+    TERRAIN_MODE.USE_HEIGHT_MAP_METERS
+  );
+
   // Without terrain, layers draw as usual
   await lifecycle.update({layers: [summitLayer, glacierLayer]});
   expect(getLayerUniforms(summitLayer).mode, 'TERRAIN_MODE.NONE').toBe(TERRAIN_MODE.NONE);
