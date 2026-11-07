@@ -456,3 +456,62 @@ test('HeatmapLayer#WebGPU binary positions', async ({skip}) => {
     layerManager.finalize();
   }
 });
+
+test('Heatmap borrows GPU columns and updates row prefixes', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) return skip();
+  const {GPUVector} = await import('@luma.gl/graph/gpu-data');
+  const buffer = webgpuDevice.createBuffer({
+    data: new Float32Array([-122.4, 37.8, 0, 2, -122.3, 37.7, 0, 3]),
+    usage: Buffer.VERTEX | Buffer.COPY_DST
+  });
+  const positions = new GPUVector({
+    type: 'buffer',
+    name: 'positions',
+    format: 'float32x3',
+    buffer,
+    length: 2,
+    byteStride: 16,
+    ownsBuffer: false
+  });
+  const weights = new GPUVector({
+    type: 'buffer',
+    name: 'weights',
+    format: 'float32',
+    buffer,
+    length: 2,
+    byteOffset: 12,
+    byteStride: 16,
+    ownsBuffer: false
+  });
+  webgpuDevice.handle.pushErrorScope('validation');
+  try {
+    const manager = new LayerManager(webgpuDevice, {viewport: viewport0});
+    const errors: Error[] = [];
+    manager.setProps({onError: error => errors.push(error)});
+    let layer = new HeatmapLayer({
+      positions,
+      weights,
+      weightsTextureSize: 128,
+      getPosition: () => {
+        throw new Error('Accessor called');
+      }
+    });
+    try {
+      for (const count of [2, 1, 0, 2]) {
+        layer = layer.clone({numInstances: count});
+        manager.setLayers([layer]);
+        expect(errors.map(error => error.message)).toEqual([]);
+        expect(layer.state.weightsTransform.model.instanceCount).toBe(count);
+      }
+    } finally {
+      manager.finalize();
+    }
+    expect(buffer.destroyed).toBe(false);
+  } finally {
+    positions.destroy();
+    weights.destroy();
+    buffer.destroy();
+    expect(await webgpuDevice.handle.popErrorScope()).toBeNull();
+  }
+});

@@ -18,6 +18,7 @@ import {
   TextureFormat,
   TextureFormatColor
 } from '@luma.gl/core';
+import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
 import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 import {
@@ -75,6 +76,8 @@ const AGGREGATION_MODE = {
 };
 
 const defaultProps: DefaultProps<HeatmapLayerProps> = {
+  positions: {type: 'object', value: null, optional: true},
+  weights: {type: 'object', value: null, optional: true},
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getWeight: {type: 'accessor', value: 1},
   intensity: {type: 'number', min: 0, value: 1},
@@ -103,6 +106,11 @@ export type HeatmapLayerProps<DataT = unknown> = _HeatmapLayerProps<DataT> &
   AggregationLayerProps<DataT>;
 
 type _HeatmapLayerProps<DataT> = {
+  /** Borrowed single-chunk float32x3 positions, bypassing the position accessor. */
+  positions?: GPUVector | null;
+  /** Borrowed scalar float32 weights with the same row count as positions. */
+  weights?: GPUVector | null;
+
   /**
    * Radius of the circle in pixels, to which the weight of an object is distributed.
    *
@@ -187,6 +195,7 @@ export default class HeatmapLayer<
   static defaultProps = defaultProps;
 
   state!: AggregationLayer<DataT>['state'] & {
+    gpuPositionsLow?: Buffer;
     colorDomain?: Readonly<[number, number]>;
     isWeightMapDirty?: boolean;
     weightsTexture?: Texture;
@@ -328,6 +337,7 @@ export default class HeatmapLayer<
       updateTimer
     } = this.state;
     weightsTransform?.destroy();
+    this.state.gpuPositionsLow?.destroy();
     weightsTexture?.destroy();
     maxWeightTransform?.destroy();
     maxWeightsTexture?.destroy();
@@ -356,6 +366,10 @@ export default class HeatmapLayer<
     } = {};
     const {dimensions} = this.state;
     changeFlags.dataChanged =
+      ((opts.props.positions !== opts.oldProps.positions ||
+        opts.props.weights !== opts.oldProps.weights ||
+        opts.props.numInstances !== opts.oldProps.numInstances) &&
+        'GPU columns changed') ||
       (opts.changeFlags.projectionChanged && 'projection changed') ||
       // Uniform transforms must regenerate the weight texture even when packed positions stay unchanged.
       ((!deepEqual(opts.props.modelMatrix, opts.oldProps.modelMatrix, 1) ||
@@ -394,6 +408,39 @@ export default class HeatmapLayer<
         format
       })
     });
+  }
+
+  /** Use GPU column length unless an explicit row prefix is supplied. */
+  override getNumInstances(): number {
+    return this.props.positions && !Number.isFinite(this.props.numInstances)
+      ? this.props.positions.length
+      : super.getNumInstances();
+  }
+
+  /** Borrow GPU columns directly; accessor inputs retain normal attribute updates. */
+  protected override _updateAttributes(): void {
+    const {positions, weights, extensions} = this.props;
+    if (!positions) {
+      if (weights) throw new Error('Heatmap weights require positions');
+      super._updateAttributes();
+      return;
+    }
+    if (this.context.device.type !== 'webgpu' || extensions.length || this.state.preproject) {
+      throw new Error(
+        'Heatmap GPU columns require WebGPU, no extensions, and compatible coordinates'
+      );
+    }
+    if (
+      positions.format !== 'float32x3' ||
+      weights?.format !== 'float32' ||
+      positions.length !== weights.length ||
+      this.getNumInstances() > positions.length
+    ) {
+      throw new Error('Heatmap requires matching float32x3 positions and float32 weights');
+    }
+    getGPUVectorData(positions);
+    getGPUVectorData(weights);
+    this.updateAttributes({});
   }
 
   _setupAttributes() {
@@ -465,7 +512,30 @@ export default class HeatmapLayer<
       id: `${this.id}-weights-transform`,
       ...shaders,
       source: weightsSource,
-      bufferLayout: attributeManager.getBufferLayouts({isInstanced: isWebGPU}),
+      bufferLayout: this.props.positions
+        ? [
+            {
+              name: 'instancePositions',
+              stepMode: 'instance',
+              byteStride: getGPUVectorData(this.props.positions).byteStride,
+              attributes: [{attribute: 'instancePositions', format: 'float32x3', byteOffset: 0}]
+            },
+            {
+              name: 'instanceWeights',
+              stepMode: 'instance',
+              byteStride: getGPUVectorData(this.props.weights!).byteStride,
+              attributes: [{attribute: 'instanceWeights', format: 'float32', byteOffset: 0}]
+            },
+            {
+              name: 'instancePositions64Low',
+              stepMode: 'instance',
+              byteStride: 12,
+              attributes: [
+                {attribute: 'instancePositions64Low', format: 'float32x3', byteOffset: 0}
+              ]
+            }
+          ]
+        : attributeManager.getBufferLayouts({isInstanced: isWebGPU}),
       vertexCount: isWebGPU ? 6 : 1,
       ...(isWebGPU
         ? {
@@ -696,7 +766,33 @@ export default class HeatmapLayer<
     const attributeManager = this.getAttributeManager()!;
     const attributes = attributeManager.getAttributes();
     const moduleSettings = this.getModuleSettings();
-    this._setModelAttributes(weightsTransform.model, attributes);
+    if (this.props.positions) {
+      const positions = getGPUVectorData(this.props.positions);
+      const weights = getGPUVectorData(this.props.weights!);
+      const size = Math.max(1, this.getNumInstances()) * 12;
+      if (!this.state.gpuPositionsLow || this.state.gpuPositionsLow.byteLength < size) {
+        this.state.gpuPositionsLow?.destroy();
+        this.state.gpuPositionsLow = this.context.device.createBuffer({
+          byteLength: size,
+          usage: Buffer.VERTEX | Buffer.COPY_DST
+        });
+      }
+      weightsTransform.model.setAttributes(
+        {
+          instancePositions: positions.buffer as Buffer,
+          instanceWeights: weights.buffer as Buffer,
+          instancePositions64Low: this.state.gpuPositionsLow
+        },
+        {
+          byteOffsets: {
+            instancePositions: positions.byteOffset,
+            instanceWeights: weights.byteOffset
+          }
+        }
+      );
+    } else {
+      this._setModelAttributes(weightsTransform.model, attributes);
+    }
     if (this.context.device.type === 'webgpu') {
       const instanceCount = this.getNumInstances();
       weightsTransform.model.setVertexCount(instanceCount > 0 ? 6 : 0);

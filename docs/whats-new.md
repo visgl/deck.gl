@@ -4,6 +4,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Heatmap GPU column inputs
+
+HeatmapLayer accepts borrowed position and weight GPUVectors on WebGPU, including strided columns and shorter row prefixes.
+
 ### Grid compute aggregation
 
 `GridLayer` supports two-channel compute aggregation with explicit color and elevation domains.
