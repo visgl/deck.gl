@@ -43,7 +43,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   output.pickingColor = geometry.pickingColor;
 
   if (
-    attributes.instanceColorValues != attributes.instanceColorValues ||
+    (bitcast<u32>(attributes.instanceColorValues) & 0x7fffffffu) > 0x7f800000u ||
     attributes.instanceColorValues < hexagon.colorDomain.z ||
     attributes.instanceColorValues > hexagon.colorDomain.w ||
     attributes.instanceElevationValues < hexagon.elevationDomain.z ||
