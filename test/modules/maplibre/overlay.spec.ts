@@ -55,6 +55,11 @@ function waitForRender(condition: () => boolean, update?: () => void): Promise<v
   });
 }
 
+/** Resolves on the next MapLibre event of the type */
+function waitForMapEvent(map: MapLibreMap, type: 'load' | 'idle'): Promise<void> {
+  return new Promise<void>(resolve => map.once(type, () => resolve()));
+}
+
 function readCenterPixel(gl: WebGL2RenderingContext): number[] {
   const pixel = new Uint8Array(4);
   gl.readPixels(
@@ -502,7 +507,7 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS.slice(1)) {
     }) as unknown as MapLibreMap;
 
     try {
-      await new Promise<void>(resolve => map.once('load', () => resolve()));
+      await waitForMapEvent(map, 'load');
 
       // Interleaved: an overlaid Deck keeps its own WebGL context after removal, and the tests share a
       // page with a limit on live contexts
@@ -510,12 +515,12 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS.slice(1)) {
       map.addControl(overlay);
       await waitForRender(() => Boolean(overlay._deck?.isInitialized));
       map.setTerrain({source: 'dem'});
-      await new Promise<void>(resolve => map.once('idle', () => resolve()));
+      await waitForMapEvent(map, 'idle');
 
       for (const zoom of [10, 11, 12]) {
         map.jumpTo({zoom});
         // map.project() follows the new zoom only after MapLibre has rendered it
-        await new Promise<void>(resolve => map.once('idle', () => resolve()));
+        await waitForMapEvent(map, 'idle');
         const viewport = overlay._deck!.getViewports()[0];
         for (const [dx, dy] of [
           [0, 0],
@@ -615,26 +620,25 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS.slice(1)) {
           parameters: {depthCompare: 'always', depthWriteEnabled: false},
           visible
         });
-      const waitForIdle = () => new Promise<void>(resolve => map.once('idle', () => resolve()));
 
       try {
-        await new Promise<void>(resolve => map.once('load', () => resolve()));
+        await waitForMapEvent(map, 'load');
         const overlay = new MapLibreOverlay({interleaved: true, layers: [getMarkerLayer(false)]});
         map.addControl(overlay);
         await waitForRender(() => Boolean(overlay._deck?.isInitialized));
         map.setTerrain({source: 'dem'});
-        await waitForIdle();
+        await waitForMapEvent(map, 'idle');
 
         for (const zoom of [11.25, 11.5, 11.75]) {
           map.setLayoutProperty('markers', 'visibility', 'visible');
           overlay.setProps({layers: [getMarkerLayer(false)]});
           map.jumpTo({zoom});
-          await waitForIdle();
+          await waitForMapEvent(map, 'idle');
           const expected = await readColorCentroids(map);
 
           map.setLayoutProperty('markers', 'visibility', 'none');
           overlay.setProps({layers: [getMarkerLayer(true)]});
-          await waitForIdle();
+          await waitForMapEvent(map, 'idle');
           const actual = await readColorCentroids(map);
 
           for (let i = 0; i < markers.length; i++) {
