@@ -23,6 +23,7 @@ const GRID_SIZE = 255;
 const vs = /* glsl */ `\
 #version 300 es
 in vec2 positions;
+in vec2 positions64Low;
 in vec2 texCoords;
 uniform highp sampler2D heightMap;
 out vec2 vTexCoords;
@@ -33,7 +34,7 @@ void main() {
   vTexCoords = texCoords;
   vec4 elevation = texture(heightMap, texCoords);
   vKnown = elevation.a;
-  vec3 position = project_position(vec3(positions, elevation.r));
+  vec3 position = project_position(vec3(positions, elevation.r), vec3(positions64Low, 0.0));
   gl_Position = project_common_position_to_clipspace(vec4(position, 1.0));
   vDepth = gl_Position.z / gl_Position.w;
 }
@@ -78,7 +79,10 @@ void main() {
 export class TerrainPickingSurface {
   private model: Model;
   private depthModel: Model;
+  /** Longitudes and latitudes of the grid in float32 */
   private positions: Buffer;
+  /** What float32 leaves out of `positions`, which grid cells at high zoom need */
+  private positions64Low: Buffer;
   private texCoords: Buffer;
   private indices: Buffer;
   private pickingCover: Framebuffer;
@@ -90,6 +94,10 @@ export class TerrainPickingSurface {
       interpolate: false
     });
     this.positions = device.createBuffer({
+      usage: Buffer.VERTEX | Buffer.COPY_DST,
+      byteLength: GRID_SIZE * GRID_SIZE * 2 * 4
+    });
+    this.positions64Low = device.createBuffer({
       usage: Buffer.VERTEX | Buffer.COPY_DST,
       byteLength: GRID_SIZE * GRID_SIZE * 2 * 4
     });
@@ -125,13 +133,18 @@ export class TerrainPickingSurface {
       lats.push(mercatorCommonToLngLat([minX, minY + (maxY - minY) * t])[1]);
     }
     const positions = new Float32Array(GRID_SIZE * GRID_SIZE * 2);
+    const positions64Low = new Float32Array(GRID_SIZE * GRID_SIZE * 2);
     for (let row = 0; row < GRID_SIZE; row++) {
       for (let column = 0; column < GRID_SIZE; column++) {
-        positions[(row * GRID_SIZE + column) * 2] = lngs[column];
-        positions[(row * GRID_SIZE + column) * 2 + 1] = lats[row];
+        const i = (row * GRID_SIZE + column) * 2;
+        positions[i] = lngs[column];
+        positions[i + 1] = lats[row];
+        positions64Low[i] = lngs[column] - positions[i];
+        positions64Low[i + 1] = lats[row] - positions[i + 1];
       }
     }
     this.positions.write(positions);
+    this.positions64Low.write(positions64Low);
   }
 
   /**
@@ -183,6 +196,7 @@ export class TerrainPickingSurface {
     this.model.destroy();
     this.depthModel.destroy();
     this.positions.destroy();
+    this.positions64Low.destroy();
     this.texCoords.destroy();
     this.indices.destroy();
     this.pickingCover.colorAttachments[0].destroy();
@@ -200,9 +214,14 @@ export class TerrainPickingSurface {
       topology: 'triangle-list',
       bufferLayout: [
         {name: 'positions', format: 'float32x2'},
+        {name: 'positions64Low', format: 'float32x2'},
         {name: 'texCoords', format: 'float32x2'}
       ],
-      attributes: {positions: this.positions, texCoords: this.texCoords},
+      attributes: {
+        positions: this.positions,
+        positions64Low: this.positions64Low,
+        texCoords: this.texCoords
+      },
       indexBuffer: this.indices,
       vertexCount: (GRID_SIZE - 1) * (GRID_SIZE - 1) * 6
     });
