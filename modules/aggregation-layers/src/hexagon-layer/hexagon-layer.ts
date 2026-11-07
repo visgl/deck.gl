@@ -175,7 +175,7 @@ type _HexagonLayerProps<DataT> = {
    * Supported Values are 'linear' and 'quantile'.
    * @default 'linear'
    */
-  elevationScaleType?: 'linear';
+  elevationScaleType?: 'linear' | 'quantile';
 
   /**
    * Material settings for lighting effect. Applies if `extruded: true`.
@@ -314,6 +314,7 @@ export default class HexagonLayer<
       this.props.onSetElevationDomain === noop &&
       this.props.colorScaleType !== 'quantile' &&
       this.props.colorScaleType !== 'ordinal' &&
+      this.props.elevationScaleType !== 'quantile' &&
       this.props.lowerPercentile === 0 &&
       this.props.upperPercentile === 100 &&
       this.props.elevationLowerPercentile === 0 &&
