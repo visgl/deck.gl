@@ -2,7 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, color, picking, log, _LayerColumns as LayerColumns} from '@deck.gl/core';
+import {
+  Layer,
+  project32,
+  color,
+  picking,
+  log,
+  _LayerColumns as LayerColumns,
+  _deepEqual as deepEqual
+} from '@deck.gl/core';
 import {type Device, type RenderPipelineParameters} from '@luma.gl/core';
 import {pbrMaterial} from '@luma.gl/shaders';
 import {ScenegraphNode, GroupNode, ModelNode, Model} from '@luma.gl/engine';
