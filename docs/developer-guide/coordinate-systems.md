@@ -52,7 +52,7 @@ Each layer is expected to specify its `coordinateSystem` prop to match the world
 
 By default, a layer's [coordinateSystem](../api-reference/core/layer.md#coordinatesystem) is assumed to be `'lnglat'` if rendered in a geospatial view (e.g. `MapView`, `GlobeView`) and `'cartesian'` if rendered in a non-geospatial view (e.g. `OrbitView`, `OrthographicView`).
 
-A layer may also supply a CRS identifier or PROJ string supported by `@math.gl/projection`. Deck.gl waits for the descriptor before initializing or updating the layer. It converts positions on the CPU when the view's projection shader cannot consume that source CRS. Each layer retains the source CRS and the CRS of its packed attributes, so CPU conversion and shader projection apply transforms once.
+A layer may also supply a CRS identifier or PROJ string supported by `@math.gl/geospatial/projection`. Deck.gl waits for the descriptor before initializing or updating the layer. It converts positions on the CPU when the view's projection shader cannot consume that source CRS. Each layer retains the source CRS and the CRS of its packed attributes, so CPU conversion and shader projection apply transforms once.
 
 For absolute CRSs, `modelMatrix` and then `coordinateOrigin` apply in the declared source CRS before conversion.
 

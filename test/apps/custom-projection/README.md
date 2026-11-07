@@ -7,7 +7,7 @@ cd test/apps/custom-projection
 yarn start-local
 ```
 
-The view resolves its target CRS through `@math.gl/projection`. Layer input,
+The view resolves its target CRS through `@math.gl/geospatial/projection`. Layer input,
 camera centers, picking coordinates and controller bounds use WGS84 longitude/latitude.
 `resolution` specifies subdivision in degrees. Common space uses a fixed scale of
 `512 / 40075016.6855` per target meter, adjusted for each target axis's linear units.

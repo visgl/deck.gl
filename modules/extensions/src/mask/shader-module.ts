@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import {project} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 
@@ -17,8 +17,8 @@ layout(std140) uniform maskUniforms {
 `;
 
 const vertex = /* glsl */ `
-vec2 mask_getCoords(vec4 position) {
-  return (position.xy - mask.bounds.xy) / (mask.bounds.zw - mask.bounds.xy);
+vec2 mask_getCoords(vec2 flatPosition) {
+  return (flatPosition - mask.bounds.xy) / (mask.bounds.zw - mask.bounds.xy);
 }
 `;
 
@@ -60,22 +60,21 @@ ${fragment}
 `;
 
 const inject = {
-  'vs:#decl': /* glsl */ `
+  'glsl:vs:#decl': /* glsl */ `
 out vec2 mask_texCoords;
 `,
-  'vs:#main-end': /* glsl */ `
-   vec4 mask_common_position;
-   if (mask.maskByInstance) {
-     mask_common_position = project_position(vec4(geometry.worldPosition, 1.0));
-   } else {
-     mask_common_position = geometry.position;
-   }
-   mask_texCoords = mask_getCoords(mask_common_position);
+  'glsl:vs:#main-end': /* glsl */ `
+   // Anchor (instance) or vertex position in common space, then flattened to the space the
+   // mask texture was rendered in (Mercator for geospatial views, identity otherwise)
+   vec4 mask_common_position = mask.maskByInstance
+     ? project_position(vec4(geometry.worldPosition, 1.0))
+     : geometry.position;
+   mask_texCoords = mask_getCoords(project_common_position_to_flat(mask_common_position));
 `,
-  'fs:#decl': /* glsl */ `
+  'glsl:fs:#decl': /* glsl */ `
 in vec2 mask_texCoords;
 `,
-  'fs:#main-start': /* glsl */ `
+  'glsl:fs:#main-start': /* glsl */ `
   if (mask.enabled) {
     bool mask = mask_isInBounds(mask_texCoords);
 
@@ -112,12 +111,11 @@ const getMaskUniforms = (opts?: MaskProps | {}): Record<string, any> => {
   return opts || {};
 };
 
-export default {
+const maskModule = {
   name: 'mask',
   dependencies: [project],
   vs,
   fs,
-  inject,
   getUniforms: getMaskUniforms,
   uniformTypes: {
     bounds: 'vec4<f32>',
@@ -127,3 +125,7 @@ export default {
     maskByInstance: 'i32'
   }
 } as const satisfies ShaderModule<MaskProps>;
+
+export const maskPlugin: ShaderPlugin = {name: 'mask', module: maskModule, injections: inject};
+
+export default maskModule;

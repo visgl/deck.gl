@@ -4,7 +4,7 @@
 
 import {test, expect, vi} from 'vitest';
 import {testLayer, generateLayerTests, getLayerUniforms, device} from '@deck.gl/test-utils/vitest';
-import {geojsonToBinary} from '@loaders.gl/gis';
+import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
 
 import {GeoJsonLayer} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';
@@ -82,10 +82,10 @@ webglTest('GeoJsonLayer#tests', () => {
     }
   });
 
-  // TODO: @loaders.gl binaryToGeojson should no modify input data
-  // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
+  // TODO: @loaders.gl convertBinaryFeatureCollectionToGeojson should no modify input data
+  // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with convertGeojsonToBinaryFeatureCollection
   const geojsonData = JSON.parse(JSON.stringify(FIXTURES.geojson.features)).slice(0, 7);
-  const binaryData = geojsonToBinary(geojsonData);
+  const binaryData = convertGeojsonToBinaryFeatureCollection(geojsonData);
 
   testCases.push({
     title: 'GeoJsonLayer#binary',
@@ -105,7 +105,7 @@ webglTest('GeoJsonLayer#tests', () => {
       );
     },
     props: {
-      // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
+      // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with convertGeojsonToBinaryFeatureCollection
       data: binaryData
     }
   });
@@ -167,7 +167,7 @@ webglTest('GeoJsonLayer#tests', () => {
       ).toBeTruthy();
     },
     props: {
-      // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
+      // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with convertGeojsonToBinaryFeatureCollection
       data: binaryDataWithAttributes
     }
   });

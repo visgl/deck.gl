@@ -4,7 +4,7 @@
 
 import {Buffer} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {GLSLShaderAssembler} from '@luma.gl/shadertools';
+import {GLSLShaderAssembler} from '@luma.gl/shaders';
 import {project32} from '@deck.gl/core';
 
 import {createRenderTarget} from './utils';

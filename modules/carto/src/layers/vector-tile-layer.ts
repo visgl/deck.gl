@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {registerLoaders} from '@loaders.gl/core';
-import {BinaryPointFeature} from '@loaders.gl/schema';
+import {BinaryPointFeature} from '@loaders.gl/core/schema';
 import CartoPropertiesTileLoader from './schema/carto-properties-tile-loader';
 import CartoVectorTileLoader from './schema/carto-vector-tile-loader';
 registerLoaders([CartoPropertiesTileLoader, CartoVectorTileLoader]);

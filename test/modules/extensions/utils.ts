@@ -18,8 +18,8 @@ export class LifecycleTester {
       device,
       deck: {
         props: {layerFilter: null},
-        _addDefaultShaderModule: layerManager.addDefaultShaderModule.bind(layerManager),
-        _removeDefaultShaderModule: layerManager.removeDefaultShaderModule.bind(layerManager)
+        _addDefaultShaderPlugin: layerManager.addDefaultShaderPlugin.bind(layerManager),
+        _removeDefaultShaderPlugin: layerManager.removeDefaultShaderPlugin.bind(layerManager)
       }
     };
     this.layerManager.setProps({

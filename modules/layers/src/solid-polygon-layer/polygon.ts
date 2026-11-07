@@ -4,14 +4,14 @@
 
 /* eslint-disable max-params */
 import earcut from 'earcut';
-import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
+import {modifyPolygonWindingDirection} from '@math.gl/geometry';
 
-import type {PolygonWinding} from '@math.gl/polygon';
+import type {PolygonWinding} from '@math.gl/geometry';
 import type {Position} from '@deck.gl/core';
 import type {NumericArray} from '@math.gl/core';
 
-const OUTER_POLYGON_WINDING = WINDING.CLOCKWISE;
-const HOLE_POLYGON_WINDING = WINDING.COUNTER_CLOCKWISE;
+const OUTER_POLYGON_WINDING = 'clockwise';
+const HOLE_POLYGON_WINDING = 'counter-clockwise';
 
 type WindingOptions = {
   start?: number;

@@ -4,7 +4,7 @@
 
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
-import {WebGLDevice} from '@luma.gl/webgl';
+import {WebGLDevice} from '@luma.gl/core/webgl';
 import AttributeManager from './attribute/attribute-manager';
 import GPUVectorModel from './luma-upstream/gpu-vector-model';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -19,24 +19,28 @@ import {deepEqual} from '../utils/deep-equal';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
-import {disablePickingIndex, PICKING_INVALID_INDEX} from '../shaderlib/picking/picking';
+import pickingModule, {
+  pickingPlugin,
+  disablePickingIndex,
+  PICKING_INVALID_INDEX
+} from '../shaderlib/picking/picking';
 
 import Component from '../lifecycle/component';
-import type {CRSDescriptor} from '@math.gl/projection/core';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import {areCRSEqual, resolveCRS} from '../utils/crs';
 import {supportsSourceCRS} from '../shaderlib/project/coordinate-systems';
 import LayerState, {ChangeFlags} from './layer-state';
 
 import {worldToPixels} from '@math.gl/web-mercator';
-import {transformMat4} from '@math.gl/core/vec3';
+import {vec3TransformMat4 as transformMat4} from '@math.gl/core';
 
 import {load} from '@loaders.gl/core';
 
-import type {Loader} from '@loaders.gl/loader-utils';
+import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {CoordinateSystem} from './constants';
 import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import type Attribute from './attribute/attribute';
-import type {Model} from '@luma.gl/engine';
+import type {Model, GPUVectorModel as LumaGPUVectorModel} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
@@ -45,7 +49,7 @@ import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {AttributeOptions, BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
-import {PickingProps} from '@luma.gl/shadertools';
+import {PickingProps} from '@luma.gl/shaders';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -418,11 +422,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return this.props.pickable && this.props.visible;
   }
 
-  /** Returns an array of models used by this layer, can be overriden by layer subclass */
-  getModels(): Model[] {
+  /** Returns the rendering models used by this layer, including GPU-vector models. */
+  getModels(): LumaGPUVectorModel[] {
     const state = this.state as {
-      models?: Model[];
-      model: Model;
+      models?: LumaGPUVectorModel[];
+      model: LumaGPUVectorModel;
     };
     return (state && (state.models || (state.model && [state.model]))) || [];
   }
@@ -579,6 +583,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Called once to set up the initial state. Layers can create WebGL resources here. */
   abstract initializeState(context: LayerContext): void;
 
+  /** Returns shader options and the deck.gl assembler used by layer models. */
   getShaders(shaders: any): any {
     // Preprojection capability is stable for the lifetime of a layer instance.
     shaders = mergeShaders(
@@ -590,14 +595,19 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       },
       shaders
     );
+    // Preserve the public picking module contract while installing its injection target contributions.
+    if (shaders.modules?.includes(pickingModule) && !shaders.plugins?.includes(pickingPlugin)) {
+      shaders = mergeShaders(shaders, {plugins: [pickingPlugin]});
+    }
     shaders = mergeShaders(shaders, {
       disableWarnings: true,
-      modules: this.context.defaultShaderModules
+      modules: this.context.defaultShaderModules,
+      plugins: this.context.defaultShaderPlugins
     });
     for (const extension of this.props.extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
-    return shaders;
+    return {...shaders, shaderAssembler: this.context.shaderAssembler};
   }
 
   /** Controls if updateState should be called. By default returns true if any prop has changed */
@@ -906,8 +916,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     attributeManager: AttributeManager,
     changedAttributes: Record<string, Attribute>
   ): void {
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const excludeAttributes = (model.userData?.excludeAttributes || {}) as Record<string, boolean>;
     const bindings = attributeManager.getBufferGroupBindings(
       changedAttributes,
       model,
@@ -933,10 +942,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
   }
 
-  /** Apply changed attributes to model */
+  /** Apply changed attributes to a rendering model or texture transform model. */
   // eslint-disable-next-line max-statements
   protected _setModelAttributes(
-    model: Model,
+    model: Model | LumaGPUVectorModel,
     changedAttributes: {
       [id: string]: Attribute;
     },
@@ -966,8 +975,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       changedAttributes = manager.getAttributes();
     }
 
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const excludeAttributes = (model.userData?.excludeAttributes || {}) as Record<string, boolean>;
     const attributeBuffers: Record<string, Buffer> = {};
     const constantAttributes: Record<string, TypedArray> = {};
 
@@ -996,12 +1004,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Apply explicit WebGPU buffer groups while preserving legacy bindings for fallbacks. */
   private _setGroupedModelAttributes(
-    model: Model,
+    model: Model | LumaGPUVectorModel,
     attributeManager: AttributeManager,
     changedAttributes: {[id: string]: Attribute}
   ) {
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const excludeAttributes = (model.userData?.excludeAttributes || {}) as Record<string, boolean>;
     const bindings = attributeManager.getBufferGroupBindings(
       changedAttributes,
       model,
@@ -1049,8 +1056,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       return;
     }
 
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const attributes = this.getAttributeManager().attributes;
+    const attributes = this.getAttributeManager()?.getAttributes() || {};
     const indexes = getPickingIndexAttribute(attributes);
     const colors = getPickingColorAttribute(attributes);
 
@@ -1089,8 +1095,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   // TODO - simplify subclassing interface
   protected _disablePickingIndex(objectIndex: number): void {
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const attributes = this.getAttributeManager().attributes;
+    const attributes = this.getAttributeManager()?.getAttributes() || {};
     const indexes = getPickingIndexAttribute(attributes);
     if (indexes) {
       const start = indexes.getVertexOffset(objectIndex);
@@ -1118,8 +1123,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** (Internal) Re-enable all picking indices after multi-depth picking */
   restorePickingColors(): void {
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const attributes = this.getAttributeManager().attributes;
+    const attributes = this.getAttributeManager()?.getAttributes() || {};
     const pickingAttribute = getPickingAttribute(attributes);
     if (!pickingAttribute) {
       if (this.internalState) {
@@ -1391,11 +1395,24 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const webGPUDrawParameters =
         context.device instanceof WebGLDevice ? null : splitWebGPUDrawParameters(parameters);
 
-      applyModelParameters(this.getModels(), renderPass, parameters, webGPUDrawParameters);
+      applyModelParameters(this.getModels(), parameters, webGPUDrawParameters);
 
       // Call subclass lifecycle method
       if (context.device instanceof WebGLDevice) {
-        context.device.withParametersWebGL(parameters, () => {
+        const {colorMask, ...webGLParameters} = parameters;
+        if (typeof colorMask === 'number') {
+          Object.assign(webGLParameters, {
+            colorMask: [
+              Boolean(colorMask & 1),
+              Boolean(colorMask & 2),
+              Boolean(colorMask & 4),
+              Boolean(colorMask & 8)
+            ]
+          });
+        } else if (colorMask) {
+          Object.assign(webGLParameters, {colorMask});
+        }
+        context.device.withParametersWebGL(webGLParameters, () => {
           const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
           // extensions
@@ -1406,17 +1423,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           this.draw(opts);
         });
       } else {
-        if (webGPUDrawParameters?.renderPassParameters) {
-          renderPass.setParameters(webGPUDrawParameters.renderPassParameters);
-        }
-        const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
+        renderPass.withParameters(webGPUDrawParameters?.renderPassParameters || {}, () => {
+          const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
-        // extensions
-        for (const extension of this.props.extensions) {
-          extension.draw.call(this, opts, extension);
-        }
+          for (const extension of this.props.extensions) {
+            extension.draw.call(this, opts, extension);
+          }
 
-        this.draw(opts);
+          this.draw(opts);
+        });
       }
     } finally {
       this.props = currentProps;
@@ -1585,7 +1600,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const {props, oldProps} = updateParams;
 
     // Note: Automatic instance count update only works for single layers
-    const model = this.state.model as Model | undefined;
+    const model = this.state.model as LumaGPUVectorModel | undefined;
     if (model?.isInstanced) {
       model.setInstanceCount(this.getNumInstances());
     }
@@ -1685,14 +1700,12 @@ function splitWebGPUDrawParameters(parameters: LumaParameters): {
 }
 
 function applyModelParameters(
-  models: Model[],
-  renderPass: RenderPass,
+  models: LumaGPUVectorModel[],
   parameters: LumaParameters,
   webGPUDrawParameters: ReturnType<typeof splitWebGPUDrawParameters> | null
 ): void {
   for (const model of models) {
     if (model.device.type === 'webgpu') {
-      syncModelAttachmentFormats(model, renderPass);
       // TODO(ibgreen): model.setParameters currently wipes parameters. Semantics TBD.
       model.setParameters({
         ...model.parameters,
@@ -1703,62 +1716,6 @@ function applyModelParameters(
     }
   }
 }
-
-function syncModelAttachmentFormats(model: Model, renderPass: RenderPass): void {
-  const framebuffer =
-    renderPass.props.framebuffer ||
-    ((
-      renderPass as RenderPass & {
-        framebuffer?: {
-          colorAttachments: Array<{texture: {format: string}}>;
-          depthStencilAttachment: {texture: {format: string}} | null;
-        };
-      }
-    ).framebuffer ??
-      null);
-
-  if (!framebuffer) {
-    return;
-  }
-
-  const colorAttachmentFormats = framebuffer.colorAttachments.map(
-    attachment => attachment?.texture?.format ?? null
-  );
-  const depthStencilAttachmentFormat = framebuffer.depthStencilAttachment?.texture?.format;
-
-  const modelWithProps = model as unknown as {
-    props: {
-      colorAttachmentFormats?: (string | null)[];
-      depthStencilAttachmentFormat?: string;
-    };
-    _setPipelineNeedsUpdate(reason: string): void;
-  };
-
-  if (
-    !equalAttachmentFormats(modelWithProps.props.colorAttachmentFormats, colorAttachmentFormats) ||
-    modelWithProps.props.depthStencilAttachmentFormat !== depthStencilAttachmentFormat
-  ) {
-    modelWithProps.props.colorAttachmentFormats = colorAttachmentFormats;
-    modelWithProps.props.depthStencilAttachmentFormat = depthStencilAttachmentFormat;
-    modelWithProps._setPipelineNeedsUpdate('attachment formats');
-  }
-}
-
-function equalAttachmentFormats(left?: (string | null)[], right?: (string | null)[]): boolean {
-  if (left === right) {
-    return true;
-  }
-  if (!left || !right || left.length !== right.length) {
-    return false;
-  }
-  for (let i = 0; i < left.length; i++) {
-    if (left[i] !== right[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
 // Resolve the current layer at invocation: layer instances are replaced while attributes survive.
 function transformPosition(this: Layer, input: number[]): [number, number, number] {
   const position: [number, number, number] = [input[0], input[1], input[2] ?? 0];
