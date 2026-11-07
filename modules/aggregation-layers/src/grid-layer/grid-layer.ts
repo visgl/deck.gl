@@ -561,6 +561,32 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
   }
 
+  protected override updateAttributes(changedAttributes) {
+    // AttributeManager has populated current positions at this point. Backend selection
+    // during updateState can only see the previous position bounds.
+    if (
+      changedAttributes.positions &&
+      this.state.aggregatorType === 'webgpu' &&
+      this.getAggregatorType() === 'cpu'
+    ) {
+      this.state.aggregator.destroy();
+      const aggregator = this.createAggregator('cpu');
+      this.setState({aggregator, aggregatorType: 'cpu'});
+      aggregator.setProps({
+        attributes: this.getAttributeManager()!.attributes,
+        pointCount: this.getNumInstances(),
+        operations: [this.props.colorAggregation, this.props.elevationAggregation],
+        binIdRange: this.state.binIdRange,
+        binOptions: {
+          cellSizeCommon: this.state.cellSizeCommon,
+          cellOriginCommon: this.state.cellOriginCommon
+        },
+        onUpdate: this._onAggregationUpdate.bind(this)
+      });
+    }
+    super.updateAttributes(changedAttributes);
+  }
+
   onAttributeChange(id: string) {
     const {aggregator} = this.state;
     switch (id) {

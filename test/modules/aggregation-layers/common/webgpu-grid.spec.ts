@@ -265,3 +265,58 @@ test('Grid compute selection falls back for features requiring CPU results', asy
     }))
   });
 });
+
+test('Grid uses current accessor bounds when checking dense buffer limits', async ({skip}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  await testLayerAsync({
+    Layer: GridLayer,
+    device,
+    viewport: new OrthographicView().makeViewport({
+      width: 200,
+      height: 200,
+      viewState: {target: [0, 0, 0], zoom: 0}
+    }),
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          data: [
+            [0, 0],
+            [100000, 100000]
+          ],
+          getPosition: d => d,
+          cellSize: 1,
+          colorDomain: [0, 10],
+          elevationDomain: [0, 10]
+        },
+        onAfterUpdate({layer}) {
+          expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+          expect(layer.state.aggregator.binCount).toBe(2);
+        }
+      },
+      {
+        updateProps: {
+          data: [
+            [0, 0],
+            [0.5, 0.5]
+          ]
+        }
+      },
+      {
+        updateProps: {
+          data: [
+            [0, 0],
+            [200000, 200000]
+          ]
+        },
+        onAfterUpdate({layer}) {
+          expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+          expect(layer.state.aggregator.binCount).toBe(2);
+        }
+      }
+    ]
+  });
+});
