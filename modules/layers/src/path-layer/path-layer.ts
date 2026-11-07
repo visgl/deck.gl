@@ -51,6 +51,8 @@ type _PathLayerProps<DataT> = {
    * @default 0
    */
   _projectionTolerance?: number;
+  /** Avoid grid splitting when a closed polygon outline is adaptively refined. @internal */
+  _projectionNoCut?: boolean;
   /** The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`
    * @default 'meters'
    */
@@ -141,6 +143,7 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   billboard: false,
   _pathType: null,
   _projectionTolerance: {type: 'number', value: 0, min: 0},
+  _projectionNoCut: false,
 
   getPath: {type: 'accessor', value: (object: any) => object.path},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -445,7 +448,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           !this.state.preproject &&
           this.state.sourceCrs?.signature === 'WGS84',
         // Subdivision runs in accessor coordinates before the source CRS transform.
-        resolution: this.getSubdivisionStep(),
+        resolution: props._projectionNoCut ? 0 : this.getSubdivisionStep(),
         projectionTolerance: props._projectionTolerance,
         projectionToleranceScale: projectionToleranceScale ?? undefined,
         // A partial data diff is only valid while normalization inputs remain unchanged.
