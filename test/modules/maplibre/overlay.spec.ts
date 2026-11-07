@@ -5,14 +5,26 @@
 import {BitmapLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {device} from '@deck.gl/test-utils';
-import {Map as MapLibreV4Map} from 'maplibre-gl-v4';
-import {Map as MapLibreV5Map} from 'maplibre-gl-v5';
-import {Map as MapLibreV6Map} from 'maplibre-gl-v6';
-import {test, expect} from 'vitest';
+import {
+  Map as MapLibreV4Map,
+  addProtocol as addProtocolV4,
+  removeProtocol as removeProtocolV4
+} from 'maplibre-gl-v4';
+import {
+  Map as MapLibreV5Map,
+  addProtocol as addProtocolV5,
+  removeProtocol as removeProtocolV5
+} from 'maplibre-gl-v5';
+import {
+  Map as MapLibreV6Map,
+  addProtocol as addProtocolV6,
+  removeProtocol as removeProtocolV6
+} from 'maplibre-gl-v6';
+import {test, expect, vi} from 'vitest';
 
 import {getMapLibreElevation} from '../../../modules/maplibre/src/compatibility';
 
-import type {Map as MapLibreMap} from 'maplibre-gl-v6';
+import type {GeoJSONSource, Map as MapLibreMap} from 'maplibre-gl-v6';
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
@@ -72,9 +84,24 @@ async function createDemTileURL(elevation: number): Promise<string> {
 // Aliases in modules/maplibre/package.json pin the earliest supported release of each major.
 // Add an alias, import, and entry here when supporting a new major.
 const MAPLIBRE_VERSIONS = [
-  {version: '4.5.1', MapClass: MapLibreV4Map},
-  {version: '5.0.0', MapClass: MapLibreV5Map},
-  {version: '6.0.0', MapClass: MapLibreV6Map}
+  {
+    version: '4.5.1',
+    MapClass: MapLibreV4Map,
+    addProtocol: addProtocolV4,
+    removeProtocol: removeProtocolV4
+  },
+  {
+    version: '5.0.0',
+    MapClass: MapLibreV5Map,
+    addProtocol: addProtocolV5,
+    removeProtocol: removeProtocolV5
+  },
+  {
+    version: '6.0.0',
+    MapClass: MapLibreV6Map,
+    addProtocol: addProtocolV6,
+    removeProtocol: removeProtocolV6
+  }
 ];
 
 test('MapLibreOverlay overlaid uses only public MapLibre APIs', () => {
@@ -271,4 +298,103 @@ for (const {version, MapClass, mode} of TERRAIN_CASES) {
       URL.revokeObjectURL(demTileURL);
     }
   });
+}
+
+for (const {version, MapClass, addProtocol, removeProtocol} of MAPLIBRE_VERSIONS) {
+  webglTest(
+    `MapLibreOverlay inserts interleaved layer groups once MapLibre ${version} sources load`,
+    async () => {
+      const container = document.createElement('div');
+      Object.assign(container.style, {width: '400px', height: '300px'});
+      document.body.append(container);
+
+      // Hold GeoJSON data requests open, so the style is parsed but
+      // `map.isStyleLoaded()` stays false until the test releases them.
+      let releaseData: () => void = () => {};
+      let dataReleased = Promise.resolve();
+      const holdData = () => {
+        dataReleased = new Promise<void>(resolve => {
+          releaseData = resolve;
+        });
+      };
+      addProtocol('delayed', async () => {
+        await dataReleased;
+        return {data: {type: 'FeatureCollection', features: []}};
+      });
+
+      holdData();
+      const map = new MapClass({
+        container,
+        style: {
+          version: 8,
+          sources: {points: {type: 'geojson', data: 'delayed://points'}},
+          layers: [
+            {id: 'points', type: 'circle', source: 'points'},
+            {id: 'labels', type: 'background'}
+          ]
+        },
+        center: [-122.45, 37.78],
+        zoom: 14,
+        attributionControl: false
+      }) as unknown as MapLibreMap;
+
+      const image = new ImageData(new Uint8ClampedArray([255, 0, 0, 255]), 1, 1);
+      const bounds: [number, number, number, number] = [-122.46, 37.77, -122.44, 37.79];
+      const overlay = new MapLibreOverlay({
+        interleaved: true,
+        layers: [new BitmapLayer({id: 'under-labels', image, bounds, beforeId: 'labels'})]
+      });
+      const waitForIdle = () => new Promise<void>(resolve => map.once('idle', () => resolve()));
+
+      try {
+        map.addControl(overlay);
+        await new Promise<void>(resolve => map.once('styledata', () => resolve()));
+        expect(map.isStyleLoaded()).toBe(false);
+
+        let idle = waitForIdle();
+        releaseData();
+        await idle;
+
+        expect(map.getLayersOrder()).toEqual([
+          'points',
+          'deck-maplibre-layer-group-before:labels',
+          'labels'
+        ]);
+
+        // Layer changes made while a source reloads are applied once it finishes.
+        const getLayersOrder = vi.spyOn(map, 'getLayersOrder');
+        holdData();
+        void map.getSource<GeoJSONSource>('points')!.setData('delayed://points-2');
+        expect(map.isStyleLoaded()).toBe(false);
+        overlay.setProps({
+          layers: [new BitmapLayer({id: 'under-points', image, bounds, beforeId: 'points'})]
+        });
+        expect(getLayersOrder).not.toHaveBeenCalled();
+
+        idle = waitForIdle();
+        releaseData();
+        await idle;
+
+        expect(map.getLayersOrder()).toEqual([
+          'deck-maplibre-layer-group-before:points',
+          'points',
+          'labels'
+        ]);
+
+        // Once resolved, later source updates do not reconcile layer groups again.
+        getLayersOrder.mockClear();
+        idle = waitForIdle();
+        void map
+          .getSource<GeoJSONSource>('points')!
+          .setData({type: 'FeatureCollection', features: []});
+        await idle;
+        expect(getLayersOrder).not.toHaveBeenCalled();
+      } finally {
+        map.removeControl(overlay);
+        map.remove();
+        container.remove();
+        removeProtocol('delayed');
+      }
+    }
+  );
 }

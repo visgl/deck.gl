@@ -51,14 +51,16 @@ for (const useColumns of [false, true]) {
     deck.props.onBeforeRender!({deck} as never);
     const next = deck.props.layers[0] as ArrowPathLayer;
     expect(next.props.data).toBe(iterator);
-    expect(next.props.color).toBe(previous.props.color);
-    expect(next.props.width).toBe(previous.props.width);
-    next.state = {sourceInitialized: true, batches: [], loadVersion: 1};
-    const loadSource = vi.spyOn(next as any, 'loadSource');
-    vi.spyOn(next, 'setNeedsRedraw').mockImplementation(() => {});
-    next.updateState({
-      props: next.props,
-      oldProps: previous.props,
+    expect(next.props.colors).toBe(previous.props.colors);
+    expect(next.props.widths).toBe(previous.props.widths);
+    const previousRenderer = previous.renderLayers().renderLayers();
+    const nextRenderer = next.renderLayers().renderLayers();
+    nextRenderer.state = {sourceInitialized: true, batches: [], loadVersion: 1};
+    const loadSource = vi.spyOn(nextRenderer as any, 'loadSource');
+    vi.spyOn(nextRenderer, 'setNeedsRedraw').mockImplementation(() => {});
+    nextRenderer.updateState({
+      props: nextRenderer.props,
+      oldProps: previousRenderer.props,
       changeFlags: {dataChanged: false}
     } as never);
     expect(loadSource).not.toHaveBeenCalled();
