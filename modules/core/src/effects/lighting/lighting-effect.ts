@@ -150,7 +150,9 @@ export default class LightingEffect implements Effect {
       lights: this._getLights(layer)
     };
     // @ts-expect-error material is not a Layer prop
-    const materialProps = layer.props.material;
+    const material = layer.props.material;
+    // ShaderInputs treats false as empty props, which restores lit defaults.
+    const materialProps = material === false ? {unlit: true} : material;
 
     return {
       shadow: shadowProps,
