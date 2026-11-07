@@ -65,3 +65,30 @@ test('cell and style counts are validated', () => {
   });
   expect(() => layer.renderLayers()).toThrow('lengths must match');
 });
+
+test('H3 column wrapper leaves viewport updates to its child', () => {
+  const layer = new H3HexagonLayer({cells: vectorFromArray(['8928308280fffff'])});
+  expect(
+    layer.shouldUpdateState({
+      props: layer.props,
+      changeFlags: {
+        propsOrDataChanged: false,
+        somethingChanged: true,
+        viewportChanged: true
+      }
+    } as never)
+  ).toBe(false);
+});
+
+test('generated rows clear source data hooks', () => {
+  const layer = new S2Layer({
+    cells: vectorFromArray(['89c25']),
+    dataTransform: rows => rows,
+    dataComparator: () => true,
+    _dataDiff: () => []
+  });
+  const child = layer.renderLayers() as any;
+  expect(child.props.dataTransform).toBeFalsy();
+  expect(child.props.dataComparator).toBeFalsy();
+  expect(child.props._dataDiff).toBeFalsy();
+});

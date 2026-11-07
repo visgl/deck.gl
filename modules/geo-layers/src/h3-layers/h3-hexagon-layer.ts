@@ -120,17 +120,19 @@ export default class H3HexagonLayer<
     vertices?: number[][];
   };
 
-  shouldUpdateState({changeFlags}: UpdateParameters<this>): boolean {
+  shouldUpdateState({props, changeFlags}: UpdateParameters<this>): boolean {
+    if (props.cells) return changeFlags.propsOrDataChanged;
     return this._shouldUseHighPrecision()
       ? changeFlags.propsOrDataChanged
       : changeFlags.somethingChanged;
   }
 
-  updateState({props, changeFlags}: UpdateParameters<this>): void {
+  updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     if (props.cells) return;
     if (
       props.highPrecision !== true &&
-      (changeFlags.dataChanged ||
+      (oldProps.cells ||
+        changeFlags.dataChanged ||
         (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getHexagon))
     ) {
       const dataProps = this._calculateH3DataProps();

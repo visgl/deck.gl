@@ -49,3 +49,27 @@ for (const [Layer, cell] of [
     });
   });
 }
+
+for (const Layer of [H3HexagonLayer, H3ClusterLayer]) {
+  test(`${Layer.layerName} restores accessor geometry when cells are removed`, () => {
+    const id = '8928308280fffff';
+    testLayer({
+      Layer: Layer as typeof H3HexagonLayer,
+      props: {data: [{hexagon: id, hexagons: [id]}], cells: vectorFromArray([id])},
+      testCases: [
+        {title: 'initialize columns'},
+        {title: 'restore accessors', updateProps: {cells: null}}
+      ],
+      onAfterUpdate: ({layer, subLayer}) => {
+        expect(subLayer).toBeTruthy();
+        if (!layer.props.cells) {
+          if (layer instanceof H3HexagonLayer) expect(layer.state.resolution).toBe(9);
+          else expect(layer.state.polygons.length).toBeGreaterThan(0);
+        }
+      },
+      onError: error => {
+        throw error;
+      }
+    });
+  });
+}

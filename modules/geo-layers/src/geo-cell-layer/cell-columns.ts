@@ -101,6 +101,9 @@ export function renderCellColumns(
     lineWidths: null,
     elevations: null,
     data,
+    dataTransform: undefined,
+    dataComparator: undefined,
+    _dataDiff: undefined,
     [accessor]: (row: {cell: unknown}) => row.cell,
     ...styleProps
   });

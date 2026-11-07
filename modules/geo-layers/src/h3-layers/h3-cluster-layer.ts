@@ -49,9 +49,10 @@ export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> ext
     H3HexagonLayer._checkH3Lib();
   }
 
-  updateState({props, changeFlags}: UpdateParameters<this>): void {
+  updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     if (props.cells) return;
     if (
+      oldProps.cells ||
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getHexagons)
     ) {
