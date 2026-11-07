@@ -482,7 +482,6 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     );
   }
 
-  /** Splits one packed transform buffer into the shader's four vector views. */
   /** Releases the Arrow path and reinstates the regular attribute manager. */
   private restoreAccessorState(): boolean {
     if (!this.state.columns) return false;

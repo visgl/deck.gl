@@ -6,6 +6,7 @@ import {createIterable, type _ColumnDefinition as ColumnDefinition} from '@deck.
 import {Buffer, type Device} from '@luma.gl/core';
 import {MATRIX_ATTRIBUTES, getMeshInstanceTransform} from './matrix';
 
+/** Accessors that compose a mesh instance transform. */
 export const TRANSFORM_ACCESSORS = [
   'getTransformMatrix',
   'getOrientation',
@@ -13,6 +14,7 @@ export const TRANSFORM_ACCESSORS = [
   'getTranslation'
 ] as const;
 const TRANSFORM_ATTRIBUTES = Object.keys(MATRIX_ATTRIBUTES.shaderAttributes);
+/** Shared instance column schema for mesh and scenegraph models. */
 export const MESH_COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = {
   positions: {
     attribute: 'instancePositions',

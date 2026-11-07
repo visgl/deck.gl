@@ -7,7 +7,7 @@ import type {GPUVector, GPUVectorFormat} from '@luma.gl/graph/gpu-data';
 import {DataType, type RecordBatch, type Vector} from 'apache-arrow';
 import {uploadArrowVector, type PreparedArrowGPUVector} from './arrow-to-gpu-vector';
 
-/** Structural Arrow input contract, without loading Arrow in accessor-only layers. */
+/** Arrow columns or borrowed GPU vectors accepted by layer column props. */
 export type ColumnSource = Pick<Vector, 'length' | 'type' | 'data'> | GPUVector;
 
 /** Layer-oriented semantics, for numeric, position, scalar, and color conversion. */
