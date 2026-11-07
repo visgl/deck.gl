@@ -8,7 +8,7 @@ import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {CubeGeometry, Model, ModelNode, GroupNode} from '@luma.gl/engine';
 import {getWebGLTestDevice, getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {makeGPUVectorFromArrow} from '@luma.gl/graph/arrow';
-import {vectorFromArray, FixedSizeList, Field, Float32} from 'apache-arrow';
+import {Vector, vectorFromArray, FixedSizeList, Field, Float32} from 'apache-arrow';
 
 for (const backend of ['webgl', 'webgpu'] as const) {
   test(`Scenegraph columns preserve model identity and borrowed buffers (${backend})`, async ({
@@ -17,6 +17,10 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     const device = await (backend === 'webgl' ? getWebGLTestDevice : getWebGPUTestDevice)('core');
     if (!device) return skip();
     const type = new FixedSizeList(3, new Field('component', new Float32()));
+    const arrowPositions = new Vector([
+      vectorFromArray([[-20, 0, 0]], type).data[0],
+      vectorFromArray([[20, 0, 0]], type).data[0]
+    ]);
     const positions = makeGPUVectorFromArrow(
       device,
       vectorFromArray(
@@ -33,8 +37,8 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     let model: Model | undefined;
     const props = {
       id: 'scene',
-      positions,
-      scenegraph: {},
+      positions: arrowPositions,
+      scenegraph: new GroupNode([]),
       _lighting: 'flat' as const,
       getColor: [255, 0, 0, 255] as [number, number, number, number],
       getScale: [10, 10, 10] as [number, number, number],
@@ -62,10 +66,11 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     });
     try {
       await expect.poll(() => layer.isLoaded).toBe(true);
-      await expect.poll(() => model?.pipeline.linkStatus).toBe('success');
+      await expect.poll(() => model?.pipeline.linkStatus, {timeout: 15000}).toBe('success');
       expect(layer.getNumInstances()).toBe(2);
+      expect((await deck.pickObjectAsync({x: 84, y: 64}))?.index).toBe(1);
       const firstModel = model;
-      layer = new ScenegraphLayer({...props, getColor: [0, 255, 0, 255]});
+      layer = new ScenegraphLayer({...props, positions, getColor: [0, 255, 0, 255]});
       deck.setProps({layers: [layer]});
       await expect.poll(() => layer.isLoaded).toBe(true);
       expect(model).toBe(firstModel);

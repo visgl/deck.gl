@@ -220,20 +220,38 @@ export class LayerColumns {
         const source =
           definition.prop === false ? undefined : (props[name] as ColumnSource | undefined);
         if (!source) continue;
-        const result = await converter.convert(source as Parameters<typeof converter.convert>[0], {
-          name,
-          semantic: definition.semantic === 'vector' ? 'numeric' : definition.semantic,
-          ...(definition.semantic === 'position'
-            ? {
-                format: 'float32x3',
-                transform: value => {
-                  positionOptions.onPosition!(value);
-                  return positionOptions.transform ? positionOptions.transform(value) : value;
-                },
-                fp64: positionOptions.fp64
-              }
-            : {})
-        });
+        if (source instanceof GPUVector) {
+          const format =
+            definition.semantic === 'color'
+              ? 'unorm8x4'
+              : definition.size === 1
+                ? 'float32'
+                : 'float32x' + definition.size;
+          if (source.format !== format)
+            throw new Error('GPU column format must match the shader input');
+          if (definition.semantic === 'position') {
+            if (positionOptions.transform)
+              throw new Error('GPU positions cannot be CPU-preprojected');
+            boundsAvailable = false;
+          }
+        }
+        const result =
+          source instanceof GPUVector
+            ? {vector: source, residualVector: undefined, destroy() {}}
+            : await converter.convert(source as Parameters<typeof converter.convert>[0], {
+                name,
+                semantic: definition.semantic === 'vector' ? 'numeric' : definition.semantic,
+                ...(definition.semantic === 'position'
+                  ? {
+                      format: 'float32x3',
+                      transform: value => {
+                        positionOptions.onPosition!(value);
+                        return positionOptions.transform ? positionOptions.transform(value) : value;
+                      },
+                      fp64: positionOptions.fp64
+                    }
+                  : {})
+              });
         results.push(result);
         if (version !== this.version) {
           for (const result of results) result.destroy();
