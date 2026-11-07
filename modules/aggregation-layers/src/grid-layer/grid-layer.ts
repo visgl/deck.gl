@@ -322,7 +322,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           'getElevationWeight'
         ]) ||
         (!this.props.positions &&
-          this.props.data === this.internalState?.getOldProps().data &&
+          this.props.data ===
+            (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
           !WebGPUGridAggregator.supportsAttributes(this.getAttributeManager()!.attributes, [
             'colorWeights',
             'elevationWeights'

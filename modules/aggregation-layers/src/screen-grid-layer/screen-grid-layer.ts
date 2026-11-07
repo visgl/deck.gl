@@ -137,7 +137,8 @@ export default class ScreenGridLayer<
       if (
         !WebGPUScreenGridAggregator.supportsData(this.props.data, ['getPosition', 'getWeight']) ||
         (!this.props.positions &&
-          this.props.data === this.internalState?.getOldProps().data &&
+          this.props.data ===
+            (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
           !WebGPUScreenGridAggregator.supportsAttributes(this.getAttributeManager()!.attributes, [
             'counts'
           ]))
