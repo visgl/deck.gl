@@ -311,6 +311,7 @@ export class TerrainEffect implements Effect {
       width: Math.ceil(renderViewport.width),
       height: Math.ceil(renderViewport.height)
     });
+    target.device.beginRenderPass({framebuffer: target, clearColor: [0, 0, 0, 0]}).end();
     externalTerrain.renderHeightMap({target, bounds});
     this.externalHeightMapId = externalTerrain.id;
   }

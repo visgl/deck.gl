@@ -26,9 +26,9 @@ export type ExternalTerrain = {
   /** Identifies the surface, and changes whenever it changes other than by camera movement. */
   id: string;
   /**
-   * Draws the ground elevation in meters into the red channel of `target`, and 1 into its alpha
-   * where the elevation is known. `bounds` is the area that `target` covers in Web Mercator common
-   * space, with `minY` in its first row.
+   * Draws the ground elevation in meters into the red channel of `target`, which is cleared, and 1
+   * into its alpha where the elevation is known. `bounds` is the area that `target` covers in Web
+   * Mercator common space, with `minY` in its first row.
    */
   renderHeightMap: (opts: {target: Framebuffer; bounds: Bounds}) => void;
   /** Receives the function that draws the draped layers, or `null` when they stop following this terrain. */

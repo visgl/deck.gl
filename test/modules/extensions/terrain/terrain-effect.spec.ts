@@ -325,11 +325,20 @@ test('TerrainEffect#external terrain', async () => {
   externalTerrain.renderHeightMap.mockClear();
   lifecycle.render();
   expect(externalTerrain.renderHeightMap, 'Height map is up to date').not.toHaveBeenCalled();
+  device.beginRenderPass({framebuffer: heightMap, clearColor: [1000, 0, 0, 1]}).end();
+  let pixelsHandedOver: number[] = [];
+  externalTerrain.renderHeightMap.mockImplementationOnce(({target}) => {
+    pixelsHandedOver = Array.from(device.readPixelsToArrayWebGL(target));
+  });
   externalTerrain.id = 'terrain-with-more-tiles';
   lifecycle.render();
   expect(externalTerrain.renderHeightMap, 'Height map follows the terrain').toHaveBeenCalledTimes(
     1
   );
+  expect(
+    pixelsHandedOver.every(value => value === 0),
+    'Height map is cleared before the terrain draws'
+  ).toBe(true);
   await lifecycle.update({
     viewport: new WebMercatorViewport({
       width: 800,
