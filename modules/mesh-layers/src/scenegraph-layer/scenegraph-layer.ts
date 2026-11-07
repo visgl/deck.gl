@@ -490,7 +490,8 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   draw({context}) {
-    if (!this.state.scenegraph || (this.state.columns && !this.getNumInstances())) return;
+    if (!this.state.scenegraph || (this.state.columns?.loading && !this.state.columns.length))
+      return;
 
     if (this.props._animations && this.state.animator) {
       this.state.animator.setTime(context.timeline.getTime());

@@ -54,7 +54,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         return new GroupNode([new ModelNode({model})]);
       }
     };
-    let layer: ScenegraphLayer = new ScenegraphLayer(props);
+    let layer: ScenegraphLayer = new ScenegraphLayer({...props, numInstances: 2});
     const deck = new Deck({
       device,
       parent,
@@ -71,15 +71,19 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       expect(layer.getNumInstances()).toBe(2);
       expect((await deck.pickObjectAsync({x: 84, y: 64}))?.index).toBe(1);
       const firstModel = model;
-      layer = new ScenegraphLayer({
+      const gpuProps = {
         ...props,
         positions,
-        getColor: [0, 255, 0, 255],
-        getScale: () => [20, 20, 20]
-      });
+        getColor: [0, 255, 0, 255] as [number, number, number, number]
+      };
+      layer = new ScenegraphLayer(gpuProps);
       deck.setProps({layers: [layer]});
       await expect.poll(() => layer.isLoaded).toBe(true);
       expect(model).toBe(firstModel);
+      expect(await deck.pickObjectAsync({x: 100, y: 64})).toBeNull();
+      layer = new ScenegraphLayer({...gpuProps, getScale: () => [20, 20, 20]});
+      deck.setProps({layers: [layer]});
+      await expect.poll(() => layer.isLoaded).toBe(true);
       expect((await deck.pickObjectAsync({x: 100, y: 64}))?.index).toBe(1);
       expect((await deck.pickObjectAsync({x: 84, y: 64}))?.index).toBe(1);
       layer = new ScenegraphLayer({...props, positions: null, data: [{position: [0, 0, 0]}]});
