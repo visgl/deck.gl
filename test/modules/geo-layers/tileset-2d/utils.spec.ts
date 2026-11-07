@@ -345,7 +345,7 @@ test('getTileIndices', () => {
 
 test('tileToBoundingBox', () => {
   for (const testCase of TEST_CASES) {
-    if (testCase.output.length && !testCase.viewport.resolution) {
+    if (testCase.output.length && testCase.viewport.crs?.coordinateFrame !== 'geocentric') {
       const {viewport, minZoom, maxZoom, tileSize, zRange} = testCase;
       const boundingBoxes = getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize}).map(
         tile => tileToBoundingBox(viewport, tile.x, tile.y, tile.z)

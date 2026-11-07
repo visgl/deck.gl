@@ -1,3 +1,4 @@
+import OpenFreeMapAttribution from '../components/openfreemap-attribution';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import CodeBlock from '@theme/CodeBlock';
 import {
@@ -30,8 +31,8 @@ import { SimpleMeshLayer } from '@deck.gl/mesh-layers';
 import { MVTLayer } from '@deck.gl/geo-layers';
 import { Map } from 'react-map-gl/maplibre';
 import { useColorMode } from '@docusaurus/theme-common';
-import { MAPBOX_STYLES, DATA_URI } from '../constants/defaults';
-import {OBJLoader} from '@loaders.gl/obj';
+import { cloneMapStyle, MAPBOX_STYLES, DATA_URI } from '../constants/defaults';
+import {OBJLoader} from '@loaders.gl/scene/obj';
 
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson'; //eslint-disable-line
@@ -72,7 +73,13 @@ function GeoDemoBase(deckProps) {
     }),
   ];
 
+  const showAttribution = !deckProps.map && [deckProps.layers || layers]
+    .flat(Infinity)
+    .some(layer => layer instanceof MVTLayer);
   const style = {...(isDarkMode ? DarkGlassTheme : LightGlassTheme), ...deckProps.style};
+  const mapStyle = useMemo(() => cloneMapStyle(deckProps.mapLabels
+    ? (isDarkMode ? MAPBOX_STYLES.DARK_LABEL : MAPBOX_STYLES.LIGHT_LABEL)
+    : (isDarkMode ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT)), [deckProps.mapLabels, isDarkMode]);
 
   return (
     <div style={DEMO_CONTAINER_STYLE}>
@@ -89,10 +96,9 @@ function GeoDemoBase(deckProps) {
         {...deckProps}
         style={style}
       >
-        {deckProps.map && <Map reuseMaps mapStyle={deckProps.mapLabels
-          ? (isDarkMode ? MAPBOX_STYLES.DARK_LABEL : MAPBOX_STYLES.LIGHT_LABEL)
-          : (isDarkMode ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT)} />}
+        {deckProps.map && <Map reuseMaps mapStyle={mapStyle} />}
       </DeckGL>
+      {showAttribution && <OpenFreeMapAttribution />}
     </div>
   )
 }
@@ -143,9 +149,7 @@ function generateMatrix(nCol, nRow) {
 }
 function getMVTLayer(overrideProps = {}) {
   return new MVTLayer({
-    data: [
-      'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-    ],
+    data: 'https://tiles.openfreemap.org/planet',
 
     minZoom: 0,
     maxZoom: 14,

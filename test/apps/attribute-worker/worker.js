@@ -4,7 +4,7 @@
 
 /* global fetch */
 import TEST_CASES from './test-cases';
-import {LayerManager} from '@deck.gl/core';
+import {LayerManager, Viewport} from '@deck.gl/core';
 import * as Layers from '@deck.gl/layers';
 
 export default self => {
@@ -26,7 +26,7 @@ function fetchJSON(url) {
 }
 
 function getLayerSnapshot(layer) {
-  const layerManager = new LayerManager();
+  const layerManager = new LayerManager(undefined, {viewport: new Viewport()});
   layerManager.setProps({layers: [layer]});
   layerManager.updateLayers();
 

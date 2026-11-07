@@ -50,11 +50,6 @@
     }
   ],
   "mapStyle": "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-  "views": [
-    {
-      "@@type": "MapView",
-      "controller": true
-    }
-  ],
-  "mapProvider": "carto"
+  "mapProvider": "carto",
+  "controller": true
 }

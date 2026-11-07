@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LayerManager, DeckRenderer} from '@deck.gl/core';
+import {LayerManager, DeckRenderer, Viewport} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils';
 
 // Helper class to execute lifecycle methods
 // TODO - move to test-utils?
 export class LifecycleTester {
   constructor() {
-    const layerManager = new LayerManager(device, {});
+    const layerManager = new LayerManager(device, {viewport: new Viewport()});
     this.layerManager = layerManager;
     this.deckRenderer = new DeckRenderer(device);
     this.viewport = this.layerManager.context.viewport;
@@ -17,8 +17,8 @@ export class LifecycleTester {
     this.effectContext = {
       device,
       deck: {
-        _addDefaultShaderModule: layerManager.addDefaultShaderModule.bind(layerManager),
-        _removeDefaultShaderModule: layerManager.removeDefaultShaderModule.bind(layerManager)
+        _addDefaultShaderPlugin: layerManager.addDefaultShaderPlugin.bind(layerManager),
+        _removeDefaultShaderPlugin: layerManager.removeDefaultShaderPlugin.bind(layerManager)
       }
     };
     this.layerManager.setProps({
@@ -36,6 +36,8 @@ export class LifecycleTester {
     const {layerManager} = this;
     if (viewport) {
       this.viewport = viewport;
+      // Geometry must initialize against the test's viewport before the first render.
+      layerManager.activateViewport(viewport);
     }
     if (effects) {
       this.effects = effects;

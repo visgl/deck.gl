@@ -3,54 +3,33 @@
 // Copyright (c) vis.gl contributors
 
 import React, {Component} from 'react';
-import {GridLayer} from '@deck.gl/aggregation-layers';
-import {DeckGL} from '@deck.gl/react';
-import {Map} from 'react-map-gl/maplibre';
-import {colorRange} from 'website-examples/3d-heatmap/app';
+import App, {colorRange} from 'website-examples/zoom-bands/app';
 
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import {makeExample} from '../components';
 import {readableInteger} from '../utils/format-utils';
 
-const INITIAL_VIEW_STATE = {
-  longitude: -1.415727,
-  latitude: 52.232395,
-  zoom: 6.6,
-  minZoom: 5,
-  maxZoom: 15,
-  pitch: 40.5,
-  bearing: -27
-};
-
 class GridDemo extends Component {
-  static title = 'United Kingdom Road Safety';
+  static title = 'Paris Street Trees';
 
-  static hasDeviceTabs = true;
-
-  static data = {
-    url: `${DATA_URI}/heatmap-data.txt`,
-    worker: '/workers/heatmap-data-decoder.js'
-  };
-
-  static code = `${GITHUB_TREE}/website/src/examples/grid-layer.js`;
+  static code = `${GITHUB_TREE}/examples/website/zoom-bands`;
 
   static parameters = {
-    cellSize: {
-      displayName: 'Cell Size',
+    cellPixels: {
+      displayName: 'Cell Size (px)',
       type: 'range',
-      value: 2000,
-      step: 100,
-      min: 500,
-      max: 20000
+      value: 24,
+      step: 1,
+      min: 8,
+      max: 64
     },
-    coverage: {displayName: 'Coverage', type: 'range', value: 0.7, step: 0.1, min: 0, max: 1},
-    upperPercentile: {
-      displayName: 'Upper Percentile',
+    fadeWidth: {
+      displayName: 'Fade Width (zoom)',
       type: 'range',
-      value: 100,
-      step: 0.1,
-      min: 80,
-      max: 100
+      value: 0.5,
+      step: 0.05,
+      min: 0.1,
+      max: 1
     }
   };
 
@@ -59,8 +38,11 @@ class GridDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <p>Personal injury road accidents in Great Britain from 1979.</p>
-        <p>The layer aggregates accidents within each grid cell.</p>
+        <p>Street trees managed by the City of Paris.</p>
+        <p>
+          A stack of GridLayers with power-of-two cell sizes crossfades as you zoom, ending with the
+          individual trees. Each band is colored by its own quantiles.
+        </p>
         <div className="layout">
           {colorRange.map((color, index) => (
             <div
@@ -74,53 +56,34 @@ class GridDemo extends Component {
           ))}
         </div>
         <p className="layout">
-          <span className="col-1-2">Fewer Accidents</span>
-          <span className="col-1-2 text-right">More Accidents</span>
+          <span className="col-1-2">Fewer Trees</span>
+          <span className="col-1-2 text-right">More Trees</span>
         </p>
         <p>
-          Data source: <a href="https://data.gov.uk">DATA.GOV.UK</a>
+          Data source:{' '}
+          <a href="https://opendata.paris.fr/explore/dataset/les-arbres/">Paris Data</a>
         </p>
-        <div className="stat">
-          Accidents<b>{readableInteger(meta.count || 0)}</b>
+        {meta.band && <p>Showing: {meta.band}</p>}
+        <div className="layout">
+          <div className="stat col-1-2">
+            Trees<b>{readableInteger(meta.count || 0)}</b>
+          </div>
         </div>
       </div>
     );
   }
 
   render() {
-    const {data, device, mapStyle, params} = this.props;
-
-    const layer = new GridLayer({
-      id: 'grid-layer',
-      data,
-      gpuAggregation: true,
-      cellSize: params.cellSize.value,
-      colorRange,
-      coverage: params.coverage.value,
-      upperPercentile: params.upperPercentile.value,
-      elevationRange: [0, 3000],
-      elevationScale: data?.length ? 50 : 0,
-      extruded: true,
-      getPosition: position => position,
-      pickable: true,
-      material: {
-        ambient: 0.64,
-        diffuse: 0.6,
-        shininess: 32,
-        specularColor: [51, 51, 51]
-      }
-    });
+    const {params, mapStyle, onStateChange} = this.props;
 
     return (
-      <DeckGL
-        device={device}
-        layers={[layer]}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-        getTooltip={({object}) => object && `${object.count} accidents`}
-      >
-        <Map reuseMaps mapStyle={mapStyle} />
-      </DeckGL>
+      <App
+        mapStyle={mapStyle}
+        cellPixels={params.cellPixels.value}
+        fadeWidth={params.fadeWidth.value}
+        onDataLoad={count => onStateChange({count})}
+        onBandChange={band => onStateChange({band})}
+      />
     );
   }
 }

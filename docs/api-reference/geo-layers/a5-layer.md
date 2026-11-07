@@ -21,7 +21,7 @@ import {A5Layer} from '@deck.gl/geo-layers';
 
 const layer = new A5Layer({
   id: 'A5Layer',
-  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5v1.json',
   
   extruded: true,
   getPentagon: f => f.pentagon,
@@ -60,7 +60,7 @@ type DataType = {
 
 const layer = new A5Layer<DataType>({
   id: 'A5Layer',
-  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5v1.json',
   
   extruded: true,
   getPentagon: (f: DataType) => f.pentagon,
@@ -102,7 +102,7 @@ type DataType = {
 function App() {
   const layer = new A5Layer<DataType>({
     id: 'A5Layer',
-    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5v1.json',
     
     extruded: true,
     getPentagon: (f: DataType) => f.pentagon,

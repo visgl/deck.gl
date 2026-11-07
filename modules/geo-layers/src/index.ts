@@ -4,6 +4,9 @@
 
 /* eslint-disable max-len */
 
+import type {Viewport} from '@deck.gl/core';
+import type {TileLoadProps, Tileset2DProps} from './tileset-2d/index';
+
 export {default as A5Layer} from './a5-layer/a5-layer';
 export {WMSLayer as _WMSLayer} from './wms-layer/wms-layer';
 export {default as GreatCircleLayer} from './great-circle-layer/great-circle-layer';
@@ -39,9 +42,31 @@ export type {GeohashLayerProps} from './geohash-layer/geohash-layer';
 // Tileset2D
 
 export type {GeoBoundingBox, NonGeoBoundingBox} from './tileset-2d/index';
-export type {TileLoadProps as _TileLoadProps} from './tileset-2d/index';
-export type {Tileset2DProps as _Tileset2DProps} from './tileset-2d/index';
+/** @deprecated Use TileLoadProps. */
+export type _TileLoadProps = TileLoadProps;
+export type {TileLoadProps} from './tileset-2d/index';
+/** @deprecated Use Tileset2DProps. */
+export type _Tileset2DProps<DataT = any, ViewStateT = Viewport> = Tileset2DProps<DataT, ViewStateT>;
+export type {
+  RefinementStrategy,
+  Tileset2DAdapter,
+  Tileset2DListener,
+  Tileset2DProps,
+  Tileset2DTileContext,
+  Tileset2DTraversalContext
+} from './tileset-2d/index';
 
 export {getURLFromTemplate as _getURLFromTemplate} from './tileset-2d/index';
-export {Tileset2D as _Tileset2D} from './tileset-2d/index';
-export {Tile2DHeader as _Tile2DHeader} from './tileset-2d/index';
+export {/** @deprecated Use Tileset2D. */ Tileset2D as _Tileset2D} from './tileset-2d/index';
+export {
+  /** @deprecated Use Tile2DHeader. */ Tile2DHeader as _Tile2DHeader
+} from './tileset-2d/index';
+export {Tileset2D} from './tileset-2d/index';
+export {Tile2DHeader} from './tileset-2d/index';
+export {tile2DDeckAdapter} from './tileset-2d/deck-tileset-adapter';
+
+export {Tile2DView as _Tile2DView} from './tileset-2d/tile-2d-view';
+export {urlType as _tileURLType} from './tileset-2d/index';
+export type {URLTemplate as _TileURLTemplate} from './tileset-2d/utils';
+export {STRATEGY_DEFAULT as _TILE_REFINEMENT_DEFAULT} from './tileset-2d/index';
+export type {ZRange as _TileZRange} from './tileset-2d/index';

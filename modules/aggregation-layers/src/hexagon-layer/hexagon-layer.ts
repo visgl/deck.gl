@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {project} from '@deck.gl/core';
+
 import {
   log,
   Accessor,
   Color,
   GetPickingInfoParams,
-  CompositeLayerProps,
   createIterable,
   Layer,
   Material,
@@ -20,11 +21,12 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
-import AggregationLayer from '../common/aggregation-layer';
+import AggregationLayer, {type AggregationLayerProps} from '../common/aggregation-layer';
 import {AggregateAccessor} from '../common/types';
 import {defaultColorRange} from '../common/utils/color-utils';
 import {AttributeWithScale} from '../common/utils/scale-utils';
 import {getBinIdRange} from '../common/utils/bounds-utils';
+import {createAggregationViewport} from '../common/utils/projection-utils';
 
 import HexagonCellLayer from './hexagon-cell-layer';
 import {pointToHexbin, HexbinVertices, getHexbinCentroid, pointToHexbinGLSL} from './hexbin';
@@ -71,18 +73,21 @@ const defaultProps: DefaultProps<HexagonLayerProps> = {
 };
 
 /** All properties supported by HexagonLayer. */
-export type HexagonLayerProps<DataT = unknown> = _HexagonLayerProps<DataT> & CompositeLayerProps;
+export type HexagonLayerProps<DataT = unknown> = _HexagonLayerProps<DataT> &
+  AggregationLayerProps<DataT>;
 
 /** Properties added by HexagonLayer. */
 type _HexagonLayerProps<DataT> = {
   /**
    * Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than flat-topped).
+   * Geospatial views approximate ground meters at the center of the data bounds.
    * @default 1000
    */
   radius?: number;
 
   /**
    * Custom accessor to retrieve a hexagonal bin index from each data object.
+   * With CustomProjectionView, position is in map meters in crs.
    * Not supported by GPU aggregation.
    * @default null
    */
@@ -257,8 +262,8 @@ export type HexagonLayerPickingInfo<DataT> = PickingInfo<{
   elevationValue: number;
   /** Number of data points in the picked cell */
   count: number;
-  /** Centroid of the hexagon */
-  position: [number, number];
+  /** Centroid of the hexagon, or null when inverse projection is unavailable. */
+  position: [number, number] | null;
   /** Indices of the data objects in the picked cell. Only available if using CPU aggregation. */
   pointIndices?: number[];
   /** The data objects in the picked cell. Only available if using CPU aggregation and layer data is an array. */
@@ -283,7 +288,11 @@ export default class HexagonLayer<
 
       binIdRange: [number, number][];
       aggregatorViewport: Viewport;
-    };
+    } & AggregationLayer<any>['state'];
+
+  protected override getAggregationChannelCount(): number {
+    return 2;
+  }
 
   getAggregatorType(): string {
     const {gpuAggregation, hexagonAggregator, getColorValue, getElevationValue} = this.props;
@@ -316,8 +325,7 @@ export default class HexagonLayer<
               return hexagonAggregator(positions, radius);
             }
             const viewport = this.state.aggregatorViewport;
-            // project to common space
-            const p = viewport.projectPosition(positions);
+            const p = this.projectPositionFromAttribute(positions, viewport);
             const {radiusCommon, hexOriginCommon} = opts;
             return pointToHexbin(
               [p[0] - hexOriginCommon[0], p[1] - hexOriginCommon[1]],
@@ -366,7 +374,8 @@ export default class HexagonLayer<
         size: 3,
         accessor: 'getPosition',
         type: 'float64',
-        fp64: this.use64bitPositions()
+        fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms()
       },
       colorWeights: {size: 1, accessor: 'getColorWeight'},
       elevationWeights: {size: 1, accessor: 'getElevationWeight'}
@@ -389,6 +398,9 @@ export default class HexagonLayer<
     if (
       aggregatorChanged ||
       changeFlags.dataChanged ||
+      props.positions !== oldProps.positions ||
+      props.weights !== oldProps.weights ||
+      props.dataBounds !== oldProps.dataBounds ||
       props.radius !== oldProps.radius ||
       props.getColorValue !== oldProps.getColorValue ||
       props.getElevationValue !== oldProps.getElevationValue ||
@@ -399,7 +411,6 @@ export default class HexagonLayer<
       const {radiusCommon, hexOriginCommon, binIdRange, dataAsArray} = this.state;
 
       aggregator.setProps({
-        // @ts-expect-error only used by GPUAggregator
         binIdRange,
         pointCount: this.getNumInstances(),
         operations: [props.colorAggregation, props.elevationAggregation],
@@ -443,6 +454,9 @@ export default class HexagonLayer<
 
   private _updateBinOptions() {
     const bounds = this.getBounds();
+    if (this.props.positions && !this.props.dataBounds) {
+      throw new Error('GPU aggregation positions require dataBounds for world-space binning');
+    }
     let radiusCommon = 1;
     let hexOriginCommon: [number, number] = [0, 0];
     let binIdRange: [number, number][] = [
@@ -452,23 +466,33 @@ export default class HexagonLayer<
     let viewport = this.context.viewport;
 
     if (bounds && Number.isFinite(bounds[0][0])) {
-      let centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
+      let centroid: [number, number] = [
+        (bounds[0][0] + bounds[1][0]) / 2,
+        (bounds[0][1] + bounds[1][1]) / 2
+      ];
       const {radius} = this.props;
       const {unitsPerMeter} = viewport.getDistanceScales(centroid);
       radiusCommon = unitsPerMeter[0] * radius;
 
       // Use the centroid of the hex at the center of the data
       // This offsets the common space without changing the bins
-      const centerHex = pointToHexbin(viewport.projectFlat(centroid), radiusCommon);
-      centroid = viewport.unprojectFlat(getHexbinCentroid(centerHex, radiusCommon));
+      const centroidCommon = viewport.projectFlat(centroid);
+      const centerHex = pointToHexbin([centroidCommon[0], centroidCommon[1]], radiusCommon);
+      const centerCommon = getHexbinCentroid(centerHex, radiusCommon);
+      centroid = project.isCustomProjection(viewport)
+        ? centerCommon
+        : viewport.unprojectFlat(centerCommon);
 
       const ViewportType = viewport.constructor as any;
       // We construct a viewport for the GPU aggregator's project module
       // This viewport is determined by data
       // removes arbitrary precision variance that depends on initial view state
-      viewport = viewport.isGeospatial
-        ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
-        : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
+      viewport =
+        viewport.isGeospatial && !project.isCustomProjection(viewport)
+          ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
+          : project.isCustomProjection(viewport)
+            ? createAggregationViewport(viewport, centroid)
+            : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
 
       hexOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
 
@@ -503,13 +527,17 @@ export default class HexagonLayer<
       this.setState({
         colors: new AttributeWithScale(result, aggregator.binCount)
       });
-      props.onSetColorDomain(aggregator.getResultDomain(0));
+      if (props.onSetColorDomain !== noop) {
+        props.onSetColorDomain(aggregator.getResultDomain(0));
+      }
     } else if (channel === 1) {
       const result = aggregator.getResult(1)!;
       this.setState({
         elevations: new AttributeWithScale(result, aggregator.binCount)
       });
-      props.onSetElevationDomain(aggregator.getResultDomain(1));
+      if (props.onSetElevationDomain !== noop) {
+        props.onSetElevationDomain(aggregator.getResultDomain(1));
+      }
     }
   }
 
@@ -522,7 +550,6 @@ export default class HexagonLayer<
         this._updateBinOptions();
         const {radiusCommon, hexOriginCommon, binIdRange} = this.state;
         aggregator.setProps({
-          // @ts-expect-error only used by GPUAggregator
           binIdRange,
           binOptions: {
             radiusCommon,
@@ -586,6 +613,7 @@ export default class HexagonLayer<
         id: 'cells'
       }),
       {
+        numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,
           attributes: {
@@ -637,12 +665,27 @@ export default class HexagonLayer<
           bin.id as [number, number],
           this.state.radiusCommon
         );
-        const centroid = this.context.viewport.unprojectFlat(centroidCommon);
+        if (project.isCustomProjection(this.context.viewport)) {
+          centroidCommon[0] += this.state.hexOriginCommon[0];
+          centroidCommon[1] += this.state.hexOriginCommon[1];
+        }
+        const viewport = this.context.viewport;
+        let position: [number, number] | null = null;
+        try {
+          const packedCentroid = viewport.unprojectFlat(centroidCommon);
+          const centroid = this.state.unpreproject
+            ? this.state.unpreproject([...packedCentroid, 0])
+            : packedCentroid;
+          if (centroid.every(Number.isFinite)) position = [centroid[0], centroid[1]];
+        } catch {
+          // A bin may overlap the render target while its center is outside the inverse domain.
+        }
+        if (!position) info.coordinate = null;
 
         object = {
           col: bin.id[0],
           row: bin.id[1],
-          position: centroid,
+          position,
           colorValue: bin.value[0],
           elevationValue: bin.value[1],
           count: bin.count

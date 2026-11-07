@@ -3,10 +3,12 @@
 A shader library facilitates creating shaders that work seamlessly with deck.gl. The `modules` parameter passed to the [Model](https://github.com/visgl/luma.gl/blob/8.0-release/docs/api-reference/engine/model.md) class can dynamically include parts from this library into your own GLSL code:
 
 ```js
-import {picking, project32, gouraudMaterial} from '@deck.gl/core';
+import {Model} from '@luma.gl/engine';
+import {picking, project32, gouraudMaterial, getShaderAssembler} from '@deck.gl/core';
 
-const model = new Model(gl, {
-  vs: '// vertex shader GLSL source'
+const model = new Model(device, {
+  shaderAssembler: getShaderAssembler('glsl'),
+  vs: '// vertex shader GLSL source',
   fs: '// fragment shader GLSL source',
   modules: [picking, project32, gouraudMaterial] // list of optional module names
 });
@@ -49,23 +51,26 @@ Note that for geospatial projection, deck.gl v6.1 introduced a "hybrid" 32-bit p
 Picking is supported using luma.gl [picking shader module](https://github.com/visgl/luma.gl/blob/8.0-release/docs/api-reference/shadertools/core-shader-modules.md#picking).
 
 
-### Standard Shader Hooks
+### Standard Shader Injection Targets
 
-When [subclassing](./subclassed-layers.md) an official deck.gl layer with minor feature additions, it is possible to inject custom code into predefined locations into the original shaders. These hooks are considered the public API of layers that will work consistently cross minor releases.
+When [subclassing](./subclassed-layers.md) an official deck.gl layer with minor feature additions, it is possible to inject custom code into predefined locations into the original shaders. These injection targets are considered the public API of layers that will work consistently cross minor releases.
 
 ```js
 const shaders = this.getShaders();
 
-const model = new Model(gl, {
-  ...this.getShaders(),
-  inject: {
-    'fs:#decl': `
+const model = new Model(device, {
+  ...shaders,
+  plugins: [...(shaders.plugins || []), {
+    name: 'coverage',
+    injections: {
+      'glsl:fs:#decl': `
       uniform float coverage;
-    `
-    'fs:DECKGL_FILTER_COLOR': `
+    `,
+      'glsl:fs:DECKGL_FILTER_COLOR': `
       if (abs(geometry.uv.x) > coverage) discard;
     `
-  }
+    }
+  }]
 });
 ```
 
@@ -90,6 +95,8 @@ Arguments:
 - `inout vec3 size` - offset of the current vertex from `geometry.worldPosition` in common space.
 - `VertexGeometry geometry` - descriptor of the current geometry
 
+
+The WGSL ShaderPlugin equivalent is `vs:DECKGL_FILTER_SIZE(size: ptr<function, vec3<f32>>, geometry: Geometry)`. Custom WGSL layers should call `DECKGL_FILTER_SIZE(&size, geometry)` at the corresponding size calculation to support extension size transforms.
 
 ##### vs:DECKGL_FILTER_GL_POSITION
 

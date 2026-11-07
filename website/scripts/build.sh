@@ -7,6 +7,10 @@ npm pkg set version=$(node -p "require('../modules/core/package.json').version")
 
 # staging or prod
 MODE=$1
+# Apply the staging prefix to both the embedded assets and Docusaurus pages.
+if [ "$MODE" = "staging" ]; then
+  export WEBSITE_BASE_URL=/deck.gl/
+fi
 WEBSITE_DIR=`pwd`
 OUTPUT_DIR=build
 
@@ -24,6 +28,9 @@ OUTPUT_DIR=build
 )
 cp ../examples/playground/schema.generated.json ./static/schema.generated.json
 
+# Build the embedded v10 examples and their unpublished luma.gl peers.
+yarn build-v10-examples
+
 # clean up cache
 docusaurus clear
 
@@ -37,9 +44,6 @@ case $MODE in
 esac
 
 # repair llms.txt / raw Markdown links for base-path deploys (WEBSITE_BASE_URL) and validate them
-if [ "$MODE" = "staging" ]; then
-  export WEBSITE_BASE_URL=/deck.gl/
-fi
 node ./scripts/normalize-llm-output.mjs
 node ./scripts/check-llm-output.mjs
 

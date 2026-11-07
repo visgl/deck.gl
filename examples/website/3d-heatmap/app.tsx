@@ -8,7 +8,7 @@ import {Map} from 'react-map-gl/maplibre';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import {DeckGL} from '@deck.gl/react';
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 import {load} from '@loaders.gl/core';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
@@ -47,7 +47,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
   bearing: -27
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/dark';
 
 export const colorRange: Color[] = [
   [1, 152, 189],
@@ -134,7 +134,7 @@ export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  const data = (await load(DATA_URL, CSVLoader)).data;
+  const data = (await load(DATA_URL, CSVLoader, {csv: {shape: 'object-row-table'}})).data;
   const points: DataPoint[] = data
     .map(d => (Number.isFinite(d.lng) ? [d.lng, d.lat] : null))
     .filter(Boolean);
