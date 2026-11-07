@@ -5,6 +5,7 @@
 import {BitmapLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {device} from '@deck.gl/test-utils';
+import {addMetersToLngLat} from '@math.gl/web-mercator';
 import {
   Map as MapLibreV4Map,
   addProtocol as addProtocolV4,
@@ -88,16 +89,15 @@ async function createDemTileURL(elevation: number): Promise<string> {
 }
 
 /** Returns a square polygon around a location, with sides of `size` meters */
-function getSquarePolygon([longitude, latitude]: number[], size: number): [number, number][] {
-  const halfLongitude = size / 2 / (111320 * Math.cos((latitude * Math.PI) / 180));
-  const halfLatitude = size / 2 / 110574;
+function getSquarePolygon(center: number[], size: number): [number, number][] {
+  const half = size / 2;
   return [
-    [longitude - halfLongitude, latitude - halfLatitude],
-    [longitude + halfLongitude, latitude - halfLatitude],
-    [longitude + halfLongitude, latitude + halfLatitude],
-    [longitude - halfLongitude, latitude + halfLatitude],
-    [longitude - halfLongitude, latitude - halfLatitude]
-  ];
+    [-half, -half],
+    [half, -half],
+    [half, half],
+    [-half, half],
+    [-half, -half]
+  ].map(offset => addMetersToLngLat(center, offset) as [number, number]);
 }
 
 /**
