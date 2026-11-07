@@ -593,6 +593,15 @@ export default class HexagonLayer<
     const CellLayerClass = this.getSubLayerClass('cells', HexagonCellLayer);
     const binAttribute = aggregator.getBins();
 
+    // Resized outputs are populated at draw time. Wait for their onUpdate callbacks
+    // before combining new bin IDs with scaled results from the previous aggregation.
+    if (
+      !this.state.colors?.matchesLength(aggregator.binCount) ||
+      !this.state.elevations?.matchesLength(aggregator.binCount)
+    ) {
+      return null;
+    }
+
     const colors = this.state.colors?.update({
       scaleType: colorScaleType,
       lowerPercentile,

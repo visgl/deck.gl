@@ -437,7 +437,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           dashJustified: lineDashJustified,
 
           // Already normalized
-          _pathType: this.props._projectionTolerance ? null : 'loop',
+          _pathType: 'loop',
           _projectionTolerance: this.props._projectionTolerance,
 
           transitions: transitions && {
