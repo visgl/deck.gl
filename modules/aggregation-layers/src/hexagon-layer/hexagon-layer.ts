@@ -586,9 +586,15 @@ export default class HexagonLayer<
     // AttributeManager has populated current positions at this point. Backend selection
     // during updateState can only see the previous position bounds.
     if (
-      changedAttributes.positions &&
+      (changedAttributes.positions ||
+        changedAttributes.colorWeights ||
+        changedAttributes.elevationWeights) &&
       this.state.aggregatorType === 'webgpu' &&
-      this.getAggregatorType() === 'cpu'
+      (this.getAggregatorType() === 'cpu' ||
+        !WebGPUHexagonAggregator.supportsAttributes(this.getAttributeManager()!.attributes, [
+          'colorWeights',
+          'elevationWeights'
+        ]))
     ) {
       this.state.aggregator.destroy();
       const aggregator = this.createAggregator('cpu');

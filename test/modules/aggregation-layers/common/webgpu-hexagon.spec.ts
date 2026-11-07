@@ -223,3 +223,47 @@ test('Hexagon GPU columns share two-channel output and update prefixes', async (
     expect(await device.handle.popErrorScope()).toBeNull();
   }
 });
+
+test('Hexagon retains CPU aggregation for quantile elevation and integer weights', async ({
+  skip
+}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  await testLayerAsync({
+    Layer: HexagonLayer,
+    device,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          data: [[0, 0]],
+          getPosition: d => d,
+          colorDomain: [0, 10],
+          elevationDomain: [0, 10],
+          elevationScaleType: 'quantile'
+        },
+        onAfterUpdate({layer}) {
+          expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+        }
+      },
+      {
+        updateProps: {
+          elevationScaleType: 'linear',
+          data: {
+            length: 1,
+            attributes: {
+              getPosition: {value: new Float32Array([0, 0, 0]), size: 3},
+              getColorWeight: {value: new Int32Array([2]), size: 1},
+              getElevationWeight: {value: new Int32Array([3]), size: 1}
+            }
+          }
+        },
+        onAfterUpdate({layer}) {
+          expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+        }
+      }
+    ]
+  });
+});
