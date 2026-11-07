@@ -4,7 +4,7 @@
 
 import {LayerExtension, UpdateParameters} from '@deck.gl/core';
 import {TerrainEffect} from './terrain-effect';
-import {terrainModule} from './shader-module';
+import {terrainPlugin} from './shader-module';
 
 import type {Layer} from '@deck.gl/core';
 
@@ -34,7 +34,7 @@ export default class TerrainExtension extends LayerExtension {
 
   getShaders(this: Layer<TerrainExtensionProps>): any {
     return {
-      modules: [terrainModule]
+      plugins: [terrainPlugin]
     };
   }
 

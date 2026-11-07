@@ -6,6 +6,7 @@ export const shaderWGSL = /* wgsl */ `\
 struct PointCloudUniforms {
   radiusPixels: f32,
   sizeUnits: i32,
+  rowIndexOffset: u32,
 };
 
 @group(0) @binding(0)
@@ -18,7 +19,7 @@ struct Attributes {
   @location(1) instancePositions: vec3<f32>,
   @location(2) instancePositions64Low: vec3<f32>,
   @location(3) instanceNormals: vec3<f32>,
-  @location(4) instanceColors: vec4<f32>
+  @location(4) instanceColors: vec4<f32>,
 };
 
 struct Varyings {
@@ -45,19 +46,19 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   // Position on the enclosing triangle. Its edges are tangent to the unit circle.
   varyings.unitPosition = attributes.positions.xy;
   geometry.uv = varyings.unitPosition;
-  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex);
+  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex + pointCloudUniforms.rowIndexOffset);
 
   // Find the center of the point and add the current vertex
 #ifdef ANTIALIASING
   var offset = vec3<f32>(
 #else
-  let offset = vec3<f32>(
+  var offset = vec3<f32>(
 #endif
     attributes.positions.xy *
       project_unit_size_to_pixel(pointCloudUniforms.radiusPixels, pointCloudUniforms.sizeUnits),
     0.0
   );
-  // DECKGL_FILTER_SIZE(offset, geometry);
+  DECKGL_FILTER_SIZE(&offset, geometry);
 #ifdef ANTIALIASING
   let triangleRadiusPixels = length(offset.xy);
   if (triangleRadiusPixels > 0.0) {
@@ -84,13 +85,14 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   // DECKGL_FILTER_COLOR(vColor, geometry);
   varyings.pickingColor = geometry.pickingColor;
 
+  DECKGL_FILTER_GL_POSITION(&varyings.position, geometry);
+
   return varyings;
 }
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
-  // var geometry: Geometry;
-  // geometry.uv = unitPosition.xy;
+  fragmentGeometry.uv = varyings.unitPosition;
 
   let distToCenter = length(varyings.unitPosition);
 #ifdef ANTIALIASING
@@ -114,6 +116,9 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
+    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
+    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(varyings.pickingColor, 1.0);
   }
 
@@ -135,8 +140,8 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   }
 
   // Apply premultiplied alpha as required by transparent canvas
+  DECKGL_FILTER_COLOR(&fragColor, fragmentGeometry);
   fragColor = deckgl_premultiplied_alpha(fragColor);
-
   return fragColor;
 }
 `;

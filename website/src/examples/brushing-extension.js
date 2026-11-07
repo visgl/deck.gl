@@ -15,6 +15,8 @@ const colorRamp = [inFlowColor, outFlowColor]
 class BrushingDemo extends Component {
   static title = 'United States County-to-county Migration';
 
+  static hasDeviceTabs = true;
+
   static data = {
     url: `${DATA_URI}/arc-data.txt`,
     worker: '/workers/arc-data-decoder.js'

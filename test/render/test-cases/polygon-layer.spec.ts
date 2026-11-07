@@ -37,7 +37,9 @@ const testCases = [
     goldenImage: './test/render/golden-images/polygon-lnglat.png'
   },
   {
+    // Golden: Red polygons with black outlines match the default Mercator projection.
     name: 'polygon-lnglat-64',
+    // WebGPU fp64 polygon rendering times out on software adapters.
     skip: ['webgpu'],
     viewState: {
       latitude: 37.751537058389985,

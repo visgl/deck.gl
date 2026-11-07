@@ -97,7 +97,7 @@ When `maskInverted` is true the result of the masking operation is inverted. Inv
 
 - The current implementation supports up to 4 masks at the same time.
 - Given that masking is performed on the GPU, the layers of `@deck.gl/aggregation-layers` module that does aggregation on the CPU, for example `CPUGridLayer` and `HexagonLayer`, are not supported.
-- Masking is not supported in [GlobeView](../core/globe-view.md)
+- In [GlobeView](../core/globe-view.md) the mask is evaluated in Web Mercator space: the mask geometry is rendered into a flat Mercator texture and each globe position is converted back to Mercator to look it up. Mask edges beyond ~70° latitude may be slightly imprecise, and a mask that straddles the antimeridian (±180° longitude) must be split into two polygons.
 
 ## Source
 

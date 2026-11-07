@@ -327,6 +327,42 @@ The width of the outline of the column, in units specified by `lineWidthUnits` (
 * If a number is provided, it is used as the outline width for all columns.
 * If a function is provided, it is called on each object to retrieve its outline width.
 
+### Arrow Columns
+
+These optional props replace the corresponding accessors. See [Using with Arrow](../../developer-guide/using-with-arrow.md)
+for input layouts, accessor fallbacks, loading, ownership, and limitations.
+
+#### `positions` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric XY or XYZ fixed-size lists specifying each column's center position. Overrides [`getPosition`](#getposition).
+
+#### `elevations` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric scalar elevations, in meters. Overrides [`getElevation`](#getelevation); `elevationScale` still applies.
+
+#### `fillColors` (Arrow Vector, optional)
+
+* Default: `null`
+
+RGB or RGBA fixed-size lists specifying fill colors. Overrides [`getFillColor`](#getfillcolor).
+
+#### `lineColors` (Arrow Vector, optional)
+
+* Default: `null`
+
+RGB or RGBA fixed-size lists specifying outline colors. Overrides [`getLineColor`](#getlinecolor).
+
+#### `lineWidths` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric scalar outline widths, in `lineWidthUnits`. Overrides [`getLineWidth`](#getlinewidth);
+`lineWidthScale`, `lineWidthMinPixels`, and `lineWidthMaxPixels` still apply.
+
 ## Source
 
 [modules/layers/src/column-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/column-layer)

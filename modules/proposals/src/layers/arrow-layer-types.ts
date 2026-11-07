@@ -18,7 +18,7 @@ export const DECK_ARROW_ALPHA_BLEND_PARAMETERS = {
   blendAlphaDstFactor: 'one-minus-src-alpha'
 } as const;
 
-/** WGSL helpers that mirror deck.gl's GLSL color, opacity, highlighting, and picking hooks. */
+/** WGSL helpers that mirror deck.gl's GLSL color, opacity, highlighting, and picking injection targets. */
 export const DECK_ARROW_WGSL_COLOR_UTILS = /* wgsl */ `
 fn deck_encodePickingColor(objectIndex: u32) -> vec3<f32> {
   let colorIndex = objectIndex + 1u;
@@ -54,7 +54,7 @@ fn deck_filterColor(color: vec4<f32>, pickingColor: vec3<f32>) -> vec4<f32> {
 }
 `;
 
-/** Minimal cartesian Deck viewport projection used until deck's WGSL shader hooks are complete. */
+/** Minimal cartesian Deck viewport projection used until deck's WGSL shader injection targets are complete. */
 export const deckArrowViewport = {
   name: 'deckArrowViewport',
   source: /* wgsl */ `

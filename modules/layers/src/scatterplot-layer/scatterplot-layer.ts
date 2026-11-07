@@ -8,15 +8,19 @@ import {
   project32,
   picking,
   UNIT,
-  _GPUVectorModel as GPUVectorModel
+  _GPUVectorModel as DeckGPUVectorModel
 } from '@deck.gl/core';
-import {type Model, Geometry} from '@luma.gl/engine';
+import {GPUVectorModel, GPUVectorGeometry, Geometry, makeGPUVectorGeometry} from '@luma.gl/engine';
 
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 import {getShaderWGSL} from './scatterplot-layer.wgsl';
-import clipExtension from '../utils/clip-extension';
+import {
+  ScatterplotLayerColumns,
+  hasScatterplotColumns,
+  type ScatterplotColumnProps
+} from './scatterplot-layer-columns';
 
 import type {
   LayerProps,
@@ -29,13 +33,15 @@ import type {
   DefaultProps
 } from '@deck.gl/core';
 
+const defaultPosition = (row: any) => row.position;
+
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 /** All props supported by the ScatterplotLayer */
 export type ScatterplotLayerProps<DataT = unknown> = _ScatterplotLayerProps<DataT> & LayerProps;
 
 /** Props added by the ScatterplotLayer */
-type _ScatterplotLayerProps<DataT> = {
+type _ScatterplotLayerProps<DataT> = ScatterplotColumnProps & {
   data: LayerDataSource<DataT>;
   /**
    * The units of the radius, one of `'meters'`, `'common'`, and `'pixels'`.
@@ -159,12 +165,17 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   billboard: false,
   antialiasing: true,
 
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
+  getPosition: {type: 'accessor', value: defaultPosition},
   getRadius: {type: 'accessor', value: 1},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', value: 1},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
+  positions: {type: 'object', value: null, optional: true},
+  radii: {type: 'object', value: null, optional: true},
+  fillColors: {type: 'object', value: null, optional: true},
+  lineColors: {type: 'object', value: null, optional: true},
+  lineWidths: {type: 'object', value: null, optional: true},
 
   // deprecated
   strokeWidth: {deprecatedFor: 'getLineWidth'},
@@ -180,27 +191,65 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   static layerName: string = 'ScatterplotLayer';
 
   state!: {
-    model?: Model;
+    model?: GPUVectorModel;
+    geometry?: GPUVectorGeometry;
+    columns?: ScatterplotLayerColumns;
   };
+
+  /** Uses converted position bounds when Arrow columns bypass the attribute manager. */
+  getBounds(): [number[], number[]] | null {
+    return this.state?.columns ? this.state.columns.getBounds() : super.getBounds();
+  }
+
+  /** Bypasses accessor attribute generation when explicit columns drive the model. */
+  protected _getAttributeManager() {
+    return hasScatterplotColumns(this.props) ? null : super._getAttributeManager();
+  }
+
+  /** Uses the prepared column length as the instance count in column mode. */
+  getNumInstances(): number {
+    return this.state?.columns && !Number.isFinite(this.props.numInstances)
+      ? this.state.columns.length
+      : super.getNumInstances();
+  }
+
+  /** Keeps the layer loading until its asynchronous column conversion finishes. */
+  get isLoaded(): boolean {
+    return !this.state?.columns?.loading && super.isLoaded;
+  }
+
+  /** Releases column-owned resources and invalidates pending conversions on removal. */
+  finalizeState(context) {
+    this.state.columns?.destroy();
+    super.finalizeState(context);
+    this.state.geometry?.destroy();
+  }
 
   getShaders() {
     const useRowIndexes = Boolean((this.props.data as any)?.attributes?.rowIndexes);
     return super.getShaders({
       vs,
       fs,
-      source: getShaderWGSL(useRowIndexes),
+      source: getShaderWGSL(
+        useRowIndexes,
+        this.context.device.type === 'webgpu' && hasScatterplotColumns(this.props)
+      ),
       defines: useRowIndexes ? {USE_ROW_INDEXES: true} : {},
-      modules: [
-        project32,
-        color,
-        picking,
-        scatterplotUniforms,
-        ...(this.context.device.type === 'webgpu' ? [clipExtension] : [])
-      ]
+      modules: [project32, color, picking, scatterplotUniforms]
     });
   }
 
   initializeState() {
+    if (hasScatterplotColumns(this.props)) {
+      if (this.props.extensions.length)
+        throw new Error('Scatterplot Arrow columns do not support extensions');
+      return;
+    }
+    this.initializeAccessorAttributes();
+  }
+
+  /** Registers the normal accessor attributes when entering or returning to accessor mode. */
+  private initializeAccessorAttributes() {
     const attributes: Record<string, any> = (this.props.data as any)?.attributes?.rowIndexes
       ? {
           /** Caller-provided logical picking index per point instance. */
@@ -261,6 +310,11 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   }
 
   updateState(params: UpdateParameters<this>) {
+    if (hasScatterplotColumns(this.props)) {
+      this.updateColumnState(params);
+      return;
+    }
+    this.restoreAccessorState();
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
@@ -268,6 +322,52 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
+  }
+
+  /** Restores the accessor model and attributes after removing the Arrow columns. */
+  private restoreAccessorState(): void {
+    if (this.state.columns) {
+      this.state.columns.destroy();
+      this.state.columns = undefined;
+      this.internalState!.attributeManager = super._getAttributeManager();
+      this.initializeAccessorAttributes();
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
+    }
+  }
+
+  /** Updates the model and schedules conversion while Arrow columns are active. */
+  private updateColumnState(params: UpdateParameters<this>): void {
+    if (this.props.extensions.length)
+      throw new Error('Scatterplot Arrow columns do not support extensions');
+    const enteringColumns = !this.state.columns;
+    if (enteringColumns) {
+      this.internalState!.attributeManager?.finalize();
+      this.internalState!.attributeManager = null;
+      this.state.columns = new ScatterplotLayerColumns(this.context.device);
+    }
+    if (
+      enteringColumns ||
+      params.changeFlags.extensionsChanged ||
+      Boolean((params.props.data as any)?.attributes?.rowIndexes) !==
+        Boolean((params.oldProps.data as any)?.attributes?.rowIndexes)
+    ) {
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
+    }
+    void this.state.columns!.updateIfNeeded(params, {
+      dataLoading: this.internalState!.isAsyncPropLoading('data'),
+      changed: () => {
+        this.setState({});
+        this.setNeedsUpdate();
+      },
+      failed: error => this.raiseError(error, 'converting Arrow columns'),
+      positionOptions: {
+        transform: this.usePositionTransforms().transform?.bind(this),
+        fp64: this.use64bitPositions(),
+        requireRows: !this.props.positions && this.props.getPosition === defaultPosition
+      }
+    });
   }
 
   draw({uniforms}) {
@@ -297,27 +397,69 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthUnits: UNIT[lineWidthUnits],
       lineWidthScale,
       lineWidthMinPixels,
-      lineWidthMaxPixels
+      lineWidthMaxPixels,
+      rowIndexOffset: 0
     };
-    const model = this.state.model!;
+    const model = this.state.model;
+    if (!model) return;
+    if (
+      this.state.columns &&
+      this.state.columns.hasRowIndexes !== Boolean((this.props.data as any)?.attributes?.rowIndexes)
+    )
+      return;
     model.shaderInputs.setProps({scatterplot: scatterplotProps});
-    model.draw(this.context.renderPass);
+    if (this.state.columns) {
+      this.state.columns.draw(model, this.context.renderPass, offset => {
+        model.setInstanceCount(
+          Math.min(model.instanceCount, Math.max(0, this.getNumInstances() - offset))
+        );
+        model.shaderInputs.setProps({scatterplot: {rowIndexOffset: offset}});
+      });
+    } else {
+      model.draw(this.context.renderPass);
+    }
   }
 
   protected _getModel() {
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
-    return new GPUVectorModel(this.context.device, {
+    this.state.geometry?.destroy();
+    this.state.geometry = undefined;
+    const geometry = new Geometry({
+      topology: 'triangle-strip',
+      attributes: {positions: {size: 3, value: new Float32Array(positions)}}
+    });
+    const options = {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
-      geometry: new Geometry({
-        topology: 'triangle-strip',
-        attributes: {
-          positions: {size: 3, value: new Float32Array(positions)}
-        }
-      }),
+      bufferLayout:
+        this.state.columns?.getBufferLayouts(
+          Boolean((this.props.data as any)?.attributes?.rowIndexes)
+        ) ?? this.getAttributeManager()!.getBufferLayouts(),
       isInstanced: true
+    };
+    if (this.state.columns) {
+      if (this.context.device.type === 'webgpu') {
+        return new GPUVectorModel(this.context.device, {
+          ...options,
+          topology: 'triangle-strip',
+          vertexCount: 4,
+          inferDrawCount: 'instance'
+        });
+      }
+      const vectorGeometry = makeGPUVectorGeometry(this.context.device, geometry);
+      this.state.geometry = vectorGeometry;
+      return new GPUVectorModel(this.context.device, {
+        ...options,
+        geometry: vectorGeometry,
+        inferDrawCount: 'instance'
+      });
+    }
+    return new DeckGPUVectorModel(this.context.device, {
+      ...options,
+      geometry,
+      enforceMatchingVectorLengths: false,
+      inferDrawCount: 'no'
     });
   }
 }

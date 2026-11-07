@@ -78,6 +78,20 @@ Limits of binId defined as [start, end] for each dimension. Ids less than `start
 
 Mapped uniforms for shadertool modules, see [ModelProps](https://github.com/visgl/luma.gl/blob/master/modules/engine/src/model/model.ts)
 
+## Outputs
+
+`getBins()` returns a `GPUVector` with `float32` or `float32x2` bin IDs, matching
+`dimensions`. `getResult(channel)` returns a scalar `float32` `GPUVector`. Each
+vector has `binCount` elements. Channel vectors share interleaved storage, with
+byte offset `channel * 4` and byte stride `channelCount * 4`.
+
+Outputs are borrowed views of buffers owned by the aggregator. Pass them directly
+to layer binary attributes. Retrieving these outputs does not copy data to the CPU.
+Repeated calls return the same vector while its buffer and length are unchanged;
+fetch outputs again after resizing, and do not use them after destroying the aggregator.
+The methods return `null` before output buffers are allocated, and `getResult`
+also returns `null` for a channel outside `channelCount`.
+
 ## Source
 
 [modules/aggregation-layers/src/common/aggregator/gpu-aggregator/webgl-aggregator.ts](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/common/aggregator/gpu-aggregator/webgl-aggregator.ts)

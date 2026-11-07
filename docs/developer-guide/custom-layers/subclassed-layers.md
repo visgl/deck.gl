@@ -72,7 +72,7 @@ returns the shaders and modules used by the layer in an object:
 * `vs`: string, GLSL source of the vertex shader
 * `fs`: string, GLSL source of the fragment shader
 * `modules`: Array, list of shader modules to be used
-* `inject`: Object, map from injection points to custom GLSL code to be injected
+* `plugins`: Array of `ShaderPlugin` descriptors contributing modules and injection target injections
 
 Read about [writing your own shaders](./writing-shaders.md).
 
