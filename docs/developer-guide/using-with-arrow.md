@@ -1,7 +1,8 @@
 # Using with Arrow
 
-ScatterplotLayer, ArcLayer, and ColumnLayer accept Apache Arrow vectors through column props, avoiding the need to
-construct a JavaScript object for every feature.
+ArcLayer, ColumnLayer, IconLayer, LineLayer, PointCloudLayer, ScatterplotLayer, and
+SimpleMeshLayer accept Apache Arrow vectors through column props. Use columns to
+provide attributes directly from Arrow data.
 
 Install `apache-arrow` alongside `@deck.gl/layers`. The layer loads its converter when needed;
 no converter registration or separate layer class is required.

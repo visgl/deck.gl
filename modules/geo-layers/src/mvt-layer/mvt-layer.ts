@@ -109,6 +109,10 @@ export type _MVTLayerProps<FeaturePropertiesT> = Omit<
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 
 /** Render data formatted as [Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/). */
+/**
+ * Compatibility MVT layer retaining binary data, TileJSON, and rendered-feature APIs.
+ * Remains supported while MVT2DLayer gains equivalent feature coverage.
+ */
 export default class MVTLayer<
   FeaturePropertiesT = any,
   ExtraProps extends {} = {}

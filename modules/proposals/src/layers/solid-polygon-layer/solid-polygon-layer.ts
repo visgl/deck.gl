@@ -24,14 +24,14 @@ import {
 export type {GPUVectorLayerPickingInfo} from '../utils/gpu-vector-picking';
 
 /** GPUVector-native tessellated filled-polygon props. Input vectors are borrowed. */
-export type GPUSolidPolygonLayerProps = Omit<LayerProps, 'data'> & {
+export type StorageSolidPolygonLayerProps = Omit<LayerProps, 'data'> & {
   positions: GPUVector<VertexList<'float32x4'>>;
   rowIndices: GPUVector<VertexList<'uint32'>>;
   indices: GPUVector<VertexList<'uint32'>>;
   fillColors?: Color | GPUVector<VertexList<'unorm8x4'>>;
 };
 
-type GPUSolidPolygonLayerState = {model: PolygonAttributeModel | null};
+type StorageSolidPolygonLayerState = {model: PolygonAttributeModel | null};
 
 const GPU_SOLID_POLYGON_SHADER = /* wgsl */ `
 struct VertexOutput {
@@ -66,22 +66,23 @@ fn encodePickingColor(rowIndex: u32) -> vec3<f32> {
 }`;
 
 /** Deck host for already tessellated polygon GPUVectors. Tessellation belongs in adapters. */
-export class GPUSolidPolygonLayer extends Layer<GPUSolidPolygonLayerProps> {
-  static override layerName = 'GPUSolidPolygonLayer';
+export class StorageSolidPolygonLayer extends Layer<StorageSolidPolygonLayerProps> {
+  static override layerName = 'StorageSolidPolygonLayer';
 
   override getAttributeManager() {
     return null;
   }
 
   override initializeState({device}: LayerContext): void {
-    if (device.type !== 'webgpu') throw new Error('GPUSolidPolygonLayer requires WebGPU');
+    if (device.type !== 'webgpu') throw new Error('StorageSolidPolygonLayer requires WebGPU');
     this.setState({model: null});
     this.createModel();
   }
 
   override updateState({props}: UpdateParameters<this>): void {
-    const boundInputs = ((this.state as GPUSolidPolygonLayerState).model?.userData['boundInputs'] ??
-      []) as unknown[];
+    const boundInputs = ((this.state as StorageSolidPolygonLayerState).model?.userData[
+      'boundInputs'
+    ] ?? []) as unknown[];
     if (
       props.positions !== boundInputs[0] ||
       props.rowIndices !== boundInputs[1] ||
@@ -94,12 +95,12 @@ export class GPUSolidPolygonLayer extends Layer<GPUSolidPolygonLayerProps> {
   }
 
   override getModels(): Model[] {
-    const model = (this.state as GPUSolidPolygonLayerState | undefined)?.model;
+    const model = (this.state as StorageSolidPolygonLayerState | undefined)?.model;
     return model ? [model] : [];
   }
 
   override draw({renderPass}: {renderPass: RenderPass}): void {
-    (this.state as GPUSolidPolygonLayerState).model?.draw(renderPass);
+    (this.state as StorageSolidPolygonLayerState).model?.draw(renderPass);
   }
 
   override getPickingInfo({info}: {info: PickingInfo}): PickingInfo {
@@ -144,11 +145,11 @@ export class GPUSolidPolygonLayer extends Layer<GPUSolidPolygonLayerProps> {
       this.props.indices,
       this.props.fillColors
     ];
-    this.setState({model} satisfies GPUSolidPolygonLayerState);
+    this.setState({model} satisfies StorageSolidPolygonLayerState);
   }
 
   private destroyModel(): void {
-    const state = this.state as GPUSolidPolygonLayerState | undefined;
+    const state = this.state as StorageSolidPolygonLayerState | undefined;
     state?.model?.destroy();
     if (state) this.setState({model: null});
   }
