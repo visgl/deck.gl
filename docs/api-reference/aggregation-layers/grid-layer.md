@@ -187,8 +187,7 @@ CPU aggregation is used as fallback in the following cases:
 
 #### Compute aggregation
 
-On a WebGPU device, `GridLayer` uses compute aggregation when `gpuAggregation` is enabled
-and both `colorDomain` and `elevationDomain` are supplied. Color and elevation are aggregated
+On a WebGPU device, `GridLayer` uses compute aggregation when `gpuAggregation` is enabled. Color and elevation are aggregated
 independently using `SUM`, `MEAN`, `MIN`, `MAX`, or `COUNT`. Results remain in GPU buffers
 and are passed directly to the cell layer.
 
@@ -210,9 +209,15 @@ Accessor-based data and single-chunk `float32x2`/`float32x3` position vectors wi
 `STORAGE` or `COPY_SRC` usage. Columns used in custom views must already use that view's
 coordinate system.
 
-Picking, layer extensions, custom aggregation callbacks, domain callbacks, quantile or
-ordinal scales, and percentile filtering use CPU aggregation instead. GPU-only input columns
-cannot use this fallback; supply accessor-based data or a custom aggregator for these features.
+Automatic domains, domain callbacks, picking, percentile filtering, quantile/ordinal color
+scales, quantile elevation scales, and accessor-based layer extensions are supported.
+CPU-facing metadata and distribution scales use an asynchronous snapshot of completed
+aggregation results; GPU vectors continue to supply cell rendering directly. Metadata is
+unavailable until the snapshot completes, and stale snapshots are discarded when inputs change.
+Providing explicit domains with picking and distribution scales disabled avoids this readback.
+Extension hooks execute before reduction; they filter input points rather than final cells.
+GPU-column input with layer extensions remains unsupported. Custom JavaScript aggregation
+callbacks and grids exceeding device buffer limits retain the CPU fallback for accessor data.
 
 #### `cellSize` (number, optional) {#cellsize}
 

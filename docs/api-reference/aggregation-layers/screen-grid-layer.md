@@ -229,6 +229,15 @@ When set to `true` and the browser supports it, aggregation is performed on GPU.
 In the right context, enabling GPU aggregation can significantly speed up your application. However, depending on the nature of input data and required application features, there are pros and cons in leveraging this functionality. See [CPU vs GPU aggregation](./overview.md#cpu-vs-gpu-aggregation) for an in-depth discussion.
 
 
+#### Compute aggregation
+
+ScreenGrid supports automatic color domains, picking metadata, and accessor-based layer
+extensions on a WebGPU device. Rendering consumes GPU vectors directly. Automatic domains
+and picking use asynchronous snapshots of completed results; stale snapshots are discarded.
+An explicit `colorDomain` with picking disabled keeps the result path entirely on the GPU.
+Extension hooks filter input points before reduction. GPU-column input with extensions or
+positions requiring CPU preprojection remains unsupported.
+
 #### `cellSizePixels` (number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#cellsizepixels}
 
 * Default: `100`

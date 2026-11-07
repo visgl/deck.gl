@@ -282,6 +282,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       colors?: AttributeWithScale;
       elevations?: AttributeWithScale;
 
+      metadataRequired?: boolean;
       binIdRange: [number, number][];
       aggregatorViewport: Viewport;
     } & AggregationLayer<any>['state'];
@@ -298,23 +299,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       return 'cpu';
     }
 
-    if (
-      gpuAggregation &&
-      this.context.device.type === 'webgpu' &&
-      this.props.colorDomain &&
-      this.props.elevationDomain &&
-      !this.props.pickable &&
-      !this.props.extensions.length &&
-      this.props.onSetColorDomain === noop &&
-      this.props.onSetElevationDomain === noop &&
-      this.props.colorScaleType !== 'quantile' &&
-      this.props.colorScaleType !== 'ordinal' &&
-      this.props.elevationScaleType !== 'quantile' &&
-      this.props.lowerPercentile === 0 &&
-      this.props.upperPercentile === 100 &&
-      this.props.elevationLowerPercentile === 0 &&
-      this.props.elevationUpperPercentile === 100
-    ) {
+    if (gpuAggregation && this.context.device.type === 'webgpu') {
       if (
         (!this.props.positions &&
           !WebGPUGridAggregator.supportsData(this.props.data, [
@@ -369,7 +354,19 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUGridAggregator {
-    if (type === 'webgpu') return new WebGPUGridAggregator(this.context.device);
+    if (type === 'webgpu')
+      return new WebGPUGridAggregator(this.context.device, {
+        shaders: super.getShaders({modules: [project32]}),
+        requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
+        bindAttributes: model => {
+          const layer = this.getCurrentLayer()! as this;
+          const manager = layer.getAttributeManager()!;
+          model.setGPUAttributes(
+            manager.getGPUVectors(),
+            manager.getBufferLayouts().map(layout => ({...layout, stepMode: 'instance' as const}))
+          );
+        }
+      });
     if (type === 'cpu') {
       const {gridAggregator, cellSize} = this.props;
       return new CPUAggregator({
@@ -443,6 +440,20 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const {props, oldProps, changeFlags} = params;
     const {aggregator} = this.state;
+    this.state.metadataRequired =
+      !props.colorDomain ||
+      !props.elevationDomain ||
+      Boolean(props.pickable) ||
+      props.onSetColorDomain !== noop ||
+      props.onSetElevationDomain !== noop ||
+      props.colorScaleType === 'quantile' ||
+      props.colorScaleType === 'ordinal' ||
+      props.lowerPercentile > 0 ||
+      props.upperPercentile < 100 ||
+      props.elevationLowerPercentile > 0 ||
+      props.elevationUpperPercentile < 100 ||
+      props.elevationScaleType === 'quantile';
+    aggregator.setProps({readback: this.state.metadataRequired});
     if (
       (changeFlags.dataChanged || !this.state.dataAsArray) &&
       (props.getColorValue || props.getElevationValue)
@@ -456,6 +467,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       props.positions !== oldProps.positions ||
       props.weights !== oldProps.weights ||
       props.dataBounds !== oldProps.dataBounds ||
+      props.modelMatrix !== oldProps.modelMatrix ||
+      props.coordinateOrigin !== oldProps.coordinateOrigin ||
+      changeFlags.projectionChanged ||
       props.cellSize !== oldProps.cellSize ||
       props.getColorValue !== oldProps.getColorValue ||
       props.getElevationValue !== oldProps.getElevationValue ||
@@ -586,7 +600,11 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     if (channel === 0) {
       const result = aggregator.getResult(0)!;
       this.setState({
-        colors: new AttributeWithScale(result, aggregator.binCount)
+        colors: new AttributeWithScale(
+          result,
+          aggregator.binCount,
+          aggregator.getResultValues?.(channel)
+        )
       });
       if (props.onSetColorDomain !== noop) {
         props.onSetColorDomain(aggregator.getResultDomain(0));
@@ -594,7 +612,11 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     } else if (channel === 1) {
       const result = aggregator.getResult(1)!;
       this.setState({
-        elevations: new AttributeWithScale(result, aggregator.binCount)
+        elevations: new AttributeWithScale(
+          result,
+          aggregator.binCount,
+          aggregator.getResultValues?.(channel)
+        )
       });
       if (props.onSetElevationDomain !== noop) {
         props.onSetElevationDomain(aggregator.getResultDomain(1));
@@ -684,6 +706,13 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       elevationUpperPercentile,
       elevationDomain
     } = this.props;
+    if (
+      this.state.metadataRequired &&
+      aggregator.getResultValues &&
+      aggregator.binCount &&
+      !aggregator.getResultValues(0)
+    )
+      return null;
     const CellLayerClass = this.getSubLayerClass('cells', GridCellLayer);
     const binAttribute = aggregator.getBins();
 

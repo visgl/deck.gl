@@ -14,6 +14,8 @@ export type AggregationOperation = 'SUM' | 'MEAN' | 'MIN' | 'MAX' | 'COUNT';
 
 /** Baseline inputs to an Aggregator */
 export type AggregationProps = {
+  /** Request asynchronous CPU metadata for domains, picking, and distribution scales. */
+  readback?: boolean;
   /** Number of data points */
   pointCount: number;
   /** Dense bin ranges, with inclusive starts and exclusive ends. */
@@ -67,6 +69,8 @@ export type AggregatedBin = {
  *
  */
 export interface Aggregator {
+  /** Whether output and requested asynchronous metadata are ready. */
+  readonly isLoaded?: boolean;
   /** Called once when the layer adopts this instance, before setProps. */
   initialize?(device: Device): void;
 
@@ -95,6 +99,9 @@ export interface Aggregator {
 
   /** Returns an accessor to the output for a given channel. */
   getResult(channel: number): AggregationResult | null;
+
+  /** Optional completed CPU snapshot for distribution scales; GPU outputs stay borrowed. */
+  getResultValues?(channel: number): Float32Array | null;
 
   /** Returns the [min, max] of aggregated values for a given channel. */
   getResultDomain(channel: number): [min: number, max: number];

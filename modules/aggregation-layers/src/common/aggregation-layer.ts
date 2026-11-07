@@ -75,6 +75,11 @@ export default abstract class AggregationLayer<
     this.state.aggregator.update();
   }
 
+  /** Include asynchronous aggregation metadata in the owning layer's loading state. */
+  override get isLoaded(): boolean {
+    return super.isLoaded && this.state?.aggregator?.isLoaded !== false;
+  }
+
   /** Number of weight columns consumed by this layer. */
   protected getAggregationChannelCount(): number {
     return 1;
