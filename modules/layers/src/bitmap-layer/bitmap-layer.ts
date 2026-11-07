@@ -24,6 +24,7 @@ import type {SamplerProps, Texture} from '@luma.gl/core';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
+import {getMetersPerUnit} from '../utils';
 
 import {bitmapUniforms, BitmapProps} from './bitmap-layer-uniforms';
 import source from './bitmap-layer.wgsl';
@@ -300,10 +301,14 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     if (tolerance && !transform) {
       throw new Error('_projectionTolerance requires a preprojecting viewport');
     }
+    const projectionToleranceScale = tolerance ? getMetersPerUnit(this.state.packedCrs) : null;
+    if (tolerance && !projectionToleranceScale) {
+      throw new Error('_projectionTolerance requires projected coordinates with linear units');
+    }
     return createMesh(
       normalizedBounds,
       this.getSubdivisionStep(),
-      tolerance ? {transform: transform!, tolerance} : undefined
+      tolerance ? {transform: transform!, tolerance, scale: projectionToleranceScale!} : undefined
     );
   }
 
