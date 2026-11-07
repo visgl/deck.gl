@@ -77,7 +77,7 @@ const AGGREGATION_MODE = {
 
 const defaultProps: DefaultProps<HeatmapLayerProps> = {
   positions: {type: 'object', value: null, optional: true},
-  weights: {type: 'object', value: null, optional: true},
+  weights: {type: 'array', value: null, optional: true, compare: 1},
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getWeight: {type: 'accessor', value: 1},
   intensity: {type: 'number', min: 0, value: 1},
@@ -108,8 +108,8 @@ export type HeatmapLayerProps<DataT = unknown> = _HeatmapLayerProps<DataT> &
 type _HeatmapLayerProps<DataT> = {
   /** Borrowed single-chunk float32x3 positions, bypassing the position accessor. */
   positions?: GPUVector | null;
-  /** Borrowed scalar float32 weights with the same row count as positions. */
-  weights?: GPUVector | null;
+  /** One borrowed scalar float32 weight vector with the same row count as positions. */
+  weights?: readonly GPUVector[] | null;
 
   /**
    * Radius of the circle in pixels, to which the weight of an object is distributed.
@@ -367,7 +367,7 @@ export default class HeatmapLayer<
     const {dimensions} = this.state;
     changeFlags.dataChanged =
       ((opts.props.positions !== opts.oldProps.positions ||
-        opts.props.weights !== opts.oldProps.weights ||
+        opts.props.weights?.[0] !== opts.oldProps.weights?.[0] ||
         opts.props.numInstances !== opts.oldProps.numInstances) &&
         'GPU columns changed') ||
       (opts.changeFlags.projectionChanged && 'projection changed') ||
@@ -430,16 +430,18 @@ export default class HeatmapLayer<
         'Heatmap GPU columns require WebGPU, no extensions, and compatible coordinates'
       );
     }
+    const weight = weights?.[0];
     if (
+      weights?.length !== 1 ||
       positions.format !== 'float32x3' ||
-      weights?.format !== 'float32' ||
-      positions.length !== weights.length ||
+      weight?.format !== 'float32' ||
+      positions.length !== weight.length ||
       this.getNumInstances() > positions.length
     ) {
       throw new Error('Heatmap requires matching float32x3 positions and float32 weights');
     }
     getGPUVectorData(positions);
-    getGPUVectorData(weights);
+    getGPUVectorData(weight);
     this.updateAttributes({});
   }
 
@@ -523,7 +525,7 @@ export default class HeatmapLayer<
             {
               name: 'instanceWeights',
               stepMode: 'instance',
-              byteStride: getGPUVectorData(this.props.weights!).byteStride,
+              byteStride: getGPUVectorData(this.props.weights![0]).byteStride,
               attributes: [{attribute: 'instanceWeights', format: 'float32', byteOffset: 0}]
             },
             {
@@ -768,7 +770,7 @@ export default class HeatmapLayer<
     const moduleSettings = this.getModuleSettings();
     if (this.props.positions) {
       const positions = getGPUVectorData(this.props.positions);
-      const weights = getGPUVectorData(this.props.weights!);
+      const weights = getGPUVectorData(this.props.weights![0]);
       const size = Math.max(1, this.getNumInstances()) * 12;
       if (!this.state.gpuPositionsLow || this.state.gpuPositionsLow.byteLength < size) {
         this.state.gpuPositionsLow?.destroy();

@@ -492,7 +492,7 @@ test('Heatmap borrows GPU columns and updates row prefixes', async ({skip}) => {
     manager.setProps({onError: error => errors.push(error)});
     let layer = new HeatmapLayer({
       positions,
-      weights,
+      weights: [weights],
       weightsTextureSize: 128,
       getPosition: () => {
         throw new Error('Accessor called');

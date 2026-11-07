@@ -247,7 +247,7 @@ The `HeatmapLayer` performs aggregation on the GPU. On WebGPU, it uses instanced
 ### GPU column inputs
 
 On a WebGPU device, `positions` accepts a borrowed single-chunk `float32x3` GPUVector
-and `weights` accepts a matching scalar `float32` GPUVector. Offsets and strides are
+and `weights` accepts an array containing one matching scalar `float32` GPUVector. Offsets and strides are
 preserved. `numInstances` may select a shorter prefix, including zero rows. These inputs
 bypass `getPosition` and `getWeight`; replace vector references when storage changes.
 Buffers must support vertex binding. Layer extensions and positions requiring CPU
@@ -256,7 +256,7 @@ preprojection are not supported by this path. Input buffers remain caller-owned.
 ```typescript
 new HeatmapLayer({
   positions: positionVector,
-  weights: weightVector,
+  weights: [weightVector],
   radiusPixels: 30
 });
 ```
