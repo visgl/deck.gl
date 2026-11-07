@@ -1082,7 +1082,7 @@ const clippedCompositionTestCases: TestCase[] = [
   {
     // TripsLayer interpolates timestamps along each source segment. Enabling dashes must not
     // stretch the active time range across only the portion left visible by camera clipping.
-    // The red and blue spans should meet at the same cutoff near the center of the gray rows.
+    // Golden: the red and blue spans meet at the same cutoff near the center of the gray rows.
     name: 'path-dash-trips-clipped-interpolation',
     views: new OrbitView({near: 1e-6, far: 1000}),
     viewState: {target: [0, 0, 0], zoom: 0, rotationX: 0, rotationOrbit: 0},
