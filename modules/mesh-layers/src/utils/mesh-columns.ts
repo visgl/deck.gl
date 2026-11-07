@@ -49,16 +49,22 @@ export function prepareMeshColumnTransforms(
         : binary;
   if (!descriptor) {
     const accessors = TRANSFORM_ACCESSORS.map(name => props[name]);
-    const constant = accessors.every(accessor => Array.isArray(accessor));
+    const constant =
+      (typeof accessors[0] !== 'function' && accessors[0]?.length === 16) ||
+      accessors.every(accessor => Array.isArray(accessor));
     const count = constant ? 1 : length;
     const values = new Float32Array(count * 12);
     const {objectInfo: info} = createIterable(props.data);
     for (let index = 0; index < count; index++) {
       info.index = index;
       const row = rows.at(index);
-      const [matrix, orientation, scale, translation] = accessors.map(accessor =>
-        typeof accessor === 'function' ? accessor(row, info) : accessor
-      );
+      const matrix = typeof accessors[0] === 'function' ? accessors[0](row, info) : accessors[0];
+      const [orientation, scale, translation] =
+        matrix?.length === 16
+          ? [[], [], []]
+          : accessors
+              .slice(1)
+              .map(accessor => (typeof accessor === 'function' ? accessor(row, info) : accessor));
       values.set(getMeshInstanceTransform(matrix, orientation, scale, translation), index * 12);
     }
     descriptor = {value: values, constant};
