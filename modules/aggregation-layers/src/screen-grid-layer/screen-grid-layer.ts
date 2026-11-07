@@ -135,7 +135,11 @@ export default class ScreenGridLayer<
       !this.props.pickable
     ) {
       if (
-        !WebGPUScreenGridAggregator.supportsData(this.props.data, ['getPosition', 'getWeight']) ||
+        (!this.props.positions &&
+          !WebGPUScreenGridAggregator.supportsData(this.props.data, [
+            'getPosition',
+            'getWeight'
+          ])) ||
         (!this.props.positions &&
           this.props.data ===
             (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&

@@ -316,11 +316,12 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       this.props.elevationUpperPercentile === 100
     ) {
       if (
-        !WebGPUGridAggregator.supportsData(this.props.data, [
-          'getPosition',
-          'getColorWeight',
-          'getElevationWeight'
-        ]) ||
+        (!this.props.positions &&
+          !WebGPUGridAggregator.supportsData(this.props.data, [
+            'getPosition',
+            'getColorWeight',
+            'getElevationWeight'
+          ])) ||
         (!this.props.positions &&
           this.props.data ===
             (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&

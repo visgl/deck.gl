@@ -177,6 +177,7 @@ test('Grid GPU columns share two-channel output and update prefixes', async ({sk
         ...(index === 0
           ? {
               props: {
+                data: {attributes: {getColorWeight: new Uint8Array([255])}},
                 positions: vectors[0],
                 weights: vectors.slice(1),
                 dataBounds: [
