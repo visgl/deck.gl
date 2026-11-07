@@ -646,6 +646,16 @@ webglTest('Deck#multi-canvas presentation', async () => {
   expect(deck.eventManagers).toBe(eventManagers);
   expect(deck.getViewports()).toBe(viewports);
 
+  // Reordering changes the default target of views without a `canvasId`
+  deck.setProps({_canvases: [canvasB, canvasA]});
+  // @ts-expect-error testing private state
+  expect(deck.eventManagers).not.toBe(eventManagers);
+  expect(deck.getCanvas()).toBe(canvasB);
+  expect(deck.getEventManager('left')?.getElement()).toBe(eventRootB);
+  expect(deck.getViewports().find(viewport => viewport.id === 'left')?.width).toBe(32);
+  deck.setProps({_canvases: [canvasA, canvasB]});
+  expect(deck.getEventManager('left')?.getElement()).toBe(eventRootA);
+
   // @ts-expect-error testing private state
   const rightCanvasContext = deck._canvasManager.targets['deck-test-canvas-b'].presentationContext;
   const originalGetCSSSize = rightCanvasContext.getCSSSize.bind(rightCanvasContext);
