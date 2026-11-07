@@ -321,11 +321,12 @@ export default class HexagonLayer<
       this.props.elevationUpperPercentile === 100
     ) {
       if (
-        !WebGPUHexagonAggregator.supportsData(this.props.data, [
-          'getPosition',
-          'getColorWeight',
-          'getElevationWeight'
-        ]) ||
+        (!this.props.positions &&
+          !WebGPUHexagonAggregator.supportsData(this.props.data, [
+            'getPosition',
+            'getColorWeight',
+            'getElevationWeight'
+          ])) ||
         (!this.props.positions &&
           this.props.data ===
             (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
