@@ -543,7 +543,12 @@ export default class HexagonLayer<
       });
     }
 
-    this.setState({radiusCommon, hexOriginCommon, binIdRange, aggregatorViewport: viewport});
+    Object.assign(this.state, {
+      radiusCommon,
+      hexOriginCommon,
+      binIdRange,
+      aggregatorViewport: viewport
+    });
   }
 
   override draw(opts) {
