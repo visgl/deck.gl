@@ -16,8 +16,8 @@ import {
 } from '@deck.gl/proposals/layers';
 import {ArrowPolygonRenderer} from '@luma.gl/engine/arrow';
 import {makeArrowFixedSizeListVector, makeGPUVectorFromArrow} from '@luma.gl/graph/arrow';
-import {GPUPathLayer} from '@deck.gl/proposals/layers/path-layer';
-import {GPUSolidPolygonLayer} from '@deck.gl/proposals/layers/solid-polygon-layer';
+import {StoragePathLayer} from '@deck.gl/proposals/layers/path-layer';
+import {StorageSolidPolygonLayer} from '@deck.gl/proposals/layers/solid-polygon-layer';
 import {expect, it} from 'vitest';
 import type {Device} from '@luma.gl/core';
 import type {GPUVectorModel} from '@luma.gl/engine';
@@ -224,7 +224,7 @@ it('clips temporal path fragments at both ends of the trail window', async conte
     await waitForDeckInitialization(deck);
     for (const fadeTrail of [false, true]) {
       const layers = [
-        new GPUPathLayer({
+        new StoragePathLayer({
           id: `gpu-temporal-clipping-${fadeTrail}`,
           paths: pathVector,
           timestamps: timestampVector,
@@ -239,7 +239,7 @@ it('clips temporal path fragments at both ends of the trail window', async conte
           data: new Table({paths, timestamps: arrowTimestamps}),
           paths: 'paths',
           timestamps: 'timestamps',
-          width: 5,
+          widths: 5,
           currentTime: 50,
           trailLength: 25,
           fadeTrail,
@@ -278,7 +278,7 @@ async function pickAtWorldPosition(deck: Deck, position: number[]): Promise<Pick
   return infos;
 }
 
-it('GPUPathLayer renders variable-length GPUVectors without an Arrow dependency', async () => {
+it('StoragePathLayer renders variable-length GPUVectors without an Arrow dependency', async () => {
   const device = await getWebGPUTestDevice('core');
   if (!device || isSoftwareBackedDevice(device)) {
     void 0;
@@ -297,7 +297,7 @@ it('GPUPathLayer renders variable-length GPUVectors without an Arrow dependency'
     format: 'vertex-list<float32x2>',
     preserveDataChunks: true
   });
-  const layer = new GPUPathLayer({id: 'gpu-path-core', paths, widths: 2});
+  const layer = new StoragePathLayer({id: 'gpu-path-core', paths, widths: 2});
   const {deck, parent} = createTestDeck(device);
   try {
     await waitForDeckInitialization(deck);
@@ -312,7 +312,7 @@ it('GPUPathLayer renders variable-length GPUVectors without an Arrow dependency'
   void 0;
 });
 
-it('GPUSolidPolygonLayer renders adapter-prepared tessellated GPUVectors', async () => {
+it('StorageSolidPolygonLayer renders adapter-prepared tessellated GPUVectors', async () => {
   const device = await getWebGPUTestDevice('core');
   if (!device || isSoftwareBackedDevice(device)) {
     void 0;
@@ -328,7 +328,7 @@ it('GPUSolidPolygonLayer renders adapter-prepared tessellated GPUVectors', async
     },
     {id: 'gpu-solid-polygon-core', tessellated: source.tessellated}
   );
-  const layer = new GPUSolidPolygonLayer({
+  const layer = new StorageSolidPolygonLayer({
     id: 'gpu-solid-polygon-core',
     positions: prepared.positions,
     rowIndices: prepared.rowIndices,
@@ -364,7 +364,7 @@ it('Arrow deck layers return source row indices from Deck picking', async () => 
     model: 'attribute'
   });
   let constantPathDataError: unknown;
-  const constantPathLayer = new GPUPathLayer({
+  const constantPathLayer = new StoragePathLayer({
     id: 'arrow-paths-constant-picking-test',
     pickable: true,
     data: new Table({paths: pathSource.sourceVectors.paths}),
@@ -388,8 +388,8 @@ it('Arrow deck layers return source row indices from Deck picking', async () => 
     pickable: true,
     data: new Table({paths: pathSource.sourceVectors.paths, colors: nullablePathColors}),
     paths: 'paths',
-    color: {source: 'colors', nullValue: [255, 80, 40, 255]},
-    width: 0.004,
+    colors: {source: 'colors', nullValue: [255, 80, 40, 255]},
+    widths: 0.004,
     model: 'attribute',
     onDataError: error => {
       nullablePathDataError = error;
@@ -401,8 +401,8 @@ it('Arrow deck layers return source row indices from Deck picking', async () => 
     pickable: true,
     data: new Table({paths: pathSource.sourceVectors.paths}),
     paths: 'paths',
-    color: 'missingColors',
-    width: {source: 'missingWidths', nullValue: 0.004},
+    colors: 'missingColors',
+    widths: {source: 'missingWidths', nullValue: 0.004},
     model: 'attribute',
     onDataError: error => {
       missingPathStyleDataError = error;
@@ -679,8 +679,8 @@ it('ArrowPathLayer storage draws streamed batches incrementally and preserves pi
     pickable: true,
     data: makeControlledPathStream(recordBatches, secondBatchReady),
     paths: 'paths',
-    color: callerColorVector,
-    width: {source: 'widths', nullValue: 0.0035},
+    colors: callerColorVector,
+    widths: {source: 'widths', nullValue: 0.0035},
     model: 'storage',
     onDataBatch: update => loadedBatchCounts.push(update.loadedBatchCount),
     onDataError: error => {
@@ -704,10 +704,11 @@ it('ArrowPathLayer storage draws streamed batches incrementally and preserves pi
     releaseSecondBatch();
     await waitForModelCount(layer, 2, () => dataError);
     expect(loadedBatchCounts, 'second batch appends without replacing the first').toEqual([1, 2]);
-    const pickingInfo = layer.getPickingInfo({
+    const renderer = (layer.getSubLayers()[0] as StoragePathLayer).getSubLayers()[0];
+    const pickingInfo = renderer.getPickingInfo({
       info: {index: 7, picked: true} as PickingInfo,
       mode: 'hover',
-      sourceLayer: layer
+      sourceLayer: renderer
     } as never) as PickingInfo & {
       arrow?: {rowIndex: number; batchIndex: number; batchRowIndex: number};
     };
