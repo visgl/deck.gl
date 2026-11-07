@@ -415,7 +415,13 @@ export default class ViewManager<ViewsT extends View[]> {
     });
     const viewsChanged = this._diffViews(views, previousViews);
     if (viewsChanged) {
-      const viewIds = new Set(views.map(view => view.id));
+      const viewIds = new Set<string>();
+      for (const view of views) {
+        if (viewIds.has(view.id)) {
+          log.warn(`Multiple views with same id ${view.id}`)();
+        }
+        viewIds.add(view.id);
+      }
       for (const view of this.views) {
         if (!viewIds.has(view.id)) this._eventCallbacks.onViewRemoved?.(view.id);
       }
@@ -595,15 +601,28 @@ export default class ViewManager<ViewsT extends View[]> {
 
     const {oldControllers, oldViewEventManagers} = this._startViewportRebuild();
 
+    // Controllers, event managers and lookups are keyed by view id, so they belong to the first
+    // view with each id. A later view with the same id is still drawn, but gets no controller.
+    const firstIndexById = new Map<string, number>();
+    views.forEach((view, index) => {
+      if (!firstIndexById.has(view.id)) firstIndexById.set(view.id, index);
+    });
+
     let invalidateControllers = false;
     // Create controllers in reverse order, so that views on top receive events first
     for (let i = views.length; i--; ) {
       const view = views[i];
       const {width, height} = this._getCanvasDimensions(view);
-      const viewEventManager = this._getViewEventManager(view);
-      this._viewEventManagers[view.id] = viewEventManager;
       const viewState = this.getViewState(view);
       const viewport = view.makeViewport({viewState, width, height});
+      if (firstIndexById.get(view.id) !== i) {
+        if (viewport) {
+          this._viewports.unshift(viewport);
+        }
+        continue;
+      }
+      const viewEventManager = this._getViewEventManager(view);
+      this._viewEventManagers[view.id] = viewEventManager;
 
       let oldController = this._getReusableController(
         oldControllers[view.id],
@@ -654,7 +673,7 @@ export default class ViewManager<ViewsT extends View[]> {
     this._viewportMap = {};
     this._viewports.forEach(viewport => {
       if (viewport.id) {
-        // TODO - issue warning if multiple viewports use same id
+        // The first viewport with an id wins; `_setViews` warns about duplicate ids
         this._viewportMap[viewport.id] = this._viewportMap[viewport.id] || viewport;
       }
     });

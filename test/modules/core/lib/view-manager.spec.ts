@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {MapView} from '@deck.gl/core';
+import {MapView, log} from '@deck.gl/core';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {equals} from '@math.gl/core';
 import {EventManager} from 'mjolnir.js';
@@ -169,6 +169,72 @@ test('ViewManager#controllers', () => {
     viewManager.controllers.main || viewManager.controllers.minimap,
     'controllers are deleted'
   ).toBeFalsy();
+});
+
+test('ViewManager#duplicate view ids', () => {
+  const warn = vi.spyOn(log, 'warn').mockReturnValue(() => {});
+  const proto = ViewManager.prototype as unknown as {_createController: (...args) => any};
+  const createController = proto._createController;
+  const controllers: {controller: any; finalized: boolean}[] = [];
+  proto._createController = function (...args) {
+    const controller = createController.apply(this, args);
+    const record = {controller, finalized: false};
+    const finalize = controller.finalize.bind(controller);
+    controller.finalize = () => {
+      record.finalized = true;
+      finalize();
+    };
+    controllers.push(record);
+    return controller;
+  };
+
+  try {
+    const makeViews = () => [
+      new MapView({id: 'main', controller: true, width: '50%'}),
+      new MapView({id: 'main', controller: true, x: '50%', width: '50%'})
+    ];
+    const viewManager = new ViewManager({
+      views: makeViews(),
+      viewState: {longitude: -122, latitude: 38, zoom: 12},
+      width: 200,
+      height: 100
+    });
+
+    expect(warn).toHaveBeenCalledWith('Multiple views with same id main');
+    expect(viewManager.getViewports(), 'both views are drawn').toHaveLength(2);
+    expect(controllers, 'only the first view gets a controller').toHaveLength(1);
+    expect(viewManager.controllers.main.props.x, 'the controller belongs to the first view').toBe(
+      0
+    );
+
+    warn.mockClear();
+    viewManager.setProps({viewState: {longitude: -121, latitude: 38, zoom: 12}});
+    expect(warn, 'view state changes do not warn again').not.toHaveBeenCalled();
+
+    viewManager.setProps({views: makeViews(), width: 300, height: 100});
+    expect(controllers, 'the controller is reused').toHaveLength(1);
+
+    // The same view instance passed twice is drawn twice but controlled once
+    const view = new MapView({id: 'shared', controller: true});
+    viewManager.setProps({
+      views: [view, view],
+      viewState: {longitude: -122, latitude: 38, zoom: 12}
+    });
+    expect(viewManager.getViewports()).toHaveLength(2);
+    expect(
+      controllers.filter(record => !record.finalized),
+      'one live controller'
+    ).toHaveLength(1);
+
+    viewManager.finalize();
+    expect(
+      controllers.every(record => record.finalized),
+      'every controller is finalized'
+    ).toBeTruthy();
+  } finally {
+    proto._createController = createController;
+    warn.mockRestore();
+  }
 });
 
 test('ViewManager#controller without a matching view state', () => {
