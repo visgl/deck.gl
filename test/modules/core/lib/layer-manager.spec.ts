@@ -289,6 +289,30 @@ test("LayerManager#setState in a layer's own update", () => {
   layerManager.finalize();
 });
 
+test('LayerManager#update waits for a layer whose viewport is pending', () => {
+  const miniViewport = new Viewport({id: 'mini'});
+  const mainViewport = new Viewport({id: 'main'});
+  const views = [new MapView({id: 'mini'}), new MapView({id: 'main'})];
+  const layerManager = new LayerManager(device, {viewport: miniViewport});
+  layerManager.setViewports([miniViewport, mainViewport], views);
+  const layer = new TestLayer({id: 'test'});
+  layerManager.setLayers([layer]);
+  expect(layer.internalState.viewport, 'initialized in the first view').toBe(miniViewport);
+
+  // The first view has no viewport, e.g. while it resolves asynchronously
+  layerManager.setViewports([mainViewport], views);
+  layerManager.updateLayers();
+  // e.g. an async prop resolves
+  layer.setNeedsUpdate();
+  layerManager.updateLayers();
+  expect(layerManager.needsUpdate(), 'no repeated update while it waits').toBeFalsy();
+
+  layerManager.setViewports([miniViewport, mainViewport], views);
+  layerManager.updateLayers();
+  expect(layer.internalState.needsUpdate, 'updated once its viewport is ready').toBe(false);
+  layerManager.finalize();
+});
+
 test('LayerManager#error handling', () => {
   const errorArgs = [];
   const onError = (error, layer) => errorArgs.push({error, layer});

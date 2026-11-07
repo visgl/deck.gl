@@ -380,9 +380,11 @@ export default class LayerManager {
 
     // Allocate array for generated layers
     const generatedLayers: Layer[] = [];
+    // Layers that wait for their viewport or coordinate system, which were not updated
+    const pausedLayers = new Set<Layer>();
 
     // Match sublayers
-    this._updateSublayersRecursively(newLayers, oldLayerMap, generatedLayers);
+    this._updateSublayersRecursively(newLayers, oldLayerMap, generatedLayers, pausedLayers);
 
     // Finalize unmatched layers
     this._finalizeOldLayers(oldLayerMap);
@@ -395,7 +397,9 @@ export default class LayerManager {
       }
       // A layer can be marked after its own update in this cycle, e.g. a composite layer whose state
       // is set from a sublayer callback (TerrainLayer's onViewportLoad). Update it in the next cycle.
-      if (layer.internalState?.needsUpdate) {
+      // A paused layer is updated once its viewport or coordinate system is ready, which requests the
+      // next cycle itself
+      if (layer.internalState?.needsUpdate && !pausedLayers.has(layer)) {
         needsUpdate = `${layer} marked during update`;
         break;
       }
@@ -406,11 +410,13 @@ export default class LayerManager {
   }
 
   /* eslint-disable complexity,max-statements */
-  // Note: adds generated layers to `generatedLayers` array parameter
+  // Note: adds generated layers to `generatedLayers` array parameter, and the ones that cannot be
+  // updated yet to `pausedLayers`
   private _updateSublayersRecursively(
     newLayers: Layer[],
     oldLayerMap: {[layerId: string]: Layer | null},
-    generatedLayers: Layer[]
+    generatedLayers: Layer[],
+    pausedLayers: Set<Layer>
   ) {
     for (const newLayer of newLayers) {
       newLayer.context = this.context as LayerContext;
@@ -442,6 +448,8 @@ export default class LayerManager {
           if (!newLayer.internalState) {
             this._initializeLayer(newLayer, initialViewport);
           } else this._updateLayer(newLayer);
+        } else {
+          pausedLayers.add(newLayer);
         }
         generatedLayers.push(newLayer);
 
@@ -456,7 +464,7 @@ export default class LayerManager {
       }
 
       if (sublayers) {
-        this._updateSublayersRecursively(sublayers, oldLayerMap, generatedLayers);
+        this._updateSublayersRecursively(sublayers, oldLayerMap, generatedLayers, pausedLayers);
       }
     }
   }
