@@ -580,9 +580,15 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     // AttributeManager has populated current positions at this point. Backend selection
     // during updateState can only see the previous position bounds.
     if (
-      changedAttributes.positions &&
+      (changedAttributes.positions ||
+        changedAttributes.colorWeights ||
+        changedAttributes.elevationWeights) &&
       this.state.aggregatorType === 'webgpu' &&
-      this.getAggregatorType() === 'cpu'
+      (this.getAggregatorType() === 'cpu' ||
+        !WebGPUGridAggregator.supportsAttributes(this.getAttributeManager()!.attributes, [
+          'colorWeights',
+          'elevationWeights'
+        ]))
     ) {
       this.state.aggregator.destroy();
       const aggregator = this.createAggregator('cpu');

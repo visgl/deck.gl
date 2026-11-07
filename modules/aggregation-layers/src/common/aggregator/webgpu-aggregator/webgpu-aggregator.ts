@@ -47,6 +47,23 @@ const aggregationUniforms = {
 
 /** Shared dense-bin compute reduction. Layer adapters supply only bin assignment. @internal */
 export class WebGPUAggregator implements Aggregator {
+  /** Attribute-generated integer columns retain the sparse CPU fallback. */
+  static supportsAttributes(
+    attributes: AggregationProps['attributes'],
+    weights: readonly string[]
+  ): boolean {
+    return (
+      Object.values(attributes.positions?.getGPUVector() || {}).every(
+        column => column.format === 'float32x2' || column.format === 'float32x3'
+      ) &&
+      weights.every(name =>
+        Object.values(attributes[name]?.getGPUVector() || {}).every(
+          column => column.format === 'float32'
+        )
+      )
+    );
+  }
+
   binCount = 0;
   private props: AggregationProps = {pointCount: 0, attributes: {}, operations: [], binOptions: {}};
   private dirty = true;

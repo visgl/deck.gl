@@ -255,6 +255,32 @@ export default class ScreenGridLayer<
     return aggregatorChanged;
   }
 
+  protected override updateAttributes(changedAttributes) {
+    if (
+      this.state.aggregatorType === 'webgpu' &&
+      !WebGPUScreenGridAggregator.supportsAttributes(this.getAttributeManager()!.attributes, [
+        'counts'
+      ])
+    ) {
+      this.state.aggregator.destroy();
+      const aggregator = this.createAggregator('cpu');
+      this.setState({aggregator, aggregatorType: 'cpu'});
+      const {cellSizePixels, aggregation} = this.props;
+      const {width, height} = this.context.viewport;
+      aggregator.setProps({
+        attributes: this.getAttributeManager()!.attributes,
+        pointCount: this.getNumInstances(),
+        operations: [aggregation],
+        binIdRange: [
+          [0, Math.ceil(width / cellSizePixels)],
+          [0, Math.ceil(height / cellSizePixels)]
+        ],
+        binOptions: {cellSizePixels}
+      });
+    }
+    super.updateAttributes(changedAttributes);
+  }
+
   onAttributeChange(id: string) {
     const {aggregator} = this.state;
     switch (id) {

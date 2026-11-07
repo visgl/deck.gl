@@ -319,3 +319,56 @@ test('Grid uses current accessor bounds when checking dense buffer limits', asyn
     ]
   });
 });
+
+test('Grid preserves CPU fallback when binary weights change to integer storage', async ({
+  skip
+}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  const position = {value: new Float32Array([0, 0, 0, 1, 1, 0]), size: 3};
+  const makeData = (weights: Float32Array | Int32Array) => ({
+    length: 2,
+    attributes: {
+      getPosition: position,
+      getColorWeight: {value: weights, size: 1},
+      getElevationWeight: {value: weights, size: 1}
+    }
+  });
+  await testLayerAsync({
+    Layer: GridLayer,
+    device,
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {target: [0, 0, 0], zoom: 0}
+    }),
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          data: makeData(new Int32Array([2, 3])),
+          colorDomain: [0, 10],
+          elevationDomain: [0, 10],
+          cellSize: 10
+        },
+        onAfterUpdate({layer}) {
+          expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+        }
+      },
+      {
+        updateProps: {data: makeData(new Float32Array([2, 3]))},
+        onAfterUpdate({layer}) {
+          expect(layer.state.aggregator).toBeInstanceOf(WebGPUGridAggregator);
+        }
+      },
+      {
+        updateProps: {data: makeData(new Int32Array([4, 5]))},
+        onAfterUpdate({layer}) {
+          expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+        }
+      }
+    ]
+  });
+});
