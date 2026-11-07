@@ -299,7 +299,8 @@ export default class MVTLayer<
     // clips those by anchor rather than by geometry, so a label or icon still overhangs the edge.
     // `clip_isInBounds` is half-open, so a feature exactly on a shared edge is drawn by one tile
     // rather than both.
-    const tileClipBounds = [0, 0, 1, 1]; // the tile, in tile-local coordinates
+    // The tile, in tile-local coordinates
+    const tileClipBounds: [number, number, number, number] = [0, 0, 1, 1];
     // ClipExtension's default clipBounds is the same unit square, so only other bounds were set
     // by the caller
     if (props.clipBounds && !equals(props.clipBounds, tileClipBounds)) {
