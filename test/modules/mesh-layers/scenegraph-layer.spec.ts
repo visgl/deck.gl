@@ -9,7 +9,7 @@ import {project32} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import source from '@deck.gl/mesh-layers/scenegraph-layer/scenegraph-layer.wgsl';
 import {CubeGeometry, Model, GroupNode, ModelNode} from '@luma.gl/engine';
-import {GLTFAnimator} from '@luma.gl/gltf';
+import {GLTFAnimator} from '@luma.gl/engine/gltf';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -64,6 +64,8 @@ test('ScenegraphLayer#WebGPU shader preserves instance picking and highlighting'
   expect(source).toContain('outputs.pickingColor = geometry.pickingColor');
   expect(source).toContain('picking.isActive > 0.5');
   expect(source).toContain('picking_isColorValid(inputs.pickingColor)');
+  expect(source).toContain('var extensionColor = vec4<f32>(inputs.pickingColor, 1.0)');
+  expect(source).toContain('DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry)');
   expect(source).toContain('return vec4<f32>(inputs.pickingColor, 1.0)');
   expect(source).toContain('picking.isHighlightActive > 0.5');
 });

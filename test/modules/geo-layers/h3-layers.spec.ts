@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect} from 'vitest';
 import {cellToBoundary, cellToLatLng, gridDisk, compactCells} from 'h3-js';
 import {
@@ -163,15 +164,15 @@ test('H3HexagonLayer', () => {
 test('H3HexagonLayer projects world-coordinate vertices with CustomProjectionViewport', () => {
   const hex = '882830829bfffff';
   const [latitude, longitude] = cellToLatLng(hex);
-  const viewport = new CustomProjectionViewport({
+  const viewport = createTestViewport({
     width: 800,
     height: 600,
     center: [longitude, latitude, 0],
-    projection: {
+    converter: {
       forward: ([x, y, z = 0]) => [x * 1000, y * 2000, z],
       inverse: ([x, y, z = 0]) => [x / 1000, y / 2000, z]
     },
-    getDistanceScale: () => [1, 1]
+    distanceScale: () => [1, 1, 1]
   });
   testLayer({
     Layer: H3HexagonLayer,

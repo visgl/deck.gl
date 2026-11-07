@@ -3,6 +3,8 @@
 
 The `FillStyleExtension` adds selected features to layers that render a "fill", such as the `PolygonLayer` and `ScatterplotLayer`.
 
+Choose texture atlas patterns or procedural hatches, cross-hatches, and dots.
+
 <div style={{position:'relative',height:450}}></div>
 <div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
   <iframe height="450" style={{width:'100%'}} scrolling="no" title="deck.gl FillStyleExtension" src="https://codepen.io/vis-gl/embed/eYBJWKz?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
@@ -231,7 +233,7 @@ the pattern and the background color styles the area behind it.
 The units of the pattern size, one of `'meters'`, `'common'` and `'pixels'`. See [unit system](../../developer-guide/coordinate-systems.md#supported-units). A 24 x 24 pixel pattern at [`getFillPatternScale: 1`](#getfillpatternscale) covers 24 units of the chosen unit. Procedural pattern stroke widths, gaps, and radii use the same units.
 
 + `'meters'` anchors the pattern to the ground, so it zooms along with the rest of the map.
-+ `'common'` sizes the pattern in [common space](../../developer-guide/coordinate-systems.md) units, which is what a non-geospatial view (`COORDINATE_SYSTEM.CARTESIAN`) wants - meters are converted with a fixed Web Mercator ratio and are not meaningful there.
++ `'common'` sizes the pattern in [common space](../../developer-guide/coordinate-systems.md) units, which is what a non-geospatial view (`'cartesian'`) wants - meters are converted with a fixed Web Mercator ratio and are not meaningful there.
 + `'pixels'` keeps the pattern at a constant size on screen instead. The size is re-anchored at each integer zoom level rather than followed continuously, so that the tiling stays put while zooming within a level; the pattern therefore stays within a factor of `sqrt(2)` of its nominal pixel size.
 
 ```js

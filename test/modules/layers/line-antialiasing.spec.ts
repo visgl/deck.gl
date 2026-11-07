@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import {testLayer} from '@deck.gl/test-utils/vitest';
 import {LineLayer} from '@deck.gl/layers';
-import {preprocess} from '@luma.gl/shadertools';
+import {preprocess} from '@luma.gl/shaders';
 import lineVertexShader from '@deck.gl/layers/line-layer/line-layer-vertex.glsl';
 import lineFragmentShader from '@deck.gl/layers/line-layer/line-layer-fragment.glsl';
 import {shaderWGSL} from '@deck.gl/layers/line-layer/line-layer.wgsl';

@@ -4,7 +4,7 @@
 
 import {test, expect, vi} from 'vitest';
 import {MapView, LayerManager} from 'deck.gl';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
+
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
@@ -205,6 +205,22 @@ test('CollisionFilterEffect#render', () => {
     preRenderStats: {'mask-effect': {didRender: false}}
   });
   expect(spy, 'Should not render when mask effect does not render').toHaveBeenCalledTimes(5);
+
+  const [width, height] = device.canvasContext!.getDrawingBufferSize();
+  const sizeSpy = vi
+    .spyOn(device.canvasContext!, 'getDrawingBufferSize')
+    .mockReturnValue([width * 2, height * 2]);
+  preRenderWithLayers([TEST_LAYER], 'canvas resized', {viewports: [testViewport2]});
+  expect(spy, 'Should render when canvas size changes').toHaveBeenCalledTimes(6);
+  const collisionFBO = collisionFilterEffect.collisionFBOs['COLLISION_GROUP'];
+  expect(
+    [collisionFBO.width, collisionFBO.height],
+    'Collision FBO is sized from the drawing buffer'
+  ).toEqual([width, height]);
+
+  preRenderWithLayers([TEST_LAYER], 'canvas size unchanged', {viewports: [testViewport2]});
+  expect(spy, 'Should not render when canvas size is unchanged').toHaveBeenCalledTimes(6);
+  sizeSpy.mockRestore();
 
   collisionFilterEffect.cleanup();
   layerManager.finalize();

@@ -2,21 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {PROJECTION_MODE, UNIT} from '../../lib/constants';
-import {getShaderCoordinateSystem} from './viewport-uniforms';
+import {UNIT} from '../../lib/constants';
+import {COORDINATE_SYSTEM, PROJECTION_MODE} from './constants';
 
-const SHADER_COORDINATE_SYSTEMS = [
-  'default',
-  'lnglat',
-  'meter-offsets',
-  'lnglat-offsets',
-  'cartesian'
-] as const;
-
-const COORDINATE_SYSTEM_GLSL_CONSTANTS = SHADER_COORDINATE_SYSTEMS.map(
-  coordinateSystem =>
-    `const int COORDINATE_SYSTEM_${coordinateSystem.toUpperCase().replaceAll('-', '_')} = ${getShaderCoordinateSystem(coordinateSystem)};`
-).join('');
+const COORDINATE_SYSTEM_GLSL_CONSTANTS = Object.entries(COORDINATE_SYSTEM)
+  .map(([name, value]) => `const int COORDINATE_SYSTEM_${name} = ${value};`)
+  .join('');
 const PROJECTION_MODE_GLSL_CONSTANTS = Object.keys(PROJECTION_MODE)
   .map(key => `const int PROJECTION_MODE_${key} = ${PROJECTION_MODE[key]};`)
   .join('');
@@ -31,7 +22,7 @@ ${UNIT_GLSL_CONSTANTS}
 
 layout(std140) uniform projectUniforms {
   bool wrapLongitude;
-  int coordinateSystem;
+  int coordinateFrame;
   vec3 commonUnitsPerMeter;
   int projectionMode;
   float scale;
@@ -67,7 +58,7 @@ float project_size_at_latitude(float lat) {
 
 float project_size() {
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR &&
-    project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT &&
+    project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC &&
     project.pseudoMeters == false) {
 
     // uCommonUnitsPerMeter in low-zoom Web Mercator is non-linear
@@ -169,7 +160,7 @@ mat3 project_get_orientation_matrix(vec3 up) {
 }
 
 bool project_needs_rotation(vec3 commonPosition, out mat3 transform) {
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     transform = project_get_orientation_matrix(commonPosition);
     return true;
   }
@@ -242,7 +233,7 @@ vec2 project_globe_to_mercator_(vec3 spherePos) {
 // For sampling textures or testing bounds produced by a flat viewport. Do not add
 // project.commonOrigin to a GLOBE result. Adding a non-flat projection mode: invert it here.
 vec2 project_common_position_to_flat(vec3 commonPosition) {
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     return project_globe_to_mercator_(commonPosition);
   }
   return commonPosition.xy;
@@ -274,7 +265,7 @@ vec2 project_common_position_to_flat_wrapped(vec4 commonPosition, float referenc
 // e.g. the camera); identity for flat modes. For periodic patterns.
 vec2 project_common_position_to_flat_continuous(vec3 commonPosition, float referenceX) {
   vec2 flatPosition = project_common_position_to_flat(commonPosition);
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     flatPosition.x = project_wrap_flat_x_(flatPosition.x, referenceX);
   }
   return flatPosition;
@@ -285,26 +276,26 @@ vec2 project_common_position_to_flat_continuous(vec4 commonPosition, float refer
 }
 
 //
-// Projects positions (defined by project.coordinateSystem) to common space (defined by project.projectionMode)
+// Projects positions (defined by project.coordinateFrame) to common space (defined by project.projectionMode)
 //
 vec4 project_position(vec4 position, vec3 position64Low) {
   vec4 position_world = project.modelMatrix * position;
 
   // Work around for a Mac+NVIDIA bug https://github.com/visgl/deck.gl/issues/4145
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR) {
-    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC) {
       return vec4(
         project_mercator_(position_world.xy),
         project_size_at_latitude(position_world.z, position_world.y),
         position_world.w
       );
     }
-    if (project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_PROJECTED) {
       position_world.xyz += project.coordinateOrigin;
     }
   }
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
-    if (project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
+  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_GEOCENTRIC) {
       // Globe-centered Cartesian XYZ are meters, not longitude/latitude.
       vec4 position_low = project.modelMatrix * vec4(position64Low, 0.0);
       return vec4(
@@ -312,20 +303,20 @@ vec4 project_position(vec4 position, vec3 position64Low) {
         position_world.w
       );
     }
-    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC) {
       return vec4(
         project_globe_(position_world.xyz),
         position_world.w
       );
     }
-    if (project.coordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS) {
+    if (project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS) {
       mat3 enuMatrix = project_get_orientation_matrix(project.commonOrigin);
       vec3 offsetCommon = (enuMatrix * vec3(-position_world.xy, position_world.z)) * project.commonUnitsPerMeter;
       return vec4(project.commonOrigin + offsetCommon, position_world.w);
     }
   }
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
-    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC) {
       if (abs(position_world.y - project.coordinateOrigin.y) > 0.25) {
         // Too far from the projection center for offset mode to be accurate
         // Only use high parts
@@ -340,8 +331,8 @@ vec4 project_position(vec4 position, vec3 position64Low) {
   if (project.projectionMode == PROJECTION_MODE_IDENTITY ||
     project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL ||
     (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
-    (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
-     project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
+    (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC ||
+     project.coordinateFrame == COORDINATE_SYSTEM_PROJECTED))) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
     position_world.xyz -= project.coordinateOrigin;
   }
@@ -388,11 +379,6 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels) {
 }
 
 float project_size_to_pixel(float meters) {
-#ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) {
-    return meters * project_external_size_scale().x * project.scale;
-  }
-#endif
   return project_size(meters) * project.scale;
 }
 vec2 project_size_to_pixel(vec2 meters) {
@@ -409,5 +395,78 @@ float project_pixel_size(float pixels) {
 }
 vec2 project_pixel_size(vec2 pixels) {
   return pixels / project.scale;
+}
+
+// True when the globe hides commonPosition from the camera: the segment from the camera to the
+// position passes through the sphere. Exact for positions at any altitude, so a point above the
+// surface stays visible past the horizon of the ground below it. Always false for flat projections.
+bool project_globe_is_occluded(vec3 commonPosition) {
+  if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+    return false;
+  }
+  vec3 eye = project.cameraPosition;
+  vec3 ray = commonPosition - eye;
+  float rayLength2 = dot(ray, ray);
+  if (rayLength2 == 0.0) {
+    return false;
+  }
+  // Closest approach of the segment to the globe centre, before reaching the position
+  float t = clamp(-dot(eye, ray) / rayLength2, 0.0, 1.0);
+  vec3 closest = eye + ray * t;
+  return t < 1.0 && dot(closest, closest) < GLOBE_RADIUS * GLOBE_RADIUS;
+}
+
+// Distance from eye along the unit direction to the first globe surface point, or fallback
+float project_globe_ray_distance_(vec3 eye, vec3 direction, float fallback) {
+  float b = dot(eye, direction);
+  float discriminant = b * b - dot(eye, eye) + GLOBE_RADIUS * GLOBE_RADIUS;
+  if (discriminant < 0.0) {
+    return fallback;
+  }
+  float distance = -b - sqrt(discriminant);
+  return distance > 0.0 ? distance : fallback;
+}
+
+// Screen-space radius, in pixels, that a billboard is assumed to cover around its anchor
+#define GLOBE_BILLBOARD_FOOTPRINT_PIXELS 64.0
+
+// Clip-space position for a billboard anchored at commonPosition. Under GLOBE the billboard is
+// moved toward the camera by the amount the globe surface rises within its footprint, so the
+// curve of the globe does not clip a sprite whose anchor is visible. The shift is the same at
+// every altitude for a given anchor direction, so sprites keep their order against each other,
+// and it is zero where the surface faces the camera. It is not zero where the surface is
+// foreshortened: it grows with the grazing angle, about 1.8 km at zoom 12 with pitch 60, so other
+// 3D geometry that is in front of the anchor by less than the shift no longer hides the sprite.
+// Pair with project_globe_is_occluded, which hides the sprite once the anchor itself is behind
+// the globe. Identity for flat projections.
+vec4 project_globe_billboard_clipspace(vec4 clipPosition, vec3 commonPosition) {
+  if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+    return clipPosition;
+  }
+  vec3 eye = project.cameraPosition;
+  vec3 ray = commonPosition - eye;
+  float anchorDistance = length(ray);
+  if (anchorDistance == 0.0) {
+    return clipPosition;
+  }
+  vec3 direction = ray / anchorDistance;
+  // On screen, the surface is nearest toward the point of the globe below the camera
+  vec3 inward = -eye - dot(-eye, direction) * direction;
+  float inwardLength = length(inward);
+  if (inwardLength == 0.0) {
+    return clipPosition;
+  }
+  // Ray through the inward edge of the footprint
+  float footprint = project_pixel_size(GLOBE_BILLBOARD_FOOTPRINT_PIXELS);
+  vec3 edgeDirection = normalize(ray + inward / inwardLength * footprint);
+  float surfaceDistance = project_globe_ray_distance_(eye, direction, anchorDistance);
+  float edgeDistance = project_globe_ray_distance_(eye, edgeDirection, surfaceDistance);
+  float shift = surfaceDistance - edgeDistance;
+  if (shift <= 0.0) {
+    return clipPosition;
+  }
+  vec4 shiftedClip = project_common_position_to_clipspace(vec4(commonPosition - direction * shift, 1.0));
+  clipPosition.z = shiftedClip.z / shiftedClip.w * clipPosition.w;
+  return clipPosition;
 }
 `;

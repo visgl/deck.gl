@@ -2,18 +2,18 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {ClipExtension} from '@deck.gl/extensions';
 import {transform} from '@deck.gl/geo-layers/mvt-layer/coordinate-transform';
 import findIndexBinary from '@deck.gl/geo-layers/mvt-layer/find-index-binary';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {geojsonToBinary} from '@loaders.gl/gis';
-import {MVTLoader} from '@loaders.gl/mvt';
+import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
+import {MVTLoader} from '@loaders.gl/tiles/mvt';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {WebMercatorViewport, _GlobeViewport as GlobeViewport, log} from '@deck.gl/core';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 
 import {testPickingLayer} from '../layers/test-picking-layer';
@@ -58,7 +58,9 @@ const geoJSONDataWGS84 = [
   }
 ];
 
-const geoJSONBinaryData = geojsonToBinary(JSON.parse(JSON.stringify(geoJSONData)));
+const geoJSONBinaryData = convertGeojsonToBinaryFeatureCollection(
+  JSON.parse(JSON.stringify(geoJSONData))
+);
 
 const TRANSFORM_COORDS_DATA = [
   {
@@ -225,21 +227,67 @@ test('ClipExtension', () => {
 });
 
 test('MVTLayer#transformCoordsToWGS84', () => {
-  const viewport = new WebMercatorViewport({
-    latitude: 0,
-    longitude: 0,
-    zoom: 1
-  });
-
   const bbox = {west: -180, north: 85.0511287798066, east: 0, south: 0};
 
   for (const tc of TRANSFORM_COORDS_DATA) {
-    const func = transform(tc.geom, bbox, viewport);
+    const func = transform(tc.geom, bbox);
     expect(func, `transform ${tc.geom.type} returned expected WGS84 coordinates`).toEqual(
       tc.result
     );
   }
 });
+
+for (const ViewportType of [WebMercatorViewport, GlobeViewport]) {
+  test(`MVTLayer#OSMTile512 ${ViewportType.name}`, async () => {
+    const viewport = new ViewportType({
+      width: 100,
+      height: 100,
+      longitude: 0,
+      latitude: 0,
+      zoom: 1
+    });
+    let requests = 0;
+    let checked = false;
+    await testLayerAsync({
+      Layer: MVTLayer,
+      viewport,
+      testCases: [
+        {
+          props: {
+            data: ['https://server.com/{z}/{x}/{y}.mvt'],
+            binary: false,
+            stroked: false,
+            fetch: (url, {loadOptions}) => {
+              requests++;
+              expect(loadOptions.mvt.coordinates).toBe('local');
+              return Promise.resolve(geoJSONData);
+            }
+          },
+          onAfterUpdate: ({layer, subLayers}) => {
+            if (!layer.isLoaded) return;
+            for (const subLayer of subLayers) {
+              const {x, y, z} = subLayer.props.tile.index;
+              const scale = 512 / 2 ** z;
+              expect(subLayer.props.coordinateSystem).toBe('OSMTile512');
+              expect(subLayer.props.coordinateOrigin).toEqual([x * scale, y * scale, 0]);
+              expect(subLayer.props.modelMatrix[0]).toBe(scale);
+              expect(subLayer.props.modelMatrix[5]).toBe(scale);
+              // Public tile/picking data stays geographic even on a non-Mercator view.
+              const tile = subLayer.props.tile;
+              expect(tile.dataInWGS84[0].geometry.coordinates).toEqual(
+                transform(geoJSONData[0].geometry, tile.bbox).coordinates
+              );
+              checked = true;
+            }
+          }
+        }
+      ],
+      onError: err => expect(err).toBeFalsy()
+    });
+    expect(requests).toBeGreaterThan(0);
+    expect(checked).toBe(true);
+  });
+}
 
 test('MVTLayer#autoHighlight', async () => {
   class TestMVTLayer extends MVTLayer {
@@ -390,8 +438,10 @@ test('MVTLayer#TileJSON', async () => {
     if (layer.isLoaded) {
       expect(subLayers.length, 'Rendered sublayers').toBe(2);
       expect(layer.state.data.length, 'Data is loaded').toBe(3);
-      expect(layer.state.tileset.minZoom, 'Min zoom layer is correct').toBe(tileJSON.minZoom);
-      expect(layer.state.tileset.minZoom, 'Max zoom layer is correct').toBe(tileJSON.maxZoom);
+      if (!Array.isArray(layer.props.data)) {
+        expect(layer.state.tileset.minZoom, 'Min zoom layer is correct').toBe(tileJSON.minzoom);
+        expect(layer.state.tileset.maxZoom, 'Max zoom layer is correct').toBe(tileJSON.maxzoom);
+      }
     }
   };
 
@@ -411,15 +461,16 @@ test('MVTLayer#TileJSON', async () => {
       onAfterUpdate
     }
   ];
-  await testLayerAsync({
-    Layer: TestMVTLayer,
-    viewport: testViewport,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
-
-  // restore fetcch
-  globalThis.fetch = fetch;
+  try {
+    await testLayerAsync({
+      Layer: TestMVTLayer,
+      viewport: testViewport,
+      testCases,
+      onError: err => expect(err).toBeFalsy()
+    });
+  } finally {
+    globalThis.fetch = fetch;
+  }
 });
 
 test('MVTLayer#core.worker false disables workers', async () => {
@@ -529,6 +580,147 @@ test('MVTLayer#dataInWGS84', async () => {
   });
 });
 
+for (const ViewportType of [WebMercatorViewport, GlobeViewport]) {
+  test(`MVTLayer#tile clipping ${ViewportType.name}`, async () => {
+    // Sub layer data is tile local under every view, so each tile clips to the unit square
+    class TestMVTLayer extends MVTLayer {
+      getTileData() {
+        return geoJSONData;
+      }
+    }
+    TestMVTLayer.layerName = 'TestMVTLayer';
+
+    expect.hasAssertions();
+    await testLayerAsync({
+      Layer: TestMVTLayer,
+      viewport: new ViewportType({
+        width: 400,
+        height: 300,
+        longitude: 0,
+        latitude: 0,
+        zoom: 2
+      }),
+      testCases: [
+        {
+          props: {data: ['https://server.com/{z}/{x}/{y}.mvt'], binary: false},
+          onAfterUpdate: ({layer, subLayers}) => {
+            if (!layer.isLoaded) return;
+            const tileCount = layer.state.tileset.selectedTiles.length;
+            expect(tileCount, 'more than one tile is loaded').toBeGreaterThan(1);
+            expect(subLayers.length, 'one sub layer per tile').toBe(tileCount);
+            for (const subLayer of subLayers) {
+              const clipExtensions = subLayer.props.extensions.filter(
+                extension => extension instanceof ClipExtension
+              );
+              expect(clipExtensions.length, 'exactly one ClipExtension per sub layer').toBe(1);
+              expect(subLayer.props.clipBounds, 'clips to the tile local unit square').toEqual([
+                0, 0, 1, 1
+              ]);
+              expect(subLayer.props.coordinateSystem, 'tile local coordinate system').toBe(
+                'OSMTile512'
+              );
+            }
+          }
+        }
+      ],
+      onError: err => expect(err).toBeFalsy()
+    });
+  });
+}
+
+test('MVTLayer#tile clipping overrides user clip props', async () => {
+  class TestMVTLayer extends MVTLayer {
+    getTileData() {
+      return geoJSONData;
+    }
+  }
+  TestMVTLayer.layerName = 'TestMVTLayer';
+
+  const warnSpy = vi.spyOn(log, 'warn');
+  expect.hasAssertions();
+  await testLayerAsync({
+    Layer: TestMVTLayer,
+    viewport: new WebMercatorViewport({
+      width: 400,
+      height: 300,
+      longitude: 0,
+      latitude: 0,
+      zoom: 0
+    }),
+    testCases: [
+      {
+        props: {
+          data: ['https://server.com/{z}/{x}/{y}.mvt'],
+          binary: false,
+          // A user supplied clip would break the per tile clip, so the layer takes it over
+          clipBounds: [-10, -10, 10, 10],
+          extensions: [new ClipExtension()]
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (!layer.isLoaded) return;
+          for (const subLayer of subLayers) {
+            const clipExtensions = subLayer.props.extensions.filter(
+              extension => extension instanceof ClipExtension
+            );
+            expect(clipExtensions.length, 'does not duplicate the ClipExtension').toBe(1);
+            expect(subLayer.props.clipBounds, 'overrides the user clipBounds').toEqual([
+              0, 0, 1, 1
+            ]);
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+  expect(
+    warnSpy.mock.calls.some(([message]) => String(message).includes('clipBounds is reserved')),
+    'warns that the user clipBounds is ignored'
+  ).toBe(true);
+  warnSpy.mockRestore();
+});
+
+test('MVTLayer#tile clipping does not warn about the default ClipExtension bounds', async () => {
+  class TestMVTLayer extends MVTLayer {
+    getTileData() {
+      return geoJSONData;
+    }
+  }
+  TestMVTLayer.layerName = 'TestMVTLayer';
+
+  const warnSpy = vi.spyOn(log, 'warn');
+  expect.hasAssertions();
+  await testLayerAsync({
+    Layer: TestMVTLayer,
+    viewport: new WebMercatorViewport({
+      width: 400,
+      height: 300,
+      longitude: 0,
+      latitude: 0,
+      zoom: 0
+    }),
+    testCases: [
+      {
+        // ClipExtension adds its default clipBounds to the props; the caller set none
+        props: {
+          data: ['https://server.com/{z}/{x}/{y}.mvt'],
+          binary: false,
+          extensions: [new ClipExtension()]
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (!layer.isLoaded) return;
+          expect(subLayers.length, 'renders sub layers').toBeGreaterThan(0);
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+  expect(
+    warnSpy.mock.calls.some(([message]) => String(message).includes('clipBounds is reserved')),
+    'does not warn when the caller set no clipBounds'
+  ).toBe(false);
+  warnSpy.mockRestore();
+});
+
 test('MVTLayer#triangulation', async () => {
   const viewport = new WebMercatorViewport({
     longitude: -100,
@@ -635,7 +827,7 @@ for (const tileset of ['mvt-tiles', 'mvt-with-hole']) {
 }
 
 test('findIndexBinary', () => {
-  const testData = geojsonToBinary([
+  const testData = convertGeojsonToBinaryFeatureCollection([
     {
       // For testing id collision
       id: 1,
@@ -713,7 +905,7 @@ test('findIndexBinary', () => {
     }
   ]);
 
-  // @loaders.gl/gis does not populate fields as of 3.0.8
+  // @loaders.gl/core/geoarrow does not populate fields as of 3.0.8
   testData.polygons.fields = [{id: 1}];
   testData.lines.fields = [{id: 2}];
   testData.points.fields = [{id: 1}, {id: 3}, {id: 4}];

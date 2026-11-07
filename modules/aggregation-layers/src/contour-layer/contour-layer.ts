@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {project} from '@deck.gl/core';
+
 import {
   Accessor,
-  COORDINATE_SYSTEM,
-  _PROJECTION_MODE as PROJECTION_MODE,
   GetPickingInfoParams,
   project32,
   LayersList,
@@ -18,8 +18,7 @@ import {
 } from '@deck.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
-import AggregationLayer from '../common/aggregation-layer';
-import {AggregationLayerProps} from '../common/aggregation-layer';
+import AggregationLayer, {type AggregationLayerProps} from '../common/aggregation-layer';
 import {generateContours, Contour, ContourLine, ContourPolygon} from './contour-utils';
 import {getAggregatorValueReader} from './value-reader';
 import {getBinIdRange} from '../common/utils/bounds-utils';
@@ -129,7 +128,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
       binIdRange: [number, number][];
       aggregatorViewport: Viewport;
-    };
+    } & AggregationLayer<any>['state'];
 
   getAggregatorType(): string {
     return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
@@ -153,8 +152,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             ];
           }
         },
-        getValue: [{sources: ['counts'], getValue: ({counts}) => counts}],
-        onUpdate: this._onAggregationUpdate.bind(this)
+        getValue: [{sources: ['counts'], getValue: ({counts}) => counts}]
       });
     }
     return new WebGLAggregator(this.context.device, {
@@ -177,8 +175,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     value = counts;
   }
   `
-      }),
-      onUpdate: this._onAggregationUpdate.bind(this)
+      })
     });
   }
 
@@ -206,6 +203,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     if (
       aggregatorChanged ||
       changeFlags.dataChanged ||
+      props.positions !== oldProps.positions ||
+      props.weights !== oldProps.weights ||
+      props.dataBounds !== oldProps.dataBounds ||
       props.cellSize !== oldProps.cellSize ||
       !_deepEqual(props.gridOrigin, oldProps.gridOrigin, 1) ||
       props.aggregation !== oldProps.aggregation
@@ -214,10 +214,10 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       const {cellSizeCommon, cellOriginCommon, binIdRange} = this.state;
 
       aggregator.setProps({
-        // @ts-expect-error only used by GPUAggregator
         binIdRange,
         pointCount: this.getNumInstances(),
         operations: [props.aggregation],
+        onUpdate: this._onAggregationUpdate.bind(this),
         binOptions: {
           cellSizeCommon,
           cellOriginCommon
@@ -235,6 +235,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   private _updateBinOptions() {
     const bounds = this.getBounds();
+    if (this.props.positions && !this.props.dataBounds) {
+      throw new Error('GPU aggregation positions require dataBounds for world-space binning');
+    }
     const cellSizeCommon: [number, number] = [1, 1];
     let cellOriginCommon: [number, number] = [0, 0];
     let binIdRange: [number, number][] = [
@@ -259,16 +262,18 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         Math.floor((centroidCommon[1] - gridOrigin[1]) / cellSizeCommon[1]) * cellSizeCommon[1] +
           gridOrigin[1]
       ];
-      centroid = viewport.preproject ? cellOriginCommon : viewport.unprojectFlat(cellOriginCommon);
+      centroid = project.isCustomProjection(viewport)
+        ? cellOriginCommon
+        : viewport.unprojectFlat(cellOriginCommon);
 
       const ViewportType = viewport.constructor as any;
       // We construct a viewport for the GPU aggregator's project module
       // This viewport is determined by data
       // removes arbitrary precision variance that depends on initial view state
       viewport =
-        viewport.isGeospatial && !viewport.preproject
+        viewport.isGeospatial && !project.isCustomProjection(viewport)
           ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
-          : viewport.preproject
+          : project.isCustomProjection(viewport)
             ? createAggregationViewport(viewport, centroid)
             : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
 
@@ -339,7 +344,6 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         this._updateBinOptions();
         const {cellSizeCommon, cellOriginCommon, binIdRange} = this.state;
         aggregator.setProps({
-          // @ts-expect-error only used by GPUAggregator
           binIdRange,
           binOptions: {
             cellSizeCommon,
@@ -370,7 +374,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const BandsSubLayerClass = this.getSubLayerClass('bands', SolidPolygonLayer);
     const {viewport} = this.context;
     const modelMatrix = new Matrix4();
-    if (viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL) {
+    if (project.isCustomProjection(viewport)) {
       const scale = viewport.distanceScales.unitsPerWorldUnit;
       modelMatrix.scale(scale.map(value => 1 / value));
     }
@@ -388,7 +392,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         }),
         {
           data: lines,
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           coordinateOrigin: [0, 0, 0],
           modelMatrix,
           getPath: d => d.vertices,
@@ -408,7 +412,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         }),
         {
           data: polygons,
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           coordinateOrigin: [0, 0, 0],
           modelMatrix,
           getPolygon: d => d.vertices,

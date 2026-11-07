@@ -16,7 +16,14 @@ import {toDoublePrecisionArray} from '../../utils/math-utils';
 import * as range from '../../utils/range';
 import {bufferLayoutEqual} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
-import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
+import {Buffer, getTypedArrayFromDataType} from '@luma.gl/core';
+import type {Device, BufferLayout} from '@luma.gl/core';
+import {
+  GPUConstant,
+  GPUVector,
+  getGPUVectorData,
+  getGPUVectorFormatInfo
+} from '@luma.gl/graph/gpu-data';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 
@@ -74,7 +81,7 @@ type AttributeInternalState = {
   /** Legacy: external binary supplied via attribute name */
   lastExternalBuffer: TypedArray | Buffer | BinaryAttribute | null;
   /** External binary supplied via accessor name */
-  binaryValue: TypedArray | Buffer | BinaryAttribute | null;
+  binaryValue: TypedArray | Buffer | BinaryAttribute | GPUVector | null;
   binaryAccessor: Accessor<any, any> | null;
   needsUpdate: string | boolean;
   needsRedraw: string | boolean;
@@ -281,18 +288,32 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return false;
     }
 
-    const wasConstant = this.isConstant;
     const transformedValue =
       this.settings.transform && context ? this.settings.transform.call(context, value) : value;
+    this.setData({constant: true, value: transformedValue});
+    return true;
+  }
+
+  /** Updates storage, retaining raw constant bytes alongside shader-normalized values. */
+  override setData(
+    data: Parameters<DataColumn<AttributeOptions, AttributeInternalState>['setData']>[0]
+  ): boolean {
+    const wasConstant = this.isConstant;
+    if (ArrayBuffer.isView(data) || data instanceof Buffer || !data.constant) {
+      const hasChanged = super.setData(data);
+      this.state.constantValue = null;
+      this.state.layoutChanged ||= wasConstant && this.device.type === 'webgpu';
+      return hasChanged;
+    }
     const ArrayType = this.settings.defaultType;
     // DataColumn normalizes constants for shader consumption. Buffer grouping needs the original
     // vertex-format bytes so that interleaving preserves integer and normalized attribute formats.
     this.state.constantValue = this._normalizeValue(
-      transformedValue,
+      data.value,
       new ArrayType(this.size),
       0
     ) as TypedArray;
-    const hasChanged = this.setData({constant: true, value: transformedValue});
+    const hasChanged = super.setData(data);
     if (this.device.type === 'webgpu') {
       let bufferValue = this.state.constantValue;
       if (
@@ -320,7 +341,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       this.setNeedsRedraw();
     }
     this.clearNeedsUpdate();
-    return true;
+    return hasChanged;
   }
 
   /** Returns one row in its vertex-buffer representation for WebGPU buffer grouping. */
@@ -354,7 +375,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   // If the returned value from the accessor is the same as the attribute value, set it directly
   // Otherwise use the auto updater for transform/normalization
   setBinaryValue(
-    buffer?: TypedArray | Buffer | BinaryAttribute,
+    buffer?: TypedArray | Buffer | BinaryAttribute | GPUVector,
     startIndices: NumericArray | null = null
   ): boolean {
     const {state, settings} = this;
@@ -370,6 +391,13 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return false;
     }
 
+    if (buffer instanceof GPUVector) {
+      assert(
+        buffer.length >= this.numInstances,
+        'GPUVector attribute is shorter than the draw count'
+      );
+    }
+
     // The source buffer can be unchanged while its projection/model matrix is invalidated.
     if (state.binaryValue === buffer && !(settings.transform && this.needsUpdate())) {
       this.clearNeedsUpdate();
@@ -377,6 +405,26 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
     state.binaryValue = buffer;
     this.setNeedsRedraw();
+
+    if (buffer instanceof GPUVector) {
+      if (!buffer.format) throw new Error('GPUVector attributes require a format');
+      const info = getGPUVectorFormatInfo(buffer.format);
+      const type = info.type;
+      if (type === 'float16') throw new Error('GPUVector float16 attributes are not supported');
+      assert(
+        !info.vertexList && !info.valueList,
+        'GPUVector attributes require fixed-width values'
+      );
+      const chunk = getGPUVectorData(buffer);
+      assert(chunk.buffer instanceof Buffer, 'GPUVector attributes require a concrete Buffer');
+      buffer = {
+        buffer: chunk.buffer as Buffer,
+        type,
+        size: info.components,
+        offset: chunk.byteOffset,
+        stride: chunk.byteStride
+      };
+    }
 
     const needsUpdate = settings.transform || startIndices !== this.startIndices;
 
@@ -429,14 +477,74 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return result;
   }
 
+  /**
+   * Returns typed shader attributes without copying GPU storage. Vectors borrow this
+   * attribute's buffers and must be reacquired after updates that replace storage.
+   * Constants contain one raw, unnormalized row. Unallocated attributes are omitted.
+   */
+  getGPUVector(): Record<string, GPUVector | GPUConstant> {
+    if (!this.isConstant && !this.getBuffer()) {
+      return {};
+    }
+    const layout = this._getShaderBufferLayout();
+    const values = this.getValue();
+    const result: Record<string, GPUVector | GPUConstant> = {};
+    let constantValue = this.getConstantValue();
+    if (
+      this.doublePrecision &&
+      (constantValue instanceof Float32Array || constantValue instanceof Float64Array)
+    ) {
+      constantValue =
+        this.device.type === 'webgpu'
+          ? toDoublePrecisionArray(constantValue, {size: this.size})
+          : new Float32Array([...this.value!, ...new Float32Array(this.size)]);
+    }
+    for (const definition of layout.attributes || []) {
+      const name = definition.attribute;
+      const value = values[name];
+      const formatInfo = getGPUVectorFormatInfo(definition.format);
+      if (this.isConstant && constantValue) {
+        const ArrayType = getTypedArrayFromDataType(formatInfo.type);
+        const offset = (definition.byteOffset || 0) / constantValue.BYTES_PER_ELEMENT;
+        result[name] = new GPUConstant({
+          format: definition.format,
+          value: new ArrayType(constantValue.subarray(offset, offset + formatInfo.components))
+        });
+      } else if (value instanceof Buffer) {
+        result[name] = new GPUVector({
+          type: 'buffer',
+          name,
+          buffer: value,
+          format: definition.format,
+          length: this.numInstances,
+          byteOffset: definition.byteOffset || 0,
+          byteStride: layout.byteStride,
+          ownsBuffer: false
+        });
+      } else if (value) {
+        // Includes the synthetic fp64 low constant for float32 input on WebGL.
+        result[name] = new GPUConstant({
+          format: definition.format,
+          value: new (getTypedArrayFromDataType(formatInfo.type))(value).subarray(
+            0,
+            formatInfo.components
+          )
+        });
+      }
+    }
+    return result;
+  }
+
   /** Generate WebGPU-style buffer layout descriptor from this attribute */
   getBufferLayout(
     /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
     modelInfo?: {isInstanced?: boolean}
   ): BufferLayout {
-    // Clear change flag
     this.state.layoutChanged = false;
+    return this._getShaderBufferLayout(modelInfo);
+  }
 
+  private _getShaderBufferLayout(modelInfo?: {isInstanced?: boolean}): BufferLayout {
     const shaderAttributeDefs = this.settings.shaderAttributes;
     const result: BufferLayout = super._getBufferLayout();
     const {stepMode} = this.settings;
