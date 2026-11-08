@@ -74,6 +74,10 @@ When displaying multiple views with different projections, create a separate lay
 
 BitmapLayer can refine its mesh using the experimental `_projectionTolerance` prop. It samples edges and triangle interiors in UV space and preserves bilinear bounds and picking coordinates. The tolerance is a sampled approximation, not a certified bound. Split seams and provide finite geometry within the converter domain. Invalid samples or exhausted math.gl limits (10 refinement passes, 65,536 vertices and 131,072 triangles) throw. Camera movement does not regenerate the mesh; bounds, tolerance, projection, coordinate system and model matrix changes do.
 
+Path and polygon layers can subdivide edges to approximate curved projections using the experimental `_projectionTolerance` prop. The tolerance is a sampled error in map meters, not a certified bound. Existing `resolution` grid cutting occurs first. The model matrix and converter are included in sampling; camera movement does not retessellate geometry. Changes to tolerance or projection rebuild geometry.
+
+Edges interpolate linearly, including altitude. Split seams and invalid domains before supplying geometry; this does not create great-circle edges or clip geometry. Quarter, midpoint and three-quarter samples are checked. Invalid samples or exhausted math.gl limits (16 bisection levels and 65,536 vertices per path or ring) throw. Inserted vertices require CPU-readable geometry and per-object styling; pre-tessellated external attribute or index buffers are unsupported.
+
 ## Limitations
 
 - Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
