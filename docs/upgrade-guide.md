@@ -120,10 +120,6 @@ Distance scales now describe world units for any CRS, so the same API supports g
 
 To retain an old degree step `d`, set `resolution: 360 / d`; for example, the former `GlobeView` default of 10 degrees becomes `resolution: 36`. Custom layers should use `viewport.getSubdivisionStep(sourceCrs)` for a step in their source CRS units instead of interpreting `viewport.resolution` directly.
 
-#### GlobeView position
-
-`GlobeView` now applies `viewState.position` as meter offsets to the east, north and up at every zoom, matching `MapView`. Camera offsets follow the local directions consistently across locations and the zoom-12 projection transition. If your application compensated for the former globe-axis interpretation below zoom 12, update those offsets to use local east, north and up.
-
 ### Layer
 
 #### Coordinate and projection constants
@@ -179,6 +175,10 @@ const commonPosition2 = layer.projectPosition(lnglat, {
 ```
 
 ## Upgrading to v9.4
+
+### GlobeView meter offsets
+
+Below zoom 12, `GlobeView` now applies camera and layer meter offsets east, north and up, matching `MapView`. If your application compensated for the previous orientation, update its offsets or remove the compensating rotation.
 
 ### pydeck lighting
 
