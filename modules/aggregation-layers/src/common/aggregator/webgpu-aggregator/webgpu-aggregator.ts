@@ -123,6 +123,7 @@ export class WebGPUAggregator implements Aggregator {
   private props: AggregationProps = {pointCount: 0, attributes: {}, operations: [], binOptions: {}};
   private dirty = true;
   private revision = 0;
+  private metadataRetryRevision = -1;
   private extensionUniformProps: Record<string, unknown> = {};
   private destroyed = false;
   private snapshot: {
@@ -449,6 +450,12 @@ export class WebGPUAggregator implements Aggregator {
       }
     } catch (error) {
       if (!this.destroyed && revision === this.revision) {
+        // Retry a transient mapping failure once; persistent errors are reported below.
+        if (this.metadataRetryRevision !== revision) {
+          this.metadataRetryRevision = revision;
+          this.dirty = true;
+          this.options.requestRedraw?.();
+        }
         const failure = error instanceof Error ? error : new Error(String(error));
         if (this.props.onError) this.props.onError(failure);
         else this.device.reportError(failure, this.valueBuffer!)();

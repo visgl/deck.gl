@@ -586,6 +586,32 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
+  override setShaderModuleProps(props: Record<string, any>): void {
+    // Geometry clipping uses projected bounds, which must share the reduction viewport.
+    if (props.clip && this.state?.aggregatorType === 'webgpu' && !this.state.clipByInstance) {
+      const bounds = (this.props as this['props'] & {clipBounds: number[]}).clipBounds;
+      if (bounds) {
+        const viewport = this.state.aggregatorViewport;
+        const a = this.projectPosition([bounds[0], bounds[1], 0], {viewport});
+        const b = this.projectPosition([bounds[2], bounds[3], 0], {viewport});
+        if (bounds[0] - bounds[2] > 180 && viewport.isGeospatial) b[0] += 512;
+        props = {
+          ...props,
+          clip: {
+            ...props.clip,
+            bounds: [
+              Math.min(a[0], b[0]),
+              Math.min(a[1], b[1]),
+              Math.max(a[0], b[0]),
+              Math.max(a[1], b[1])
+            ]
+          }
+        };
+      }
+    }
+    super.setShaderModuleProps(props);
+  }
+
   override draw(opts) {
     // Replaces render time viewport with our own
     if (opts.shaderModuleProps.project) {

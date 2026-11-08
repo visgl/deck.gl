@@ -250,6 +250,18 @@ test('Compute metadata discards stale readbacks and handles empty input', async 
     expect(aggregator.getResultDomain(0)).toEqual([0, 0]);
     expect(aggregator.getResultValues(0)![0]).toBeNaN();
     expect(aggregator.getBin(0)).toBeNull();
+    const onError = vi.fn();
+    aggregator.setProps({pointCount: 2, onError});
+    const read = vi
+      .spyOn((aggregator as any).valueBuffer, 'readAsync')
+      .mockRejectedValueOnce(new Error('transient mapping failure'));
+    aggregator.preDraw();
+    await vi.waitFor(() => expect(onError).toHaveBeenCalledOnce());
+    expect(aggregator.isLoaded).toBe(false);
+    aggregator.preDraw();
+    await vi.waitFor(() => expect(aggregator.isLoaded).toBe(true));
+    expect(aggregator.getResultDomain(0)).toEqual([5, 5]);
+    read.mockRestore();
   } finally {
     aggregator.destroy();
     positions.destroy();
@@ -324,4 +336,49 @@ test('Brushing recomputes Grid bins on pointer changes without a layer update', 
   } finally {
     manager.finalize();
   }
+});
+
+test('Grid geometry clipping uses the aggregation coordinate frame', async ({skip}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  const {ClipExtension} = await import('@deck.gl/extensions');
+  await testLayerAsync({
+    Layer: GridLayer,
+    device,
+    viewport: new OrthographicView().makeViewport({
+      width: 300,
+      height: 300,
+      viewState: {target: [0, 0, 0], zoom: 0}
+    }),
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          data: [
+            [102, 102],
+            [103, 103],
+            [122, 122]
+          ],
+          getPosition: p => p,
+          cellSize: 10,
+          extensions: [new ClipExtension()],
+          clipBounds: [100, 100, 110, 110]
+        },
+        async onAfterUpdate({layer}) {
+          await vi.waitFor(() => expect(layer.state.aggregator.getResultValues(0)).not.toBeNull(), {
+            timeout: 10000
+          });
+          const aggregator = layer.state.aggregator;
+          const count = Array.from(
+            {length: aggregator.binCount},
+            (_, i) => aggregator.getBin(i)?.count || 0
+          ).reduce((a, b) => a + b, 0);
+          expect(count).toBe(2);
+          expect(aggregator.getResultDomain(0)).toEqual([2, 2]);
+        }
+      }
+    ]
+  });
 });
