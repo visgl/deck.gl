@@ -2,6 +2,21 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/** Returns the linear unit conversion for each axis, or null for non-linear CRS axes. */
+export function getMetersPerUnit(
+  crs?: {
+    xUnit: {metersPerUnit?: number};
+    yUnit: {metersPerUnit?: number};
+    zUnit: {metersPerUnit?: number};
+  } | null
+): [number, number, number] | null {
+  if (!crs) return null;
+  const factors = [crs.xUnit, crs.yUnit, crs.zUnit].map(unit => unit.metersPerUnit);
+  return factors.every(value => typeof value === 'number' && Number.isFinite(value) && value > 0)
+    ? (factors as [number, number, number])
+    : null;
+}
+
 // Assume data array is sorted by <accessor>
 // Replaces the specified range with a new subarray
 // Mutates the data array

@@ -156,6 +156,14 @@ Supported formats:
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
 `top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
 
+#### `_projectionTolerance` (number, optional) {#_projectiontolerance}
+
+* Default: `0`
+
+> Note: This prop is experimental
+
+Maximum sampled projection error in meters when a preprojecting view bends the image. Zero retains the `resolution` grid. Requires CPU preprojection and does not support `coordinateSystem: 'cartesian'`. See [Adaptive refinement](../core/custom-projection-view.md#adaptive-refinement).
+
 #### `loadOptions` (object, optional) {#loadoptions}
 
 On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:
@@ -263,25 +271,6 @@ new BitmapLayer({
   }
 })
 ```
-
-### `_projectionTolerance` (number, optional, experimental)
-
-* Default: `0`
-
-With a preprojecting viewport such as `CustomProjectionView`, a positive value adaptively
-refines the bitmap mesh to a sampled error tolerance in **map meters**. Zero retains the
-existing mesh behavior. The refiner starts from the view's `resolution` grid, when present,
-and samples both triangle edges and interiors through the model matrix and converter.
-
-Refinement operates in UV space and retains the bilinear mapping of all four bounds,
-including nonrectangular quads and altitude. Picking continues to use the same texture UVs.
-Camera movement does not regenerate this mesh; changes to bounds, tolerance, projection,
-coordinate system or model matrix do.
-
-Split projection seams and provide finite geometry within the converter's valid domain.
-The tolerance is a sampled approximation, not a certified bound. Invalid samples or exhausted
-math.gl limits (10 refinement passes, 65536 vertices, 131072 triangles) throw. This option
-requires CPU preprojection and cannot be used with `coordinateSystem: 'cartesian'`.
 
 ## Source
 

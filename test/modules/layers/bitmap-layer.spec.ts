@@ -275,7 +275,7 @@ test('adaptive bitmap mesh preserves bilinear UVs, altitude and seed indices', (
   const seed = createMesh(bounds, 0);
   const originalIndices = Array.from(seed.indices);
   const transform = ([x, y, z]) => [x, y + x * x, z];
-  const mesh = createMesh(bounds, 0, {transform, tolerance: 0.05});
+  const mesh = createMesh(bounds, 0, {transform, tolerance: 0.05, scale: [1, 1, 1]});
   expect(mesh.positions.length).toBeGreaterThan(seed.positions.length);
   for (let i = 0; i < mesh.positions.length / 3; i++) {
     const u = mesh.texCoords[2 * i],
@@ -293,6 +293,16 @@ test('adaptive bitmap mesh preserves bilinear UVs, altitude and seed indices', (
   }
   expect(Array.from(seed.indices)).toEqual(originalIndices);
   expect(Array.from(createMesh(bounds, 0).indices)).toEqual(originalIndices);
+  const feetMesh = createMesh(bounds, 0, {
+    transform: position => transform(position).map(value => value / 0.3048),
+    tolerance: 0.05,
+    scale: [0.3048, 0.3048, 0.3048]
+  });
+  expect(Array.from(feetMesh.indices)).toEqual(Array.from(mesh.indices));
+  expect(Array.from(feetMesh.positions)).toEqual(Array.from(mesh.positions));
+  feetMesh.projectedPositions!.forEach((value, index) =>
+    expect(value * 0.3048).toBeCloseTo(mesh.projectedPositions![index], 6)
+  );
 });
 
 test('adaptive bitmap rebuilds on modelMatrix changes and disabling refinement', () => {

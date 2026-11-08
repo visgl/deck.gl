@@ -105,7 +105,15 @@ function interpolateQuad(quad, ut, vt) {
 function createProjectedMesh(
   bounds,
   resolution,
-  {transform, tolerance, scale}: {transform: (position: number[]) => number[]; tolerance: number; scale: [number, number, number]}
+  {
+    transform,
+    tolerance,
+    scale
+  }: {
+    transform: (position: number[]) => number[];
+    tolerance: number;
+    scale: [number, number, number];
+  }
 ) {
   const seed = createMesh(bounds, resolution);
   const uv = Float64Array.from(seed.texCoords);

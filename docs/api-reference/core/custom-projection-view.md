@@ -70,6 +70,10 @@ Use a new layer ID when switching a layer between `MapView` and `CustomProjectio
 
 When displaying multiple views with different projections, create a separate layer instance with a unique ID for each view, and use `layerFilter` to restrict each instance to its intended view.
 
+## Adaptive refinement {#adaptive-refinement}
+
+BitmapLayer can refine its mesh using the experimental `_projectionTolerance` prop. It samples edges and triangle interiors in UV space and preserves bilinear bounds and picking coordinates. The tolerance is a sampled approximation, not a certified bound. Split seams and provide finite geometry within the converter domain. Invalid samples or exhausted math.gl limits (10 refinement passes, 65,536 vertices and 131,072 triangles) throw. Camera movement does not regenerate the mesh; bounds, tolerance, projection, coordinate system and model matrix changes do.
+
 ## Limitations
 
 - Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
