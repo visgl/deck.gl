@@ -5,6 +5,7 @@
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/core/webgl';
+import {resolveColumns} from './resolve-columns';
 import AttributeManager from './attribute/attribute-manager';
 import GPUVectorModel from './luma-upstream/gpu-vector-model';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -579,6 +580,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   // / LIFECYCLE METHODS - overridden by the layer subclasses
+
+  /**
+   * Selects explicit column props without conversion or ownership changes.
+   * Missing inputs retain binary attribute and accessor fallbacks.
+   */
+  protected resolveColumns(definitions: Parameters<typeof resolveColumns>[1]) {
+    return resolveColumns(this.props, definitions);
+  }
 
   /** Called once to set up the initial state. Layers can create WebGL resources here. */
   abstract initializeState(context: LayerContext): void;

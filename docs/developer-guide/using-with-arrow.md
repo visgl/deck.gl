@@ -93,3 +93,14 @@ Column mode rejects nulls, mismatched lengths or chunk structures, attribute tra
 Use the normal accessor path when you need those features. See the
 [ScatterplotLayer API](../api-reference/layers/scatterplot-layer.md#arrow-columns) and
 [loading data guide](./loading-data.md) for more details.
+
+## Column selection and preparation
+
+Core selects explicit column props before the shared preparation helper converts them.
+The protected Layer helper uses column definitions to exclude internal shader inputs.
+Selection borrows the inputs, leaves props unchanged, and performs no uploads or value validation.
+Missing or null inputs retain the existing binary attribute and accessor fallbacks.
+
+Preparation validates selected inputs and owns conversion allocations. Invalid explicit inputs
+remain errors. This separation prepares for table field selection; supplying a table as
+`data` alone still does not select its fields.
