@@ -160,6 +160,12 @@ test('Grid GPU columns share two-channel output and update prefixes', async ({sk
         ownsBuffer: false
       })
   );
+  expect(WebGPUGridAggregator.supportsColumns(vectors, buffer.byteLength)).toBe(true);
+  expect(WebGPUGridAggregator.supportsColumns(vectors, buffer.byteLength - 1)).toBe(false);
+  const attributes = {positions: {getGPUVector: () => ({positions: vectors[0]})}};
+  expect(
+    WebGPUGridAggregator.supportsAttributes(attributes as any, [], buffer.byteLength - 1)
+  ).toBe(false);
   let previousResult: GPUVector | null = null;
   try {
     await testLayerAsync({

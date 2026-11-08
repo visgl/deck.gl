@@ -6,7 +6,7 @@ import {project32} from '@deck.gl/core';
 import {Buffer, type Device} from '@luma.gl/core';
 import {Computation} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shaders';
-import {GPUVector} from '@luma.gl/graph/gpu-data';
+import {GPUVector, GPUConstant, getGPUVectorData} from '@luma.gl/graph/gpu-data';
 import type {Aggregator, AggregationProps} from '../aggregator';
 import {AggregationColumnPreparation} from './column-preparation';
 import {initializeSource, getAggregateSource, finalizeSource} from './reduce.wgsl';
@@ -60,12 +60,29 @@ export class WebGPUAggregator implements Aggregator {
     });
   }
 
+  /** Whether every concrete input buffer fits a compute storage binding. */
+  static supportsColumns(
+    columns: (GPUVector | GPUConstant | undefined)[],
+    byteLimit: number
+  ): boolean {
+    return columns.every(column => {
+      if (!(column instanceof GPUVector)) return true;
+      const {buffer} = getGPUVectorData(column);
+      return !(buffer instanceof Buffer) || buffer.byteLength <= byteLimit;
+    });
+  }
+
   /** Attribute-generated integer columns retain the sparse CPU fallback. */
   static supportsAttributes(
     attributes: AggregationProps['attributes'],
-    weights: readonly string[]
+    weights: readonly string[],
+    byteLimit = Infinity
   ): boolean {
+    const columns = ['positions', ...weights].flatMap(name =>
+      Object.values(attributes[name]?.getGPUVector() || {})
+    );
     return (
+      this.supportsColumns(columns, byteLimit) &&
       Object.values(attributes.positions?.getGPUVector() || {}).every(
         column => column.format === 'float32x2' || column.format === 'float32x3'
       ) &&

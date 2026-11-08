@@ -143,11 +143,22 @@ export default class ScreenGridLayer<
         (!this.props.positions &&
           this.props.data ===
             (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
-          !WebGPUScreenGridAggregator.supportsAttributes(this.getAttributeManager()!.attributes, [
-            'counts'
-          ]))
+          !WebGPUScreenGridAggregator.supportsAttributes(
+            this.getAttributeManager()!.attributes,
+            ['counts'],
+            this.context.device.limits.maxStorageBufferBindingSize
+          ))
       )
         return 'cpu';
+      if (
+        this.props.positions &&
+        !WebGPUScreenGridAggregator.supportsColumns(
+          [this.props.positions, ...(this.props.weights || [])],
+          this.context.device.limits.maxStorageBufferBindingSize
+        )
+      ) {
+        throw new Error('Aggregation GPU input exceeds the storage buffer binding limit');
+      }
       if (this.props.positions && this.state.preproject) {
         throw new Error('ScreenGrid GPU columns must use the custom view coordinate system');
       }
@@ -272,9 +283,11 @@ export default class ScreenGridLayer<
   protected override updateAttributes(changedAttributes) {
     if (
       this.state.aggregatorType === 'webgpu' &&
-      !WebGPUScreenGridAggregator.supportsAttributes(this.getAttributeManager()!.attributes, [
-        'counts'
-      ])
+      !WebGPUScreenGridAggregator.supportsAttributes(
+        this.getAttributeManager()!.attributes,
+        ['counts'],
+        this.context.device.limits.maxStorageBufferBindingSize
+      )
     ) {
       this.state.aggregator.destroy();
       const aggregator = this.createAggregator('cpu');
