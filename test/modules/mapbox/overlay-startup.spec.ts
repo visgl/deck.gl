@@ -63,3 +63,40 @@ webglTest('MapboxOverlay synchronizes camera changes before interleaved Deck loa
     map.removeControl(overlay);
   }
 });
+
+webglTest(
+  'MapboxOverlay keeps tracking the map when setProps is called before Deck loads',
+  async () => {
+    const map = new MockMapboxMap({
+      center: {lng: 8.5, lat: 47.3},
+      zoom: 6
+    });
+
+    let resolveLoaded: () => void;
+    const loaded = new Promise<void>(resolve => {
+      resolveLoaded = resolve;
+    });
+    let onLoadCalls = 0;
+    const overlay = new MapboxOverlay({interleaved: true, layers: []});
+
+    map.addControl(overlay);
+    try {
+      expect(overlay._deck!.isInitialized).toBe(false);
+
+      overlay.setProps({
+        layers: [],
+        onLoad: () => {
+          onLoadCalls++;
+          resolveLoaded();
+        }
+      });
+      await loaded;
+
+      map.setZoom(9);
+      expect(onLoadCalls).toBe(1);
+      expect(overlay._deck!.props.viewState.zoom).toBe(9);
+    } finally {
+      map.removeControl(overlay);
+    }
+  }
+);
