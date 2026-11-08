@@ -42,11 +42,6 @@
       },
       "import": "./dist/lib/luma-upstream/arrow-converter.js",
       "require": "./dist/lib/luma-upstream/arrow-converter.cjs"
-    },
-    "./projection": {
-      "types": "./dist/projection.d.ts",
-      "import": "./dist/projection.js",
-      "require": "./dist/projection.cjs"
     }
   },
   "files": [

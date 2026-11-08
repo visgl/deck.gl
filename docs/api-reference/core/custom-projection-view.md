@@ -21,40 +21,6 @@ new Deck({
 
 The view resolves its CRS descriptor asynchronously using `projectionEngine.getCRS(crs)`. Deck waits for the descriptor before creating its viewport and controller. Resolution errors reach Deck's `onError` callback. For standalone viewport creation, see [CustomProjectionViewport](./custom-projection-viewport.md#usage).
 
-## math.gl projection adapter
-
-The optional `@deck.gl/core/projection` entry point prepares a synchronous converter using
-``@math.gl/geospatial`. The packages are already installed by `@deck.gl/core`.
-Only the selected projection algorithms are loaded; the regular core entry point does not
-import the projection engine.
-
-```js
-import {createProjectionConverter} from '@deck.gl/core/projection';
-import {equalEarth} from '@math.gl/geospatial/projection/projections/eqearth';
-
-const fromCrs = 'EPSG:4326';
-const toCrs = '+proj=eqearth +datum=WGS84 +units=m';
-const projection = await createProjectionConverter({
-  from: fromCrs,
-  to: toCrs,
-  projections: [equalEarth]
-});
-const view = new CustomProjectionView({crs: toCrs, projection});
-```
-
-`from` and `to` also accept math.gl spatial-reference descriptors, including normalized
-loaders.gl metadata. Definitions, parsers, grids and lazy algorithm descriptors use the
-same options as `ProjectionTransform.create`. Unknown CRS definitions reject rather than
-assuming WGS84. Source coordinates must use longitude/latitude or easting/northing order;
-target coordinates must be planar east/north/up in meters. Lossy horizontal-only transforms
-are rejected because deck retains altitude.
-
-The adapter supplies normalized source units and ellipsoid parameters for local sizing,
-including projected coordinates in feet and geographic coordinates in radians. Projected
-source sizing measures distances in the source plane; use `getDistanceScale` when you need
-ground distances corrected for source-projection distortion. Change `fromCrs` or `toCrs`
-alongside the converter when changing definitions or metadata at runtime.
-
 ## Constructor
 
 Inherits [View options](./view.md#constructor), including layout, padding and controller settings.
@@ -62,7 +28,6 @@ Inherits [View options](./view.md#constructor), including layout, padding and co
 | Option | Default | Description |
 | --- | --- | --- |
 | `crs` | Required | A supported planar CRS definition: an identifier such as `EPSG:3857`, a PROJ string, WKT, PROJJSON object, or math.gl spatial-reference object. Linear axis units are read from the descriptor. |
-| `projection` | `undefined` | Optional prepared converter. When omitted, the view adapts its resolved CRS descriptor. |
 | `resolution` | `0` | Subdivision intervals around the earth for paths, polygons and bitmaps. The step is `EarthCircumference / resolution`, converted to source CRS units. Higher values generate more detailed geometry. Zero disables subdivision. |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
 
@@ -126,4 +91,3 @@ Edges interpolate linearly, including altitude. Split seams and invalid domains 
 ## Source
 
 [modules/core/src/views/custom-projection-view.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/custom-projection-view.ts)
-

@@ -98,7 +98,6 @@ const aliases = {
   '@deck.gl/arcgis': resolve(rootDir, 'modules/arcgis/src'),
   '@deck.gl/carto': resolve(rootDir, 'modules/carto/src'),
   '@deck.gl/core/arrow': resolve(rootDir, 'modules/core/src/lib/luma-upstream/arrow-converter.ts'),
-  '@deck.gl/core/projection': resolve(rootDir, 'modules/core/src/projection.ts'),
   '@deck.gl/core': resolve(rootDir, 'modules/core/src'),
   '@deck.gl/extensions': resolve(rootDir, 'modules/extensions/src'),
   '@deck.gl/geo-layers': resolve(rootDir, 'modules/geo-layers/src'),
