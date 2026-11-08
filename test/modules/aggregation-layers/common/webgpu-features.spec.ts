@@ -317,19 +317,23 @@ test('Brushing recomputes Grid bins on pointer changes without a layer update', 
           brushingTarget: 'source'
         }
       });
-      layer.draw({
-        shaderModuleProps: {
-          project: {
-            viewport,
-            coordinateSystem: 'cartesian',
-            coordinateOrigin: [0, 0, 0],
-            modelMatrix: null,
-            devicePixelRatio: 1
+      const draw = () =>
+        layer.draw({
+          shaderModuleProps: {
+            project: {
+              viewport,
+              coordinateSystem: 'cartesian',
+              coordinateOrigin: [0, 0, 0],
+              modelMatrix: null,
+              devicePixelRatio: 1
+            }
           }
-        }
-      } as any);
+        } as any);
       await vi.waitFor(
-        () => expect(layer.state.aggregator.getResultDomain(0)).toEqual([expected, expected]),
+        () => {
+          draw();
+          expect(layer.state.aggregator.getResultDomain(0)).toEqual([expected, expected]);
+        },
         {timeout: 10000}
       );
     }
