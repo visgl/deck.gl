@@ -288,6 +288,14 @@ The proper value depends on the source of your data. Most geometry formats [enfo
 
 ### Data Accessors
 
+#### `_projectionTolerance` (number, optional) {#_projectiontolerance}
+
+* Default: `0`
+
+> Note: This prop is experimental
+
+Maximum sampled boundary error in meters with a preprojecting viewport. Zero disables refinement. Requires `_normalize: true` and per-object styling. Applies to fill and outline; interiors and extruded sides are not refined. See [Adaptive refinement](../core/custom-projection-view.md#adaptive-refinement).
+
 #### `getPolygon` ([Accessor&lt;PolygonGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpolygon}
 
 * default: `object => object.polygon`
@@ -390,17 +398,6 @@ The PolygonLayer renders the following sublayers:
 * Wireframe lines are rendered with `GL.LINE` and thus will always be 1 pixel wide.
 * Wireframe and solid extrusions are exclusive, you'll need to create two layers
   with the same data if you want a combined rendering effect.
-
-### `_projectionTolerance` (number, optional, experimental)
-
-* Default: `0`
-
-Forward a positive sampled edge-error tolerance in map meters to the fill and outline layers
-when using a preprojecting viewport such as `CustomProjectionView`. Requires `_normalize: true`.
-Existing `resolution` grid cutting is retained. Holes remain separate rings and artificial
-cut edges remain hidden. This refines polygon boundaries, not polygon interiors or extruded
-surfaces. See [SolidPolygonLayer](./solid-polygon-layer.md#_projectiontolerance-number-optional-experimental)
-for domains, budgets, and supported attributes.
 
 ## Source
 

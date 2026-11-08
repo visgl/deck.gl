@@ -430,7 +430,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           Object.keys(buffers).some(key => key !== 'getPath'))
       ) {
         throw new Error(
-          'Projection refinement requires a projected or geocentric target CRS with linear units, normalized paths and per-object attributes'
+          'Projection refinement requires linear target units, normalized paths and per-object attributes'
         );
       }
 

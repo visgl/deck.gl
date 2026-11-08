@@ -393,7 +393,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           Object.keys(buffers).some(key => key !== 'getPolygon'))
       ) {
         throw new Error(
-          'Projection refinement requires a projected or geocentric target CRS with linear units, normalized polygons and per-object attributes'
+          'Projection refinement requires linear target units, normalized polygons and per-object attributes'
         );
       }
       polygonTesselator.updateGeometry({
