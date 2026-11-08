@@ -243,4 +243,7 @@ ContourLayer uses CPU-readable results for marching squares.
 
 ### Asynchronous result metadata
 
-Aggregators may expose `getResultValues(channel)` as a completed CPU snapshot for distribution scales. Compute implementations can refresh this asynchronously, notify `onUpdate` after completion, and continue returning borrowed GPUVectors from `getResult`. Domains and picking metadata describe the same completed snapshot.
+Picking and percentile scales need results on the CPU. An aggregator can copy its GPU
+results asynchronously and return the copy from `getResultValues(channel)`. Set `isLoaded`
+to false while the copy is pending, then call `onUpdate` when it is ready. Rendering
+continues to use the GPU buffers returned by `getResult()`.

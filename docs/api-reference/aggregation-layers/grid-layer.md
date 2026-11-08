@@ -209,15 +209,10 @@ Accessor-based data and single-chunk `float32x2`/`float32x3` position vectors wi
 `STORAGE` or `COPY_SRC` usage. Columns used in custom views must already use that view's
 coordinate system.
 
-Automatic domains, domain callbacks, picking, percentile filtering, quantile/ordinal color
-scales, quantile elevation scales, and accessor-based layer extensions are supported.
-CPU-facing metadata and distribution scales use an asynchronous snapshot of completed
-aggregation results; GPU vectors continue to supply cell rendering directly. Metadata is
-unavailable until the snapshot completes, and stale snapshots are discarded when inputs change.
-Providing explicit domains with picking and distribution scales disabled avoids this readback.
-Extension hooks execute before reduction; they filter input points rather than final cells.
-GPU-column input with layer extensions remains unsupported. Custom JavaScript aggregation
-callbacks and grids exceeding device buffer limits retain the CPU fallback for accessor data.
+Automatic domains, picking, domain callbacks, percentiles, quantile/ordinal scales, and
+compatible extensions are supported. Results are copied to the CPU only when these
+features need them. Extensions filter input points and currently require accessor data.
+Custom JavaScript callbacks and grids exceeding device limits use CPU aggregation.
 
 #### `cellSize` (number, optional) {#cellsize}
 
