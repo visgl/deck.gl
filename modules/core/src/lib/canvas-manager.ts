@@ -138,12 +138,15 @@ export default class CanvasManager {
       }
     }
 
+    const orderChanged = !this._haveSameOrder(nextOrder);
     this.targets = nextTargets;
     this.order = nextOrder;
     const nextEventManagers = Object.fromEntries(
       Object.entries(nextTargets).map(([id, target]) => [id, target.eventManager])
     );
-    if (!this._haveSameEventManagers(nextEventManagers)) {
+    // The first canvas is the default target for views without a `canvasId`. A new map identity
+    // tells consumers to rebuild viewports and controllers when only the order changed.
+    if (orderChanged || !this._haveSameEventManagers(nextEventManagers)) {
       this.eventManagers = nextEventManagers;
     }
   }
@@ -181,6 +184,11 @@ export default class CanvasManager {
 
       return {id, canvas};
     });
+  }
+
+  /** Check whether the presentation order matches the current one. */
+  private _haveSameOrder(order: string[]): boolean {
+    return order.length === this.order.length && order.every((id, i) => id === this.order[i]);
   }
 
   /** Preserve manager-map identity when an update retains the same event managers. */
