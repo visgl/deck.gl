@@ -253,6 +253,7 @@ test('ScreenGridLayer accepts GPU columns and updates prefixes without readback'
         ...(i === 0
           ? {
               props: {
+                data: {attributes: {getWeight: new Uint8Array([255])}},
                 positions,
                 weights: [weights],
                 colorDomain: [0, 10],
