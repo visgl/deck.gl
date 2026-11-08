@@ -184,10 +184,20 @@ In the right context, enabling GPU aggregation can significantly speed up your a
 CPU aggregation is used as fallback in the following cases:
 
 - The current browser does not support GPU aggregation
-- `gridAggregator` is defined
+- `hexagonAggregator` is defined
 - `getColorValue` is defined
 - `getElevationValue` is defined
 
+
+##### Compute aggregation
+
+On a WebGPU device, HexagonLayer uses compute aggregation with explicit `colorDomain`
+and `elevationDomain`. Accessor data and GPU columns are supported; GPU positions require explicit `dataBounds`.
+
+Picking, extensions, domain callbacks, percentile filtering, quantile scales, and ordinal
+color scales use CPU aggregation instead. Dense grids exceeding
+device buffer limits also use CPU aggregation for accessor data. GPU-only inputs require
+a compatible compute configuration. Columns requiring CPU preprojection are unsupported.
 
 #### `radius` (number, optional) {#radius}
 
@@ -537,15 +547,3 @@ The HexagonLayer renders the following sublayers:
 ## Source
 
 [modules/aggregation-layers/src/hexagon-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/hexagon-layer)
-
-### Compute aggregation
-
-On a WebGPU device, HexagonLayer uses compute aggregation with explicit `colorDomain`
-and `elevationDomain`. Both channels support SUM, MEAN, MIN, MAX, and COUNT. Results
-remain in GPU vectors consumed by the cell layer. Accessor data and GPU columns are
-supported; GPU positions require explicit `dataBounds`.
-
-Picking, extensions, domain callbacks, custom aggregation callbacks, percentile filtering,
-and quantile or ordinal color scales use CPU aggregation instead. Dense grids exceeding
-device buffer limits also use CPU aggregation for accessor data. GPU-only inputs require
-a compatible compute configuration. Columns requiring CPU preprojection are unsupported.

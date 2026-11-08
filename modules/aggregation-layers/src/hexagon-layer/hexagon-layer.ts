@@ -303,6 +303,8 @@ export default class HexagonLayer<
       return 'cpu';
     }
 
+    // Feature guards are temporary until metadata, scales, and extension filtering
+    // are connected to this adapter. Input formats and device limits still need validation.
     if (
       gpuAggregation &&
       this.context.device.type === 'webgpu' &&
