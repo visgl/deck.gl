@@ -93,3 +93,15 @@ Column mode rejects nulls, mismatched lengths or chunk structures, attribute tra
 Use the normal accessor path when you need those features. See the
 [ScatterplotLayer API](../api-reference/layers/scatterplot-layer.md#arrow-columns) and
 [loading data guide](./loading-data.md) for more details.
+
+## Schema validation
+
+Column conversion checks Arrow type metadata before uploading values. Positions require numeric
+fixed-size lists of width two or three; scalars require integer or floating-point fields.
+Colors require numeric RGB or RGBA fixed-size lists. Numeric vectors use their list width.
+Dictionary, string, and variable-size list inputs are not supported by this numeric converter.
+
+The internal shared schema helper validates types and output formats without reading rows or
+allocating GPU resources. Conversion still validates null values, transformed widths, and buffers.
+Schema compatibility alone does not guarantee valid column values. This preparation does not
+enable automatic field lookup from a table supplied as `data`.
