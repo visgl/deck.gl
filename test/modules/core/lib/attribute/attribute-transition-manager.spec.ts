@@ -117,6 +117,41 @@ webglTest('AttributeTransitionManager#update', async () => {
   expect(manager.transitions.instanceSizes, 'transition is deleted').toBeFalsy();
 });
 
+webglTest('AttributeTransitionManager#remove transition', () => {
+  const timeline = new Timeline();
+  const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
+  const instanceColors = new Attribute(device, {
+    id: 'instanceColors',
+    size: 4,
+    type: 'unorm8',
+    accessor: 'getColor',
+    transition: true
+  });
+  instanceColors.setData({value: new Uint8Array(16).fill(255)});
+  instanceColors.setNeedsRedraw('initial');
+  const attributes = {instanceColors};
+
+  manager.update({attributes, transitions: {getColor: 1000}, numInstances: 4});
+  const transitionAttribute = manager.getAttributes().instanceColors;
+  expect(transitionAttribute.getAccessor().type, 'transition buffer is float32').toBe('float32');
+
+  instanceColors.needsRedraw({clearChangedFlags: true});
+  instanceColors.getBufferLayout();
+  manager.update({attributes, transitions: {}, numInstances: 4});
+  expect(manager.hasAttribute('instanceColors'), 'removed transition').toBeFalsy();
+  expect(
+    instanceColors.needsRedraw(),
+    'instanceColors is bound again in place of the deleted transition buffer'
+  ).toBeTruthy();
+  expect(
+    instanceColors.layoutChanged(),
+    'instanceColors requests its unorm8 buffer layout'
+  ).toBeTruthy();
+
+  manager.finalize();
+  instanceColors.delete();
+});
+
 webglTest('AttributeTransitionManager#transition', async () => {
   const timeline = new Timeline();
   const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});

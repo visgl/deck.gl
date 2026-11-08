@@ -86,6 +86,11 @@ export default class AttributeTransitionManager {
       if (!attribute || !attribute.getTransitionSetting(transitions)) {
         // Animated attribute has been removed
         this._removeTransition(attributeName);
+        if (attribute) {
+          // Models may still be bound to the deleted transition buffer and its layout
+          attribute.setNeedsRedraw();
+          attribute.setLayoutChanged();
+        }
       }
     }
   }
