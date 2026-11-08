@@ -330,12 +330,22 @@ export default class HexagonLayer<
         (!this.props.positions &&
           this.props.data ===
             (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
-          !WebGPUHexagonAggregator.supportsAttributes(this.getAttributeManager()!.attributes, [
-            'colorWeights',
-            'elevationWeights'
-          ]))
+          !WebGPUHexagonAggregator.supportsAttributes(
+            this.getAttributeManager()!.attributes,
+            ['colorWeights', 'elevationWeights'],
+            this.context.device.limits.maxStorageBufferBindingSize
+          ))
       )
         return 'cpu';
+      if (
+        this.props.positions &&
+        !WebGPUHexagonAggregator.supportsColumns(
+          [this.props.positions, ...(this.props.weights || [])],
+          this.context.device.limits.maxStorageBufferBindingSize
+        )
+      ) {
+        throw new Error('Aggregation GPU input exceeds the storage buffer binding limit');
+      }
       if (this.props.positions && this.state.preproject) {
         throw new Error('Hexagon GPU columns must use the custom view coordinate system');
       }
@@ -607,10 +617,11 @@ export default class HexagonLayer<
         changedAttributes.elevationWeights) &&
       this.state.aggregatorType === 'webgpu' &&
       (this.getAggregatorType() === 'cpu' ||
-        !WebGPUHexagonAggregator.supportsAttributes(this.getAttributeManager()!.attributes, [
-          'colorWeights',
-          'elevationWeights'
-        ]))
+        !WebGPUHexagonAggregator.supportsAttributes(
+          this.getAttributeManager()!.attributes,
+          ['colorWeights', 'elevationWeights'],
+          this.context.device.limits.maxStorageBufferBindingSize
+        ))
     ) {
       this.state.aggregator.destroy();
       const aggregator = this.createAggregator('cpu');
