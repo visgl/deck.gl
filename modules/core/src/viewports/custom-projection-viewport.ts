@@ -203,8 +203,9 @@ export default class CustomProjectionViewport extends Viewport {
   }
 
   protected _getCenter(options: ViewportOptions, position: number[]): number[] {
-    const preproject = (options as ViewportOptions & {preproject?: (position: number[]) => number[]})
-      .preproject;
+    const preproject = (
+      options as ViewportOptions & {preproject?: (position: number[]) => number[]}
+    ).preproject;
     return preproject ? preproject(position) : super._getCenter(options, position);
   }
 

@@ -54,6 +54,8 @@ Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A sha
 
 The optional [`@deck.gl/core/projection`](./api-reference/core/custom-projection-view.md) entry point prepares math.gl CRS converters for custom projection views. Source coordinate units and ellipsoids guide meter sizing, including radians and projected feet. CRS identifiers use deck.gl longitude/latitude or easting/northing order; explicit stored-order metadata must match.
 
+Paths and polygon rings support opt-in `_projectionTolerance` refinement through math.gl to approximate curved projected edges. Refinement requires normalized geometry, CPU-readable coordinates and per-object styling; polygon interiors are triangulated separately.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
