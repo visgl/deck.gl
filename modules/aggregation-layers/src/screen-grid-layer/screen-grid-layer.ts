@@ -134,6 +134,31 @@ export default class ScreenGridLayer<
       !this.props.extensions.length &&
       !this.props.pickable
     ) {
+      if (
+        (!this.props.positions &&
+          !WebGPUScreenGridAggregator.supportsData(this.props.data, [
+            'getPosition',
+            'getWeight'
+          ])) ||
+        (!this.props.positions &&
+          this.props.data ===
+            (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
+          !WebGPUScreenGridAggregator.supportsAttributes(
+            this.getAttributeManager()!.attributes,
+            ['counts'],
+            this.context.device.limits.maxStorageBufferBindingSize
+          ))
+      )
+        return 'cpu';
+      if (
+        this.props.positions &&
+        !WebGPUScreenGridAggregator.supportsColumns(
+          [this.props.positions, ...(this.props.weights || [])],
+          this.context.device.limits.maxStorageBufferBindingSize
+        )
+      ) {
+        throw new Error('Aggregation GPU input exceeds the storage buffer binding limit');
+      }
       if (this.props.positions && this.state.preproject) {
         throw new Error('ScreenGrid GPU columns must use the custom view coordinate system');
       }
@@ -253,6 +278,34 @@ export default class ScreenGridLayer<
       this.state.aggregator.setNeedsUpdate();
     }
     return aggregatorChanged;
+  }
+
+  protected override updateAttributes(changedAttributes) {
+    if (
+      this.state.aggregatorType === 'webgpu' &&
+      !WebGPUScreenGridAggregator.supportsAttributes(
+        this.getAttributeManager()!.attributes,
+        ['counts'],
+        this.context.device.limits.maxStorageBufferBindingSize
+      )
+    ) {
+      this.state.aggregator.destroy();
+      const aggregator = this.createAggregator('cpu');
+      this.setState({aggregator, aggregatorType: 'cpu'});
+      const {cellSizePixels, aggregation} = this.props;
+      const {width, height} = this.context.viewport;
+      aggregator.setProps({
+        attributes: this.getAttributeManager()!.attributes,
+        pointCount: this.getNumInstances(),
+        operations: [aggregation],
+        binIdRange: [
+          [0, Math.ceil(width / cellSizePixels)],
+          [0, Math.ceil(height / cellSizePixels)]
+        ],
+        binOptions: {cellSizePixels}
+      });
+    }
+    super.updateAttributes(changedAttributes);
   }
 
   onAttributeChange(id: string) {
