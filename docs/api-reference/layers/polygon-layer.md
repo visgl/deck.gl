@@ -288,6 +288,14 @@ The proper value depends on the source of your data. Most geometry formats [enfo
 
 ### Data Accessors
 
+#### `_projectionTolerance` (number, optional) {#_projectiontolerance}
+
+* Default: `0`
+
+> Note: This prop is experimental
+
+Maximum sampled boundary error in meters with a preprojecting viewport. Zero disables refinement. Requires `_normalize: true` and per-object styling. Applies to fill and outline; interiors and extruded sides are not refined. See [Adaptive refinement](../core/custom-projection-view.md#adaptive-refinement).
+
 #### `getPolygon` ([Accessor&lt;PolygonGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpolygon}
 
 * default: `object => object.polygon`

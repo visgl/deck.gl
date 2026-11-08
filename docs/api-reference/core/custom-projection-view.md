@@ -70,6 +70,12 @@ Use a new layer ID when switching a layer between `MapView` and `CustomProjectio
 
 When displaying multiple views with different projections, create a separate layer instance with a unique ID for each view, and use `layerFilter` to restrict each instance to its intended view.
 
+## Adaptive refinement {#adaptive-refinement}
+
+Path and polygon layers can subdivide edges to approximate curved projections using the experimental `_projectionTolerance` prop. The tolerance is a sampled error in map meters, not a certified bound. Existing `resolution` grid cutting occurs first. The model matrix and converter are included in sampling; camera movement does not retessellate geometry. Changes to tolerance or projection rebuild geometry.
+
+Edges interpolate linearly, including altitude. Split seams and invalid domains before supplying geometry; this does not create great-circle edges or clip geometry. Quarter, midpoint and three-quarter samples are checked. Invalid samples or exhausted math.gl limits (16 bisection levels and 65,536 vertices per path or ring) throw. Inserted vertices require CPU-readable geometry and per-object styling; pre-tessellated external attribute or index buffers are unsupported.
+
 ## Limitations
 
 - Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
