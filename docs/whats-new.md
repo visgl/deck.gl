@@ -4,6 +4,13 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Grid compute aggregation
+
+`GridLayer` supports two-channel compute aggregation with explicit color and elevation domains.
+Color and elevation results stay in GPU vectors consumed directly by the cell layer. The
+implementation shares column preparation and reduction kernels with ScreenGrid. See
+[GridLayer](./api-reference/aggregation-layers/grid-layer.md#compute-aggregation).
+
 ### ScreenGrid compute aggregation
 
 `ScreenGridLayer` can aggregate on WebGPU using an explicit `colorDomain`, with

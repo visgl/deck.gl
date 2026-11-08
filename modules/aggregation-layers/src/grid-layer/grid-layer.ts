@@ -29,6 +29,7 @@ import {getBinIdRange} from '../common/utils/bounds-utils';
 import {createAggregationViewport} from '../common/utils/projection-utils';
 
 import {GridCellLayer} from './grid-cell-layer';
+import {WebGPUGridAggregator} from './webgpu-grid-aggregator';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -298,6 +299,65 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
 
     if (
+      gpuAggregation &&
+      this.context.device.type === 'webgpu' &&
+      this.props.colorDomain &&
+      this.props.elevationDomain &&
+      !this.props.pickable &&
+      !this.props.extensions.length &&
+      this.props.onSetColorDomain === noop &&
+      this.props.onSetElevationDomain === noop &&
+      this.props.colorScaleType !== 'quantile' &&
+      this.props.colorScaleType !== 'ordinal' &&
+      this.props.elevationScaleType !== 'quantile' &&
+      this.props.lowerPercentile === 0 &&
+      this.props.upperPercentile === 100 &&
+      this.props.elevationLowerPercentile === 0 &&
+      this.props.elevationUpperPercentile === 100
+    ) {
+      if (
+        (!this.props.positions &&
+          !WebGPUGridAggregator.supportsData(this.props.data, [
+            'getPosition',
+            'getColorWeight',
+            'getElevationWeight'
+          ])) ||
+        (!this.props.positions &&
+          this.props.data ===
+            (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
+          !WebGPUGridAggregator.supportsAttributes(
+            this.getAttributeManager()!.attributes,
+            ['colorWeights', 'elevationWeights'],
+            this.context.device.limits.maxStorageBufferBindingSize
+          ))
+      )
+        return 'cpu';
+      if (
+        this.props.positions &&
+        !WebGPUGridAggregator.supportsColumns(
+          [this.props.positions, ...(this.props.weights || [])],
+          this.context.device.limits.maxStorageBufferBindingSize
+        )
+      ) {
+        throw new Error('Aggregation GPU input exceeds the storage buffer binding limit');
+      }
+      if (this.props.positions && this.state.preproject) {
+        throw new Error('Grid GPU columns must use the custom view coordinate system');
+      }
+      this._updateBinOptions();
+      const count = this.state.binIdRange.reduce((total, [start, end]) => total * (end - start), 1);
+      const limits = this.context.device.limits;
+      if (
+        !Number.isSafeInteger(count) ||
+        count * 16 > Math.min(limits.maxBufferSize, limits.maxStorageBufferBindingSize)
+      ) {
+        if (this.props.positions) throw new Error('Grid aggregation exceeds device buffer limits');
+        return 'cpu';
+      }
+      return 'webgpu';
+    }
+
+    if (
       // GPU aggregation is requested
       gpuAggregation &&
       // GPU aggregation is supported by the device
@@ -308,7 +368,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return 'cpu';
   }
 
-  createAggregator(type: string): WebGLAggregator | CPUAggregator {
+  createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUGridAggregator {
+    if (type === 'webgpu') return new WebGPUGridAggregator(this.context.device);
     if (type === 'cpu') {
       const {gridAggregator, cellSize} = this.props;
       return new CPUAggregator({
@@ -503,7 +564,12 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       });
     }
 
-    this.setState({cellSizeCommon, cellOriginCommon, binIdRange, aggregatorViewport: viewport});
+    Object.assign(this.state, {
+      cellSizeCommon,
+      cellOriginCommon,
+      binIdRange,
+      aggregatorViewport: viewport
+    });
   }
 
   override draw(opts) {
@@ -534,6 +600,39 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         props.onSetElevationDomain(aggregator.getResultDomain(1));
       }
     }
+  }
+
+  protected override updateAttributes(changedAttributes) {
+    // AttributeManager has populated current positions at this point. Backend selection
+    // during updateState can only see the previous position bounds.
+    if (
+      (changedAttributes.positions ||
+        changedAttributes.colorWeights ||
+        changedAttributes.elevationWeights) &&
+      this.state.aggregatorType === 'webgpu' &&
+      (this.getAggregatorType() === 'cpu' ||
+        !WebGPUGridAggregator.supportsAttributes(
+          this.getAttributeManager()!.attributes,
+          ['colorWeights', 'elevationWeights'],
+          this.context.device.limits.maxStorageBufferBindingSize
+        ))
+    ) {
+      this.state.aggregator.destroy();
+      const aggregator = this.createAggregator('cpu');
+      this.setState({aggregator, aggregatorType: 'cpu'});
+      aggregator.setProps({
+        attributes: this.getAttributeManager()!.attributes,
+        pointCount: this.getNumInstances(),
+        operations: [this.props.colorAggregation, this.props.elevationAggregation],
+        binIdRange: this.state.binIdRange,
+        binOptions: {
+          cellSizeCommon: this.state.cellSizeCommon,
+          cellOriginCommon: this.state.cellOriginCommon
+        },
+        onUpdate: this._onAggregationUpdate.bind(this)
+      });
+    }
+    super.updateAttributes(changedAttributes);
   }
 
   onAttributeChange(id: string) {
