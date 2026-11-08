@@ -2,19 +2,37 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/** Returns the linear unit conversion for each axis, or null for non-linear CRS axes. */
+type CRSUnits = {
+  coordinateFrame: string;
+  xUnit: {metersPerUnit?: number};
+  yUnit: {metersPerUnit?: number};
+  zUnit: {metersPerUnit?: number};
+};
+
+/** Return the per-axis scale needed to measure projected coordinates in meters. */
 export function getMetersPerUnit(
-  crs?: {
-    xUnit: {metersPerUnit?: number};
-    yUnit: {metersPerUnit?: number};
-    zUnit: {metersPerUnit?: number};
-  } | null
+  crs: CRSUnits | null | undefined
 ): [number, number, number] | null {
-  if (!crs) return null;
-  const factors = [crs.xUnit, crs.yUnit, crs.zUnit].map(unit => unit.metersPerUnit);
-  return factors.every(value => typeof value === 'number' && Number.isFinite(value) && value > 0)
-    ? (factors as [number, number, number])
-    : null;
+  if (!crs || (crs.coordinateFrame !== 'projected' && crs.coordinateFrame !== 'geocentric')) {
+    return null;
+  }
+  const x = crs.xUnit.metersPerUnit;
+  const y = crs.yUnit.metersPerUnit;
+  const z = crs.zUnit.metersPerUnit;
+  if (
+    typeof x !== 'number' ||
+    !Number.isFinite(x) ||
+    x <= 0 ||
+    typeof y !== 'number' ||
+    !Number.isFinite(y) ||
+    y <= 0 ||
+    typeof z !== 'number' ||
+    !Number.isFinite(z) ||
+    z <= 0
+  ) {
+    return null;
+  }
+  return [x, y, z];
 }
 
 // Assume data array is sorted by <accessor>
