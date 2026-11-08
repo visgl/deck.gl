@@ -386,3 +386,73 @@ test('Grid geometry clipping uses the aggregation coordinate frame', async ({ski
     ]
   });
 });
+
+test('Grid globe clipping supplies flat Mercator bounds', async ({skip}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  const {LayerManager, _GlobeViewport, WebMercatorViewport} = await import('@deck.gl/core');
+  const {ClipExtension} = await import('@deck.gl/extensions');
+  const manager = new LayerManager(device, {
+    viewport: new _GlobeViewport({width: 100, height: 100, longitude: 10, latitude: 20, zoom: 0})
+  });
+  const layer = new GridLayer({
+    data: [[10, 20]],
+    getPosition: p => p,
+    colorDomain: [0, 10],
+    elevationDomain: [0, 10],
+    extensions: [new ClipExtension()],
+    clipBounds: [10, 20, 15, 25]
+  });
+  try {
+    manager.setLayers([layer]);
+    const setProps = vi.spyOn(layer.state.aggregator, 'setProps');
+    const extension = layer.props.extensions[0];
+    extension.draw.call(layer, {} as any, extension);
+    const reference = new WebMercatorViewport({width: 1, height: 1, zoom: 0});
+    const a = reference.projectPosition([10, 20, 0]);
+    const b = reference.projectPosition([15, 25, 0]);
+    const bounds = setProps.mock.calls.at(-1)![0].shaderModuleProps!.clip.bounds;
+    [a[0], a[1], b[0], b[1]].forEach((value, i) => expect(bounds[i]).toBeCloseTo(value));
+    setProps.mockRestore();
+  } finally {
+    manager.finalize();
+  }
+});
+
+test('Default rendering plugins leave aggregation on compute', async ({skip}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  const {LayerManager} = await import('@deck.gl/core');
+  const manager = new LayerManager(device, {
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {target: [0, 0, 0], zoom: 0}
+    })
+  });
+  manager.addDefaultShaderPlugin({name: 'render-effect', injections: {}});
+  const layers = [
+    new GridLayer({
+      id: 'grid-effects',
+      data: [[0, 0]],
+      getPosition: p => p,
+      colorDomain: [0, 10],
+      elevationDomain: [0, 10]
+    }),
+    new ScreenGridLayer({
+      id: 'screen-effects',
+      data: [[0, 0]],
+      getPosition: p => p,
+      colorDomain: [0, 10]
+    })
+  ];
+  try {
+    manager.setLayers(layers);
+    for (const layer of layers) {
+      expect(layer.state.aggregator).toBeInstanceOf(WebGPUAggregator);
+      expect((layer.state.aggregator as any).filterModel).toBeUndefined();
+    }
+  } finally {
+    manager.finalize();
+  }
+});

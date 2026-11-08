@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {project} from '@deck.gl/core';
+import {project, project32} from '@deck.gl/core';
 
 import {
   CompositeLayer,
@@ -89,6 +89,17 @@ export default abstract class AggregationLayer<
     aggregatorType: string;
     aggregator: Aggregator;
   } & CompositeLayer['state'];
+
+  /** Extension hooks affect input points; rendering effects only affect the cells. */
+  protected getAggregationShaders() {
+    const shaders = super.getShaders({modules: [project32]});
+    return {
+      ...shaders,
+      plugins: shaders.plugins?.filter(
+        plugin => !this.context.defaultShaderPlugins.includes(plugin)
+      )
+    };
+  }
 
   /** Forwards extension uniforms to the GPU aggregation model as well as rendering models. */
   setShaderModuleProps(props: Record<string, any>): void {

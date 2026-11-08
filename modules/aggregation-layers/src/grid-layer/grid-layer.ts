@@ -17,6 +17,7 @@ import {
   PickingInfo,
   Position,
   Viewport,
+  _GlobeViewport,
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
@@ -356,7 +357,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUGridAggregator {
     if (type === 'webgpu')
       return new WebGPUGridAggregator(this.context.device, {
-        shaders: super.getShaders({modules: [project32]}),
+        shaders: this.getAggregationShaders(),
         requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
         bindAttributes: model => {
           const layer = this.getCurrentLayer()! as this;
@@ -588,7 +589,13 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   override setShaderModuleProps(props: Record<string, any>): void {
     // Geometry clipping uses projected bounds, which must share the reduction viewport.
-    if (props.clip && this.state?.aggregatorType === 'webgpu' && !this.state.clipByInstance) {
+    if (
+      props.clip &&
+      this.state?.aggregatorType === 'webgpu' &&
+      !this.state.clipByInstance &&
+      // Globe clipping already uses camera-independent Mercator bounds from ClipExtension.
+      !(this.state.aggregatorViewport instanceof _GlobeViewport)
+    ) {
       const bounds = (this.props as this['props'] & {clipBounds: number[]}).clipBounds;
       if (bounds) {
         const viewport = this.state.aggregatorViewport;

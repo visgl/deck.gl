@@ -166,7 +166,7 @@ export default class ScreenGridLayer<
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUScreenGridAggregator {
     if (type === 'webgpu')
       return new WebGPUScreenGridAggregator(this.context.device, {
-        shaders: super.getShaders({modules: [project32]}),
+        shaders: this.getAggregationShaders(),
         requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
         bindAttributes: model => {
           const layer = this.getCurrentLayer()! as this;
