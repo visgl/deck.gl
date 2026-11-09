@@ -3,8 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {beforeEach, describe, expect, test} from 'vitest';
-import {Deck, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
-import {ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
+import {Deck, MapView, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {IconLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {MaskExtension} from '@deck.gl/extensions';
 import {Buffer, luma, Texture} from '@luma.gl/core';
 import {webgl2Adapter, type WebGLDevice} from '@luma.gl/core/webgl';
@@ -150,3 +150,113 @@ describe.each(['webgl', 'webgpu'] as const)('MaskExtension %s', type => {
     120000
   );
 });
+
+test('MaskExtension clips billboard icon corners and preserves instance masking on WebGPU', async ({
+  skip
+}) => {
+  if (!(await getWebGPUTestDevice())) return skip();
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const width = 128;
+  const device = await luma.createDevice({
+    type: 'webgpu',
+    adapters: [webgpuAdapter],
+    createCanvasContext: {container, width, height: width, useDevicePixels: false}
+  });
+  const texture = device.createTexture({
+    width,
+    height: width,
+    format: 'rgba8unorm',
+    usage: Texture.RENDER | Texture.COPY_SRC
+  });
+  const framebuffer = device.createFramebuffer({
+    width,
+    height: width,
+    colorAttachments: [texture],
+    depthStencilAttachment: 'depth24plus'
+  });
+  const readback = device.createBuffer({
+    byteLength: texture.computeMemoryLayout().byteLength,
+    usage: Buffer.COPY_DST | Buffer.MAP_READ
+  });
+  const atlas = device.createTexture({
+    width: 1,
+    height: 1,
+    format: 'rgba8unorm',
+    data: new Uint8Array([255, 255, 255, 255])
+  });
+  const mask = new SolidPolygonLayer({
+    id: 'icon-mask',
+    operation: 'mask',
+    data: [
+      [
+        [-64, -64],
+        [0, -64],
+        [0, 64],
+        [-64, 64]
+      ]
+    ],
+    getPolygon: polygon => polygon
+  });
+  const icon = new IconLayer({
+    id: 'masked-icon',
+    data: [{position: [-8, 0]}],
+    getPosition: d => d.position,
+    iconAtlas: atlas,
+    iconMapping: {square: {x: 0, y: 0, width: 1, height: 1, mask: true}},
+    getIcon: () => 'square',
+    getSize: 64,
+    getColor: [255, 0, 0],
+    billboard: true,
+    pickable: true,
+    extensions: [new MaskExtension()],
+    maskId: mask.id,
+    maskByInstance: false
+  });
+  const deck = new Deck({
+    device,
+    parent: container,
+    width,
+    height: width,
+    useDevicePixels: false,
+    views: new OrthographicView(),
+    initialViewState: {target: [0, 0, 0], zoom: 0},
+    layers: [],
+    _framebuffer: framebuffer
+  });
+  try {
+    for (const maskByInstance of [false, true]) {
+      const currentIcon = icon.clone({id: `masked-icon-${maskByInstance}`, maskByInstance});
+      device.handle.pushErrorScope('validation');
+      await new Promise<void>((resolve, reject) =>
+        deck.setProps({
+          layers: [mask, currentIcon],
+          onAfterRender: () => resolve(),
+          onError: reject
+        })
+      );
+      expect(await device.handle.popErrorScope()).toBeNull();
+      texture.readBuffer({}, readback);
+      const pixels = await readback.readAsync();
+      for (const x of [40, 72]) {
+        const visible = x === 40 || maskByInstance;
+        const offset = (64 * width + x) * 4;
+        expect(Array.from(pixels.slice(offset, offset + 3))).toEqual(
+          visible ? [255, 0, 0] : [0, 0, 0]
+        );
+        expect((await deck.pickObjectAsync({x, y: 64}))?.layer?.id).toBe(
+          visible ? currentIcon.id : undefined
+        );
+      }
+    }
+  } finally {
+    deck.finalize();
+    readback.destroy();
+    framebuffer.destroy();
+    texture.destroy();
+    atlas.destroy();
+    device.destroy();
+    container.remove();
+  }
+  // Software GPUs compile both icon and mask pipelines during initialization.
+}, 120000);

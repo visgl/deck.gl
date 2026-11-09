@@ -145,6 +145,25 @@ if (mask.enabled != 0) {
   var commonPosition = geometry.position;
   if (mask.maskByInstance != 0) {
     commonPosition = vec4<f32>(project_position_vec3_f64(geometry.worldPosition, vec3<f32>(0.0)), 1.0);
+  } else {
+    // Billboard corners may only offset clip space; recover their common-space position.
+    let matrix = project.viewProjectionMatrix;
+    let rowX = vec3<f32>(matrix[0].x, matrix[1].x, matrix[2].x);
+    let rowY = vec3<f32>(matrix[0].y, matrix[1].y, matrix[2].y);
+    let rowZ = vec3<f32>(matrix[0].z, matrix[1].z, matrix[2].z);
+    let rowW = vec3<f32>(matrix[0].w, matrix[1].w, matrix[2].w);
+    let perspective = dot(rowW, rowW) > 0.0;
+    let depthRow = select(rowZ, rowW, perspective);
+    let projected = project_common_position_to_clipspace(geometry.position);
+    let delta = (*position).xy - projected.xy;
+    let depthDelta = select(2.0 * ((*position).z - projected.z),
+      (*position).w - projected.w, perspective);
+    let determinant = dot(rowX, cross(rowY, depthRow));
+    if (abs(determinant) > 0.0) {
+      commonPosition = vec4<f32>(commonPosition.xyz +
+        (cross(rowY, depthRow) * delta.x + cross(depthRow, rowX) * delta.y +
+          cross(rowX, rowY) * depthDelta) / determinant, commonPosition.w);
+    }
   }
   let flatPosition = project_common_position_to_flat(commonPosition.xyz);
   let coords = (flatPosition - mask.bounds.xy) / (mask.bounds.zw - mask.bounds.xy);
