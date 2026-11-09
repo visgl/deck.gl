@@ -4,7 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {BitmapLayer} from '@deck.gl/layers';
-import {ClipExtension} from '@deck.gl/extensions';
+import {DataFilterExtension, ClipExtension} from '@deck.gl/extensions';
 import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Buffer, Texture} from '@luma.gl/core';
@@ -50,7 +50,9 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           {
             props: {
               image,
-              extensions: [new ClipExtension()],
+              extensions: [new ClipExtension(), new DataFilterExtension()],
+              getFilterValue: 5,
+              filterRange: [4, 6],
               clipBounds: [-180, -90, 180, 90],
               positions: column([
                 [0, 0],
@@ -76,7 +78,10 @@ for (const backend of ['webgl', 'webgpu'] as const) {
               expect(layer.getAttributeManager()).not.toBeNull();
               expect(oldBuffer.destroyed).toBe(true);
             } else {
-              expect(layer.getAttributeManager()!.getAttributes().positions.value).toBeNull();
+              expect(layer.getAttributeManager()!.getAttributes().positions).toBeUndefined();
+              expect(
+                Array.from(layer.getAttributeManager()!.getAttributes().filterValues.value)
+              ).toEqual([5]);
               expect(layer.state.model!.constructor).toBe(GPUVectorModel);
               const mesh = layer.state.typedMesh as any;
               if (index === 0) {
