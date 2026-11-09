@@ -13,10 +13,11 @@ import TabItem from '@theme/TabItem';
   <TabItem value="ts" label="TypeScript">
 
 ```ts
-import {Deck, TerrainController} from '@deck.gl/core';
+import {Deck, MapView, TerrainController} from '@deck.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 const deckgl = new Deck({
+  views: new MapView({minimumElevation: -500}),
   initialViewState: {
     latitude: 50.089,
     longitude: 14.42,
@@ -91,6 +92,12 @@ The [TerrainController](../../api-reference/core/terrain-controller.md) extends 
 The controller works by picking the terrain elevation at the center of the viewport. For this to work, the layer used as the elevation data source (e.g. `Tile3DLayer`) must be marked with `pickable: '3d'`. Without a `pickable: '3d'` layer in the scene, the controller has no elevation data and will behave like a standard `MapController`.
 
 Without `TerrainController`, the camera will orbit around the sea-level plane, which can cause it to clip through the terrain.
+
+## Below-ellipsoid terrain and clipping
+
+3D Tiles heights are measured from the WGS84 ellipsoid and can be negative, for example along coasts. When the camera looks straight down at high zoom, terrain below elevation 0 can disappear while a slightly tilted camera still shows it. Set `minimumElevation` on the `MapView` to the lowest height in your data, as the example above does with -500 m. A deeper value than needed reduces depth precision.
+
+With an interleaved Mapbox or MapLibre overlay, the base map controls clipping, so configure its camera instead.
 
 ## Integrating Layers with the Terrain
 

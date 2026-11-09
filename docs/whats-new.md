@@ -4,6 +4,8 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+- [`MapView`](./api-reference/core/map-view.md#minimumelevation) adds `minimumElevation`, which keeps terrain and 3D Tiles below sea level visible in top-down views. The Google 3D Tiles example uses it.
+
 ### Hexagon compute aggregation
 
 HexagonLayer supports WebGPU aggregation with explicit color and elevation domains,
@@ -72,6 +74,7 @@ Paths and polygons can follow curved projected edges with the experimental [`_pr
 ### Layer source CRS (Experimental)
 
 Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
+
 
 ## deck.gl v9.4
 
