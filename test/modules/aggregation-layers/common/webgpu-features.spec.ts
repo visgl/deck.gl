@@ -456,3 +456,47 @@ test('Default rendering plugins leave aggregation on compute', async ({skip}) =>
     manager.finalize();
   }
 });
+
+for (const coordinateSystem of ['cartesian', 'meter-offsets', 'lnglat-offsets'] as const) {
+  test(`Grid does not wrap reversed ${coordinateSystem} clip bounds`, async ({skip}) => {
+    const device = await getWebGPUTestDevice();
+    if (!device) return skip();
+    const {LayerManager, WebMercatorViewport} = await import('@deck.gl/core');
+    const {ClipExtension} = await import('@deck.gl/extensions');
+    const viewport = new WebMercatorViewport({
+      width: 100,
+      height: 100,
+      longitude: 0,
+      latitude: 0,
+      zoom: 0
+    });
+    const manager = new LayerManager(device, {viewport});
+    const layer = new GridLayer({
+      coordinateSystem,
+      data: [[0, 0]],
+      getPosition: p => p,
+      cellSize: 100000,
+      colorDomain: [0, 10],
+      elevationDomain: [0, 10],
+      extensions: [new ClipExtension()],
+      clipBounds: [200, -10, -200, 10]
+    });
+    try {
+      manager.setLayers([layer]);
+      const setProps = vi.spyOn(layer.state.aggregator, 'setProps');
+      const extension = layer.props.extensions[0];
+      extension.draw.call(layer, {} as any, extension);
+      const a = layer.projectPosition([200, -10, 0], {viewport: layer.state.aggregatorViewport});
+      const b = layer.projectPosition([-200, 10, 0], {viewport: layer.state.aggregatorViewport});
+      const bounds = setProps.mock.calls.at(-1)![0].shaderModuleProps!.clip.bounds;
+      expect(bounds).toEqual([
+        Math.min(a[0], b[0]),
+        Math.min(a[1], b[1]),
+        Math.max(a[0], b[0]),
+        Math.max(a[1], b[1])
+      ]);
+    } finally {
+      manager.finalize();
+    }
+  });
+}

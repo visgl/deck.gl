@@ -601,7 +601,15 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         const viewport = this.state.aggregatorViewport;
         const a = this.projectPosition([bounds[0], bounds[1], 0], {viewport});
         const b = this.projectPosition([bounds[2], bounds[3], 0], {viewport});
-        if (bounds[0] - bounds[2] > 180 && viewport.isGeospatial) b[0] += 512;
+        const sourceCrs = this.internalState!.sourceCrs;
+        const longitudeCoordinates =
+          !['cartesian', 'meter-offsets', 'lnglat-offsets'].includes(this.props.coordinateSystem) &&
+          sourceCrs?.coordinateFrame === 'geographic' &&
+          sourceCrs.axis.startsWith('en') &&
+          sourceCrs.xUnit.degreesPerUnit === 1 &&
+          sourceCrs.yUnit.degreesPerUnit === 1;
+        if (bounds[0] - bounds[2] > 180 && viewport.isGeospatial && longitudeCoordinates)
+          b[0] += 512;
         props = {
           ...props,
           clip: {

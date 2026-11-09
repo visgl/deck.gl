@@ -42,7 +42,7 @@ struct Varyings {
   return varyings;
 }
 @fragment fn fragmentMain(varyings: Varyings) -> @location(0) vec4f {
-  if (varyings.valid == 0u || any(varyings.binId < aggregation.binRange.xz) || any(varyings.binId >= aggregation.binRange.yw)) {discard;}
+  if (varyings.valid == 0u || any(varyings.binId < aggregation.binRange.xz) || any(varyings.binId >= aggregation.binRange.yw)) {return vec4f(0.0);}
   fragmentGeometry.uv = vec2f(0.0);
   var color = varyings.weights;
   DECKGL_FILTER_COLOR(&color, fragmentGeometry);
