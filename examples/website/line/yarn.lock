@@ -91,7 +91,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/core@npm:9.4.1":
+"@deck.gl/core@npm:9.4.1, @deck.gl/core@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/core@npm:9.4.1"
   dependencies:
@@ -190,7 +190,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/layers@npm:9.4.1":
+"@deck.gl/layers@npm:9.4.1, @deck.gl/layers@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/layers@npm:9.4.1"
   dependencies:
@@ -254,7 +254,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/react@npm:9.4.1":
+"@deck.gl/react@npm:9.4.1, @deck.gl/react@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/react@npm:9.4.1"
   peerDependencies:
@@ -1920,6 +1920,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-examples-line@workspace:."
   dependencies:
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
+    "@deck.gl/react": "npm:^9.0.0"
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
     deck.gl: "npm:^9.0.0"

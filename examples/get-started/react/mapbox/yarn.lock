@@ -212,7 +212,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/mapbox@npm:9.4.1":
+"@deck.gl/mapbox@npm:9.4.1, @deck.gl/mapbox@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/mapbox@npm:9.4.1"
   dependencies:
@@ -1808,6 +1808,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-react-map-gl-mapbox@workspace:."
   dependencies:
+    "@deck.gl/mapbox": "npm:^9.0.0"
     deck.gl: "npm:^9.0.0"
     mapbox-gl: "npm:^3.0.0"
     react: "npm:^18.0.0"

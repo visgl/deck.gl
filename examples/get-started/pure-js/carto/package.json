@@ -9,6 +9,8 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@deck.gl/carto": "^9.0.0",
+    "@deck.gl/core": "^9.0.0",
     "deck.gl": "^9.0.0",
     "maplibre-gl": "^5.0.0"
   },

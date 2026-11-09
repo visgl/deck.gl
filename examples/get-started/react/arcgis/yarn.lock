@@ -266,7 +266,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/layers@npm:9.4.1":
+"@deck.gl/layers@npm:9.4.1, @deck.gl/layers@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/layers@npm:9.4.1"
   dependencies:
@@ -2929,6 +2929,7 @@ __metadata:
   dependencies:
     "@arcgis/core": "npm:^4.25.0"
     "@deck.gl/arcgis": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
     "@esri/react-arcgis": "npm:^5.2.0"
     deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"

@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "vite",
-    "build": "tsc && vite build",
-    "serve": "vite preview"
+    "start": "../../../node_modules/.bin/vite",
+    "build": "../../../node_modules/.bin/tsc && ../../../node_modules/.bin/vite build",
+    "serve": "../../../node_modules/.bin/vite preview"
   }
 }
