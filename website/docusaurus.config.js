@@ -144,6 +144,11 @@ const config = {
           // Resolve dependencies through their package export maps, including subpaths.
           modules: [resolve('node_modules'), resolve('../node_modules')],
           alias: {
+            // concaveman requires the v2 UMD entry, which may be nested under Yarn 4.
+            'robust-predicates/umd/orient2d.min.js$': require.resolve(
+              'robust-predicates/umd/orient2d.min.js',
+              {paths: [require.resolve('concaveman')]}
+            ),
             '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers/dist'),
             '@deck.gl/arcgis': resolve('../modules/arcgis/dist'),
             '@deck.gl/carto': resolve('../modules/carto/dist'),

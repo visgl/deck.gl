@@ -67,6 +67,7 @@
     "autoprefixer": "^10.5.4",
     "jscodeshift": "^17.3.0",
     "jsdom": "^20.0.0",
+    "lerna": "^10.0.0",
     "pixelmatch": "^7.1.0",
     "playwright": "^1.64.1",
     "pngjs": "^7.0.0",
@@ -89,5 +90,5 @@
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "yarn@4.15.0"
 }

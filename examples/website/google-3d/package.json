@@ -9,6 +9,9 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@deck.gl/google-maps": "^9.0.0",
+    "@deck.gl/layers": "^9.0.0",
+    "@deck.gl/mesh-layers": "^9.0.0",
     "@googlemaps/js-api-loader": "^1.16.0",
     "@turf/rhumb-bearing": "^6.5.0",
     "@turf/rhumb-distance": "^6.5.0",

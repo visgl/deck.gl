@@ -9,6 +9,9 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@deck.gl/core": "^9.4.0",
+    "@deck.gl/layers": "^9.4.0",
+    "@deck.gl/react": "^9.4.0",
     "@loaders.gl/pointclouds": "5.0.0-beta.5",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",

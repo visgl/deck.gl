@@ -5,7 +5,7 @@
   "description": "Website for vis.gl project",
   "scripts": {
     "docusaurus": "docusaurus",
-    "start": "docusaurus start",
+    "start": "yarn build-v10-examples && docusaurus start",
     "build": "./scripts/build.sh prod",
     "build-staging": "./scripts/build.sh staging",
     "test-build": "./scripts/test-build.sh",
@@ -13,8 +13,7 @@
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-heading-ids": "node ../scripts/write-heading-ids.mjs",
-    "build-v10-examples": "node scripts/build-v10-examples.mjs",
-    "prestart": "yarn build-v10-examples"
+    "build-v10-examples": "node scripts/build-v10-examples.mjs"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.0",
@@ -65,7 +64,7 @@
     ">0.2% and supports async-functions",
     "not dead"
   ],
-  "packageManager": "yarn@1.22.19",
+  "packageManager": "yarn@4.15.0",
   "engines": {
     "node": ">=22"
   }
