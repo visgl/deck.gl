@@ -9,7 +9,6 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 HexagonLayer supports WebGPU aggregation with explicit color and elevation domains,
 using the shared reducer and GPUVector rendering path.
 
-
 ### ScreenGrid and Grid compute rendering features
 
 Compute aggregation now supports automatic domains, picking metadata, accessor-based
