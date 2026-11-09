@@ -26,23 +26,27 @@ for (const [Layer, cell] of [
     const cells = vectorFromArray([cell]);
     testLayer({
       Layer: Layer as typeof H3HexagonLayer,
-      props: {cells, elevations: vectorFromArray([10]), extruded: true, pickable: true},
       testCases: [
-        {title: 'initialize columns'},
+        {
+          title: 'initialize columns',
+          props: {cells, elevations: vectorFromArray([10]), extruded: true, pickable: true}
+        },
         {title: 'replace styles', updateProps: {elevations: vectorFromArray([20])}},
         {
           title: 'replace geometry',
           updateProps: {cells: vectorFromArray([cell, cell]), elevations: vectorFromArray([30, 40])}
         }
-      ],
-      onAfterUpdate: ({layer, subLayer}) => {
-        expect(subLayer).toBeTruthy();
-        const rows = subLayer.props.data;
-        expect(rows.length).toBe(layer.props.cells.length);
-        expect(subLayer.props.getElevation(rows[0], {index: 0})).toBe(
-          layer.props.elevations.get(0)
-        );
-      },
+      ].map(testCase => ({
+        ...testCase,
+        onAfterUpdate: ({layer, subLayer}) => {
+          expect(subLayer).toBeTruthy();
+          const rows = subLayer.props.data;
+          expect(rows.length).toBe(layer.props.cells.length);
+          expect(subLayer.props.getElevation(rows[0], {index: 0})).toBe(
+            layer.props.elevations.get(0)
+          );
+        }
+      })),
       onError: error => {
         throw error;
       }
@@ -55,18 +59,22 @@ for (const Layer of [H3HexagonLayer, H3ClusterLayer]) {
     const id = '8928308280fffff';
     testLayer({
       Layer: Layer as typeof H3HexagonLayer,
-      props: {data: [{hexagon: id, hexagons: [id]}], cells: vectorFromArray([id])},
       testCases: [
-        {title: 'initialize columns'},
+        {
+          title: 'initialize columns',
+          props: {data: [{hexagon: id, hexagons: [id]}], cells: vectorFromArray([id])}
+        },
         {title: 'restore accessors', updateProps: {cells: null}}
-      ],
-      onAfterUpdate: ({layer, subLayer}) => {
-        expect(subLayer).toBeTruthy();
-        if (!layer.props.cells) {
-          if (layer instanceof H3HexagonLayer) expect(layer.state.resolution).toBe(9);
-          else expect(layer.state.polygons.length).toBeGreaterThan(0);
+      ].map(testCase => ({
+        ...testCase,
+        onAfterUpdate: ({layer, subLayer}) => {
+          expect(subLayer).toBeTruthy();
+          if (!layer.props.cells) {
+            if (layer instanceof H3HexagonLayer) expect(layer.state.resolution).toBe(9);
+            else expect(layer.state.polygons.length).toBeGreaterThan(0);
+          }
         }
-      },
+      })),
       onError: error => {
         throw error;
       }

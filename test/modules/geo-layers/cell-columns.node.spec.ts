@@ -11,7 +11,7 @@ import {
   QuadkeyLayer,
   A5Layer
 } from '@deck.gl/geo-layers';
-import {vectorFromArray, Utf8, Uint64, List, Field, Dictionary, Int32} from 'apache-arrow';
+import {vectorFromArray, Utf8, Uint64, List, Field, Dictionary, Int32, Int64} from 'apache-arrow';
 
 const cases = [
   [H3HexagonLayer, 'getHexagon', '8928308280fffff'],
@@ -91,4 +91,25 @@ test('generated rows clear source data hooks', () => {
   expect(child.props.dataTransform).toBeFalsy();
   expect(child.props.dataComparator).toBeFalsy();
   expect(child.props._dataDiff).toBeFalsy();
+});
+
+test('signed S2 identifiers preserve their unsigned token', () => {
+  const cell = BigInt.asIntN(64, 0x89c2500000000000n);
+  const layer = new S2Layer({cells: vectorFromArray([cell], new Int64())});
+  const child = layer.renderLayers() as any;
+  expect(child.props.getS2Token(child.props.data[0])).toBe('89c25');
+});
+
+test('Int64 H3 identifiers retain all bits', () => {
+  const cell = 0x8928308280fffffn;
+  const layer = new H3HexagonLayer({cells: vectorFromArray([cell], new Int64())});
+  const child = layer.renderLayers() as any;
+  expect(child.props.getHexagon(child.props.data[0])).toBe(cell.toString(16));
+});
+
+test('signed A5 identifiers become unsigned bigint values', () => {
+  const cell = 0xae80000000000000n;
+  const layer = new A5Layer({cells: vectorFromArray([BigInt.asIntN(64, cell)], new Int64())});
+  const child = layer.renderLayers() as any;
+  expect(child.props.getPentagon(child.props.data[0])).toBe(cell);
 });

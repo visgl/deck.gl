@@ -67,8 +67,10 @@ export function renderCellColumns(
       typeof value === 'string' || typeof value === 'bigint' ? [value] : Array.from(value);
     const ids = values.map(cell => {
       if (typeof cell !== 'string' && typeof cell !== 'bigint')
-        throw new Error('cells must contain strings or uint64 values');
-      if (typeof cell === 'string' || accessor === 'getPentagon') return cell;
+        throw new Error('cells must contain strings or 64-bit integers');
+      if (typeof cell === 'string') return cell;
+      cell = BigInt.asUintN(64, cell);
+      if (accessor === 'getPentagon') return cell;
       if (accessor === 'getS2Token') return cell.toString(16).padStart(16, '0').replace(/0+$/, '');
       if (accessor === 'getHexagon' || accessor === 'getHexagons') return cell.toString(16);
       throw new Error('This grid requires string cells');
