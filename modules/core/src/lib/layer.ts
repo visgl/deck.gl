@@ -1432,7 +1432,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           this.draw(opts);
         });
       } else {
-        renderPass.withParameters(webGPUDrawParameters?.renderPassParameters || {}, () => {
+        const previousParameters = renderPass.getParameters();
+        try {
+          renderPass.setParameters(webGPUDrawParameters?.renderPassParameters || {});
           const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
           for (const extension of this.props.extensions) {
@@ -1440,7 +1442,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           }
 
           this.draw(opts);
-        });
+        } finally {
+          renderPass.setParameters(previousParameters);
+        }
       }
     } finally {
       this.props = currentProps;
