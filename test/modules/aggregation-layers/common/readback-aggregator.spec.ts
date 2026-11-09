@@ -53,10 +53,13 @@ test('Readback aggregation preserves strided columns, prefixes, and ownership', 
       operations: ['SUM'],
       onUpdate
     });
+    const createBuffer = vi.spyOn(device, 'createBuffer');
     aggregator.update();
     expect(aggregator.isLoaded).toBe(false);
     await vi.waitFor(() => expect(aggregator.isLoaded).toBe(true));
     expect(aggregator.getBin(0)).toMatchObject({value: [5], count: 2, pointIndices: [0, 1]});
+    expect(createBuffer).not.toHaveBeenCalled();
+    createBuffer.mockRestore();
     for (const count of [1, 0, 2]) {
       aggregator.setProps({pointCount: count});
       aggregator.update();
@@ -113,6 +116,7 @@ test('Readback aggregation preserves strided columns, prefixes, and ownership', 
         }
       ]
     });
+    const snapshot = await buffer.readAsync();
     const read = vi.spyOn(buffer, 'readAsync');
     let finish!: (value: Uint8Array) => void;
     read.mockImplementationOnce(
@@ -123,6 +127,7 @@ test('Readback aggregation preserves strided columns, prefixes, and ownership', 
     );
     aggregator.setNeedsUpdate();
     aggregator.update();
+    read.mockResolvedValueOnce(snapshot);
     aggregator.setProps({pointCount: 1});
     aggregator.update();
     await vi.waitFor(() => expect(aggregator.isLoaded).toBe(true));
@@ -133,15 +138,37 @@ test('Readback aggregation preserves strided columns, prefixes, and ownership', 
     expect(onUpdate.mock.calls.length).toBe(calls);
     expect(aggregator.getBin(0)!.value).toEqual([2]);
     const onError = vi.fn();
-    read.mockRejectedValueOnce(new Error('mapping failed'));
+    read
+      .mockRejectedValueOnce(new Error('mapping failed'))
+      .mockRejectedValueOnce(new Error('retry failed'));
     aggregator.setProps({onError});
     aggregator.setNeedsUpdate();
     aggregator.update();
-    await vi.waitFor(() => expect(onError).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(onError).toHaveBeenCalledTimes(2));
     expect(aggregator.isLoaded).toBe(false);
-    aggregator.setNeedsUpdate();
+    // A later update retries without invalidating or changing the input revision.
     aggregator.update();
     await vi.waitFor(() => expect(aggregator.isLoaded).toBe(true));
+    // A single transient copy failure also recovers without another layer update.
+    read.mockRejectedValueOnce(new Error('transient mapping failure'));
+    aggregator.setNeedsUpdate();
+    aggregator.update();
+    await vi.waitFor(() => expect(onError).toHaveBeenCalledTimes(3));
+    await vi.waitFor(() => expect(aggregator.isLoaded).toBe(true));
+    const getValue = aggregator.props.getValue[0].getValue;
+    aggregator.props.getValue[0].getValue = () => {
+      throw new Error('CPU callback failed');
+    };
+    onUpdate.mockClear();
+    aggregator.setNeedsUpdate();
+    aggregator.update();
+    await vi.waitFor(() => expect(onError).toHaveBeenCalledTimes(4));
+    expect(aggregator.isLoaded).toBe(false);
+    expect(onUpdate).not.toHaveBeenCalled();
+    aggregator.props.getValue[0].getValue = getValue;
+    aggregator.update();
+    await vi.waitFor(() => expect(aggregator.isLoaded).toBe(true));
+    expect(aggregator.getBin(0)!.value).toEqual([2]);
     read.mockRestore();
   } finally {
     aggregator.destroy();

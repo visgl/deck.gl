@@ -21,6 +21,7 @@ export class ReadbackAggregator extends CPUAggregator {
   private revision = 0;
   private pendingRevision = -1;
   private completedRevision = -1;
+  private retriedRevision = -1;
   private disposed = false;
   private readonly weightAttributes: readonly string[];
   private ownedAttributes: Attribute[] = [];
@@ -89,6 +90,7 @@ export class ReadbackAggregator extends CPUAggregator {
   }
 
   private async readInputs(revision: number): Promise<void> {
+    let copying = false;
     try {
       if (!this.device) throw new Error('ReadbackAggregator must be initialized before update');
       const {positions, weights, pointCount} = this.props;
@@ -114,7 +116,9 @@ export class ReadbackAggregator extends CPUAggregator {
         return {data, size: info.components};
       });
       const buffers = [...new Set(layouts.map(({data}) => data.buffer))];
+      copying = true;
       const bytes = await Promise.all(buffers.map(buffer => buffer.readAsync()));
+      copying = false;
       if (this.disposed || revision !== this.revision) return;
       const attributes: Record<string, Attribute> = {...this.props.attributes};
       const owned = layouts.map(({data, size}, index) => {
@@ -135,20 +139,42 @@ export class ReadbackAggregator extends CPUAggregator {
           type: 'float32',
           noAlloc: true
         });
-        attribute.setData({value});
+        // CPU accessors only need the value and constructor-provided layout.
+        // setData would allocate and upload a GPU buffer for this readback.
+        attribute.value = value;
         attributes[names[index]] = attribute;
         return attribute;
       });
       for (const attribute of this.ownedAttributes) attribute.delete();
       this.ownedAttributes = owned;
       super.setProps({attributes});
-      // Publish readiness before CPU callbacks notify the owning layer.
-      this.completedRevision = this.revision;
-      super.update();
+      // Notify the owner only after every channel has completed successfully.
+      const onUpdate = this.props.onUpdate;
+      const channels: number[] = [];
+      this.props.onUpdate = ({channel}) => channels.push(channel);
+      try {
+        super.update();
+      } finally {
+        this.props.onUpdate = onUpdate;
+      }
+      this.completedRevision = revision;
+      for (const channel of channels) onUpdate?.({channel});
     } catch (error) {
       if (!this.disposed && revision === this.revision) {
+        this.completedRevision = -1;
+        super.setNeedsUpdate();
+        // Retry a transient copy failure once without requiring a layer prop change.
+        // Persistent failures remain retryable on the next explicit update.
+        if (copying && this.retriedRevision !== revision) {
+          this.retriedRevision = revision;
+          queueMicrotask(() => {
+            if (!this.disposed && revision === this.revision) this.update();
+          });
+        }
         this.props.onError?.(error instanceof Error ? error : new Error(String(error)));
       }
+    } finally {
+      if (this.pendingRevision === revision) this.pendingRevision = -1;
     }
   }
 }

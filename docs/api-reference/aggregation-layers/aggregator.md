@@ -256,10 +256,17 @@ The layer stays unloaded until the current copy and aggregation finish. Inputs r
 `COPY_SRC` buffers and single-chunk float32 columns. Copies preserve offsets, strides,
 and `numInstances` prefixes; input buffers remain caller-owned.
 
-For Cartesian GridLayer inputs, compare the native aggregator with the CPU adapter:
+For Cartesian GridLayer inputs, compare the native WebGPU aggregator with the CPU adapter.
+Both branches use the same WebGPU device; WebGL does not accept these borrowed columns:
 
 ```typescript
 import {GridLayer, ReadbackAggregator} from '@deck.gl/aggregation-layers';
+import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {luma} from '@luma.gl/core';
+import {webgpuAdapter} from '@luma.gl/webgpu';
+
+const device = await luma.createDevice({adapters: [webgpuAdapter], type: 'webgpu'});
+// Create positionVector and weight vectors on this same device.
 
 const cpuAggregator = new ReadbackAggregator({
   dimensions: 2,
@@ -277,7 +284,9 @@ const cpuAggregator = new ReadbackAggregator({
   ]
 });
 
-new GridLayer({
+const layer = new GridLayer({
+  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+  gpuAggregation: true,
   positions: positionVector,
   weights: [colorWeightVector, elevationWeightVector],
   dataBounds,
@@ -286,6 +295,8 @@ new GridLayer({
   elevationDomain: [0, 100],
   aggregator: useCPU ? cpuAggregator : undefined
 });
+
+new Deck({device, views: new OrthographicView(), layers: [layer]});
 ```
 
 The example assumes untransformed Cartesian positions. Other coordinate systems require
