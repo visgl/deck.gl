@@ -5,12 +5,9 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "prestart": "yarn generate-schema",
-    "start": "vite --open",
-    "prestart-local": "yarn generate-schema",
-    "start-local": "vite --config ../vite.config.local.mjs",
-    "prebuild": "yarn generate-schema",
-    "build": "vite build",
+    "start": "yarn generate-schema && vite --open",
+    "start-local": "yarn generate-schema && vite --config ../vite.config.local.mjs",
+    "build": "yarn generate-schema && vite build",
     "generate-schema": "node generate-schema.cjs"
   },
   "dependencies": {
