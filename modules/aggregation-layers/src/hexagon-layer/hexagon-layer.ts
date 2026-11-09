@@ -18,6 +18,7 @@ import {
   PickingInfo,
   Position,
   Viewport,
+  _GlobeViewport,
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
@@ -287,6 +288,7 @@ export default class HexagonLayer<
       colors?: AttributeWithScale;
       elevations?: AttributeWithScale;
 
+      metadataRequired?: boolean;
       binIdRange: [number, number][];
       aggregatorViewport: Viewport;
     } & AggregationLayer<any>['state'];
@@ -303,25 +305,7 @@ export default class HexagonLayer<
       return 'cpu';
     }
 
-    // Feature guards are temporary until metadata, scales, and extension filtering
-    // are connected to this adapter. Input formats and device limits still need validation.
-    if (
-      gpuAggregation &&
-      this.context.device.type === 'webgpu' &&
-      this.props.colorDomain &&
-      this.props.elevationDomain &&
-      !this.props.pickable &&
-      !this.props.extensions.length &&
-      this.props.onSetColorDomain === noop &&
-      this.props.onSetElevationDomain === noop &&
-      this.props.colorScaleType !== 'quantile' &&
-      this.props.colorScaleType !== 'ordinal' &&
-      this.props.elevationScaleType !== 'quantile' &&
-      this.props.lowerPercentile === 0 &&
-      this.props.upperPercentile === 100 &&
-      this.props.elevationLowerPercentile === 0 &&
-      this.props.elevationUpperPercentile === 100
-    ) {
+    if (gpuAggregation && this.context.device.type === 'webgpu') {
       if (
         (!this.props.positions &&
           !WebGPUHexagonAggregator.supportsData(this.props.data, [
@@ -377,7 +361,19 @@ export default class HexagonLayer<
   }
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUHexagonAggregator {
-    if (type === 'webgpu') return new WebGPUHexagonAggregator(this.context.device);
+    if (type === 'webgpu')
+      return new WebGPUHexagonAggregator(this.context.device, {
+        shaders: this.getAggregationShaders(),
+        requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
+        bindAttributes: model => {
+          const layer = this.getCurrentLayer()! as this;
+          const manager = layer.getAttributeManager()!;
+          model.setGPUAttributes(
+            manager.getGPUVectors(),
+            manager.getBufferLayouts().map(layout => ({...layout, stepMode: 'instance' as const}))
+          );
+        }
+      });
     if (type === 'cpu') {
       const {hexagonAggregator, radius} = this.props;
       return new CPUAggregator({
@@ -452,6 +448,20 @@ export default class HexagonLayer<
 
     const {props, oldProps, changeFlags} = params;
     const {aggregator} = this.state;
+    this.state.metadataRequired =
+      !props.colorDomain ||
+      !props.elevationDomain ||
+      Boolean(props.pickable) ||
+      props.onSetColorDomain !== noop ||
+      props.onSetElevationDomain !== noop ||
+      props.colorScaleType === 'quantile' ||
+      props.colorScaleType === 'ordinal' ||
+      props.lowerPercentile > 0 ||
+      props.upperPercentile < 100 ||
+      props.elevationLowerPercentile > 0 ||
+      props.elevationUpperPercentile < 100 ||
+      props.elevationScaleType === 'quantile';
+    aggregator.setProps({readback: this.state.metadataRequired});
     if (
       (changeFlags.dataChanged || !this.state.dataAsArray) &&
       (props.getColorValue || props.getElevationValue)
@@ -580,6 +590,49 @@ export default class HexagonLayer<
     });
   }
 
+  override setShaderModuleProps(props: Record<string, any>): void {
+    // Geometry clipping uses projected bounds, which must share the reduction viewport.
+    if (
+      props.clip &&
+      this.state?.aggregatorType === 'webgpu' &&
+      !this.state.clipByInstance &&
+      // Globe clipping already uses camera-independent Mercator bounds from ClipExtension.
+      !(this.state.aggregatorViewport instanceof _GlobeViewport)
+    ) {
+      const bounds = (this.props as this['props'] & {clipBounds: number[]}).clipBounds;
+      if (bounds) {
+        const viewport = this.state.aggregatorViewport;
+        const a = this.projectPosition([bounds[0], bounds[1], 0], {viewport});
+        const b = this.projectPosition([bounds[2], bounds[3], 0], {viewport});
+        const sourceCrs = this.internalState!.sourceCrs;
+        const longitudeCoordinates =
+          (typeof this.props.coordinateSystem !== 'string' ||
+            !['cartesian', 'meter-offsets', 'lnglat-offsets'].includes(
+              this.props.coordinateSystem
+            )) &&
+          sourceCrs?.coordinateFrame === 'geographic' &&
+          sourceCrs.axis.startsWith('en') &&
+          sourceCrs.xUnit.degreesPerUnit === 1 &&
+          sourceCrs.yUnit.degreesPerUnit === 1;
+        if (bounds[0] - bounds[2] > 180 && viewport.isGeospatial && longitudeCoordinates)
+          b[0] += 512;
+        props = {
+          ...props,
+          clip: {
+            ...props.clip,
+            bounds: [
+              Math.min(a[0], b[0]),
+              Math.min(a[1], b[1]),
+              Math.max(a[0], b[0]),
+              Math.max(a[1], b[1])
+            ]
+          }
+        };
+      }
+    }
+    super.setShaderModuleProps(props);
+  }
+
   override draw(opts) {
     // Replaces render time viewport with our own
     if (opts.shaderModuleProps.project) {
@@ -594,7 +647,11 @@ export default class HexagonLayer<
     if (channel === 0) {
       const result = aggregator.getResult(0)!;
       this.setState({
-        colors: new AttributeWithScale(result, aggregator.binCount)
+        colors: new AttributeWithScale(
+          result,
+          aggregator.binCount,
+          aggregator.getResultValues?.(channel)
+        )
       });
       if (props.onSetColorDomain !== noop) {
         props.onSetColorDomain(aggregator.getResultDomain(0));
@@ -602,7 +659,11 @@ export default class HexagonLayer<
     } else if (channel === 1) {
       const result = aggregator.getResult(1)!;
       this.setState({
-        elevations: new AttributeWithScale(result, aggregator.binCount)
+        elevations: new AttributeWithScale(
+          result,
+          aggregator.binCount,
+          aggregator.getResultValues?.(channel)
+        )
       });
       if (props.onSetElevationDomain !== noop) {
         props.onSetElevationDomain(aggregator.getResultDomain(1));
@@ -692,6 +753,13 @@ export default class HexagonLayer<
       elevationUpperPercentile,
       elevationDomain
     } = this.props;
+    if (
+      this.state.metadataRequired &&
+      aggregator.getResultValues &&
+      aggregator.binCount &&
+      !aggregator.getResultValues(0)
+    )
+      return null;
     const CellLayerClass = this.getSubLayerClass('cells', HexagonCellLayer);
     const binAttribute = aggregator.getBins();
 

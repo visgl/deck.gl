@@ -4,6 +4,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Hexagon compute features
+
+HexagonLayer supports automatic domains, picking, distribution scales, percentiles, and compatible extension filtering through the shared aggregation pipeline.
+
 ### Hexagon compute aggregation
 
 HexagonLayer supports WebGPU aggregation with explicit color and elevation domains,

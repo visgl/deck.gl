@@ -3,13 +3,20 @@
 // Copyright (c) vis.gl contributors
 
 import type {Device} from '@luma.gl/core';
-import {WebGPUAggregator} from '../common/aggregator/webgpu-aggregator/webgpu-aggregator';
+import {
+  WebGPUAggregator,
+  type WebGPUAggregatorOptions
+} from '../common/aggregator/webgpu-aggregator/webgpu-aggregator';
 import {binOptionsUniforms} from './bin-options-uniforms';
 
 /** Hexagonal bin assignment for the shared two-channel reducer. @internal */
 export class WebGPUHexagonAggregator extends WebGPUAggregator {
-  constructor(device: Device) {
+  constructor(
+    device: Device,
+    extensions: Pick<WebGPUAggregatorOptions, 'shaders' | 'bindAttributes' | 'requestRedraw'> = {}
+  ) {
     super(device, {
+      ...extensions,
       channelNames: ['colorWeights', 'elevationWeights'],
       binOptions: binOptionsUniforms,
       binning: `fn getBin(position: vec3f, low: vec3f) -> BinAssignment {
