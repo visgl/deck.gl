@@ -12,7 +12,7 @@ import {
   QuadkeyLayer,
   A5Layer
 } from '@deck.gl/geo-layers';
-import {vectorFromArray} from 'apache-arrow';
+import {Table, vectorFromArray} from 'apache-arrow';
 
 for (const [Layer, cell] of [
   [H3HexagonLayer, '8928308280fffff'],
@@ -124,6 +124,38 @@ test('H3ClusterLayer does not apply source comparators to generated polygons', (
         expect(subLayer.props.dataComparator).toBeFalsy();
       }
     })),
+    onError: error => {
+      throw error;
+    }
+  });
+});
+
+test('Arrow table style updates skip descendant polygon tessellation', () => {
+  const data = new Table({value: vectorFromArray([1])});
+  const cells = vectorFromArray(['89c25']);
+  let geometryUpdate;
+  testLayer({
+    Layer: S2Layer,
+    testCases: [
+      {
+        props: {data, cells, elevations: vectorFromArray([10])},
+        onAfterUpdate: ({subLayer}) => {
+          const fill = subLayer
+            .getSubLayers()[0]
+            .getSubLayers()
+            .find(child => child.state.polygonTesselator);
+          expect(fill).toBeTruthy();
+          geometryUpdate = vi.spyOn(fill.state.polygonTesselator, 'updateGeometry');
+        }
+      },
+      {
+        updateProps: {opacity: 0.5, elevations: vectorFromArray([20])},
+        onAfterUpdate: () => {
+          expect(geometryUpdate).not.toHaveBeenCalled();
+          geometryUpdate.mockRestore();
+        }
+      }
+    ],
     onError: error => {
       throw error;
     }

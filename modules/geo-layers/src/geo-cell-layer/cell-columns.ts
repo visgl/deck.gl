@@ -82,7 +82,13 @@ export function renderCellColumns(
       throw new Error('This grid requires string cells');
     });
     for (const cell of cluster ? [ids] : ids) {
-      data.push(callbacks.row({cell}, rows[index], index));
+      data.push(
+        callbacks.row(
+          {cell, sourceIdentity: typeof props.data?.get === 'function' ? props.data : rows[index]},
+          rows[index],
+          index
+        )
+      );
     }
   }
   const styleProps: Record<string, unknown> = {};
@@ -125,7 +131,7 @@ export function renderCellColumns(
         const oldRow = previous[index];
         return (
           deepEqual(row.cell, oldRow.cell, -1) &&
-          row.__source?.object === oldRow.__source?.object &&
+          row.sourceIdentity === oldRow.sourceIdentity &&
           row.__source?.index === oldRow.__source?.index
         );
       }),

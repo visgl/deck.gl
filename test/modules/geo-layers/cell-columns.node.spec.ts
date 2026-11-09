@@ -11,7 +11,17 @@ import {
   QuadkeyLayer,
   A5Layer
 } from '@deck.gl/geo-layers';
-import {vectorFromArray, Utf8, Uint64, List, Field, Dictionary, Int32, Int64} from 'apache-arrow';
+import {
+  Table,
+  vectorFromArray,
+  Utf8,
+  Uint64,
+  List,
+  Field,
+  Dictionary,
+  Int32,
+  Int64
+} from 'apache-arrow';
 
 const cases = [
   [H3HexagonLayer, 'getHexagon', '8928308280fffff'],
@@ -128,4 +138,16 @@ test('cell rows compare source features by identity, including cyclic and built-
   changed.self = changed;
   const next = makeRows(changed);
   expect(next.dataComparator(next.data, first.data)).toBe(false);
+});
+
+test('Arrow source-table identity survives fresh row wrappers', () => {
+  const data = new Table({value: vectorFromArray([1])});
+  const cells = vectorFromArray(['89c25']);
+  const makeRows = table => (new S2Layer({data: table, cells}).renderLayers() as any).props;
+  const first = makeRows(data);
+  const next = makeRows(data);
+  expect(first.data[0].__source.object).not.toBe(next.data[0].__source.object);
+  expect(next.dataComparator(next.data, first.data)).toBe(true);
+  const changed = makeRows(new Table({value: vectorFromArray([2])}));
+  expect(changed.dataComparator(changed.data, first.data)).toBe(false);
 });
