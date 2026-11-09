@@ -264,6 +264,12 @@ test('Hexagon retains CPU aggregation for quantile elevation and integer weights
         onAfterUpdate({layer}) {
           expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
         }
+      },
+      {
+        updateProps: {opacity: 0.5, colorDomain: [0, 20]},
+        onAfterUpdate({layer}) {
+          expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+        }
       }
     ]
   });
