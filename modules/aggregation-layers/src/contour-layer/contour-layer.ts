@@ -180,6 +180,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUAggregator {
     if (type === 'webgpu')
       return new WebGPUAggregator(this.context.device, {
+        requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
         channelNames: ['counts'],
         binOptions: binOptionsUniforms,
         binning: `fn getBin(position: vec3f, low: vec3f) -> BinAssignment {

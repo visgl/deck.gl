@@ -149,3 +149,52 @@ test('Contour compute reads borrowed GPU columns and updates row prefixes', asyn
     buffer.destroy();
   }
 });
+
+test('Contour requests a redraw and recovers after a failed metadata readback', async ({skip}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  const {LayerManager} = await import('@deck.gl/core');
+  const viewport = new OrthographicView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {target: [0, 0, 0], zoom: 0}
+  });
+  const manager = new LayerManager(device, {viewport});
+  const layer = new ContourComputationLayer({data: [[1, 1]], getPosition: p => p, cellSize: 10});
+  const draw = () =>
+    layer.draw({
+      shaderModuleProps: {
+        project: {
+          viewport,
+          coordinateSystem: 'cartesian',
+          coordinateOrigin: [0, 0, 0],
+          devicePixelRatio: 1
+        }
+      }
+    } as any);
+  try {
+    manager.setLayers([layer]);
+    draw();
+    await vi.waitFor(() => expect(layer.state.aggregator.isLoaded).toBe(true), {timeout: 10000});
+    const aggregator = layer.state.aggregator;
+    const redraw = vi.spyOn(layer, 'setNeedsRedraw');
+    const onError = vi.fn();
+    const read = vi
+      .spyOn((aggregator as any).valueBuffer, 'readAsync')
+      .mockRejectedValueOnce(new Error('transient mapping failure'));
+    aggregator.setProps({onError});
+    aggregator.setNeedsUpdate();
+    draw();
+    await vi.waitFor(() => expect(onError).toHaveBeenCalledOnce(), {timeout: 10000});
+    expect(redraw).toHaveBeenCalledOnce();
+    expect(aggregator.isLoaded).toBe(false);
+    draw();
+    await vi.waitFor(() => expect(aggregator.isLoaded).toBe(true), {timeout: 10000});
+    expect(aggregator.getResultDomain(0)).toEqual([1, 1]);
+    expect((layer as any)._getContours()).not.toBeNull();
+    read.mockRestore();
+    redraw.mockRestore();
+  } finally {
+    manager.finalize();
+  }
+});
