@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>deck.gl Multi-Canvas Cities</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: #081018;
+      color: #f5f7fb;
+    }
+
+    #app {
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 16px;
+      height: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 10px 0 8px;
+      font-size: 36px;
+      line-height: 1.05;
+    }
+
+    p {
+      max-width: 760px;
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.5;
+      opacity: 0.86;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.4px;
+      opacity: 0.7;
+      text-transform: uppercase;
+    }
+
+    .status {
+      min-height: 48px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      font-weight: 700;
+    }
+
+    #map-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      min-height: 0;
+    }
+
+    .deck-events-root {
+      position: relative;
+      min-height: 0;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: #111923;
+    }
+
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .panel-label {
+      position: absolute;
+      z-index: 2;
+      top: 12px;
+      left: 12px;
+      max-width: 220px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: rgba(8, 16, 24, 0.72);
+      pointer-events: none;
+    }
+
+    .panel-label strong,
+    .panel-label span {
+      display: block;
+    }
+
+    .panel-label strong {
+      font-size: 18px;
+    }
+
+    .panel-label span {
+      margin-top: 3px;
+      font-size: 13px;
+      line-height: 1.35;
+      opacity: 0.82;
+    }
+  </style>
+</head>
+<body>
+  <main id="app">
+    <header>
+      <div class="eyebrow">deck.gl multi-canvas</div>
+      <h1>Four live city views, one Deck instance</h1>
+      <p>Each panel has its own DOM canvas, event root, controller, view-bound widget, and filtered layer stack.</p>
+    </header>
+    <div id="hover-status" class="status"></div>
+    <div id="map-grid">
+      <section class="deck-events-root">
+        <canvas id="new-york"></canvas>
+        <div class="panel-label"><strong>New York</strong><span>Midtown lights and waterfront routes</span></div>
+      </section>
+      <section class="deck-events-root">
+        <canvas id="london"></canvas>
+        <div class="panel-label"><strong>London</strong><span>River crossings and west end clusters</span></div>
+      </section>
+      <section class="deck-events-root">
+        <canvas id="tokyo"></canvas>
+        <div class="panel-label"><strong>Tokyo</strong><span>Station density across the eastern core</span></div>
+      </section>
+      <section class="deck-events-root">
+        <canvas id="sydney"></canvas>
+        <div class="panel-label"><strong>Sydney</strong><span>Harbor landmarks with coastal spillover</span></div>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="app.ts"></script>
+</body>
+</html>
