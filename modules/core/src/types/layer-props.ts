@@ -5,6 +5,7 @@
 import type {CoordinateSystem} from '../lib/constants';
 import type Layer from '../lib/layer';
 import type LayerExtension from '../lib/layer-extension';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
 import type {BinaryAttribute} from '../lib/attribute/attribute';
 import type {ConstructorOf, NumericArray, TypedArray} from './types';
 import type {PickingInfo} from '../lib/picking/pick-info';
@@ -12,7 +13,7 @@ import type {MjolnirEvent} from 'mjolnir.js';
 
 import type {Texture, TextureProps} from '@luma.gl/core';
 import type {Buffer, Parameters} from '@luma.gl/core';
-import type {Loader} from '@loaders.gl/loader-utils';
+import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
 import type {Matrix4Like} from '@math.gl/core';
 
@@ -20,7 +21,7 @@ export type LayerData<T> =
   | Iterable<T>
   | {
       length: number;
-      attributes?: Record<string, TypedArray | Buffer | BinaryAttribute>;
+      attributes?: Record<string, TypedArray | Buffer | BinaryAttribute | GPUVector>;
     };
 
 export type AccessorContext<T> = {
@@ -217,7 +218,8 @@ export type LayerProps = {
    */
   loadOptions?: any;
   /**
-   * Callback to calculate the polygonOffset WebGL parameter.
+   * Callback returning [factor, units] for triangle depth offset.
+   * Uses polygon offset on WebGL and depth bias on WebGPU (with units rounded to an integer).
    */
   getPolygonOffset?: ((params: {layerIndex: number}) => [number, number]) | null;
 

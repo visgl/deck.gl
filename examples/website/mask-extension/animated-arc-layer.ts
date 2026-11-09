@@ -4,7 +4,7 @@
 
 import {ArcLayer, ArcLayerProps} from '@deck.gl/layers';
 import {Accessor, DefaultProps} from '@deck.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 const uniformBlock = `\
 uniform tripsUniforms {
@@ -49,33 +49,39 @@ export default class AnimatedArcLayer<DataT = any, ExtraProps = {}> extends ArcL
 
   getShaders() {
     const shaders = super.getShaders();
-    shaders.inject = {
-      'vs:#decl': `\
+    shaders.plugins = [
+      ...(shaders.plugins || []),
+      {
+        name: 'animatedArc',
+        module: tripsUniforms,
+        injections: {
+          'glsl:vs:#decl': `\
 in float instanceSourceTimestamp;
 in float instanceTargetTimestamp;
 out float vTimestamp;
 `,
-      'vs:#main-end': `\
+          'glsl:vs:#main-end': `\
 vTimestamp = mix(instanceSourceTimestamp, instanceTargetTimestamp, segmentRatio);
 `,
-      'fs:#decl': `\
+          'glsl:fs:#decl': `\
 in float vTimestamp;
 `,
-      'fs:#main-start': `\
+          'glsl:fs:#main-start': `\
 if (vTimestamp < trips.timeRange.x || vTimestamp > trips.timeRange.y) {
   discard;
 }
 `,
-      // Shape trail into teardrop
-      'fs:DECKGL_FILTER_COLOR': `\
+          // Shape trail into teardrop
+          'glsl:fs:DECKGL_FILTER_COLOR': `\
 float f = (vTimestamp - trips.timeRange.x) / (trips.timeRange.y - trips.timeRange.x);
 color.a *= pow(f, 5.0);
 float cap = 10.0 * (f - 0.9);
 float w = pow(f, 4.0) - smoothstep(0.89, 0.91, f) * pow(cap, 4.0);
 color.a *= smoothstep(1.1 * w, w, abs(geometry.uv.y));
 `
-    };
-    shaders.modules = [...shaders.modules, tripsUniforms];
+        }
+      }
+    ];
     return shaders;
   }
 

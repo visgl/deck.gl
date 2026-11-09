@@ -4,12 +4,12 @@
 
 import {WebMercatorViewport, OrthographicViewport, _GlobeViewport} from '@deck.gl/core';
 import type {Layer, ProjectUniforms, Viewport} from '@deck.gl/core';
-import * as vec3 from '@math.gl/core/vec3';
-import * as vec4 from '@math.gl/core/vec4';
+import {vec3} from '@math.gl/core';
+import {vec4} from '@math.gl/core';
 import type {NumericArray} from '@math.gl/core';
 
-/** TILE_SIZE in the project shader module */
-const TILE_SIZE = 512;
+/** TILE_SIZE in the project shader module: the width of one world copy in flat common space */
+export const TILE_SIZE = 512;
 /** GLOBE_RADIUS / EARTH_RADIUS in the project shader module */
 const GLOBE_METERS_TO_COMMON = 256 / 6370972;
 
@@ -47,7 +47,7 @@ export function isFlatViewport(viewport: Viewport): boolean {
 
 /** Per-call overrides of the layer's coordinateSystem, coordinateOrigin and modelMatrix */
 export type FlatProjectOptions = {
-  sourceCrs?: import('@math.gl/projection/core').CRSDescriptor;
+  sourceCrs?: import('@math.gl/geospatial/projection/core').CRSDescriptor;
   coordinateSystem?: 'cartesian' | 'meter-offsets';
   coordinateOrigin?: [number, number, number];
   modelMatrix?: NumericArray | null;
@@ -96,13 +96,15 @@ function projectGlobeMeterOffsetsToFlatCommon(
   }
   // project.commonOrigin: sphere position of the coordinate origin
   const originCommon = viewport.projectPosition(origin);
-  // project_get_orientation_matrix(commonOrigin)
+  // project_get_orientation_matrix(commonOrigin): east, north and up
   const uz = vec3.normalize([] as number[], originCommon);
-  const ux = Math.abs(uz[2]) === 1 ? [1, 0, 0] : vec3.normalize([] as number[], [uz[1], -uz[0], 0]);
+  const horizontalLength = Math.hypot(uz[0], uz[1]);
+  const ux =
+    horizontalLength > 0 ? [-uz[1] / horizontalLength, uz[0] / horizontalLength, 0] : [1, 0, 0];
   const uy = vec3.cross([] as number[], uz, ux);
-  // enuMatrix * vec3(-x, -y, z) * metersToCommon
+  // enuMatrix * vec3(x, y, z) * metersToCommon
   const displaced = [0, 1, 2].map(
-    i => originCommon[i] + (ux[i] * -x + uy[i] * -y + uz[i] * z) * GLOBE_METERS_TO_COMMON
+    i => originCommon[i] + (ux[i] * x + uy[i] * y + uz[i] * z) * GLOBE_METERS_TO_COMMON
   );
   // project_globe_to_mercator_
   const lngLatZ = viewport.unprojectPosition(displaced);

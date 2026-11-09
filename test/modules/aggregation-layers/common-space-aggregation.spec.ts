@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {WebGPUScreenGridAggregator} from '../../../modules/aggregation-layers/src/screen-grid-layer/webgpu-screen-grid-aggregator';
 import {createTestViewport} from '../core/viewports/test-crs';
 import {WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {test, expect, vi} from 'vitest';
@@ -22,7 +23,7 @@ import {
   WebGLAggregator
 } from '@deck.gl/aggregation-layers';
 import {device} from '@deck.gl/test-utils/vitest';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Matrix4} from '@math.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getUniformsFromViewport} from '@deck.gl/core/shaderlib/project/viewport-uniforms';
@@ -254,7 +255,7 @@ for (const binary of [false, true]) {
   }
 }
 
-test('ScreenGridLayer reuses packed positions across backend changes and WebGPU CPU fallback', async () => {
+test('ScreenGridLayer reuses packed positions across CPU, WebGL, and WebGPU backends', async () => {
   for (const targetDevice of [device, await getWebGPUTestDevice()]) {
     if (!targetDevice) continue;
     const viewport = createViewport();
@@ -280,15 +281,22 @@ test('ScreenGridLayer reuses packed positions across backend changes and WebGPU 
         layer = layer.clone({gpuAggregation});
         manager.setLayers([layer]);
         const expectedType =
-          gpuAggregation && WebGLAggregator.isSupported(targetDevice)
-            ? WebGLAggregator
-            : CPUAggregator;
+          gpuAggregation && targetDevice.type === 'webgpu'
+            ? WebGPUScreenGridAggregator
+            : gpuAggregation && WebGLAggregator.isSupported(targetDevice)
+              ? WebGLAggregator
+              : CPUAggregator;
         expect(layer.state.aggregator).toBeInstanceOf(expectedType);
         layer.draw({shaderModuleProps: {project: {viewport, modelMatrix}}} as any);
         expect(layer.getAttributeManager()!.attributes.positions.value).toBe(positions);
         expect(getPosition).not.toHaveBeenCalled();
         expect(viewport.crs!.converter.WGS84.from).not.toHaveBeenCalled();
         const aggregator = layer.state.aggregator;
+        if (aggregator instanceof WebGPUScreenGridAggregator) {
+          await vi.waitFor(() => expect(aggregator.getResultValues(0)).not.toBeNull(), {
+            timeout: 10000
+          });
+        }
         const bins = Array.from({length: aggregator.binCount}, (_, i) =>
           aggregator.getBin(i)
         ).filter(bin => bin && bin.count > 0);

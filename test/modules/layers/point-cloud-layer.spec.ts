@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {UNIT} from '@deck.gl/core';
-import {preprocess} from '@luma.gl/shadertools';
+import {preprocess} from '@luma.gl/shaders';
 
 import {PointCloudLayer} from '@deck.gl/layers';
 import pointCloudVertexShader from '@deck.gl/layers/point-cloud-layer/point-cloud-layer-vertex.glsl';

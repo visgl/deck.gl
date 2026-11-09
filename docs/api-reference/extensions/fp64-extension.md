@@ -1,7 +1,7 @@
 
 # Fp64Extension
 
-The `Fp64Extension` adds 64-bit precision to geospatial layers.
+The `Fp64Extension` adds extended-precision Mercator projection to geospatial layers. It represents coordinates as high and low `f32` terms using luma.gl's `fp64` shader module; this is emulated double-single arithmetic, not native IEEE 754 binary64.
 
 > Note: This extension is the equivalent of the `fp64` prop from older deck.gl versions. As of v6.3, the fp64 mode was deprecated in favor of the new default 32-bit projection mode that is comparable in precision but considerably more performant.
 
@@ -58,7 +58,9 @@ When added to a layer via the `extensions` prop, the `Fp64Extension` uses WGS84 
 
 ## Limitations
 
-- Only `MapView` (and other Web Mercator based viewports) are supported. `GlobeView` and Non-geospatial views such as `OrthographicView` and `OrbitView` are not supported.
+Only `MapView` and other Web Mercator based viewports are supported. `GlobeView`, custom projections, and non-geospatial views such as `OrthographicView` and `OrbitView` are not supported. The default projection remains recommended for most applications because it is substantially faster.
+
+Software WebGPU adapters such as SwiftShader are not validated for high-zoom fp64 precision.
 
 ## Source
 

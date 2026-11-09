@@ -4,8 +4,9 @@
 
 import {test, expect} from 'vitest';
 import * as FIXTURES from 'deck.gl-test/data';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
-import {LayerManager, MapView} from '@deck.gl/core';
+import {testLayer, testLayerAsync, generateLayerTests, device} from '@deck.gl/test-utils/vitest';
+import {LayerManager, MapView, _GPUVectorModel as GPUVectorModel} from '@deck.gl/core';
+import {Buffer} from '@luma.gl/core';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 import {default as TriangleLayer} from '@deck.gl/aggregation-layers/heatmap-layer/triangle-layer';
 import {
@@ -19,10 +20,76 @@ import weightSource from '@deck.gl/aggregation-layers/heatmap-layer/weights.wgsl
 import {
   getShaderModuleSource,
   getShaderModuleUniformLayoutValidationResult
-} from '@luma.gl/shadertools';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+} from '@luma.gl/shaders';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
 const getPosition = d => d.COORDINATES;
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`TriangleLayer borrows typed vertex buffers on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    const positions = testDevice.createBuffer({
+      data: new Float32Array(12),
+      usage: Buffer.VERTEX | Buffer.COPY_DST
+    });
+    const texCoords = testDevice.createBuffer({
+      data: new Float32Array(8),
+      usage: Buffer.VERTEX | Buffer.COPY_DST
+    });
+    const texture = testDevice.createTexture({
+      width: 1,
+      height: 1,
+      data: new Uint8Array([0, 0, 0, 255])
+    });
+    try {
+      await testLayerAsync({
+        Layer: TriangleLayer,
+        device: testDevice,
+        testCases: [
+          {
+            props: {
+              data: {attributes: {positions, texCoords}},
+              vertexCount: 4,
+              colorDomain: [0, 1],
+              aggregationMode: 0,
+              threshold: 0,
+              intensity: 1,
+              colorTexture: texture,
+              maxTexture: texture,
+              weightsTexture: texture
+            },
+            onAfterUpdate: ({layer}) => {
+              const model = layer.getModels()[0] as GPUVectorModel;
+              expect(model).toBeInstanceOf(GPUVectorModel);
+              for (const [name, buffer] of Object.entries({positions, texCoords})) {
+                const slot =
+                  backend === 'webgl'
+                    ? model.pipeline.shaderLayout.attributes!.find(
+                        attribute => attribute.name === name
+                      )!.location
+                    : model.vertexArray.getBufferSlot(name)!;
+                expect(model.vertexArray.attributes[slot]).toBe(buffer);
+              }
+            }
+          }
+        ],
+        onError: error => {
+          throw error;
+        }
+      });
+      expect(positions.destroyed).toBe(false);
+      expect(texCoords.destroyed).toBe(false);
+    } finally {
+      positions.destroy();
+      texCoords.destroy();
+      texture.destroy();
+    }
+  });
+}
 
 test('HeatmapLayer#WGSL uniform layouts', () => {
   const modules = [
@@ -387,5 +454,77 @@ test('HeatmapLayer#WebGPU binary positions', async ({skip}) => {
     ).toBeNull();
 
     layerManager.finalize();
+  }
+});
+
+test('Heatmap borrows GPU columns and updates row prefixes', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) return skip();
+  const {GPUVector} = await import('@luma.gl/graph/gpu-data');
+  const buffer = webgpuDevice.createBuffer({
+    data: new Float32Array([999, 999, 999, 999, -122.4, 37.8, 0, 2, -122.3, 37.7, 0, 3]),
+    usage: Buffer.VERTEX | Buffer.COPY_DST
+  });
+  const positions = new GPUVector({
+    type: 'buffer',
+    name: 'positions',
+    format: 'float32x3',
+    byteOffset: 16,
+    buffer,
+    length: 2,
+    byteStride: 16,
+    ownsBuffer: false
+  });
+  const weights = new GPUVector({
+    type: 'buffer',
+    name: 'weights',
+    format: 'float32',
+    buffer,
+    length: 2,
+    byteOffset: 28,
+    byteStride: 16,
+    ownsBuffer: false
+  });
+  webgpuDevice.handle.pushErrorScope('validation');
+  try {
+    const manager = new LayerManager(webgpuDevice, {viewport: viewport0});
+    const errors: Error[] = [];
+    manager.setProps({onError: error => errors.push(error)});
+    let layer = new HeatmapLayer({
+      positions,
+      weights: [weights],
+      weightsTextureSize: 128,
+      getPosition: () => {
+        throw new Error('Accessor called');
+      }
+    });
+    try {
+      for (const count of [2, 1, 0, 2]) {
+        layer = layer.clone({numInstances: count});
+        manager.setLayers([layer]);
+        expect(errors.map(error => error.message)).toEqual([]);
+        expect(layer.state.weightsTransform.model.instanceCount).toBe(count);
+        const model = layer.state.weightsTransform.model;
+        const vertexArray = model.vertexArray;
+        for (const [name, offset] of [
+          ['instancePositions', 16],
+          ['instanceWeights', 28]
+        ] as const) {
+          const slot = vertexArray.getBufferSlot(name)!;
+          expect(slot).not.toBeNull();
+          expect(vertexArray.attributes[slot]).toBe(buffer);
+          expect(vertexArray.attributeByteOffsets[slot]).toBe(offset);
+          expect(model.bufferLayout.find(layout => layout.name === name)!.byteStride).toBe(16);
+        }
+      }
+    } finally {
+      manager.finalize();
+    }
+    expect(buffer.destroyed).toBe(false);
+  } finally {
+    positions.destroy();
+    weights.destroy();
+    buffer.destroy();
+    expect(await webgpuDevice.handle.popErrorScope()).toBeNull();
   }
 });

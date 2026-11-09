@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 // deck.gl, MIT license
-import type {CRSDescriptor} from '@math.gl/projection/core';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import ComponentState from '../lifecycle/component-state';
 
 import type Layer from './layer';

@@ -168,6 +168,50 @@ Called for each data object to retrieve the geohash string identifier.
 * default: `object => object.geohash`
 
 
+### Column Inputs
+
+#### `cells` (object, optional) {#cells}
+
+* Default: `null`
+
+A CPU-readable Arrow column of cell identifiers. Each row contains one cell or a list of cells
+belonging to one feature. String and dictionary-encoded string columns are accepted.
+
+When `data` is supplied, its row count must match `cells`. Omitted styling columns use accessors
+with the original feature and source row index. Null cells and GPU-only columns are unsupported.
+`highlightedObjectIndex` selects an expanded cell row in column mode. Picking reports
+the source feature index.
+See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates) for updates.
+
+#### `fillColors` (object, optional) {#fillcolors}
+
+* Default: `null`
+
+RGBA fill colors as a CPU-readable Arrow column in source feature order. Requires `cells`
+and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+
+#### `lineColors` (object, optional) {#linecolors}
+
+* Default: `null`
+
+RGBA outline colors as a CPU-readable Arrow column in source feature order. Requires `cells`
+and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+
+#### `lineWidths` (object, optional) {#linewidths}
+
+* Default: `null`
+
+Outline widths as a CPU-readable Arrow column in source feature order. Requires `cells`
+and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+
+#### `elevations` (object, optional) {#elevations}
+
+* Default: `null`
+
+Elevations as a CPU-readable Arrow column in source feature order. Requires `cells`
+and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+
+
 ## Sub Layers
 
 The `GeohashLayer` renders the following sublayers:
