@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -10,7 +10,8 @@ import {testLayer, testLayerAsync, generateLayerTests, device} from '@deck.gl/te
 
 import {LayerManager, MapView} from '@deck.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {ContourLayer, CPUAggregator} from '@deck.gl/aggregation-layers';
+import {ContourLayer} from '@deck.gl/aggregation-layers';
+import {WebGPUAggregator} from '../../../../modules/aggregation-layers/src/common/aggregator/webgpu-aggregator/webgpu-aggregator';
 import type {ContourLayerProps} from '@deck.gl/aggregation-layers';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 const webglTest = device.type === 'webgl' ? test : test.skip;
@@ -22,7 +23,9 @@ const CONTOURS: ContourLayerProps['contours'] = [
   {threshold: [6, 10], color: [0, 0, 255]} // => Isoband for threshold range [6, 10)
 ];
 
-test('ContourLayer#WebGPU renders isolines and isobands with CPU aggregation', async ({skip}) => {
+test('ContourLayer#WebGPU renders isolines and isobands with compute aggregation', async ({
+  skip
+}) => {
   const webgpuDevice = await getWebGPUTestDevice();
 
   if (!webgpuDevice) {
@@ -52,7 +55,24 @@ test('ContourLayer#WebGPU renders isolines and isobands with CPU aggregation', a
   layerManager.setLayers([layer]);
 
   expect(errors).toEqual([]);
-  expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+  expect(layer.state.aggregator).toBeInstanceOf(WebGPUAggregator);
+  await vi.waitFor(
+    () => {
+      layer.draw({
+        shaderModuleProps: {
+          project: {
+            viewport,
+            coordinateSystem: 'lnglat',
+            coordinateOrigin: [0, 0, 0],
+            devicePixelRatio: 1
+          }
+        }
+      } as any);
+      expect(layer.state.aggregator.isLoaded).toBe(true);
+    },
+    {timeout: 10000}
+  );
+  layerManager.updateLayers();
 
   const renderedLayers = layerManager.getLayers();
   expect(renderedLayers.some(renderedLayer => renderedLayer instanceof PathLayer)).toBe(true);
