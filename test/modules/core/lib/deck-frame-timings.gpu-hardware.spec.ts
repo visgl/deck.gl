@@ -7,10 +7,10 @@
 import {test, expect, beforeAll, afterAll, vi} from 'vitest';
 import {luma, Buffer, Texture} from '@luma.gl/core';
 import type {Device, Framebuffer, QuerySet} from '@luma.gl/core';
-import {webgpuAdapter} from '@luma.gl/webgpu';
-import type {WebGPUDevice} from '@luma.gl/webgpu';
-import {webgl2Adapter} from '@luma.gl/webgl';
-import type {WebGLDevice} from '@luma.gl/webgl';
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
+import type {WebGPUDevice} from '@luma.gl/core/webgpu';
+import {webgl2Adapter} from '@luma.gl/core/webgl';
+import type {WebGLDevice} from '@luma.gl/core/webgl';
 import {Deck, MapView} from '@deck.gl/core';
 import type {DeckProps} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
