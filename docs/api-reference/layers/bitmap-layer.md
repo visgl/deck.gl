@@ -148,6 +148,9 @@ The image data will be converted to a [Texture](https://luma.gl/docs/api-referen
 
 #### `bounds` (number[4] | Position[4]) {#bounds}
 
+When `positions` is supplied, it defines the rendered mesh. For GPU-only positions, `bounds`
+provides the footprint for view fitting.
+
 Supported formats:
 
 - Coordinates of the bounding box of the bitmap `[left, bottom, right, top]`
@@ -155,6 +158,69 @@ Supported formats:
 
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
 `top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
+
+#### `positions` (object, optional) {#positions}
+
+* Default: `null`
+
+Mesh vertex positions, replacing the quad from `bounds`. Accepts numeric Arrow XY/XYZ
+fixed-size lists or a `float32x2`/`float32x3` GPUVector. With GPU-only positions,
+set `bounds` to the footprint for view fitting.
+
+#### `texCoords` (object, optional) {#texcoords}
+
+* Default: `null`
+
+Texture coordinates per vertex as Arrow XY fixed-size lists or a `float32x2` GPUVector.
+Supply with `positions` and the same vertex count. `(0, 0)` is the image's top-left corner.
+These coordinates take precedence over `_imageCoordinateSystem`.
+
+#### `indices` (object, optional) {#indices}
+
+* Default: `null`
+
+Optional `uint16` or `uint32` triangle indices. Without indices, every three vertices form
+a triangle. Removing all mesh props restores the quad from `bounds`.
+
+Remarks:
+
+* Each input must be a single Arrow chunk or GPU buffer.
+* GPUVector inputs remain owned by the application. Keep them alive while the layer uses them.
+* GPU-only positions require a view that does not convert positions on the CPU.
+* Mesh inputs cannot be async iterables, and mesh changes do not transition.
+* See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates) for updates.
+
+#### `imageMapping` (object, optional) {#imagemapping}
+
+* Default: `null`
+
+Use when the image and mesh use different projections. The object contains `bounds`
+(`[left, bottom, right, top]` in the image CRS), `imageCRS`, and `positionCRS`.
+Both CRS fields accept math.gl CRS definitions such as PROJ strings. Keep `positionCRS`
+consistent with the layer's `coordinateSystem`. Without `positions`, the layer uses its
+`bounds` footprint and the view's subdivision step.
+
+Remarks:
+
+* Replaces `texCoords` and `_imageCoordinateSystem`. Setting `texCoords` too raises an error.
+* Positions must be CPU-readable Arrow columns. GPU-only meshes require explicit `texCoords`.
+* Split projection seams and clip to the image CRS's valid area before supplying the mesh.
+
+#### `meshMaxEdgeLength` (number, optional) {#meshmaxedgelength}
+
+* Default: `null`
+
+Requires `imageMapping`. Splits triangles with edges longer than this length in position units.
+Use it when a coarse mesh visibly bends the image. XYZ positions must use one unit on all axes.
+Very small values can exceed refinement limits and raise an error.
+
+#### `_projectionTolerance` (number, optional) {#_projectiontolerance}
+
+* Default: `0`
+
+> Note: This prop is experimental
+
+Maximum sampled projection error in meters when a preprojecting view bends the image. Zero retains the `resolution` grid. Requires CPU preprojection and does not support `coordinateSystem: 'cartesian'`. See [Adaptive refinement](../core/custom-projection-view.md#adaptive-refinement).
 
 #### `loadOptions` (object, optional) {#loadoptions}
 
@@ -267,78 +333,3 @@ new BitmapLayer({
 ## Source
 
 [modules/layers/src/bitmap-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/bitmap-layer)
-
-### Typed meshes
-
-`positions`, `texCoords`, and optional `indices` supply a triangle mesh instead of
-one generated from `bounds`. Each input accepts an Apache Arrow column or a
-caller-owned luma.gl `GPUVector`.
-
-* `positions`: `FixedSizeList[2]` or `FixedSizeList[3]` numeric Arrow positions,
-  or `float32x2`/`float32x3` GPU positions. Arrow float64 coordinates retain
-  high/low precision when required by the layer.
-* `texCoords`: `FixedSizeList[2]` numeric Arrow values or a `float32x2` GPU vector.
-  `(0, 0)` is the top-left corner of the image.
-* `indices`: optional tightly packed `uint16` or `uint32` triangle indices.
-  GPU index buffers must have index usage and matching index-type metadata.
-
-Supply positions and texture coordinates together, with matching vertex counts.
-Without indices, every three consecutive vertices form a triangle. Inputs must
-have a single contiguous chunk; indexed multi-chunk topology is not supported.
-GPU buffers retain their offsets and strides and remain caller-owned. Keep them
-alive until the layer no longer uses them. Arrow conversion buffers are released
-by the layer. In-place mutations do not trigger updates; replace the input object.
-
-Supplied UVs take precedence over `_imageCoordinateSystem`. Bitmap picking still
-returns image UV and pixel coordinates. CPU positions provide view-fitting bounds;
-for GPU-only inputs, set `bounds` to the mesh footprint. GPU-only positions cannot
-be used when a custom projection requires CPU preprojection. No implicit GPU
-readback is performed. Async mesh iterators and topology transitions are not supported.
-
-Removing all three mesh props restores the bounds-generated mesh.
-
-### Generated texture coordinates
-
-Set `imageMapping` to generate texture coordinates from CPU-readable Arrow positions:
-
-```typescript
-new BitmapLayer({
-  image,
-  positions,
-  indices, // optional manual segmentation
-  imageMapping: {
-    bounds: [left, bottom, right, top],
-    positionCRS: '+proj=longlat +datum=WGS84',
-    imageCRS: '+proj=merc +a=6378137 +b=6378137 +units=m'
-  },
-  meshMaxEdgeLength: 0.25 // optional, in input position-coordinate units
-});
-```
-
-`imageMapping.bounds` is an axis-aligned rectangle in `imageCRS`. Both CRS values
-are explicit math.gl CRS definitions. Positions are interpreted in `positionCRS`
-before the layer's model matrix or rendering projection. The viewport does not
-select the image projection. Set the layer's `coordinateSystem` consistently with
-`positionCRS`; the mapping affects UVs, not the layer's position interpretation.
-Without positions, the layer generates a footprint
-from its ordinary `bounds` prop. Explicit `texCoords` and `imageMapping` are mutually
-exclusive; `_imageCoordinateSystem` does not replace generated UVs.
-
-`meshMaxEdgeLength` must be finite and positive and requires `imageMapping`.
-It subdivides source-space triangles using math.gl's bounded refinement helper.
-Omitting it preserves the supplied segmentation and winding. Distinct seam vertices
-are not welded. The limit is a source-space edge length, not a screen-space error
-bound; for geographic positions use degrees, and avoid mixing elevation units in
-refinement inputs. Tiny limits may exceed math.gl's refinement or allocation bounds
-and report an error.
-
-The layer transforms each resulting vertex into the image CRS, then calculates
-`u = (x - left) / (right - left)` and `v = (top - y) / (top - bottom)`.
-Out-of-range UVs retain the configured texture sampler's behavior. Split projection
-seams and clip invalid projection domains before supplying a mesh. Nonfinite
-positions or projection results and degenerate image bounds are rejected.
-
-Generation requires CPU-readable Arrow columns. GPUVector inputs currently expose
-no supported CPU-value interface and must supply complete positions and UVs instead;
-the layer never performs implicit GPU readback. Manual GPU meshes remain supported
-without `imageMapping`.

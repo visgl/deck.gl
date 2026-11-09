@@ -3,11 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {createArrowTextLayerDeck} from '../../../../../examples/v10-experimental/arrow-text-layer/app';
-import {createArrowPolygonLayerDeck} from '../../../../../examples/v10-experimental/arrow-polygon-layer/app';
+import {createArrowTextLayerDeck} from '../../../../../examples/proposals/arrow-text-layer/app';
+import {createArrowPolygonLayerDeck} from '../../../../../examples/proposals/arrow-polygon-layer/app';
 
 const sources = vi.hoisted(() => ({text: null as any, polygon: null as any}));
-vi.mock('../../../../../examples/v10-experimental/arrow-deck', () => ({
+vi.mock('../../../../../examples/proposals/arrow-deck', () => ({
   ArrowDeck: class {
     props: any;
     constructor(props: any) {
@@ -19,7 +19,7 @@ vi.mock('../../../../../examples/v10-experimental/arrow-deck', () => ({
   }
 }));
 vi.mock('@luma.gl/engine/text', () => ({buildSdfFontAtlas: () => ({})}));
-vi.mock('../../../../../examples/v10-experimental/arrow-text-layer/arrow-text-data-source', () => ({
+vi.mock('../../../../../examples/proposals/arrow-text-layer/arrow-text-data-source', () => ({
   ArrowTextDataSource: class {
     constructor(props: any) {
       sources.text = props;
@@ -27,7 +27,7 @@ vi.mock('../../../../../examples/v10-experimental/arrow-text-layer/arrow-text-da
   }
 }));
 vi.mock(
-  '../../../../../examples/v10-experimental/shared/arrow/arrow-polygons/arrow-polygon-data-source',
+  '../../../../../examples/proposals/shared/arrow/arrow-polygons/arrow-polygon-data-source',
   () => ({
     ArrowPolygonDataSource: class {
       constructor(props: any) {

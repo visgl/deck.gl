@@ -6,8 +6,6 @@ The `PathStyleExtension` adds dashes and offsets to the [PathLayer](../layers/pa
 
 <PathStyleExtensionDemo />
 
-WebGPU supports PathLayer dashes and offsets, ScatterplotLayer outline dashes, and TextLayer background dashes.
-
 ## Installation
 
 To install the dependencies from NPM:

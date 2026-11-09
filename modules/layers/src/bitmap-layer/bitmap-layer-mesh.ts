@@ -15,11 +15,11 @@ export type BitmapMeshSource = ColumnSource | GPUVector;
 
 /** Triangle mesh inputs with explicit texture coordinates or a CPU image mapping. */
 export type BitmapMeshProps = BitmapMappingProps & {
-  /** XY/XYZ positions. GPU-only meshes use bounds for view-fitting metadata. */
+  /** Arrow XY/XYZ lists or float32x2/float32x3 GPUVector positions, replacing bounds. */
   positions?: BitmapMeshSource | null;
   /** Two texture coordinates per vertex, with (0, 0) at the image's top left. */
   texCoords?: BitmapMeshSource | null;
-  /** Optional tightly packed uint16/uint32 triangle indices. */
+  /** Optional uint16/uint32 triangle indices. Otherwise every three vertices form a triangle. */
   indices?: BitmapMeshSource | null;
 };
 
@@ -50,7 +50,11 @@ export class BitmapLayerMesh {
   /** Prepares a replacement atomically and ignores superseded asynchronous conversions. */
   async update(
     props: BitmapMeshProps & {bounds?: BitmapBoundingBox},
-    options: {transform?: (value: number[]) => readonly number[]; fp64?: boolean},
+    options: {
+      transform?: (value: number[]) => readonly number[];
+      fp64?: boolean;
+      resolution?: number;
+    },
     changed: () => void,
     failed: (error: Error) => void
   ): Promise<void> {
@@ -60,7 +64,10 @@ export class BitmapLayerMesh {
     try {
       if (props.imageMapping || props.meshMaxEdgeLength != null) {
         const {createMappedBitmapMesh} = await import('./bitmap-layer-mapping');
-        props = createMappedBitmapMesh({...props, bounds: props.bounds ?? [1, 0, 0, 1]});
+        props = createMappedBitmapMesh(
+          {...props, bounds: props.bounds ?? [1, 0, 0, 1]},
+          options.resolution
+        );
       }
       if (!props.positions || !props.texCoords)
         throw new Error('Bitmap positions require texCoords');

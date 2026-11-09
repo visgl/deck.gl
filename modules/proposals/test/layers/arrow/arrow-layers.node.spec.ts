@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, it} from 'vitest';
+import {ArrowPathRendererLayer} from '../../../src/layers/path-layer/arrow-path-renderer-layer';
 import {ArrowPathLayer, ArrowPolygonLayer, ArrowTextLayer} from '@deck.gl/proposals/layers';
 import {makeGPUVectorFromArrow, makeArrowFixedSizeListVector} from '@luma.gl/graph/arrow';
 import type {Model} from '@luma.gl/engine';
@@ -49,7 +50,7 @@ it('Arrow deck layers do not use AttributeManager for Arrow GPU vectors', () => 
 });
 
 it('Arrow deck layers expose their active draw models to Deck', () => {
-  const pathLayer = new ArrowPathLayer({id: 'path'});
+  const pathLayer = new ArrowPathRendererLayer({id: 'path'});
   const polygonLayer = new ArrowPolygonLayer({id: 'polygon'});
   const textLayer = new ArrowTextLayer({id: 'text'});
   const pathModel = {id: 'path-model'} as Model;

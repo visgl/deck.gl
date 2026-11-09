@@ -245,11 +245,8 @@ If `true`, circles are rendered with smoothed edges. If `false`, circles are ren
 
 ### Arrow Columns
 
-Install `apache-arrow` to pass Arrow vectors directly. Each column overrides its corresponding
-accessor; omitted columns use the accessors or binary attributes. All supplied columns must have
-the same length, and nonempty `data` must have that length as well.
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
 
-See [Using with Arrow](../../developer-guide/using-with-arrow.md) for modes and loading.
 These examples draw the same two circles.
 
 <Tabs groupId="scatterplot-input">
@@ -288,17 +285,35 @@ const layer = new ScatterplotLayer({positions, radii, getFillColor: [255, 140, 0
 </TabItem>
 </Tabs>
 
-* `positions`: numeric XY or XYZ fixed-size lists, overriding `getPosition`.
-* `radii`: numeric scalars, overriding `getRadius`.
-* `fillColors`: RGB or RGBA fixed-size lists, overriding `getFillColor`.
-* `lineColors`: RGB or RGBA fixed-size lists, overriding `getLineColor`.
-* `lineWidths`: numeric scalars, overriding `getLineWidth`.
+#### `positions` (Arrow Vector, optional)
 
-Floating-point color components use the range 0–1; integer components use 0–255.
-Nulls, mismatched lengths, and differing chunk structures are rejected. Column mode does not support attribute transitions or
-extensions. Conversion is asynchronous: `layer.isLoaded` includes conversion state, and Deck's
-[`onAfterRender`](../core/deck.md#onafterrender) runs after a frame. Neither is a dedicated callback
-for GPU completion. Errors are reported through the layer's `onError` callback.
+* Default: `null`
+
+Numeric XY or XYZ fixed-size lists specifying circle centers. Overrides [`getPosition`](#getposition).
+
+#### `radii` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric scalar radii in `radiusUnits`. Overrides [`getRadius`](#getradius).
+
+#### `fillColors` (Arrow Vector, optional)
+
+* Default: `null`
+
+RGB or RGBA fixed-size lists specifying fill colors. Overrides [`getFillColor`](#getfillcolor).
+
+#### `lineColors` (Arrow Vector, optional)
+
+* Default: `null`
+
+RGB or RGBA fixed-size lists specifying outline colors. Overrides [`getLineColor`](#getlinecolor).
+
+#### `lineWidths` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric scalar outline widths in `lineWidthUnits`. Overrides [`getLineWidth`](#getlinewidth).
 
 ### Data Accessors
 
