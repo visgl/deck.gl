@@ -225,7 +225,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/maplibre@npm:9.4.1":
+"@deck.gl/maplibre@npm:9.4.1, @deck.gl/maplibre@npm:^9.4.0":
   version: 9.4.1
   resolution: "@deck.gl/maplibre@npm:9.4.1"
   peerDependencies:
@@ -1889,6 +1889,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-react-map-gl-maplibre@workspace:."
   dependencies:
+    "@deck.gl/maplibre": "npm:^9.4.0"
     deck.gl: "npm:^9.4.0"
     maplibre-gl: "npm:^6.0.0"
     react: "npm:^18.0.0"

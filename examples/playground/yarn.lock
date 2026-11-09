@@ -20,7 +20,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/aggregation-layers@npm:9.4.1":
+"@deck.gl/aggregation-layers@npm:9.4.1, @deck.gl/aggregation-layers@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/aggregation-layers@npm:9.4.1"
   dependencies:
@@ -52,7 +52,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/carto@npm:9.4.1":
+"@deck.gl/carto@npm:9.4.1, @deck.gl/carto@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/carto@npm:9.4.1"
   dependencies:
@@ -91,7 +91,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/core@npm:9.4.1":
+"@deck.gl/core@npm:9.4.1, @deck.gl/core@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/core@npm:9.4.1"
   dependencies:
@@ -131,7 +131,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/geo-layers@npm:9.4.1":
+"@deck.gl/geo-layers@npm:9.4.1, @deck.gl/geo-layers@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/geo-layers@npm:9.4.1"
   dependencies:
@@ -164,7 +164,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/google-maps@npm:9.4.1":
+"@deck.gl/google-maps@npm:9.4.1, @deck.gl/google-maps@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/google-maps@npm:9.4.1"
   dependencies:
@@ -179,7 +179,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/json@npm:9.4.1":
+"@deck.gl/json@npm:9.4.1, @deck.gl/json@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/json@npm:9.4.1"
   dependencies:
@@ -190,7 +190,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/layers@npm:9.4.1":
+"@deck.gl/layers@npm:9.4.1, @deck.gl/layers@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/layers@npm:9.4.1"
   dependencies:
@@ -236,7 +236,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/mesh-layers@npm:9.4.1":
+"@deck.gl/mesh-layers@npm:9.4.1, @deck.gl/mesh-layers@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/mesh-layers@npm:9.4.1"
   dependencies:
@@ -254,7 +254,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/react@npm:9.4.1":
+"@deck.gl/react@npm:9.4.1, @deck.gl/react@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/react@npm:9.4.1"
   peerDependencies:
@@ -266,7 +266,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/widgets@npm:9.4.1":
+"@deck.gl/widgets@npm:9.4.1, @deck.gl/widgets@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/widgets@npm:9.4.1"
   dependencies:
@@ -1129,6 +1129,13 @@ __metadata:
   peerDependencies:
     "@loaders.gl/core": ~4.5.0
   checksum: 10c0/65bc7d84deca7187c3231f85dcb00320eb96eaf39d5cee819ce66874b9336c701aeec773f5ca3454ff2a10b47f72b1ba5799237293ae4cff7b877a60c75410f9
+  languageName: node
+  linkType: hard
+
+"@luma.gl/constants@npm:^9.0.0":
+  version: 9.4.2
+  resolution: "@luma.gl/constants@npm:9.4.2"
+  checksum: 10c0/52241e2331ffe0b2af1b425d20f7862bd8c27f010b9ba1a5a02a6d87fe7ac0ae5e217dac69f250aab679913ea90f793c1fe900817b4459516abca6d29ad77608
   languageName: node
   linkType: hard
 
@@ -2292,10 +2299,21 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-examples-playground@workspace:."
   dependencies:
+    "@deck.gl/aggregation-layers": "npm:^9.0.0"
+    "@deck.gl/carto": "npm:^9.0.0"
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/geo-layers": "npm:^9.0.0"
+    "@deck.gl/google-maps": "npm:^9.0.0"
+    "@deck.gl/json": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
+    "@deck.gl/mesh-layers": "npm:^9.0.0"
+    "@deck.gl/react": "npm:^9.0.0"
+    "@deck.gl/widgets": "npm:^9.0.0"
     "@loaders.gl/core": "npm:5.0.0-beta.5"
     "@loaders.gl/scene": "npm:5.0.0-beta.5"
     "@loaders.gl/tables": "npm:5.0.0-beta.5"
     "@loaders.gl/tiles-3d": "npm:5.0.0-beta.5"
+    "@luma.gl/constants": "npm:^9.0.0"
     "@monaco-editor/react": "npm:^4.4.6"
     deck.gl: "npm:^9.0.0"
     maplibre-gl: "npm:^5.0.0"

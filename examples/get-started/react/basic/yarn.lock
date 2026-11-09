@@ -254,7 +254,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/react@npm:9.4.1":
+"@deck.gl/react@npm:9.4.1, @deck.gl/react@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/react@npm:9.4.1"
   peerDependencies:
@@ -1713,6 +1713,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-react-basic@workspace:."
   dependencies:
+    "@deck.gl/react": "npm:^9.0.0"
     deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"

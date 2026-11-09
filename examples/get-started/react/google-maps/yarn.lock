@@ -164,7 +164,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/google-maps@npm:9.4.1":
+"@deck.gl/google-maps@npm:9.4.1, @deck.gl/google-maps@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/google-maps@npm:9.4.1"
   dependencies:
@@ -1726,6 +1726,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-example-react-google-maps@workspace:."
   dependencies:
+    "@deck.gl/google-maps": "npm:^9.0.0"
     "@vis.gl/react-google-maps": "npm:^0.7.1"
     deck.gl: "npm:^9.0.0"
     react: "npm:^18.0.0"

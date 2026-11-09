@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "vite",
-    "build": "tsc && vite build",
+    "start": "../../../node_modules/.bin/vite",
+    "build": "../../../node_modules/.bin/tsc && ../../../node_modules/.bin/vite build",
     "test:visual": "node scripts/visual-smoke.mjs",
     "benchmark": "FLOW_RUN_TIMING=true node scripts/visual-smoke.mjs"
   }

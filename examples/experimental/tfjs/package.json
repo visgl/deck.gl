@@ -9,6 +9,8 @@
     "build": "tsc && vite build"
   },
   "dependencies": {
+    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/layers": "^9.0.0",
     "@tensorflow/tfjs": "^4.2.0",
     "deck.gl": "^9.0.0"
   },

@@ -98,7 +98,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/core@npm:9.4.1":
+"@deck.gl/core@npm:9.4.1, @deck.gl/core@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/core@npm:9.4.1"
   dependencies:
@@ -197,7 +197,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/layers@npm:9.4.1":
+"@deck.gl/layers@npm:9.4.1, @deck.gl/layers@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/layers@npm:9.4.1"
   dependencies:
@@ -232,7 +232,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/maplibre@npm:9.4.1":
+"@deck.gl/maplibre@npm:9.4.1, @deck.gl/maplibre@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/maplibre@npm:9.4.1"
   peerDependencies:
@@ -2218,6 +2218,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-examples-maplibre@workspace:."
   dependencies:
+    "@deck.gl/core": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
+    "@deck.gl/maplibre": "npm:^9.0.0"
     "@loaders.gl/tables": "npm:5.0.0-beta.5"
     "@material-ui/core": "npm:^4.10.2"
     "@material-ui/icons": "npm:^4.9.1"

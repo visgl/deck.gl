@@ -164,7 +164,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/google-maps@npm:9.4.1":
+"@deck.gl/google-maps@npm:9.4.1, @deck.gl/google-maps@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/google-maps@npm:9.4.1"
   dependencies:
@@ -190,7 +190,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/layers@npm:9.4.1":
+"@deck.gl/layers@npm:9.4.1, @deck.gl/layers@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/layers@npm:9.4.1"
   dependencies:
@@ -236,7 +236,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/mesh-layers@npm:9.4.1":
+"@deck.gl/mesh-layers@npm:9.4.1, @deck.gl/mesh-layers@npm:^9.0.0":
   version: 9.4.1
   resolution: "@deck.gl/mesh-layers@npm:9.4.1"
   dependencies:
@@ -1756,6 +1756,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "deckgl-examples-google-maps-3d@workspace:."
   dependencies:
+    "@deck.gl/google-maps": "npm:^9.0.0"
+    "@deck.gl/layers": "npm:^9.0.0"
+    "@deck.gl/mesh-layers": "npm:^9.0.0"
     "@googlemaps/js-api-loader": "npm:^1.16.0"
     "@turf/rhumb-bearing": "npm:^6.5.0"
     "@turf/rhumb-distance": "npm:^6.5.0"
