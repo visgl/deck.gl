@@ -4,14 +4,14 @@
 
 import {expect, test, vi} from 'vitest';
 import type {ArrowPathLayer} from '@deck.gl/proposals/layers';
-import type {ArrowPathDataSourceProps} from '../../../../../examples/v10-experimental/arrow-path-layer/arrow-path-data-source';
-import {MEASURE_SWEEP_DURATION} from '../../../../../examples/v10-experimental/shared/arrow/arrow-lines/arrow-line-data';
-import {createArrowPathLayerDeck} from '../../../../../examples/v10-experimental/arrow-path-layer/app';
+import type {ArrowPathDataSourceProps} from '../../../../../examples/proposals/arrow-path-layer/arrow-path-data-source';
+import {MEASURE_SWEEP_DURATION} from '../../../../../examples/proposals/shared/arrow/arrow-lines/arrow-line-data';
+import {createArrowPathLayerDeck} from '../../../../../examples/proposals/arrow-path-layer/app';
 
 const callbacks = vi.hoisted(() => ({
   onDataUpdated: null as ArrowPathDataSourceProps['onDataUpdated'] | null
 }));
-vi.mock('../../../../../examples/v10-experimental/arrow-path-layer/arrow-path-data-source', () => ({
+vi.mock('../../../../../examples/proposals/arrow-path-layer/arrow-path-data-source', () => ({
   ArrowPathDataSource: class {
     constructor(props: ArrowPathDataSourceProps) {
       callbacks.onDataUpdated = props.onDataUpdated;
@@ -20,7 +20,7 @@ vi.mock('../../../../../examples/v10-experimental/arrow-path-layer/arrow-path-da
     finalize(): void {}
   }
 }));
-vi.mock('../../../../../examples/v10-experimental/arrow-deck', () => ({
+vi.mock('../../../../../examples/proposals/arrow-deck', () => ({
   ArrowDeck: class {
     props: any;
     constructor(props: any) {
@@ -51,14 +51,16 @@ for (const useColumns of [false, true]) {
     deck.props.onBeforeRender!({deck} as never);
     const next = deck.props.layers[0] as ArrowPathLayer;
     expect(next.props.data).toBe(iterator);
-    expect(next.props.color).toBe(previous.props.color);
-    expect(next.props.width).toBe(previous.props.width);
-    next.state = {sourceInitialized: true, batches: [], loadVersion: 1};
-    const loadSource = vi.spyOn(next as any, 'loadSource');
-    vi.spyOn(next, 'setNeedsRedraw').mockImplementation(() => {});
-    next.updateState({
-      props: next.props,
-      oldProps: previous.props,
+    expect(next.props.colors).toBe(previous.props.colors);
+    expect(next.props.widths).toBe(previous.props.widths);
+    const previousRenderer = previous.renderLayers().renderLayers();
+    const nextRenderer = next.renderLayers().renderLayers();
+    nextRenderer.state = {sourceInitialized: true, batches: [], loadVersion: 1};
+    const loadSource = vi.spyOn(nextRenderer as any, 'loadSource');
+    vi.spyOn(nextRenderer, 'setNeedsRedraw').mockImplementation(() => {});
+    nextRenderer.updateState({
+      props: nextRenderer.props,
+      oldProps: previousRenderer.props,
       changeFlags: {dataChanged: false}
     } as never);
     expect(loadSource).not.toHaveBeenCalled();

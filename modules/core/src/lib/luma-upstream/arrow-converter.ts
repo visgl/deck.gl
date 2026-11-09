@@ -3,12 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import type {Device} from '@luma.gl/core';
-import type {GPUVectorFormat} from '@luma.gl/graph/gpu-data';
+import type {GPUVector, GPUVectorFormat} from '@luma.gl/graph/gpu-data';
 import {DataType, type RecordBatch, type Vector} from 'apache-arrow';
 import {uploadArrowVector, type PreparedArrowGPUVector} from './arrow-to-gpu-vector';
 
-/** Structural Arrow input contract, without loading Arrow in accessor-only layers. */
-export type ColumnSource = Pick<Vector, 'length' | 'type' | 'data'>;
+/** Arrow columns or borrowed GPU vectors accepted by layer column props. */
+export type ColumnSource = Pick<Vector, 'length' | 'type' | 'data'> | GPUVector;
 
 /** Layer-oriented semantics, for numeric, position, scalar, and color conversion. */
 export type ArrowConverterSemantic = 'auto' | 'numeric' | 'position' | 'scalar' | 'color';

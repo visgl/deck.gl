@@ -155,6 +155,33 @@ visuals when used with the right data set can be quite effective.
 
 
 
+## Compute aggregation
+
+On a WebGPU device, `gpuAggregation: true` uses compute aggregation when
+`colorDomain` is explicit, `pickable` is false, and no extensions are enabled.
+All five aggregation operations are supported. Bin IDs and values remain in GPU
+buffers through cell rendering. Automatic color domains, picking, and extensions
+use CPU aggregation.
+
+```ts
+new ScreenGridLayer({
+  data,
+  getPosition: d => d.position,
+  getWeight: d => d.weight,
+  gpuAggregation: true,
+  colorDomain: [0, 100],
+  cellSizePixels: 40
+});
+```
+
+This path also accepts `positions` and `weights` GPUVectors without a custom
+aggregator. Positions must be single-chunk `float32x2` or `float32x3`, and weights
+must be a single-chunk `float32` vector. Buffers need `STORAGE` or `COPY_SRC` usage;
+non-storage inputs are copied on the GPU. Custom views require GPU positions in
+the view's coordinate system. Accessor inputs use the normal position conversion.
+For GPU-only inputs, keep the compute conditions above or supply a custom aggregator.
+
+
 ## Installation
 
 To install the dependencies from NPM:

@@ -40,7 +40,7 @@ void main(void) {
 #ifdef USE_ROW_INDEXES
   geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
 #else
-  geometry.pickingColor = picking_getPickingColorFromInstanceID();
+  geometry.pickingColor = picking_getPickingColorFromIndex(uint(gl_InstanceID) + icon.rowIndexOffset);
 #endif
   uv = positions;
 

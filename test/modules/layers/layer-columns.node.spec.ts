@@ -6,7 +6,7 @@ import {expect, test, vi} from 'vitest';
 import {NullDevice} from '@luma.gl/core/test-utils';
 import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
 import {ArrowConverter} from '@deck.gl/core/arrow';
-import {LayerColumns} from '../../../modules/layers/src/utils/layer-columns';
+import {LayerColumns} from '../../../modules/core/src/lib/layer-columns';
 
 function positions() {
   return vectorFromArray(

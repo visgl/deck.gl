@@ -151,6 +151,7 @@ const config = {
             '@deck.gl/core': resolve('../modules/core/dist'),
             '@deck.gl/extensions': resolve('../modules/extensions/dist'),
             '@deck.gl/geo-layers': resolve('../modules/geo-layers/dist'),
+            '@deck.gl/proposals/layers': resolve('../modules/proposals/src/layers/index.ts'),
             '@deck.gl/google-maps': resolve('../modules/google-maps/dist'),
             '@deck.gl/json': resolve('../modules/json/dist'),
             '@deck.gl/layers': resolve('../modules/layers/dist'),
@@ -159,6 +160,7 @@ const config = {
             '@deck.gl/mesh-layers': resolve('../modules/mesh-layers/dist'),
             '@deck.gl/react': resolve('../modules/react/dist'),
             '@deck.gl/widgets': resolve('../modules/widgets/dist'),
+            'proposal-examples': resolve('../examples/proposals'),
             'website-examples': resolve('../examples/website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom')
