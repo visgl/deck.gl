@@ -187,8 +187,7 @@ CPU aggregation is used as fallback in the following cases:
 
 #### Compute aggregation
 
-On a WebGPU device, `GridLayer` uses compute aggregation when `gpuAggregation` is enabled
-and both `colorDomain` and `elevationDomain` are supplied. Color and elevation are aggregated
+On a WebGPU device, `GridLayer` uses compute aggregation when `gpuAggregation` is enabled. Color and elevation are aggregated
 independently using `SUM`, `MEAN`, `MIN`, `MAX`, or `COUNT`. Results remain in GPU buffers
 and are passed directly to the cell layer.
 
@@ -210,9 +209,8 @@ Accessor-based data and single-chunk `float32x2`/`float32x3` position vectors wi
 `STORAGE` or `COPY_SRC` usage. Columns used in custom views must already use that view's
 coordinate system.
 
-Picking, layer extensions, custom aggregation callbacks, domain callbacks, quantile or
-ordinal scales, and percentile filtering use CPU aggregation instead. GPU-only input columns
-cannot use this fallback; supply accessor-based data or a custom aggregator for these features.
+Extensions currently require accessor data rather than GPU columns. Custom JavaScript
+callbacks and grids exceeding device limits use CPU aggregation.
 
 #### `cellSize` (number, optional) {#cellsize}
 

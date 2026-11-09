@@ -127,13 +127,7 @@ export default class ScreenGridLayer<
   static defaultProps = defaultProps;
 
   getAggregatorType(): string {
-    if (
-      this.props.gpuAggregation &&
-      this.context.device.type === 'webgpu' &&
-      this.props.colorDomain &&
-      !this.props.extensions.length &&
-      !this.props.pickable
-    ) {
+    if (this.props.gpuAggregation && this.context.device.type === 'webgpu') {
       if (
         (!this.props.positions &&
           !WebGPUScreenGridAggregator.supportsData(this.props.data, [
@@ -170,14 +164,26 @@ export default class ScreenGridLayer<
   }
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUScreenGridAggregator {
-    if (type === 'webgpu') return new WebGPUScreenGridAggregator(this.context.device);
+    if (type === 'webgpu')
+      return new WebGPUScreenGridAggregator(this.context.device, {
+        shaders: this.getAggregationShaders(),
+        requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
+        bindAttributes: model => {
+          const layer = this.getCurrentLayer()! as this;
+          const manager = layer.getAttributeManager()!;
+          model.setGPUAttributes(
+            manager.getGPUVectors(),
+            manager.getBufferLayouts().map(layout => ({...layout, stepMode: 'instance' as const}))
+          );
+        }
+      });
     if (type === 'cpu' || !WebGLAggregator.isSupported(this.context.device)) {
       return new CPUAggregator({
         dimensions: 2,
         getBin: {
           sources: ['positions'],
           getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
-            const layer = this.getCurrentLayer()!;
+            const layer = this.getCurrentLayer()! as this;
             const viewport = layer.context.viewport;
             const commonPosition = this.projectPositionFromAttribute(positions, viewport);
             const p = worldToPixels(commonPosition, viewport.pixelProjectionMatrix);
@@ -243,6 +249,10 @@ export default class ScreenGridLayer<
 
     const {props, oldProps, changeFlags} = params;
     const {cellSizePixels, aggregation} = props;
+    this.state.aggregator.setProps({
+      readback: !props.colorDomain || Boolean(props.pickable),
+      onUpdate: () => this.getCurrentLayer()?.setState({})
+    });
     if (
       aggregatorChanged ||
       changeFlags.dataChanged ||
@@ -326,6 +336,7 @@ export default class ScreenGridLayer<
 
   renderLayers(): LayersList | Layer | null {
     const {aggregator} = this.state;
+    if (aggregator.isLoaded === false) return null;
     const CellLayerClass = this.getSubLayerClass('cells', ScreenGridCellLayer);
     const binAttribute = aggregator.getBins();
     const weightAttribute = aggregator.getResult(0);

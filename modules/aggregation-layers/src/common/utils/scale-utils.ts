@@ -38,7 +38,11 @@ export class AttributeWithScale {
   /** Valid domain if lower/upper percentile are defined */
   cutoff: [number, number] | null = null;
 
-  constructor(input: AggregationResult, inputLength: number) {
+  constructor(
+    input: AggregationResult,
+    inputLength: number,
+    private readonly inputValues?: Float32Array | null
+  ) {
     this.input = input;
     this.inputLength = inputLength;
     // No processing is needed with the default scale
@@ -52,7 +56,7 @@ export class AttributeWithScale {
 
   private getScalePercentile() {
     if (!this._percentile) {
-      const value = getAttributeValue(this.input, this.inputLength);
+      const value = this.inputValues || getAttributeValue(this.input, this.inputLength);
       this._percentile = applyScaleQuantile(value);
     }
     return this._percentile;
@@ -60,7 +64,7 @@ export class AttributeWithScale {
 
   private getScaleOrdinal() {
     if (!this._ordinal) {
-      const value = getAttributeValue(this.input, this.inputLength);
+      const value = this.inputValues || getAttributeValue(this.input, this.inputLength);
       this._ordinal = applyScaleOrdinal(value);
     }
     return this._ordinal;
