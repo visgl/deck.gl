@@ -52,6 +52,8 @@ The website gallery includes three new sections: Arrow Layers, Visual Effects, a
 
 ### Extension updates
 
+[`MaskExtension`](./api-reference/extensions/mask-extension.md) supports up to four masks on WebGPU in map and globe views, including inverted masks and picking.
+
 Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) with `countItems` to report how many objects pass numeric or category filters.
 
 ### Custom projections (Experimental)
