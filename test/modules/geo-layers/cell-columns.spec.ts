@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {testLayer} from '@deck.gl/test-utils/vitest';
 import {
   H3HexagonLayer,
@@ -26,6 +26,7 @@ for (const [Layer, cell] of [
     const cells = vectorFromArray([cell]);
     let previousCells;
     let previousRows;
+    let geometryUpdates: ReturnType<typeof vi.spyOn>[] = [];
     testLayer({
       Layer: Layer as typeof H3HexagonLayer,
       testCases: [
@@ -47,7 +48,20 @@ for (const [Layer, cell] of [
           if (previousCells === layer.props.cells) {
             expect(subLayer.props.dataComparator(rows, previousRows)).toBe(true);
             expect(subLayer.internalState.changeFlags.dataChanged).toBeFalsy();
+            for (const update of geometryUpdates) expect(update).not.toHaveBeenCalled();
           }
+          for (const update of geometryUpdates) update.mockRestore();
+          geometryUpdates = [];
+          const watchGeometry = (child: any) => {
+            if (child.state?.polygonTesselator) {
+              geometryUpdates.push(vi.spyOn(child.state.polygonTesselator, 'updateGeometry'));
+            }
+            const positions = child.getAttributeManager?.()?.getAttributes().instancePositions;
+            if (positions) geometryUpdates.push(vi.spyOn(positions, 'updateBuffer'));
+            for (const descendant of child.getSubLayers?.() ?? []) watchGeometry(descendant);
+          };
+          watchGeometry(subLayer);
+          expect(geometryUpdates.length).toBeGreaterThan(0);
           previousCells = layer.props.cells;
           previousRows = rows;
           expect(rows.length).toBe(layer.props.cells.length);

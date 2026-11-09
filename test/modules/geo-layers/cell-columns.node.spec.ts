@@ -114,3 +114,18 @@ test('signed A5 identifiers become unsigned bigint values', () => {
   const child = layer.renderLayers() as any;
   expect(child.props.getPentagon(child.props.data[0])).toBe(cell);
 });
+
+test('cell rows compare source features by identity, including cyclic and built-in objects', () => {
+  const cells = vectorFromArray(['8928308280fffff']);
+  const source: any = {date: new Date(0), values: new Map([['height', 1]])};
+  source.self = source;
+  const makeRows = (feature: any) =>
+    (new H3ClusterLayer({cells, data: [feature]}).renderLayers() as any).props;
+  const first = makeRows(source);
+  const same = makeRows(source);
+  expect(same.dataComparator(same.data, first.data)).toBe(true);
+  const changed: any = {date: new Date(1), values: new Map([['height', 2]])};
+  changed.self = changed;
+  const next = makeRows(changed);
+  expect(next.dataComparator(next.data, first.data)).toBe(false);
+});

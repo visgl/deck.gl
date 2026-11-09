@@ -384,6 +384,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
       new FillLayer(
         {
           _dataDiff,
+          dataComparator: this.props.dataComparator,
           extruded,
           elevationScale,
 

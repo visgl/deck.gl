@@ -265,6 +265,7 @@ export default class H3HexagonLayer<
     } = this.props;
 
     return {
+      dataComparator: this.props.dataComparator,
       elevationScale,
       extruded,
       coverage,

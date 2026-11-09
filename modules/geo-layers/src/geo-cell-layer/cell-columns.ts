@@ -125,7 +125,7 @@ export function renderCellColumns(
         const oldRow = previous[index];
         return (
           deepEqual(row.cell, oldRow.cell, -1) &&
-          deepEqual(row.__source?.object, oldRow.__source?.object, -1) &&
+          row.__source?.object === oldRow.__source?.object &&
           row.__source?.index === oldRow.__source?.index
         );
       }),
