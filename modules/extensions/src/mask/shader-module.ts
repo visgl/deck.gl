@@ -137,7 +137,10 @@ const maskModule = {
 export const maskPlugin: ShaderPlugin = {
   name: 'mask',
   module: maskModule,
-  interStageVariables: {mask_texCoords: {type: 'vec2<f32>'}},
+  interStageVariables: {
+    mask_texCoords: {type: 'vec2<f32>'},
+    mask_commonPosition: {type: 'vec3<f32>'}
+  },
   injections: {
     ...inject,
     'wgsl:vs:DECKGL_FILTER_GL_POSITION': /* wgsl */ `
@@ -165,17 +168,17 @@ if (mask.enabled != 0) {
           cross(rowX, rowY) * depthDelta) / determinant, commonPosition.w);
     }
   }
-  // Keep globe triangles continuous in the world copy containing this mask.
-  let flatPosition = project_common_position_to_flat_continuous(
-    commonPosition.xyz, 0.5 * (mask.bounds.x + mask.bounds.z)
-  );
-  let coords = (flatPosition - mask.bounds.xy) / (mask.bounds.zw - mask.bounds.xy);
-  mask_texCoords = vec2<f32>(coords.x, 1.0 - coords.y);
+  mask_commonPosition = commonPosition.xyz;
 }
 `,
     'wgsl:fs:DECKGL_FILTER_COLOR': /* wgsl */ `
 if (mask.enabled != 0) {
-  let maskColor = textureSampleLevel(mask_texture, mask_textureSampler, mask_texCoords, 0.0);
+  // Wrap after interpolation so no triangle interpolates across a longitude seam.
+  let flatPosition = project_common_position_to_flat_continuous(
+    mask_commonPosition, 0.5 * (mask.bounds.x + mask.bounds.z)
+  );
+  let coords = (flatPosition - mask.bounds.xy) / (mask.bounds.zw - mask.bounds.xy);
+  let maskColor = textureSampleLevel(mask_texture, mask_textureSampler, vec2<f32>(coords.x, 1.0 - coords.y), 0.0);
   let inside = maskColor[u32(mask.channel)] < 0.5;
   if (inside == (mask.inverted != 0)) { discard; }
 }
