@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {project32} from '@deck.gl/core';
-import {Buffer, type Device} from '@luma.gl/core';
-import {Computation} from '@luma.gl/engine';
+import {project32, _GPUVectorModel as GPUVectorModel, _deepEqual as deepEqual} from '@deck.gl/core';
+import {Buffer, type Device, type Texture, type Framebuffer} from '@luma.gl/core';
+import {getFilterSource} from './filter.wgsl';
+import {Computation, type ModelProps} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shaders';
 import {GPUVector, GPUConstant, getGPUVectorData} from '@luma.gl/graph/gpu-data';
 import type {Aggregator, AggregationProps} from '../aggregator';
@@ -12,7 +13,10 @@ import {AggregationColumnPreparation} from './column-preparation';
 import {initializeSource, getAggregateSource, finalizeSource} from './reduce.wgsl';
 
 /** Layer-specific bin assignment and input channel names for dense 2D reduction. */
-type WebGPUAggregatorOptions = {
+export type WebGPUAggregatorOptions = {
+  shaders?: Pick<ModelProps, 'plugins' | 'shaderAssembler' | 'modules' | 'defines'>;
+  requestRedraw?: () => void;
+  bindAttributes?: (model: GPUVectorModel) => void;
   channelNames: readonly string[];
   binning: string;
   binOptions: ShaderModule;
@@ -44,6 +48,21 @@ const aggregationUniforms = {
     dispatchWidth: 'u32'
   }
 } as const;
+
+// Keep plain uniform values by value, but retain resource identity and revision.
+function snapshotUniformProps(value: any, depth = 4): any {
+  if (!value || typeof value !== 'object' || depth === 0) return value;
+  if (Array.isArray(value) || ArrayBuffer.isView(value))
+    return Array.from(value as ArrayLike<unknown>);
+  if (Object.getPrototypeOf(value) !== Object.prototype) {
+    return typeof value.updateTimestamp === 'number'
+      ? {resource: value, revision: value.updateTimestamp}
+      : value;
+  }
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entry]) => [key, snapshotUniformProps(entry, depth - 1)])
+  );
+}
 
 /** Shared dense-bin compute reduction. Layer adapters supply only bin assignment. @internal */
 export class WebGPUAggregator implements Aggregator {
@@ -95,8 +114,23 @@ export class WebGPUAggregator implements Aggregator {
   }
 
   binCount = 0;
+  get isLoaded(): boolean {
+    return !this.dirty && (!this.props.readback || this.snapshot !== null);
+  }
+  private filterModel?: GPUVectorModel;
+  private filterTexture?: Texture;
+  private filterTarget?: Framebuffer;
   private props: AggregationProps = {pointCount: 0, attributes: {}, operations: [], binOptions: {}};
   private dirty = true;
+  private revision = 0;
+  private metadataRetryRevision = -1;
+  private extensionUniformProps: Record<string, unknown> = {};
+  private destroyed = false;
+  private snapshot: {
+    values: Float32Array[];
+    counts: Uint32Array;
+    range: [number, number][];
+  } | null = null;
   private columns = 0;
   private bins: Buffer | null = null;
   private idBuffer: Buffer | null = null;
@@ -129,6 +163,21 @@ export class WebGPUAggregator implements Aggregator {
       source: finalizeSource,
       modules: [aggregationUniforms]
     });
+    if (options.shaders?.plugins?.length) {
+      this.filterModel = new GPUVectorModel(device, {
+        ...options.shaders,
+        id: 'aggregation-extension-filter',
+        source: getFilterSource(options.channelNames, options.binning),
+        modules: [...(options.shaders.modules || []), aggregationUniforms, options.binOptions],
+        vertexCount: 6,
+        isInstanced: true,
+        topology: 'triangle-list',
+        colorAttachmentFormats: ['rgba8unorm'],
+        parameters: {depthWriteEnabled: false}
+      });
+      this.filterTexture = device.createTexture({width: 1, height: 1, format: 'rgba8unorm'});
+      this.filterTarget = device.createFramebuffer({colorAttachments: [this.filterTexture]});
+    }
     this.zero = device.createBuffer({
       data: new Float32Array(3),
       usage: Buffer.STORAGE | Buffer.COPY_DST
@@ -136,20 +185,45 @@ export class WebGPUAggregator implements Aggregator {
   }
 
   setProps(props: Partial<AggregationProps>): void {
+    if (props.shaderModuleProps && this.filterModel) {
+      for (const plugin of this.options.shaders?.plugins || []) {
+        const name = plugin.module?.name;
+        if (name && name in props.shaderModuleProps) {
+          const next = snapshotUniformProps(props.shaderModuleProps[name]);
+          if (!deepEqual(next, this.extensionUniformProps[name], 4)) {
+            this.extensionUniformProps[name] = next;
+            this.setNeedsUpdate();
+          }
+        }
+      }
+    }
     for (const key in props) {
       if (key === 'attributes') {
         // Attribute objects are mutable; only the changed-attribute map signals new data.
-        if (Object.keys(props.attributes!).length) this.dirty = true;
-      } else if (key !== 'shaderModuleProps' && props[key] !== this.props[key]) {
-        this.dirty = true;
+        if (Object.keys(props.attributes!).length) this.setNeedsUpdate();
+      } else if (
+        key !== 'shaderModuleProps' &&
+        key !== 'onUpdate' &&
+        key !== 'onError' &&
+        props[key] !== this.props[key]
+      ) {
+        this.setNeedsUpdate();
       }
     }
     if (props.attributes)
       props = {...props, attributes: {...this.props.attributes, ...props.attributes}};
     Object.assign(this.props, props);
-    if (props.shaderModuleProps) this.aggregate.shaderInputs.setProps(props.shaderModuleProps);
-    if (props.binOptions)
-      this.aggregate.shaderInputs.setProps({[this.options.binOptions.name]: props.binOptions});
+    if (props.shaderModuleProps) {
+      if (props.shaderModuleProps.project) {
+        this.aggregate.shaderInputs.setProps({project: props.shaderModuleProps.project});
+      }
+      this.filterModel?.shaderInputs.setProps(props.shaderModuleProps);
+    }
+    if (props.binOptions) {
+      const options = {[this.options.binOptions.name]: props.binOptions};
+      this.aggregate.shaderInputs.setProps(options);
+      this.filterModel?.shaderInputs.setProps(options);
+    }
     const range = this.props.binIdRange;
     if (range) {
       this.columns = range[0][1] - range[0][0];
@@ -160,6 +234,8 @@ export class WebGPUAggregator implements Aggregator {
   }
 
   setNeedsUpdate(): void {
+    this.revision++;
+    this.snapshot = null;
     this.dirty = true;
   }
 
@@ -172,7 +248,7 @@ export class WebGPUAggregator implements Aggregator {
     const usage = Buffer.STORAGE | Buffer.VERTEX | Buffer.COPY_SRC | Buffer.COPY_DST;
     this.bins = this.device.createBuffer({
       byteLength: capacity * channelCount * 8,
-      usage: Buffer.STORAGE
+      usage: Buffer.STORAGE | Buffer.COPY_SRC
     });
     this.idBuffer = this.device.createBuffer({byteLength: capacity * 8, usage});
     this.valueBuffer = this.device.createBuffer({byteLength: capacity * channelCount * 4, usage});
@@ -202,13 +278,26 @@ export class WebGPUAggregator implements Aggregator {
   preDraw(): void {
     if (!this.dirty) return;
     this.update();
-    if (this.binCount) this.run();
+    if (this.binCount && !this.run()) return;
     this.dirty = false;
-    for (let channel = 0; channel < this.options.channelNames.length; channel++)
-      this.props.onUpdate?.({channel});
+    if (this.props.readback && this.binCount) {
+      void this.readMetadata(this.revision);
+    } else {
+      if (this.props.readback)
+        this.snapshot = {
+          values: this.options.channelNames.map(() => new Float32Array(0)),
+          counts: new Uint32Array(0),
+          range: this.props.binIdRange || [
+            [0, 0],
+            [0, 0]
+          ]
+        };
+      for (let channel = 0; channel < this.options.channelNames.length; channel++)
+        this.props.onUpdate?.({channel});
+    }
   }
 
-  private run(): void {
+  private run(): boolean {
     // Use a separate encoder: the cell render pass may already be open.
     const encoder = this.device.createCommandEncoder();
     const columns = new AggregationColumnPreparation(this.device, encoder, this.zero);
@@ -260,6 +349,23 @@ export class WebGPUAggregator implements Aggregator {
         [this.aggregate, this.props.pointCount],
         [this.finalizeBins, this.binCount]
       ] as const) {
+        if (computation === this.aggregate && this.filterModel) {
+          this.options.bindAttributes!(this.filterModel);
+          this.filterModel.setInstanceCount(this.props.pointCount);
+          this.filterModel.setBindings({bins: this.bins!});
+          this.filterModel.shaderInputs.setProps({aggregation: {...settings, dispatchWidth: 0}});
+          const pass = encoder.beginRenderPass({
+            framebuffer: this.filterTarget!,
+            clearColor: [0, 0, 0, 0]
+          });
+          const drawn = this.filterModel.draw(pass);
+          pass.end();
+          if (!drawn) {
+            this.options.requestRedraw?.();
+            return false;
+          }
+          continue;
+        }
         const groups = Math.ceil(count / 64);
         const width = Math.min(groups, this.device.limits.maxComputeWorkgroupsPerDimension);
         computation.shaderInputs.setProps({aggregation: {...settings, dispatchWidth: width * 64}});
@@ -271,6 +377,7 @@ export class WebGPUAggregator implements Aggregator {
         }
       }
       this.device.submit(encoder.finish());
+      return true;
     } finally {
       encoder.destroy();
       columns.destroy();
@@ -283,11 +390,77 @@ export class WebGPUAggregator implements Aggregator {
   getResult(channel: number): GPUVector | null {
     return this.results[channel] || null;
   }
-  getResultDomain(): [number, number] {
-    throw new Error('Compute aggregation requires explicit domains');
+  getResultValues(channel: number): Float32Array | null {
+    return this.snapshot?.values[channel] || null;
   }
-  getBin(): null {
-    return null;
+  getResultDomain(channel: number): [number, number] {
+    const values = this.getResultValues(channel);
+    let min = Infinity;
+    let max = -Infinity;
+    for (const value of values || [])
+      if (Number.isFinite(value)) {
+        min = Math.min(min, value);
+        max = Math.max(max, value);
+      }
+    return min === Infinity ? [0, 0] : [min, max];
+  }
+  getBin(index: number) {
+    const snapshot = this.snapshot;
+    if (!snapshot || index < 0 || index >= snapshot.counts.length || !snapshot.counts[index])
+      return null;
+    const columns = snapshot.range[0][1] - snapshot.range[0][0];
+    return {
+      id: [
+        (index % columns) + snapshot.range[0][0],
+        Math.floor(index / columns) + snapshot.range[1][0]
+      ],
+      value: snapshot.values.map(values => values[index]),
+      count: snapshot.counts[index]
+    };
+  }
+
+  private async readMetadata(revision: number): Promise<void> {
+    const length = this.binCount;
+    const channels = this.options.channelNames.length;
+    const range = this.props.binIdRange!.map(pair => [...pair] as [number, number]);
+    try {
+      const [valueBytes, countBytes] = await Promise.all([
+        this.valueBuffer!.readAsync(),
+        this.bins!.readAsync()
+      ]);
+      if (this.destroyed || revision !== this.revision) return;
+      const packed = new Float32Array(
+        valueBytes.buffer,
+        valueBytes.byteOffset,
+        valueBytes.byteLength / 4
+      );
+      const scratch = new Uint32Array(
+        countBytes.buffer,
+        countBytes.byteOffset,
+        countBytes.byteLength / 4
+      );
+      const values = Array.from({length: channels}, (_, channel) =>
+        Float32Array.from({length}, (_, i) => packed[i * channels + channel])
+      );
+      const counts = Uint32Array.from({length}, (_, i) => scratch[i * channels * 2]);
+      this.snapshot = {values, counts, range};
+      for (let channel = 0; channel < channels; channel++) {
+        if (this.destroyed || revision !== this.revision) return;
+        this.props.onUpdate?.({channel});
+      }
+    } catch (error) {
+      if (!this.destroyed && revision === this.revision) {
+        // Retry a transient mapping failure once; persistent errors are reported below.
+        if (this.metadataRetryRevision !== revision) {
+          this.metadataRetryRevision = revision;
+          this.dirty = true;
+          this.options.requestRedraw?.();
+        }
+        const failure = error instanceof Error ? error : new Error(String(error));
+        if (this.props.onError) this.props.onError(failure);
+        else this.device.reportError(failure, this.valueBuffer!)();
+      }
+    }
   }
 
   private destroyOutputs(): void {
@@ -298,6 +471,11 @@ export class WebGPUAggregator implements Aggregator {
   }
 
   destroy(): void {
+    this.destroyed = true;
+    this.revision++;
+    this.filterModel?.destroy();
+    this.filterTarget?.destroy();
+    this.filterTexture?.destroy();
     this.initializeBins.destroy();
     this.aggregate.destroy();
     this.finalizeBins.destroy();

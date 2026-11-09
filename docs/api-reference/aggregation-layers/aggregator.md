@@ -240,3 +240,10 @@ custom aggregators. Explicit domain callbacks receive the aggregation domain thr
 
 Percentile and ordinal scales access results on the CPU. Picking uses `getBin()`.
 ContourLayer uses CPU-readable results for marching squares.
+
+### Asynchronous result metadata
+
+Picking and percentile scales need results on the CPU. An aggregator can copy its GPU
+results asynchronously and return the copy from `getResultValues(channel)`. Set `isLoaded`
+to false while the copy is pending, then call `onUpdate` when it is ready. Rendering
+continues to use the GPU buffers returned by `getResult()`.

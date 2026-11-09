@@ -10,6 +10,12 @@ HexagonLayer supports WebGPU aggregation with explicit color and elevation domai
 using the shared reducer and GPUVector rendering path.
 
 
+### ScreenGrid and Grid compute rendering features
+
+Compute aggregation now supports automatic domains, picking metadata, accessor-based
+extensions, and Grid distribution scales and percentile filtering. Explicit-domain rendering
+continues to consume GPU vectors directly; CPU-facing metadata uses asynchronous snapshots.
+
 ### Heatmap GPU column inputs
 
 HeatmapLayer accepts borrowed position and weight GPUVectors on WebGPU, including strided columns and shorter row prefixes.
