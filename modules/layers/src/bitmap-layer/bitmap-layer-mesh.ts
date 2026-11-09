@@ -204,6 +204,11 @@ export class BitmapLayerMesh {
     }
   }
 
+  /** Number of mesh vertices used to populate extension attributes. */
+  getVertexCount(): number {
+    return this.vertexCount;
+  }
+
   /** Binds vertex and index inputs separately, preserving borrowed offsets and strides. */
   bind(model: GPUVectorModel): void {
     if (!this.attributes.positions) return;

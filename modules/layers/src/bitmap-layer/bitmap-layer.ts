@@ -159,9 +159,9 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
-  /** Keeps extension metadata available without generating or binding mesh attributes. */
-  protected _updateAttributes(): void {
-    if (!hasBitmapMesh(this.props)) super._updateAttributes();
+  /** Uses mesh vertices as rows for extension attributes. */
+  getNumInstances(): number {
+    return this.state?.typedMesh?.getVertexCount() ?? super.getNumInstances();
   }
 
   /** Includes pending Arrow conversion in the layer loading state. */
@@ -191,6 +191,10 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   }
 
   initializeState() {
+    this.initializeMeshAttributes();
+  }
+
+  private initializeMeshAttributes(): void {
     const attributeManager = this.getAttributeManager()!;
 
     const noAlloc = true;
@@ -251,6 +255,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       this.state.model?.destroy();
       this.state.typedMesh!.destroy();
       this.state.typedMesh = undefined;
+      this.initializeMeshAttributes();
     }
     // setup model first
     const attributeManager = this.getAttributeManager()!;
@@ -291,6 +296,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     const enteringMesh = !this.state.typedMesh;
     const subdivisionStep = this.getSubdivisionStep();
     if (enteringMesh) {
+      this.getAttributeManager()!.remove(['indices', 'positions', 'texCoords']);
       this.state.typedMesh = new BitmapLayerMesh(this.context.device);
     }
     if (enteringMesh || changeFlags.extensionsChanged) {
@@ -328,6 +334,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         },
         () => {
           this.state.typedMesh!.bind(this.state.model!);
+          this.getAttributeManager()!.invalidateAll();
           this.setState({coordinateConversion: 0, bounds: [0, 0, 0, 0]});
           this.setNeedsUpdate();
         },
