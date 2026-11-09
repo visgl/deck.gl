@@ -4,6 +4,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Async CPU aggregation of GPU inputs
+
+`ReadbackAggregator` copies GPUVector inputs asynchronously for CPU/GPU comparisons using the same buffers. See the [comparison example](./api-reference/aggregation-layers/aggregator.md#comparing-gpu-and-cpu-aggregation-with-the-same-inputs).
+
 ### Hexagon compute aggregation
 
 HexagonLayer supports WebGPU aggregation with explicit color and elevation domains,

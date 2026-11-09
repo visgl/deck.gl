@@ -247,3 +247,50 @@ Picking and percentile scales need results on the CPU. An aggregator can copy it
 results asynchronously and return the copy from `getResultValues(channel)`. Set `isLoaded`
 to false while the copy is pending, then call `onUpdate` when it is ready. Rendering
 continues to use the GPU buffers returned by `getResult()`.
+
+### Comparing GPU and CPU aggregation with the same inputs
+
+`ReadbackAggregator` is an opt-in CPU adapter for borrowed GPUVectors. It asynchronously
+copies positions and weights, then runs `CPUAggregator` with your bin and value accessors.
+The layer stays unloaded until the current copy and aggregation finish. Inputs require
+`COPY_SRC` buffers and single-chunk float32 columns. Copies preserve offsets, strides,
+and `numInstances` prefixes; input buffers remain caller-owned.
+
+For Cartesian GridLayer inputs, compare the native aggregator with the CPU adapter:
+
+```typescript
+import {GridLayer, ReadbackAggregator} from '@deck.gl/aggregation-layers';
+
+const cpuAggregator = new ReadbackAggregator({
+  dimensions: 2,
+  weightAttributes: ['colorWeights', 'elevationWeights'],
+  getBin: {
+    sources: ['positions'],
+    getValue: ({positions}, index, {cellSizeCommon, cellOriginCommon}) => [
+      Math.floor((positions[0] - cellOriginCommon[0]) / cellSizeCommon[0]),
+      Math.floor((positions[1] - cellOriginCommon[1]) / cellSizeCommon[1])
+    ]
+  },
+  getValue: [
+    {sources: ['colorWeights'], getValue: ({colorWeights}) => colorWeights},
+    {sources: ['elevationWeights'], getValue: ({elevationWeights}) => elevationWeights}
+  ]
+});
+
+new GridLayer({
+  positions: positionVector,
+  weights: [colorWeightVector, elevationWeightVector],
+  dataBounds,
+  cellSize: 10,
+  colorDomain: [0, 100],
+  elevationDomain: [0, 100],
+  aggregator: useCPU ? cpuAggregator : undefined
+});
+```
+
+The example assumes untransformed Cartesian positions. Other coordinate systems require
+matching projection in `getBin`. The adapter does not run shader extensions or recreate
+original JavaScript objects. Keep it stable across layer updates; the layer owns and destroys
+it. Create a new adapter when switching back after removing it. Call `setNeedsUpdate()` when
+modifying input buffer contents in place. Include copy latency when comparing end-to-end
+performance; CPU aggregation alone and GPU aggregation alone measure different workloads.
