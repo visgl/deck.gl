@@ -3,9 +3,28 @@
 // Copyright (c) vis.gl contributors
 
 import {dataTypeDecoder, getTypedArrayConstructor} from '@luma.gl/core';
-import type {BufferAttributeLayout, VertexFormat} from '@luma.gl/core';
+import type {BufferAttributeLayout, BufferLayout, VertexFormat} from '@luma.gl/core';
 import type {TypedArrayConstructor} from '../../types/types';
 import type {BufferAccessor, DataColumnSettings, LogicalDataType} from './data-column';
+
+/** Internal binding name shared by zero-stride low parts on WebGPU. */
+export const ZERO_LOW_BUFFER_NAME = '__deckZero64Low';
+
+/** Combines zero low parts into one vertex buffer slot, regardless of step mode. */
+export function mergeZeroLowBufferLayouts(layouts: BufferLayout[]): BufferLayout[] {
+  const firstIndex = layouts.findIndex(layout => layout.name === ZERO_LOW_BUFFER_NAME);
+  if (firstIndex < 0) {
+    return layouts;
+  }
+  const zeroLayout = layouts[firstIndex];
+  return layouts.filter((layout, index) => {
+    if (index !== firstIndex && layout.name === ZERO_LOW_BUFFER_NAME) {
+      zeroLayout.attributes!.push(...layout.attributes!);
+      return false;
+    }
+    return true;
+  });
+}
 
 export function typedArrayFromDataType(type: LogicalDataType): TypedArrayConstructor {
   // Sorted in some order of likelihood to reduce amount of comparisons
