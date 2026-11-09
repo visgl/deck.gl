@@ -165,7 +165,10 @@ if (mask.enabled != 0) {
           cross(rowX, rowY) * depthDelta) / determinant, commonPosition.w);
     }
   }
-  let flatPosition = project_common_position_to_flat(commonPosition.xyz);
+  // Keep globe triangles continuous in the world copy containing this mask.
+  let flatPosition = project_common_position_to_flat_continuous(
+    commonPosition.xyz, 0.5 * (mask.bounds.x + mask.bounds.z)
+  );
   let coords = (flatPosition - mask.bounds.xy) / (mask.bounds.zw - mask.bounds.xy);
   mask_texCoords = vec2<f32>(coords.x, 1.0 - coords.y);
 }
