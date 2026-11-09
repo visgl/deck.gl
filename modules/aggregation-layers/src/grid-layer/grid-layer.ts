@@ -603,7 +603,10 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         const b = this.projectPosition([bounds[2], bounds[3], 0], {viewport});
         const sourceCrs = this.internalState!.sourceCrs;
         const longitudeCoordinates =
-          !['cartesian', 'meter-offsets', 'lnglat-offsets'].includes(this.props.coordinateSystem) &&
+          (typeof this.props.coordinateSystem !== 'string' ||
+            !['cartesian', 'meter-offsets', 'lnglat-offsets'].includes(
+              this.props.coordinateSystem
+            )) &&
           sourceCrs?.coordinateFrame === 'geographic' &&
           sourceCrs.axis.startsWith('en') &&
           sourceCrs.xUnit.degreesPerUnit === 1 &&
