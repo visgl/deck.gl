@@ -49,8 +49,8 @@
   "dependencies": {
     "@luma.gl/graph": "10.0.0-alpha.11",
     "@luma.gl/shaders": "10.0.0-alpha.11",
-    "@math.gl/core": "5.0.0-beta.5",
-    "@math.gl/web-mercator": "5.0.0-beta.5",
+    "@math.gl/core": "5.0.0-beta.6",
+    "@math.gl/web-mercator": "5.0.0-beta.6",
     "d3-hexbin": "^0.2.1"
   },
   "peerDependencies": {
