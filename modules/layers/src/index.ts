@@ -43,3 +43,5 @@ export type {PointCloudLayerProps} from './point-cloud-layer/point-cloud-layer';
 export type {TextBackgroundLayerProps} from './text-layer/text-background-layer/text-background-layer';
 export type {PathLayerProps} from './path-layer/path-layer';
 export type {SolidPolygonLayerProps} from './solid-polygon-layer/solid-polygon-layer';
+
+export type {BitmapMeshSource} from './bitmap-layer/bitmap-layer-mesh';

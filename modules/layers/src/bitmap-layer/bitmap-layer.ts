@@ -4,7 +4,6 @@
 
 import {
   Layer,
-  _deepEqual as deepEqual,
   _GPUVectorModel as DeckGPUVectorModel,
   color as colorModule,
   project32,

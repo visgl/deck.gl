@@ -13,11 +13,11 @@ export type BitmapMeshSource = ColumnSource | GPUVector;
 
 /** Explicit triangle mesh inputs; positions and texture coordinates must be supplied together. */
 export type BitmapMeshProps = {
-  /** XY/XYZ positions. GPU-only meshes use bounds for view-fitting metadata. */
+  /** Arrow XY/XYZ lists or float32x2/float32x3 GPUVector positions, replacing bounds. */
   positions?: BitmapMeshSource | null;
   /** Two texture coordinates per vertex, with (0, 0) at the image's top left. */
   texCoords?: BitmapMeshSource | null;
-  /** Optional tightly packed uint16/uint32 triangle indices. */
+  /** Optional uint16/uint32 triangle indices. Otherwise every three vertices form a triangle. */
   indices?: BitmapMeshSource | null;
 };
 

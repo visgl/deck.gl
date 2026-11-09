@@ -148,6 +148,9 @@ The image data will be converted to a [Texture](https://luma.gl/docs/api-referen
 
 #### `bounds` (number[4] | Position[4]) {#bounds}
 
+When `positions` is supplied, it defines the rendered mesh. For GPU-only positions, `bounds`
+provides the footprint for view fitting.
+
 Supported formats:
 
 - Coordinates of the bounding box of the bitmap `[left, bottom, right, top]`
@@ -155,6 +158,37 @@ Supported formats:
 
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
 `top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
+
+#### `positions` (object, optional) {#positions}
+
+* Default: `null`
+
+Mesh vertex positions, replacing the quad from `bounds`. Accepts numeric Arrow XY/XYZ
+fixed-size lists or a `float32x2`/`float32x3` GPUVector. With GPU-only positions,
+set `bounds` to the footprint for view fitting.
+
+#### `texCoords` (object, optional) {#texcoords}
+
+* Default: `null`
+
+Texture coordinates per vertex as Arrow XY fixed-size lists or a `float32x2` GPUVector.
+Supply with `positions` and the same vertex count. `(0, 0)` is the image's top-left corner.
+These coordinates take precedence over `_imageCoordinateSystem`.
+
+#### `indices` (object, optional) {#indices}
+
+* Default: `null`
+
+Optional `uint16` or `uint32` triangle indices. Without indices, every three vertices form
+a triangle. Removing all mesh props restores the quad from `bounds`.
+
+Remarks:
+
+* Each input must be a single Arrow chunk or GPU buffer.
+* GPUVector inputs remain owned by the application. Keep them alive while the layer uses them.
+* GPU-only positions require a view that does not convert positions on the CPU.
+* Mesh inputs cannot be async iterables, and mesh changes do not transition.
+* See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates) for updates.
 
 #### `_projectionTolerance` (number, optional) {#_projectiontolerance}
 
@@ -275,32 +309,3 @@ new BitmapLayer({
 ## Source
 
 [modules/layers/src/bitmap-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/bitmap-layer)
-
-### Typed meshes
-
-`positions`, `texCoords`, and optional `indices` supply a triangle mesh instead of
-one generated from `bounds`. Each input accepts an Apache Arrow column or a
-caller-owned luma.gl `GPUVector`.
-
-* `positions`: `FixedSizeList[2]` or `FixedSizeList[3]` numeric Arrow positions,
-  or `float32x2`/`float32x3` GPU positions. Arrow float64 coordinates retain
-  high/low precision when required by the layer.
-* `texCoords`: `FixedSizeList[2]` numeric Arrow values or a `float32x2` GPU vector.
-  `(0, 0)` is the top-left corner of the image.
-* `indices`: optional tightly packed `uint16` or `uint32` triangle indices.
-  GPU index buffers must have index usage and matching index-type metadata.
-
-Supply positions and texture coordinates together, with matching vertex counts.
-Without indices, every three consecutive vertices form a triangle. Inputs must
-have a single contiguous chunk; indexed multi-chunk topology is not supported.
-GPU buffers retain their offsets and strides and remain caller-owned. Keep them
-alive until the layer no longer uses them. Arrow conversion buffers are released
-by the layer. In-place mutations do not trigger updates; replace the input object.
-
-Supplied UVs take precedence over `_imageCoordinateSystem`. Bitmap picking still
-returns image UV and pixel coordinates. CPU positions provide view-fitting bounds;
-for GPU-only inputs, set `bounds` to the mesh footprint. GPU-only positions cannot
-be used when a custom projection requires CPU preprojection. No implicit GPU
-readback is performed. Async mesh iterators and topology transitions are not supported.
-
-Removing all three mesh props restores the bounds-generated mesh.
