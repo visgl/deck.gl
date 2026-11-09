@@ -132,3 +132,10 @@ test('Bitmap mapping rejects invalid inputs and exhausted refinement limits', ()
       createMappedBitmapMesh({bounds, imageMapping: mapping, ...changes} as any)
     ).toThrow();
 });
+
+test('Bitmap mapping retains view subdivision for bounds footprints', () => {
+  const mesh = createMappedBitmapMesh({bounds, imageMapping: mapping}, 0.25);
+  expect(mesh.positions!.length).toBeGreaterThan(4);
+  const uv = values(mesh.texCoords) as number[][];
+  expect(uv.every(([u, v]) => u >= 0 && u <= 1 && v >= 0 && v <= 1)).toBe(true);
+});

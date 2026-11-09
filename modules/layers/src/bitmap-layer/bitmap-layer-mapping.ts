@@ -39,7 +39,8 @@ export type BitmapMappingProps = {
 
 /** Generates UVs for a CPU-readable mesh, optionally refining its source-space triangles. */
 export function createMappedBitmapMesh(
-  props: BitmapMeshProps & BitmapMappingProps & {bounds: BitmapBoundingBox}
+  props: BitmapMeshProps & BitmapMappingProps & {bounds: BitmapBoundingBox},
+  resolution?: number
 ): BitmapMeshProps {
   const {imageMapping: mapping, meshMaxEdgeLength} = props;
   if (!mapping) throw new Error('Bitmap subdivision requires imageMapping');
@@ -100,7 +101,7 @@ export function createMappedBitmapMesh(
             [bounds[2], bounds[1]]
           ]
         : bounds;
-    ({positions, indices} = createMesh(corners, undefined));
+    ({positions, indices} = createMesh(corners, resolution));
   }
   if ((indices?.length ?? positions.length / 3) % 3)
     throw new Error('Bitmap meshes require complete triangles');
@@ -111,8 +112,8 @@ export function createMappedBitmapMesh(
         indices: indices ?? Uint32Array.from({length: positions.length / 3}, (_, i) => i)
       },
       {
+        refinement: 'source-edge',
         transform: position => position,
-        tolerance: 1,
         size: 3,
         targetSize: 3,
         maxEdgeLength: meshMaxEdgeLength

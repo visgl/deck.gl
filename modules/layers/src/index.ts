@@ -45,3 +45,5 @@ export type {PathLayerProps} from './path-layer/path-layer';
 export type {SolidPolygonLayerProps} from './solid-polygon-layer/solid-polygon-layer';
 
 export type {BitmapMeshSource} from './bitmap-layer/bitmap-layer-mesh';
+
+export type {BitmapImageMapping} from './bitmap-layer/bitmap-layer-mapping';

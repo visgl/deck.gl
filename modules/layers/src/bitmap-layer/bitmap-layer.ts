@@ -33,7 +33,7 @@ import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
 const defaultProps: DefaultProps<BitmapLayerProps> = {
-  imageMapping: {type: 'object', value: null, compare: false},
+  imageMapping: {type: 'object', value: null, compare: -1},
   meshMaxEdgeLength: null,
   positions: {type: 'object', value: null, compare: false},
   texCoords: {type: 'object', value: null, compare: false},
@@ -206,6 +206,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        resolution: this.getSubdivisionStep(),
         ...this.usePositionTransforms(),
         update: function (this: BitmapLayer, attribute) {
           const {positions, projectedPositions} = this.state.mesh;
@@ -308,7 +309,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1) ||
       props.positions !== oldProps.positions ||
       props.texCoords !== oldProps.texCoords ||
-      props.imageMapping !== oldProps.imageMapping ||
+      !deepEqual(props.imageMapping, oldProps.imageMapping, -1) ||
       props.meshMaxEdgeLength !== oldProps.meshMaxEdgeLength ||
       (Boolean(props.imageMapping) && !props.positions && props.bounds !== oldProps.bounds) ||
       props.indices !== oldProps.indices
@@ -317,7 +318,8 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         props,
         {
           transform: this.usePositionTransforms().transform?.bind(this),
-          fp64: this.use64bitPositions()
+          fp64: this.use64bitPositions(),
+          resolution: this.getSubdivisionStep()
         },
         () => {
           this.state.typedMesh!.bind(this.state.model!);
