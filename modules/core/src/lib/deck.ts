@@ -20,8 +20,8 @@ import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
 import {luma} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/webgl';
-import {GL} from '@luma.gl/webgl/constants';
+import {webgl2Adapter} from '@luma.gl/core/webgl';
+import {GL} from '@luma.gl/core/webgl-constants';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import type {
@@ -33,7 +33,7 @@ import type {
   Parameters,
   PresentationContext
 } from '@luma.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
@@ -262,7 +262,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
 
   /**
    * Enables GPU debug mode when initializing a device. Overridden by `deviceProps.debug`.
-   * Requires importing `@luma.gl/webgl/debug` for WebGL debugging tools.
+   * Requires importing `@luma.gl/core/webgl-debug` for WebGL debugging tools.
    */
   debug?: boolean;
   /** (Debug) Render the picking buffer to screen. */
@@ -916,6 +916,16 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   _removeDefaultShaderModule(module: ShaderModule<Record<string, unknown>>) {
     this.layerManager?.removeDefaultShaderModule(module);
+  }
+
+  /** Install an effect's shader plugin on all layer models. */
+  _addDefaultShaderPlugin(plugin: ShaderPlugin) {
+    this.layerManager!.addDefaultShaderPlugin(plugin);
+  }
+
+  /** Remove an effect's shader plugin from layer models. */
+  _removeDefaultShaderPlugin(plugin: ShaderPlugin) {
+    this.layerManager?.removeDefaultShaderPlugin(plugin);
   }
 
   // Private Methods
@@ -1669,7 +1679,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       });
     }
 
-    this.props.onDeviceInitialized(this.device);
+    this.props.onDeviceInitialized?.(this.device);
     if (this.device.type === 'webgl') {
       // Legacy callback - warn?
       // @ts-expect-error gl is not visible on Device base class

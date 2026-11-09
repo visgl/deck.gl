@@ -4,7 +4,7 @@
 
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import type {CustomProjectionViewportOptions} from '@deck.gl/core';
-import type {CRSDescriptor, CRSRenderingScale} from '@math.gl/projection/core';
+import type {CRSDescriptor, CRSRenderingScale} from '@math.gl/geospatial/projection/core';
 
 /** Synthetic descriptors isolate layer and shader plumbing from projection algorithms. */
 export function createTestCRS({

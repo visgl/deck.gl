@@ -264,3 +264,102 @@ test('BitmapLayer#picking', async () => {
     ]
   });
 });
+
+test('adaptive bitmap mesh preserves bilinear UVs, altitude and seed indices', () => {
+  const bounds = [
+    [0, 0, 2],
+    [0, 2, 4],
+    [3, 3, 8],
+    [2, 0, 6]
+  ];
+  const seed = createMesh(bounds, 0);
+  const originalIndices = Array.from(seed.indices);
+  const transform = ([x, y, z]) => [x, y + x * x, z];
+  const mesh = createMesh(bounds, 0, {transform, tolerance: 0.05, scale: [1, 1, 1]});
+  expect(mesh.positions.length).toBeGreaterThan(seed.positions.length);
+  for (let i = 0; i < mesh.positions.length / 3; i++) {
+    const u = mesh.texCoords[2 * i],
+      v = 1 - mesh.texCoords[2 * i + 1];
+    const expected = [0, 1, 2].map(
+      axis =>
+        (1 - u) * ((1 - v) * bounds[0][axis] + v * bounds[1][axis]) +
+        u * ((1 - v) * bounds[3][axis] + v * bounds[2][axis])
+    );
+    expected.forEach((value, axis) => expect(mesh.positions[3 * i + axis]).toBeCloseTo(value, 6));
+    const projected = transform(expected);
+    projected.forEach((value, axis) =>
+      expect(mesh.projectedPositions![3 * i + axis]).toBeCloseTo(value, 6)
+    );
+  }
+  expect(Array.from(seed.indices)).toEqual(originalIndices);
+  expect(Array.from(createMesh(bounds, 0).indices)).toEqual(originalIndices);
+  const feetMesh = createMesh(bounds, 0, {
+    transform: position => transform(position).map(value => value / 0.3048),
+    tolerance: 0.05,
+    scale: [0.3048, 0.3048, 0.3048]
+  });
+  expect(Array.from(feetMesh.indices)).toEqual(Array.from(mesh.indices));
+  expect(Array.from(feetMesh.positions)).toEqual(Array.from(mesh.positions));
+  feetMesh.projectedPositions!.forEach((value, index) =>
+    expect(value * 0.3048).toBeCloseTo(mesh.projectedPositions![index], 6)
+  );
+});
+
+test('adaptive bitmap rebuilds on modelMatrix changes and disabling refinement', () => {
+  const viewport = createTestViewport({
+    converter: {
+      forward: ([x, y, z = 0]) => [x, y + x * x, z],
+      inverse: ([x, y, z = 0]) => [x, y - x * x, z]
+    }
+  });
+  testLayer({
+    Layer: BitmapLayer,
+    viewport,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          bounds: [
+            [0, 0, 2],
+            [0, 2, 4],
+            [3, 3, 8],
+            [2, 0, 6]
+          ],
+          _projectionTolerance: 0.05
+        },
+        onAfterUpdate({layer}) {
+          expect(layer.state.mesh.projectedPositions).toBeTruthy();
+        }
+      },
+      {
+        updateProps: {coordinateOrigin: [3, 0, 0]},
+        onAfterUpdate({layer, oldState}) {
+          expect(layer.state.mesh).not.toBe(oldState.mesh);
+          expect(layer.state.mesh.projectedPositions[0]).toBe(3);
+          expect(layer.getAttributeManager()!.attributes.positions.value[0]).toBe(3);
+        }
+      },
+      {
+        updateProps: {
+          coordinateOrigin: [0, 0, 0],
+          modelMatrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1]
+        },
+        onAfterUpdate({layer, oldState}) {
+          expect(layer.state.mesh).not.toBe(oldState.mesh);
+          expect(layer.state.mesh.projectedPositions[0]).toBe(2);
+          expect(layer.getAttributeManager()!.attributes.positions.value[0]).toBe(2);
+        }
+      },
+      {
+        updateProps: {_projectionTolerance: 0},
+        onAfterUpdate({layer}) {
+          expect(layer.state.mesh.projectedPositions).toBeUndefined();
+          expect(layer.state.mesh.positions.length).toBe(12);
+          expect(layer.getAttributeManager()!.attributes.positions.value[0]).toBe(2);
+        }
+      }
+    ]
+  });
+});

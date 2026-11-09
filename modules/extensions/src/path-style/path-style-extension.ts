@@ -2,22 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {getPathStylePlugin, getSDFDashPlugin} from './shaders.wgsl';
+import {LayerExtension, WebMercatorViewport, project, _deepEqual as deepEqual} from '@deck.gl/core';
+import {vec3} from '@math.gl/core';
+import {vec4} from '@math.gl/core';
 import {
-  LayerExtension,
-  WebMercatorViewport,
-  project,
-  _deepEqual as deepEqual,
-  _mergeShaders as mergeShaders
-} from '@deck.gl/core';
-import * as vec3 from '@math.gl/core/vec3';
-import * as vec4 from '@math.gl/core/vec4';
-import {
-  dashShaders,
+  dashInjections,
   Defines,
-  offsetShaders,
-  pathStylePipelineShaders,
-  scatterplotDashShaders,
-  textBackgroundDashShaders
+  offsetInjections,
+  pathStylePipelineInjections,
+  scatterplotDashInjections,
+  textBackgroundDashInjections
 } from './shaders.glsl';
 
 import type {
@@ -28,7 +23,6 @@ import type {
   ProjectUniforms,
   UpdateParameters
 } from '@deck.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
@@ -322,54 +316,30 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       if (!extension.opts.dash) {
         return null;
       }
-      const inject =
-        layerType === 'scatterplot'
-          ? scatterplotDashShaders.inject
-          : textBackgroundDashShaders.inject;
-      const pathStyle: ShaderModule<SDFDashStyleProps> = {
-        name: 'pathStyle',
-        inject,
-        uniformTypes: {
-          dashGapPickable: 'i32'
-        }
-      };
-      return {modules: [pathStyle]};
+      const injections =
+        layerType === 'scatterplot' ? scatterplotDashInjections : textBackgroundDashInjections;
+      return {plugins: [getSDFDashPlugin(layerType === 'textBackground', injections)]};
     }
 
     // PathLayer: one ordered coordinate stage plus capability-specific declarations and setup.
-    let result = {} as {inject: Record<string, string>};
-    if (extension.opts.dash || extension.opts.offset) {
-      result = mergeShaders(result, pathStylePipelineShaders);
-    }
     const defines: Defines = {};
     if (extension.opts.dash) {
-      result = mergeShaders(result, dashShaders);
       defines.DASH_ENABLED = true;
       if (extension.opts.dashMode === 'path') {
         defines.HIGH_PRECISION_DASH = true;
       }
     }
     if (extension.opts.offset) {
-      result = mergeShaders(result, offsetShaders);
       defines.PATH_STYLE_OFFSET = true;
     }
 
-    const {inject} = result;
-    const pathStyle: ShaderModule<PathStyleProps> = {
-      name: 'pathStyle',
-      inject
+    const {dash, offset, dashMode} = extension.opts;
+    const injections = {
+      ...((dash || offset) && pathStylePipelineInjections),
+      ...(dash && dashInjections),
+      ...(offset && offsetInjections)
     };
-    if (extension.opts.dash) {
-      pathStyle.uniformTypes = {
-        dashAlignMode: 'f32',
-        dashGapPickable: 'i32',
-        dashUnits: 'i32'
-      };
-    }
-    return {
-      modules: [pathStyle],
-      defines
-    };
+    return {defines, plugins: [getPathStylePlugin(dash, offset, dashMode === 'path', injections)]};
   }
 
   initializeState(this: Layer<PathStyleExtensionProps>, context: LayerContext, extension: this) {

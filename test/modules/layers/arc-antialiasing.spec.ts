@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import {testLayer} from '@deck.gl/test-utils/vitest';
 import {ArcLayer} from '@deck.gl/layers';
-import {preprocess} from '@luma.gl/shadertools';
+import {preprocess} from '@luma.gl/shaders';
 import arcVertexShader from '@deck.gl/layers/arc-layer/arc-layer-vertex.glsl';
 import arcFragmentShader from '@deck.gl/layers/arc-layer/arc-layer-fragment.glsl';
 import {shaderWGSL} from '@deck.gl/layers/arc-layer/arc-layer.wgsl';

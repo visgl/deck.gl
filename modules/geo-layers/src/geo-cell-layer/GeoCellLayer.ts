@@ -79,6 +79,8 @@ export default class GeoCellLayer<DataT = any, ExtraProps extends {} = {}> exten
       },
       this.getSubLayerProps({
         id: 'cell',
+        dataComparator:
+          boundsProps.data === this.props.data ? this.props.dataComparator : undefined,
         updateTriggers: updateTriggers && {
           ...boundsUpdateTriggers,
           getElevation: updateTriggers.getElevation,

@@ -151,10 +151,14 @@ vec4 project_size(vec4 meters) {
 
 // Get rotation matrix that aligns the z axis with the given up vector
 // Find 3 unit vectors ux, uy, uz that are perpendicular to each other and uz == up
+// On the globe, ux points east and uy north. Longitude 0 lies on -y and the north pole on +z.
+// At a pole, ux is the limit of east along the longitude that up retains; it is +x only when up
+// lies exactly on the polar axis.
 mat3 project_get_orientation_matrix(vec3 up) {
   vec3 uz = normalize(up);
   // Tangent on XY plane
-  vec3 ux = abs(uz.z) == 1.0 ? vec3(1.0, 0.0, 0.0) : normalize(vec3(uz.y, -uz.x, 0));
+  float horizontalLength = length(uz.xy);
+  vec3 ux = horizontalLength > 0.0 ? vec3(-uz.y, uz.x, 0.0) / horizontalLength : vec3(1.0, 0.0, 0.0);
   vec3 uy = cross(uz, ux);
   return mat3(ux, uy, uz);
 }
@@ -207,6 +211,8 @@ vec3 project_globe_(vec3 lnglatz) {
   float lambda = radians(lnglatz.x);
   float phi = radians(lnglatz.y);
   float cosPhi = cos(phi);
+  // Preserve longitude at the poles despite GPU cosine rounding to zero or negative.
+  if (abs(lnglatz.y) == 90.0) cosPhi = max(abs(cosPhi), 1e-7);
   float D = (lnglatz.z / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
 
   return vec3(
@@ -311,7 +317,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     }
     if (project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS) {
       mat3 enuMatrix = project_get_orientation_matrix(project.commonOrigin);
-      vec3 offsetCommon = (enuMatrix * vec3(-position_world.xy, position_world.z)) * project.commonUnitsPerMeter;
+      vec3 offsetCommon = (enuMatrix * position_world.xyz) * project.commonUnitsPerMeter;
       return vec4(project.commonOrigin + offsetCommon, position_world.w);
     }
   }
@@ -395,5 +401,78 @@ float project_pixel_size(float pixels) {
 }
 vec2 project_pixel_size(vec2 pixels) {
   return pixels / project.scale;
+}
+
+// True when the globe hides commonPosition from the camera: the segment from the camera to the
+// position passes through the sphere. Exact for positions at any altitude, so a point above the
+// surface stays visible past the horizon of the ground below it. Always false for flat projections.
+bool project_globe_is_occluded(vec3 commonPosition) {
+  if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+    return false;
+  }
+  vec3 eye = project.cameraPosition;
+  vec3 ray = commonPosition - eye;
+  float rayLength2 = dot(ray, ray);
+  if (rayLength2 == 0.0) {
+    return false;
+  }
+  // Closest approach of the segment to the globe centre, before reaching the position
+  float t = clamp(-dot(eye, ray) / rayLength2, 0.0, 1.0);
+  vec3 closest = eye + ray * t;
+  return t < 1.0 && dot(closest, closest) < GLOBE_RADIUS * GLOBE_RADIUS;
+}
+
+// Distance from eye along the unit direction to the first globe surface point, or fallback
+float project_globe_ray_distance_(vec3 eye, vec3 direction, float fallback) {
+  float b = dot(eye, direction);
+  float discriminant = b * b - dot(eye, eye) + GLOBE_RADIUS * GLOBE_RADIUS;
+  if (discriminant < 0.0) {
+    return fallback;
+  }
+  float distance = -b - sqrt(discriminant);
+  return distance > 0.0 ? distance : fallback;
+}
+
+// Screen-space radius, in pixels, that a billboard is assumed to cover around its anchor
+#define GLOBE_BILLBOARD_FOOTPRINT_PIXELS 64.0
+
+// Clip-space position for a billboard anchored at commonPosition. Under GLOBE the billboard is
+// moved toward the camera by the amount the globe surface rises within its footprint, so the
+// curve of the globe does not clip a sprite whose anchor is visible. The shift is the same at
+// every altitude for a given anchor direction, so sprites keep their order against each other,
+// and it is zero where the surface faces the camera. It is not zero where the surface is
+// foreshortened: it grows with the grazing angle, about 1.8 km at zoom 12 with pitch 60, so other
+// 3D geometry that is in front of the anchor by less than the shift no longer hides the sprite.
+// Pair with project_globe_is_occluded, which hides the sprite once the anchor itself is behind
+// the globe. Identity for flat projections.
+vec4 project_globe_billboard_clipspace(vec4 clipPosition, vec3 commonPosition) {
+  if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+    return clipPosition;
+  }
+  vec3 eye = project.cameraPosition;
+  vec3 ray = commonPosition - eye;
+  float anchorDistance = length(ray);
+  if (anchorDistance == 0.0) {
+    return clipPosition;
+  }
+  vec3 direction = ray / anchorDistance;
+  // On screen, the surface is nearest toward the point of the globe below the camera
+  vec3 inward = -eye - dot(-eye, direction) * direction;
+  float inwardLength = length(inward);
+  if (inwardLength == 0.0) {
+    return clipPosition;
+  }
+  // Ray through the inward edge of the footprint
+  float footprint = project_pixel_size(GLOBE_BILLBOARD_FOOTPRINT_PIXELS);
+  vec3 edgeDirection = normalize(ray + inward / inwardLength * footprint);
+  float surfaceDistance = project_globe_ray_distance_(eye, direction, anchorDistance);
+  float edgeDistance = project_globe_ray_distance_(eye, edgeDirection, surfaceDistance);
+  float shift = surfaceDistance - edgeDistance;
+  if (shift <= 0.0) {
+    return clipPosition;
+  }
+  vec4 shiftedClip = project_common_position_to_clipspace(vec4(commonPosition - direction * shift, 1.0));
+  clipPosition.z = shiftedClip.z / shiftedClip.w * clipPosition.w;
+  return clipPosition;
 }
 `;
