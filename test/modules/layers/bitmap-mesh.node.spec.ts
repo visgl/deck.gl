@@ -7,6 +7,7 @@ import {NullDevice} from '@luma.gl/core/test-utils';
 import {Buffer} from '@luma.gl/core';
 import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {Field, FixedSizeList, Float64, Float32, Uint16, Int32, vectorFromArray} from 'apache-arrow';
+import {BitmapLayer} from '../../../modules/layers/src';
 import {BitmapLayerMesh} from '../../../modules/layers/src/bitmap-layer/bitmap-layer-mesh';
 
 function column(rows: number[][], type = new Float64()) {
@@ -140,4 +141,9 @@ test('Bitmap rejects incompatible GPU index metadata without borrowing ownership
   expect(buffer.destroyed).toBe(false);
   buffer.destroy();
   device.destroy();
+});
+
+test('Bitmap mesh mode rejects projection tolerance instead of ignoring it', () => {
+  const layer = new BitmapLayer({...props(), _projectionTolerance: 1});
+  expect(() => layer.updateState({} as any)).toThrow('_projectionTolerance');
 });

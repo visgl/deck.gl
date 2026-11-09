@@ -239,6 +239,9 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
 
   updateState(params: UpdateParameters<this>): void {
     if (hasBitmapMesh(this.props)) {
+      if (this.props._projectionTolerance) {
+        throw new Error('_projectionTolerance is not supported with bitmap mesh inputs');
+      }
       this.updateMeshState(params);
       return;
     }
