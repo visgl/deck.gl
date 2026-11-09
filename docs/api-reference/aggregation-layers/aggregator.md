@@ -261,7 +261,7 @@ Both branches use the same WebGPU device; WebGL does not accept these borrowed c
 
 ```typescript
 import {GridLayer, ReadbackAggregator} from '@deck.gl/aggregation-layers';
-import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
 import {webgpuAdapter} from '@luma.gl/webgpu';
 
@@ -285,7 +285,7 @@ const cpuAggregator = new ReadbackAggregator({
 });
 
 const layer = new GridLayer({
-  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+  coordinateSystem: 'cartesian',
   gpuAggregation: true,
   positions: positionVector,
   weights: [colorWeightVector, elevationWeightVector],
