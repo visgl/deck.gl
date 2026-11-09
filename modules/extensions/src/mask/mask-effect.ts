@@ -191,6 +191,8 @@ export default class MaskEffect implements Effect {
           views,
           effects,
           shaderModuleProps: {
+            // Mask writers must not bind the attachment they are rendering into.
+            mask: {maskMap: this.dummyMaskMap, maskChannels: null},
             project: {
               devicePixelRatio: 1
             }

@@ -218,7 +218,8 @@ export type LayerProps = {
    */
   loadOptions?: any;
   /**
-   * Callback to calculate the polygonOffset WebGL parameter.
+   * Callback returning [factor, units] for triangle depth offset.
+   * Uses polygon offset on WebGL and depth bias on WebGPU (with units rounded to an integer).
    */
   getPolygonOffset?: ((params: {layerIndex: number}) => [number, number]) | null;
 
