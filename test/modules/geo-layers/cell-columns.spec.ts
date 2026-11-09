@@ -44,7 +44,10 @@ for (const [Layer, cell] of [
         onAfterUpdate: ({layer, subLayer}) => {
           expect(subLayer).toBeTruthy();
           const rows = subLayer.props.data;
-          if (previousCells === layer.props.cells) expect(rows).toBe(previousRows);
+          if (previousCells === layer.props.cells) {
+            expect(subLayer.props.dataComparator(rows, previousRows)).toBe(true);
+            expect(subLayer.internalState.changeFlags.dataChanged).toBeFalsy();
+          }
           previousCells = layer.props.cells;
           previousRows = rows;
           expect(rows.length).toBe(layer.props.cells.length);

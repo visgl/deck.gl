@@ -198,14 +198,7 @@ Hexagon radius multiplier, between 0 - 1. When `coverage` = 1, hexagon is render
 Method called to retrieve the [H3](https://h3geo.org/) hexagon index of each object. Note that all hexagons within one `H3HexagonLayer` must use the same [resolution](https://h3geo.org/docs/core-library/restable).
 
 
-## Sub Layers
-
-The `H3HexagonLayer` renders the following sublayers:
-
-* `hexagon-cell-hifi` - On `highPrecision` mode, rendered by [SolidPolygonLayer](../layers/solid-polygon-layer.md)
-* `hexagon-cell` - On non `highPrecision` mode, rendered by [ColumnLayer](../layers/column-layer.md)
-
-
+### Column Inputs
 
 #### `cells` (object, optional) {#cells}
 
@@ -249,6 +242,16 @@ and the same row count. Each value applies to all cells in that feature. Null va
 
 Elevations as a CPU-readable Arrow column in source feature order. Requires `cells`
 and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+
+
+## Sub Layers
+
+The `H3HexagonLayer` renders the following sublayers:
+
+* `hexagon-cell-hifi` - On `highPrecision` mode, rendered by [SolidPolygonLayer](../layers/solid-polygon-layer.md)
+* `hexagon-cell` - On non `highPrecision` mode, rendered by [ColumnLayer](../layers/column-layer.md)
+
+
 
 ## Source
 

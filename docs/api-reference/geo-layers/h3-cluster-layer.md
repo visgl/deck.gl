@@ -170,12 +170,7 @@ Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/compo
 Method called to retrieve the hexagon cluster from each object, as an array of [H3](https://h3geo.org/) hexagon indices. These hexagons are joined into polygons that represent the geospatial outline of the cluster.
 
 
-## Sub Layers
-
-The `H3ClusterLayer` renders the following sublayers:
-
-* `cell` - a [PolygonLayer](../layers/column-layer.md) rendering all clusters.
-
+### Column Inputs
 
 #### `cells` (object, optional) {#cells}
 
@@ -220,6 +215,14 @@ and the same row count. Each value applies to all cells in that feature. Null va
 
 Elevations as a CPU-readable Arrow column in source feature order. Requires `cells`
 and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+
+
+## Sub Layers
+
+The `H3ClusterLayer` renders the following sublayers:
+
+* `cell` - a [PolygonLayer](../layers/column-layer.md) rendering all clusters.
+
 
 ## Source
 

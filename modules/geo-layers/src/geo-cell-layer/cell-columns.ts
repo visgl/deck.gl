@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {CompositeLayer, createIterable, type Layer, type DefaultProps} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  createIterable,
+  type Layer,
+  type DefaultProps,
+  _deepEqual as deepEqual
+} from '@deck.gl/core';
 
 /** CPU-readable Arrow column. Dictionary encoding is decoded by Arrow's get(). */
 export type CellColumn<T> = {readonly length: number; get(index: number): T | null};
@@ -30,33 +36,18 @@ export const cellColumnDefaults: DefaultProps<CellColumnProps> = {
   elevations: {type: 'object', value: null, optional: true}
 };
 
-/** Updates expanded geometry only when source rows or cell identifiers change. */
-export function updateCellColumns(
+/** Expands cell rows while retaining the source feature for styling and picking. */
+export function renderCellColumns(
   layer: CompositeLayer,
-  params: any,
   accessor: string,
   cluster: boolean,
-  row: (value: any, source: any, index: number) => any
-): void {
-  if (!params.props.cells) {
-    if (params.oldProps.cells) layer.setState({cellColumnRows: null});
-    return;
+  callbacks: {
+    row: (value: any, source: any, index: number) => any;
+    accessor: (value: any) => any;
+    props: (value: any) => any;
   }
-  if (
-    !layer.state.cellColumnRows ||
-    params.changeFlags.dataChanged ||
-    params.props.cells !== params.oldProps.cells
-  ) {
-    layer.setState({cellColumnRows: expandCellRows(params.props, accessor, cluster, row)});
-  }
-}
-
-function expandCellRows(
-  props: CellColumnProps & Record<string, any>,
-  accessor: string,
-  cluster: boolean,
-  row: (value: any, source: any, index: number) => any
-): unknown[] {
+): Layer {
+  const props = layer.props as CellColumnProps & Record<string, any>;
   const cells = props.cells!;
   const rows =
     props.data && typeof props.data.get === 'function'
@@ -64,6 +55,16 @@ function expandCellRows(
       : Array.from(createIterable(props.data).iterable);
   if (rows.length && rows.length !== cells.length)
     throw new Error('cells and data lengths must match');
+  const styles = {
+    fillColors: 'getFillColor',
+    lineColors: 'getLineColor',
+    lineWidths: 'getLineWidth',
+    elevations: 'getElevation'
+  } as const;
+  for (const name of Object.keys(styles) as (keyof typeof styles)[]) {
+    if (props[name] && props[name].length !== cells.length)
+      throw new Error(`${name} and cells lengths must match`);
+  }
   const data: unknown[] = [];
   for (let index = 0; index < cells.length; index++) {
     const value = cells.get(index);
@@ -81,37 +82,9 @@ function expandCellRows(
       throw new Error('This grid requires string cells');
     });
     for (const cell of cluster ? [ids] : ids) {
-      data.push(row({cell}, rows[index], index));
+      data.push(callbacks.row({cell}, rows[index], index));
     }
   }
-  return data;
-}
-
-/** Expands cell rows while retaining the source feature for styling and picking. */
-export function renderCellColumns(
-  layer: CompositeLayer,
-  accessor: string,
-  cluster: boolean,
-  callbacks: {
-    row: (value: any, source: any, index: number) => any;
-    accessor: (value: any) => any;
-    props: (value: any) => any;
-  }
-): Layer {
-  const props = layer.props as CellColumnProps & Record<string, any>;
-  const cells = props.cells!;
-  const styles = {
-    fillColors: 'getFillColor',
-    lineColors: 'getLineColor',
-    lineWidths: 'getLineWidth',
-    elevations: 'getElevation'
-  } as const;
-  for (const name of Object.keys(styles) as (keyof typeof styles)[]) {
-    if (props[name] && props[name].length !== cells.length)
-      throw new Error(`${name} and cells lengths must match`);
-  }
-  const data =
-    layer.state?.cellColumnRows || expandCellRows(props, accessor, cluster, callbacks.row);
   const styleProps: Record<string, unknown> = {};
   for (const [name, target] of Object.entries(styles)) {
     const column = props[name as keyof typeof styles];
@@ -145,7 +118,17 @@ export function renderCellColumns(
     elevations: null,
     data,
     dataTransform: undefined,
-    dataComparator: undefined,
+    // Compare semantic rows: fresh expansion alone must not invalidate geometry.
+    dataComparator: (next, previous) =>
+      next.length === previous.length &&
+      next.every((row, index) => {
+        const oldRow = previous[index];
+        return (
+          deepEqual(row.cell, oldRow.cell, -1) &&
+          deepEqual(row.__source?.object, oldRow.__source?.object, -1) &&
+          row.__source?.index === oldRow.__source?.index
+        );
+      }),
     _dataDiff: undefined,
     [accessor]: (row: {cell: unknown}) => row.cell,
     ...styleProps

@@ -89,7 +89,8 @@ test('generated rows clear source data hooks', () => {
   });
   const child = layer.renderLayers() as any;
   expect(child.props.dataTransform).toBeFalsy();
-  expect(child.props.dataComparator).toBeFalsy();
+  expect(child.props.dataComparator).not.toBe(layer.props.dataComparator);
+  expect(child.props.dataComparator(child.props.data, [])).toBe(false);
   expect(child.props._dataDiff).toBeFalsy();
 });
 

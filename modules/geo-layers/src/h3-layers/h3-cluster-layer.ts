@@ -12,7 +12,6 @@ import {normalizeLongitudes} from './h3-utils';
 import {
   cellColumnDefaults,
   renderCellColumns,
-  updateCellColumns,
   type CellColumnProps
 } from '../geo-cell-layer/cell-columns';
 
@@ -51,13 +50,6 @@ export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> ext
   }
 
   updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
-    updateCellColumns(
-      this,
-      {props, oldProps, changeFlags},
-      'getHexagons',
-      true,
-      this.getSubLayerRow.bind(this)
-    );
     if (props.cells) return;
     if (
       oldProps.cells ||

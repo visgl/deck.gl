@@ -168,12 +168,7 @@ Called for each data object to retrieve the quadkey string identifier.
 * default: `object => object.quadkey`
 
 
-## Sub Layers
-
-The `QuadkeyLayer` renders the following sublayers:
-
-* `cell` - a [PolygonLayer](../layers/polygon-layer.md) rendering all quadkey cells.
-
+### Column Inputs
 
 #### `cells` (object, optional) {#cells}
 
@@ -215,6 +210,14 @@ and the same row count. Each value applies to all cells in that feature. Null va
 
 Elevations as a CPU-readable Arrow column in source feature order. Requires `cells`
 and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+
+
+## Sub Layers
+
+The `QuadkeyLayer` renders the following sublayers:
+
+* `cell` - a [PolygonLayer](../layers/polygon-layer.md) rendering all quadkey cells.
+
 
 ## Source
 
