@@ -3,12 +3,13 @@
 // Copyright (c) vis.gl contributors
 
 import type {Device} from '@luma.gl/core';
-import type {GPUVectorFormat} from '@luma.gl/graph/gpu-data';
-import {DataType, type RecordBatch, type Vector} from 'apache-arrow';
+import type {GPUVector, GPUVectorFormat} from '@luma.gl/graph/gpu-data';
+import {type RecordBatch, type Vector} from 'apache-arrow';
+import {getArrowConversionFormat} from './arrow-schema';
 import {uploadArrowVector, type PreparedArrowGPUVector} from './arrow-to-gpu-vector';
 
-/** Structural Arrow input contract, without loading Arrow in accessor-only layers. */
-export type ColumnSource = Pick<Vector, 'length' | 'type' | 'data'>;
+/** Arrow columns or borrowed GPU vectors accepted by layer column props. */
+export type ColumnSource = Pick<Vector, 'length' | 'type' | 'data'> | GPUVector;
 
 /** Layer-oriented semantics, for numeric, position, scalar, and color conversion. */
 export type ArrowConverterSemantic = 'auto' | 'numeric' | 'position' | 'scalar' | 'color';
@@ -78,34 +79,11 @@ export class ArrowConverter {
     options: ArrowConverterOptions = {}
   ): Promise<PreparedArrowGPUVector> {
     const {semantic = 'auto', nullPolicy = 'reject', ...conversion} = options;
-    if (
-      semantic === 'position' &&
-      (!DataType.isFixedSizeList(vector.type) || ![2, 3].includes(vector.type.listSize))
-    ) {
-      throw new Error('Arrow positions must be FixedSizeList[2] or FixedSizeList[3]');
-    }
-    if (semantic === 'scalar' && !DataType.isInt(vector.type) && !DataType.isFloat(vector.type)) {
-      throw new Error('Arrow scalar input must be numeric');
-    }
-    let format = conversion.format;
-    if (!format) {
-      if (semantic === 'color') format = 'unorm8x4';
-      if (semantic === 'scalar') format = 'float32';
-      if (semantic === 'position') {
-        if (!DataType.isFixedSizeList(vector.type) || ![2, 3].includes(vector.type.listSize)) {
-          throw new Error('Arrow positions must be FixedSizeList[2] or FixedSizeList[3]');
-        }
-        format = vector.type.listSize === 2 ? 'float32x2' : 'float32x3';
-      }
-    }
-    if (!format) {
-      const width = DataType.isFixedSizeList(vector.type) ? vector.type.listSize : 1;
-      format = (width === 1 ? 'float32' : `float32x${width}`) as GPUVectorFormat;
-    }
+    const format = getArrowConversionFormat(vector.type, options);
     return uploadArrowVector(this.device, vector, {
       name: conversion.name,
       format,
-      color: semantic === 'color',
+      color: semantic === 'color' || format === 'unorm8x4',
       preserveNulls: nullPolicy === 'preserve',
       fp64: conversion.fp64,
       transform: conversion.transform

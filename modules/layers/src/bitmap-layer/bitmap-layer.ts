@@ -9,6 +9,7 @@ import {
   project32,
   picking,
   CoordinateSystem,
+  _deepEqual as deepEqual,
   LayerProps,
   PickingInfo,
   GetPickingInfoParams,
@@ -23,6 +24,7 @@ import type {SamplerProps, Texture} from '@luma.gl/core';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
+import {getMetersPerUnit} from '../utils';
 
 import {bitmapUniforms, BitmapProps} from './bitmap-layer-uniforms';
 import source from './bitmap-layer.wgsl';
@@ -33,6 +35,7 @@ const defaultProps: DefaultProps<BitmapLayerProps> = {
   image: {type: 'image', value: null, async: true},
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
   _imageCoordinateSystem: 'default',
+  _projectionTolerance: {type: 'number', value: 0, min: 0},
 
   desaturate: {type: 'number', min: 0, max: 1, value: 0},
   // More context: because of the blending mode we're using for ground imagery,
@@ -68,6 +71,14 @@ type _BitmapLayerProps = {
    * @default [1, 0, 0, 1]
    */
   bounds?: BitmapBoundingBox;
+
+  /** Sampled mesh error in map meters for a preprojecting viewport. Zero disables refinement.
+   * Preserves bilinear bounds-to-UV mapping and refines the existing resolution grid.
+   * Requires finite geometry away from projection seams. Throws if refinement limits are exhausted.
+   * @experimental
+   * @default 0
+   */
+  _projectionTolerance?: number;
 
   /**
    * > Note: this prop is experimental.
@@ -159,7 +170,12 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         fp64: this.use64bitPositions(),
         ...this.usePositionTransforms(),
         update: function (this: BitmapLayer, attribute) {
-          const {positions} = this.state.mesh;
+          const {positions, projectedPositions} = this.state.mesh;
+          if (projectedPositions) {
+            // The mesh refiner already applied modelMatrix and projection exactly once.
+            attribute.value = projectedPositions;
+            return;
+          }
           const {transform} = attribute.settings;
           if (!transform) {
             attribute.value = positions;
@@ -197,7 +213,11 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     if (
       props.bounds !== oldProps.bounds ||
       changeFlags.projectionChanged ||
-      this.state.subdivisionStep !== subdivisionStep
+      this.state.subdivisionStep !== subdivisionStep ||
+      props._projectionTolerance !== oldProps._projectionTolerance ||
+      (this.state.preproject &&
+        (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
+          !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1)))
     ) {
       const oldMesh = this.state.mesh;
       const mesh = this._createMesh();
@@ -276,7 +296,20 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       ];
     }
 
-    return createMesh(normalizedBounds, this.getSubdivisionStep());
+    const tolerance = this.props._projectionTolerance;
+    const transform = this.usePositionTransforms().transform?.bind(this);
+    if (tolerance && !transform) {
+      throw new Error('_projectionTolerance requires a preprojecting viewport');
+    }
+    const projectionToleranceScale = tolerance ? getMetersPerUnit(this.state.packedCrs) : null;
+    if (tolerance && !projectionToleranceScale) {
+      throw new Error('_projectionTolerance requires projected coordinates with linear units');
+    }
+    return createMesh(
+      normalizedBounds,
+      this.getSubdivisionStep(),
+      tolerance ? {transform: transform!, tolerance, scale: projectionToleranceScale!} : undefined
+    );
   }
 
   protected _getModel(): Model {

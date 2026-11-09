@@ -1,7 +1,8 @@
 # Using with Arrow
 
-ScatterplotLayer and ArcLayer accept Apache Arrow vectors through column props, avoiding the need to
-construct a JavaScript object for every feature.
+ArcLayer, ColumnLayer, IconLayer, LineLayer, PointCloudLayer, ScatterplotLayer, and
+SimpleMeshLayer accept Apache Arrow vectors through column props. Use columns to
+provide attributes directly from Arrow data.
 
 Install `apache-arrow` alongside `@deck.gl/layers`. The layer loads its converter when needed;
 no converter registration or separate layer class is required.
@@ -30,9 +31,12 @@ props. Separate longitude and latitude fields must first be combined into fixed-
 | --- | --- | --- |
 | `positions` | Numeric XY or XYZ fixed-size lists | `getPosition` |
 | `radii` | Numeric scalars | `getRadius` |
+| `elevations` | Numeric scalars | `getElevation` |
 | `fillColors` | RGB or RGBA fixed-size lists | `getFillColor` |
 | `lineColors` | RGB or RGBA fixed-size lists | `getLineColor` |
 | `lineWidths` | Numeric scalars | `getLineWidth` |
+
+Available column props depend on the layer; see its API reference.
 
 Floating-point colors use 0–1; integer colors use 0–255. Columns must have equal lengths and
 must not contain nulls. Layer settings such as `radiusUnits`, `radiusScale`, `stroked`, and
@@ -80,7 +84,8 @@ Conversion errors are reported through the layer's `onError` callback.
 Keep vectors stable between renders and supply new vectors when their contents change.
 Chunked columns must have identical chunk lengths and draw in aligned ranges, preserving logical row indexes for picking.
 Arrow data still requires conversion and GPU upload; this is not a zero-copy rendering promise.
-The layer manages GPU buffers it creates during conversion.
+The layer manages GPU buffers it creates during conversion and releases them when replaced or removed.
+`numInstances` can limit rendering to a prefix of the columns.
 
 ## Limitations
 
@@ -88,3 +93,15 @@ Column mode rejects nulls, mismatched lengths or chunk structures, attribute tra
 Use the normal accessor path when you need those features. See the
 [ScatterplotLayer API](../api-reference/layers/scatterplot-layer.md#arrow-columns) and
 [loading data guide](./loading-data.md) for more details.
+
+## Schema validation
+
+Column inputs must use the following Arrow types.
+
+- Positions require numeric fixed-size lists with two or three components.
+- Scalars accept integer or floating-point fields.
+- Colors accept numeric RGB or RGBA fixed-size lists.
+- Numeric vectors use their fixed-size list width.
+
+Dictionary, string, and variable-size list inputs are unsupported. Null values and invalid
+transformed values raise conversion errors, even when the schema is compatible.

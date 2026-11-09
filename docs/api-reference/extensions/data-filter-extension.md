@@ -3,7 +3,7 @@
 
 The `DataFilterExtension` adds GPU-based data filtering functionalities to layers. It allows the layer to show/hide objects based on user-defined properties. This extension provides a significantly more performant alternative to filtering the data array on the CPU.
 
-Numeric and category filtering, soft ranges, and size/color transforms work on supported layers on WebGL and WebGPU through luma.gl ShaderPlugins. `countItems` currently requires WebGL. Filtering composes with `BrushingExtension` and `ClipExtension`.
+Use numeric ranges or categories to select objects, soften numeric filter boundaries, and count the objects that pass the filter. Filtering composes with `BrushingExtension` and `ClipExtension`.
 
 > Note: This extension does not work with all deck.gl layers. See "limitations" below.
 
@@ -116,7 +116,7 @@ new DataFilterExtension({filterSize, fp64});
 * `filterSize` (number) - the size of the filter (number of columns to filter by). The data filter can show/hide data based on 1-4 numeric properties of each object. Set to `0` to disable numeric filtering. Default `1`.
 * `categorySize` (number) - the size of the category filter (number of columns to filter by). The category filter can show/hide data based on 1-4 properties of each object. Set to `0` to disable category filtering. Default `0`.
 * `fp64` (boolean) - if `true`, use 64-bit precision instead of 32-bit. Default `false`. See the "remarks" section below for use cases and limitations.
-* `countItems` (boolean) - if `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback. Default `false`. Requires WebGL; enabling this option on WebGPU throws an error.
+* `countItems` (boolean) - if `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback. Default `false`.
 
 
 ## Layer Properties
@@ -277,7 +277,7 @@ Enable/disable the data filter. If the data filter is disabled, all objects are 
 
 #### `onFilteredItemsChange` (Function, optional) {#onfiltereditemschange}
 
-Only used if the `countItems` option is enabled. Called with the following arguments when the filter changes:
+Only used if the `countItems` option is enabled. Called with the following arguments when the filter or data changes. On WebGPU, the callback runs asynchronously after the count is read back. Results superseded by another filter or data update, or by layer removal, are discarded:
 
 - `event` (object)
   + `id` (string) - the id of the source layer. Note when this prop is specified on a [CompositeLayer](../core/composite-layer.md), such as `GeoJsonLayer`, the callback is called once by each sub layer.
@@ -304,7 +304,7 @@ filterRange: [rangeStart - ORIGIN_TS, rangeEnd - ORIGIN_TS]
 Given data filtering happens on GPU, not all layers of `@deck.gl/aggregation-layers` module, support this feature.
 
 ### WebGL only:
-* `HeatmapLayer`: the WebGPU weight-accumulation pass does not invoke the filtering hooks. WebGPU heatmap filtering requires a separate integration and is not supported by this port
+* `HeatmapLayer`: filtering is unavailable when rendering heatmaps with WebGPU.
 
 ### Always supported:
 * `GPUGridLayer`
