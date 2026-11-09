@@ -33,6 +33,8 @@ import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
 const defaultProps: DefaultProps<BitmapLayerProps> = {
+  imageMapping: {type: 'object', value: null, compare: -1},
+  meshMaxEdgeLength: null,
   positions: {type: 'object', value: null, compare: false},
   texCoords: {type: 'object', value: null, compare: false},
   indices: {type: 'object', value: null, compare: false},
@@ -292,6 +294,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   /** Converts changed mesh inputs while retaining the last successful replacement. */
   private updateMeshState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     const enteringMesh = !this.state.typedMesh;
+    const subdivisionStep = this.getSubdivisionStep();
     if (enteringMesh) {
       this.getAttributeManager()!.remove(['indices', 'positions', 'texCoords']);
       this.state.typedMesh = new BitmapLayerMesh(this.context.device);
@@ -310,18 +313,24 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     }
     if (
       enteringMesh ||
+      this.state.subdivisionStep !== subdivisionStep ||
       changeFlags.projectionChanged ||
       !deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
       !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1) ||
       props.positions !== oldProps.positions ||
       props.texCoords !== oldProps.texCoords ||
+      !deepEqual(props.imageMapping, oldProps.imageMapping, -1) ||
+      props.meshMaxEdgeLength !== oldProps.meshMaxEdgeLength ||
+      (Boolean(props.imageMapping) && !props.positions && props.bounds !== oldProps.bounds) ||
       props.indices !== oldProps.indices
     ) {
+      this.setState({subdivisionStep});
       void this.state.typedMesh!.update(
         props,
         {
           transform: this.usePositionTransforms().transform?.bind(this),
-          fp64: this.use64bitPositions()
+          fp64: this.use64bitPositions(),
+          resolution: this.getSubdivisionStep()
         },
         () => {
           this.state.typedMesh!.bind(this.state.model!);

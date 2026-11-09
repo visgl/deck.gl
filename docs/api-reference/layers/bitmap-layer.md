@@ -191,6 +191,30 @@ Remarks:
 * Mesh inputs cannot be combined with a positive `_projectionTolerance`.
 * See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates) for updates.
 
+#### `imageMapping` (object, optional) {#imagemapping}
+
+* Default: `null`
+
+Use when the image and mesh use different projections. The object contains `bounds`
+(`[left, bottom, right, top]` in the image CRS), `imageCRS`, and `positionCRS`.
+Both CRS fields accept math.gl CRS definitions such as PROJ strings. Keep `positionCRS`
+consistent with the layer's `coordinateSystem`. Without `positions`, the layer uses its
+`bounds` footprint and the view's subdivision step.
+
+Remarks:
+
+* Replaces `texCoords` and `_imageCoordinateSystem`. Setting `texCoords` too raises an error.
+* Positions must be CPU-readable Arrow columns. GPU-only meshes require explicit `texCoords`.
+* Split projection seams and clip to the image CRS's valid area before supplying the mesh.
+
+#### `meshMaxEdgeLength` (number, optional) {#meshmaxedgelength}
+
+* Default: `null`
+
+Requires `imageMapping`. Splits triangles with edges longer than this length in position units.
+Use it when a coarse mesh visibly bends the image. XYZ positions must use one unit on all axes.
+Very small values can exceed refinement limits and raise an error.
+
 #### `_projectionTolerance` (number, optional) {#_projectiontolerance}
 
 * Default: `0`

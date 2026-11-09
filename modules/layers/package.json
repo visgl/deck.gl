@@ -53,6 +53,7 @@
     "@mapbox/tiny-sdf": "^2.0.5",
     "@math.gl/core": "5.0.0-beta.5",
     "@math.gl/geometry": "5.0.0-beta.5",
+    "@math.gl/geospatial": "5.0.0-beta.5",
     "@math.gl/web-mercator": "5.0.0-beta.5",
     "@types/geojson": "^7946.0.16",
     "earcut": "^2.2.4"
