@@ -222,7 +222,7 @@ export class BitmapLayerMesh {
           attributes: [{attribute: name, format: vector.format as VertexFormat, byteOffset: 0}]
         });
     }
-    model.setAttributeVectors(this.attributes, layouts);
+    model.setGeometryVectors(this.attributes, layouts);
     model.setIndexVector(this.indices);
     model.setVertexCount(this.vertexCount);
   }

@@ -301,7 +301,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     }
     if (enteringMesh || changeFlags.extensionsChanged) {
       this.state.model?.destroy();
-      this.state.model = new GPUVectorModel(this.context.device, {
+      this.state.model = new DeckGPUVectorModel(this.context.device, {
         ...this.getShaders(),
         id: this.props.id,
         topology: 'triangle-list',
