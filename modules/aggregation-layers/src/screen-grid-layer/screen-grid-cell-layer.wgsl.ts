@@ -26,7 +26,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   var output: Varyings;
   output.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex);
 
-  if (attributes.instanceWeights != attributes.instanceWeights) {
+  if ((bitcast<u32>(attributes.instanceWeights) & 0x7fffffffu) > 0x7f800000u) {
     output.position = vec4<f32>(0.0);
     output.color = vec4<f32>(0.0);
     return output;

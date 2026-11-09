@@ -4,7 +4,14 @@
 
 import {createTestViewport} from '../viewports/test-crs';
 import {test, expect, vi} from 'vitest';
-import {Layer, LayerExtension, AttributeManager, MapView, OrbitView, picking} from '@deck.gl/core';
+import {
+  Layer,
+  LayerExtension,
+  AttributeManager,
+  MapView,
+  OrbitView,
+  pickingPlugin
+} from '@deck.gl/core';
 import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {equals, Matrix4} from '@math.gl/core';
 import {Timeline, Model} from '@luma.gl/engine';
@@ -585,6 +592,7 @@ test('Layer#updateModules', async () => {
 
     _getModel() {
       return new Model(this.context.device, {
+        shaderAssembler: this.context.shaderAssembler,
         vs: `\
   #version 300 es
   void main() {
@@ -599,7 +607,7 @@ test('Layer#updateModules', async () => {
     fragColor = vec4(1.0);
   }
         `,
-        modules: [picking]
+        plugins: [pickingPlugin]
       });
     }
   }

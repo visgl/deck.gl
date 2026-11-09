@@ -39,19 +39,26 @@ export class Tensor2DLayer extends BitmapLayer<{
   }
 
   getShaders() {
+    const shaders = super.getShaders();
     return {
-      ...super.getShaders(),
-      inject: {
-        'fs:#decl': `
+      ...shaders,
+      plugins: [
+        ...(shaders.plugins || []),
+        {
+          name: 'tensorColorScale',
+          injections: {
+            'glsl:fs:#decl': `
             uniform sampler2D colorScale;
             uniform vec2 colorDomain;
         `,
-        'fs:DECKGL_FILTER_COLOR': `
+            'glsl:fs:DECKGL_FILTER_COLOR': `
             float normalizedValue = (color.a - colorDomain.x) / (colorDomain.y - colorDomain.x);
             vec2 coord = vec2(normalizedValue, 0.5);
             color = texture(colorScale, coord);
         `
-      }
+          }
+        }
+      ]
     };
   }
 

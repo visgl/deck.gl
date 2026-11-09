@@ -9,7 +9,7 @@ import {WebMercatorViewport, project32} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
 // import {Matrix4, config} from '@math.gl/core';
 import {config, NumberArray3} from '@math.gl/core';
-import {fp64} from '@luma.gl/shadertools';
+import {fp64} from '@luma.gl/shaders';
 const {fp64LowPart} = fp64;
 import {getPixelOffset, runOnGPU, testUniforms, verifyGPUResult} from './project-glsl-test-utils';
 import {TestCase} from './project-glsl.spec';

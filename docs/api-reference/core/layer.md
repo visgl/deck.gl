@@ -252,7 +252,7 @@ Specifies the CRS of layer positions after `modelMatrix` and `coordinateOrigin` 
 - `'meter-offsets'`
 - `'lnglat-offsets'`
 
-`'lnglat'`, `'WGS84'`, `'EPSG:4326'`, and `'EPSG:4979'` identify WGS84 longitude/latitude/elevation. `'globe'` identifies geocentric meter coordinates on deck.gl's existing sphere; `'EPSG:4978'` identifies WGS84 ellipsoid geocentric coordinates. Other CRS identifiers and PROJ strings are resolved by `@math.gl/projection`. While resolution is pending, the layer waits before initialization or updates; failures are reported through the layer's error handler.
+`'lnglat'`, `'WGS84'`, `'EPSG:4326'`, and `'EPSG:4979'` identify WGS84 longitude/latitude/elevation. `'globe'` identifies geocentric meter coordinates on deck.gl's existing sphere; `'EPSG:4978'` identifies WGS84 ellipsoid geocentric coordinates. Other CRS identifiers and PROJ strings are resolved by `@math.gl/geospatial/projection`. While resolution is pending, the layer waits before initialization or updates; failures are reported through the layer's error handler.
 
 In [multi-view applications](../../developer-guide/views.md), the first viewport allowed by the layer filter determines the layer's CPU coordinate conversion. Use separate layer instances when views require different packed coordinate systems.
 
@@ -526,7 +526,7 @@ Out of the box, deck.gl supports loading JSON and image files (with [ImageLoader
 Support for addtional formats can be added by adding loaders to the `loaders` prop. For example, to load data from CSV files:
 
 ```js
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 
 const layer = new HexagonLayer({
   data: './data.csv',
@@ -590,11 +590,11 @@ Please refer to the luma.gl [GPU Parameters](https://luma.gl/docs/api-reference/
 
 * Default: `({layerIndex}) => [0, -layerIndex * 100]`
 
-When multiple layers are rendered on the same plane, [z-fighting](https://en.wikipedia.org/wiki/Z-fighting) may create undesirable artifacts. To improve the visual quality of composition, deck.gl allows layers to use `gl.polygonOffset` to apply an offset to its depth. By default, each layer is offset a small amount by its index so that layers are cleanly stacked from bottom to top.
+When multiple layers are rendered on the same plane, [z-fighting](https://en.wikipedia.org/wiki/Z-fighting) may create undesirable artifacts. To improve the visual quality of composition, deck.gl applies a depth offset. By default, each layer is offset a small amount by its index so that layers are cleanly stacked from bottom to top.
 
 This accessor takes a single parameter `uniform` - an object that contains the current render uniforms, and returns an array of two numbers `factor` and `units`. Negative values pull layer towards the camera, and positive values push layer away from the camera. For more information, refer to the [documentation](https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glPolygonOffset.xml) and [FAQ](https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm).
 
-If the accessor is assigned a falsy value, polygon offset will be set to `[0, 0]`.
+If the accessor is assigned a falsy value, polygon offset will be set to `[0, 0]`. On WebGPU, `units` is rounded to an integer and the offset applies only to triangle geometry. Explicit `parameters.depthBias` and `parameters.depthBiasSlopeScale` override the accessor.
 
 Remarks:
 

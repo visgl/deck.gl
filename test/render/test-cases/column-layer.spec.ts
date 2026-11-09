@@ -3,11 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import {describe} from 'vitest';
+import {Field, FixedSizeList, Float64, vectorFromArray} from 'apache-arrow';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
-import {GL} from '@luma.gl/webgl/constants';
+import {GL} from '@luma.gl/core/webgl-constants';
 import {hexagons, worldGrid} from 'deck.gl-test/data';
 import type {SnapshotTestCase} from '@deck.gl/test-utils';
 
@@ -171,6 +172,26 @@ const testCases = [
     }
   )
 ];
+
+// Golden: Arrow positions reproduce the existing extruded wireframe and flat-outline columns.
+for (const name of ['column-lnglat-extruded-wireframe', 'column-lnglat-flat-stroke']) {
+  const original = testCases.find(testCase => testCase.name === name)!;
+  const midpoint = Math.floor(hexagons.length / 2);
+  const column = rows =>
+    vectorFromArray(
+      rows.map(row => row.centroid),
+      new FixedSizeList(2, new Field('value', new Float64(), false))
+    );
+  testCases.push({
+    ...original,
+    name: name + '-arrow',
+    layers: [
+      original.layers[0].clone({
+        positions: column(hexagons.slice(0, midpoint)).concat(column(hexagons.slice(midpoint)))
+      })
+    ]
+  });
+}
 
 describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);

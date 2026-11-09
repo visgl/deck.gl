@@ -2,8 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {projectionEngine} from '@math.gl/projection';
-import type {CRSConversion, CRSDescriptor, TypeScriptCRSInput} from '@math.gl/projection/core';
+import {projectionEngine} from '@math.gl/geospatial/projection';
+import type {
+  CRSConversion,
+  CRSDescriptor,
+  TypeScriptCRSInput
+} from '@math.gl/geospatial/projection/core';
 import {GLOBE_CRS} from '../viewports/globe-util';
 import {OSM_TILE_CRS} from '../viewports/web-mercator-util';
 

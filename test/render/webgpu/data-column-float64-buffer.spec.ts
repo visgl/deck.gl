@@ -9,11 +9,11 @@
 /// <reference types="@webgpu/types" />
 
 import {test, expect, beforeAll, describe, vi} from 'vitest';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Buffer} from '@luma.gl/core';
 import type {Device} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
-import {GPUConstant} from '@luma.gl/gpgpu/gpu-data';
+import {GPUConstant} from '@luma.gl/graph/gpu-data';
 
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';

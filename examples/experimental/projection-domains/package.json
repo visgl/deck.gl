@@ -1,0 +1,31 @@
+{
+  "name": "deckgl-examples-projection-domains",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "build": "tsc --noEmit && vite build",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@ateliercartographie/geoarrow-deck-stream": "1.2.0",
+    "@deck.gl/core": "^9.2.0",
+    "@deck.gl/layers": "^9.2.0",
+    "@deck.gl/mesh-layers": "^9.2.0",
+    "@geoarrow/geoarrow-js": "^0.3.3",
+    "apache-arrow": "^21.0.0",
+    "d3-geo": "^3.1.1",
+    "d3-geo-polygon": "2.0.1",
+    "earcut": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/d3-geo": "^3.1.0",
+    "@types/earcut": "^3.0.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.3.1"
+  }
+}

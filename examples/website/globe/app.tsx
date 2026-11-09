@@ -20,7 +20,7 @@ import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 import {SphereGeometry} from '@luma.gl/engine';
 import {load} from '@loaders.gl/core';
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 
 import AnimatedArcLayer from './animated-arc-group-layer';
 import RangeInput from './range-input';

@@ -4,7 +4,7 @@
 
 /* eslint-disable camelcase */
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import {project, ProjectProps, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
@@ -82,68 +82,7 @@ vec2 terrain_globe_to_mercator(vec3 globePosition) {
 }
 `,
   fs: `${uniformBlock}in vec2 terrainMercPos;\nin float terrainHeight;`,
-  inject: {
-    'vs:#main-start': /* glsl */ `
-if (terrain.mode == TERRAIN_MODE_SKIP) {
-  gl_Position = vec4(0.0);
-  return;
-}
-`,
-    'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
-commonPos = geometry.position.xyz;
-terrainHeight = commonPos.z + project.commonOrigin.z;
-if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
-  terrainMercPos = terrain_globe_to_mercator(commonPos);
-  terrainHeight = length(commonPos) - GLOBE_RADIUS;
-} else {
-  terrainMercPos = commonPos.xy;
-}
-if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
-  vec2 texCoords = (terrainMercPos - terrain.bounds.xy) / terrain.bounds.zw;
-  position = vec4(texCoords * 2.0 - 1.0, 0.0, 1.0);
-}
-if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
-  vec3 anchor = geometry.worldPosition;
-  anchor.z = 0.0;
-  vec3 anchorCommon = project_position(anchor);
-  vec2 anchorMercPos = (project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)
-    ? terrain_globe_to_mercator(anchorCommon)
-    : anchorCommon.xy;
-  vec2 texCoords = (anchorMercPos - terrain.bounds.xy) / terrain.bounds.zw;
-  if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
-    float terrainZ = texture(terrain_map, texCoords).r;
-    if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
-      // Height map is written in Mercator common space (units = TILE_SIZE / EARTH_CIRCUMFERENCE / cos(lat))
-      // Convert to globe radial units (units = GLOBE_RADIUS / EARTH_RADIUS)
-      terrainZ *= cos(radians(geometry.worldPosition.y)) * PI;
-      geometry.position.xyz += normalize(geometry.position.xyz) * terrainZ;
-    } else {
-      geometry.position.z += terrainZ;
-    }
-    position = project_common_position_to_clipspace(geometry.position);
-  }
-}
-    `,
-    'fs:#main-start': /* glsl */ `
-if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
-  fragColor = vec4(terrainHeight, 0.0, 0.0, 1.0);
-  return;
-}
-    `,
-    'fs:DECKGL_FILTER_COLOR': /* glsl */ `
-if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY)) {
-  vec2 texCoords = (terrainMercPos - terrain.bounds.xy) / terrain.bounds.zw;
-  vec4 pixel = texture(terrain_map, texCoords);
-  if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY) {
-    color = pixel;
-  } else {
-    // pixel is premultiplied
-    color = pixel + color * (1.0 - pixel.a);
-  }
-  return;
-}
-    `
-  },
+
   // eslint-disable-next-line complexity
   getUniforms: (opts: Partial<TerrainModuleProps> = {}) => {
     if (!opts.dummyHeightMap) {
@@ -225,3 +164,70 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
     bounds: 'vec4<f32>'
   }
 } as const satisfies ShaderModule<TerrainModuleProps, TerrainModuleUniforms, TerrainModuleBindings>;
+
+export const terrainPlugin: ShaderPlugin = {
+  name: 'terrain',
+  module: terrainModule,
+  injections: {
+    'glsl:vs:#main-start': /* glsl */ `
+if (terrain.mode == TERRAIN_MODE_SKIP) {
+  gl_Position = vec4(0.0);
+  return;
+}
+`,
+    'glsl:vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
+commonPos = geometry.position.xyz;
+terrainHeight = commonPos.z + project.commonOrigin.z;
+if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+  terrainMercPos = terrain_globe_to_mercator(commonPos);
+  terrainHeight = length(commonPos) - GLOBE_RADIUS;
+} else {
+  terrainMercPos = commonPos.xy;
+}
+if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+  vec2 texCoords = (terrainMercPos - terrain.bounds.xy) / terrain.bounds.zw;
+  position = vec4(texCoords * 2.0 - 1.0, 0.0, 1.0);
+}
+if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
+  vec3 anchor = geometry.worldPosition;
+  anchor.z = 0.0;
+  vec3 anchorCommon = project_position(anchor);
+  vec2 anchorMercPos = (project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)
+    ? terrain_globe_to_mercator(anchorCommon)
+    : anchorCommon.xy;
+  vec2 texCoords = (anchorMercPos - terrain.bounds.xy) / terrain.bounds.zw;
+  if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
+    float terrainZ = texture(terrain_map, texCoords).r;
+    if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+      // Height map is written in Mercator common space (units = TILE_SIZE / EARTH_CIRCUMFERENCE / cos(lat))
+      // Convert to globe radial units (units = GLOBE_RADIUS / EARTH_RADIUS)
+      terrainZ *= cos(radians(geometry.worldPosition.y)) * PI;
+      geometry.position.xyz += normalize(geometry.position.xyz) * terrainZ;
+    } else {
+      geometry.position.z += terrainZ;
+    }
+    position = project_common_position_to_clipspace(geometry.position);
+  }
+}
+    `,
+    'glsl:fs:#main-start': /* glsl */ `
+if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+  fragColor = vec4(terrainHeight, 0.0, 0.0, 1.0);
+  return;
+}
+    `,
+    'glsl:fs:DECKGL_FILTER_COLOR': /* glsl */ `
+if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY)) {
+  vec2 texCoords = (terrainMercPos - terrain.bounds.xy) / terrain.bounds.zw;
+  vec4 pixel = texture(terrain_map, texCoords);
+  if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY) {
+    color = pixel;
+  } else {
+    // pixel is premultiplied
+    color = pixel + color * (1.0 - pixel.a);
+  }
+  return;
+}
+    `
+  }
+};

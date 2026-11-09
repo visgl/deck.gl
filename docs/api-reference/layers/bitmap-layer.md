@@ -156,6 +156,14 @@ Supported formats:
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
 `top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
 
+#### `_projectionTolerance` (number, optional) {#_projectiontolerance}
+
+* Default: `0`
+
+> Note: This prop is experimental
+
+Maximum sampled projection error in meters when a preprojecting view bends the image. Zero retains the `resolution` grid. Requires CPU preprojection and does not support `coordinateSystem: 'cartesian'`. See [Adaptive refinement](../core/custom-projection-view.md#adaptive-refinement).
+
 #### `loadOptions` (object, optional) {#loadoptions}
 
 On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:

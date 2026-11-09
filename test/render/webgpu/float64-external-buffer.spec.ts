@@ -14,7 +14,7 @@ import {Deck, MapView, OrthographicView, WebMercatorViewport} from '@deck.gl/cor
 import type {Layer} from '@deck.gl/core';
 import {ArcLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {Buffer} from '@luma.gl/core';
-import {webgpuAdapter} from '@luma.gl/webgpu';
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import type {Device} from '@luma.gl/core';
 import {isRenderTestDeviceEnabled} from '../render-test-suite';
 

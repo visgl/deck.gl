@@ -4,7 +4,7 @@
 
 import {loadArcGISModules} from '@deck.gl/arcgis';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
-import {I3SLoader} from '@loaders.gl/i3s';
+import {I3SLoader} from '@loaders.gl/tiles-3d/i3s';
 
 loadArcGISModules(['esri/Map', 'esri/views/SceneView', 'esri/views/3d/webgl/RenderNode'], {
   url: 'https://js.arcgis.com/4.32/'
