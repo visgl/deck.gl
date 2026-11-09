@@ -94,7 +94,14 @@ Use the normal accessor path when you need those features. See the
 [ScatterplotLayer API](../api-reference/layers/scatterplot-layer.md#arrow-columns) and
 [loading data guide](./loading-data.md) for more details.
 
+## Schema validation
 
-Supplying an Arrow table as `data` does not select its fields automatically. Pass each vector
-to the layer's column prop, for example `positions: table.getChild('position')`. Omitted column
-props continue to use binary attributes or accessors.
+Column inputs must use the following Arrow types.
+
+- Positions require numeric fixed-size lists with two or three components.
+- Scalars accept integer or floating-point fields.
+- Colors accept numeric RGB or RGBA fixed-size lists.
+- Numeric vectors use their fixed-size list width.
+
+Dictionary, string, and variable-size list inputs are unsupported. Null values and invalid
+transformed values raise conversion errors, even when the schema is compatible.
