@@ -209,10 +209,8 @@ Accessor-based data and single-chunk `float32x2`/`float32x3` position vectors wi
 `STORAGE` or `COPY_SRC` usage. Columns used in custom views must already use that view's
 coordinate system.
 
-Automatic domains, picking, domain callbacks, percentiles, quantile/ordinal scales, and
-compatible extensions are supported. Results are copied to the CPU only when these
-features need them. Extensions filter input points and currently require accessor data.
-Custom JavaScript callbacks and grids exceeding device limits use CPU aggregation.
+Extensions currently require accessor data rather than GPU columns. Custom JavaScript
+callbacks and grids exceeding device limits use CPU aggregation.
 
 #### `cellSize` (number, optional) {#cellsize}
 
