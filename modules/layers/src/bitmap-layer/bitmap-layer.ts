@@ -206,7 +206,6 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
-        resolution: this.getSubdivisionStep(),
         ...this.usePositionTransforms(),
         update: function (this: BitmapLayer, attribute) {
           const {positions, projectedPositions} = this.state.mesh;
@@ -287,6 +286,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   /** Converts changed mesh inputs while retaining the last successful replacement. */
   private updateMeshState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     const enteringMesh = !this.state.typedMesh;
+    const subdivisionStep = this.getSubdivisionStep();
     if (enteringMesh) {
       this.state.typedMesh = new BitmapLayerMesh(this.context.device);
     }
@@ -304,6 +304,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     }
     if (
       enteringMesh ||
+      this.state.subdivisionStep !== subdivisionStep ||
       changeFlags.projectionChanged ||
       !deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
       !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1) ||
@@ -314,6 +315,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       (Boolean(props.imageMapping) && !props.positions && props.bounds !== oldProps.bounds) ||
       props.indices !== oldProps.indices
     ) {
+      this.setState({subdivisionStep});
       void this.state.typedMesh!.update(
         props,
         {
