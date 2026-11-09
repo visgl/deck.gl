@@ -104,3 +104,28 @@ for (const Layer of [H3HexagonLayer, H3ClusterLayer]) {
     });
   });
 }
+
+test('H3ClusterLayer does not apply source comparators to generated polygons', () => {
+  testLayer({
+    Layer: H3ClusterLayer,
+    testCases: [
+      {
+        props: {
+          data: [{hexagons: ['8928308280fffff'], version: 1}],
+          getHexagons: d => d.hexagons,
+          dataComparator: (next, old) => next[0]?.version === old[0]?.version
+        }
+      },
+      {updateProps: {data: [{hexagons: ['8928308280fffff', '8928308280bffff'], version: 2}]}}
+    ].map(testCase => ({
+      ...testCase,
+      onAfterUpdate: ({layer, subLayer}) => {
+        expect(subLayer.props.data).toBe(layer.state.polygons);
+        expect(subLayer.props.dataComparator).toBeFalsy();
+      }
+    })),
+    onError: error => {
+      throw error;
+    }
+  });
+});
