@@ -188,6 +188,7 @@ Remarks:
 * GPUVector inputs remain owned by the application. Keep them alive while the layer uses them.
 * GPU-only positions require a view that does not convert positions on the CPU.
 * Mesh inputs cannot be async iterables, and mesh changes do not transition.
+* Mesh inputs cannot be combined with a positive `_projectionTolerance`.
 * See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates) for updates.
 
 #### `_projectionTolerance` (number, optional) {#_projectiontolerance}
