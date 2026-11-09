@@ -270,6 +270,14 @@ The `ContourLayer` renders the following sublayers:
 * `bands` - For Isobands, rendered by [SolidPolygonLayer](../layers/solid-polygon-layer.md)
 
 
+## Compute aggregation
+
+ContourLayer bins and reduces points on the GPU, then copies completed values asynchronously
+for CPU contour generation. All five aggregation operations are supported. GPU column inputs
+require explicit `dataBounds`, fixed-width float32 positions/weights, and `STORAGE` or
+`COPY_SRC` buffers. Layer extensions and unsupported accessor formats retain CPU aggregation.
+The layer remains unloaded while a new result is pending.
+
 ## Source
 
 [modules/aggregation-layers/src/contour-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/contour-layer)

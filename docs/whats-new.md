@@ -4,6 +4,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Contour compute aggregation
+
+ContourLayer uses the shared compute reducer and asynchronously reads values for CPU contour generation.
+
 ### Hexagon compute aggregation
 
 HexagonLayer supports WebGPU aggregation with explicit color and elevation domains,

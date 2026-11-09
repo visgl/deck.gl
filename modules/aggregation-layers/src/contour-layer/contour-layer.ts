@@ -23,6 +23,7 @@ import {generateContours, Contour, ContourLine, ContourPolygon} from './contour-
 import {getAggregatorValueReader} from './value-reader';
 import {getBinIdRange} from '../common/utils/bounds-utils';
 import {createAggregationViewport} from '../common/utils/projection-utils';
+import {WebGPUAggregator} from '../common/aggregator/webgpu-aggregator/webgpu-aggregator';
 import {Matrix4} from '@math.gl/core';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 
@@ -131,12 +132,61 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     } & AggregationLayer<any>['state'];
 
   getAggregatorType(): string {
+    if (this.props.gpuAggregation && this.context.device.type === 'webgpu') {
+      if (this.props.extensions.length) return 'cpu';
+      if (
+        (!this.props.positions &&
+          !WebGPUAggregator.supportsData(this.props.data, ['getPosition', 'getWeight'])) ||
+        (!this.props.positions &&
+          this.props.data ===
+            (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
+          !WebGPUAggregator.supportsAttributes(
+            this.getAttributeManager()!.attributes,
+            ['counts'],
+            this.context.device.limits.maxStorageBufferBindingSize
+          ))
+      )
+        return 'cpu';
+      if (
+        this.props.positions &&
+        !WebGPUAggregator.supportsColumns(
+          [this.props.positions, ...(this.props.weights || [])],
+          this.context.device.limits.maxStorageBufferBindingSize
+        )
+      ) {
+        throw new Error('Aggregation GPU input exceeds the storage buffer binding limit');
+      }
+      if (this.props.positions && this.state.preproject) {
+        throw new Error('Contour GPU columns must use the custom view coordinate system');
+      }
+      this._updateBinOptions();
+      const count = this.state.binIdRange.reduce((total, [start, end]) => total * (end - start), 1);
+      const limits = this.context.device.limits;
+      if (
+        !Number.isSafeInteger(count) ||
+        count * 8 > Math.min(limits.maxBufferSize, limits.maxStorageBufferBindingSize)
+      ) {
+        if (this.props.positions)
+          throw new Error('Contour aggregation exceeds device buffer limits');
+        return 'cpu';
+      }
+      return 'webgpu';
+    }
     return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
       ? 'gpu'
       : 'cpu';
   }
 
-  createAggregator(type: string): WebGLAggregator | CPUAggregator {
+  createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUAggregator {
+    if (type === 'webgpu')
+      return new WebGPUAggregator(this.context.device, {
+        channelNames: ['counts'],
+        binOptions: binOptionsUniforms,
+        binning: `fn getBin(position: vec3f, low: vec3f) -> BinAssignment {
+        let positionCommon = project_position_vec3_f64(position, low);
+        return BinAssignment(vec2i(floor(positionCommon.xy / binOptions.cellSizeCommon)), true);
+      }`
+      });
     if (type === 'cpu') {
       return new CPUAggregator({
         dimensions: 2,
@@ -200,12 +250,16 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const {props, oldProps, changeFlags} = params;
     const {aggregator} = this.state;
+    aggregator.setProps({readback: true});
     if (
       aggregatorChanged ||
       changeFlags.dataChanged ||
       props.positions !== oldProps.positions ||
       props.weights !== oldProps.weights ||
       props.dataBounds !== oldProps.dataBounds ||
+      props.modelMatrix !== oldProps.modelMatrix ||
+      props.coordinateOrigin !== oldProps.coordinateOrigin ||
+      changeFlags.projectionChanged ||
       props.cellSize !== oldProps.cellSize ||
       !_deepEqual(props.gridOrigin, oldProps.gridOrigin, 1) ||
       props.aggregation !== oldProps.aggregation
@@ -292,7 +346,12 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       });
     }
 
-    this.setState({cellSizeCommon, cellOriginCommon, binIdRange, aggregatorViewport: viewport});
+    Object.assign(this.state, {
+      cellSizeCommon,
+      cellOriginCommon,
+      binIdRange,
+      aggregatorViewport: viewport
+    });
   }
 
   override draw(opts) {
@@ -315,6 +374,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     lines: ContourLine[];
     polygons: ContourPolygon[];
   } | null {
+    if (this.state.aggregator.isLoaded === false) return null;
     const {aggregatedValueReader} = this.state;
     if (
       !aggregatedValueReader ||
@@ -338,6 +398,37 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       this.state.contourData = contourData;
     }
     return this.state.contourData;
+  }
+
+  protected override updateAttributes(changedAttributes) {
+    // AttributeManager has populated current positions at this point. Backend selection
+    // during updateState can only see the previous position bounds.
+    if (
+      (changedAttributes.positions || changedAttributes.counts) &&
+      this.state.aggregatorType === 'webgpu' &&
+      (this.getAggregatorType() === 'cpu' ||
+        !WebGPUAggregator.supportsAttributes(
+          this.getAttributeManager()!.attributes,
+          ['counts'],
+          this.context.device.limits.maxStorageBufferBindingSize
+        ))
+    ) {
+      this.state.aggregator.destroy();
+      const aggregator = this.createAggregator('cpu');
+      this.setState({aggregator, aggregatorType: 'cpu'});
+      aggregator.setProps({
+        attributes: this.getAttributeManager()!.attributes,
+        pointCount: this.getNumInstances(),
+        operations: [this.props.aggregation],
+        binIdRange: this.state.binIdRange,
+        binOptions: {
+          cellSizeCommon: this.state.cellSizeCommon,
+          cellOriginCommon: this.state.cellOriginCommon
+        },
+        onUpdate: this._onAggregationUpdate.bind(this)
+      });
+    }
+    super.updateAttributes(changedAttributes);
   }
 
   onAttributeChange(id: string) {

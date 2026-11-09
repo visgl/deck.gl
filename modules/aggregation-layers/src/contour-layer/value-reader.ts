@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Aggregator, CPUAggregator, WebGLAggregator} from '../common/aggregator/index';
+import {WebGPUAggregator} from '../common/aggregator/webgpu-aggregator/webgpu-aggregator';
 import {getAggregationAttribute} from '../common/aggregator/aggregation-result';
 import type {TypedArray} from '@luma.gl/core';
 
@@ -24,6 +25,10 @@ export function getAggregatorValueReader(opts: {
   ) {
     return null;
   }
+
+  const snapshot =
+    aggregator instanceof WebGPUAggregator ? aggregator.getResultValues(channel) : null;
+  if (snapshot) return getWebGLAggregatorValueReader(snapshot, binIdRange, 0, 1);
 
   if (aggregator instanceof WebGLAggregator) {
     const attribute = getAggregationAttribute(aggregator.getResult(channel));
