@@ -9,6 +9,7 @@ import {HexagonLayer, WebGLAggregator, CPUAggregator} from '@deck.gl/aggregation
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils/vitest';
+import {WebGPUHexagonAggregator} from '../../../modules/aggregation-layers/src/hexagon-layer/webgpu-hexagon-aggregator';
 
 const SAMPLE_PROPS = {
   data: FIXTURES.points.slice(0, 3),
@@ -16,7 +17,7 @@ const SAMPLE_PROPS = {
   // gpuAggregation: false
 };
 
-test('HexagonLayer#WebGPU renders with automatic CPU aggregation', async ({skip}) => {
+test('HexagonLayer#WebGPU renders with automatic compute domains', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
 
   if (!webgpuDevice) {
@@ -45,7 +46,24 @@ test('HexagonLayer#WebGPU renders with automatic CPU aggregation', async ({skip}
   layerManager.setLayers([layer]);
 
   expect(errors).toEqual([]);
-  expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+  expect(layer.state.aggregator).toBeInstanceOf(WebGPUHexagonAggregator);
+  await vi.waitFor(
+    () => {
+      layer.draw({
+        shaderModuleProps: {
+          project: {
+            viewport,
+            coordinateSystem: 'lnglat',
+            coordinateOrigin: [0, 0, 0],
+            devicePixelRatio: 1
+          }
+        }
+      } as any);
+      expect(layer.state.aggregator.isLoaded).toBe(true);
+    },
+    {timeout: 10000}
+  );
+  layerManager.updateLayers();
   expect(
     layerManager
       .getLayers()
