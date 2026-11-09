@@ -82,7 +82,14 @@ for (const backend of ['webgl', 'webgpu'] as const) {
               expect(
                 Array.from(layer.getAttributeManager()!.getAttributes().filterValues.value)
               ).toEqual([5]);
-              expect(layer.state.model!.constructor).toBe(GPUVectorModel);
+              expect(layer.state.model).toBeInstanceOf(GPUVectorModel);
+              const model = layer.state.model as any;
+              expect(Array.from(model.attributeVectorBindings.inputs.filterValues.value)).toEqual([
+                5
+              ]);
+              expect(model.geometryVectorBindings.inputs.positions).toBe(
+                (layer.state.typedMesh as any).attributes.positions
+              );
               const mesh = layer.state.typedMesh as any;
               if (index === 0) {
                 oldBuffer = mesh.attributes.positions.data[0].buffer;
