@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {WebGPUHexagonAggregator} from './webgpu-hexagon-aggregator';
 import {project} from '@deck.gl/core';
 
 import {
@@ -174,7 +175,7 @@ type _HexagonLayerProps<DataT> = {
    * Supported Values are 'linear' and 'quantile'.
    * @default 'linear'
    */
-  elevationScaleType?: 'linear';
+  elevationScaleType?: 'linear' | 'quantile';
 
   /**
    * Material settings for lighting effect. Applies if `extruded: true`.
@@ -302,6 +303,68 @@ export default class HexagonLayer<
       return 'cpu';
     }
 
+    // Feature guards are temporary until metadata, scales, and extension filtering
+    // are connected to this adapter. Input formats and device limits still need validation.
+    if (
+      gpuAggregation &&
+      this.context.device.type === 'webgpu' &&
+      this.props.colorDomain &&
+      this.props.elevationDomain &&
+      !this.props.pickable &&
+      !this.props.extensions.length &&
+      this.props.onSetColorDomain === noop &&
+      this.props.onSetElevationDomain === noop &&
+      this.props.colorScaleType !== 'quantile' &&
+      this.props.colorScaleType !== 'ordinal' &&
+      this.props.elevationScaleType !== 'quantile' &&
+      this.props.lowerPercentile === 0 &&
+      this.props.upperPercentile === 100 &&
+      this.props.elevationLowerPercentile === 0 &&
+      this.props.elevationUpperPercentile === 100
+    ) {
+      if (
+        (!this.props.positions &&
+          !WebGPUHexagonAggregator.supportsData(this.props.data, [
+            'getPosition',
+            'getColorWeight',
+            'getElevationWeight'
+          ])) ||
+        (!this.props.positions &&
+          this.props.data ===
+            (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
+          !WebGPUHexagonAggregator.supportsAttributes(
+            this.getAttributeManager()!.attributes,
+            ['colorWeights', 'elevationWeights'],
+            this.context.device.limits.maxStorageBufferBindingSize
+          ))
+      )
+        return 'cpu';
+      if (
+        this.props.positions &&
+        !WebGPUHexagonAggregator.supportsColumns(
+          [this.props.positions, ...(this.props.weights || [])],
+          this.context.device.limits.maxStorageBufferBindingSize
+        )
+      ) {
+        throw new Error('Aggregation GPU input exceeds the storage buffer binding limit');
+      }
+      if (this.props.positions && this.state.preproject) {
+        throw new Error('Hexagon GPU columns must use the custom view coordinate system');
+      }
+      this._updateBinOptions();
+      const count = this.state.binIdRange.reduce((total, [start, end]) => total * (end - start), 1);
+      const limits = this.context.device.limits;
+      if (
+        !Number.isSafeInteger(count) ||
+        count * 16 > Math.min(limits.maxBufferSize, limits.maxStorageBufferBindingSize)
+      ) {
+        if (this.props.positions)
+          throw new Error('Hexagon aggregation exceeds device buffer limits');
+        return 'cpu';
+      }
+      return 'webgpu';
+    }
+
     if (
       // GPU aggregation is requested
       gpuAggregation &&
@@ -313,7 +376,8 @@ export default class HexagonLayer<
     return 'cpu';
   }
 
-  createAggregator(type: string): WebGLAggregator | CPUAggregator {
+  createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUHexagonAggregator {
+    if (type === 'webgpu') return new WebGPUHexagonAggregator(this.context.device);
     if (type === 'cpu') {
       const {hexagonAggregator, radius} = this.props;
       return new CPUAggregator({
@@ -508,7 +572,12 @@ export default class HexagonLayer<
       });
     }
 
-    this.setState({radiusCommon, hexOriginCommon, binIdRange, aggregatorViewport: viewport});
+    Object.assign(this.state, {
+      radiusCommon,
+      hexOriginCommon,
+      binIdRange,
+      aggregatorViewport: viewport
+    });
   }
 
   override draw(opts) {
@@ -539,6 +608,39 @@ export default class HexagonLayer<
         props.onSetElevationDomain(aggregator.getResultDomain(1));
       }
     }
+  }
+
+  protected override updateAttributes(changedAttributes) {
+    // AttributeManager has populated current positions at this point. Backend selection
+    // during updateState can only see the previous position bounds.
+    if (
+      (changedAttributes.positions ||
+        changedAttributes.colorWeights ||
+        changedAttributes.elevationWeights) &&
+      this.state.aggregatorType === 'webgpu' &&
+      (this.getAggregatorType() === 'cpu' ||
+        !WebGPUHexagonAggregator.supportsAttributes(
+          this.getAttributeManager()!.attributes,
+          ['colorWeights', 'elevationWeights'],
+          this.context.device.limits.maxStorageBufferBindingSize
+        ))
+    ) {
+      this.state.aggregator.destroy();
+      const aggregator = this.createAggregator('cpu');
+      this.setState({aggregator, aggregatorType: 'cpu'});
+      aggregator.setProps({
+        attributes: this.getAttributeManager()!.attributes,
+        pointCount: this.getNumInstances(),
+        operations: [this.props.colorAggregation, this.props.elevationAggregation],
+        binIdRange: this.state.binIdRange,
+        binOptions: {
+          radiusCommon: this.state.radiusCommon,
+          hexOriginCommon: this.state.hexOriginCommon
+        },
+        onUpdate: this._onAggregationUpdate.bind(this)
+      });
+    }
+    super.updateAttributes(changedAttributes);
   }
 
   onAttributeChange(id: string) {
