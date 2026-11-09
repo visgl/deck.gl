@@ -218,3 +218,20 @@ test('TextLayer luma atlases upload to WebGPU, including empty atlases', async (
   }
   expect(await device.handle.popErrorScope()).toBeNull();
 });
+
+test('TextLayer retains an independent atlas when luma expands a shared font', async () => {
+  const {default: FontAtlasManager} = await import(
+    '../../../../modules/layers/src/text-layer/font-atlas-manager'
+  );
+  const {buildSdfFontAtlas} = await import('@luma.gl/engine/text-fonts');
+  const manager = new FontAtlasManager();
+  manager.setProps({fontFamily: 'monospace', fontSize: 43, sdf: true, characterSet: 'a'});
+  const atlas = manager.atlas!;
+  const height = atlas.data.height;
+  buildSdfFontAtlas({...manager.props, characterSet: new Set('az')});
+  expect(manager.mapping!.z).toBeUndefined();
+  expect(atlas.data.height).toBe(height);
+  manager.setProps({characterSet: 'az'});
+  expect(manager.mapping!.z).toBeTruthy();
+  expect(manager.atlas).not.toBe(atlas);
+});

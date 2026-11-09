@@ -244,10 +244,17 @@ export default class FontAtlasManager {
       : settings.sdf
         ? buildSdfFontAtlas(settings)
         : buildBitmapFontAtlas(settings);
-    const canvas = atlas.pages[0] as HTMLCanvasElement | OffscreenCanvas;
+    const source = atlas.pages[0] as HTMLCanvasElement | OffscreenCanvas;
+    const canvas = document.createElement('canvas');
+    canvas.width = source.width;
+    canvas.height = Math.max(1, source.height);
+    canvas.getContext('2d')!.drawImage(source, 0, 0);
+    const mapping = Object.fromEntries(
+      Object.entries(atlas.mapping).map(([character, glyph]) => [character, {...glyph}])
+    );
     // Until luma clamps empty atlases, keep WebGPU uploads at least one pixel tall.
     if (!canvas.height) canvas.height = 1;
-    return {...atlas, data: canvas, height: canvas.height};
+    return {...atlas, mapping, pages: [canvas], data: canvas, height: canvas.height};
   }
 
   private _getKey(): string {
