@@ -145,8 +145,8 @@ const config = {
       {
         debug: true,
         resolve: {
-          // Resolve each dependency nearest its importer before project fallbacks.
-          modules: ['node_modules', resolve('node_modules'), resolve('../node_modules')],
+          // Resolve dependencies through their package export maps, including subpaths.
+          modules: [resolve('node_modules'), resolve('../node_modules')],
           alias: {
             // concaveman imports a UMD file from its nested robust-predicates 2.x dependency.
             'robust-predicates/umd/orient2d.min.js$': createRequire(
