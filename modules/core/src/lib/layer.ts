@@ -585,7 +585,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
    * Selects explicit column props without conversion or ownership changes.
    * Missing inputs retain binary attribute and accessor fallbacks.
    */
-  protected resolveColumns(definitions: Parameters<typeof resolveColumns>[1]) {
+  protected resolveColumns(
+    definitions: Readonly<Record<string, {prop?: boolean}>>
+  ): Record<string, unknown> {
     return resolveColumns(this.props, definitions);
   }
 
