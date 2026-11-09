@@ -67,6 +67,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          yarn install --immutable
           yarn bootstrap
           (cd website && yarn)
 

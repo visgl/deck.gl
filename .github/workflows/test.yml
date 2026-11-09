@@ -33,7 +33,9 @@ jobs:
         run: corepack enable yarn
 
       - name: Install dependencies
-        run: yarn bootstrap
+        run: |
+          yarn install --immutable
+          yarn bootstrap
 
       - name: Build packages
         run: yarn build
@@ -84,7 +86,9 @@ jobs:
         run: corepack enable yarn
 
       - name: Install dependencies
-        run: yarn bootstrap
+        run: |
+          yarn install --immutable
+          yarn bootstrap
 
       - name: Build packages
         run: yarn build
@@ -152,7 +156,9 @@ jobs:
         run: corepack enable yarn
 
       - name: Install dependencies
-        run: yarn bootstrap
+        run: |
+          yarn install --immutable
+          yarn bootstrap
 
       - name: Build packages
         run: yarn build

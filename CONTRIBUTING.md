@@ -14,6 +14,7 @@ We use [yarn](https://yarnpkg.com/en/docs/install) to manage the dependencies of
 
 ```bash
 git checkout master
+yarn install
 yarn bootstrap
 yarn test
 ```
