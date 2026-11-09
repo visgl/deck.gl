@@ -83,7 +83,7 @@ export class ArrowConverter {
     return uploadArrowVector(this.device, vector, {
       name: conversion.name,
       format,
-      color: semantic === 'color',
+      color: semantic === 'color' || format === 'unorm8x4',
       preserveNulls: nullPolicy === 'preserve',
       fp64: conversion.fp64,
       transform: conversion.transform
