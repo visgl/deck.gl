@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {AccessorFunction, DefaultProps} from '@deck.gl/core';
+import {AccessorFunction, DefaultProps, UpdateParameters} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {getGeohashPolygon} from './geohash-utils';
 
 import {
   cellColumnDefaults,
   renderCellColumns,
+  updateCellColumns,
   type CellColumnProps
 } from '../geo-cell-layer/cell-columns';
 
@@ -38,6 +39,16 @@ export default class GeohashLayer<DataT = any, ExtraProps extends {} = {}> exten
 > {
   static layerName = 'GeohashLayer';
   static defaultProps = defaultProps;
+
+  updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
+    updateCellColumns(
+      this,
+      {props, oldProps, changeFlags},
+      'getGeohash',
+      false,
+      this.getSubLayerRow.bind(this)
+    );
+  }
 
   /** Routes cell columns through source-preserving geometry and style accessors. */
   renderLayers() {

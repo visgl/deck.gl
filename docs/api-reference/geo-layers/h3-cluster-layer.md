@@ -189,6 +189,8 @@ Cells in each row are combined into one cluster.
 
 When `data` is supplied, its row count must match `cells`. Omitted styling columns use accessors
 with the original feature and source row index. Null cells and GPU-only columns are unsupported.
+`highlightedObjectIndex` selects an expanded cell row in column mode. Picking reports
+the source feature index.
 See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates) for updates.
 
 #### `fillColors` (object, optional) {#fillcolors}

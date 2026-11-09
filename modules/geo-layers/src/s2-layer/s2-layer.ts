@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {AccessorFunction, DefaultProps} from '@deck.gl/core';
+import {AccessorFunction, DefaultProps, UpdateParameters} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {getS2Polygon} from './s2-utils';
 
 import {
   cellColumnDefaults,
   renderCellColumns,
+  updateCellColumns,
   type CellColumnProps
 } from '../geo-cell-layer/cell-columns';
 
@@ -37,6 +38,16 @@ export default class S2Layer<DataT = any, ExtraProps extends {} = {}> extends Ge
 > {
   static layerName = 'S2Layer';
   static defaultProps = defaultProps;
+
+  updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
+    updateCellColumns(
+      this,
+      {props, oldProps, changeFlags},
+      'getS2Token',
+      false,
+      this.getSubLayerRow.bind(this)
+    );
+  }
 
   /** Routes cell columns through source-preserving geometry and style accessors. */
   renderLayers() {

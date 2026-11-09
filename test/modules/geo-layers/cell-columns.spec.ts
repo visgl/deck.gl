@@ -24,6 +24,8 @@ for (const [Layer, cell] of [
 ] as const) {
   test(`${Layer.layerName} renders cell columns and replaces feature styles`, () => {
     const cells = vectorFromArray([cell]);
+    let previousCells;
+    let previousRows;
     testLayer({
       Layer: Layer as typeof H3HexagonLayer,
       testCases: [
@@ -31,6 +33,7 @@ for (const [Layer, cell] of [
           title: 'initialize columns',
           props: {cells, elevations: vectorFromArray([10]), extruded: true, pickable: true}
         },
+        {title: 'opacity update', updateProps: {opacity: 0.5}},
         {title: 'replace styles', updateProps: {elevations: vectorFromArray([20])}},
         {
           title: 'replace geometry',
@@ -41,6 +44,9 @@ for (const [Layer, cell] of [
         onAfterUpdate: ({layer, subLayer}) => {
           expect(subLayer).toBeTruthy();
           const rows = subLayer.props.data;
+          if (previousCells === layer.props.cells) expect(rows).toBe(previousRows);
+          previousCells = layer.props.cells;
+          previousRows = rows;
           expect(rows.length).toBe(layer.props.cells.length);
           expect(subLayer.props.getElevation(rows[0], {index: 0})).toBe(
             layer.props.elevations.get(0)

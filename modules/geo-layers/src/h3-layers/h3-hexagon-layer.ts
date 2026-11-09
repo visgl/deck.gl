@@ -27,6 +27,7 @@ import {flattenPolygon, getHexagonCentroid, h3ToPolygon} from './h3-utils';
 import {
   cellColumnDefaults,
   renderCellColumns,
+  updateCellColumns,
   type CellColumnProps
 } from '../geo-cell-layer/cell-columns';
 
@@ -128,6 +129,13 @@ export default class H3HexagonLayer<
   }
 
   updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
+    updateCellColumns(
+      this,
+      {props, oldProps, changeFlags},
+      'getHexagon',
+      false,
+      this.getSubLayerRow.bind(this)
+    );
     if (props.cells) return;
     if (
       props.highPrecision !== true &&
