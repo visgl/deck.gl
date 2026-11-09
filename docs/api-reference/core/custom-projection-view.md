@@ -70,10 +70,18 @@ Use a new layer ID when switching a layer between `MapView` and `CustomProjectio
 
 When displaying multiple views with different projections, create a separate layer instance with a unique ID for each view, and use `layerFilter` to restrict each instance to its intended view.
 
+## Adaptive refinement {#adaptive-refinement}
+
+BitmapLayer can refine its mesh using the experimental `_projectionTolerance` prop. It samples edges and triangle interiors in UV space and preserves bilinear bounds and picking coordinates. The tolerance is a sampled approximation, not a certified bound. Split seams and provide finite geometry within the converter domain. Invalid samples or exhausted math.gl limits (10 refinement passes, 65,536 vertices and 131,072 triangles) throw. Camera movement does not regenerate the mesh; bounds, tolerance, projection, coordinate system and model matrix changes do.
+
+Path and polygon layers can subdivide edges to approximate curved projections using the experimental `_projectionTolerance` prop. The tolerance is a sampled error in map meters, not a certified bound. Existing `resolution` grid cutting occurs first. The model matrix and converter are included in sampling; camera movement does not retessellate geometry. Changes to tolerance or projection rebuild geometry.
+
+Edges interpolate linearly, including altitude. Split seams and invalid domains before supplying geometry; this does not create great-circle edges or clip geometry. Quarter, midpoint and three-quarter samples are checked. Invalid samples or exhausted math.gl limits (16 bisection levels and 65,536 vertices per path or ring) throw. Inserted vertices require CPU-readable geometry and per-object styling; pre-tessellated external attribute or index buffers are unsupported.
+
 ## Limitations
 
 - Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
-- `BitmapLayer` approximates the projection with a triangle mesh. A positive `resolution` creates an interior grid in the source CRS and projects every grid vertex; higher values improve the approximation at a higher processing cost. Image coordinates are linearly interpolated within each triangle. Subdivision cannot correct an image's pixel-to-coordinate mapping when it differs from the declared source CRS.
+- `BitmapLayer` approximates the projection with a triangle mesh. A positive `resolution` creates an interior grid in the source CRS and projects every grid vertex; higher values improve the approximation at a higher processing cost. [`_projectionTolerance`](../layers/bitmap-layer.md#_projectiontolerance) adds adaptive refinement. Image coordinates are linearly interpolated within each triangle. Subdivision cannot correct an image's pixel-to-coordinate mapping when it differs from the declared source CRS.
 - Great-circle paths are not supported by `GreatCircleLayer` or `ArcLayer` with `greatCircle: true`. They fall back to ordinary arcs between projected endpoints, as with `greatCircle: false`. To preserve a great-circle path, sample it in geographic coordinates and render the samples with `PathLayer`.
 - `LineLayer`, `ArcLayer`, `PathLayer` and `SolidPolygonLayer` ignore `wrapLongitude` when the layer uses CPU preprojection or its source coordinates are not WGS84. Split geometry at the desired longitude boundary before passing it to these layers.
 - With `coordinateSystem: 'default'`, layer positions are interpreted as coordinates in WGS84. `modelMatrix` and then `coordinateOrigin` are applied in the source CRS before conversion. Use a CRS identifier or PROJ string to declare another source CRS. Positions whose CRS signature matches the view's descriptor bypass CPU conversion. Legacy `coordinateSystem: 'cartesian'` also bypasses conversion. Cartesian positions are in target CRS units in `crs`, and `modelMatrix` and `coordinateOrigin` both apply.
