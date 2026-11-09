@@ -15,6 +15,7 @@ import type {WebGLDevice} from '@luma.gl/core/webgl';
 import type {NumberArray4} from '@math.gl/core';
 
 import Pass from './pass';
+import {getPreprojectionSignature} from '../shaderlib/project/coordinate-systems';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type Layer from '../lib/layer';
@@ -49,6 +50,12 @@ export type LayersPassRenderOptions = {
   layers: Layer[];
   viewports: Viewport[];
   onViewportActive?: (viewport: Viewport) => void;
+  /**
+   * If true, this pass draws into an auxiliary target with a viewport of its own making.
+   * Layers keep the update state they have for the primary viewport instead of re-updating for
+   * this one, which would be undone as soon as the primary viewport is activated again.
+   */
+  isAuxiliaryPass?: boolean;
   cullRect?: Rect;
   views?: Record<string, View>;
   effects?: Effect[];
@@ -215,6 +222,7 @@ export default class LayersPass extends Pass {
       layers,
       pass,
       isPicking = false,
+      isAuxiliaryPass = false,
       layerFilter,
       cullRect,
       views,
@@ -243,7 +251,8 @@ export default class LayersPass extends Pass {
         layer,
         drawContext,
         layerFilter,
-        layerFilterCache
+        layerFilterCache,
+        isAuxiliaryPass
       );
 
       const layerParam = {shouldDrawLayer} as DrawLayerParameters;
@@ -435,7 +444,8 @@ export default class LayersPass extends Pass {
     layer: Layer,
     drawContext: FilterContext,
     layerFilter: ((params: FilterContext) => boolean) | undefined | null,
-    layerFilterCache: Record<string, boolean>
+    layerFilterCache: Record<string, boolean>,
+    isAuxiliaryPass: boolean = false
   ) {
     if (!layer.internalState || !layer.isCoordinateSystemLoaded) return false;
     const shouldDrawLayer = layer.props.visible && this.shouldDrawLayer(layer);
@@ -469,9 +479,14 @@ export default class LayersPass extends Pass {
       }
     }
 
-    // One attribute set is shared by all views. Only the first eligible viewport
-    // selects its conversion; later views and picking reuse the prepared geometry.
-    if (!drawContext.isPicking && !this._activatedLayers.has(layer)) {
+    // Auxiliary and picking passes must not replace the viewport used to prepare geometry.
+    if (
+      !drawContext.isPicking &&
+      !this._activatedLayers.has(layer) &&
+      (!isAuxiliaryPass ||
+        layer.internalState?.preprojectionSignature !==
+          getPreprojectionSignature(drawContext.viewport, layer.internalState?.sourceCrs ?? null))
+    ) {
       this._activatedLayers.add(layer);
       layer.activateViewport(drawContext.viewport);
     }

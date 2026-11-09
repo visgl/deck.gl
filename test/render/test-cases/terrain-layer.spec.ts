@@ -24,7 +24,7 @@ const DECODER = {
   offset: -32768 * 4
 };
 
-function waitAfterDefaultCompletion(waitMs = 0) {
+function waitAfterDefaultCompletion(waitMs = 0, {untilSettled = false} = {}) {
   let doneScheduled = false;
 
   return ({deck, layers, done}) => {
@@ -33,8 +33,11 @@ function waitAfterDefaultCompletion(waitMs = 0) {
     // @ts-expect-error Accessing protected layerManager in test code
     const needsUpdate = deck.layerManager?.needsUpdate();
     const allLoaded = layers.every(layer => layer.isLoaded);
+    // Optionally also wait for a frame that requests no further redraw, so a layer that
+    // re-updates on every frame times out instead of being captured mid-loop
+    const settled = !untilSettled || !deck.needsRedraw();
 
-    if (!needsUpdate && allLoaded && !doneScheduled) {
+    if (!needsUpdate && allLoaded && settled && !doneScheduled) {
       doneScheduled = true;
       if (waitMs > 0) {
         setTimeout(done, waitMs);
@@ -91,11 +94,9 @@ const testCases = [
     goldenImage: './test/render/golden-images/terrain-extension-drape.png'
   },
   {
-    // terrain-extension-drape in GlobeView, without outlines.
-    // Golden: the same choropleth fills draped over the terrain, on the globe.
-    // No stroke: a draped PathLayer on GlobeView re-tessellates every frame, so the screenshot
-    // never settles.
-    name: 'terrain-extension-drape-fill-globe',
+    // Golden: choropleth fills and strokes draped over terrain in GlobeView.
+    // Wait for redraws to stop so repeated terrain cover updates fail the test.
+    name: 'terrain-extension-drape-globe',
     skip: ['webgpu'],
     views: new GlobeView({resolution: 36}),
     viewState: {
@@ -114,14 +115,14 @@ const testCases = [
       }),
       new GeoJsonLayer({
         data: choropleths,
-        stroked: false,
+        getLineWidth: 50,
         getFillColor: (_, {index}) => [(index % 3) * 80, (index % 2) * 128, 128, 200],
         extensions: [new TerrainExtension()]
       })
     ],
-    onAfterRender: waitAfterDefaultCompletion(500),
+    onAfterRender: waitAfterDefaultCompletion(500, {untilSettled: true}),
     imageDiffOptions: {threshold: 0.985},
-    goldenImage: './test/render/golden-images/terrain-extension-drape-fill-globe.png'
+    goldenImage: './test/render/golden-images/terrain-extension-drape-globe.png'
   },
   {
     name: 'terrain-extension-offset',
