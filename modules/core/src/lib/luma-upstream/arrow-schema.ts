@@ -37,7 +37,7 @@ export function getArrowConversionFormat(
     const width = DataType.isFixedSizeList(type) ? type.listSize : 1;
     format = (width === 1 ? 'float32' : `float32x${width}`) as GPUVectorFormat;
   }
-  const color = semantic === 'color';
+  const color = semantic === 'color' || format === 'unorm8x4';
   const width = format === 'float32' ? 1 : Number(/x([234])$/.exec(format)?.[1]);
   if (!width || (color ? format !== 'unorm8x4' : !format.startsWith('float32')))
     throw new Error(`Unsupported Arrow output format: ${format}`);

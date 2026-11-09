@@ -19,6 +19,7 @@ test('Arrow schema accepts numeric scalars, positions, colors and vectors', () =
   );
   for (const size of [3, 4]) {
     expect(getArrowConversionFormat(list(size), {semantic: 'color'})).toBe('unorm8x4');
+    expect(getArrowConversionFormat(list(size), {format: 'unorm8x4'})).toBe('unorm8x4');
   }
   expect(getArrowConversionFormat(list(4), {semantic: 'numeric'})).toBe('float32x4');
 });

@@ -96,12 +96,12 @@ Use the normal accessor path when you need those features. See the
 
 ## Schema validation
 
-Column conversion checks Arrow type metadata before uploading values. Positions require numeric
-fixed-size lists of width two or three; scalars require integer or floating-point fields.
-Colors require numeric RGB or RGBA fixed-size lists. Numeric vectors use their list width.
-Dictionary, string, and variable-size list inputs are not supported by this numeric converter.
+Column inputs must use the following Arrow types.
 
-The internal shared schema helper validates types and output formats without reading rows or
-allocating GPU resources. Conversion still validates null values, transformed widths, and buffers.
-Schema compatibility alone does not guarantee valid column values. This preparation does not
-enable automatic field lookup from a table supplied as `data`.
+- Positions require numeric fixed-size lists with two or three components.
+- Scalars accept integer or floating-point fields.
+- Colors accept numeric RGB or RGBA fixed-size lists.
+- Numeric vectors use their fixed-size list width.
+
+Dictionary, string, and variable-size list inputs are unsupported. Null values and invalid
+transformed values raise conversion errors, even when the schema is compatible.
