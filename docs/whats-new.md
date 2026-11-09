@@ -31,9 +31,9 @@ GPUVector cell results without copying them to the CPU. The default `WebGLAggreg
 channel values. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
 result layouts, and supported scales and contours.
 
-### luma.gl v10 alpha.10
+### luma.gl v10 alpha.11
 
-The v10 packages use luma.gl alpha.10. Layer models delegate typed vector and
+The v10 packages use luma.gl alpha.11. Layer models delegate typed vector and
 constant-buffer binding and render-target format tracking to luma.gl. WebGPU
 layer draws restore dynamic render-pass parameters after drawing. Custom shader
 plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-guide.md).
@@ -54,9 +54,13 @@ Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md)
 
 [`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/geospatial/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
 
+Custom projection inverse conversions that return non-finite coordinates are reported as invalid, consistent with conversions that throw.
+
 ### Layer source CRS (Experimental)
 
 Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
+
+Paths and polygon rings support opt-in `_projectionTolerance` refinement through math.gl to approximate curved projected edges. Refinement requires normalized geometry, CPU-readable coordinates and per-object styling; polygon interiors are triangulated separately.
 
 ## deck.gl v9.4
 
