@@ -163,18 +163,21 @@ test('ArrowConverter uploads sliced numeric chunks and Float64 residuals', async
   device.destroy();
 });
 
-test('ArrowConverter expands RGB floats to normalized RGBA bytes', async () => {
-  const device = new NullDevice({});
-  const buffers = vi.spyOn(device, 'createBuffer');
-  const source = vectorFromArray(
-    [[1, 0.5, 0]],
-    new FixedSizeList(3, new Field('values', new Float32(), false))
-  );
-  const result = await new ArrowConverter(device).convert(source, {semantic: 'color'});
-  expect(Array.from(buffers.mock.calls[0][0]!.data as Uint8Array)).toEqual([255, 128, 0, 255]);
-  result.destroy();
-  device.destroy();
-});
+test.each([{semantic: 'color' as const}, {format: 'unorm8x4' as const}])(
+  'ArrowConverter expands RGB floats to normalized RGBA bytes with %o',
+  async options => {
+    const device = new NullDevice({});
+    const buffers = vi.spyOn(device, 'createBuffer');
+    const source = vectorFromArray(
+      [[1, 0.5, 0]],
+      new FixedSizeList(3, new Field('values', new Float32(), false))
+    );
+    const result = await new ArrowConverter(device).convert(source, options);
+    expect(Array.from(buffers.mock.calls[0][0]!.data as Uint8Array)).toEqual([255, 128, 0, 255]);
+    result.destroy();
+    device.destroy();
+  }
+);
 
 test('ArrowConverter owns special output names during destruction and rollback', async () => {
   const device = new NullDevice({});
