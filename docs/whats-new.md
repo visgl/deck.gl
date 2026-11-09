@@ -4,9 +4,30 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
-### luma.gl v10 alpha.10
+### Grid compute aggregation
 
-The v10 packages use luma.gl alpha.10. Layer models delegate typed vector and
+`GridLayer` supports two-channel compute aggregation with explicit color and elevation domains.
+Color and elevation results stay in GPU vectors consumed directly by the cell layer. The
+implementation shares column preparation and reduction kernels with ScreenGrid. See
+[GridLayer](./api-reference/aggregation-layers/grid-layer.md#compute-aggregation).
+
+### ScreenGrid compute aggregation
+
+`ScreenGridLayer` can aggregate on WebGPU using an explicit `colorDomain`, with
+picking and extensions disabled. SUM, MEAN, MIN, MAX, and COUNT produce GPUVector
+outputs consumed directly by the cell layer. See [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#compute-aggregation).
+
+### Custom aggregators and GPUVector inputs
+
+GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer now accept custom aggregator
+instances. Custom aggregators can consume GPUVector position/weight columns and publish
+GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and
+channel values. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
+result layouts, and supported scales and contours.
+
+### luma.gl v10 alpha.11
+
+The v10 packages use luma.gl alpha.11. Layer models delegate typed vector and
 constant-buffer binding and render-target format tracking to luma.gl. WebGPU
 layer draws restore dynamic render-pass parameters after drawing. Custom shader
 plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-guide.md).
@@ -19,22 +40,21 @@ ScatterplotLayer accepts Arrow vectors for positions and styling, with accessor 
 
 The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples/v10/arrow-path-layer), [riverfront weather](/examples/v10/weather), and [GPU graph exploration](/examples/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
 
-### WebGPU brushing
+### Extension updates
 
-[`BrushingExtension`](./api-reference/extensions/brushing-extension.md) supports WebGPU on standard rendering primitives, including picking and live accessor updates.
-
-### WebGPU data filtering
-
-[`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) supports numeric and category filtering on WebGPU, including fp64 values, soft ranges, and size and color transforms. Filtered item counting (`countItems`) requires WebGL.
-
+Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) with `countItems` to report how many objects pass numeric or category filters.
 
 ### Custom projections (Experimental)
 
 [`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/geospatial/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
 
+Custom projection inverse conversions that return non-finite coordinates are reported as invalid, consistent with conversions that throw.
+
 ### Layer source CRS (Experimental)
 
 Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
+
+Paths and polygon rings support opt-in `_projectionTolerance` refinement through math.gl to approximate curved projected edges. Refinement requires normalized geometry, CPU-readable coordinates and per-object styling; polygon interiors are triangulated separately.
 
 ## deck.gl v9.4
 

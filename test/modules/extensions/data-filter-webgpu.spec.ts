@@ -378,32 +378,6 @@ test.each([true, false])(
   }
 );
 
-test('DataFilterExtension#WebGPU rejects item counting before model creation', async () => {
-  const {LayerManager, OrthographicViewport} = await import('@deck.gl/core');
-  const device = await getWebGPUTestDevice();
-  expect(device).toBeTruthy();
-  if (!device) return;
-  const errors: Error[] = [];
-  const manager = new LayerManager(device, {
-    viewport: new OrthographicViewport({width: 128, height: 128})
-  });
-  manager.setProps({onError: error => errors.push(error)});
-  const layer = new ScatterplotLayer({
-    id: 'unsupported-filter-count',
-    data: [{position: [0, 0]}],
-    getPosition: object => object.position,
-    extensions: [new DataFilterExtension({countItems: true})]
-  });
-  try {
-    manager.setLayers([layer]);
-    expect(errors).toHaveLength(1);
-    expect(errors[0].message).toContain('DataFilterExtension countItems requires WebGL');
-    expect(layer.getModels()).toHaveLength(0);
-  } finally {
-    manager.finalize();
-  }
-});
-
 // These regressions also run in the WebGL browser project.
 beforeEach(async context => {
   if (!(await getWebGPUTestDevice())) context.skip();

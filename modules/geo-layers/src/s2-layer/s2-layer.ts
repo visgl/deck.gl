@@ -6,7 +6,14 @@ import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {getS2Polygon} from './s2-utils';
 
+import {
+  cellColumnDefaults,
+  renderCellColumns,
+  type CellColumnProps
+} from '../geo-cell-layer/cell-columns';
+
 const defaultProps: DefaultProps<S2LayerProps> = {
+  ...cellColumnDefaults,
   getS2Token: {type: 'accessor', value: (d: any) => d.token}
 };
 
@@ -14,7 +21,7 @@ const defaultProps: DefaultProps<S2LayerProps> = {
 export type S2LayerProps<DataT = unknown> = _S2LayerProps<DataT> & GeoCellLayerProps<DataT>;
 
 /** Properties added by S2Layer. */
-type _S2LayerProps<DataT> = {
+type _S2LayerProps<DataT> = CellColumnProps & {
   /**
    * Called for each data object to retrieve the quadkey string identifier.
    *
@@ -30,6 +37,17 @@ export default class S2Layer<DataT = any, ExtraProps extends {} = {}> extends Ge
 > {
   static layerName = 'S2Layer';
   static defaultProps = defaultProps;
+
+  /** Routes cell columns through source-preserving geometry and style accessors. */
+  renderLayers() {
+    if (this.props.cells)
+      return renderCellColumns(this, 'getS2Token', false, {
+        row: this.getSubLayerRow.bind(this),
+        accessor: this.getSubLayerAccessor.bind(this),
+        props: this.getSubLayerProps.bind(this)
+      });
+    return super.renderLayers();
+  }
 
   indexToBounds(): Partial<GeoCellLayer['props']> | null {
     const {data, getS2Token} = this.props;

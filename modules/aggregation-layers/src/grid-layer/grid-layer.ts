@@ -9,7 +9,6 @@ import {
   Accessor,
   Color,
   GetPickingInfoParams,
-  CompositeLayerProps,
   createIterable,
   Layer,
   Material,
@@ -22,7 +21,7 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
-import AggregationLayer from '../common/aggregation-layer';
+import AggregationLayer, {type AggregationLayerProps} from '../common/aggregation-layer';
 import {AggregateAccessor} from '../common/types';
 import {defaultColorRange} from '../common/utils/color-utils';
 import {AttributeWithScale} from '../common/utils/scale-utils';
@@ -30,6 +29,7 @@ import {getBinIdRange} from '../common/utils/bounds-utils';
 import {createAggregationViewport} from '../common/utils/projection-utils';
 
 import {GridCellLayer} from './grid-cell-layer';
+import {WebGPUGridAggregator} from './webgpu-grid-aggregator';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -73,7 +73,7 @@ const defaultProps: DefaultProps<GridLayerProps> = {
 };
 
 /** All properties supported by GridLayer. */
-export type GridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & CompositeLayerProps;
+export type GridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & AggregationLayerProps<DataT>;
 
 /** Properties added by GridLayer. */
 type _GridLayerProps<DataT> = {
@@ -286,12 +286,75 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       aggregatorViewport: Viewport;
     } & AggregationLayer<any>['state'];
 
+  protected override getAggregationChannelCount(): number {
+    return 2;
+  }
+
   getAggregatorType(): string {
     const {gpuAggregation, gridAggregator, getColorValue, getElevationValue} = this.props;
     if (gpuAggregation && (gridAggregator || getColorValue || getElevationValue)) {
       // If these features are desired by the app, the user should explicitly use CPU aggregation
       log.warn('Features not supported by GPU aggregation, falling back to CPU')();
       return 'cpu';
+    }
+
+    if (
+      gpuAggregation &&
+      this.context.device.type === 'webgpu' &&
+      this.props.colorDomain &&
+      this.props.elevationDomain &&
+      !this.props.pickable &&
+      !this.props.extensions.length &&
+      this.props.onSetColorDomain === noop &&
+      this.props.onSetElevationDomain === noop &&
+      this.props.colorScaleType !== 'quantile' &&
+      this.props.colorScaleType !== 'ordinal' &&
+      this.props.elevationScaleType !== 'quantile' &&
+      this.props.lowerPercentile === 0 &&
+      this.props.upperPercentile === 100 &&
+      this.props.elevationLowerPercentile === 0 &&
+      this.props.elevationUpperPercentile === 100
+    ) {
+      if (
+        (!this.props.positions &&
+          !WebGPUGridAggregator.supportsData(this.props.data, [
+            'getPosition',
+            'getColorWeight',
+            'getElevationWeight'
+          ])) ||
+        (!this.props.positions &&
+          this.props.data ===
+            (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
+          !WebGPUGridAggregator.supportsAttributes(
+            this.getAttributeManager()!.attributes,
+            ['colorWeights', 'elevationWeights'],
+            this.context.device.limits.maxStorageBufferBindingSize
+          ))
+      )
+        return 'cpu';
+      if (
+        this.props.positions &&
+        !WebGPUGridAggregator.supportsColumns(
+          [this.props.positions, ...(this.props.weights || [])],
+          this.context.device.limits.maxStorageBufferBindingSize
+        )
+      ) {
+        throw new Error('Aggregation GPU input exceeds the storage buffer binding limit');
+      }
+      if (this.props.positions && this.state.preproject) {
+        throw new Error('Grid GPU columns must use the custom view coordinate system');
+      }
+      this._updateBinOptions();
+      const count = this.state.binIdRange.reduce((total, [start, end]) => total * (end - start), 1);
+      const limits = this.context.device.limits;
+      if (
+        !Number.isSafeInteger(count) ||
+        count * 16 > Math.min(limits.maxBufferSize, limits.maxStorageBufferBindingSize)
+      ) {
+        if (this.props.positions) throw new Error('Grid aggregation exceeds device buffer limits');
+        return 'cpu';
+      }
+      return 'webgpu';
     }
 
     if (
@@ -305,7 +368,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return 'cpu';
   }
 
-  createAggregator(type: string): WebGLAggregator | CPUAggregator {
+  createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUGridAggregator {
+    if (type === 'webgpu') return new WebGPUGridAggregator(this.context.device);
     if (type === 'cpu') {
       const {gridAggregator, cellSize} = this.props;
       return new CPUAggregator({
@@ -389,6 +453,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     if (
       aggregatorChanged ||
       changeFlags.dataChanged ||
+      props.positions !== oldProps.positions ||
+      props.weights !== oldProps.weights ||
+      props.dataBounds !== oldProps.dataBounds ||
       props.cellSize !== oldProps.cellSize ||
       props.getColorValue !== oldProps.getColorValue ||
       props.getElevationValue !== oldProps.getElevationValue ||
@@ -399,7 +466,6 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       const {cellSizeCommon, cellOriginCommon, binIdRange, dataAsArray} = this.state;
 
       aggregator.setProps({
-        // @ts-expect-error only used by GPUAggregator
         binIdRange,
         pointCount: this.getNumInstances(),
         operations: [props.colorAggregation, props.elevationAggregation],
@@ -443,6 +509,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   private _updateBinOptions() {
     const bounds = this.getBounds();
+    if (this.props.positions && !this.props.dataBounds) {
+      throw new Error('GPU aggregation positions require dataBounds for world-space binning');
+    }
     const cellSizeCommon: [number, number] = [1, 1];
     let cellOriginCommon: [number, number] = [0, 0];
     let binIdRange: [number, number][] = [
@@ -495,7 +564,12 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       });
     }
 
-    this.setState({cellSizeCommon, cellOriginCommon, binIdRange, aggregatorViewport: viewport});
+    Object.assign(this.state, {
+      cellSizeCommon,
+      cellOriginCommon,
+      binIdRange,
+      aggregatorViewport: viewport
+    });
   }
 
   override draw(opts) {
@@ -514,14 +588,51 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       this.setState({
         colors: new AttributeWithScale(result, aggregator.binCount)
       });
-      props.onSetColorDomain(aggregator.getResultDomain(0));
+      if (props.onSetColorDomain !== noop) {
+        props.onSetColorDomain(aggregator.getResultDomain(0));
+      }
     } else if (channel === 1) {
       const result = aggregator.getResult(1)!;
       this.setState({
         elevations: new AttributeWithScale(result, aggregator.binCount)
       });
-      props.onSetElevationDomain(aggregator.getResultDomain(1));
+      if (props.onSetElevationDomain !== noop) {
+        props.onSetElevationDomain(aggregator.getResultDomain(1));
+      }
     }
+  }
+
+  protected override updateAttributes(changedAttributes) {
+    // AttributeManager has populated current positions at this point. Backend selection
+    // during updateState can only see the previous position bounds.
+    if (
+      (changedAttributes.positions ||
+        changedAttributes.colorWeights ||
+        changedAttributes.elevationWeights) &&
+      this.state.aggregatorType === 'webgpu' &&
+      (this.getAggregatorType() === 'cpu' ||
+        !WebGPUGridAggregator.supportsAttributes(
+          this.getAttributeManager()!.attributes,
+          ['colorWeights', 'elevationWeights'],
+          this.context.device.limits.maxStorageBufferBindingSize
+        ))
+    ) {
+      this.state.aggregator.destroy();
+      const aggregator = this.createAggregator('cpu');
+      this.setState({aggregator, aggregatorType: 'cpu'});
+      aggregator.setProps({
+        attributes: this.getAttributeManager()!.attributes,
+        pointCount: this.getNumInstances(),
+        operations: [this.props.colorAggregation, this.props.elevationAggregation],
+        binIdRange: this.state.binIdRange,
+        binOptions: {
+          cellSizeCommon: this.state.cellSizeCommon,
+          cellOriginCommon: this.state.cellOriginCommon
+        },
+        onUpdate: this._onAggregationUpdate.bind(this)
+      });
+    }
+    super.updateAttributes(changedAttributes);
   }
 
   onAttributeChange(id: string) {
@@ -533,7 +644,6 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         this._updateBinOptions();
         const {cellSizeCommon, cellOriginCommon, binIdRange} = this.state;
         aggregator.setProps({
-          // @ts-expect-error only used by GPUAggregator
           binIdRange,
           binOptions: {
             cellSizeCommon,
@@ -577,6 +687,15 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const CellLayerClass = this.getSubLayerClass('cells', GridCellLayer);
     const binAttribute = aggregator.getBins();
 
+    // Resized outputs are populated at draw time. Wait for their onUpdate callbacks
+    // before combining new bin IDs with scaled results from the previous aggregation.
+    if (
+      !this.state.colors?.matchesLength(aggregator.binCount) ||
+      !this.state.elevations?.matchesLength(aggregator.binCount)
+    ) {
+      return null;
+    }
+
     const colors = this.state.colors?.update({
       scaleType: colorScaleType,
       lowerPercentile,
@@ -597,6 +716,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         id: 'cells'
       }),
       {
+        numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,
           attributes: {

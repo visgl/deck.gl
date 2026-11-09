@@ -4,7 +4,10 @@
 
 import type {Device} from '@luma.gl/core';
 import type {ColumnSource} from '@deck.gl/core/arrow';
-import {LayerColumns, type ColumnDefinition} from '../utils/layer-columns';
+import {
+  _LayerColumns as LayerColumns,
+  type _ColumnDefinition as ColumnDefinition
+} from '@deck.gl/core';
 
 const DEFINITIONS: Record<string, ColumnDefinition> = {
   sourcePositions: {

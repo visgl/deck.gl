@@ -314,6 +314,18 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       this.updateColumnState(params);
       return;
     }
+    this.restoreAccessorState();
+    super.updateState(params);
+
+    if (params.changeFlags.extensionsChanged) {
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
+      this.getAttributeManager()!.invalidateAll();
+    }
+  }
+
+  /** Restores the accessor model and attributes after removing the Arrow columns. */
+  private restoreAccessorState(): void {
     if (this.state.columns) {
       this.state.columns.destroy();
       this.state.columns = undefined;
@@ -321,13 +333,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       this.initializeAccessorAttributes();
       this.state.model?.destroy();
       this.state.model = this._getModel();
-    }
-    super.updateState(params);
-
-    if (params.changeFlags.extensionsChanged) {
-      this.state.model?.destroy();
-      this.state.model = this._getModel();
-      this.getAttributeManager()!.invalidateAll();
     }
   }
 
