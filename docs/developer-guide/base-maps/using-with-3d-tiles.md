@@ -95,9 +95,9 @@ Without `TerrainController`, the camera will orbit around the sea-level plane, w
 
 ## Below-ellipsoid terrain and clipping
 
-3D Tiles heights may be negative relative to the WGS84 ellipsoid, including in coastal areas. The default `MapView` far plane follows elevation zero, so at high zoom a top-down camera can clip this terrain even though a slightly tilted camera shows it. `minimumElevation` extends the automatic far plane to a chosen elevation floor, with the same projection used for rendering and tile traversal. The example above uses -500 m; choose a floor appropriate for your data. It does not correct a camera below elevated terrain or move the terrain itself.
+3D Tiles heights are measured from the WGS84 ellipsoid and can be negative, for example along coasts. When the camera looks straight down at high zoom, terrain below elevation 0 can disappear while a slightly tilted camera still shows it. Set `minimumElevation` on the `MapView` to the lowest height in your data, as the example above does with -500 m. A deeper value than needed reduces depth precision.
 
-`TerrainController` needs rendered terrain for depth picking, so terrain-aware navigation alone cannot recover a surface that the initial projection clips. Explicit `farZ` and custom projection matrices remain application-controlled. For interleaved Mapbox/MapLibre overlays, configure the host map's camera instead.
+With an interleaved Mapbox or MapLibre overlay, the base map controls clipping, so configure its camera instead.
 
 ## Integrating Layers with the Terrain
 

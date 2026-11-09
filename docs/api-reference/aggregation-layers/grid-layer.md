@@ -179,11 +179,38 @@ In the right context, enabling GPU aggregation can significantly speed up your a
 CPU aggregation is used as fallback in the following cases:
 
 - The current browser does not support GPU aggregation
-- The layer is rendered with WebGPU, which does not support WebGL GPU aggregation
+- The compute aggregation requirements below are not met when using a WebGPU device
 - `gridAggregator` is defined
 - `getColorValue` is defined
 - `getElevationValue` is defined
 
+
+#### Compute aggregation
+
+On a WebGPU device, `GridLayer` uses compute aggregation when `gpuAggregation` is enabled. Color and elevation are aggregated
+independently using `SUM`, `MEAN`, `MIN`, `MAX`, or `COUNT`. Results remain in GPU buffers
+and are passed directly to the cell layer.
+
+```typescript
+new GridLayer({
+  positions: positionVector,
+  weights: [colorWeightVector, elevationWeightVector],
+  dataBounds: [[-123, 37], [-122, 38]],
+  cellSize: 1000,
+  colorAggregation: 'SUM',
+  elevationAggregation: 'MEAN',
+  colorDomain: [0, 100],
+  elevationDomain: [0, 50]
+});
+```
+
+Accessor-based data and single-chunk `float32x2`/`float32x3` position vectors with two
+`float32` weight vectors are supported. GPU columns require `dataBounds` and buffers with
+`STORAGE` or `COPY_SRC` usage. Columns used in custom views must already use that view's
+coordinate system.
+
+Extensions currently require accessor data rather than GPU columns. Custom JavaScript
+callbacks and grids exceeding device limits use CPU aggregation.
 
 #### `cellSize` (number, optional) {#cellsize}
 
@@ -191,6 +218,8 @@ CPU aggregation is used as fallback in the following cases:
 
 Size of each cell in meters.
 
+
+In geospatial views, this size represents locally approximated ground meters. The viewport's distance scale is evaluated at the center of the data bounds and applied uniformly to all bins. Projection distortion may vary across the dataset, so ground dimensions away from that anchor are approximate. Panning does not change the bin definitions.
 
 #### `colorAggregation` (string, optional) {#coloraggregation}
 

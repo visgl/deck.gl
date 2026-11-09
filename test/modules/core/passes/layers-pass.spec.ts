@@ -4,16 +4,23 @@
 
 import {test, expect, vi} from 'vitest';
 
-import {Layer, CompositeLayer, LayerManager, Viewport, MapView} from '@deck.gl/core';
+import {
+  Layer,
+  CompositeLayer,
+  LayerManager,
+  Viewport,
+  MapView,
+  OrthographicView
+} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Buffer, Texture} from '@luma.gl/core';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
-import {getGLParameters} from '@luma.gl/webgl';
-import {GL} from '@luma.gl/webgl/constants';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
+import {getGLParameters} from '@luma.gl/core/webgl';
+import {GL} from '@luma.gl/core/webgl-constants';
 import type {CanvasContext} from '@luma.gl/core';
 
 class TestLayer extends Layer {
@@ -195,7 +202,7 @@ test('LayersPass#layerIndexResolver', () => {
     const resolver = layerIndexResolver();
     const resolver2 = layerIndexResolver();
 
-    const layerManager = new LayerManager(device, {});
+    const layerManager = new LayerManager(device, {viewport: new Viewport()});
     layerManager.setLayers(testCase.layers);
     const layers = layerManager.getLayers();
 
@@ -240,7 +247,7 @@ test('LayersPass#shouldDrawLayer', () => {
     })
   ];
 
-  const layerManager = new LayerManager(device, {});
+  const layerManager = new LayerManager(device, {viewport: new Viewport()});
   const layersPass = new DrawLayersPass(device);
   layerManager.setLayers(layers);
 
@@ -293,6 +300,7 @@ test('LayersPass#viewParameters', () => {
   ];
 
   const layerManager = new LayerManager(device, {
+    viewport: new Viewport(),
     deck: {
       props: {
         parameters: {
@@ -489,9 +497,90 @@ test('LayersPass#WebGPU renders and picks each repeated world in a separate pass
   }
 });
 
+test('LayersPass#WebGPU viewport uses a top-left origin', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+    return;
+  }
+
+  const size = 64;
+  // The view covers the top quarter of the framebuffer
+  const view = new OrthographicView({id: 'top', x: 0, y: 0, width: '100%', height: '25%'});
+  const viewport = view.makeViewport({
+    width: size,
+    height: size,
+    viewState: {target: [0, 0, 0], zoom: 0}
+  });
+  const colorTexture = webgpuDevice.createTexture({
+    format: 'rgba8unorm',
+    width: size,
+    height: size,
+    usage: Texture.RENDER | Texture.COPY_SRC
+  });
+  const framebuffer = webgpuDevice.createFramebuffer({
+    width: size,
+    height: size,
+    colorAttachments: [colorTexture],
+    depthStencilAttachment: 'depth24plus'
+  });
+  const readbackOptions = {x: size / 2, y: 0, width: 1, height: size};
+  const readbackLayout = colorTexture.computeMemoryLayout(readbackOptions);
+  const readbackBuffer = webgpuDevice.createBuffer({
+    byteLength: readbackLayout.byteLength,
+    usage: Buffer.COPY_DST | Buffer.MAP_READ
+  });
+  const layerManager = new LayerManager(webgpuDevice, {viewport});
+  const layersPass = new DrawLayersPass(webgpuDevice);
+
+  try {
+    layerManager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    layerManager.setLayers([
+      new ScatterplotLayer({
+        id: 'webgpu-viewport-origin',
+        data: [{position: [0, 0]}],
+        getPosition: point => point.position,
+        getFillColor: [255, 0, 0, 255],
+        radiusUnits: 'pixels',
+        getRadius: 4
+      })
+    ]);
+    layersPass.render({
+      target: framebuffer,
+      viewports: [viewport],
+      views: {[view.id]: view},
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport,
+      clearColor: [0, 0, 0, 0]
+    });
+
+    colorTexture.readBuffer(readbackOptions, readbackBuffer);
+    const pixels = await readbackBuffer.readAsync(0, readbackLayout.byteLength);
+    const getRowColor = (row: number) => {
+      const start = row * readbackLayout.bytesPerRow;
+      return Array.from(pixels.subarray(start, start + 4));
+    };
+
+    expect(getRowColor(size / 8), 'the view is drawn in the top quarter').toEqual([255, 0, 0, 255]);
+    expect(getRowColor(size - size / 8), 'nothing is drawn in the bottom quarter').toEqual([
+      0, 0, 0, 0
+    ]);
+  } finally {
+    readbackBuffer.destroy();
+    layerManager.finalize();
+    framebuffer.destroy();
+    colorTexture.destroy();
+  }
+});
+
 test('LayersPass#uses the supplied canvas context for viewport and clear passes', () => {
   const layer = new TestLayer({id: 'canvas-context-layer'});
-  const layerManager = new LayerManager(device, {});
+  const viewport = new Viewport({id: 'canvas-context-view', x: 2, y: 3, width: 10, height: 8});
+  const layerManager = new LayerManager(device, {viewport});
   const layersPass = new DrawLayersPass(device);
   const framebuffer = device.createFramebuffer({
     width: 60,
@@ -503,7 +592,6 @@ test('LayersPass#uses the supplied canvas context for viewport and clear passes'
     getDrawingBufferSize: () => [60, 40],
     cssToDeviceRatio: () => 2
   } as CanvasContext;
-  const viewport = new Viewport({id: 'canvas-context-view', x: 2, y: 3, width: 10, height: 8});
 
   layerManager.setLayers([layer]);
   const beginRenderPass = vi.spyOn(device, 'beginRenderPass');
@@ -536,7 +624,7 @@ test('LayersPass#GLViewport', () => {
     })
   ];
 
-  const layerManager = new LayerManager(device, {});
+  const layerManager = new LayerManager(device, {viewport: new Viewport()});
   const layersPass = new DrawLayersPass(device);
   const framebuffer = device.createFramebuffer({
     width: 100,

@@ -50,7 +50,7 @@ Parameters:
 
   + `nearZMultiplier` (number, optional) - Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`.
   + `farZMultiplier` (number, optional) - Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1.01`.
-  + `minimumElevation` (number, optional) - Lowest elevation in meters used to extend the automatic far plane below elevation zero. Default `0`; positive values retain the default range. The camera and geometry are unchanged. Explicit `farZ` or `projectionMatrix` overrides take precedence. See [MapView](./map-view.md#minimumelevation).
+  + `minimumElevation` (number, optional) - Lowest elevation in meters that stays visible. Default `0`. See [MapView](./map-view.md#minimumelevation).
   + `orthographic` (boolean, optional) - Default `false`.
   + `projectionMatrix` (number[16], optional) - Optional 16-element 4x4 projection matrix, that overrides the matrix created from the parameters above.
 
@@ -63,6 +63,19 @@ Remarks:
 * When constructing the viewport, a field of view is not specified, but rather is calculated from the `altitude` or (if present) the `projectionMatrix`. The value can be obtained from `this.fovy` (in degrees).
 
 Inherits all [Viewport methods](./viewport.md#methods).
+
+## Target CRS
+
+`viewport.crs` describes deck.gl's `OSMTile512` coordinate system. X increases eastward
+and Y increases southward across a 512-unit zoom-zero tile; Z is altitude in meters.
+Its bounds `[[0, 0], [512, 512]]` describe an appropriate rendering target, not the
+projection algorithm's validity limits. This is a tile-coordinate convention, distinct
+from EPSG:3857 coordinates in meters.
+
+The descriptor's WGS84 converters use `@math.gl/web-mercator`. Conversion preserves
+altitude and continuous longitude; explicit normalization wraps longitude and clamps
+latitude to the Mercator rendering extent. The viewport retains its northward Y in
+common space and its existing meter-based altitude scaling.
 
 ## Methods
 

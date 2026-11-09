@@ -9,7 +9,12 @@
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
 import {Tesselator} from '@deck.gl/core';
-import {cutPolygonByGrid, cutPolygonByMercatorBounds} from '@math.gl/polygon';
+import {
+  subdividePolyline,
+  cutPolygonByGrid,
+  cutPolygonByMercatorBounds,
+  modifyPolygonWindingDirection
+} from '@math.gl/geometry';
 
 import type {
   PolygonGeometry,
@@ -38,9 +43,12 @@ export default class PolygonTesselator extends Tesselator<
     fp64?: boolean;
     IndexType?: Uint32ArrayConstructor | Uint16ArrayConstructor;
     resolution?: number;
+    projectionTolerance?: number;
+    projectionToleranceScale?: [number, number, number];
     wrapLongitude?: boolean;
     preproject?: (xy: number[]) => number[];
     full3d?: boolean;
+    geocentric?: boolean;
   }
 > {
   constructor(opts) {
@@ -73,41 +81,136 @@ export default class PolygonTesselator extends Tesselator<
     if (externalIndices) {
       // @ts-ignore (2339) value is not defined on TypedArray (fall through)
       this.vertexCount = (externalIndices.value || externalIndices).length;
-    } else if (this.data && !this.getGeometry) {
+    } else if (this.data && !this.geometryAccessor) {
       throw new Error('missing indices buffer');
     }
   }
 
-  /** Implement base Tesselator interface */
+  protected prepareGeometry(polygon: PolygonGeometry): PolygonGeometry {
+    // Cutting requires closed, flat input rings; winding is checked again after projection.
+    return this.preparePolygon(polygon, this.inputPositionSize) as PolygonGeometry;
+  }
+
   protected normalizeGeometry(polygon: PolygonGeometry): NormalizedPolygonGeometry | CutPolygon[] {
+    if (!this.opts.transform) return this.preparePolygon(polygon, this.positionSize);
+    const prepared = polygon as NormalizedPolygonGeometry | CutPolygon[];
+    if (!this.normalize) return prepared;
+    if (isCut(prepared)) {
+      for (const part of prepared) {
+        // Reversing a ring also reverses its outgoing edges. Keep cut-edge visibility
+        // attached to the original edge when a projection flips winding.
+        const {positions, holeIndices, edgeTypes} = part;
+        const ends = [...(holeIndices || []), positions.length];
+        let start = 0;
+        for (let ring = 0; ring < ends.length; ring++) {
+          const end = ends[ring];
+          const reversed = modifyPolygonWindingDirection(
+            positions,
+            ring === 0 ? 'clockwise' : 'counter-clockwise',
+            {start, end, size: this.positionSize, isClosed: true}
+          );
+          if (reversed && edgeTypes) {
+            const first = start / this.positionSize;
+            const last = end / this.positionSize - 1;
+            const edges = edgeTypes.slice(first, last).reverse();
+            for (let i = 0; i < edges.length; i++) edgeTypes[first + i] = edges[i];
+          }
+          start = end;
+        }
+      }
+      return prepared;
+    }
+    return Polygon.normalize(prepared, this.positionSize);
+  }
+
+  /** Implement base Tesselator interface */
+  private preparePolygon(
+    polygon: PolygonGeometry,
+    size: number
+  ): NormalizedPolygonGeometry | CutPolygon[] {
     if (this.normalize) {
-      const normalizedPolygon = Polygon.normalize(polygon, this.positionSize);
+      const normalizedPolygon = Polygon.normalize(polygon, size);
       if (this.opts.resolution) {
-        return cutPolygonByGrid(
+        const parts = cutPolygonByGrid(
           Polygon.getPositions(normalizedPolygon),
           Polygon.getHoleIndices(normalizedPolygon),
           {
-            size: this.positionSize,
+            size: size,
             gridResolution: this.opts.resolution,
             edgeTypes: true
           }
         ) as CutPolygon[];
+        return this.refinePolygons(parts, size);
       }
       if (this.opts.wrapLongitude) {
-        return cutPolygonByMercatorBounds(
+        const parts = cutPolygonByMercatorBounds(
           Polygon.getPositions(normalizedPolygon),
           Polygon.getHoleIndices(normalizedPolygon),
           {
-            size: this.positionSize,
+            size: size,
             maxLatitude: 86,
             edgeTypes: true
           }
         ) as CutPolygon[];
+        return this.refinePolygons(parts, size);
       }
-      return normalizedPolygon;
+      return this.opts.projectionTolerance
+        ? this.refinePolygons([normalizedPolygon], size)
+        : normalizedPolygon;
     }
     // normalize is explicitly set to false, assume that user passed in already normalized polygons
     return polygon as NormalizedPolygonGeometry;
+  }
+
+  /** Preserve hole offsets and outgoing cut-edge visibility while densifying each ring. */
+  private refinePolygons(
+    polygons: (NormalizedPolygonGeometry | CutPolygon)[],
+    size: number
+  ): CutPolygon[] {
+    const {projectionTolerance, projectionToleranceScale, transform} = this.opts;
+    if (!projectionTolerance) return polygons as CutPolygon[];
+    if (!transform) throw new Error('Projection refinement requires preprojected polygons');
+    const scale = projectionToleranceScale || [1, 1, 1];
+    return polygons.map(polygon => {
+      const input = Polygon.getPositions(polygon);
+      const holes = Polygon.getHoleIndices(polygon);
+      const inputEdges = (polygon as CutPolygon).edgeTypes;
+      const positions: number[] = [];
+      const holeIndices: number[] = [];
+      const edgeTypes: number[] = [];
+      let start = 0;
+      for (const end of [...(holes || []), input.length]) {
+        if (start) holeIndices.push(positions.length);
+        // Grid clipping may return an implicitly closed ring. Include its closing
+        // edge in refinement before projected-space winding and triangulation.
+        const ring = Array.from(input.slice(start, end));
+        if (
+          ring.length &&
+          ring.slice(0, size).some((value, i) => value !== ring[ring.length - size + i])
+        ) {
+          ring.push(...ring.slice(0, size));
+        }
+        const refined = subdividePolyline(ring, {
+          size: size as 2 | 3,
+          targetSize: 3,
+          transform: position => {
+            const projected = transform(Array.from(position));
+            return projected.map((value, index) => value * scale[index]);
+          },
+          tolerance: projectionTolerance
+        });
+        for (const value of refined.sourcePositions) positions.push(value);
+        for (let i = 0; i < refined.segmentIndices.length; i++) {
+          // Endpoints belong to the preceding segment; visibility belongs to the outgoing edge.
+          const segment = refined.segmentIndices[i] + (refined.segmentFractions[i] === 1 ? 1 : 0);
+          const sourceIndex = start / size + segment;
+          edgeTypes.push(inputEdges ? inputEdges[sourceIndex] : 1);
+        }
+        edgeTypes[edgeTypes.length - 1] = 0;
+        start = end;
+      }
+      return {positions, holeIndices, edgeTypes};
+    });
   }
 
   /** Implement base Tesselator interface */
@@ -124,10 +227,10 @@ export default class PolygonTesselator extends Tesselator<
 
   /** Override base Tesselator method */
   protected getGeometryFromBuffer(buffer) {
-    if (this.normalize || !this.buffers.indices) {
+    // Supplied triangles avoid triangulation, but not conversion of their positions.
+    if (this.normalize || this.opts.transform || !this.buffers.indices) {
       return super.getGeometryFromBuffer(buffer);
     }
-    // we don't need to read the positions if no normalization/tesselation
     return null;
   }
 
@@ -170,7 +273,8 @@ export default class PolygonTesselator extends Tesselator<
       polygon,
       this.positionSize,
       this.opts.preproject,
-      this.opts.full3d
+      this.opts.full3d,
+      this.opts.geocentric
     );
 
     // make sure the buffer is large enough

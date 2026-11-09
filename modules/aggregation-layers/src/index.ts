@@ -22,6 +22,7 @@ export type {
 } from './screen-grid-layer/screen-grid-layer';
 
 export type {
+  AggregationResult,
   Aggregator,
   AggregationOperation,
   AggregationProps,

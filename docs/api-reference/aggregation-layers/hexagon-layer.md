@@ -184,16 +184,28 @@ In the right context, enabling GPU aggregation can significantly speed up your a
 CPU aggregation is used as fallback in the following cases:
 
 - The current browser does not support GPU aggregation
-- `gridAggregator` is defined
+- `hexagonAggregator` is defined
 - `getColorValue` is defined
 - `getElevationValue` is defined
 
+
+##### Compute aggregation
+
+On a WebGPU device, HexagonLayer uses compute aggregation with explicit `colorDomain`
+and `elevationDomain`. Accessor data and GPU columns are supported; GPU positions require explicit `dataBounds`.
+
+Picking, extensions, domain callbacks, percentile filtering, quantile scales, and ordinal
+color scales use CPU aggregation instead. Dense grids exceeding
+device buffer limits also use CPU aggregation for accessor data. GPU-only inputs require
+a compatible compute configuration. Columns requiring CPU preprojection are unsupported.
 
 #### `radius` (number, optional) {#radius}
 
 * Default: `1000`
 
 Radius of hexagon in meters. The hexagons are pointy-topped (rather than flat-topped).
+
+In geospatial views, this size represents locally approximated ground meters. The viewport's distance scale is evaluated at the center of the data bounds and applied uniformly to all bins. Projection distortion may vary across the dataset, so ground dimensions away from that anchor are approximate. Panning does not change the bin definitions.
 
 #### `colorAggregation` (string, optional) {#coloraggregation}
 
@@ -515,6 +527,7 @@ This callback will be called when hexagon elevation domain has been calculated.
 
 The [PickingInfo.object](../../developer-guide/interactivity.md#the-pickinginfo-object) field returned by hover/click events of this layer represents an aggregated hexagon. The object contains the following fields:
 
+- `position` (number[] | null) - Center of the picked hexagon in the source CRS, or `null` when inverse projection is unavailable.
 - `col` (number) - Column index of the picked hexagon.
 - `row` (number) - Row index of the picked hexagon.
 - `colorValue` (number) - Aggregated color value, as determined by `getColorWeight` and `colorAggregation`

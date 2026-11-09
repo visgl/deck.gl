@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {MapView} from '@deck.gl/core';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {equals} from '@math.gl/core';
@@ -169,6 +169,56 @@ test('ViewManager#controllers', () => {
     viewManager.controllers.main || viewManager.controllers.minimap,
     'controllers are deleted'
   ).toBeFalsy();
+});
+
+test('ViewManager#controller without a matching view state', () => {
+  // A deck created with `controller: true`, a per-view `initialViewState` and no `views` (a
+  // widget will provide them) starts out with a default view whose state cannot be resolved
+  const viewState = {
+    a: {longitude: -122, latitude: 38, zoom: 12},
+    b: {longitude: -73, latitude: 40, zoom: 6}
+  };
+  const viewManager = new ViewManager({
+    views: [new MapView({id: 'default-view', controller: true})],
+    viewState,
+    width: 100,
+    height: 100
+  });
+  expect(viewManager.controllers['default-view'], 'no controller without a view state').toBeFalsy();
+  expect(viewManager.getViewports(), 'viewport is still built').toHaveLength(1);
+
+  // The controller is created once a view state for the view arrives
+  viewManager.setProps({
+    viewState: {...viewState, 'default-view': {longitude: 0, latitude: 0, zoom: 1}}
+  });
+  expect(
+    viewManager.controllers['default-view'],
+    'controller created with late view state'
+  ).toBeTruthy();
+  viewManager.setProps({viewState});
+
+  viewManager.setProps({
+    views: [new MapView({id: 'a', controller: true}), new MapView({id: 'b', controller: true})]
+  });
+  expect(viewManager.controllers.a, 'controller a is constructed').toBeTruthy();
+  expect(viewManager.controllers.b, 'controller b is constructed').toBeTruthy();
+
+  // A view that fully defines its own view state does not need an entry in the keyed map
+  viewManager.setProps({
+    views: [
+      new MapView({
+        id: 'own-state',
+        controller: true,
+        viewState: {longitude: 0, latitude: 0, zoom: 3}
+      })
+    ]
+  });
+  expect(
+    viewManager.controllers['own-state'],
+    'view-owned state keeps its controller'
+  ).toBeTruthy();
+
+  viewManager.finalize();
 });
 
 test('ViewManager#update view props', () => {
@@ -410,3 +460,85 @@ function mockControllerEvent(type, x, y, details) {
     }
   };
 }
+
+test.each(['synchronous', 'asynchronous'] as const)(
+  'ViewManager reports %s initialization errors and continues initializing other views',
+  async failureType => {
+    const error = new Error('View initialization failed');
+    const onError = vi.fn();
+    const initializeOtherView = vi.fn();
+    class FailingView extends MapView {
+      initialize() {
+        if (failureType === 'synchronous') throw error;
+        return Promise.reject(error);
+      }
+      makeViewport() {
+        return null;
+      }
+    }
+    class OtherView extends MapView {
+      initialize() {
+        initializeOtherView();
+      }
+    }
+    const manager = new ViewManager({
+      width: 100,
+      height: 100,
+      viewState: {longitude: 0, latitude: 0, zoom: 1},
+      onError
+    });
+    try {
+      expect(() =>
+        manager.setProps({views: [new FailingView({id: 'failing'}), new OtherView({id: 'other'})]})
+      ).not.toThrow();
+      await vi.waitFor(() => expect(onError).toHaveBeenCalledExactlyOnceWith(error));
+      expect(initializeOtherView).toHaveBeenCalledTimes(1);
+      expect(manager.getViewports().map(viewport => viewport.id)).toEqual(['other']);
+    } finally {
+      manager.finalize();
+    }
+  }
+);
+
+test.each(['synchronous', 'asynchronous'] as const)(
+  'ViewManager replaces a view after %s failure even when the retry is synchronous',
+  async failureType => {
+    const error = new Error('View initialization failed');
+    const onError = vi.fn();
+    let attempts = 0;
+    class RetryingView extends MapView {
+      #ready = false;
+      initialize() {
+        if (++attempts === 1) {
+          if (failureType === 'synchronous') throw error;
+          return Promise.reject(error);
+        }
+        this.#ready = true;
+      }
+      makeViewport(options: Parameters<MapView['makeViewport']>[0]) {
+        return this.#ready ? super.makeViewport(options) : null;
+      }
+    }
+    const view = new RetryingView({id: 'retry'});
+    const manager = new ViewManager({
+      views: [view],
+      onError,
+      width: 100,
+      height: 100,
+      viewState: {longitude: 0, latitude: 0, zoom: 1}
+    });
+    try {
+      await vi.waitFor(() => expect(onError).toHaveBeenCalledExactlyOnceWith(error));
+      expect(manager.getViewports()).toHaveLength(0);
+      manager.setProps({views: [view]});
+      expect(attempts).toBe(1);
+      const replacement = view.clone({});
+      manager.setProps({views: [replacement]});
+      expect(attempts).toBe(2);
+      expect(manager.views[0]).toBe(replacement);
+      expect(manager.getViewports()).toHaveLength(1);
+    } finally {
+      manager.finalize();
+    }
+  }
+);

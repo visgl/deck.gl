@@ -33,18 +33,19 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   geometry.worldPosition = attributes.instancePositions;
   geometry.uv = attributes.texCoords;
-  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex);
+  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex + simpleMesh.rowIndexOffset);
 
   let instanceModelMatrix = mat3x3<f32>(
     attributes.instanceModelMatrixCol0,
     attributes.instanceModelMatrixCol1,
     attributes.instanceModelMatrixCol2
   );
-  let meshPosition =
+  var meshPosition =
     (instanceModelMatrix * attributes.positions) * simpleMesh.sizeScale +
     attributes.instanceTranslation;
 
   if (simpleMesh.composeModelMatrix > 0.5) {
+    DECKGL_FILTER_SIZE(&meshPosition, geometry);
     geometry.normal = project_normal(instanceModelMatrix * attributes.normals);
     geometry.worldPosition += meshPosition;
     let projected = project_position_to_clipspace_and_commonspace(
@@ -55,10 +56,12 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     geometry.position = projected.commonPosition;
     varyings.position = projected.clipPosition;
   } else {
+    meshPosition = project_size_vec3(meshPosition);
+    DECKGL_FILTER_SIZE(&meshPosition, geometry);
     let projected = project_position_to_clipspace_and_commonspace(
       attributes.instancePositions,
       attributes.instancePositions64Low,
-      project_size_vec3(meshPosition)
+      meshPosition
     );
     geometry.position = projected.commonPosition;
     geometry.normal = project_normal(instanceModelMatrix * attributes.normals);
@@ -73,17 +76,22 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   varyings.normal = geometry.normal;
   varyings.positionCommon = geometry.position.xyz;
   varyings.pickingColor = geometry.pickingColor;
+  DECKGL_FILTER_GL_POSITION(&varyings.position, geometry);
   return varyings;
 }
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.texCoords;
+  fragmentGeometry.uv = geometry.uv;
 
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
+    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
+    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(varyings.pickingColor, 1.0);
   }
 
@@ -116,6 +124,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     }
   }
 
+  DECKGL_FILTER_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
 }
 `;

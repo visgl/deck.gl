@@ -33,9 +33,12 @@
           "developer-guide/using-layers",
           "developer-guide/interactivity",
           "developer-guide/coordinate-systems",
+          "developer-guide/projection-domains",
           "developer-guide/views",
           "developer-guide/animations-and-transitions",
+          "developer-guide/zoom-dependent-layers",
           "developer-guide/loading-data",
+          "developer-guide/using-with-arrow",
           "developer-guide/using-effects",
           "developer-guide/performance",
           "developer-guide/tips-and-tricks",
@@ -71,6 +74,16 @@
           "developer-guide/custom-layers/prop-types",
           "developer-guide/custom-layers/attribute-management",
           "developer-guide/custom-layers/writing-shaders"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Writing Custom Widgets",
+        "items": [
+          "developer-guide/custom-widgets/README",
+          "developer-guide/custom-widgets/universal-widgets",
+          "developer-guide/custom-widgets/preact-widgets",
+          "developer-guide/custom-widgets/react-widgets"
         ]
       }
     ]
@@ -132,6 +145,21 @@
       },
       {
         "type": "category",
+        "label": "Proposals",
+        "items": [
+          "api-reference/proposals/overview",
+          "api-reference/proposals/layers",
+          "api-reference/proposals/arrow-layers",
+          "api-reference/proposals/gpu-layers",
+          "api-reference/proposals/effects",
+          "api-reference/proposals/tile-2d-layer",
+          "api-reference/proposals/mvt-2d-layer",
+          "api-reference/proposals/tileset-2d",
+          "api-reference/proposals/tile-2d-header"
+        ]
+      },
+      {
+        "type": "category",
         "label": "Aggregation Layers",
         "items": [
           "api-reference/aggregation-layers/overview",
@@ -163,6 +191,7 @@
         "items": [
           "api-reference/core/viewport",
           "api-reference/core/globe-viewport",
+          "api-reference/core/custom-projection-viewport",
           "api-reference/core/web-mercator-viewport"
         ]
       },
@@ -173,6 +202,7 @@
           "api-reference/core/view",
           "api-reference/core/map-view",
           "api-reference/core/globe-view",
+          "api-reference/core/custom-projection-view",
           "api-reference/core/first-person-view",
           "api-reference/core/orthographic-view",
           "api-reference/core/orbit-view"
@@ -186,6 +216,7 @@
           "api-reference/core/map-controller",
           "api-reference/core/terrain-controller",
           "api-reference/core/globe-controller",
+          "api-reference/core/custom-projection-controller",
           "api-reference/core/first-person-controller",
           "api-reference/core/orthographic-controller",
           "api-reference/core/orbit-controller"

@@ -2,16 +2,28 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, WebMercatorViewport, project, project32, color, picking, UNIT} from '@deck.gl/core';
+import {
+  Layer,
+  _GPUVectorModel as GPUVectorModel,
+  WebMercatorViewport,
+  project,
+  project32,
+  color,
+  picking,
+  UNIT,
+  _deepEqual as deepEqual,
+  _pathUniforms as pathUniforms,
+  type _PathProps as PathProps,
+  _pathShaderWGSL as shaderWGSL,
+  _pathShaderPlugin as pathShaderPlugin
+} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
+import {getMetersPerUnit} from '../utils';
 
-import {pathUniforms, PathProps} from './path-layer-uniforms';
-import {shaderWGSL} from './path-layer.wgsl';
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
-import clipExtension from '../utils/clip-extension';
 
 import type {
   LayerProps,
@@ -31,6 +43,16 @@ import type {PathGeometry} from './path';
 
 type _PathLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
+  /** Sampled edge error in map meters for a projected or geocentric preprojecting viewport.
+   * Zero disables refinement.
+   * Requires normalized geometry, finite samples and pre-split projection seams.
+   * Throws when math.gl refinement limits are exhausted.
+   * @experimental
+   * @default 0
+   */
+  _projectionTolerance?: number;
+  /** Avoid grid splitting when a closed polygon outline is adaptively refined. @internal */
+  _projectionNoCut?: boolean;
   /** The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`
    * @default 'meters'
    */
@@ -120,6 +142,8 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   antialiasing: false,
   billboard: false,
   _pathType: null,
+  _projectionTolerance: {type: 'number', value: 0, min: 0},
+  _projectionNoCut: false,
 
   getPath: {type: 'accessor', value: (object: any) => object.path},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -170,9 +194,9 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   state!: {
     model?: Model;
     pathTesselator: PathTesselator;
-    tessellationResolution?: number;
+    subdivisionStep?: number;
     pathProjectionScale: PathProjectionScale;
-  };
+  } & Layer['state'];
 
   getShaders() {
     const {antialiasing} = this.props;
@@ -180,14 +204,9 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       vs,
       fs,
       source: shaderWGSL,
+      plugins: this.context.device.type === 'webgpu' ? [pathShaderPlugin] : [],
       defines: antialiasing ? {ANTIALIASING: 1} : {},
-      modules: [
-        project32,
-        color,
-        picking,
-        pathUniforms,
-        ...(this.context.device.type === 'webgpu' ? [clipExtension] : [])
-      ]
+      modules: [project32, color, picking, pathUniforms]
     }); // 'project' module added by default.
   }
 
@@ -213,15 +232,15 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       viewport instanceof WebMercatorViewport &&
       viewport.zoom >= 12 &&
       // Offset coordinate systems use their fixed coordinateOrigin as the projection origin.
-      // Default/lnglat and preprojected Cartesian paths follow the viewport center instead.
-      (coordinateSystem === 'default' ||
-        coordinateSystem === 'lnglat' ||
-        coordinateSystem === 'cartesian');
+      // Absolute CRS inputs and Cartesian paths follow the viewport center instead.
+      coordinateSystem !== 'meter-offsets' &&
+      coordinateSystem !== 'lnglat-offsets';
 
     if (trackViewportScale) {
       const projectUniforms = project.getUniforms({
         viewport,
         coordinateSystem,
+        sourceCrs: this.internalState!.sourceCrs,
         coordinateOrigin: this.props.coordinateOrigin,
         autoWrapLongitude: this.wrapLongitude
       }) as ProjectUniforms;
@@ -245,7 +264,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {viewport} = this.context;
     return (
       super.shouldUpdateState(params) ||
-      this.state?.tessellationResolution !== viewport.resolution ||
+      this.state?.subdivisionStep !== this.getSubdivisionStep() ||
       !pathProjectionScalesEqual(
         this.state?.pathProjectionScale,
         this.getPathProjectionScale(viewport)
@@ -264,6 +283,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             // WebGPU cannot express WebGL's vertexOffset window in one vertex buffer layout.
             // Pack each segment's [left, start, end, right] high and low position parts instead.
             pathPositions: {
+              ...this.usePositionTransforms(),
               size: 24,
               type: 'float32',
               transition: false,
@@ -285,6 +305,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           }
         : {
             vertexPositions: {
+              ...this.usePositionTransforms(),
               size: 3,
               // Start filling buffer from 1 vertex in
               vertexOffset: 1,
@@ -319,6 +340,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         noAlloc
       },
       instanceStrokeWidths: {
+        transform: null,
         size: 1,
         accessor: 'getWidth',
         transition: isWebGPU ? false : ATTRIBUTE_TRANSITION,
@@ -326,6 +348,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         bufferGroup: 'path-instance-data'
       },
       instanceColors: {
+        transform: null,
         size: this.props.colorFormat.length,
         type: 'unorm8',
         accessor: 'getColor',
@@ -349,7 +372,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         fp64: this.use64bitPositions(),
         isWebGPU
       }),
-      tessellationResolution: this.context.viewport.resolution,
+      subdivisionStep: this.getSubdivisionStep(),
       pathProjectionScale: this.getPathProjectionScale(this.context.viewport)
     });
   }
@@ -359,8 +382,18 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {props, oldProps, changeFlags} = params;
 
     const attributeManager = this.getAttributeManager();
+    // An inactive transform still forces CPU conversion of binary attributes.
+    // Attach refinement validators only while refinement is enabled.
+    // Transition attributes have separate settings; update the source descriptors.
+    const attributes = attributeManager!.attributes;
+    attributes.instanceStrokeWidths.settings.transform = props._projectionTolerance
+      ? transformRefinedWidth
+      : null;
+    attributes.instanceColors.settings.transform = props._projectionTolerance
+      ? transformRefinedColor
+      : null;
     const {viewport} = this.context;
-    const tessellationResolutionChanged = this.state.tessellationResolution !== viewport.resolution;
+    const subdivisionStepChanged = this.state.subdivisionStep !== this.getSubdivisionStep();
     const pathProjectionScale = this.getPathProjectionScale(viewport);
     const pathProjectionScaleChanged = !pathProjectionScalesEqual(
       this.state.pathProjectionScale,
@@ -371,16 +404,35 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       changeFlags.updateTriggersChanged &&
       (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPath);
     const geometryConfigurationChanged =
+      changeFlags.projectionChanged ||
+      (this.state.preproject &&
+        (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
+          !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1))) ||
       getPathChanged ||
+      props._projectionTolerance !== oldProps._projectionTolerance ||
+      props._projectionNoCut !== oldProps._projectionNoCut ||
       props._pathType !== oldProps._pathType ||
       props.positionFormat !== oldProps.positionFormat ||
       props.wrapLongitude !== oldProps.wrapLongitude ||
-      tessellationResolutionChanged;
+      subdivisionStepChanged;
     const geometryChanged = changeFlags.dataChanged || geometryConfigurationChanged;
 
     if (geometryChanged) {
       const {pathTesselator} = this.state;
       const buffers = (props.data as any).attributes || {};
+      const projectionToleranceScale = getMetersPerUnit(this.state.packedCrs);
+      if (
+        props._projectionTolerance &&
+        (!projectionToleranceScale ||
+          !this.usePositionTransforms().transform ||
+          props._pathType ||
+          (buffers.getPath && !ArrayBuffer.isView(buffers.getPath.value ?? buffers.getPath)) ||
+          Object.keys(buffers).some(key => key !== 'getPath'))
+      ) {
+        throw new Error(
+          'Projection refinement requires linear target units, normalized paths and per-object attributes'
+        );
+      }
 
       pathTesselator.updateGeometry({
         data: props.data,
@@ -389,17 +441,24 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         normalize: !props._pathType,
         loop: props._pathType === 'loop',
         getGeometry: props.getPath,
+        transform: this.usePositionTransforms().transform?.bind(this),
         positionFormat: props.positionFormat,
-        wrapLongitude: props.wrapLongitude,
-        // TODO - move the flag out of the viewport
-        resolution: viewport.resolution,
+        // Longitude cutting assumes geographic input and cannot run on preprojected coordinates.
+        wrapLongitude:
+          props.wrapLongitude &&
+          !this.state.preproject &&
+          this.state.sourceCrs?.signature === 'WGS84',
+        // Subdivision runs in accessor coordinates before the source CRS transform.
+        resolution: props._projectionNoCut ? 0 : this.getSubdivisionStep(),
+        projectionTolerance: props._projectionTolerance,
+        projectionToleranceScale: projectionToleranceScale ?? undefined,
         // A partial data diff is only valid while normalization inputs remain unchanged.
         dataChanged: geometryConfigurationChanged ? undefined : changeFlags.dataChanged
       });
       this.setState({
         numInstances: pathTesselator.instanceCount,
         startIndices: pathTesselator.vertexStarts,
-        tessellationResolution: viewport.resolution,
+        subdivisionStep: this.getSubdivisionStep(),
         pathProjectionScale
       });
       if (!changeFlags.dataChanged || geometryConfigurationChanged) {
@@ -524,7 +583,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       1, 0
     ];
 
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
@@ -586,4 +645,21 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     attribute.startIndices = pathTesselator.vertexStarts;
     attribute.value = result;
   }
+}
+
+function transformRefinedWidth(this: PathLayer, value) {
+  if (this.props._projectionTolerance && typeof value !== 'number') {
+    throw new Error('Projection refinement requires per-object widths');
+  }
+  return value;
+}
+
+function transformRefinedColor(this: PathLayer, value) {
+  if (this.props._projectionTolerance && (typeof value?.[0] === 'object' || value?.length > 4)) {
+    throw new Error('Projection refinement requires per-object colors');
+  }
+  // RGB attributes must not treat a single RGBA color as packed vertex data.
+  return this.props._projectionTolerance && this.props.colorFormat === 'RGB' && value?.length === 4
+    ? value.slice(0, 3)
+    : value;
 }

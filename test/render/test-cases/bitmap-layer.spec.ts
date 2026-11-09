@@ -6,7 +6,6 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 
 const testCases = [
@@ -41,7 +40,7 @@ const testCases = [
       new BitmapLayer({
         bounds: [-180, -90, 180, 90],
         image: '/test/data/world.jpg',
-        _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+        _imageCoordinateSystem: 'lnglat'
       })
     ],
     goldenImage: './test/render/golden-images/bitmap-imagecoordinates.png'

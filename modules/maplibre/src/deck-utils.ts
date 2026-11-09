@@ -5,7 +5,7 @@
 import {Deck, MapView, _GlobeView as GlobeView, _flatten as flatten} from '@deck.gl/core';
 
 import {
-  getMapLibreElevation,
+  getMapLibreCameraElevation,
   getMapLibreProjection,
   type MapLibreRenderParameters
 } from './compatibility';
@@ -103,8 +103,8 @@ export function getMapLibreViewState(map: MapLibreMap): MapViewState & {
     repeat: map.getRenderWorldCopies()
   };
 
-  const elevation = getMapLibreElevation(map);
-  if (typeof elevation === 'number' && Number.isFinite(elevation)) {
+  const elevation = getMapLibreCameraElevation(map, viewState.zoom);
+  if (elevation !== undefined) {
     viewState.position = [0, 0, elevation];
   }
 
@@ -131,6 +131,7 @@ export function createMapLibreDeckInstance(map: MapLibreMap, deck: Deck): Deck {
     },
     renderListener: () => {
       if (deck.isInitialized) {
+        syncMapLibreElevation(deck, map);
         afterMapLibreRender(deck, map);
       }
     }
@@ -302,6 +303,18 @@ function afterMapLibreRender(deck: Deck, map: MapLibreMap): void {
   }
 
   (deck.userData as UserData).currentViewport = null;
+}
+
+/**
+ * Picking uses the stored view state, so it has to follow the center elevation that MapLibre
+ * changes without a move event while terrain loads.
+ */
+function syncMapLibreElevation(deck: Deck, map: MapLibreMap): void {
+  const elevation = getMapLibreCameraElevation(map, map.getZoom());
+  const viewState = deck.props.viewState as MapViewState | null;
+  if (viewState?.position?.[2] !== elevation) {
+    onMapLibreMove(deck, map);
+  }
 }
 
 function onMapLibreMove(deck: Deck, map: MapLibreMap): void {

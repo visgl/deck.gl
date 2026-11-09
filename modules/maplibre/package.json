@@ -22,11 +22,13 @@
   },
   "homepage": "https://deck.gl",
   "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
@@ -34,9 +36,12 @@
     "src"
   ],
   "sideEffects": false,
+  "dependencies": {
+    "@math.gl/core": "5.0.0-beta.5"
+  },
   "peerDependencies": {
     "@deck.gl/core": "~9.4.0",
-    "@luma.gl/core": "~9.4.0",
+    "@luma.gl/core": "10.0.0-alpha.11",
     "maplibre-gl": "^4.5.1 || ^5.0.0 || ^6.0.0"
   },
   "devDependencies": {

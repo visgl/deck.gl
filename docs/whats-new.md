@@ -4,7 +4,77 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
-- [`MapView`](./api-reference/core/map-view.md#minimumelevation) and `WebMercatorViewport` accept `minimumElevation` to include below-ellipsoid terrain in the automatic far clipping range. The Google 3D Tiles example uses this option to keep negative-height terrain visible in top-down views.
+- [`MapView`](./api-reference/core/map-view.md#minimumelevation) adds `minimumElevation`, which keeps terrain and 3D Tiles below sea level visible in top-down views. The Google 3D Tiles example uses it.
+
+### Hexagon compute aggregation
+
+HexagonLayer supports WebGPU aggregation with explicit color and elevation domains,
+using the shared reducer and GPUVector rendering path.
+
+### ScreenGrid and Grid compute rendering features
+
+Compute aggregation now supports automatic domains, picking metadata, accessor-based
+extensions, and Grid distribution scales and percentile filtering. Explicit-domain rendering
+continues to consume GPU vectors directly; CPU-facing metadata uses asynchronous snapshots.
+
+### Heatmap GPU column inputs
+
+HeatmapLayer accepts borrowed position and weight GPUVectors on WebGPU, including strided columns and shorter row prefixes.
+
+### Grid compute aggregation
+
+`GridLayer` supports two-channel compute aggregation with explicit color and elevation domains.
+Color and elevation results stay in GPU vectors consumed directly by the cell layer. The
+implementation shares column preparation and reduction kernels with ScreenGrid. See
+[GridLayer](./api-reference/aggregation-layers/grid-layer.md#compute-aggregation).
+
+### ScreenGrid compute aggregation
+
+`ScreenGridLayer` can aggregate on WebGPU using an explicit `colorDomain`, with
+picking and extensions disabled. SUM, MEAN, MIN, MAX, and COUNT produce GPUVector
+outputs consumed directly by the cell layer. See [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#compute-aggregation).
+
+### Custom aggregators and GPUVector inputs
+
+GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer now accept custom aggregator
+instances. Custom aggregators can consume GPUVector position/weight columns and publish
+GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and
+channel values. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
+result layouts, and supported scales and contours.
+
+### luma.gl v10 alpha.11
+
+The v10 packages use luma.gl alpha.11. Layer models delegate typed vector and
+constant-buffer binding and render-target format tracking to luma.gl. WebGPU
+layer draws restore dynamic render-pass parameters after drawing. Custom shader
+plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-guide.md).
+
+### ScatterplotLayer Arrow columns
+
+ScatterplotLayer accepts Arrow vectors for positions and styling, with accessor and binary fallbacks. See [Using with Arrow](./developer-guide/using-with-arrow.md) for modes and [tabbed examples](./api-reference/layers/scatterplot-layer.md#arrow-columns).
+
+### deck.gl v10 examples (Experimental)
+
+The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples/v10/arrow-path-layer), [riverfront weather](/examples/v10/weather), and [GPU graph exploration](/examples/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
+
+### Extension updates
+
+[`MaskExtension`](./api-reference/extensions/mask-extension.md) supports up to four masks on WebGPU in map and globe views, including inverted masks and picking.
+
+Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) with `countItems` to report how many objects pass numeric or category filters.
+
+### Custom projections (Experimental)
+
+[`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/geospatial/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
+
+Custom projection inverse conversions that return non-finite coordinates are reported as invalid, consistent with conversions that throw.
+
+Paths and polygons can follow curved projected edges with the experimental [`_projectionTolerance`](./api-reference/layers/path-layer.md#_projectiontolerance) prop.
+
+### Layer source CRS (Experimental)
+
+Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
+
 
 ## deck.gl v9.4
 
@@ -47,10 +117,14 @@ deck.gl v9.4 brings numerous view and controller improvements on top of the subs
 [`GlobeView`](./api-reference/core/globe-view.md) continues to mature, including significantly expanded layer compatibility:
 
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now renders correctly on `GlobeView`, producing properly projected terrain meshes on the globe.
+- [`MaskExtension`](./api-reference/extensions/mask-extension.md) works in `GlobeView`; masks are evaluated in Web Mercator space, so the mask shape follows the same latitude stretch as the layers it masks.
 - [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
 - [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) renders correctly on `GlobeView`.
 - The [`project` shader module](./api-reference/core/project.md#project_common_position_to_flat) adds `project_common_position_to_flat` and its wrapped and continuous variants, so extensions and custom layers can test bounds or sample textures computed in flat Web Mercator space while rendering on the globe.
-- Pointer-anchored zoom now rotates the camera frame like a physical ball, keeping steering smooth and consistent around the poles while allowing bearing to evolve naturally.
+- [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) dashes render the same in `GlobeView` as in `MapView`.
+- [IconLayer](./api-reference/layers/icon-layer.md), [TextLayer](./api-reference/layers/text-layer.md) and billboard [ScatterplotLayer](./api-reference/layers/scatterplot-layer.md) render on `GlobeView`: objects behind the globe are hidden, objects near the horizon are no longer clipped by the globe's surface, and objects with altitude stay visible past the ground horizon. The [`project` shader module](./api-reference/core/project.md#project_globe_is_occluded) exposes `project_globe_is_occluded` and `project_globe_billboard_clipspace` for custom billboard layers.
+- [`ClipExtension`](./api-reference/extensions/clip-extension.md) clips by geometry on `GlobeView`, and `clipBounds` may cross the antimeridian, e.g. `[170, -20, -170, 20]`.
+- [LineLayer](./api-reference/layers/line-layer.md) and [ArcLayer](./api-reference/layers/arc-layer.md) render on `GlobeView` with its default back-face culling; the `cullMode: 'none'` workaround is no longer needed.
 - [`GlobeController`](./api-reference/core/globe-controller.md) now supports bearing and pitch, including shift/right-click drag and multi-touch rotation, as well as inertial spinning after a fling gesture.
 
 **View management**
@@ -112,6 +186,7 @@ New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module is forked
 - [`PathLayer`](./api-reference/layers/path-layer.md), [`LineLayer`](./api-reference/layers/line-layer.md), [`ArcLayer`](./api-reference/layers/arc-layer.md), and [`PointCloudLayer`](./api-reference/layers/point-cloud-layer.md) now use analytic antialiasing for smooth edges without requiring MSAA. Composite layers that render paths, including `GeoJsonLayer`, `PolygonLayer`, and the geospatial cell layers, forward the new `antialiasing` prop to their path sublayers.
 - [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) adds `dashMode` to choose whether a dash pattern restarts at each segment or runs continuously across a complete path, and `dashUnits` to express dash lengths in stroke widths, pixels, meters, or common units. Dash rendering is also more robust for dense and 3D paths, billboarded or offset strokes, long paths, and subpixel patterns.
 - [`FillStyleExtension`](./api-reference/extensions/fill-style-extension.md) can generate hatch, cross-hatch, and dot patterns directly in the fragment shader without a texture atlas. It also adds `fillPatternSizeUnits` for ground- or screen-relative pattern sizing and `getFillPatternBackgroundColor` for compositing patterns over a per-object background color.
+- [`FillStyleExtension`](./api-reference/extensions/fill-style-extension.md) patterns now render in [GlobeView](./api-reference/core/globe-view.md).
 
 ### Other Improvements
 
@@ -128,6 +203,8 @@ deck.gl's Python bindings gain first-class support for [layer extensions](./api-
 
 The Jupyter integration now recognizes the canonical `GlobeView` type name while retaining `_GlobeView` as a backwards-compatible alias.
 
+pydeck documents [multi-view layouts](https://deckgl.readthedocs.io/en/latest/view.html) and the [`SplitterWidget`](https://deckgl.readthedocs.io/en/latest/widget.html), with gallery examples for both. `Deck` sends a top-level `controller` (new argument, default `True`) and leaves `views` to deck.gl, so widgets such as `SplitterWidget` can manage them.
+
 ```python
 import pydeck as pdk
 
@@ -142,6 +219,19 @@ layer = pdk.Layer(
 ```
 
 Experiment with these features via the new [pydeck playground](https://deck.gl/pydeck).
+
+pydeck draws [charts](https://deckgl.readthedocs.io/en/latest/view.html#non-geospatial-charts) on `OrthographicView` and `OrbitView` without a basemap. The gallery gains a [scatter plot](https://deckgl.readthedocs.io/en/latest/gallery/scatter_plot.html), a [bar chart](https://deckgl.readthedocs.io/en/latest/gallery/bar_chart.html) and a [surface plot](https://deckgl.readthedocs.io/en/latest/gallery/surface_plot.html).
+
+[Custom layer libraries](https://deckgl.readthedocs.io/en/latest/custom_layers.html#es-module-bundles) published as ES modules load with `module=True`:
+
+```python
+import pydeck as pdk
+
+pdk.settings.register_library("MyLayers", "https://example.com/my-layers.mjs", module=True)
+layer = pdk.Layer("MyLayer", data=df)  # MyLayers exports MyLayer
+```
+
+HTML exports get lighter: `Deck.to_html()` embeds the deck.gl JSON compactly, without indentation, while `to_json()` keeps the pretty-printed form for notebooks and diffs.
 
 ## deck.gl v9.3
 

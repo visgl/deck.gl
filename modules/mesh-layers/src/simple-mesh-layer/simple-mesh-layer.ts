@@ -8,6 +8,9 @@
 
 import {
   Layer,
+  _deepEqual as deepEqual,
+  _LayerColumns as LayerColumns,
+  _GPUVectorModel as GPUVectorModel,
   color,
   project32,
   picking,
@@ -18,8 +21,14 @@ import {
   phongMaterial
 } from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
-import {ParsedPBRMaterial} from '@luma.gl/gltf';
+import {
+  type Model,
+  Geometry,
+  GPUVectorModel as ArrowModel,
+  makeGPUVectorGeometry,
+  GPUVectorGeometry
+} from '@luma.gl/engine';
+import {ParsedPBRMaterial} from '@luma.gl/engine/gltf';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
@@ -37,9 +46,15 @@ import type {
   Color,
   TextureSource
 } from '@deck.gl/core';
-import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
+import {
+  MESH_COLUMN_DEFINITIONS as COLUMN_DEFINITIONS,
+  prepareMeshColumnTransforms,
+  TRANSFORM_ACCESSORS
+} from '../utils/mesh-columns';
+import type {ColumnSource} from '@deck.gl/core/arrow';
+import type {MeshAttribute, MeshAttributes} from '@loaders.gl/core/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
-import {getMeshBoundingBox} from '@loaders.gl/schema';
+import {getMeshBoundingBox} from '@loaders.gl/core/schema';
 
 function normalizeGeometryAttributes(attributes: MeshAttributes): MeshAttributes {
   const positionAttribute = attributes.positions || attributes.POSITION;
@@ -71,14 +86,25 @@ function normalizeGeometryAttributes(attributes: MeshAttributes): MeshAttributes
  * Convert mesh data into geometry
  * @returns {Geometry} geometry
  */
-function getGeometry(data: Mesh): Geometry {
+function getGeometry(data: Exclude<Mesh, GPUVectorGeometry>): Geometry {
   if (data instanceof Geometry) {
     // @ts-expect-error data.attributes is readonly
     data.attributes = normalizeGeometryAttributes(data.attributes);
     return data;
   } else if ((data as any).attributes) {
+    const {indices} = data as {indices?: MeshAttribute};
+    // loaders.gl's Arrow mesh format uses signed indices; GPU index buffers require unsigned.
+    const indexValues = indices?.value;
+    const normalizedIndices =
+      indexValues instanceof Int32Array
+        ? {
+            ...indices,
+            value: new Uint32Array(indexValues.buffer, indexValues.byteOffset, indexValues.length)
+          }
+        : indices;
     return new Geometry({
       ...data,
+      indices: normalizedIndices,
       topology: 'triangle-list',
       attributes: normalizeGeometryAttributes((data as any).attributes)
     });
@@ -90,9 +116,11 @@ function getGeometry(data: Mesh): Geometry {
   }
 }
 
+const defaultPosition = (object: any) => object.position;
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 type Mesh =
+  | GPUVectorGeometry
   | GeometryType
   | {
       attributes: MeshAttributes;
@@ -100,8 +128,36 @@ type Mesh =
     }
   | MeshAttributes;
 
+/** Rejects GPU meshes that would need multiple geometry bindings per draw. */
+function validateMeshChunks(mesh: GPUVectorGeometry): void {
+  if (
+    (mesh.indices && mesh.indices.data.length > 1) ||
+    Object.values(mesh.attributes).some(input => input && 'data' in input && input.data.length > 1)
+  ) {
+    throw new Error('SimpleMeshLayer GPU mesh attributes and indices must be single-chunk');
+  }
+}
+
+/** Detects normal inputs, including those in an interleaved GPU buffer layout. */
+function hasMeshNormals(mesh: Mesh): boolean {
+  if (mesh instanceof GPUVectorGeometry) {
+    return Boolean(
+      mesh.attributes.normals ||
+        mesh.bufferLayout?.some(layout =>
+          layout.attributes?.some(input => input.attribute === 'normals')
+        )
+    );
+  }
+  const attributes = (mesh as any).attributes || mesh;
+  return Boolean(attributes.NORMAL || attributes.normals);
+}
+
 type _SimpleMeshLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
+  /** Arrow XY or XYZ instance anchors. Overrides `getPosition`. */
+  positions?: ColumnSource | null;
+  /** Arrow RGB or RGBA instance colors. Overrides `getColor`. */
+  colors?: ColumnSource | null;
   mesh: string | Mesh | Promise<Mesh> | null;
   texture?: string | TextureSource | Promise<TextureSource>;
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
@@ -170,6 +226,8 @@ export type SimpleMeshLayerProps<DataT = unknown> = _SimpleMeshLayerProps<DataT>
 const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   mesh: {type: 'object', value: null, async: true},
   texture: {type: 'image', value: null, async: true},
+  positions: {type: 'object', value: null, optional: true},
+  colors: {type: 'object', value: null, optional: true},
   sizeScale: {type: 'number', value: 1, min: 0},
 
   // _instanced is a hack to use world position instead of meter offsets in mesh
@@ -181,7 +239,7 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   wireframe: false,
   // Optional material for 'lighting' shader module
   material: true,
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
+  getPosition: {type: 'accessor', value: defaultPosition},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees
@@ -206,10 +264,13 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   state!: {
     parsedPBRMaterial?: ParsedPBRMaterial;
     model?: Model;
+    arrowModel?: ArrowModel;
+    ownedArrowGeometry?: GPUVectorGeometry;
+    columns?: LayerColumns;
     emptyTexture: Texture;
     hasNormals?: boolean;
     positionBounds?: [number[], number[]] | null;
-  };
+  } & Layer['state'];
 
   getShaders() {
     return super.getShaders({
@@ -222,14 +283,14 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
   getBounds(): [number[], number[]] | null {
     if (this.props._instanced) {
-      return super.getBounds();
+      return this.state.columns ? this.state.columns.getBounds() : super.getBounds();
     }
     let result = this.state.positionBounds;
     if (result) {
       return result;
     }
     const {mesh} = this.props;
-    if (!mesh) {
+    if (!mesh || mesh instanceof GPUVectorGeometry) {
       return null;
     }
     // @ts-ignore Detect if mesh is generated by loaders.gl
@@ -237,7 +298,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
     if (!result) {
       // Otherwise, calculate bounding box from positions
-      const {attributes} = getGeometry(mesh as Mesh);
+      const {attributes} = getGeometry(mesh as Exclude<Mesh, GPUVectorGeometry>);
       attributes.POSITION = attributes.POSITION || attributes.positions;
 
       //@ts-expect-error
@@ -249,6 +310,20 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   initializeState() {
+    this.initializeAccessorAttributes();
+    this.setState({
+      // Avoid luma.gl's missing uniform warning
+      // TODO - add feature to luma.gl to specify ignored uniforms?
+      emptyTexture: this.context.device.createTexture({
+        data: new Uint8Array(4),
+        width: 1,
+        height: 1
+      })
+    });
+  }
+
+  /** Registers the attributes used by the ordinary accessor path. */
+  private initializeAccessorAttributes(): void {
     const attributeManager = this.getAttributeManager();
     // attributeManager is always defined in a primitive layer
     attributeManager!.addInstanced({
@@ -256,6 +331,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
         transition: true,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         size: 3,
         accessor: 'getPosition'
       },
@@ -268,32 +344,29 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       },
       instanceModelMatrix: MATRIX_ATTRIBUTES
     });
-
-    this.setState({
-      // Avoid luma.gl's missing uniform warning
-      // TODO - add feature to luma.gl to specify ignored uniforms?
-      emptyTexture: this.context.device.createTexture({
-        data: new Uint8Array(4),
-        width: 1,
-        height: 1
-      })
-    });
   }
 
   updateState(params: UpdateParameters<this>) {
+    const {mesh} = params.props;
+    if (mesh instanceof GPUVectorGeometry && mesh !== params.oldProps.mesh) {
+      validateMeshChunks(mesh);
+    }
+    if (params.props.positions || params.props.colors) {
+      this.updateColumnState(params);
+      return;
+    }
+    const restored = this.restoreAccessorState();
     super.updateState(params);
 
     const {props, oldProps, changeFlags} = params;
-    if (props.mesh !== oldProps.mesh || changeFlags.extensionsChanged) {
+    if (restored || props.mesh !== oldProps.mesh || changeFlags.extensionsChanged) {
       this.state.positionBounds = null;
       this.state.model?.destroy();
+      this.state.model = undefined;
       if (props.mesh) {
         this.state.model = this.getModel(props.mesh as Mesh);
 
-        const attributes = (props.mesh as any).attributes || props.mesh;
-        this.setState({
-          hasNormals: Boolean(attributes.NORMAL || attributes.normals)
-        });
+        this.setState({hasNormals: hasMeshNormals(props.mesh as Mesh)});
       }
       // attributeManager is always defined in a primitive layer
       this.getAttributeManager()!.invalidateAll();
@@ -304,18 +377,143 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     }
 
     if (this.state.model) {
-      this.state.model.setTopology(this.props.wireframe ? 'line-strip' : 'triangle-list');
+      this.state.model.setTopology(this.getMeshTopology());
     }
+  }
+
+  /** Updates instance columns independently of the mesh and texture lifecycle. */
+  private updateColumnState(params: UpdateParameters<this>): void {
+    const {props, oldProps, changeFlags} = params;
+    if (props.extensions.length || Object.keys(props.transitions || {}).length) {
+      throw new Error('SimpleMesh Arrow columns do not support extensions or transitions');
+    }
+    const entering = !this.state.columns;
+    if (entering) {
+      this.state.model?.destroy();
+      this.state.model = undefined;
+      this.internalState!.attributeManager?.finalize();
+      this.internalState!.attributeManager = null;
+      this.state.columns = new LayerColumns(this.context.device, COLUMN_DEFINITIONS, 'SimpleMesh');
+    }
+    if (entering || props.mesh !== oldProps.mesh) {
+      this.updateColumnModel(props.mesh as Mesh | null);
+    }
+    const model = this.state.arrowModel;
+    if (model) {
+      model.setTopology(this.getMeshTopology());
+      model.shaderInputs.setProps({simpleMesh: this.getTextureProps(props.texture as Texture)});
+    }
+    this.updateInstanceColumns(params);
+  }
+
+  /** Keeps the topology declared by a caller-provided GPU mesh. */
+  private getMeshTopology() {
+    const {mesh, wireframe} = this.props;
+    return wireframe
+      ? 'line-strip'
+      : mesh instanceof GPUVectorGeometry
+        ? mesh.topology
+        : 'triangle-list';
+  }
+
+  /** Uploads the current mesh for the Arrow model, including any index buffer. */
+  private updateColumnModel(mesh: Mesh | null): void {
+    this.state.arrowModel?.destroy();
+    this.state.ownedArrowGeometry?.destroy();
+    this.state.arrowModel = undefined;
+    this.state.ownedArrowGeometry = undefined;
+    this.state.positionBounds = null;
+    if (!mesh) return;
+    const geometry =
+      mesh instanceof GPUVectorGeometry
+        ? mesh
+        : makeGPUVectorGeometry(this.context.device, getGeometry(mesh));
+    if (geometry !== mesh) this.state.ownedArrowGeometry = geometry;
+    this.state.hasNormals = hasMeshNormals(mesh);
+    this.state.arrowModel = new ArrowModel(this.context.device, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry,
+      bufferLayout: this.state.columns!.getBufferLayouts(),
+      isInstanced: true,
+      inferDrawCount: 'instance'
+    });
+  }
+
+  /** Supplies mesh transform accessors as the four instance vectors expected by the shaders. */
+  private updateInstanceColumns({props, oldProps, changeFlags}: UpdateParameters<this>): void {
+    // Function-valued transforms follow updateTriggers, like ordinary mesh accessors.
+    const transformsChanged = TRANSFORM_ACCESSORS.some(name => {
+      const value = props[name];
+      const oldValue = oldProps[name];
+      return (
+        (typeof value !== 'function' || typeof oldValue !== 'function') &&
+        !deepEqual(value, oldValue, 1)
+      );
+    });
+    void this.state.columns!.updateIfNeeded(
+      {
+        props,
+        oldProps,
+        changeFlags: {
+          ...changeFlags,
+          dataChanged:
+            changeFlags.dataChanged || (transformsChanged ? 'mesh transforms changed' : false)
+        }
+      },
+      {
+        dataLoading: this.internalState!.isAsyncPropLoading('data'),
+        changed: () => {
+          this.setState({});
+          this.setNeedsUpdate();
+        },
+        failed: error => this.raiseError(error, 'converting Arrow columns'),
+        prepareFallbacks: (rows, length, own) =>
+          prepareMeshColumnTransforms(this.context.device, props, rows, length, own),
+        positionOptions: {
+          transform: this.usePositionTransforms().transform?.bind(this),
+          fp64: this.use64bitPositions(),
+          requireRows:
+            !props.positions &&
+            props.getPosition === defaultPosition &&
+            !(props.data as any)?.attributes?.getPosition
+        }
+      }
+    );
+  }
+
+  /** Releases the Arrow path and reinstates the regular attribute manager. */
+  private restoreAccessorState(): boolean {
+    if (!this.state.columns) return false;
+    this.state.columns.destroy();
+    this.state.columns = undefined;
+    this.updateColumnModel(null);
+    this.internalState!.attributeManager = super._getAttributeManager();
+    this.initializeAccessorAttributes();
+    return true;
+  }
+
+  getModels(): ArrowModel[] {
+    return this.state?.arrowModel ? [this.state.arrowModel] : super.getModels();
+  }
+
+  getNumInstances(): number {
+    return this.state?.columns && !Number.isFinite(this.props.numInstances)
+      ? this.state.columns.length
+      : super.getNumInstances();
   }
 
   finalizeState(context: LayerContext) {
     super.finalizeState(context);
+    this.state.columns?.destroy();
+    this.state.ownedArrowGeometry?.destroy();
 
     this.state.emptyTexture.delete();
   }
 
   draw({uniforms}) {
-    const {model} = this.state;
+    const {columns} = this.state;
+    const model = this.state.arrowModel ?? this.state.model;
     if (!model) {
       return;
     }
@@ -325,23 +523,43 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
     const simpleMeshProps: SimpleMeshProps = {
       sizeScale,
-      composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
+      rowIndexOffset: 0,
+      composeModelMatrix:
+        !_instanced ||
+        shouldComposeModelMatrix(
+          viewport,
+          this.state.sourceCrs?.signature || coordinateSystem,
+          Boolean(this.state.preproject)
+        ),
       flatShading: !this.state.hasNormals
     };
     model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
-    model.draw(renderPass);
+    if (columns) {
+      columns.draw(model, renderPass, rowIndexOffset => {
+        model.setInstanceCount(
+          Math.min(model.instanceCount, Math.max(0, this.getNumInstances() - rowIndexOffset))
+        );
+        model.shaderInputs.setProps({simpleMesh: {rowIndexOffset}});
+      });
+    } else {
+      model.draw(renderPass);
+    }
   }
 
   get isLoaded(): boolean {
-    return Boolean(this.state?.model && super.isLoaded);
+    return Boolean(
+      (this.state?.model || this.state?.arrowModel) &&
+        !this.state.columns?.loading &&
+        super.isLoaded
+    );
   }
 
   protected getModel(mesh: Mesh): Model {
-    const model = new Model(this.context.device, {
+    const model = new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
-      geometry: getGeometry(mesh),
+      geometry: mesh instanceof GPUVectorGeometry ? mesh : getGeometry(mesh),
       isInstanced: true
     });
 

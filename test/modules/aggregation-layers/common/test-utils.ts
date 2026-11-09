@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {BinaryAttribute} from '@deck.gl/core';
+import type {AggregationResult} from '../../../../modules/aggregation-layers/src/common/aggregator/aggregator';
+import {getAggregationAttribute} from '../../../../modules/aggregation-layers/src/common/aggregator/aggregation-result';
 import {luma} from '@luma.gl/core';
 
 export function binaryAttributeToArray(
-  accessor: BinaryAttribute | null,
+  aggregationResult: AggregationResult | null,
   length: number
 ): number[] | null {
+  const accessor = getAggregationAttribute(aggregationResult);
   if (!accessor) {
     return null;
   }

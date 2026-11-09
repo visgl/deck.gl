@@ -12,9 +12,9 @@
  *    scalar `getDashOffsets` helper remains available for compatibility but does not back the
  *    managed attribute.
  * 2. **Screen pixels** — the common basis for reconciling flat and billboard extrusion.
- *    At the dash injection point, `width` is in common units for a flat path but pixels for
- *    a billboarded path, whose conversion also includes `project.focalDistance`.
- *    `dashWidthPixels` is correct in both branches.
+ *    At the dash injection point, the pre-offset stroke half-width is in common units for a
+ *    flat path but pixels for a billboarded path, whose conversion also includes
+ *    `project.focalDistance`.
  * 3. **Half-widths along the path** — the units of `vPathPosition.y`, tested by the fragment
  *    shader. One unit spans `dashWidthPixels` screen pixels.
  *
@@ -28,8 +28,8 @@ export type Defines = {
    */
   HIGH_PRECISION_DASH?: boolean;
   /**
-   * Set whenever the dash shaders are injected, so that the offset shaders can adjust dash
-   * varyings only when they actually exist.
+   * Set whenever the dash shaders are injected. It guards PathLayer's additional arclength
+   * varyings and the dash stage of the shared PathStyle pipeline.
    */
   DASH_ENABLED?: boolean;
   /**
@@ -38,18 +38,120 @@ export type Defines = {
   PATH_STYLE_OFFSET?: boolean;
 };
 
-export const dashShaders = {
-  inject: {
-    'vs:#decl': `
-in vec2 instanceDashArrays;
-#ifdef HIGH_PRECISION_DASH
-// [distance from the start of the path, total length of the path], in common space.
-in vec2 instanceDashOffsets;
+/**
+ * Ordered PathStyle coordinate pipeline shared by the dash and offset capabilities.
+ *
+ * Offset rendering temporarily widens PathLayer's geometry so the shifted stroke fits inside the
+ * generated mesh. This stage first maps PathLayer's varyings back to the pre-offset stroke, then
+ * derives dash coordinates from that width. Keeping both operations in one injection
+ * avoids making their result depend on the order in which the capability shaders are merged.
+ * It also owns their deferred fragment rejection, after PathLayer has evaluated derivatives.
+ */
+export const pathStylePipelineInjections = {
+  'glsl:vs:#main-end': `
+#ifdef PATH_STYLE_OFFSET
+  float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
+  float offsetDir = sign(instanceOffsets);
+  vPathPosition.x = (vPathPosition.x + offsetDir) * offsetWidth - offsetDir;
+  vPathPosition.y *= offsetWidth;
+  vPathLength *= offsetWidth;
+#ifdef DASH_ENABLED
+  vPathBounds *= offsetWidth;
 #endif
-out vec2 vDashArray;
-out float vDashOffset;
-out float vDashPathLength;
+#endif
 
+#ifdef DASH_ENABLED
+// DECKGL_FILTER_SIZE may have widened width for offset geometry. Dash coordinates are measured
+// against the pre-offset stroke, so recover its half-width before converting dash units.
+float strokeHalfWidth = width.x;
+#ifdef PATH_STYLE_OFFSET
+strokeHalfWidth /= offsetWidth;
+#endif
+
+// How many screen pixels one unit of vPathPosition.y covers. Flat paths extrude in common space;
+// billboarded paths extrude in clip space, whose conversion also includes focalDistance.
+float dashWidthPixels = path.billboard
+  ? strokeHalfWidth * project.focalDistance
+  : strokeHalfWidth * project.scale;
+float strokeHalfWidthPixels = path.billboard
+  ? strokeHalfWidth
+  : strokeHalfWidth * project.scale;
+
+// Convert every public dash unit to the half-width coordinate used by the fragment shader.
+// Keep the cases in sync with DASH_UNITS in path-style-extension.ts.
+float dashUnitPixels = strokeHalfWidthPixels;
+if (pathStyle.dashUnits == 1) {
+  dashUnitPixels = 1.0;
+} else if (pathStyle.dashUnits == 2) {
+  dashUnitPixels = project_size_to_pixel(1.0);
+} else if (pathStyle.dashUnits == 3) {
+  dashUnitPixels = project.scale;
+}
+pathStyle_dashArray = instanceDashArrays * (dashUnitPixels / dashWidthPixels);
+
+#ifdef HIGH_PRECISION_DASH
+// instanceDashOffsets accumulates common-space distance on the CPU. Convert it to pixels, then
+// divide by the pixel half-width so both extrusion branches use the same dash coordinate.
+vec2 dashOffsetAndLength = (instanceDashOffsets * project.scale) / dashWidthPixels;
+pathStyle_dashPathLength = dashOffsetAndLength.y;
+
+// Reduce the phase into the first period here rather than in the fragment shader. On a long
+// path at high zoom the raw offset reaches into the millions, and adding the much smaller
+// vPathPosition.y to it in fp32 loses the latter entirely, freezing the pattern mid-segment.
+// The dash function is periodic, so this discards nothing - but it has to be reduced modulo
+// whichever period the fragment stage will actually test against, hence dashAlignMode here.
+float dashUnitLength = pathStyle_dashArray.x + pathStyle_dashArray.y;
+float dashPeriod = pathStyle.dashAlignMode == 0.0
+  ? dashUnitLength
+  : pathStyle_dashPathLength / max(round(pathStyle_dashPathLength / max(dashUnitLength, 0.0001)), 1.0);
+pathStyle_dashOffset = dashPeriod > 0.0 ? mod(dashOffsetAndLength.x, dashPeriod) : 0.0;
+#else
+pathStyle_dashOffset = 0.0;
+pathStyle_dashPathLength = 0.0;
+#endif
+#endif
+`,
+  'glsl:fs:#main-end': `
+#ifdef DASH_ENABLED
+  // PathLayer computes analytic-edge derivatives in its fragment body. A discard in
+  // #main-start can remove helper invocations and make those derivatives undefined, so all
+  // dash-related termination is deferred until the layer has completed that work.
+  #ifdef ANTIALIASING
+  if (inRoundedDashGap) {
+    // The rounded dash cap and PathLayer silhouette are two geometric constraints on the
+    // same fragment. Intersect their coverage instead of multiplying two edge ramps; at the
+    // cap/body shoulder both ramps are half covered and multiplication would create a dark
+    // quarter-covered notch. Keep the sub-pixel duty cycle separable from the path silhouette.
+    float pathCoverage = smoothedge(0.0, edgePixels);
+    float resolvedCapMultiplier =
+      min(pathCoverage, roundedDashResolvedCoverage) / max(pathCoverage, 1e-6);
+    dashCoverage = mix(
+      resolvedCapMultiplier,
+      roundedDashDutyCycle,
+      roundedDashSubPixelBlend
+    );
+  }
+  #endif
+  if (shouldDiscardDash) {
+    discard;
+  }
+  fragColor.a *= dashCoverage;
+#endif
+#ifdef PATH_STYLE_OFFSET
+#ifndef ANTIALIASING
+  // With analytic antialiasing, PathLayer evaluates this boundary using the remapped
+  // vPathPosition and retains the complete centered coverage ramp. The hard clip remains for
+  // the original non-AA path.
+  if (abs(vPathPosition.x) > 1.0) {
+    discard;
+  }
+#endif
+#endif
+`
+};
+
+export const dashInjections = {
+  'glsl:vs:#decl': `
 // Also declared in the fragment stage. The vertex stage needs dashAlignMode so that it can
 // reduce the dash phase modulo the same period the fragment stage will test against, and
 // dashUnits to scale the dash array into that period's units.
@@ -60,74 +162,12 @@ layout(std140) uniform pathStyleUniforms {
 } pathStyle;
 `,
 
-    'vs:#main-end': `
-// How many screen pixels one unit of vPathPosition.y covers. The two extrusion branches of
-// the path layer leave this in different units, and both differences have to be undone here
-// for a billboarded path to dash like a flat one.
-//
-// Flat paths extrude in common space, so \`width\` is in common units and a unit of
-// vPathPosition.y is width.x * project.scale pixels.
-//
-// Billboarded paths extrude in clip space, so \`width\` is already in pixels at this point -
-// the clip-space conversion happens inside getLineJoinOffset. That conversion also folds in
-// project.focalDistance, which scales the half-width the segment delta is divided by but not
-// the delta itself, so a unit of vPathPosition.y ends up focalDistance pixels wider than the
-// stroke it is supposed to be relative to.
-float dashWidthPixels = path.billboard
-  ? width.x * project.focalDistance
-  : width.x * project.scale;
-
-// The actual half stroke width on screen, which is what 'widths' is relative to. It differs
-// from dashWidthPixels by exactly the spurious focalDistance above, so expressing 'widths'
-// as a ratio of the two corrects the billboard case onto the flat one - getDashArray is
-// documented relative to the stroke, and flat paths already honor that.
-float strokeHalfWidthPixels = path.billboard ? width.x : width.x * project.scale;
-
-// Everything reduces to "how many screen pixels is one dash unit", divided through by the
-// pixels per unit of vPathPosition.y, so the fragment shader needs no notion of units at all.
-// Keep the cases in sync with DASH_UNITS in path-style-extension.ts.
-float dashUnitPixels = strokeHalfWidthPixels;
-if (pathStyle.dashUnits == 1) {
-  dashUnitPixels = 1.0;
-} else if (pathStyle.dashUnits == 2) {
-  dashUnitPixels = project_size_to_pixel(1.0);
-} else if (pathStyle.dashUnits == 3) {
-  dashUnitPixels = project.scale;
-}
-vDashArray = instanceDashArrays * (dashUnitPixels / dashWidthPixels);
-
-#ifdef HIGH_PRECISION_DASH
-// instanceDashOffsets accumulates common-space distance on the CPU. Convert it to pixels, then
-// divide by the pixel half-width so both extrusion branches use the same dash coordinate.
-vec2 dashOffsetAndLength = (instanceDashOffsets * project.scale) / dashWidthPixels;
-vDashPathLength = dashOffsetAndLength.y;
-
-// Reduce the phase into the first period here rather than in the fragment shader. On a long
-// path at high zoom the raw offset reaches into the millions, and adding the much smaller
-// vPathPosition.y to it in fp32 loses the latter entirely, freezing the pattern mid-segment.
-// The dash function is periodic, so this discards nothing - but it has to be reduced modulo
-// whichever period the fragment stage will actually test against, hence dashAlignMode here.
-float dashUnitLength = vDashArray.x + vDashArray.y;
-float dashPeriod = pathStyle.dashAlignMode == 0.0
-  ? dashUnitLength
-  : vDashPathLength / max(round(vDashPathLength / max(dashUnitLength, 0.0001)), 1.0);
-vDashOffset = dashPeriod > 0.0 ? mod(dashOffsetAndLength.x, dashPeriod) : 0.0;
-#else
-vDashOffset = 0.0;
-vDashPathLength = 0.0;
-#endif
-`,
-
-    'fs:#decl': `
+  'glsl:fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
   float dashAlignMode;
   bool dashGapPickable;
   highp int dashUnits;
 } pathStyle;
-
-in vec2 vDashArray;
-in float vDashOffset;
-in float vDashPathLength;
 
 // Integral of the dash square wave from 0 to position, i.e. how much solid stroke lies before it.
 float dashPatternIntegral(float position, float solidLength, float unitLength) {
@@ -162,15 +202,15 @@ float dashPatternCoverage(
 }
 `,
 
-    // if given position is in the gap part of the dashed line
-    // dashArray.x: solid stroke length, relative to width
-    // dashArray.y: gap length, relative to width
-    // alignMode:
-    // 0 - no adjustment
-    // o----     ----     ----     ---- o----     -o----     ----     o
-    // 1 - stretch to fit, draw half dash at each end for nicer joints
-    // o--    ----    ----    ----    --o--      --o--     ----     --o
-    'fs:#main-start': `
+  // if given position is in the gap part of the dashed line
+  // dashArray.x: solid stroke length, relative to width
+  // dashArray.y: gap length, relative to width
+  // alignMode:
+  // 0 - no adjustment
+  // o----     ----     ----     ---- o----     -o----     ----     o
+  // 1 - stretch to fit, draw half dash at each end for nicer joints
+  // o--    ----    ----    ----    --o--      --o--     ----     --o
+  'glsl:fs:#main-start': `
   float dashCoverage = 1.0;
   bool shouldDiscardDash = false;
   bool inRoundedDashGap = false;
@@ -178,14 +218,14 @@ float dashPatternCoverage(
   float roundedDashSubPixelBlend = 0.0;
   float roundedDashDutyCycle = 1.0;
 
-  float solidLength = vDashArray.x;
-  float gapLength = vDashArray.y;
+  float solidLength = pathStyle_dashArray.x;
+  float gapLength = pathStyle_dashArray.y;
   float unitLength = solidLength + gapLength;
 
   if (unitLength > 0.0 && gapLength > 0.0) {
     float offset;
     if (pathStyle.dashAlignMode == 0.0) {
-      offset = vDashOffset;
+      offset = pathStyle_dashOffset;
     } else {
       // Justified: stretch the period so a whole number of them spans the run, and start
       // half a dash in so both ends finish on a joint. Rounding up to at least one period
@@ -193,10 +233,10 @@ float dashPatternCoverage(
       // unitLength infinite and rendered it solid.
 #ifdef HIGH_PRECISION_DASH
       // Justify across the entire path rather than each segment separately, so the gaps stay
-      // even instead of being stretched by a different amount on every segment. vDashOffset
+      // even instead of being stretched by a different amount on every segment. pathStyle_dashOffset
       // already carries the distance to the start of this segment, reduced modulo this same
       // period in the vertex shader.
-      unitLength = vDashPathLength / max(round(vDashPathLength / unitLength), 1.0);
+      unitLength = pathStyle_dashPathLength / max(round(pathStyle_dashPathLength / unitLength), 1.0);
 #else
       unitLength = vPathLength / max(round(vPathLength / unitLength), 1.0);
 #endif
@@ -205,7 +245,7 @@ float dashPatternCoverage(
       solidLength = min(solidLength, unitLength);
       offset = solidLength / 2.0;
 #ifdef HIGH_PRECISION_DASH
-      offset += vDashOffset;
+      offset += pathStyle_dashOffset;
 #endif
     }
 
@@ -270,60 +310,25 @@ float dashPatternCoverage(
     // Fully transparent fragments would still write depth and occlude whatever is behind.
     shouldDiscardDash = shouldDiscardDash || dashCoverage <= 0.0;
   }
-`,
-
-    'fs:#main-end': `
-  // PathLayer computes analytic-edge derivatives in its fragment body. A discard in
-  // #main-start can remove helper invocations and make those derivatives undefined, so all
-  // dash-related termination is deferred until the layer has completed that work.
-  #ifdef ANTIALIASING
-  if (inRoundedDashGap) {
-    // The rounded dash cap and PathLayer silhouette are two geometric constraints on the
-    // same fragment. Intersect their coverage instead of multiplying two edge ramps; at the
-    // cap/body shoulder both ramps are half covered and multiplication would create a dark
-    // quarter-covered notch. Keep the sub-pixel duty cycle separable from the path silhouette.
-    float pathCoverage = smoothedge(0.0, edgePixels);
-    float resolvedCapMultiplier =
-      min(pathCoverage, roundedDashResolvedCoverage) / max(pathCoverage, 1e-6);
-    dashCoverage = mix(
-      resolvedCapMultiplier,
-      roundedDashDutyCycle,
-      roundedDashSubPixelBlend
-    );
-  }
-  #endif
-  if (shouldDiscardDash) {
-    discard;
-  }
-  fragColor.a *= dashCoverage;
 `
-  }
 };
 
-export const scatterplotDashShaders = {
-  inject: {
-    'vs:#decl': `
-in vec2 instanceDashArrays;
-out vec2 vDashArray;
+export const scatterplotDashInjections = {
+  'glsl:vs:#main-end': `
+pathStyle_dashArray = instanceDashArrays;
 `,
 
-    'vs:#main-end': `
-vDashArray = instanceDashArrays;
-`,
-
-    'fs:#decl': `
+  'glsl:fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
   bool dashGapPickable;
 } pathStyle;
 
-in vec2 vDashArray;
-
 #define PI 3.141592653589793
 `,
 
-    'fs:#main-start': `
+  'glsl:fs:#main-start': `
   bool inDashGap = false;
-  float dashUnitLength = vDashArray.x + vDashArray.y;
+  float dashUnitLength = pathStyle_dashArray.x + pathStyle_dashArray.y;
   if (dashUnitLength > 0.0 && scatterplot.stroked > 0.5) {
     float _distToCenter = length(unitPosition) * outerRadiusPixels;
     float innerRadius = innerUnitRadius * outerRadiusPixels;
@@ -334,7 +339,7 @@ in vec2 vDashArray;
       float circumference = 2.0 * PI * midStrokeRadius;
       float posAlongStroke = (angle / (2.0 * PI)) * circumference / strokeWidth;
       float unitOffset = mod(posAlongStroke, dashUnitLength);
-      if (unitOffset > vDashArray.x) {
+      if (unitOffset > pathStyle_dashArray.x) {
         if (scatterplot.filled > 0.5) {
           inDashGap = true;
         } else {
@@ -347,7 +352,7 @@ in vec2 vDashArray;
   }
 `,
 
-    'fs:#main-end': `
+  'glsl:fs:#main-end': `
   if (inDashGap) {
     float alphaFactor = fragColor.a / max(vLineColor.a, 0.001);
     fragColor = vec4(vFillColor.rgb, vFillColor.a * alphaFactor);
@@ -355,26 +360,17 @@ in vec2 vDashArray;
     fragColor = picking_filterHighlightColor(fragColor);
   }
 `
-  }
 };
 
-export const textBackgroundDashShaders = {
-  inject: {
-    'vs:#decl': `
-in vec2 instanceDashArrays;
-out vec2 vDashArray;
+export const textBackgroundDashInjections = {
+  'glsl:vs:#main-end': `
+pathStyle_dashArray = instanceDashArrays;
 `,
 
-    'vs:#main-end': `
-vDashArray = instanceDashArrays;
-`,
-
-    'fs:#decl': `
+  'glsl:fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
   bool dashGapPickable;
 } pathStyle;
-
-in vec2 vDashArray;
 
 #define PI 3.141592653589793
 
@@ -469,9 +465,9 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
 }
 `,
 
-    'fs:#main-start': `
+  'glsl:fs:#main-start': `
   bool inDashGap = false;
-  float dashUnitLength = vDashArray.x + vDashArray.y;
+  float dashUnitLength = pathStyle_dashArray.x + pathStyle_dashArray.y;
   if (dashUnitLength > 0.0 && textBackground.stroked) {
     float distToEdge;
     bool hasRoundedCorners = textBackground.borderRadius != vec4(0.0);
@@ -489,7 +485,7 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
         posAlongStroke = getRectPerimeterPosition(uv, dimensions, vLineWidth);
       }
       float unitOffset = mod(posAlongStroke, dashUnitLength);
-      if (unitOffset > vDashArray.x) {
+      if (unitOffset > pathStyle_dashArray.x) {
         if (vFillColor.a > 0.0) {
           inDashGap = true;
         } else {
@@ -502,7 +498,7 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
   }
 `,
 
-    'fs:#main-end': `
+  'glsl:fs:#main-end': `
   if (inDashGap) {
     float alphaFactor = fragColor.a / max(vLineColor.a, 0.001);
     fragColor = vec4(vFillColor.rgb, vFillColor.a * alphaFactor);
@@ -510,60 +506,11 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
     fragColor = picking_filterHighlightColor(fragColor);
   }
 `
-  }
 };
 
-export const offsetShaders = {
-  inject: {
-    'vs:#decl': `
-in float instanceOffsets;
-`,
-    'vs:DECKGL_FILTER_SIZE': `
+export const offsetInjections = {
+  'glsl:vs:DECKGL_FILTER_SIZE': `
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
   size *= offsetWidth;
-`,
-    'vs:#main-end': `
-  float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
-  float offsetDir = sign(instanceOffsets);
-  vPathPosition.x = (vPathPosition.x + offsetDir) * offsetWidth - offsetDir;
-  vPathPosition.y *= offsetWidth;
-  vPathLength *= offsetWidth;
-#ifdef DASH_ENABLED
-  // DECKGL_FILTER_SIZE above widened the stroke by offsetWidth, so these rescalings restore
-  // units of the original half-width. The dash block merges ahead of this one.
-  if (pathStyle.dashUnits != 0) {
-    // Absolute dash units must not inherit the artificial width used to build offset
-    // geometry. Relative 'widths' units intentionally remain tied to the original stroke.
-    vDashArray *= offsetWidth;
-  }
-  vPathBounds *= offsetWidth;
-#ifdef HIGH_PRECISION_DASH
-  vDashPathLength *= offsetWidth;
-  // The dash block reduced the CPU path offset modulo a period expressed in widened-width
-  // units. Multiplying that remainder cannot recover the original phase after wrapping, so
-  // redo the reduction with both the restored path offset and restored justified period.
-  float restoredDashUnitLength = vDashArray.x + vDashArray.y;
-  float restoredDashPeriod = pathStyle.dashAlignMode == 0.0
-    ? restoredDashUnitLength
-    : vDashPathLength /
-      max(round(vDashPathLength / max(restoredDashUnitLength, 0.0001)), 1.0);
-  vDashOffset = restoredDashPeriod > 0.0
-    ? mod(dashOffsetAndLength.x * offsetWidth, restoredDashPeriod)
-    : 0.0;
-#else
-  vDashOffset *= offsetWidth;
-#endif
-#endif
-`,
-    'fs:#main-end': `
-#ifndef ANTIALIASING
-  // With analytic antialiasing, PathLayer evaluates this boundary using the remapped
-  // vPathPosition and retains the complete centered coverage ramp. The hard clip remains for
-  // the original non-AA path.
-  if (abs(vPathPosition.x) > 1.0) {
-    discard;
-  }
-#endif
 `
-  }
 };

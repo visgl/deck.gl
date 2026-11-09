@@ -2,14 +2,33 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, color, picking, log} from '@deck.gl/core';
-import type {Device, RenderPipelineParameters} from '@luma.gl/core';
-import {pbrMaterial} from '@luma.gl/shadertools';
+import {
+  Layer,
+  project32,
+  color,
+  picking,
+  log,
+  _LayerColumns as LayerColumns,
+  _deepEqual as deepEqual
+} from '@deck.gl/core';
+import {type Device, type RenderPipelineParameters} from '@luma.gl/core';
+import {pbrMaterial} from '@luma.gl/shaders';
 import {ScenegraphNode, GroupNode, ModelNode, Model} from '@luma.gl/engine';
-import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
-import {GLTFLoader, postProcessGLTF} from '@loaders.gl/gltf';
+import {
+  GLTFAnimator,
+  PBREnvironment,
+  createScenegraphsFromGLTF,
+  postProcessGLTF
+} from '@luma.gl/engine/gltf';
+import {GLTFLoader} from '@loaders.gl/scene/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 
+import {
+  MESH_COLUMN_DEFINITIONS as COLUMN_DEFINITIONS,
+  prepareMeshColumnTransforms,
+  TRANSFORM_ACCESSORS
+} from '../utils/mesh-columns';
+import type {ColumnSource} from '@deck.gl/core/arrow';
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
 import {scenegraphUniforms, ScenegraphProps} from './scenegraph-layer-uniforms';
@@ -87,6 +106,10 @@ type _ScenegraphLayerProps<DataT> = {
       }) => PBREnvironment);
 
   /** Anchor position accessor. */
+  /** Arrow column or GPUVector of instance positions. */
+  positions?: ColumnSource | null;
+  /** Arrow column or GPUVector of instance colors. */
+  colors?: ColumnSource | null;
   getPosition?: Accessor<DataT, Position>;
   /** Color value or accessor.
    * @default [255, 255, 255, 255]
@@ -152,6 +175,8 @@ const defaultProps: DefaultProps<ScenegraphLayerProps> = {
   sizeMinPixels: {type: 'number', min: 0, value: 0},
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER},
 
+  positions: {type: 'object', value: null, optional: true},
+  colors: {type: 'object', value: null, optional: true},
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
@@ -180,12 +205,13 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   static layerName = 'ScenegraphLayer';
 
   state!: {
+    columns?: LayerColumns;
     scenegraph: GroupNode | null;
     animator: GLTFAnimator | null;
     materials?: {destroy(): void}[] | null;
     models: Model[];
     firstDrawSignaled: boolean;
-  };
+  } & Layer['state'];
 
   getShaders() {
     const defines: {LIGHTING_PBR?: 1} = {};
@@ -224,6 +250,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         accessor: 'getPosition',
         transition: supportsTransitions
       },
@@ -242,6 +269,8 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     super.updateState(params);
     const {props, oldProps} = params;
 
+    this.updateColumns(params);
+
     if (props.scenegraph !== oldProps.scenegraph) {
       this._updateScenegraph();
     } else if (props._animations !== oldProps._animations) {
@@ -250,12 +279,74 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   finalizeState(context: LayerContext) {
+    this.state.columns?.destroy();
     super.finalizeState(context);
     this._destroyScenegraphAssets();
   }
 
   get isLoaded(): boolean {
-    return Boolean(this.state?.scenegraph && super.isLoaded);
+    return Boolean(this.state?.scenegraph && !this.state.columns?.loading && super.isLoaded);
+  }
+
+  /** Uses the prepared column length when callers omit an explicit instance count. */
+  override getNumInstances(): number {
+    return this.state?.columns && !Number.isFinite(this.props.numInstances)
+      ? this.state.columns.length
+      : super.getNumInstances();
+  }
+
+  /** Uses converted positions for bounds while columns are active. */
+  override getBounds() {
+    return this.state?.columns ? this.state.columns.getBounds() : super.getBounds();
+  }
+
+  /** Converts instance columns independently of glTF assets and animation. */
+  private updateColumns(params: UpdateParameters<this>): void {
+    if (!this.props.positions && !this.props.colors) {
+      if (!this.state.columns) return;
+      this.state.columns.destroy();
+      this.state.columns = undefined;
+      this.internalState!.attributeManager = this._getAttributeManager();
+      this.initializeState();
+      return;
+    }
+    if (this.props.extensions.length || Object.keys(this.props.transitions || {}).length) {
+      throw new Error('Scenegraph columns do not support extensions or transitions');
+    }
+    if (!this.state.columns) {
+      this.internalState!.attributeManager?.finalize();
+      this.internalState!.attributeManager = null;
+      this.state.columns = new LayerColumns(this.context.device, COLUMN_DEFINITIONS, 'Scenegraph');
+    }
+    const transformsChanged = TRANSFORM_ACCESSORS.some(
+      name =>
+        !deepEqual(params.props[name], params.oldProps[name], 1) &&
+        (typeof params.props[name] !== 'function' || typeof params.oldProps[name] !== 'function')
+    );
+    void this.state.columns.updateIfNeeded(
+      {
+        ...params,
+        changeFlags: {
+          ...params.changeFlags,
+          dataChanged:
+            params.changeFlags.dataChanged || (transformsChanged ? 'transforms changed' : false)
+        }
+      },
+      {
+        dataLoading: this.internalState!.isAsyncPropLoading('data'),
+        changed: () => {
+          this.setState({});
+          this.setNeedsUpdate();
+        },
+        failed: error => this.raiseError(error, 'converting scenegraph columns'),
+        prepareFallbacks: (rows, length, own) =>
+          prepareMeshColumnTransforms(this.context.device, this.props, rows, length, own),
+        positionOptions: {
+          transform: this.usePositionTransforms().transform?.bind(this),
+          fp64: this.use64bitPositions()
+        }
+      }
+    );
   }
 
   private _updateScenegraph(): void {
@@ -266,7 +357,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       // Signature 1: props.scenegraph is a proper luma.gl Scenegraph
       scenegraphData = {scenes: [props.scenegraph]};
     } else if (props.scenegraph && typeof props.scenegraph === 'object') {
-      // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/experimental function
+      // Converts loaders.gl glTF data to a luma.gl scenegraph.
       const gltf = props.scenegraph;
 
       // Tiles3DLoader already processes GLTF
@@ -305,7 +396,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         models,
         firstDrawSignaled: false
       });
-      this.getAttributeManager()!.invalidateAll();
+      this.getAttributeManager()?.invalidateAll();
     } else if (scenegraph !== null) {
       log.warn('invalid scenegraph:', scenegraph)();
     }
@@ -388,7 +479,8 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       modelOptions: {
         id: this.props.id,
         isInstanced: true,
-        bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+        bufferLayout:
+          this.state.columns?.getBufferLayouts() ?? this.getAttributeManager()!.getBufferLayouts(),
         parameters,
         ...this.getShaders()
       },
@@ -398,7 +490,8 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   draw({context}) {
-    if (!this.state.scenegraph) return;
+    if (!this.state.scenegraph || (this.state.columns?.loading && !this.state.columns.length))
+      return;
 
     if (this.props._animations && this.state.animator) {
       this.state.animator.setTime(context.timeline.getTime());
@@ -418,10 +511,17 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         model.setInstanceCount(numInstances);
 
         const scenegraphProps: ScenegraphProps = {
+          rowIndexOffset: 0,
           sizeScale,
           sizeMinPixels,
           sizeMaxPixels,
-          composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem) ? 1 : 0,
+          composeModelMatrix: shouldComposeModelMatrix(
+            viewport,
+            this.state.sourceCrs?.signature || coordinateSystem,
+            Boolean(this.state.preproject)
+          )
+            ? 1
+            : 0,
           sceneModelMatrix: worldMatrix
         };
 
@@ -429,7 +529,14 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           pbrProjection: pbrProjectionProps,
           scenegraph: scenegraphProps
         });
-        model.draw(renderPass);
+        if (this.state.columns) {
+          this.state.columns.draw(model, renderPass, (offset, rowCount) => {
+            model.setInstanceCount(Math.min(rowCount, Math.max(0, numInstances - offset)));
+            model.shaderInputs.setProps({scenegraph: {rowIndexOffset: offset}});
+          });
+        } else {
+          model.draw(renderPass);
+        }
       }
     });
 
