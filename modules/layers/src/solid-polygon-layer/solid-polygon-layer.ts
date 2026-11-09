@@ -21,6 +21,7 @@ import vsTop from './solid-polygon-layer-vertex-top.glsl';
 import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 import {getSolidPolygonShaderWGSL} from './solid-polygon-layer.wgsl';
+import {getMetersPerUnit} from '../utils';
 
 import type {
   LayerProps,
@@ -38,6 +39,14 @@ import type {PolygonGeometry} from './polygon';
 
 type _SolidPolygonLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
+  /** Sampled edge error in map meters for a projected or geocentric preprojecting viewport.
+   * Zero disables refinement.
+   * Requires normalized geometry, finite samples and pre-split projection seams.
+   * Throws when math.gl refinement limits are exhausted.
+   * @experimental
+   * @default 0
+   */
+  _projectionTolerance?: number;
   /** Whether to fill the polygons
    * @default true
    */
@@ -109,6 +118,7 @@ const defaultProps: DefaultProps<SolidPolygonLayerProps> = {
   _normalize: true,
   _windingOrder: 'CW',
   _full3d: false,
+  _projectionTolerance: {type: 'number', value: 0, min: 0},
 
   elevationScale: {type: 'number', min: 0, value: 1},
 
@@ -213,6 +223,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         noAlloc
       },
       elevations: {
+        transform: null,
         size: 1,
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
@@ -220,6 +231,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         bufferGroup: 'solid-polygon-instance-data'
       },
       fillColors: {
+        transform: null,
         size: this.props.colorFormat.length,
         type: 'unorm8',
         stepMode: 'dynamic',
@@ -229,6 +241,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         bufferGroup: 'solid-polygon-instance-data'
       },
       lineColors: {
+        transform: null,
         size: this.props.colorFormat.length,
         type: 'unorm8',
         stepMode: 'dynamic',
@@ -315,6 +328,19 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
     const {props, oldProps, changeFlags} = updateParams;
     const attributeManager = this.getAttributeManager();
+    // An inactive transform still forces CPU conversion of binary attributes.
+    // Attach refinement validators only while refinement is enabled.
+    // Transition attributes have separate settings; update the source descriptors.
+    const attributes = attributeManager!.attributes;
+    attributes.elevations.settings.transform = props._projectionTolerance
+      ? transformRefinedElevation
+      : null;
+    attributes.fillColors.settings.transform = props._projectionTolerance
+      ? transformRefinedColor
+      : null;
+    attributes.lineColors.settings.transform = props._projectionTolerance
+      ? transformRefinedColor
+      : null;
 
     const regenerateModels =
       changeFlags.extensionsChanged ||
@@ -341,7 +367,11 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       (viewport.isGeospatial &&
         (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
           !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1)));
+    const refinementChanged =
+      props._projectionTolerance !== oldProps._projectionTolerance ||
+      (props._projectionTolerance > 0 && props._normalize !== oldProps._normalize);
     const geometryConfigChanged =
+      refinementChanged ||
       changeFlags.dataChanged ||
       projectionChanged ||
       (changeFlags.updateTriggersChanged &&
@@ -352,6 +382,20 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     if (geometryConfigChanged) {
       const {polygonTesselator} = this.state;
       const buffers = (props.data as any).attributes || {};
+      const projectionToleranceScale = getMetersPerUnit(this.state.packedCrs);
+      if (
+        props._projectionTolerance &&
+        (!projectionToleranceScale ||
+          !this.usePositionTransforms().transform ||
+          !props._normalize ||
+          (buffers.getPolygon &&
+            !ArrayBuffer.isView(buffers.getPolygon.value ?? buffers.getPolygon)) ||
+          Object.keys(buffers).some(key => key !== 'getPolygon'))
+      ) {
+        throw new Error(
+          'Projection refinement requires linear target units, normalized polygons and per-object attributes'
+        );
+      }
       polygonTesselator.updateGeometry({
         data: props.data,
         normalize: props._normalize,
@@ -374,8 +418,10 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           !this.state.preproject &&
           this.state.sourceCrs?.signature === 'WGS84',
         resolution: subdivisionStep,
+        projectionTolerance: props._projectionTolerance,
+        projectionToleranceScale: projectionToleranceScale ?? undefined,
         fp64: this.use64bitPositions(),
-        dataChanged: projectionChanged ? undefined : changeFlags.dataChanged,
+        dataChanged: projectionChanged || refinementChanged ? undefined : changeFlags.dataChanged,
         // A geocentric target needs a polygon plane selected from XYZ, even for flat source data.
         full3d: props._full3d || geocentric,
         geocentric
@@ -387,7 +433,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         startIndices: polygonTesselator.vertexStarts
       });
 
-      if (!changeFlags.dataChanged || projectionChanged) {
+      if (!changeFlags.dataChanged || projectionChanged || refinementChanged) {
         // Projection changes affect all triangles, even alongside a partial data update.
         // Base `layer.updateState` only invalidates all attributes on data change
         // Cover the rest of the scenarios here
@@ -514,4 +560,21 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         ? Float32Array.from(vertexValid)
         : vertexValid;
   }
+}
+
+function transformRefinedElevation(this: SolidPolygonLayer, value) {
+  if (this.props._projectionTolerance && typeof value !== 'number') {
+    throw new Error('Projection refinement requires per-object elevations');
+  }
+  return value;
+}
+
+function transformRefinedColor(this: SolidPolygonLayer, value) {
+  if (this.props._projectionTolerance && (typeof value?.[0] === 'object' || value?.length > 4)) {
+    throw new Error('Projection refinement requires per-object colors');
+  }
+  // RGB attributes must not treat a single RGBA color as packed vertex data.
+  return this.props._projectionTolerance && this.props.colorFormat === 'RGB' && value?.length === 4
+    ? value.slice(0, 3)
+    : value;
 }
