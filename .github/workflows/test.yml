@@ -183,6 +183,6 @@ jobs:
       - name: Test projection preprocessing and build worker
         working-directory: examples/experimental/projection-domains
         run: |
-          yarn --ignore-scripts
+          YARN_ENABLE_SCRIPTS=false yarn
           yarn test
           yarn build

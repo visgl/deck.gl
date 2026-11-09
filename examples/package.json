@@ -1,5 +1,5 @@
 {
   "private": true,
   "type": "module",
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "yarn@4.15.0"
 }
