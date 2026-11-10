@@ -5,10 +5,11 @@
 /* eslint-disable max-statements */
 import AttributeTransitionManager from '@deck.gl/core/lib/attribute/attribute-transition-manager';
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {test, expect} from 'vitest';
 import type {Buffer} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
-import {device} from '@deck.gl/test-utils/vitest';
+import {device, testLayer} from '@deck.gl/test-utils/vitest';
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const TEST_ATTRIBUTES = (function () {
@@ -150,6 +151,51 @@ webglTest('AttributeTransitionManager#remove transition', () => {
 
   manager.finalize();
   instanceColors.delete();
+});
+
+webglTest('AttributeTransitionManager#remove transition rebinds the layer model', () => {
+  const timeline = new Timeline();
+  const getFillColorFormat = (layer: ScatterplotLayer) =>
+    layer.state
+      .model!.bufferLayout.flatMap(layout => layout.attributes ?? [])
+      .find(attribute => attribute.attribute === 'instanceFillColors')?.format;
+  const hasDestroyedBuffer = (layer: ScatterplotLayer) =>
+    layer.state.model!.vertexArray.attributes.some(buffer => (buffer as Buffer)?.destroyed);
+
+  testLayer({
+    Layer: ScatterplotLayer,
+    timeline,
+    testCases: [
+      {
+        props: {
+          data: [{position: [0, 0]}, {position: [1, 1]}],
+          getPosition: d => d.position,
+          getFillColor: [255, 0, 0],
+          transitions: {getFillColor: 1000}
+        },
+        onAfterUpdate: ({layer}) => {
+          expect(getFillColorFormat(layer), 'transition buffer is bound').toBe('float32x4');
+        }
+      },
+      {
+        updateProps: {transitions: null, opacity: 0.7},
+        onAfterUpdate: ({layer}) => {
+          expect(getFillColorFormat(layer), 'instanceFillColors is bound again').toBe('unorm8x4');
+          expect(hasDestroyedBuffer(layer), 'no destroyed buffer is bound').toBe(false);
+        }
+      }
+    ],
+    onError: (error, title) => {
+      // GPUTransitionBase.delete() does not delete attributeInTransition, which leaks one buffer
+      if (
+        title === 'ScatterplotLayer should delete all resources' &&
+        error.message === '1 Buffers'
+      ) {
+        return;
+      }
+      throw error;
+    }
+  });
 });
 
 webglTest('AttributeTransitionManager#transition', async () => {
