@@ -272,11 +272,12 @@ The `ContourLayer` renders the following sublayers:
 
 ## Compute aggregation
 
-ContourLayer bins and reduces points on the GPU, then copies completed values asynchronously
-for CPU contour generation. All five aggregation operations are supported. GPU column inputs
-require explicit `dataBounds`, fixed-width float32 positions/weights, and `STORAGE` or
-`COPY_SRC` buffers. Layer extensions and unsupported accessor formats retain CPU aggregation.
-The layer remains unloaded while a new result is pending.
+On a WebGPU device, `gpuAggregation: true` aggregates points in a compute shader for all five
+`aggregation` operations. Contours are still generated on the CPU, so they update a frame or
+more after each change. Previous contours remain visible until the new results arrive.
+Layers with extensions use CPU aggregation.
+
+ContourLayer also accepts [GPU column inputs](./aggregator.md#gpu-column-inputs), which need `dataBounds`.
 
 ## Source
 

@@ -128,6 +128,12 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       };
 
       binIdRange: [number, number][];
+      contourFrame?: {
+        data: {lines: ContourLine[]; polygons: ContourPolygon[]};
+        origin: number[];
+        size: number[];
+        scale: number[];
+      };
       aggregatorViewport: Viewport;
     } & AggregationLayer<any>['state'];
 
@@ -375,7 +381,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     lines: ContourLine[];
     polygons: ContourPolygon[];
   } | null {
-    if (this.state.aggregator.isLoaded === false) return null;
+    if (this.state.aggregator.isLoaded === false) return this.state.contourFrame?.data || null;
     const {aggregatedValueReader} = this.state;
     if (
       !aggregatedValueReader ||
@@ -383,6 +389,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         ([start, end]) => !Number.isFinite(start) || !Number.isFinite(end) || end <= start
       )
     ) {
+      this.state.contourFrame = undefined;
       return null;
     }
 
@@ -397,6 +404,14 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       });
 
       this.state.contourData = contourData;
+      this.state.contourFrame = {
+        data: contourData,
+        origin: [...this.state.cellOriginCommon],
+        size: [...this.state.cellSizeCommon],
+        scale: project.isCustomProjection(this.context.viewport)
+          ? this.context.viewport.distanceScales.unitsPerWorldUnit.map(value => 1 / value)
+          : [1, 1, 1]
+      };
     }
     return this.state.contourData;
   }
@@ -465,16 +480,13 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
     const {lines, polygons} = contourData;
     const {zOffset} = this.props;
-    const {cellOriginCommon, cellSizeCommon} = this.state;
+    const frame = this.state.contourFrame!;
+    const cellOriginCommon = frame.origin;
+    const cellSizeCommon = frame.size;
 
     const LinesSubLayerClass = this.getSubLayerClass('lines', PathLayer);
     const BandsSubLayerClass = this.getSubLayerClass('bands', SolidPolygonLayer);
-    const {viewport} = this.context;
-    const modelMatrix = new Matrix4();
-    if (project.isCustomProjection(viewport)) {
-      const scale = viewport.distanceScales.unitsPerWorldUnit;
-      modelMatrix.scale(scale.map(value => 1 / value));
-    }
+    const modelMatrix = new Matrix4().scale(frame.scale);
     modelMatrix
       .translate([cellOriginCommon[0], cellOriginCommon[1], 0])
       .scale([cellSizeCommon[0], cellSizeCommon[1], zOffset]);

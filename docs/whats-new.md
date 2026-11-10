@@ -6,7 +6,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ### Contour compute aggregation
 
-ContourLayer uses the shared compute reducer and asynchronously reads values for CPU contour generation.
+On WebGPU devices, [ContourLayer](./api-reference/aggregation-layers/contour-layer.md#compute-aggregation) aggregates points in a compute shader before generating contours.
 
 ### Hexagon compute aggregation
 

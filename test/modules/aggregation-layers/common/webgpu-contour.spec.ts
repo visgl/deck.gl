@@ -198,3 +198,64 @@ test('Contour requests a redraw and recovers after a failed metadata readback', 
     manager.finalize();
   }
 });
+
+test('Contour keeps completed geometry and its transform while new bins are pending', async ({
+  skip
+}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  const {LayerManager} = await import('@deck.gl/core');
+  const viewport = new OrthographicView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {target: [0, 0, 0], zoom: 0}
+  });
+  const manager = new LayerManager(device, {viewport});
+  let layer = new ContourComputationLayer({
+    id: 'retained-contours',
+    data: [
+      [1, 1],
+      [21, 21]
+    ],
+    getPosition: p => p,
+    cellSize: 10,
+    contours: [{threshold: 0.5}, {threshold: [0.5, 2]}]
+  });
+  const draw = () =>
+    layer.draw({
+      shaderModuleProps: {
+        project: {
+          viewport,
+          coordinateSystem: 'cartesian',
+          coordinateOrigin: [0, 0, 0],
+          devicePixelRatio: 1
+        }
+      }
+    } as any);
+  try {
+    manager.setLayers([layer]);
+    draw();
+    await vi.waitFor(() => expect(layer.state.aggregator.isLoaded).toBe(true), {timeout: 10000});
+    for (const cellSize of [20, 5]) {
+      const previous = (layer as any)._getContours();
+      const previousLayers = ContourLayer.prototype.renderLayers.call(layer) as any[];
+      expect(previousLayers.filter(Boolean)).toHaveLength(2);
+      layer = layer.clone({cellSize});
+      manager.setLayers([layer]);
+      expect(layer.state.aggregator.isLoaded).toBe(false);
+      expect((layer as any)._getContours()).toBe(previous);
+      const pendingLayers = ContourLayer.prototype.renderLayers.call(layer) as any[];
+      expect(pendingLayers.filter(Boolean)).toHaveLength(2);
+      expect(Array.from(pendingLayers[0].props.modelMatrix)).toEqual(
+        Array.from(previousLayers[0].props.modelMatrix)
+      );
+      draw();
+      expect((layer as any)._getContours()).toBe(previous);
+      await vi.waitFor(() => expect(layer.state.aggregator.isLoaded).toBe(true), {timeout: 10000});
+      expect((layer as any)._getContours()).not.toBe(previous);
+      expect(layer.state.contourFrame!.size).toEqual(layer.state.cellSizeCommon);
+    }
+  } finally {
+    manager.finalize();
+  }
+});
