@@ -40,9 +40,9 @@ GPUVector cell results without copying them to the CPU. The default `WebGLAggreg
 channel values. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
 result layouts, and supported scales and contours.
 
-### luma.gl v10 alpha.11
+### luma.gl v10 alpha.12
 
-The v10 packages use luma.gl alpha.11. Layer models delegate typed vector and
+The v10 packages use luma.gl alpha.12. Layer models delegate typed vector and
 constant-buffer binding and render-target format tracking to luma.gl. WebGPU
 layer draws restore dynamic render-pass parameters after drawing. Custom shader
 plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-guide.md).
