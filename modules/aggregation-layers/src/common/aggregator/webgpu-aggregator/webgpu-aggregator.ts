@@ -4,6 +4,7 @@
 
 import {project32, _GPUVectorModel as GPUVectorModel, _deepEqual as deepEqual} from '@deck.gl/core';
 import {Buffer, type Device, type Texture, type Framebuffer} from '@luma.gl/core';
+import {GraphAggregation} from './graph-aggregation';
 import {getFilterSource} from './filter.wgsl';
 import {Computation, type ModelProps} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shaders';
@@ -17,6 +18,7 @@ export type WebGPUAggregatorOptions = {
   shaders?: Pick<ModelProps, 'plugins' | 'shaderAssembler' | 'modules' | 'defines'>;
   requestRedraw?: () => void;
   bindAttributes?: (model: GPUVectorModel) => void;
+  graph?: boolean;
   channelNames: readonly string[];
   binning: string;
   binOptions: ShaderModule;
@@ -117,6 +119,7 @@ export class WebGPUAggregator implements Aggregator {
   get isLoaded(): boolean {
     return !this.dirty && (!this.props.readback || this.snapshot !== null);
   }
+  private graphAggregation?: GraphAggregation;
   private filterModel?: GPUVectorModel;
   private filterTexture?: Texture;
   private filterTarget?: Framebuffer;
@@ -178,6 +181,13 @@ export class WebGPUAggregator implements Aggregator {
       this.filterTexture = device.createTexture({width: 1, height: 1, format: 'rgba8unorm'});
       this.filterTarget = device.createFramebuffer({colorAttachments: [this.filterTexture]});
     }
+    if (options.graph && !this.filterModel) {
+      this.graphAggregation = new GraphAggregation(device, options.binning, [
+        project32,
+        aggregationUniforms,
+        options.binOptions
+      ]);
+    }
     this.zero = device.createBuffer({
       data: new Float32Array(3),
       usage: Buffer.STORAGE | Buffer.COPY_DST
@@ -216,12 +226,14 @@ export class WebGPUAggregator implements Aggregator {
     if (props.shaderModuleProps) {
       if (props.shaderModuleProps.project) {
         this.aggregate.shaderInputs.setProps({project: props.shaderModuleProps.project});
+        this.graphAggregation?.setShaderModuleProps({project: props.shaderModuleProps.project});
       }
       this.filterModel?.shaderInputs.setProps(props.shaderModuleProps);
     }
     if (props.binOptions) {
       const options = {[this.options.binOptions.name]: props.binOptions};
       this.aggregate.shaderInputs.setProps(options);
+      this.graphAggregation?.setShaderModuleProps(options);
       this.filterModel?.shaderInputs.setProps(options);
     }
     const range = this.props.binIdRange;
@@ -344,11 +356,18 @@ export class WebGPUAggregator implements Aggregator {
         binIds: this.idBuffer!,
         values: this.valueBuffer!
       });
+      this.graphAggregation?.encode(encoder, settings, {
+        positions: p.buffer,
+        positionsLow: low.buffer,
+        weights: weights[0].buffer,
+        bins: this.bins!
+      });
       for (const [computation, count] of [
         [this.initializeBins, this.binCount * weights.length],
         [this.aggregate, this.props.pointCount],
         [this.finalizeBins, this.binCount]
       ] as const) {
+        if (this.graphAggregation && computation !== this.finalizeBins) continue;
         if (computation === this.aggregate && this.filterModel) {
           this.options.bindAttributes!(this.filterModel);
           this.filterModel.setInstanceCount(this.props.pointCount);
@@ -368,7 +387,16 @@ export class WebGPUAggregator implements Aggregator {
         }
         const groups = Math.ceil(count / 64);
         const width = Math.min(groups, this.device.limits.maxComputeWorkgroupsPerDimension);
-        computation.shaderInputs.setProps({aggregation: {...settings, dispatchWidth: width * 64}});
+        computation.shaderInputs.setProps({
+          aggregation: {
+            ...settings,
+            // Graph MEAN is already finalized; the shared finalizer only handles empty bins.
+            operations: this.graphAggregation
+              ? operations.map(value => (value === 1 ? 0 : value))
+              : operations,
+            dispatchWidth: width * 64
+          }
+        });
         computation.predraw(encoder);
         if (count) {
           const pass = encoder.beginComputePass();
@@ -476,6 +504,7 @@ export class WebGPUAggregator implements Aggregator {
     this.filterModel?.destroy();
     this.filterTarget?.destroy();
     this.filterTexture?.destroy();
+    this.graphAggregation?.destroy();
     this.initializeBins.destroy();
     this.aggregate.destroy();
     this.finalizeBins.destroy();

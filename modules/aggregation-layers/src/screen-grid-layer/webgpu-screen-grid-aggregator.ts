@@ -17,6 +17,7 @@ export class WebGPUScreenGridAggregator extends WebGPUAggregator {
   ) {
     super(device, {
       ...extensions,
+      graph: true,
       channelNames: ['counts'],
       binOptions: binOptionsUniforms,
       binning: `fn getBin(position: vec3f, low: vec3f) -> BinAssignment {
