@@ -4,6 +4,12 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Optional graph aggregation
+
+[`GraphScreenGridAggregator`](./api-reference/aggregation-layers/aggregator.md#graphscreengridaggregator)
+can be supplied to `ScreenGridLayer` through its `aggregator` prop to compose luma
+graph operations while rendering directly from GPUVector outputs.
+
 ### Async CPU aggregation of GPU inputs
 
 [`ReadbackAggregator`](./api-reference/aggregation-layers/cpu-aggregator.md#readbackaggregator) runs CPU aggregation on GPUVector inputs, so you can compare CPU and GPU timings on the same buffers.

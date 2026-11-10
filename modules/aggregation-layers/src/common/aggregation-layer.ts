@@ -174,6 +174,9 @@ export default abstract class AggregationLayer<
   // Extend Layer.updateState to update the Aggregator instance
   // returns true if aggregator is changed
   updateState(params: UpdateParameters<this>): boolean {
+    if (this.props.aggregator?.supportsExtensions === false && this.props.extensions.length) {
+      throw new Error('The supplied aggregator does not support shader extensions');
+    }
     super.updateState(params);
     if (this.props.weights && !this.props.positions) {
       throw new Error('GPU aggregation weights require positions');
@@ -203,6 +206,7 @@ export default abstract class AggregationLayer<
       }
       aggregator.setProps({
         onError: error => this.getCurrentLayer()?.raiseError(error, 'aggregation'),
+        onNeedsRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
         attributes: this.getAttributeManager()?.attributes,
         positions: this.props.positions,
         weights: this.props.weights

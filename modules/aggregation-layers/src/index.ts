@@ -30,3 +30,5 @@ export type {
   CPUAggregatorProps,
   ReadbackAggregatorProps
 } from './common/aggregator/index';
+
+export {GraphScreenGridAggregator} from './screen-grid-layer/graph-screen-grid-aggregator';

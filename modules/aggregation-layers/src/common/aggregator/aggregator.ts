@@ -34,6 +34,8 @@ export type AggregationProps = {
   binOptions: Record<string, number | number[]>;
   /** Report an asynchronous backend failure to the owning layer. */
   onError?: (error: Error) => void;
+  /** Request another draw, for example after a transient asynchronous failure. */
+  onNeedsRedraw?: () => void;
   /** Callback after a channel is updated */
   onUpdate?: (event: {channel: number}) => void;
 };
@@ -71,6 +73,8 @@ export type AggregatedBin = {
  *
  */
 export interface Aggregator {
+  /** Set to false to reject layer shader extensions. Unspecified preserves existing behavior. */
+  readonly supportsExtensions?: boolean;
   /** Whether output and requested asynchronous metadata are ready. */
   readonly isLoaded?: boolean;
   /** Called once when the layer adopts this instance, before setProps. */

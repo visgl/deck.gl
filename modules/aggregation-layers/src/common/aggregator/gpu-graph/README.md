@@ -13,7 +13,8 @@ outputs currently require a single packed chunk. Inputs use the underlying luma
 primitives' supported layouts and chunking. Operations borrow their inputs and
 outputs; compiled command graphs own their scratch resources.
 
-ScreenGrid's projection, bin assignment, output formatting, and lifecycle remain in
-`webgpu-aggregator/graph-aggregation.ts` and the layer adapter. The graph path uses
+ScreenGrid's projection and bin assignment remain in `screen-grid-layer/screen-grid-graph.ts`.
+`GraphScreenGridAggregator` owns its output vectors and lifecycle. The graph path uses
 GPU-resident keys and contributions and returns the existing GPUVector results.
-Extension shader hooks continue through the shared shader reducer.
+It is selected explicitly through the layer's `aggregator` prop. The default backend is unchanged.
+The graph aggregator does not yet support shader extensions.

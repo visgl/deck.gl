@@ -312,3 +312,33 @@ Limitations:
 - The layer destroys removed adapters. Create a new one for each switch to CPU.
 - After writing to a buffer in place, call the adapter's `setNeedsUpdate()`.
 - CPU timings include readback. Compare end-to-end frame times.
+
+
+### GraphScreenGridAggregator
+
+`GraphScreenGridAggregator` is an opt-in implementation for `ScreenGridLayer` that
+composes luma graph operations. It supports COUNT, SUM, MIN, MAX and MEAN with
+accessor-generated attributes or borrowed GPUVector inputs:
+
+```typescript
+import {ScreenGridLayer, GraphScreenGridAggregator} from '@deck.gl/aggregation-layers';
+
+new ScreenGridLayer({
+  data,
+  getPosition: d => d.position,
+  aggregator: new GraphScreenGridAggregator(),
+  colorDomain: [0, 100]
+});
+```
+
+The layer initializes and destroys the aggregator. Create a new instance when
+switching back to it after replacing or removing the layer. Its output stays in
+GPUVectors; automatic domains and picking request asynchronous metadata snapshots.
+It requires a WebGPU device and does not yet support shader extensions. Omitting
+`aggregator` selects the existing default implementation.
+
+Custom aggregators can set `supportsExtensions` to `false` to reject unsupported
+shader extensions when the layer adopts them.
+
+Aggregators can call the supplied `onNeedsRedraw` callback to request another draw,
+for example when retrying an asynchronous metadata copy.

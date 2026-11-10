@@ -11,7 +11,7 @@ import type {CompiledGPUCommandGraph} from '@luma.gl/graph/gpu-graph';
 import {
   GPUGroupAggregationOperation,
   aggregationOperationLowerings
-} from '../gpu-graph/aggregation-operations';
+} from '../common/aggregator/gpu-graph/aggregation-operations';
 
 const assignmentSource = (binning: string) => `
 @group(0) @binding(auto) var<storage, read> positions: array<f32>;
@@ -52,7 +52,7 @@ struct Bin { count: u32, value: u32 };
 }`;
 
 /** ScreenGrid's projection/packing adapter around generic graph reductions. @internal */
-export class GraphAggregation {
+export class ScreenGridGraph {
   private readonly assign: Computation;
   private readonly pack: Computation;
   private compiled?: CompiledGPUCommandGraph;
