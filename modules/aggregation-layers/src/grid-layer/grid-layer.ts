@@ -688,7 +688,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       pendingMetadata &&
       (!colorDomain || !elevationDomain || this.needsAggregationScaleValues())
     ) {
-      return this.state.retainedAggregationLayer?.clone({}) || null;
+      return this.state.retainedAggregationLayer?.clone({pickable: false}) || null;
     }
     if (pendingMetadata && !this.needsAggregationScaleValues()) this.prepareRawAggregationScales();
     const CellLayerClass = this.getSubLayerClass('cells', GridCellLayer);
@@ -723,6 +723,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         id: 'cells'
       }),
       {
+        pickable: pendingMetadata ? false : this.props.pickable,
         numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,

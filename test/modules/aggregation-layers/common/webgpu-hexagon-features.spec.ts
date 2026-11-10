@@ -141,6 +141,7 @@ for (const explicitDomains of [false, true]) {
         expect(layer.state.aggregator.isLoaded).toBe(false);
         const pending = layer.renderLayers() as any;
         expect(pending).not.toBeNull();
+        expect(pending.props.pickable).toBe(false);
         if (explicitDomains) expect(pending.props.radius).toBe(layer.state.radiusCommon);
         else {
           expect(pending.props.radius).toBe(oldRadius);
@@ -156,6 +157,7 @@ for (const explicitDomains of [false, true]) {
         });
         const completed = layer.renderLayers() as any;
         expect(completed.props.radius).toBe(layer.state.radiusCommon);
+        expect(completed.props.pickable).toBe(true);
         previous = completed;
       }
     } finally {

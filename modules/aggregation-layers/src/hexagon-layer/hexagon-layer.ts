@@ -691,7 +691,7 @@ export default class HexagonLayer<
       pendingMetadata &&
       (!colorDomain || !elevationDomain || this.needsAggregationScaleValues())
     ) {
-      return this.state.retainedAggregationLayer?.clone({}) || null;
+      return this.state.retainedAggregationLayer?.clone({pickable: false}) || null;
     }
     if (pendingMetadata && !this.needsAggregationScaleValues()) this.prepareRawAggregationScales();
     const CellLayerClass = this.getSubLayerClass('cells', HexagonCellLayer);
@@ -726,6 +726,7 @@ export default class HexagonLayer<
         id: 'cells'
       }),
       {
+        pickable: pendingMetadata ? false : this.props.pickable,
         numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,
