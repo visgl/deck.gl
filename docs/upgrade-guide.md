@@ -14,7 +14,7 @@ as layer binary attributes. For direct buffer access, use `getGPUVectorData(vect
 from `@luma.gl/graph/gpu-data` and read its `buffer`, `byteOffset`, and `byteStride`
 instead of the former descriptor's `buffer`, `offset`, and `stride` fields.
 
-### luma.gl v10 alpha.10
+### luma.gl v10 alpha.11
 
 The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from
 `@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and
@@ -74,9 +74,14 @@ of both rendering model classes. Narrow to `Model` when accessing material-speci
 or model pipeline parameters instead. `LayersPassRenderOptions.colorMask` still
 applies to layer draws and preserves masked WebGL attachment clears.
 
+`RenderPass.withParameters` is removed in alpha.11. For custom render-pass state
+overrides, save `renderPass.getParameters()`, apply overrides with `setParameters`,
+and restore the saved parameters in a `finally` block. Deck.gl handles this for
+layer and extension draws.
+
 ### loaders.gl and math.gl v5 beta
 
-Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.4`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.6`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
 | Previous import | Replacement import |
 | --- | --- |

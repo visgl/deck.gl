@@ -47,16 +47,16 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "5.0.0-beta.4",
-    "@loaders.gl/ogc": "5.0.0-beta.4",
-    "@loaders.gl/raster": "5.0.0-beta.4",
-    "@loaders.gl/tiles": "5.0.0-beta.4",
-    "@loaders.gl/tiles-3d": "5.0.0-beta.4",
-    "@luma.gl/engine": "10.0.0-alpha.10",
-    "@luma.gl/shaders": "10.0.0-alpha.10",
-    "@math.gl/core": "5.0.0-beta.4",
-    "@math.gl/geometry": "5.0.0-beta.4",
-    "@math.gl/web-mercator": "5.0.0-beta.4",
+    "@loaders.gl/core": "5.0.0-beta.6",
+    "@loaders.gl/ogc": "5.0.0-beta.6",
+    "@loaders.gl/raster": "5.0.0-beta.6",
+    "@loaders.gl/tiles": "5.0.0-beta.6",
+    "@loaders.gl/tiles-3d": "5.0.0-beta.6",
+    "@luma.gl/engine": "10.0.0-alpha.12",
+    "@luma.gl/shaders": "10.0.0-alpha.12",
+    "@math.gl/core": "5.0.0-beta.6",
+    "@math.gl/geometry": "5.0.0-beta.6",
+    "@math.gl/web-mercator": "5.0.0-beta.6",
     "@probe.gl/stats": "^4.1.1",
     "@types/geojson": "^7946.0.8",
     "a5-js": "^1.0.0",
@@ -69,9 +69,9 @@
     "@deck.gl/extensions": "~9.4.0",
     "@deck.gl/layers": "~9.4.0",
     "@deck.gl/mesh-layers": "~9.4.0",
-    "@loaders.gl/core": "5.0.0-beta.4",
-    "@luma.gl/core": "10.0.0-alpha.10",
-    "@luma.gl/engine": "10.0.0-alpha.10"
+    "@loaders.gl/core": "5.0.0-beta.6",
+    "@luma.gl/core": "10.0.0-alpha.12",
+    "@luma.gl/engine": "10.0.0-alpha.12"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

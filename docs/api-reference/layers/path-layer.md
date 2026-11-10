@@ -243,6 +243,14 @@ When normalization is disabled, paths must be specified in the format of flat ar
 
 ### Data Accessors
 
+#### `_projectionTolerance` (number, optional) {#_projectiontolerance}
+
+* Default: `0`
+
+> Note: This prop is experimental
+
+Maximum sampled edge error in meters with a preprojecting viewport. Zero disables refinement. Requires `_pathType: null`, CPU-readable paths and per-object width and color. See [Adaptive refinement](../core/custom-projection-view.md#adaptive-refinement).
+
 #### `getPath` ([Accessor&lt;PathGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpath}
 
 * Default: `object => object.path`

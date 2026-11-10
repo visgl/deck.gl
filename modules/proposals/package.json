@@ -57,16 +57,16 @@
     "@deck.gl/extensions": "9.4.0-beta.4",
     "@deck.gl/geo-layers": "9.4.0-beta.4",
     "@deck.gl/layers": "9.4.0-beta.4",
-    "@loaders.gl/core": "5.0.0-beta.4",
-    "@loaders.gl/tiles": "5.0.0-beta.4",
-    "@math.gl/web-mercator": "5.0.0-beta.4",
-    "@luma.gl/core": "10.0.0-alpha.10",
-    "@luma.gl/engine": "10.0.0-alpha.10",
-    "@luma.gl/anari": "10.0.0-alpha.10",
-    "@luma.gl/graph": "10.0.0-alpha.10",
-    "@luma.gl/shaders": "10.0.0-alpha.10",
-    "@math.gl/core": "5.0.0-beta.4",
-    "@math.gl/earth": "5.0.0-beta.4"
+    "@loaders.gl/core": "5.0.0-beta.6",
+    "@loaders.gl/tiles": "5.0.0-beta.6",
+    "@math.gl/web-mercator": "5.0.0-beta.6",
+    "@luma.gl/core": "10.0.0-alpha.12",
+    "@luma.gl/engine": "10.0.0-alpha.12",
+    "@luma.gl/anari": "10.0.0-alpha.12",
+    "@luma.gl/graph": "10.0.0-alpha.12",
+    "@luma.gl/shaders": "10.0.0-alpha.12",
+    "@math.gl/core": "5.0.0-beta.6",
+    "@math.gl/earth": "5.0.0-beta.6"
   },
   "peerDependencies": {
     "apache-arrow": ">=17.0.0"

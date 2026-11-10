@@ -20,6 +20,8 @@ export type BinOptions = {
 export const binOptionsUniforms = {
   name: 'binOptions',
   vs: uniformBlock,
+  source: `struct BinOptionsUniforms {hexOriginCommon: vec2f, radiusCommon: f32,};
+  @group(0) @binding(auto) var<uniform> binOptions: BinOptionsUniforms;`,
   uniformTypes: {
     hexOriginCommon: 'vec2<f32>',
     radiusCommon: 'f32'

@@ -17,6 +17,7 @@ import {
   PickingInfo,
   Position,
   Viewport,
+  _GlobeViewport,
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
@@ -29,6 +30,7 @@ import {getBinIdRange} from '../common/utils/bounds-utils';
 import {createAggregationViewport} from '../common/utils/projection-utils';
 
 import {GridCellLayer} from './grid-cell-layer';
+import {WebGPUGridAggregator} from './webgpu-grid-aggregator';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -281,6 +283,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       colors?: AttributeWithScale;
       elevations?: AttributeWithScale;
 
+      metadataRequired?: boolean;
       binIdRange: [number, number][];
       aggregatorViewport: Viewport;
     } & AggregationLayer<any>['state'];
@@ -297,6 +300,49 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       return 'cpu';
     }
 
+    if (gpuAggregation && this.context.device.type === 'webgpu') {
+      if (
+        (!this.props.positions &&
+          !WebGPUGridAggregator.supportsData(this.props.data, [
+            'getPosition',
+            'getColorWeight',
+            'getElevationWeight'
+          ])) ||
+        (!this.props.positions &&
+          this.props.data ===
+            (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
+          !WebGPUGridAggregator.supportsAttributes(
+            this.getAttributeManager()!.attributes,
+            ['colorWeights', 'elevationWeights'],
+            this.context.device.limits.maxStorageBufferBindingSize
+          ))
+      )
+        return 'cpu';
+      if (
+        this.props.positions &&
+        !WebGPUGridAggregator.supportsColumns(
+          [this.props.positions, ...(this.props.weights || [])],
+          this.context.device.limits.maxStorageBufferBindingSize
+        )
+      ) {
+        throw new Error('Aggregation GPU input exceeds the storage buffer binding limit');
+      }
+      if (this.props.positions && this.state.preproject) {
+        throw new Error('Grid GPU columns must use the custom view coordinate system');
+      }
+      this._updateBinOptions();
+      const count = this.state.binIdRange.reduce((total, [start, end]) => total * (end - start), 1);
+      const limits = this.context.device.limits;
+      if (
+        !Number.isSafeInteger(count) ||
+        count * 16 > Math.min(limits.maxBufferSize, limits.maxStorageBufferBindingSize)
+      ) {
+        if (this.props.positions) throw new Error('Grid aggregation exceeds device buffer limits');
+        return 'cpu';
+      }
+      return 'webgpu';
+    }
+
     if (
       // GPU aggregation is requested
       gpuAggregation &&
@@ -308,7 +354,20 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return 'cpu';
   }
 
-  createAggregator(type: string): WebGLAggregator | CPUAggregator {
+  createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUGridAggregator {
+    if (type === 'webgpu')
+      return new WebGPUGridAggregator(this.context.device, {
+        shaders: this.getAggregationShaders(),
+        requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
+        bindAttributes: model => {
+          const layer = this.getCurrentLayer()! as this;
+          const manager = layer.getAttributeManager()!;
+          model.setGPUAttributes(
+            manager.getGPUVectors(),
+            manager.getBufferLayouts().map(layout => ({...layout, stepMode: 'instance' as const}))
+          );
+        }
+      });
     if (type === 'cpu') {
       const {gridAggregator, cellSize} = this.props;
       return new CPUAggregator({
@@ -382,6 +441,20 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const {props, oldProps, changeFlags} = params;
     const {aggregator} = this.state;
+    this.state.metadataRequired =
+      !props.colorDomain ||
+      !props.elevationDomain ||
+      Boolean(props.pickable) ||
+      props.onSetColorDomain !== noop ||
+      props.onSetElevationDomain !== noop ||
+      props.colorScaleType === 'quantile' ||
+      props.colorScaleType === 'ordinal' ||
+      props.lowerPercentile > 0 ||
+      props.upperPercentile < 100 ||
+      props.elevationLowerPercentile > 0 ||
+      props.elevationUpperPercentile < 100 ||
+      props.elevationScaleType === 'quantile';
+    aggregator.setProps({readback: this.state.metadataRequired});
     if (
       (changeFlags.dataChanged || !this.state.dataAsArray) &&
       (props.getColorValue || props.getElevationValue)
@@ -395,6 +468,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       props.positions !== oldProps.positions ||
       props.weights !== oldProps.weights ||
       props.dataBounds !== oldProps.dataBounds ||
+      props.modelMatrix !== oldProps.modelMatrix ||
+      props.coordinateOrigin !== oldProps.coordinateOrigin ||
+      changeFlags.projectionChanged ||
       props.cellSize !== oldProps.cellSize ||
       props.getColorValue !== oldProps.getColorValue ||
       props.getElevationValue !== oldProps.getElevationValue ||
@@ -503,7 +579,55 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       });
     }
 
-    this.setState({cellSizeCommon, cellOriginCommon, binIdRange, aggregatorViewport: viewport});
+    Object.assign(this.state, {
+      cellSizeCommon,
+      cellOriginCommon,
+      binIdRange,
+      aggregatorViewport: viewport
+    });
+  }
+
+  override setShaderModuleProps(props: Record<string, any>): void {
+    // Geometry clipping uses projected bounds, which must share the reduction viewport.
+    if (
+      props.clip &&
+      this.state?.aggregatorType === 'webgpu' &&
+      !this.state.clipByInstance &&
+      // Globe clipping already uses camera-independent Mercator bounds from ClipExtension.
+      !(this.state.aggregatorViewport instanceof _GlobeViewport)
+    ) {
+      const bounds = (this.props as this['props'] & {clipBounds: number[]}).clipBounds;
+      if (bounds) {
+        const viewport = this.state.aggregatorViewport;
+        const a = this.projectPosition([bounds[0], bounds[1], 0], {viewport});
+        const b = this.projectPosition([bounds[2], bounds[3], 0], {viewport});
+        const sourceCrs = this.internalState!.sourceCrs;
+        const longitudeCoordinates =
+          (typeof this.props.coordinateSystem !== 'string' ||
+            !['cartesian', 'meter-offsets', 'lnglat-offsets'].includes(
+              this.props.coordinateSystem
+            )) &&
+          sourceCrs?.coordinateFrame === 'geographic' &&
+          sourceCrs.axis.startsWith('en') &&
+          sourceCrs.xUnit.degreesPerUnit === 1 &&
+          sourceCrs.yUnit.degreesPerUnit === 1;
+        if (bounds[0] - bounds[2] > 180 && viewport.isGeospatial && longitudeCoordinates)
+          b[0] += 512;
+        props = {
+          ...props,
+          clip: {
+            ...props.clip,
+            bounds: [
+              Math.min(a[0], b[0]),
+              Math.min(a[1], b[1]),
+              Math.max(a[0], b[0]),
+              Math.max(a[1], b[1])
+            ]
+          }
+        };
+      }
+    }
+    super.setShaderModuleProps(props);
   }
 
   override draw(opts) {
@@ -520,7 +644,11 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     if (channel === 0) {
       const result = aggregator.getResult(0)!;
       this.setState({
-        colors: new AttributeWithScale(result, aggregator.binCount)
+        colors: new AttributeWithScale(
+          result,
+          aggregator.binCount,
+          aggregator.getResultValues?.(channel)
+        )
       });
       if (props.onSetColorDomain !== noop) {
         props.onSetColorDomain(aggregator.getResultDomain(0));
@@ -528,12 +656,49 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     } else if (channel === 1) {
       const result = aggregator.getResult(1)!;
       this.setState({
-        elevations: new AttributeWithScale(result, aggregator.binCount)
+        elevations: new AttributeWithScale(
+          result,
+          aggregator.binCount,
+          aggregator.getResultValues?.(channel)
+        )
       });
       if (props.onSetElevationDomain !== noop) {
         props.onSetElevationDomain(aggregator.getResultDomain(1));
       }
     }
+  }
+
+  protected override updateAttributes(changedAttributes) {
+    // AttributeManager has populated current positions at this point. Backend selection
+    // during updateState can only see the previous position bounds.
+    if (
+      (changedAttributes.positions ||
+        changedAttributes.colorWeights ||
+        changedAttributes.elevationWeights) &&
+      this.state.aggregatorType === 'webgpu' &&
+      (this.getAggregatorType() === 'cpu' ||
+        !WebGPUGridAggregator.supportsAttributes(
+          this.getAttributeManager()!.attributes,
+          ['colorWeights', 'elevationWeights'],
+          this.context.device.limits.maxStorageBufferBindingSize
+        ))
+    ) {
+      this.state.aggregator.destroy();
+      const aggregator = this.createAggregator('cpu');
+      this.setState({aggregator, aggregatorType: 'cpu'});
+      aggregator.setProps({
+        attributes: this.getAttributeManager()!.attributes,
+        pointCount: this.getNumInstances(),
+        operations: [this.props.colorAggregation, this.props.elevationAggregation],
+        binIdRange: this.state.binIdRange,
+        binOptions: {
+          cellSizeCommon: this.state.cellSizeCommon,
+          cellOriginCommon: this.state.cellOriginCommon
+        },
+        onUpdate: this._onAggregationUpdate.bind(this)
+      });
+    }
+    super.updateAttributes(changedAttributes);
   }
 
   onAttributeChange(id: string) {
@@ -585,6 +750,13 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       elevationUpperPercentile,
       elevationDomain
     } = this.props;
+    if (
+      this.state.metadataRequired &&
+      aggregator.getResultValues &&
+      aggregator.binCount &&
+      !aggregator.getResultValues(0)
+    )
+      return null;
     const CellLayerClass = this.getSubLayerClass('cells', GridCellLayer);
     const binAttribute = aggregator.getBins();
 

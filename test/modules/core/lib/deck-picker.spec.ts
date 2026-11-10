@@ -3,10 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {LayerManager, MapView} from '@deck.gl/core';
+import {LayerManager, MapView, OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import DeckPicker from '@deck.gl/core/lib/deck-picker';
 import {device} from '@deck.gl/test-utils/vitest';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import type {CanvasContext} from '@luma.gl/core';
 
 const DEVICE_RECT_TEST_CASES = [
@@ -193,4 +194,78 @@ test('DeckPicker#pick async empty', async () => {
 
   layerManager.finalize();
   deckPicker.finalize();
+});
+
+test('DeckPicker#pick async on WebGPU uses a top-left framebuffer origin', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+    return;
+  }
+
+  const size = 64;
+  // A 1:1 canvas context, so CSS pixels and device pixels match
+  const canvasContext = {
+    getCSSSize: () => [size, size],
+    getDrawingBufferSize: () => [size, size],
+    cssToDeviceRatio: () => 1,
+    cssToDevicePixels: ([x, y]: number[], yInvert = true) => ({
+      x,
+      y: yInvert ? size - 1 - y : y,
+      width: 1,
+      height: 1
+    })
+  } as unknown as CanvasContext;
+  // The view covers the top quarter of the canvas. Its dot is centered at CSS [32, 8].
+  const view = new OrthographicView({id: 'top', x: 0, y: 0, width: '100%', height: '25%'});
+  const viewport = view.makeViewport({
+    width: size,
+    height: size,
+    viewState: {target: [0, 0, 0], zoom: 0}
+  });
+  const layer = new ScatterplotLayer({
+    id: 'webgpu-picking-origin',
+    data: [{position: [0, 0]}],
+    getPosition: point => point.position,
+    radiusUnits: 'pixels',
+    getRadius: 4,
+    pickable: true
+  });
+  const deckPicker = new DeckPicker(webgpuDevice);
+  const layerManager = new LayerManager(webgpuDevice, {viewport});
+
+  try {
+    layerManager.setLayers([layer]);
+    const opts = {
+      layers: layerManager.getLayers(),
+      views: {[view.id]: view},
+      viewports: [viewport],
+      effects: [],
+      onViewportActive: layerManager.activateViewport,
+      canvasContext
+    };
+
+    const beginRenderPass = vi.spyOn(webgpuDevice, 'beginRenderPass');
+    let output = await deckPicker.pickObjectAsync({...opts, x: 32, y: 8});
+    expect(output.result[0]?.layer, 'the dot is picked in the top quarter').toBe(layer);
+    expect(
+      beginRenderPass.mock.calls[0][0]?.parameters?.scissorRect,
+      'the picking scissor rectangle has a top-left origin'
+    ).toEqual([32, 8, 1, 1]);
+    beginRenderPass.mockRestore();
+
+    output = await deckPicker.pickObjectAsync({...opts, x: 32, y: size - 8});
+    expect(output.result, 'nothing is picked in the bottom quarter').toEqual([]);
+
+    // Picking below the dot, the closest dot pixel is above the pick point (larger bottom-left y)
+    output = await deckPicker.pickObjectAsync({...opts, x: 32, y: 16, radius: 6});
+    expect(output.result[0]?.layer, 'the dot is picked within the radius').toBe(layer);
+    expect(
+      output.result[0]?.devicePixel?.[1],
+      'readback rows are in bottom-to-top order'
+    ).toBeGreaterThan(size - 1 - 16);
+  } finally {
+    layerManager.finalize();
+    deckPicker.finalize();
+  }
 });

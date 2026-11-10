@@ -24,6 +24,12 @@ import {
 import {ColumnLayer, PolygonLayer, PolygonLayerProps} from '@deck.gl/layers';
 import {flattenPolygon, getHexagonCentroid, h3ToPolygon} from './h3-utils';
 
+import {
+  cellColumnDefaults,
+  renderCellColumns,
+  type CellColumnProps
+} from '../geo-cell-layer/cell-columns';
+
 // There is a cost to updating the instanced geometries when using highPrecision: false
 // This constant defines the distance between two hexagons that leads to "significant
 // distortion." Smaller value makes the column layer more sensitive to viewport change.
@@ -40,12 +46,6 @@ function mergeTriggers(getHexagon, coverage) {
   }
   return trigger;
 }
-
-import {
-  cellColumnDefaults,
-  renderCellColumns,
-  type CellColumnProps
-} from '../geo-cell-layer/cell-columns';
 
 const defaultProps: DefaultProps<H3HexagonLayerProps> = {
   ...cellColumnDefaults,
@@ -265,6 +265,7 @@ export default class H3HexagonLayer<
     } = this.props;
 
     return {
+      dataComparator: this.props.dataComparator,
       elevationScale,
       extruded,
       coverage,

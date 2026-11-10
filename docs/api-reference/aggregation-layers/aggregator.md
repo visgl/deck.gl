@@ -220,7 +220,8 @@ new ScreenGridLayer({
 
 Input columns remain caller-owned. Replace column references when their data changes, or
 explicitly invalidate the aggregator when updating storage in place. GPU column inputs require
-a custom aggregator, except for the built-in [ScreenGrid compute path](./screen-grid-layer.md#compute-aggregation),
+a custom aggregator, except for the built-in [ScreenGrid](./screen-grid-layer.md#compute-aggregation) and
+[Grid](./grid-layer.md#compute-aggregation) compute paths,
 and do not support layer extensions or accessor fallbacks.
 
 ### GPU column results
@@ -239,3 +240,75 @@ custom aggregators. Explicit domain callbacks receive the aggregation domain thr
 
 Percentile and ordinal scales access results on the CPU. Picking uses `getBin()`.
 ContourLayer uses CPU-readable results for marching squares.
+
+### Asynchronous result metadata
+
+Picking and percentile scales need results on the CPU. An aggregator can copy its GPU
+results asynchronously and return the copy from `getResultValues(channel)`. Set `isLoaded`
+to false while the copy is pending, then call `onUpdate` when it is ready. Rendering
+continues to use the GPU buffers returned by `getResult()`.
+
+### Comparing GPU and CPU aggregation with the same inputs
+
+[`ReadbackAggregator`](./cpu-aggregator.md#readbackaggregator) aggregates GPU column inputs
+on the CPU, so you can compare CPU and GPU aggregation on the same buffers. It copies the
+columns back first, and the layer reports `isLoaded: false` until aggregation finishes.
+Columns need `COPY_SRC` usage. See the [constructor docs](./cpu-aggregator.md#readbackaggregator)
+for accepted formats. Strided and interleaved columns work.
+
+For Cartesian GridLayer inputs, compare the native WebGPU aggregator with the CPU adapter.
+Both branches use the same WebGPU device; WebGL does not accept these borrowed columns:
+
+```typescript
+import {GridLayer, ReadbackAggregator} from '@deck.gl/aggregation-layers';
+import {Deck, OrthographicView} from '@deck.gl/core';
+import {luma} from '@luma.gl/core';
+import {webgpuAdapter} from '@luma.gl/webgpu';
+
+const device = await luma.createDevice({adapters: [webgpuAdapter], type: 'webgpu'});
+// Create positionVector and weight vectors on this same device.
+
+const createCPUAggregator = () => new ReadbackAggregator({
+  dimensions: 2,
+  weightAttributes: ['colorWeights', 'elevationWeights'],
+  getBin: {
+    sources: ['positions'],
+    getValue: ({positions}, index, {cellSizeCommon, cellOriginCommon}) => [
+      Math.floor((positions[0] - cellOriginCommon[0]) / cellSizeCommon[0]),
+      Math.floor((positions[1] - cellOriginCommon[1]) / cellSizeCommon[1])
+    ]
+  },
+  getValue: [
+    {sources: ['colorWeights'], getValue: ({colorWeights}) => colorWeights},
+    {sources: ['elevationWeights'], getValue: ({elevationWeights}) => elevationWeights}
+  ]
+});
+
+// Keep the adapter while CPU mode is active; replace it on each switch back to CPU.
+let cpuAggregator = null;
+function render(useCPU) {
+  if (useCPU && !cpuAggregator) cpuAggregator = createCPUAggregator();
+  if (!useCPU) cpuAggregator = null;
+  return new GridLayer({
+    coordinateSystem: 'cartesian',
+    gpuAggregation: true,
+    positions: positionVector,
+    weights: [colorWeightVector, elevationWeightVector],
+    dataBounds,
+    cellSize: 10,
+    colorDomain: [0, 100],
+    elevationDomain: [0, 100],
+    aggregator: useCPU ? cpuAggregator : undefined
+  });
+}
+const deck = new Deck({device, views: new OrthographicView(), layers: [render(false)]});
+// Switch modes with deck.setProps({layers: [render(useCPU)]}).
+```
+
+Limitations:
+
+- `getBin` receives untransformed positions. Project other coordinate systems in `getBin`.
+- Layer extensions do not apply. Picking returns bins, not original JavaScript objects.
+- The layer destroys removed adapters. Create a new one for each switch to CPU.
+- After writing to a buffer in place, call the adapter's `setNeedsUpdate()`.
+- CPU timings include readback. Compare end-to-end frame times.

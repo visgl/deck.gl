@@ -41,12 +41,12 @@
     "src"
   ],
   "dependencies": {
-    "@luma.gl/core": "10.0.0-alpha.10"
+    "@luma.gl/core": "10.0.0-alpha.12"
   },
   "peerDependencies": {
     "@deck.gl/core": "~9.4.0",
-    "@luma.gl/core": "10.0.0-alpha.10",
-    "@luma.gl/engine": "10.0.0-alpha.10",
+    "@luma.gl/core": "10.0.0-alpha.12",
+    "@luma.gl/engine": "10.0.0-alpha.12",
     "@probe.gl/test-utils": "^4.1.1",
     "vitest": "^4.0.18"
   },

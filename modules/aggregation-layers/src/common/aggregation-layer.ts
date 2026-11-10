@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {project} from '@deck.gl/core';
+import {project, project32} from '@deck.gl/core';
 
 import {
   CompositeLayer,
@@ -75,6 +75,11 @@ export default abstract class AggregationLayer<
     this.state.aggregator.update();
   }
 
+  /** Include asynchronous aggregation metadata in the owning layer's loading state. */
+  override get isLoaded(): boolean {
+    return super.isLoaded && this.state?.aggregator?.isLoaded !== false;
+  }
+
   /** Number of weight columns consumed by this layer. */
   protected getAggregationChannelCount(): number {
     return 1;
@@ -84,6 +89,17 @@ export default abstract class AggregationLayer<
     aggregatorType: string;
     aggregator: Aggregator;
   } & CompositeLayer['state'];
+
+  /** Extension hooks affect input points; rendering effects only affect the cells. */
+  protected getAggregationShaders() {
+    const shaders = super.getShaders({modules: [project32]});
+    return {
+      ...shaders,
+      plugins: shaders.plugins?.filter(
+        plugin => !this.context.defaultShaderPlugins.includes(plugin)
+      )
+    };
+  }
 
   /** Forwards extension uniforms to the GPU aggregation model as well as rendering models. */
   setShaderModuleProps(props: Record<string, any>): void {
@@ -186,6 +202,7 @@ export default abstract class AggregationLayer<
         aggregator.setNeedsUpdate();
       }
       aggregator.setProps({
+        onError: error => this.getCurrentLayer()?.raiseError(error, 'aggregation'),
         attributes: this.getAttributeManager()?.attributes,
         positions: this.props.positions,
         weights: this.props.weights

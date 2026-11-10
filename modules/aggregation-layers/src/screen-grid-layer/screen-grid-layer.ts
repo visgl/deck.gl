@@ -127,13 +127,32 @@ export default class ScreenGridLayer<
   static defaultProps = defaultProps;
 
   getAggregatorType(): string {
-    if (
-      this.props.gpuAggregation &&
-      this.context.device.type === 'webgpu' &&
-      this.props.colorDomain &&
-      !this.props.extensions.length &&
-      !this.props.pickable
-    ) {
+    if (this.props.gpuAggregation && this.context.device.type === 'webgpu') {
+      if (
+        (!this.props.positions &&
+          !WebGPUScreenGridAggregator.supportsData(this.props.data, [
+            'getPosition',
+            'getWeight'
+          ])) ||
+        (!this.props.positions &&
+          this.props.data ===
+            (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
+          !WebGPUScreenGridAggregator.supportsAttributes(
+            this.getAttributeManager()!.attributes,
+            ['counts'],
+            this.context.device.limits.maxStorageBufferBindingSize
+          ))
+      )
+        return 'cpu';
+      if (
+        this.props.positions &&
+        !WebGPUScreenGridAggregator.supportsColumns(
+          [this.props.positions, ...(this.props.weights || [])],
+          this.context.device.limits.maxStorageBufferBindingSize
+        )
+      ) {
+        throw new Error('Aggregation GPU input exceeds the storage buffer binding limit');
+      }
       if (this.props.positions && this.state.preproject) {
         throw new Error('ScreenGrid GPU columns must use the custom view coordinate system');
       }
@@ -145,14 +164,26 @@ export default class ScreenGridLayer<
   }
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUScreenGridAggregator {
-    if (type === 'webgpu') return new WebGPUScreenGridAggregator(this.context.device);
+    if (type === 'webgpu')
+      return new WebGPUScreenGridAggregator(this.context.device, {
+        shaders: this.getAggregationShaders(),
+        requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
+        bindAttributes: model => {
+          const layer = this.getCurrentLayer()! as this;
+          const manager = layer.getAttributeManager()!;
+          model.setGPUAttributes(
+            manager.getGPUVectors(),
+            manager.getBufferLayouts().map(layout => ({...layout, stepMode: 'instance' as const}))
+          );
+        }
+      });
     if (type === 'cpu' || !WebGLAggregator.isSupported(this.context.device)) {
       return new CPUAggregator({
         dimensions: 2,
         getBin: {
           sources: ['positions'],
           getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
-            const layer = this.getCurrentLayer()!;
+            const layer = this.getCurrentLayer()! as this;
             const viewport = layer.context.viewport;
             const commonPosition = this.projectPositionFromAttribute(positions, viewport);
             const p = worldToPixels(commonPosition, viewport.pixelProjectionMatrix);
@@ -218,6 +249,10 @@ export default class ScreenGridLayer<
 
     const {props, oldProps, changeFlags} = params;
     const {cellSizePixels, aggregation} = props;
+    this.state.aggregator.setProps({
+      readback: !props.colorDomain || Boolean(props.pickable),
+      onUpdate: () => this.getCurrentLayer()?.setState({})
+    });
     if (
       aggregatorChanged ||
       changeFlags.dataChanged ||
@@ -255,6 +290,34 @@ export default class ScreenGridLayer<
     return aggregatorChanged;
   }
 
+  protected override updateAttributes(changedAttributes) {
+    if (
+      this.state.aggregatorType === 'webgpu' &&
+      !WebGPUScreenGridAggregator.supportsAttributes(
+        this.getAttributeManager()!.attributes,
+        ['counts'],
+        this.context.device.limits.maxStorageBufferBindingSize
+      )
+    ) {
+      this.state.aggregator.destroy();
+      const aggregator = this.createAggregator('cpu');
+      this.setState({aggregator, aggregatorType: 'cpu'});
+      const {cellSizePixels, aggregation} = this.props;
+      const {width, height} = this.context.viewport;
+      aggregator.setProps({
+        attributes: this.getAttributeManager()!.attributes,
+        pointCount: this.getNumInstances(),
+        operations: [aggregation],
+        binIdRange: [
+          [0, Math.ceil(width / cellSizePixels)],
+          [0, Math.ceil(height / cellSizePixels)]
+        ],
+        binOptions: {cellSizePixels}
+      });
+    }
+    super.updateAttributes(changedAttributes);
+  }
+
   onAttributeChange(id: string) {
     const {aggregator} = this.state;
     switch (id) {
@@ -273,6 +336,7 @@ export default class ScreenGridLayer<
 
   renderLayers(): LayersList | Layer | null {
     const {aggregator} = this.state;
+    if (aggregator.isLoaded === false) return null;
     const CellLayerClass = this.getSubLayerClass('cells', ScreenGridCellLayer);
     const binAttribute = aggregator.getBins();
     const weightAttribute = aggregator.getResult(0);

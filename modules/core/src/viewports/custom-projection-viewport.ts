@@ -254,7 +254,8 @@ export default class CustomProjectionViewport extends Viewport {
           .slice(0, 3)
           .map((value, axis) => value / this.distanceScales.unitsPerWorldUnit[axis])
       );
-      return [result[0], result[1], result[2] ?? 0];
+      const coordinates: [number, number, number] = [result[0], result[1], result[2] ?? 0];
+      return coordinates.every(Number.isFinite) ? coordinates : [NaN, NaN, NaN];
     } catch {
       return [NaN, NaN, NaN];
     }

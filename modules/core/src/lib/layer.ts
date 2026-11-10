@@ -1395,7 +1395,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const webGPUDrawParameters =
         context.device instanceof WebGLDevice ? null : splitWebGPUDrawParameters(parameters);
 
-      applyModelParameters(this.getModels(), parameters, webGPUDrawParameters);
+      applyModelParameters(this.getModels(), parameters, webGPUDrawParameters, offsets);
 
       // Call subclass lifecycle method
       if (context.device instanceof WebGLDevice) {
@@ -1423,7 +1423,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           this.draw(opts);
         });
       } else {
-        renderPass.withParameters(webGPUDrawParameters?.renderPassParameters || {}, () => {
+        const previousParameters = renderPass.getParameters();
+        try {
+          renderPass.setParameters(webGPUDrawParameters?.renderPassParameters || {});
           const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
           for (const extension of this.props.extensions) {
@@ -1431,7 +1433,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           }
 
           this.draw(opts);
-        });
+        } finally {
+          renderPass.setParameters(previousParameters);
+        }
       }
     } finally {
       this.props = currentProps;
@@ -1702,13 +1706,19 @@ function splitWebGPUDrawParameters(parameters: LumaParameters): {
 function applyModelParameters(
   models: LumaGPUVectorModel[],
   parameters: LumaParameters,
-  webGPUDrawParameters: ReturnType<typeof splitWebGPUDrawParameters> | null
+  webGPUDrawParameters: ReturnType<typeof splitWebGPUDrawParameters> | null,
+  polygonOffset: number[]
 ): void {
   for (const model of models) {
     if (model.device.type === 'webgpu') {
       // TODO(ibgreen): model.setParameters currently wipes parameters. Semantics TBD.
       model.setParameters({
         ...model.parameters,
+        // WebGPU depth bias, like WebGL polygon offset, applies only to triangles.
+        ...(model.topology.startsWith('triangle') && {
+          depthBias: Math.round(polygonOffset[1]),
+          depthBiasSlopeScale: polygonOffset[0]
+        }),
         ...webGPUDrawParameters?.pipelineParameters
       });
     } else {
