@@ -4,6 +4,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Contour compute aggregation
+
+On WebGPU devices, [ContourLayer](./api-reference/aggregation-layers/contour-layer.md#compute-aggregation) aggregates points in a compute shader before generating contours.
+
 ### Hexagon compute aggregation
 
 HexagonLayer supports WebGPU aggregation with explicit color and elevation domains,
