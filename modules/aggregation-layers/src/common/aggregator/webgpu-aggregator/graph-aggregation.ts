@@ -115,7 +115,8 @@ export class GraphAggregation {
             keys: 'keys',
             values: 'contributions',
             output: 'statistics',
-            operation: (['sum', 'mean', 'min', 'max'] as const)[operation]
+            // Reuse the shared row counts and finalizer for MEAN.
+            operation: (['sum', 'sum', 'min', 'max'] as const)[operation]
           })
         );
       const vectors = Object.fromEntries(

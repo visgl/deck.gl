@@ -390,10 +390,6 @@ export class WebGPUAggregator implements Aggregator {
         computation.shaderInputs.setProps({
           aggregation: {
             ...settings,
-            // Graph MEAN is already finalized; the shared finalizer only handles empty bins.
-            operations: this.graphAggregation
-              ? operations.map(value => (value === 1 ? 0 : value))
-              : operations,
             dispatchWidth: width * 64
           }
         });
