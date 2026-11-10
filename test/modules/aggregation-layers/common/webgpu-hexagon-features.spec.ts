@@ -89,3 +89,77 @@ for (const filtering of [false, true]) {
     }
   });
 }
+
+for (const explicitDomains of [false, true]) {
+  test(`Hexagon keeps cells during readback (explicit domains=${explicitDomains})`, async ({
+    skip
+  }) => {
+    const device = await getWebGPUTestDevice();
+    if (!device) return skip();
+    const {LayerManager} = await import('@deck.gl/core');
+    const viewport = new OrthographicView().makeViewport({
+      width: 200,
+      height: 200,
+      viewState: {target: [0, 0, 0], zoom: 0}
+    });
+    const manager = new LayerManager(device, {viewport});
+    let layer = new HexagonLayer({
+      id: 'retained-hexagons',
+      data: [
+        {position: [2, 2], value: 2},
+        {position: [22, 22], value: 4}
+      ],
+      getPosition: d => d.position,
+      getColorWeight: d => d.value,
+      getElevationWeight: d => d.value,
+      radius: 10,
+      pickable: true,
+      ...(explicitDomains ? {colorDomain: [0, 10], elevationDomain: [0, 10]} : {})
+    });
+    const draw = () =>
+      layer.draw({
+        shaderModuleProps: {
+          project: {
+            viewport,
+            coordinateSystem: 'cartesian',
+            coordinateOrigin: [0, 0, 0],
+            devicePixelRatio: 1
+          }
+        }
+      } as any);
+    try {
+      manager.setLayers([layer]);
+      if (explicitDomains) expect(layer.renderLayers()).not.toBeNull();
+      draw();
+      await vi.waitFor(() => expect(layer.state.aggregator.isLoaded).toBe(true), {timeout: 10000});
+      let previous = layer.renderLayers() as any;
+      expect(previous).not.toBeNull();
+      for (const radius of [20, 5]) {
+        const oldRadius = previous.props.radius;
+        layer = layer.clone({radius});
+        manager.setLayers([layer]);
+        expect(layer.state.aggregator.isLoaded).toBe(false);
+        const pending = layer.renderLayers() as any;
+        expect(pending).not.toBeNull();
+        if (explicitDomains) expect(pending.props.radius).toBe(layer.state.radiusCommon);
+        else {
+          expect(pending.props.radius).toBe(oldRadius);
+          expect(pending.props.numInstances).toBe(previous.props.numInstances);
+          expect(pending.props.data.attributes.getBin.value).toBeInstanceOf(Float32Array);
+          expect(pending.props.data.attributes.getColorValue.value).toBeInstanceOf(Float32Array);
+        }
+        draw();
+        // Still visible while the async snapshot is unavailable.
+        expect(layer.renderLayers()).not.toBeNull();
+        await vi.waitFor(() => expect(layer.state.aggregator.isLoaded).toBe(true), {
+          timeout: 10000
+        });
+        const completed = layer.renderLayers() as any;
+        expect(completed.props.radius).toBe(layer.state.radiusCommon);
+        previous = completed;
+      }
+    } finally {
+      manager.finalize();
+    }
+  });
+}
