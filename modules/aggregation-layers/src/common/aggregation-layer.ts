@@ -143,7 +143,7 @@ export default abstract class AggregationLayer<
     return (
       !props.colorDomain ||
       !props.elevationDomain ||
-      Boolean(props.pickable) ||
+      Boolean(props._subLayerProps?.cells?.pickable ?? props.pickable) ||
       props.onSetColorDomain !== noop ||
       props.onSetElevationDomain !== noop ||
       this.needsAggregationScaleValues(props)

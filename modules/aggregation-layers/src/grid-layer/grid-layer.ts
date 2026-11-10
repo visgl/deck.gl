@@ -723,7 +723,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         id: 'cells'
       }),
       {
-        pickable: pendingMetadata ? false : this.props.pickable,
+        ...(pendingMetadata ? {pickable: false} : {}),
         numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,

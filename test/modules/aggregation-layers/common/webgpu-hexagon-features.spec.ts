@@ -160,6 +160,14 @@ for (const explicitDomains of [false, true]) {
         expect(completed.props.pickable).toBe(true);
         previous = completed;
       }
+      layer = layer.clone({_subLayerProps: {cells: {pickable: false}}});
+      manager.setLayers([layer]);
+      expect((layer.renderLayers() as any).props.pickable).toBe(false);
+      layer = layer.clone({pickable: false, _subLayerProps: {cells: {pickable: true}}});
+      manager.setLayers([layer]);
+      draw();
+      await vi.waitFor(() => expect(layer.state.aggregator.isLoaded).toBe(true), {timeout: 10000});
+      expect((layer.renderLayers() as any).props.pickable).toBe(true);
     } finally {
       manager.finalize();
     }

@@ -726,7 +726,7 @@ export default class HexagonLayer<
         id: 'cells'
       }),
       {
-        pickable: pendingMetadata ? false : this.props.pickable,
+        ...(pendingMetadata ? {pickable: false} : {}),
         numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,
