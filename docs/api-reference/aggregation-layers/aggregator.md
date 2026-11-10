@@ -253,8 +253,8 @@ continues to use the GPU buffers returned by `getResult()`.
 [`ReadbackAggregator`](./cpu-aggregator.md#readbackaggregator) aggregates GPU column inputs
 on the CPU, so you can compare CPU and GPU aggregation on the same buffers. It copies the
 columns back first, and the layer reports `isLoaded: false` until aggregation finishes.
-Columns need `COPY_SRC` usage and the [GPU column input](#gpu-column-inputs) formats.
-Strided and interleaved columns work.
+Columns need `COPY_SRC` usage. See the [constructor docs](./cpu-aggregator.md#readbackaggregator)
+for accepted formats. Strided and interleaved columns work.
 
 For Cartesian GridLayer inputs, compare the native WebGPU aggregator with the CPU adapter.
 Both branches use the same WebGPU device; WebGL does not accept these borrowed columns:
