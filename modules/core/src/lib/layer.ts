@@ -582,8 +582,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // / LIFECYCLE METHODS - overridden by the layer subclasses
 
   /**
-   * Selects explicit column props without conversion or ownership changes.
-   * Missing inputs retain binary attribute and accessor fallbacks.
+   * Returns the column props set on this layer, keyed by column name.
+   * Null or undefined props and definitions with `prop: false` are left out,
+   * so those columns use binary attributes or accessors.
+   * Selected inputs are returned without conversion or ownership changes.
    */
   protected resolveColumns(
     definitions: Readonly<Record<string, {prop?: boolean}>>
