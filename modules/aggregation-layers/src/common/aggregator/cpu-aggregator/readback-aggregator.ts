@@ -66,16 +66,13 @@ export class ReadbackAggregator extends CPUAggregator {
 
   /** Start a copy without blocking the layer update cycle. */
   override update(): void {
+    if (this.disposed)
+      throw new Error('ReadbackAggregator has been destroyed; create a new adapter');
     if (!this.props.positions) {
       super.update();
       return;
     }
-    if (
-      this.disposed ||
-      this.completedRevision === this.revision ||
-      this.pendingRevision === this.revision
-    )
-      return;
+    if (this.completedRevision === this.revision || this.pendingRevision === this.revision) return;
     const revision = this.revision;
     this.pendingRevision = revision;
     void this.readInputs(revision);

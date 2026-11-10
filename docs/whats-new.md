@@ -6,7 +6,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ### Async CPU aggregation of GPU inputs
 
-`ReadbackAggregator` copies GPUVector inputs asynchronously for CPU/GPU comparisons using the same buffers. See the [comparison example](./api-reference/aggregation-layers/aggregator.md#comparing-gpu-and-cpu-aggregation-with-the-same-inputs).
+[`ReadbackAggregator`](./api-reference/aggregation-layers/cpu-aggregator.md#readbackaggregator) runs CPU aggregation on GPUVector inputs, so you can compare CPU and GPU timings on the same buffers.
 
 ### Hexagon compute aggregation
 

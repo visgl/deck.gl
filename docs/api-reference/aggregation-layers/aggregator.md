@@ -250,11 +250,11 @@ continues to use the GPU buffers returned by `getResult()`.
 
 ### Comparing GPU and CPU aggregation with the same inputs
 
-`ReadbackAggregator` is an opt-in CPU adapter for borrowed GPUVectors. It asynchronously
-copies positions and weights, then runs `CPUAggregator` with your bin and value accessors.
-The layer stays unloaded until the current copy and aggregation finish. Inputs require
-`COPY_SRC` buffers and single-chunk float32 columns. Copies preserve offsets, strides,
-and `numInstances` prefixes; input buffers remain caller-owned.
+[`ReadbackAggregator`](./cpu-aggregator.md#readbackaggregator) aggregates GPU column inputs
+on the CPU, so you can compare CPU and GPU aggregation on the same buffers. It copies the
+columns back first, and the layer reports `isLoaded: false` until aggregation finishes.
+Columns need `COPY_SRC` usage and the [GPU column input](#gpu-column-inputs) formats.
+Strided and interleaved columns work.
 
 For Cartesian GridLayer inputs, compare the native WebGPU aggregator with the CPU adapter.
 Both branches use the same WebGPU device; WebGL does not accept these borrowed columns:
@@ -268,7 +268,7 @@ import {webgpuAdapter} from '@luma.gl/webgpu';
 const device = await luma.createDevice({adapters: [webgpuAdapter], type: 'webgpu'});
 // Create positionVector and weight vectors on this same device.
 
-const cpuAggregator = new ReadbackAggregator({
+const createCPUAggregator = () => new ReadbackAggregator({
   dimensions: 2,
   weightAttributes: ['colorWeights', 'elevationWeights'],
   getBin: {
@@ -284,24 +284,31 @@ const cpuAggregator = new ReadbackAggregator({
   ]
 });
 
-const layer = new GridLayer({
-  coordinateSystem: 'cartesian',
-  gpuAggregation: true,
-  positions: positionVector,
-  weights: [colorWeightVector, elevationWeightVector],
-  dataBounds,
-  cellSize: 10,
-  colorDomain: [0, 100],
-  elevationDomain: [0, 100],
-  aggregator: useCPU ? cpuAggregator : undefined
-});
-
-new Deck({device, views: new OrthographicView(), layers: [layer]});
+// Keep the adapter while CPU mode is active; replace it on each switch back to CPU.
+let cpuAggregator = null;
+function render(useCPU) {
+  if (useCPU && !cpuAggregator) cpuAggregator = createCPUAggregator();
+  if (!useCPU) cpuAggregator = null;
+  return new GridLayer({
+    coordinateSystem: 'cartesian',
+    gpuAggregation: true,
+    positions: positionVector,
+    weights: [colorWeightVector, elevationWeightVector],
+    dataBounds,
+    cellSize: 10,
+    colorDomain: [0, 100],
+    elevationDomain: [0, 100],
+    aggregator: useCPU ? cpuAggregator : undefined
+  });
+}
+const deck = new Deck({device, views: new OrthographicView(), layers: [render(false)]});
+// Switch modes with deck.setProps({layers: [render(useCPU)]}).
 ```
 
-The example assumes untransformed Cartesian positions. Other coordinate systems require
-matching projection in `getBin`. The adapter does not run shader extensions or recreate
-original JavaScript objects. Keep it stable across layer updates; the layer owns and destroys
-it. Create a new adapter when switching back after removing it. Call `setNeedsUpdate()` when
-modifying input buffer contents in place. Include copy latency when comparing end-to-end
-performance; CPU aggregation alone and GPU aggregation alone measure different workloads.
+Limitations:
+
+- `getBin` receives untransformed positions. Project other coordinate systems in `getBin`.
+- Layer extensions do not apply. Picking returns bins, not original JavaScript objects.
+- The layer destroys removed adapters. Create a new one for each switch to CPU.
+- After writing to a buffer in place, call the adapter's `setNeedsUpdate()`.
+- CPU timings include readback. Compare end-to-end frame times.

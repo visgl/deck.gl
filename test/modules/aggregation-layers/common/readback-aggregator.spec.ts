@@ -67,23 +67,24 @@ test('Readback aggregation preserves strided columns, prefixes, and ownership', 
       expect(aggregator.binCount).toBe(count ? 1 : 0);
       if (count) expect(aggregator.getBin(0)!.value).toEqual([count === 1 ? 2 : 5]);
     }
-    const layerAggregator = new ReadbackAggregator({
-      dimensions: 2,
-      weightAttributes: ['colorWeights', 'elevationWeights'],
-      getBin: {
-        sources: ['positions'],
-        getValue: ({positions}, index, {cellSizeCommon, cellOriginCommon}) =>
-          positions
-            .slice(0, 2)
-            .map((value, axis) =>
-              Math.floor((value - cellOriginCommon[axis]) / cellSizeCommon[axis])
-            )
-      },
-      getValue: [
-        {sources: ['colorWeights'], getValue: ({colorWeights}) => colorWeights},
-        {sources: ['elevationWeights'], getValue: ({elevationWeights}) => elevationWeights}
-      ]
-    });
+    const createLayerAggregator = () =>
+      new ReadbackAggregator({
+        dimensions: 2,
+        weightAttributes: ['colorWeights', 'elevationWeights'],
+        getBin: {
+          sources: ['positions'],
+          getValue: ({positions}, index, {cellSizeCommon, cellOriginCommon}) =>
+            positions
+              .slice(0, 2)
+              .map((value, axis) =>
+                Math.floor((value - cellOriginCommon[axis]) / cellSizeCommon[axis])
+              )
+        },
+        getValue: [
+          {sources: ['colorWeights'], getValue: ({colorWeights}) => colorWeights},
+          {sources: ['elevationWeights'], getValue: ({elevationWeights}) => elevationWeights}
+        ]
+      });
     await testLayerAsync({
       Layer: GridLayer,
       device,
@@ -95,26 +96,26 @@ test('Readback aggregation preserves strided columns, prefixes, and ownership', 
       onError: error => {
         throw error;
       },
-      testCases: [
-        {
-          props: {
-            positions,
-            weights: [weight, weight],
-            dataBounds: [
-              [0, 0],
-              [1, 0]
-            ],
-            cellSize: 10,
-            aggregator: layerAggregator,
-            pickable: true
-          },
-          async onAfterUpdate({layer}) {
-            await vi.waitFor(() => expect(layer.state.aggregator.isLoaded).toBe(true));
-            expect(layer.state.aggregator.getBin(0)).toMatchObject({value: [5, 5], count: 2});
-            expect(layer.state.aggregator.getResultDomain(0)).toEqual([5, 5]);
-          }
+      testCases: [createLayerAggregator(), null, createLayerAggregator()].map(layerAggregator => ({
+        props: {
+          positions,
+          weights: [weight, weight],
+          dataBounds: [
+            [0, 0],
+            [1, 0]
+          ],
+          cellSize: 10,
+          colorDomain: [0, 10],
+          elevationDomain: [0, 10],
+          aggregator: layerAggregator,
+          pickable: true
+        },
+        async onAfterUpdate({layer}) {
+          await vi.waitFor(() => expect(layer.state.aggregator.isLoaded).toBe(true));
+          expect(layer.state.aggregator.getBin(0)).toMatchObject({value: [5, 5], count: 2});
+          expect(layer.state.aggregator.getResultDomain(0)).toEqual([5, 5]);
         }
-      ]
+      }))
     });
     const snapshot = await buffer.readAsync();
     const read = vi.spyOn(buffer, 'readAsync');
@@ -172,6 +173,7 @@ test('Readback aggregation preserves strided columns, prefixes, and ownership', 
     read.mockRestore();
   } finally {
     aggregator.destroy();
+    expect(() => aggregator.update()).toThrow(/destroyed/);
     expect(buffer.destroyed).toBe(false);
     positions.destroy();
     weight.destroy();
