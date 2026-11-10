@@ -334,8 +334,12 @@ new ScreenGridLayer({
 The layer initializes and destroys the aggregator. Create a new instance when
 switching back to it after replacing or removing the layer. Its output stays in
 GPUVectors; automatic domains and picking request asynchronous metadata snapshots.
-It requires a WebGPU device and does not yet support shader extensions. Borrowed
-position vectors must already use the custom view coordinate system; accessor-generated
+Input shader extensions, including `DataFilterExtension`, `ClipExtension`, and
+`BrushingExtension`, run as deck-specific graph operations before grouped reduction.
+Their selection masks and modified weights stay on the GPU. Extensions currently
+use accessor-generated attributes; borrowed GPUVector inputs require no extensions.
+
+It requires a WebGPU device. Borrowed position vectors must already use the custom view coordinate system; accessor-generated
 positions can use the layer's ordinary CPU preprojection. Weights must be finite. Omitting
 `aggregator` selects the existing default implementation.
 
@@ -345,3 +349,10 @@ shader extensions when the layer adopts them. Set `requiresProjectedPositions` t
 
 Aggregators can call the supplied `onNeedsRedraw` callback to request another draw,
 for example when retrying an asynchronous metadata copy.
+
+
+Custom aggregators can implement `setShaderContext(context)` to receive the layer's
+shader plugins and `getAttributeBindings()` callback after initialization and when
+extensions change. The callback resolves current GPU attributes and buffer layouts
+from the owning layer. Aggregators borrow these bindings and must release their own
+compiled shader resources when the context changes or the aggregator is destroyed.

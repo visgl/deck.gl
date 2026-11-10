@@ -26,6 +26,7 @@ export type {
   Aggregator,
   AggregationOperation,
   AggregationProps,
+  AggregationShaderContext,
   WebGLAggregatorProps,
   CPUAggregatorProps,
   ReadbackAggregatorProps

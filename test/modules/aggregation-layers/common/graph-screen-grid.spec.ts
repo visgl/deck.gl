@@ -326,37 +326,6 @@ test('Graph aggregator rejects unsupported devices and destroyed reuse', () => {
   expect(() => aggregator.initialize({type: 'webgpu'} as any)).toThrow('has been destroyed');
 });
 
-test('Graph aggregation rejects shader extensions when adopted by a layer', async ({skip}) => {
-  const device = await getWebGPUTestDevice();
-  if (!device) return skip();
-  const {LayerManager} = await import('@deck.gl/core');
-  const {ScreenGridLayer} = await import('@deck.gl/aggregation-layers');
-  const {DataFilterExtension} = await import('@deck.gl/extensions');
-  const errors: Error[] = [];
-  const manager = new LayerManager(device, {
-    viewport: new OrthographicView().makeViewport({
-      width: 100,
-      height: 100,
-      viewState: {target: [0, 0, 0], zoom: 0}
-    })
-  });
-  try {
-    manager.setProps({onError: error => errors.push(error)});
-    manager.setLayers([
-      new ScreenGridLayer({
-        data: [],
-        aggregator: new GraphScreenGridAggregator(),
-        extensions: [new DataFilterExtension()]
-      })
-    ]);
-    expect(errors.some(error => error.message.includes('does not support shader extensions'))).toBe(
-      true
-    );
-  } finally {
-    manager.finalize();
-  }
-});
-
 test('Graph aggregation rejects borrowed positions that require CPU preprojection', async ({
   skip
 }) => {

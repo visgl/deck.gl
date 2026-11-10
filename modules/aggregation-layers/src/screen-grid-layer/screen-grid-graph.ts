@@ -2,6 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {AggregationShaderContext} from '../common/aggregator/aggregator';
+import {
+  DeckAggregationInputsOperation,
+  deckAggregationInputsLowering,
+  getAggregationAttributeBuffers,
+  type DeckAggregationInputs
+} from '../common/aggregator/deck-graph/deck-aggregation-inputs-operation';
 import {Buffer, type Device, type CommandEncoder} from '@luma.gl/core';
 import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {Computation} from '@luma.gl/engine';
@@ -13,17 +20,19 @@ import {
   aggregationOperationLowerings
 } from '../common/aggregator/gpu-graph/aggregation-operations';
 
-const assignmentSource = (binning: string) => `
+const assignmentSource = (binning: string, filtering: boolean) => `
 @group(0) @binding(auto) var<storage, read> positions: array<f32>;
 @group(0) @binding(auto) var<storage, read> positionsLow: array<f32>;
 @group(0) @binding(auto) var<storage, read> weights: array<f32>;
 @group(0) @binding(auto) var<storage, read_write> keys: array<u32>;
 @group(0) @binding(auto) var<storage, read_write> contributions: array<f32>;
+${filtering ? '@group(0) @binding(auto) var<storage, read_write> selection: array<u32>;' : ''}
 struct BinAssignment { id: vec2i, valid: bool };
 ${binning}
 @compute @workgroup_size(64) fn main(@builtin(global_invocation_id) id: vec3u) {
   let index = id.x + id.y * aggregation.dispatchWidth;
   if (index >= aggregation.counts.x) { return; }
+  ${filtering ? 'selection[index] = 0u;' : ''}
   let p = aggregation.positionLayout.x + index * aggregation.positionLayout.y;
   var position = vec3f(positions[p], positions[p + 1u], 0.0);
   if (aggregation.positionLayout.z == 3u) { position.z = positions[p + 2u]; }
@@ -53,22 +62,23 @@ struct Bin { count: u32, value: u32 };
 
 /** ScreenGrid's projection/packing adapter around generic graph reductions. @internal */
 export class ScreenGridGraph {
-  private readonly assign: Computation;
+  private assign: Computation;
   private readonly pack: Computation;
   private compiled?: CompiledGPUCommandGraph;
+  private shaderContext?: AggregationShaderContext;
+  private shaderModuleProps: Record<string, any> = {};
+  private extensionInputs?: DeckAggregationInputs;
+  private attributeBuffers: Buffer[] = [];
+  private layoutSignature = '';
   private shape = '';
   private buffers: Record<string, Buffer> = {};
 
   constructor(
     private readonly device: Device,
-    binning: string,
-    modules: [ShaderModule, ShaderModule, ShaderModule]
+    private readonly binning: string,
+    private readonly modules: [ShaderModule, ShaderModule, ShaderModule]
   ) {
-    this.assign = new Computation(device, {
-      id: 'aggregation-assign',
-      source: assignmentSource(binning),
-      modules
-    });
+    this.assign = this.createAssignment(false);
     this.pack = new Computation(device, {
       id: 'aggregation-pack',
       source: packSource,
@@ -76,8 +86,30 @@ export class ScreenGridGraph {
     });
   }
 
+  setShaderContext(context: AggregationShaderContext): void {
+    const wasFiltering = Boolean(this.shaderContext?.shaders.plugins?.length);
+    const filtering = Boolean(context.shaders.plugins?.length);
+    this.destroyGraph();
+    this.shaderContext = context;
+    if (wasFiltering !== filtering) {
+      this.assign.destroy();
+      this.assign = this.createAssignment(filtering);
+      this.setShaderModuleProps(this.shaderModuleProps);
+    }
+  }
+
+  private createAssignment(filtering: boolean): Computation {
+    return new Computation(this.device, {
+      id: 'aggregation-assign',
+      source: assignmentSource(this.binning, filtering),
+      modules: this.modules
+    });
+  }
+
   setShaderModuleProps(props: Record<string, any>): void {
-    this.assign.shaderInputs.setProps(props);
+    Object.assign(this.shaderModuleProps, props);
+    if (props.project) this.assign.shaderInputs.setProps({project: props.project});
+    if (props.binOptions) this.assign.shaderInputs.setProps({binOptions: props.binOptions});
   }
 
   encode(
@@ -88,32 +120,60 @@ export class ScreenGridGraph {
     const [pointCount, binCount] = settings.counts;
     const operation = settings.operations[0];
     const shape = `${pointCount}/${binCount}/${operation}`;
-    if (shape !== this.shape) {
+    const context = this.shaderContext?.shaders.plugins?.length ? this.shaderContext : undefined;
+    const attributes = context?.getAttributeBindings();
+    const buffers = attributes ? getAggregationAttributeBuffers(attributes.attributes) : [];
+    const layoutSignature = JSON.stringify(attributes?.bufferLayouts);
+    if (
+      shape !== this.shape ||
+      layoutSignature !== this.layoutSignature ||
+      buffers.length !== this.attributeBuffers.length ||
+      buffers.some((buffer, i) => buffer !== this.attributeBuffers[i])
+    ) {
       this.destroyGraph();
       const program = new GPUGraph({id: 'screen-grid-aggregation'});
       for (const [name, format, length] of [
         ['keys', 'uint32', pointCount],
         ['contributions', 'float32', pointCount],
         ['counts', 'uint32', binCount],
-        ['statistics', 'float32', binCount]
+        ['statistics', 'float32', binCount],
+        ...(context ? [['selection', 'uint32', pointCount] as const] : [])
       ] as const) {
         const buffer = this.device.createBuffer({
           byteLength: Math.max(4, length * 4),
           usage: Buffer.STORAGE | Buffer.COPY_DST
         });
         this.buffers[name] = buffer;
-        if (name === 'keys' || name === 'contributions')
+        if (
+          name === 'keys' ||
+          ((name === 'contributions' || name === 'selection') && (!context || !pointCount))
+        )
           program.addInput(name, gpuGraph.vector(format, {length}));
         else program.addState(name, gpuGraph.vector(format, {length}));
       }
+      if (context && attributes && pointCount) {
+        this.extensionInputs = {
+          ...attributes,
+          context,
+          shaderModuleProps: this.shaderModuleProps,
+          settings
+        };
+        program.add(new DeckAggregationInputsOperation(this.extensionInputs));
+      }
       program.add(
-        new GPUGroupAggregationOperation({keys: 'keys', output: 'counts', operation: 'count'})
+        new GPUGroupAggregationOperation({
+          keys: 'keys',
+          output: 'counts',
+          operation: 'count',
+          mask: context ? 'selection' : undefined
+        })
       );
       if (operation !== 4)
         program.add(
           new GPUGroupAggregationOperation({
             keys: 'keys',
             values: 'contributions',
+            mask: context ? 'selection' : undefined,
             output: 'statistics',
             // Reuse the shared row counts and finalizer for MEAN.
             operation: (['sum', 'sum', 'min', 'max'] as const)[operation]
@@ -128,24 +188,34 @@ export class ScreenGridGraph {
             name,
             buffer,
             format:
-              name === 'keys' || name === 'counts' ? ('uint32' as const) : ('float32' as const),
-            length: name === 'keys' || name === 'contributions' ? pointCount : binCount
+              name === 'keys' || name === 'counts' || name === 'selection'
+                ? ('uint32' as const)
+                : ('float32' as const),
+            length:
+              name === 'keys' || name === 'contributions' || name === 'selection'
+                ? pointCount
+                : binCount
           })
         ])
       );
-      const compilation = new GPUGraphCompiler(this.device, aggregationOperationLowerings).compile(
-        program,
-        {vectors}
-      );
+      const compilation = new GPUGraphCompiler(this.device, [
+        ...aggregationOperationLowerings,
+        deckAggregationInputsLowering
+      ]).compile(program, {vectors});
       this.compiled = compilation.graph.compile();
       this.shape = shape;
+      this.attributeBuffers = buffers;
+      this.layoutSignature = layoutSignature;
     }
+    if (this.extensionInputs && attributes)
+      Object.assign(this.extensionInputs, attributes, {settings});
     this.assign.setBindings({
       positions: bindings.positions,
       positionsLow: bindings.positionsLow,
       weights: bindings.weights,
       keys: this.buffers.keys,
-      contributions: this.buffers.contributions
+      contributions: this.buffers.contributions,
+      ...(context ? {selection: this.buffers.selection} : {})
     });
     this.dispatch(this.assign, encoder, settings, pointCount);
     this.compiled!.encode(encoder, {parameters: undefined});
@@ -179,6 +249,9 @@ export class ScreenGridGraph {
     for (const buffer of Object.values(this.buffers)) buffer.destroy();
     this.buffers = {};
     this.shape = '';
+    this.extensionInputs = undefined;
+    this.attributeBuffers = [];
+    this.layoutSignature = '';
   }
 
   destroy(): void {

@@ -207,6 +207,18 @@ export default abstract class AggregationLayer<
         // Extension changes refresh the supplied instance without destroying it.
         aggregator.setNeedsUpdate();
       }
+      aggregator.setShaderContext?.({
+        shaders: this.getAggregationShaders(),
+        getAttributeBindings: () => {
+          const manager = this.getCurrentLayer()!.getAttributeManager()!;
+          return {
+            attributes: manager.getGPUVectors(),
+            bufferLayouts: manager
+              .getBufferLayouts()
+              .map(layout => ({...layout, stepMode: 'instance' as const}))
+          };
+        }
+      });
       aggregator.setProps({
         onError: error => this.getCurrentLayer()?.raiseError(error, 'aggregation'),
         onNeedsRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),

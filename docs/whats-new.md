@@ -8,7 +8,8 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 [`GraphScreenGridAggregator`](./api-reference/aggregation-layers/aggregator.md#graphscreengridaggregator)
 can be supplied to `ScreenGridLayer` through its `aggregator` prop to compose luma
-graph operations while rendering directly from GPUVector outputs.
+graph operations while rendering directly from GPUVector outputs. Input shader
+extensions evaluate selection masks and modified weights before grouped reduction.
 
 ### Async CPU aggregation of GPU inputs
 

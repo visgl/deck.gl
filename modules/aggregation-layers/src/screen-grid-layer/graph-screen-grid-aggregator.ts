@@ -2,11 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {project32} from '@deck.gl/core';
+import {snapshotUniformProps} from '../common/utils/prop-utils';
+import {AggregationInputsNotReady} from '../common/aggregator/deck-graph/deck-aggregation-inputs-operation';
+import {project32, _deepEqual as deepEqual} from '@deck.gl/core';
 import {Buffer, type Device} from '@luma.gl/core';
 import {Computation} from '@luma.gl/engine';
 import {GPUVector} from '@luma.gl/graph/gpu-data';
-import type {Aggregator, AggregationProps} from '../common/aggregator/aggregator';
+import type {
+  Aggregator,
+  AggregationProps,
+  AggregationShaderContext
+} from '../common/aggregator/aggregator';
 import {AggregationColumnPreparation} from '../common/aggregator/webgpu-aggregator/column-preparation';
 import {ScreenGridGraph} from './screen-grid-graph';
 import {aggregationUniforms} from '../common/aggregator/webgpu-aggregator/aggregation-uniforms';
@@ -23,11 +29,11 @@ const screenGridBinning = `fn getBin(position: vec3f, low: vec3f) -> BinAssignme
 
 /** Opt-in ScreenGridLayer aggregation using GPU graph operations.
  * Pass an instance as the layer's `aggregator` prop. The layer initializes and destroys
- * it; input vectors remain borrowed. Shader extensions are not supported.
+ * it; input vectors remain borrowed. Input shader hooks run as deck graph operations.
  */
 export class GraphScreenGridAggregator implements Aggregator {
-  /** Shader extensions are not supported by this implementation. */
-  readonly supportsExtensions = false;
+  /** Input shader extensions are evaluated before grouped reduction. */
+  readonly supportsExtensions = true;
   /** Borrowed positions cannot be converted on the CPU by this graph implementation. */
   readonly requiresProjectedPositions = true;
   /** Number of dense screen cells in the current grid. */
@@ -37,6 +43,8 @@ export class GraphScreenGridAggregator implements Aggregator {
     return !this.dirty && (!this.props.readback || this.snapshot !== null);
   }
   private props: AggregationProps = {pointCount: 0, attributes: {}, operations: [], binOptions: {}};
+  private shaderContext?: AggregationShaderContext;
+  private extensionUniformProps: Record<string, unknown> = {};
   private dirty = true;
   private revision = 0;
   private metadataRetryRevision = -1;
@@ -82,9 +90,27 @@ export class GraphScreenGridAggregator implements Aggregator {
     });
   }
 
+  /** Receive layer-owned shaders and attribute bindings without coupling the graph executor to deck. */
+  setShaderContext(context: AggregationShaderContext): void {
+    this.shaderContext = context;
+    this.extensionUniformProps = {};
+    this.graph.setShaderContext(context);
+    this.setNeedsUpdate();
+  }
+
   /** Accept ScreenGrid inputs and invalidate outputs when those inputs change. */
   setProps(props: Partial<AggregationProps>): void {
     if (this.destroyed) throw new Error('GraphScreenGridAggregator has been destroyed');
+    for (const plugin of this.shaderContext?.shaders.plugins || []) {
+      const name = plugin.module?.name;
+      if (name && props.shaderModuleProps && name in props.shaderModuleProps) {
+        const next = snapshotUniformProps(props.shaderModuleProps[name]);
+        if (!deepEqual(next, this.extensionUniformProps[name], 4)) {
+          this.extensionUniformProps[name] = next;
+          this.setNeedsUpdate();
+        }
+      }
+    }
     for (const key in props) {
       if (key === 'attributes') {
         // Attribute objects are mutable; only the changed-attribute map signals new data.
@@ -102,8 +128,7 @@ export class GraphScreenGridAggregator implements Aggregator {
     if (props.attributes)
       props = {...props, attributes: {...this.props.attributes, ...props.attributes}};
     Object.assign(this.props, props);
-    if (props.shaderModuleProps?.project)
-      this.graph.setShaderModuleProps({project: props.shaderModuleProps.project});
+    if (props.shaderModuleProps) this.graph.setShaderModuleProps(props.shaderModuleProps);
     if (props.binOptions) this.graph.setShaderModuleProps({binOptions: props.binOptions});
     const range = this.props.binIdRange;
     if (range) {
@@ -158,7 +183,7 @@ export class GraphScreenGridAggregator implements Aggregator {
   preDraw(): void {
     if (!this.dirty) return;
     this.update();
-    if (this.binCount) this.run();
+    if (this.binCount && !this.run()) return;
     this.dirty = false;
     if (this.props.readback && this.binCount) {
       void this.readMetadata(this.revision);
@@ -176,7 +201,7 @@ export class GraphScreenGridAggregator implements Aggregator {
     }
   }
 
-  private run(): void {
+  private run(): boolean {
     // Use a separate encoder: the cell render pass may already be open.
     const encoder = this.device.createCommandEncoder();
     const columns = new AggregationColumnPreparation(this.device, encoder, this.zero);
@@ -226,6 +251,15 @@ export class GraphScreenGridAggregator implements Aggregator {
       this.finalizeBins.dispatch(pass, width, Math.ceil(groups / width));
       pass.end();
       this.device.submit(encoder.finish());
+      return true;
+    } catch (error) {
+      if (error instanceof AggregationInputsNotReady) {
+        // Keep model uploads encoded by predraw(), while leaving public outputs untouched.
+        this.device.submit(encoder.finish());
+        this.props.onNeedsRedraw?.();
+        return false;
+      }
+      throw error;
     } finally {
       encoder.destroy();
       columns.destroy();

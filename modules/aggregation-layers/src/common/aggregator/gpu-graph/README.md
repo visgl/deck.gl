@@ -17,4 +17,7 @@ ScreenGrid's projection and bin assignment remain in `screen-grid-layer/screen-g
 `GraphScreenGridAggregator` owns its output vectors and lifecycle. The graph path uses
 GPU-resident keys and contributions and returns the existing GPUVector results.
 It is selected explicitly through the layer's `aggregator` prop. The default backend is unchanged.
-The graph aggregator does not yet support shader extensions.
+Input shader extensions are evaluated by the deck-specific
+`deck-graph/deck-aggregation-inputs-operation.ts` operation. That operation writes a
+selection mask and modified weights; the generic group operations consume them
+without knowing about deck shader plugins.

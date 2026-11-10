@@ -3,8 +3,20 @@
 // Copyright (c) vis.gl contributors
 
 import type {Attribute, BinaryAttribute} from '@deck.gl/core';
-import type {Device} from '@luma.gl/core';
-import type {GPUVector} from '@luma.gl/graph/gpu-data';
+import type {BufferLayout, Device} from '@luma.gl/core';
+import type {GPUConstant, GPUVector} from '@luma.gl/graph/gpu-data';
+import type {ModelProps} from '@luma.gl/engine';
+
+/** Layer-owned shader hooks and current attribute bindings for an aggregator. */
+export type AggregationShaderContext = {
+  /** Input shader plugins and their module dependencies. */
+  shaders: Pick<ModelProps, 'plugins' | 'shaderAssembler' | 'modules' | 'defines'>;
+  /** Resolve bindings from the current layer after attribute updates. */
+  getAttributeBindings: () => {
+    attributes: Record<string, GPUVector | GPUConstant>;
+    bufferLayouts: BufferLayout[];
+  };
+};
 
 /** Borrowed aggregation output; vectors use single-chunk float32 scalar/XY storage. */
 export type AggregationResult = BinaryAttribute | GPUVector;
@@ -81,6 +93,8 @@ export interface Aggregator {
   readonly isLoaded?: boolean;
   /** Called once when the layer adopts this instance, before setProps. */
   initialize?(device: Device): void;
+  /** Called after initialization and when layer extensions change. Bindings remain layer-owned. */
+  setShaderContext?(context: AggregationShaderContext): void;
 
   /** Update aggregation props */
   setProps(props: Partial<AggregationProps>): void;

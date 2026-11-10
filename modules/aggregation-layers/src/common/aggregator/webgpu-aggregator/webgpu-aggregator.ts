@@ -5,6 +5,7 @@
 import {project32, _GPUVectorModel as GPUVectorModel, _deepEqual as deepEqual} from '@deck.gl/core';
 import {Buffer, type Device, type Texture, type Framebuffer} from '@luma.gl/core';
 import {aggregationUniforms} from './aggregation-uniforms';
+import {snapshotUniformProps} from '../../utils/prop-utils';
 import {getFilterSource} from './filter.wgsl';
 import {Computation, type ModelProps} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shaders';
@@ -22,21 +23,6 @@ export type WebGPUAggregatorOptions = {
   binning: string;
   binOptions: ShaderModule;
 };
-
-// Keep plain uniform values by value, but retain resource identity and revision.
-function snapshotUniformProps(value: any, depth = 4): any {
-  if (!value || typeof value !== 'object' || depth === 0) return value;
-  if (Array.isArray(value) || ArrayBuffer.isView(value))
-    return Array.from(value as ArrayLike<unknown>);
-  if (Object.getPrototypeOf(value) !== Object.prototype) {
-    return typeof value.updateTimestamp === 'number'
-      ? {resource: value, revision: value.updateTimestamp}
-      : value;
-  }
-  return Object.fromEntries(
-    Object.entries(value).map(([key, entry]) => [key, snapshotUniformProps(entry, depth - 1)])
-  );
-}
 
 /** Shared dense-bin compute reduction. Layer adapters supply only bin assignment. @internal */
 export class WebGPUAggregator implements Aggregator {
