@@ -75,6 +75,8 @@ export type AggregatedBin = {
 export interface Aggregator {
   /** Set to false to reject layer shader extensions. Unspecified preserves existing behavior. */
   readonly supportsExtensions?: boolean;
+  /** Set to true if borrowed position vectors must already use the view coordinate system. */
+  readonly requiresProjectedPositions?: boolean;
   /** Whether output and requested asynchronous metadata are ready. */
   readonly isLoaded?: boolean;
   /** Called once when the layer adopts this instance, before setProps. */

@@ -28,6 +28,8 @@ const screenGridBinning = `fn getBin(position: vec3f, low: vec3f) -> BinAssignme
 export class GraphScreenGridAggregator implements Aggregator {
   /** Shader extensions are not supported by this implementation. */
   readonly supportsExtensions = false;
+  /** Borrowed positions cannot be converted on the CPU by this graph implementation. */
+  readonly requiresProjectedPositions = true;
   /** Number of dense screen cells in the current grid. */
   binCount = 0;
   /** Whether requested output metadata is ready. */

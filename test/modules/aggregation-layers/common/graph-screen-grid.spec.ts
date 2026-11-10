@@ -8,6 +8,7 @@ import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
 import {OrthographicView} from '@deck.gl/core';
 import {GraphScreenGridAggregator} from '@deck.gl/aggregation-layers';
+import {createTestViewport} from '../../core/viewports/test-crs';
 import {WebGPUScreenGridAggregator} from '../../../../modules/aggregation-layers/src/screen-grid-layer/webgpu-screen-grid-aggregator';
 
 test('Graph ScreenGrid reductions stay on GPU and recover from empty input', async ({skip}) => {
@@ -353,5 +354,71 @@ test('Graph aggregation rejects shader extensions when adopted by a layer', asyn
     );
   } finally {
     manager.finalize();
+  }
+});
+
+test('Graph aggregation rejects borrowed positions that require CPU preprojection', async ({
+  skip
+}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  const {LayerManager} = await import('@deck.gl/core');
+  const {ScreenGridLayer} = await import('@deck.gl/aggregation-layers');
+  const buffer = device.createBuffer({data: new Float32Array([1, 2, 0, 1]), usage: Buffer.STORAGE});
+  const positions = new GPUVector({
+    type: 'buffer',
+    name: 'positions',
+    format: 'float32x3',
+    length: 1,
+    buffer,
+    ownsBuffer: false
+  });
+  const weights = new GPUVector({
+    type: 'buffer',
+    name: 'weights',
+    format: 'float32',
+    byteOffset: 12,
+    length: 1,
+    buffer,
+    ownsBuffer: false
+  });
+  const viewport = createTestViewport({
+    width: 100,
+    height: 100,
+    converter: {forward: p => p.map(v => v * 2), inverse: p => p.map(v => v / 2)}
+  });
+  try {
+    for (const coordinateSystem of ['default', 'cartesian'] as const) {
+      const errors: Error[] = [];
+      const manager = new LayerManager(device, {viewport});
+      const layer = new ScreenGridLayer({
+        data: [],
+        positions,
+        weights: [weights],
+        colorDomain: [0, 10],
+        coordinateSystem,
+        aggregator: new GraphScreenGridAggregator()
+      });
+      try {
+        manager.setProps({onError: error => errors.push(error)});
+        manager.setLayers([layer]);
+        if (coordinateSystem === 'default') {
+          expect(layer.state.preproject).toBeTypeOf('function');
+          expect(
+            errors.some(error => error.message.includes('custom view coordinate system'))
+          ).toBe(true);
+        } else {
+          expect(layer.state.preproject).toBeNull();
+          expect(errors).toEqual([]);
+        }
+      } finally {
+        manager.finalize();
+      }
+      expect(buffer.destroyed).toBe(false);
+    }
+  } finally {
+    positions.destroy();
+    weights.destroy();
+    buffer.destroy();
   }
 });

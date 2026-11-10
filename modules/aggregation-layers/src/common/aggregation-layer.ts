@@ -61,6 +61,9 @@ export default abstract class AggregationLayer<
       return;
     }
     const {positions, weights, aggregator, extensions} = this.props;
+    if (aggregator?.requiresProjectedPositions && this.state.preproject) {
+      throw new Error('GPU aggregation positions must use the custom view coordinate system');
+    }
     if ((!aggregator && this.state.aggregatorType !== 'webgpu') || extensions.length || !weights) {
       throw new Error('GPU columns require a compatible aggregator, weights, and no extensions');
     }

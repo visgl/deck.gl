@@ -4,7 +4,7 @@ These internal semantic operations use only luma APIs. They are kept here until 
 can be upstreamed to `@luma.gl/graph`:
 
 - `GPUGroupAggregationOperation`: dense unsigned keys, optional row mask, and
-  count/sum/min/max/mean statistics. Weighted inputs use float32.
+  count/sum/min/max/mean statistics. Weighted inputs use finite float32 contributions.
 - `GPUReductionOperation`: float32 sum/min/max/extent, with an optional row mask.
 - `aggregationOperationLowerings`: register these with `GPUGraphCompiler`.
 

@@ -334,11 +334,14 @@ new ScreenGridLayer({
 The layer initializes and destroys the aggregator. Create a new instance when
 switching back to it after replacing or removing the layer. Its output stays in
 GPUVectors; automatic domains and picking request asynchronous metadata snapshots.
-It requires a WebGPU device and does not yet support shader extensions. Omitting
+It requires a WebGPU device and does not yet support shader extensions. Borrowed
+position vectors must already use the custom view coordinate system; accessor-generated
+positions can use the layer's ordinary CPU preprojection. Weights must be finite. Omitting
 `aggregator` selects the existing default implementation.
 
 Custom aggregators can set `supportsExtensions` to `false` to reject unsupported
-shader extensions when the layer adopts them.
+shader extensions when the layer adopts them. Set `requiresProjectedPositions` to
+`true` when borrowed position vectors must already use the view coordinate system.
 
 Aggregators can call the supplied `onNeedsRedraw` callback to request another draw,
 for example when retrying an asynchronous metadata copy.
