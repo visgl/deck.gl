@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {DataType} from 'apache-arrow';
+import {isNumericArrowType} from '@luma.gl/graph/arrow';
 import type {GPUVectorFormat} from '@luma.gl/graph/gpu-data';
 import type {ArrowConverterOptions} from './arrow-converter';
 
@@ -22,7 +23,7 @@ export function getArrowConversionFormat(
   ) {
     throw new Error('Arrow positions must be FixedSizeList[2] or FixedSizeList[3]');
   }
-  if (semantic === 'scalar' && !DataType.isInt(type) && !DataType.isFloat(type)) {
+  if (semantic === 'scalar' && !isNumericArrowType(type)) {
     throw new Error('Arrow scalar input must be numeric');
   }
   let format = conversion.format;
@@ -44,8 +45,7 @@ export function getArrowConversionFormat(
   const list = DataType.isFixedSizeList(type);
   const sourceWidth = list ? type.listSize : 1;
   const childType = list ? type.children[0].type : type;
-  if (!DataType.isInt(childType) && !DataType.isFloat(childType))
-    throw new Error('Arrow input must contain numeric values');
+  if (!isNumericArrowType(childType)) throw new Error('Arrow input must contain numeric values');
   if (
     (!color && !conversion.transform && sourceWidth > width) ||
     (color && ![3, 4].includes(sourceWidth))
