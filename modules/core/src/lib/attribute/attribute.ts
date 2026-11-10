@@ -138,6 +138,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return this.state.layoutChanged;
   }
 
+  /** Requests a new model buffer layout, e.g. when this attribute replaces a transition buffer */
+  setLayoutChanged(): void {
+    this.state.layoutChanged = true;
+  }
+
   setAccessor(accessor: DataColumnSettings<AttributeOptions>) {
     this.state.layoutChanged ||= !bufferLayoutEqual(accessor, this.getAccessor());
     super.setAccessor(accessor);
