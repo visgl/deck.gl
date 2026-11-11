@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {isArrowTable} from './is-arrow-table';
+import {isArrowTable} from '../arrow/upstream-math/is-arrow-table';
 
 const ERR_NOT_OBJECT = 'count(): argument not an object';
 const ERR_NOT_CONTAINER = 'count(): argument not a container';

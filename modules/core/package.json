@@ -35,13 +35,13 @@
       "require": "./dist/index.cjs"
     },
     "./arrow": {
-      "types": "./dist/lib/luma-upstream/arrow-converter.d.ts",
+      "types": "./dist/arrow/upstream-luma/arrow-converter.d.ts",
       "visgl:webgl-only": {
-        "import": "./dist.webgl-only/lib/luma-upstream/arrow-converter.js",
-        "require": "./dist.webgl-only/lib/luma-upstream/arrow-converter.cjs"
+        "import": "./dist.webgl-only/arrow/upstream-luma/arrow-converter.js",
+        "require": "./dist.webgl-only/arrow/upstream-luma/arrow-converter.cjs"
       },
-      "import": "./dist/lib/luma-upstream/arrow-converter.js",
-      "require": "./dist/lib/luma-upstream/arrow-converter.cjs"
+      "import": "./dist/arrow/upstream-luma/arrow-converter.js",
+      "require": "./dist/arrow/upstream-luma/arrow-converter.cjs"
     }
   },
   "files": [
