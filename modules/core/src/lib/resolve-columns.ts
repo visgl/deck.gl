@@ -8,7 +8,7 @@ import type {ColumnDefinition} from './layer-columns';
 import type {ColumnSource} from './luma-upstream/arrow-converter';
 
 /** Public column names and whether each input is exposed as a prop. */
-type ColumnDefinitions = Readonly<Record<string, Partial<ColumnDefinition>>>;
+export type ColumnDefinitions = Readonly<Record<string, Partial<ColumnDefinition>>>;
 
 /**
  * Selects explicit inputs first, then compatible fields from an opted-in table.
