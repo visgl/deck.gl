@@ -5,7 +5,9 @@
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/core/webgl';
+import {isArrowTable} from '../utils/is-arrow-table';
 import {resolveColumns} from './resolve-columns';
+import type {ColumnDefinitions} from './layer-columns';
 import AttributeManager from './attribute/attribute-manager';
 import GPUVectorModel from './luma-upstream/gpu-vector-model';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -582,15 +584,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // / LIFECYCLE METHODS - overridden by the layer subclasses
 
   /**
-   * Returns the column props set on this layer, keyed by column name.
-   * Null or undefined props and definitions with `prop: false` are left out,
-   * so those columns use binary attributes or accessors.
+   * Returns selected column inputs, optionally including compatible fields from loaded Arrow data.
+   * Explicit props take precedence. Unselected columns use binary attributes or accessors.
    * Selected inputs are returned without conversion or ownership changes.
    */
   protected resolveColumns(
-    definitions: Readonly<Record<string, {prop?: boolean}>>
+    definitions: ColumnDefinitions,
+    useTable = false
   ): Record<string, unknown> {
-    return resolveColumns(this.props, definitions);
+    return resolveColumns(this.props, definitions, useTable);
   }
 
   /** Called once to set up the initial state. Layers can create WebGL resources here. */
@@ -707,6 +709,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // If props.data is an indexable array, get the object
       if (Array.isArray(this.props.data)) {
         info.object = this.props.data[index];
+      } else if (isArrowTable(this.props.data)) {
+        info.object = this.props.data.get(index);
       }
     }
 
@@ -1064,7 +1068,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
      This method may be overriden by layer implementations */
   disablePickingIndex(objectIndex: number) {
     const data = this.props.data as LayerData<any>;
-    if (!('attributes' in data)) {
+    if (!('attributes' in data) || isArrowTable(data)) {
       this._disablePickingIndex(objectIndex);
       return;
     }

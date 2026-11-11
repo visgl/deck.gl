@@ -28,6 +28,9 @@ export type ColumnDefinition = {
   defaultValue?: number;
 };
 
+/** Definitions keyed by public column name, including internal inputs. */
+export type ColumnDefinitions = Readonly<Record<string, Partial<ColumnDefinition>>>;
+
 type PositionOptions = {
   transform?: ((value: number[]) => readonly number[]) | null;
   fp64?: boolean;
@@ -79,7 +82,8 @@ export class LayerColumns {
     private readonly device: Device,
     private readonly definitions: Record<string, ColumnDefinition>,
     private readonly name: string,
-    private readonly useRowIndexes = false
+    private readonly useRowIndexes = false,
+    private readonly useTable = false
   ) {}
 
   /** Supplies shader input layouts while asynchronous conversion has not produced buffers yet. */
@@ -214,7 +218,7 @@ export class LayerColumns {
           }
         }
       };
-      const sources = resolveColumns(props, this.definitions);
+      const sources = resolveColumns(props, this.definitions, this.useTable);
       let length: number | undefined;
       let chunkLengths: number[] | undefined;
       for (const [name, definition] of Object.entries(this.definitions)) {
