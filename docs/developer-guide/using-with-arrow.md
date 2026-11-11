@@ -114,3 +114,34 @@ Column inputs must use the following Arrow types.
 
 Dictionary, string, and variable-size list inputs are unsupported. Null values and invalid
 transformed values raise conversion errors, even when the schema is compatible.
+
+### Selecting fields with a query
+
+ScatterplotLayer can project a loaded Arrow table before resolving column inputs. Use
+`columnsQuery.select` to keep fields by name, rename them, or compute fields with SQL strings or math.gl expression ASTs.
+Use `where` and `limit` to restrict the rows before evaluating expressions.
+
+```ts
+import {sqlParser} from '@deck.gl/core/sql';
+
+new Deck({
+  sqlParser,
+  layers: [
+    new ScatterplotLayer({
+      id: 'points',
+      data: tablePromise,
+      columnsQuery: `SELECT ARRAY[longitude, latitude]::DOUBLE PRECISION[2] AS positions,
+        size AS radii`
+    })
+  ]
+});
+```
+
+The loaded `data` table is the implicit source. `FROM data` is optional.
+
+Column queries require Apache Arrow 21.2 or later with the current loaders.gl evaluator.
+Structured selections can pass expression and predicate ASTs directly. To use strings inside
+a structured selection, provide `sqlParser.parseExpression` for an expression or
+`sqlParser.parsePredicate` for a `where` clause.
+The query runs after `dataTransform`. Accessor fallbacks see the selected fields. Picking returns the original source row,
+including fields omitted by the query. Explicit column props take precedence.

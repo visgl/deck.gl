@@ -16,6 +16,8 @@ import type {Buffer, Parameters} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
 import type {Matrix4Like} from '@math.gl/core';
+import type {ColumnarPredicate, Expression} from '@math.gl/core/expressions';
+import type {SQLQuery} from '@math.gl/core/sql';
 
 /** Arrow table interface accepted by layers without requiring the optional Arrow peer. */
 type ArrowTableData = {
@@ -25,6 +27,31 @@ type ArrowTableData = {
   getChild(name: string): unknown;
   attributes?: never;
   length?: never;
+};
+
+type ArrowTableResult = {readonly shape: 'arrow-table'; readonly data: ArrowTableData};
+
+/** Projects source Arrow fields and SQL expressions for layer column resolution. */
+export type ColumnsQuery = {
+  readonly select: readonly (
+    | string
+    | {readonly column: string; readonly as?: string}
+    | {readonly expression: string | Expression; readonly as: string}
+  )[];
+  /** SQL predicate applied to source rows before evaluating expressions. */
+  readonly where?: string | ColumnarPredicate;
+  /** Maximum number of rows selected after filtering. */
+  readonly limit?: number;
+};
+
+/** Optional SQL parser methods supplied by the application to Deck. */
+export type SQLParser = {
+  /** Parses a SELECT query against the loaded layer table. */
+  parseQuery?: (sql: string) => SQLQuery | ColumnsQuery;
+  /** Parses an SQL string used in a structured column selection. */
+  parseExpression?: (sql: string) => Expression;
+  /** Parses a WHERE string used in a structured column query. */
+  parsePredicate?: (sql: string) => ColumnarPredicate;
 };
 
 export type LayerData<T> =
@@ -110,7 +137,8 @@ export type LayerDataSource<DataType> =
   | LayerData<DataType>
   | string
   | AsyncIterable<DataType[]>
-  | Promise<LayerData<DataType>>
+  | ArrowTableResult
+  | Promise<LayerData<DataType> | ArrowTableResult>
   | null;
 
 /**
@@ -125,6 +153,8 @@ export type LayerProps = {
    * The data to visualize.
    */
   data?: unknown;
+  /** Projects loaded Arrow data into fields used by column-aware layers. */
+  columnsQuery?: ColumnsQuery | string | null;
   /**
    * Callback to determine if two data values are equal.
    */

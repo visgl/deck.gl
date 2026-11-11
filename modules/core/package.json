@@ -34,6 +34,15 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./sql": {
+      "types": "./dist/arrow/upstream-math/sql-parser.d.ts",
+      "visgl:webgl-only": {
+        "import": "./dist.webgl-only/arrow/upstream-math/sql-parser.js",
+        "require": "./dist.webgl-only/arrow/upstream-math/sql-parser.cjs"
+      },
+      "import": "./dist/arrow/upstream-math/sql-parser.js",
+      "require": "./dist/arrow/upstream-math/sql-parser.cjs"
+    },
     "./arrow": {
       "types": "./dist/arrow/upstream-luma/arrow-converter.d.ts",
       "visgl:webgl-only": {
@@ -64,6 +73,7 @@
     "@luma.gl/engine": "10.0.0-alpha.13",
     "@luma.gl/graph": "10.0.0-alpha.13",
     "@luma.gl/shaders": "10.0.0-alpha.13",
+    "@math.gl/arrow": "5.0.0-beta.7",
     "@math.gl/core": "5.0.0-beta.7",
     "@math.gl/earth": "5.0.0-beta.7",
     "@math.gl/geospatial": "5.0.0-beta.7",

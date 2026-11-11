@@ -360,7 +360,15 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       this.state.model?.destroy();
       this.state.model = this._getModel();
     }
-    void this.state.columns!.updateIfNeeded(params, {
+    const data = this.getColumnData();
+    const columnParams =
+      data === params.props.data
+        ? params
+        : {
+            ...params,
+            props: Object.create(params.props, {data: {value: data}})
+          };
+    void this.state.columns!.updateIfNeeded(columnParams, {
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

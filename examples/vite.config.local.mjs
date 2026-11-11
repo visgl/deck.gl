@@ -20,13 +20,20 @@ export default defineConfig(async () => {
   return {
     resolve: {
       alias: [
+        {
+          find: '@deck.gl/core/sql',
+          replacement: join(rootDir, './modules/core/src/arrow/upstream-math/sql-parser.ts')
+        },
         ...Object.entries(aliases).map(([find, replacement]) => ({find, replacement})),
         // Use root dependencies
         {find: 'mjolnir.js', replacement: join(rootDir, './node_modules/mjolnir.js')},
         aliasScopedPackages('@luma.gl'),
         aliasScopedPackages('@math.gl'),
         {find: '@arcgis/core', replacement: join(rootDir, './node_modules/@arcgis/core')},
-        {find: '@loaders.gl/core', replacement: join(rootDir, './node_modules/@loaders.gl/core')}
+        {
+          find: /^@loaders\.gl\/core$/,
+          replacement: join(rootDir, './node_modules/@loaders.gl/core')
+        }
       ]
     },
     define: {

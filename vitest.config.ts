@@ -97,6 +97,7 @@ const aliases = {
   '@deck.gl/aggregation-layers': resolve(rootDir, 'modules/aggregation-layers/src'),
   '@deck.gl/arcgis': resolve(rootDir, 'modules/arcgis/src'),
   '@deck.gl/carto': resolve(rootDir, 'modules/carto/src'),
+  '@deck.gl/core/sql': resolve(rootDir, 'modules/core/src/arrow/upstream-math/sql-parser.ts'),
   '@deck.gl/core/arrow': resolve(rootDir, 'modules/core/src/arrow/upstream-luma/arrow-converter.ts'),
   '@deck.gl/core': resolve(rootDir, 'modules/core/src'),
   '@deck.gl/extensions': resolve(rootDir, 'modules/extensions/src'),
@@ -151,6 +152,10 @@ const optimizeDepsConfig = {
     'maplibre-gl-v4',
     'maplibre-gl-v5',
     // loaders.gl dependencies
+    '@loaders.gl/core/scan/query-arrow-table',
+    '@loaders.gl/core/scan/parse-sql-predicate',
+    '@math.gl/arrow/expressions',
+    '@math.gl/core/sql',
     '@loaders.gl/core/polyfills',
     '@loaders.gl/core',
     '@loaders.gl/images',
