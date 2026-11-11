@@ -17,7 +17,7 @@ import {DynamicBuffer} from '@luma.gl/core/dynamic';
 import type {GPUVectorModel, GPUVectorModelInputs} from '@luma.gl/engine';
 import {GPUConstant, GPUVector, getGPUVectorFormatInfo} from '@luma.gl/graph/gpu-data';
 
-import type {ColumnSource} from './luma-upstream/arrow-converter';
+import {resolveColumns} from './resolve-columns';
 
 export type ColumnDefinition = {
   attribute: string;
@@ -214,11 +214,11 @@ export class LayerColumns {
           }
         }
       };
+      const sources = resolveColumns(props, this.definitions);
       let length: number | undefined;
       let chunkLengths: number[] | undefined;
       for (const [name, definition] of Object.entries(this.definitions)) {
-        const source =
-          definition.prop === false ? undefined : (props[name] as ColumnSource | undefined);
+        const source = sources[name];
         if (!source) continue;
         if (source instanceof GPUVector) {
           const format =
@@ -277,7 +277,7 @@ export class LayerColumns {
         throw new Error('data rows must match Arrow column lengths');
       const fallbacks = prepareFallbacks?.(rows, length, resource => results.push(resource));
       for (const [name, definition] of Object.entries(this.definitions)) {
-        if (definition.prop === false || !props[name]) {
+        if (!sources[name]) {
           columns[definition.attribute] = await this.makeAccessorColumn(
             props,
             definition.accessor,
