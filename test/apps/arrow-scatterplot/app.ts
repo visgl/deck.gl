@@ -21,7 +21,6 @@ const INITIAL_VIEW_STATE = {
   minZoom: 9,
   maxZoom: 20
 };
-const MAX_POINTS = 20000;
 
 const map = new Map({
   container: 'map',
@@ -57,7 +56,6 @@ new Deck({
             {op: 'not', args: [{op: 'isNull', args: [{property: 'LATITUDE'}]}]}
           ]
         },
-        limit: MAX_POINTS,
         select: [
           {
             as: 'positions',
