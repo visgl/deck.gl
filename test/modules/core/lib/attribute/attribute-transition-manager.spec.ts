@@ -184,17 +184,7 @@ webglTest('AttributeTransitionManager#remove transition rebinds the layer model'
           expect(hasDestroyedBuffer(layer), 'no destroyed buffer is bound').toBe(false);
         }
       }
-    ],
-    onError: (error, title) => {
-      // GPUTransitionBase.delete() does not delete attributeInTransition, which leaks one buffer
-      if (
-        title === 'ScatterplotLayer should delete all resources' &&
-        error.message === '1 Buffers'
-      ) {
-        return;
-      }
-      throw error;
-    }
+    ]
   });
 });
 

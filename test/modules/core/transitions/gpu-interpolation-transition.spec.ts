@@ -49,7 +49,6 @@ webglTest('interpolation preserves its source when restarted before rendering', 
     expect(await read()).toEqual([20, 30, 40, 80, 90, 100]);
   } finally {
     transition.delete();
-    transition.attributeInTransition.delete();
     attribute.delete();
   }
 });
