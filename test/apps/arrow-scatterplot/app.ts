@@ -3,7 +3,6 @@
 // Copyright (c) vis.gl contributors
 
 import {Deck} from '@deck.gl/core';
-import {sqlParser} from '@deck.gl/core/sql';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
@@ -45,7 +44,6 @@ const map = new Map({
 
 const backend = new URLSearchParams(location.search).get('backend');
 new Deck({
-  sqlParser,
   parent: document.querySelector<HTMLDivElement>('#deck'),
   deviceProps: backend === 'webgpu' ? {type: 'webgpu', adapters: [webgpuAdapter]} : {type: 'webgl'},
   initialViewState: INITIAL_VIEW_STATE,
@@ -59,22 +57,43 @@ new Deck({
       id: 'paris-trees',
       data,
       columnsQuery: {
-        where: '"LONGITUDE" IS NOT NULL AND "LATITUDE" IS NOT NULL',
+        where: {
+          op: 'and',
+          args: [
+            {op: 'not', args: [{op: 'isNull', args: [{property: 'LONGITUDE'}]}]},
+            {op: 'not', args: [{op: 'isNull', args: [{property: 'LATITUDE'}]}]}
+          ]
+        },
         limit: MAX_POINTS,
         select: [
-          {as: 'positions', expression: 'ARRAY["LONGITUDE", "LATITUDE"]::DOUBLE PRECISION[2]'},
+          {
+            as: 'positions',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'array_float64'},
+              arguments: [
+                {type: 'Identifier', name: 'LONGITUDE'},
+                {type: 'Identifier', name: 'LATITUDE'}
+              ]
+            }
+          },
           {
             as: 'radii',
-            expression: `CASE
-              WHEN "CIRCONFERENCE(CM)" > 240 THEN 8.0
-              WHEN "CIRCONFERENCE(CM)" > 30 THEN "CIRCONFERENCE(CM)" / 30.0
-              ELSE 1.0
-            END`
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'COALESCE'},
+              arguments: [
+                {type: 'Identifier', name: 'CIRCONFERENCE(CM)'},
+                {type: 'Literal', value: 30}
+              ]
+            }
           }
         ]
       },
       radiusUnits: 'pixels',
+      radiusScale: 1 / 30,
       radiusMinPixels: 1,
+      radiusMaxPixels: 8,
       getFillColor: [173, 221, 142, 210],
       pickable: true
     })
