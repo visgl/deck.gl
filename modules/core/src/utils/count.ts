@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {isArrowTable} from './is-arrow-table';
+
 const ERR_NOT_OBJECT = 'count(): argument not an object';
 const ERR_NOT_CONTAINER = 'count(): argument not a container';
 
@@ -16,6 +18,8 @@ export function count(container: any): number {
   if (!isObject(container)) {
     throw new Error(ERR_NOT_OBJECT);
   }
+
+  if (isArrowTable(container)) return container.numRows;
 
   // Check if ES6 collection "count" function is available
   if (typeof container.count === 'function') {

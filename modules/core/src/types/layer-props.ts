@@ -17,7 +17,10 @@ import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
 import type {Matrix4Like} from '@math.gl/core';
 
+import type {Table} from 'apache-arrow';
+
 export type LayerData<T> =
+  | (Table & {attributes?: never; length?: never})
   | Iterable<T>
   | {
       length: number;
