@@ -17,10 +17,18 @@ import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
 import type {Matrix4Like} from '@math.gl/core';
 
-import type {Table} from 'apache-arrow';
+/** Arrow table interface accepted by layers without requiring the optional Arrow peer. */
+type ArrowTableData = {
+  readonly numRows: number;
+  readonly schema: {readonly fields: readonly unknown[]};
+  get(index: number): unknown;
+  getChild(name: string): unknown;
+  attributes?: never;
+  length?: never;
+};
 
 export type LayerData<T> =
-  | (Table & {attributes?: never; length?: never})
+  | ArrowTableData
   | Iterable<T>
   | {
       length: number;

@@ -4,11 +4,8 @@
 
 import {isArrowTable} from '../utils/is-arrow-table';
 import {getArrowConversionFormat} from './luma-upstream/arrow-schema';
-import type {ColumnDefinition} from './layer-columns';
+import type {ColumnDefinitions} from './layer-columns';
 import type {ColumnSource} from './luma-upstream/arrow-converter';
-
-/** Public column names and whether each input is exposed as a prop. */
-export type ColumnDefinitions = Readonly<Record<string, Partial<ColumnDefinition>>>;
 
 /**
  * Selects explicit inputs first, then compatible fields from an opted-in table.

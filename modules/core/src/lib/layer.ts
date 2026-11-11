@@ -6,7 +6,8 @@
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/core/webgl';
 import {isArrowTable} from '../utils/is-arrow-table';
-import {resolveColumns, type ColumnDefinitions} from './resolve-columns';
+import {resolveColumns} from './resolve-columns';
+import type {ColumnDefinitions} from './layer-columns';
 import AttributeManager from './attribute/attribute-manager';
 import GPUVectorModel from './luma-upstream/gpu-vector-model';
 import UniformTransitionManager from './uniform-transition-manager';

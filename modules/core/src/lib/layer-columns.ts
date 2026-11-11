@@ -28,6 +28,9 @@ export type ColumnDefinition = {
   defaultValue?: number;
 };
 
+/** Definitions keyed by public column name, including internal inputs. */
+export type ColumnDefinitions = Readonly<Record<string, Partial<ColumnDefinition>>>;
+
 type PositionOptions = {
   transform?: ((value: number[]) => readonly number[]) | null;
   fp64?: boolean;
