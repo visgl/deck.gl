@@ -263,7 +263,7 @@ export class SplitterWidget<ViewsT extends View[] = View[]> extends Widget<
                 {...layout}
                 onChange={newSplit => this.onChange(newSplit, layout)}
                 onDragStart={() => this.props.onDragStart()}
-                onDragEnd={() => this.props.onDragStart()}
+                onDragEnd={() => this.props.onDragEnd()}
               />
             )
         )}

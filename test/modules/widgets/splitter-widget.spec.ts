@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {afterEach, test, expect, vi} from 'vitest';
+import {act} from 'preact/test-utils';
 import {MapView, OrbitView} from '@deck.gl/core';
 import {_SplitterWidget as SplitterWidget, type SplitterWidgetProps} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
@@ -250,4 +251,34 @@ test('SplitterWidget - controlled', async () => {
   expect(onViewsChange).lastCalledWith(views);
   expect(views[0].props.width).toBe('25%');
   expect(views[1].props.width).toBe('75%');
+});
+
+test('SplitterWidget - drag callbacks', async () => {
+  const onDragStart = vi.fn();
+  const onDragEnd = vi.fn();
+  const widget = new SplitterWidget<MapView[]>({viewLayout: mapsLayoutH, onDragStart, onDragEnd});
+  testInstance = new WidgetTester<MapView[]>({
+    initialViewState: {
+      left: {longitude: 0, latitude: 0, zoom: 1},
+      right: {longitude: -122, latitude: 38, zoom: 8}
+    },
+    widgets: [widget]
+  });
+
+  await testInstance.idle();
+  const [handle] = testInstance.findElements('.deck-widget-splitter-handle');
+  expect(handle).toBeTruthy();
+
+  // act() flushes the re-render and the effect that attaches the document listeners
+  act(() => {
+    handle.dispatchEvent(new PointerEvent('pointerdown', {bubbles: true}));
+  });
+  expect(onDragStart).toHaveBeenCalledTimes(1);
+  expect(onDragEnd).not.toHaveBeenCalled();
+
+  act(() => {
+    document.dispatchEvent(new PointerEvent('pointerup', {bubbles: true}));
+  });
+  expect(onDragEnd).toHaveBeenCalledTimes(1);
+  expect(onDragStart).toHaveBeenCalledTimes(1);
 });
