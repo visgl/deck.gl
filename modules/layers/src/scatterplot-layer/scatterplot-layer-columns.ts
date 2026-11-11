@@ -65,16 +65,9 @@ export type ScatterplotColumnProps = {
   lineWidths?: ColumnSource | null;
 };
 
-/** Returns whether any Arrow column prop is present. */
-export function hasScatterplotColumns(props: ScatterplotColumnProps): boolean {
-  return Object.entries(SCATTERPLOT_COLUMN_DEFINITIONS).some(
-    ([name, definition]) => definition.prop !== false && Boolean(props[name])
-  );
-}
-
 /** Prepares Scatterplot columns using the shared column implementation. */
 export class ScatterplotLayerColumns extends LayerColumns {
   constructor(device: Device) {
-    super(device, SCATTERPLOT_COLUMN_DEFINITIONS, 'Scatterplot', true);
+    super(device, SCATTERPLOT_COLUMN_DEFINITIONS, 'Scatterplot', true, true);
   }
 }

@@ -24,8 +24,17 @@ equivalent row and Arrow inputs.
 ## Column layouts
 
 For an existing Arrow table, `table.getChild('radius')` returns a vector suitable for `radii`
-when the field is numeric. Passing a table as `data` alone does not bind its fields to column
-props. Separate longitude and latitude fields must first be combined into fixed-size lists.
+when the field is numeric. ScatterplotLayer can also discover compatible fields by their exact
+column prop names from a table passed as `data`:
+
+```ts
+new ScatterplotLayer({id: 'points', data: table}); // table has a positions field
+```
+
+Explicit column props take precedence. Missing or incompatible fields use the existing accessors,
+which receive Arrow rows. This also works with a promise that resolves to a table.
+Other layers still require explicit column props. Combine separate longitude and latitude fields
+into fixed-size lists before supplying positions.
 
 | Column | Shape | Overrides |
 | --- | --- | --- |

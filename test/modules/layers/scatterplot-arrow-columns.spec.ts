@@ -10,7 +10,7 @@ import {ArrowConverter} from '@deck.gl/core/arrow';
 import {Texture} from '@luma.gl/core';
 import {GPUVectorModel} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
-import {Field, FixedSizeList, Float32, Uint8, vectorFromArray} from 'apache-arrow';
+import {Field, FixedSizeList, Float32, Table, Uint8, vectorFromArray} from 'apache-arrow';
 
 const bufferPoolSize = GPUDataEvaluator.bufferPoolSize;
 beforeAll(() => {
@@ -788,3 +788,52 @@ test('Scatterplot borrows GPU-only positions without reading them for bounds', a
     buffer.destroy();
   }
 });
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Scatterplot resolves Arrow table data on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) return skip();
+    const data = new Table({
+      positions: positions([
+        [0, 0],
+        [1, 1]
+      ]),
+      radius: vectorFromArray([2, 3], new Float32())
+    });
+    const getRadius = vi.fn(row => row.radius);
+    const loadedTables = new Set();
+    const checkTable = ({layer}: {layer: ScatterplotLayer}) => {
+      if (!layer.isLoaded) return;
+      loadedTables.add(layer.props.data);
+      expect(layer.state.columns).toBeDefined();
+      expect(layer.getNumInstances()).toBe(2);
+      const info = layer.getPickingInfo({
+        info: {index: 1, color: null, layer, picked: true, x: 0, y: 0, pixelRatio: 1},
+        mode: 'query',
+        sourceLayer: null
+      });
+      expect(info.object.radius).toBe(3);
+      expect(getRadius).toHaveBeenCalled();
+    };
+    await testLayerAsync({
+      Layer: ScatterplotLayer,
+      device: testDevice,
+      draw: false,
+      testCases: [
+        {props: {data, getRadius}, onAfterUpdate: checkTable},
+        {updateProps: {data: Promise.resolve(new Table(data.batches))}, onAfterUpdate: checkTable},
+        {
+          updateProps: {data: [{position: [0, 0], radius: 1}]},
+          onAfterUpdate: ({layer}) => {
+            expect(layer.state.columns).toBeUndefined();
+            expect(layer.getNumInstances()).toBe(1);
+          }
+        }
+      ],
+      onError: error => {
+        throw error;
+      }
+    });
+    expect(loadedTables.size).toBe(2);
+  });
+}
