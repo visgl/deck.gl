@@ -6,7 +6,6 @@ import {Deck} from '@deck.gl/core';
 import {sqlParser} from '@deck.gl/core/sql';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {webgpuAdapter} from '@luma.gl/core/webgpu';
-import {load} from '@loaders.gl/core';
 import {JSONTableLoaderWithParser} from '@loaders.gl/tables/json-table-loader';
 import {Field, Float64, Int8, Schema} from 'apache-arrow';
 import {Map} from 'maplibre-gl';
@@ -21,10 +20,6 @@ const schema = new Schema([
   new Field('latitude', new Float64(), false),
   new Field('gender', new Int8(), false)
 ]);
-const data = load(DATA_URL, JSONTableLoaderWithParser, {
-  core: {worker: false},
-  json: {shape: 'arrow-table', schema}
-});
 
 const map = new Map({
   container: 'map',
@@ -48,7 +43,12 @@ new Deck({
   layers: [
     new ScatterplotLayer({
       id: 'ny-population',
-      data,
+      data: DATA_URL,
+      loaders: [JSONTableLoaderWithParser],
+      loadOptions: {
+        core: {worker: false},
+        json: {shape: 'arrow-table', schema}
+      },
       columnsQuery: `SELECT
         ARRAY[longitude, latitude]::DOUBLE PRECISION[2] AS positions,
         PACK_UNORM8(ARRAY[

@@ -4,8 +4,6 @@
 
 import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {load} from '@loaders.gl/core';
-import type {ArrowTable} from '@loaders.gl/core/schema';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {Map} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -46,11 +44,12 @@ new Deck({
   layers: [
     new ScatterplotLayer({
       id: 'paris-trees',
-      // The loader return type includes other shapes even when csv.shape is set.
-      data: load(DATA_URL, CSVLoader, {
+      data: DATA_URL,
+      loaders: [CSVLoader],
+      loadOptions: {
         core: {worker: false},
         csv: {shape: 'arrow-table'}
-      }) as Promise<ArrowTable>,
+      },
       columnsQuery: {
         where: {
           op: 'and',
