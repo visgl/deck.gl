@@ -792,7 +792,9 @@ test('Scatterplot borrows GPU-only positions without reading them for bounds', a
 for (const backend of ['webgl', 'webgpu'] as const) {
   test(`Scatterplot resolves Arrow table data on ${backend}`, async ({skip}) => {
     const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
-    if (!testDevice) return skip();
+    if (!testDevice) {
+      return skip();
+    }
     const data = new Table({
       positions: positions([
         [0, 0],
@@ -803,7 +805,9 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     const getRadius = vi.fn(row => row.radius);
     const loadedTables = new Set();
     const checkTable = ({layer}: {layer: ScatterplotLayer}) => {
-      if (!layer.isLoaded) return;
+      if (!layer.isLoaded) {
+        return;
+      }
       loadedTables.add(layer.props.data);
       expect(layer.state.columns).toBeDefined();
       expect(layer.getNumInstances()).toBe(2);
