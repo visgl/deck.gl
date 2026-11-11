@@ -24,16 +24,6 @@ const INITIAL_VIEW_STATE = {
 };
 const MAX_POINTS = 20000;
 
-const data = load(DATA_URL, CSVLoader, {
-  core: {worker: false},
-  csv: {shape: 'arrow-table'}
-}).then(result => {
-  if (result.shape !== 'arrow-table') {
-    throw new Error('Expected an Arrow table from the CSV loader');
-  }
-  return result;
-});
-
 const map = new Map({
   container: 'map',
   style: MAP_STYLE,
@@ -55,7 +45,15 @@ new Deck({
   layers: [
     new ScatterplotLayer({
       id: 'paris-trees',
-      data,
+      data: load(DATA_URL, CSVLoader, {
+        core: {worker: false},
+        csv: {shape: 'arrow-table'}
+      }).then(result => {
+        if (result.shape !== 'arrow-table') {
+          throw new Error('Expected an Arrow table from the CSV loader');
+        }
+        return result;
+      }),
       columnsQuery: {
         where: {
           op: 'and',
