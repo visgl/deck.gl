@@ -37,7 +37,7 @@ const backend = new URLSearchParams(location.search).get('backend');
 
 new Deck({
   sqlParser,
-  parent: document.getElementById('deck'),
+  parent: document.querySelector<HTMLDivElement>('#deck'),
   deviceProps: backend === 'webgpu' ? {type: 'webgpu', adapters: [webgpuAdapter]} : {type: 'webgl'},
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,

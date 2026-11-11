@@ -25,7 +25,15 @@ const INITIAL_VIEW_STATE = {
 };
 const MAX_POINTS = 20000;
 
-const data = load(DATA_URL, CSVLoader, {core: {worker: false}, csv: {shape: 'arrow-table'}});
+const data = load(DATA_URL, CSVLoader, {
+  core: {worker: false},
+  csv: {shape: 'arrow-table'}
+}).then(result => {
+  if (result.shape !== 'arrow-table') {
+    throw new Error('Expected an Arrow table from the CSV loader');
+  }
+  return result;
+});
 
 const map = new Map({
   container: 'map',
@@ -38,7 +46,7 @@ const map = new Map({
 const backend = new URLSearchParams(location.search).get('backend');
 new Deck({
   sqlParser,
-  parent: document.getElementById('deck'),
+  parent: document.querySelector<HTMLDivElement>('#deck'),
   deviceProps: backend === 'webgpu' ? {type: 'webgpu', adapters: [webgpuAdapter]} : {type: 'webgl'},
   initialViewState: INITIAL_VIEW_STATE,
   onViewStateChange: ({viewState}) => {
