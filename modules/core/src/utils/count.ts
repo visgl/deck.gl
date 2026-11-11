@@ -19,7 +19,9 @@ export function count(container: any): number {
     throw new Error(ERR_NOT_OBJECT);
   }
 
-  if (isArrowTable(container)) return container.numRows;
+  if (isArrowTable(container)) {
+    return container.numRows;
+  }
 
   // Check if ES6 collection "count" function is available
   if (typeof container.count === 'function') {

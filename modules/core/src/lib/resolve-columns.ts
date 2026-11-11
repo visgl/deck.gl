@@ -22,15 +22,21 @@ export function resolveColumns(
   const table = useTable && isArrowTable(props.data) ? props.data : null;
   const columns: Record<string, ColumnSource> = {};
   for (const [name, definition] of Object.entries(definitions)) {
-    if (definition.prop === false) continue;
+    if (definition.prop === false) {
+      continue;
+    }
     const source = props[name];
     if (source != null) {
       columns[name] = source as ColumnSource;
       continue;
     }
-    if (!definition.semantic) continue;
+    if (!definition.semantic) {
+      continue;
+    }
     const column = table?.getChild(name);
-    if (!column) continue;
+    if (!column) {
+      continue;
+    }
     try {
       const format = getArrowConversionFormat(column.type, {
         semantic: definition.semantic === 'vector' ? 'numeric' : definition.semantic
@@ -39,8 +45,9 @@ export function resolveColumns(
         definition.semantic === 'vector' &&
         definition.size &&
         format !== (definition.size === 1 ? 'float32' : `float32x${definition.size}`)
-      )
+      ) {
         continue;
+      }
     } catch {
       continue;
     }
