@@ -9,7 +9,8 @@ import {
   type _ColumnDefinition as ColumnDefinition
 } from '@deck.gl/core';
 
-const DEFINITIONS: Record<string, ColumnDefinition> = {
+/** Column semantics shared by Scatterplot selection and preparation. */
+export const SCATTERPLOT_COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = {
   positions: {
     attribute: 'instancePositions',
     accessor: 'getPosition',
@@ -66,12 +67,14 @@ export type ScatterplotColumnProps = {
 
 /** Returns whether any Arrow column prop is present. */
 export function hasScatterplotColumns(props: ScatterplotColumnProps): boolean {
-  return Object.keys(DEFINITIONS).some(name => name !== 'pixelOffsets' && Boolean(props[name]));
+  return Object.entries(SCATTERPLOT_COLUMN_DEFINITIONS).some(
+    ([name, definition]) => definition.prop !== false && Boolean(props[name])
+  );
 }
 
 /** Prepares Scatterplot columns using the shared column implementation. */
 export class ScatterplotLayerColumns extends LayerColumns {
   constructor(device: Device) {
-    super(device, DEFINITIONS, 'Scatterplot', true);
+    super(device, SCATTERPLOT_COLUMN_DEFINITIONS, 'Scatterplot', true);
   }
 }
