@@ -47,8 +47,7 @@ new Deck({
       data: DATA_URL,
       loaders: [CSVLoader],
       loadOptions: {
-        core: {worker: false},
-        csv: {shape: 'arrow-table'}
+        core: {worker: false}
       },
       columnsQuery: {
         where: {
