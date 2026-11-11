@@ -11,4 +11,4 @@ and attribute changes are supplied through `AggregationShaderContext`. Changing
 buffer identities or layouts rebuilds the graph's resource declarations.
 
 This operation stays in deck because it uses deck geometry and extension hooks.
-The independent math operations in `gpu-graph/` remain candidates for luma upstreaming.
+Grouped aggregation uses luma.gl’s `GPUGraphGroupAggregation` and its built-in compiler lowering.

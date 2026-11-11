@@ -13,12 +13,13 @@ import {Buffer, type Device, type CommandEncoder} from '@luma.gl/core';
 import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {Computation} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shaders';
-import {GPUGraph, GPUGraphCompiler, gpuGraph} from '@luma.gl/graph/gpu-graph';
-import type {CompiledGPUCommandGraph} from '@luma.gl/graph/gpu-graph';
 import {
-  GPUGroupAggregationOperation,
-  aggregationOperationLowerings
-} from '../common/aggregator/gpu-graph/aggregation-operations';
+  GPUGraph,
+  GPUGraphCompiler,
+  GPUGraphGroupAggregation,
+  gpuGraph
+} from '@luma.gl/graph/gpu-graph';
+import type {CompiledGPUCommandGraph} from '@luma.gl/graph/gpu-graph';
 
 const assignmentSource = (binning: string, filtering: boolean) => `
 @group(0) @binding(auto) var<storage, read> positions: array<f32>;
@@ -149,6 +150,8 @@ export class ScreenGridGraph {
           ((name === 'contributions' || name === 'selection') && (!context || !pointCount))
         )
           program.addInput(name, gpuGraph.vector(format, {length}));
+        else if (name === 'counts' || name === 'statistics')
+          program.vector(name, format, {length, external: true});
         else program.addState(name, gpuGraph.vector(format, {length}));
       }
       if (context && attributes && pointCount) {
@@ -161,7 +164,7 @@ export class ScreenGridGraph {
         program.add(new DeckAggregationInputsOperation(this.extensionInputs));
       }
       program.add(
-        new GPUGroupAggregationOperation({
+        new GPUGraphGroupAggregation({
           keys: 'keys',
           output: 'counts',
           operation: 'count',
@@ -170,7 +173,7 @@ export class ScreenGridGraph {
       );
       if (operation !== 4)
         program.add(
-          new GPUGroupAggregationOperation({
+          new GPUGraphGroupAggregation({
             keys: 'keys',
             values: 'contributions',
             mask: context ? 'selection' : undefined,
@@ -199,7 +202,6 @@ export class ScreenGridGraph {
         ])
       );
       const compilation = new GPUGraphCompiler(this.device, [
-        ...aggregationOperationLowerings,
         deckAggregationInputsLowering
       ]).compile(program, {vectors});
       this.compiled = compilation.graph.compile();
