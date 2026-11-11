@@ -802,6 +802,13 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       ]),
       radius: vectorFromArray([2, 3], new Float32())
     });
+    const listFallbackData = new Table({
+      position: positions([
+        [2, 3],
+        [4, 5]
+      ]),
+      radii: vectorFromArray([2, 3], new Float32())
+    });
     const getRadius = vi.fn(row => row.radius);
     const loadedTables = new Set();
     const checkTable = ({layer}: {layer: ScatterplotLayer}) => {
@@ -826,6 +833,23 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       testCases: [
         {props: {data, getRadius}, onAfterUpdate: checkTable},
         {updateProps: {data: Promise.resolve(new Table(data.batches))}, onAfterUpdate: checkTable},
+        {
+          updateProps: {data: listFallbackData},
+          onAfterUpdate: async ({layer}) => {
+            if (!layer.isLoaded) {
+              return;
+            }
+            const {instancePositions} = (layer.state.columns as any).prepared.columns;
+            const bytes = await instancePositions.data[0].buffer.readAsync();
+            expect(Array.from(new Float32Array(bytes.buffer, bytes.byteOffset, 6))).toEqual([
+              2, 3, 0, 4, 5, 0
+            ]);
+            expect(layer.getBounds()).toEqual([
+              [2, 3, 0],
+              [4, 5, 0]
+            ]);
+          }
+        },
         {
           updateProps: {data: [{position: [0, 0], radius: 1}]},
           onAfterUpdate: ({layer}) => {
