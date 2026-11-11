@@ -4,7 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {Field, FixedSizeList, Float32, Float64, Int32, Utf8} from 'apache-arrow';
-import {getArrowConversionFormat} from '../../../../modules/core/src/lib/luma-upstream/arrow-schema';
+import {getArrowConversionFormat} from '../../../../modules/core/src/arrow/upstream-luma/arrow-schema';
 
 const list = (size: number, type = new Float32()) =>
   new FixedSizeList(size, new Field('values', type, true));

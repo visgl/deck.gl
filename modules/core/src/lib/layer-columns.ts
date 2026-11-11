@@ -195,7 +195,7 @@ export class LayerColumns {
         changed();
         return;
       }
-      const {ArrowConverter} = await import('./luma-upstream/arrow-converter');
+      const {ArrowConverter} = await import('../arrow/upstream-luma/arrow-converter');
       const converter = new ArrowConverter(this.device);
       const columns: Columns = {};
       let bounds: [number[], number[]] | undefined;

@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {isArrowTable} from '../utils/is-arrow-table';
-import {getArrowConversionFormat} from './luma-upstream/arrow-schema';
+import {isArrowTable} from '../arrow/upstream-math/is-arrow-table';
+import {getArrowConversionFormat} from '../arrow/upstream-luma/arrow-schema';
 import type {ColumnDefinitions} from './layer-columns';
-import type {ColumnSource} from './luma-upstream/arrow-converter';
+import type {ColumnSource} from '../arrow/upstream-luma/arrow-converter';
 
 /**
  * Selects explicit inputs first, then compatible fields from an opted-in table.
