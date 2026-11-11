@@ -6,7 +6,7 @@ import {Deck} from '@deck.gl/core';
 import {sqlParser} from '@deck.gl/core/sql';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {webgpuAdapter} from '@luma.gl/core/webgpu';
-import {JSONTableLoaderWithParser} from '@loaders.gl/tables/json-table-loader';
+import {JSONTableLoader} from '@loaders.gl/tables/json';
 import {Field, Float64, Int8, Schema} from 'apache-arrow';
 import {Map} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -44,10 +44,10 @@ new Deck({
     new ScatterplotLayer({
       id: 'ny-population',
       data: DATA_URL,
-      loaders: [JSONTableLoaderWithParser],
+      loaders: [JSONTableLoader],
       loadOptions: {
-        core: {worker: false},
-        json: {shape: 'arrow-table', schema}
+        core: {ignoreRegisteredLoaders: true},
+        json: {schema}
       },
       columnsQuery: `SELECT
         ARRAY[longitude, latitude]::DOUBLE PRECISION[2] AS positions,
