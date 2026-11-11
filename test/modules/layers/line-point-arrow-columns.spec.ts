@@ -169,6 +169,8 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       layers: [layer]
     });
     try {
+      // Model compilation can finish before asynchronous Arrow column uploads.
+      await expect.poll(() => layer.isLoaded).toBe(true);
       await expect
         .poll(() => layer.getModels().map(model => model.pipeline.linkStatus))
         .toEqual(['success', 'success']);

@@ -67,7 +67,7 @@ describe('optional GPU Graph deck.gl integration package isolation', () => {
 
     expect(packageJson.private).toBe(true);
     expect(packageJson.dependencies?.['@deck.gl/core']).toContain('9.4.0');
-    expect(packageJson.dependencies?.['@luma.gl/graph']).toContain('10.0.0-alpha.12');
+    expect(packageJson.dependencies?.['@luma.gl/graph']).toContain('10.0.0-alpha.13');
     expect(packageJson.dependencies?.['@luma.gl/gpgpu']).toBeUndefined();
     expect(packageJson.dependencies?.['@luma.gl/tables']).toBeUndefined();
   });
