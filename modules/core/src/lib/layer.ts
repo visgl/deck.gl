@@ -60,12 +60,13 @@ const COLUMNS_QUERY_COMPARE_DEPTH = -1;
 
 function usesSQLParser(query: ColumnsQuery | ColumnExpressionQuery | string): boolean {
   if (typeof query === 'string') return true;
-  if (!('select' in query)) {
+  if (!('select' in query) || !Array.isArray(query.select)) {
     return Object.values(query).some(expression => typeof expression === 'string');
   }
+  const structured = query as ColumnsQuery;
   return (
-    typeof query.where === 'string' ||
-    query.select.some(
+    typeof structured.where === 'string' ||
+    structured.select.some(
       field =>
         typeof field !== 'string' && 'expression' in field && typeof field.expression === 'string'
     )
