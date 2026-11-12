@@ -119,6 +119,64 @@ test('Hover picking wakes the idle loop', async () => {
   deck.finalize();
 });
 
+test('Hover updates the cursor after the hover callbacks', async () => {
+  let hoveredIndex = -1;
+  const {deck, frames} = await createIdleDeck({
+    onHover: info => {
+      hoveredIndex = info.index;
+    },
+    getCursor: () => (hoveredIndex === 3 ? 'pointer' : 'grab')
+  });
+  const pickResult = {
+    result: [{index: 3, picked: true, x: 0, y: 0}],
+    emptyInfo: {index: -1, picked: false, x: 0, y: 0}
+  };
+  // @ts-expect-error testing private method override
+  deck._pick = () => pickResult;
+  // @ts-expect-error testing private method override
+  deck._pickAsync = () => Promise.resolve(pickResult);
+
+  deck._onPointerMove({type: 'pointermove', offsetCenter: {x: 1, y: 1}} as any);
+  await sleep(50);
+  expect(deck.getCanvas()!.style.cursor, 'cursor reflects the completed hover').toBe('pointer');
+
+  await expectIdle(frames);
+  deck.finalize();
+});
+
+test('Default effect and shader changes wake the idle loop', async () => {
+  const {deck, draws, frames} = await createIdleDeck();
+  const module = {name: 'idle-test-module'};
+  // @ts-expect-error protected member
+  const layerManager = deck.layerManager;
+
+  deck._addDefaultShaderModule(module);
+  await sleep(50);
+  expect(layerManager.needsUpdate(), 'added module is applied').toBe(false);
+  expect(draws.count, 'added module is drawn').toBeGreaterThan(0);
+  await expectIdle(frames);
+
+  draws.count = 0;
+  deck._removeDefaultShaderModule(module);
+  await sleep(50);
+  expect(layerManager.needsUpdate(), 'removed module is applied').toBe(false);
+  expect(draws.count, 'removed module is drawn').toBeGreaterThan(0);
+  await expectIdle(frames);
+
+  draws.count = 0;
+  deck._addDefaultEffect({
+    id: 'idle-test-effect',
+    setup: () => {},
+    preRender: () => {},
+    cleanup: () => {}
+  } as any);
+  await sleep(50);
+  expect(draws.count, 'added effect is drawn').toBeGreaterThan(0);
+
+  await expectIdle(frames);
+  deck.finalize();
+});
+
 test('Canvas resize wakes the idle loop', async () => {
   const {deck, draws, frames} = await createIdleDeck();
 

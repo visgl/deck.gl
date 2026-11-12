@@ -903,24 +903,29 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
    */
   _addDefaultEffect(effect: Effect) {
     this.effectManager!.addDefaultEffect(effect);
+    this._requestFrame();
   }
 
   _addDefaultShaderModule(module: ShaderModule<Record<string, unknown>>) {
     this.layerManager!.addDefaultShaderModule(module);
+    this._requestFrame();
   }
 
   _removeDefaultShaderModule(module: ShaderModule<Record<string, unknown>>) {
     this.layerManager?.removeDefaultShaderModule(module);
+    this._requestFrame();
   }
 
   /** Install an effect's shader plugin on all layer models. */
   _addDefaultShaderPlugin(plugin: ShaderPlugin) {
     this.layerManager!.addDefaultShaderPlugin(plugin);
+    this._requestFrame();
   }
 
   /** Remove an effect's shader plugin from layer models. */
   _removeDefaultShaderPlugin(plugin: ShaderPlugin) {
     this.layerManager?.removeDefaultShaderPlugin(plugin);
+    this._requestFrame();
   }
 
   // Private Methods
@@ -1008,11 +1013,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       return;
     }
 
-    const isHovering = result.length > 0;
-    if (this.cursorState.isHovering !== isHovering) {
-      this.cursorState.isHovering = isHovering;
-      this._updateCursor();
-    }
+    this.cursorState.isHovering = result.length > 0;
 
     let pickedInfo = emptyInfo;
     let handled = false;
@@ -1024,6 +1025,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.props.onHover?.(pickedInfo, event);
       this.widgetManager.onHover(pickedInfo, event);
     }
+    // After the hover callbacks, so `getCursor` sees state they set. The loop may go idle
+    // after this pick, so no later frame would correct the cursor.
+    this._updateCursor();
   }
 
   private _dispatchPickingEvent(info: PickingInfo, event: MjolnirGestureEvent): void {
