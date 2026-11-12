@@ -7,20 +7,25 @@ import {compileArrowExpression} from '@math.gl/arrow/expressions';
 import type {Expression} from '@math.gl/core/expressions';
 import type {TableSelection} from '@math.gl/core/sql';
 import {makeVector, Table, type Vector} from 'apache-arrow';
-import type {ColumnsQuery, SQLParser} from '../types/layer-props';
+import type {ColumnExpressionQuery, ColumnsQuery, SQLParser} from '../types/layer-props';
+import {evaluateColumnExpression} from './column-constructors';
 import {unwrapArrowTable} from './unwrap-arrow-table';
 
 /** Filters source rows and projects fields or expressions into a new Arrow table. */
 export function projectColumns(
   source: unknown,
-  query: ColumnsQuery | string,
+  query: ColumnsQuery | ColumnExpressionQuery | string,
   parser?: SQLParser
 ): {table: Table; sourceRowIndices?: {get(index: number): number | null}} {
   const data = unwrapArrowTable(source);
   if (!data) {
     throw new Error('columnsQuery requires Arrow table data');
   }
-  const {select, where, limit} = normalizeQuery(data, query, parser);
+  // A mapping evaluates one expression per named output column, preserving row alignment.
+  if (typeof query === 'object' && !('select' in query)) {
+    return projectExpressionColumns(data, query as ColumnExpressionQuery, parser);
+  }
+  const {select, where, limit} = normalizeQuery(data, query as ColumnsQuery | string, parser);
   let predicate = where;
   if (typeof where === 'string') {
     if (!parser?.parsePredicate) {
@@ -73,9 +78,7 @@ export function projectColumns(
       } else {
         expression = field.expression;
       }
-      computed[name] = compileArrowExpression(expression, {
-        inputSchema: input.schema
-      }).evaluateTable(input);
+      computed[name] = evaluateColumnExpression(expression, input);
     }
   }
   const computedTable = new Table(computed);
@@ -87,6 +90,38 @@ export function projectColumns(
     {select: sourceFields}
   ).data;
   return {table: selected.assign(computedTable).select([...outputNames]), sourceRowIndices};
+}
+
+/** Evaluate each named scalar expression over the same source rows; no row-changing operators. */
+function projectExpressionColumns(
+  input: Table,
+  query: ColumnExpressionQuery,
+  parser?: SQLParser
+): {table: Table} {
+  const names = Object.keys(query);
+  if (!names.length) {
+    throw new Error('columnsQuery expression mappings require at least one output column');
+  }
+  const columns: Record<string, Vector> = Object.create(null);
+  for (const name of names) {
+    if (!name || name === '__proto__' || name === 'constructor' || name === 'prototype') {
+      throw new Error(`Invalid columnsQuery output name: ${name}`);
+    }
+    const value = query[name]!;
+    let expression: Expression;
+    if (typeof value === 'string') {
+      if (!parser?.parseExpression) {
+        throw new Error('columnsQuery expression strings require sqlParser.parseExpression');
+      }
+      expression = parser.parseExpression(value);
+    } else if (value && typeof value === 'object') {
+      expression = value;
+    } else {
+      throw new Error(`Invalid columnsQuery expression for ${name}`);
+    }
+    columns[name] = evaluateColumnExpression(expression, input);
+  }
+  return {table: new Table(columns)};
 }
 
 /** Binds a parsed SELECT to the one table already loaded by the layer. */
