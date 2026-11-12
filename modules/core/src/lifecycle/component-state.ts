@@ -294,7 +294,8 @@ export default class ComponentState<ComponentT extends Component> {
       if (isArrowChunk) {
         const {Table, RecordBatch} = await import('apache-arrow');
         if (!(chunk instanceof RecordBatch)) {
-          throw new Error('Expected an Arrow RecordBatch in the query stream.');
+          this._onError(propName, new Error('Expected an Arrow RecordBatch in the query stream.'));
+          return;
         }
         if (queryOutput === 'snapshots') {
           arrowBatches = [chunk];
@@ -308,7 +309,8 @@ export default class ComponentState<ComponentT extends Component> {
         continue;
       }
       if (queryOutput === 'snapshots') {
-        throw new Error('queryOutput: snapshots requires Arrow RecordBatch chunks.');
+        this._onError(propName, new Error('queryOutput: snapshots requires Arrow RecordBatch chunks.'));
+        return;
       }
       if (dataTransform) {
         data = dataTransform(chunk, data) as any[];
