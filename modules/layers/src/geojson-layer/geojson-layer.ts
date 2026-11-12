@@ -21,6 +21,7 @@ import type {BinaryFeatureCollection} from '@loaders.gl/core/schema';
 import type {Feature, Geometry, GeoJSON} from 'geojson';
 
 import {replaceInRange} from '../utils';
+import IconLayer from '../icon-layer/icon-layer';
 import {BinaryFeatureTypes, binaryToFeatureForAccesor} from './geojson-binary';
 import {
   POINT_LAYER,
@@ -326,6 +327,7 @@ const defaultProps: DefaultProps<GeoJsonLayerProps> = {
 
 type GeoJsonPickingInfo = PickingInfo & {
   featureType?: string | null;
+  pointUsesSourceIndexes?: boolean;
   info?: any;
 };
 
@@ -423,6 +425,8 @@ export default class GeoJsonLayer<
     const info = super.getPickingInfo(params) as GeoJsonPickingInfo;
     const {index, sourceLayer} = info;
     info.featureType = FEATURE_TYPES.find(ft => sourceLayer!.id.startsWith(`${this.id}-${ft}-`));
+    info.pointUsesSourceIndexes =
+      sourceLayer instanceof IconLayer && sourceLayer.useSourceIndexes();
     if (index >= 0 && sourceLayer!.id.startsWith(`${this.id}-points-text`) && this.state.binary) {
       info.index = (this.props.data as BinaryFeatureCollection).points!.globalFeatureIds.value[
         index
@@ -432,13 +436,29 @@ export default class GeoJsonLayer<
   }
 
   _updateAutoHighlight(info: GeoJsonPickingInfo): void {
-    // All sub layers except the points layer use source feature index to encode the picking color
-    // The points layer uses indices from the points data array.
+    // Non-binary point sublayers may use point indices or source feature indices.
     const pointLayerIdPrefix = `${this.id}-points-`;
     const sourceIsPoints = info.featureType === 'points';
+    const sourceUsesSourceIndexes = info.pointUsesSourceIndexes;
+    let alternateInfo = info;
+    if (sourceIsPoints && !this.state.binary && info.picked) {
+      // Decode the local picking color: outer composite layers may replace info.index.
+      const pickedIndex = this.decodePickingColor(info.color);
+      const points = this.state.layerProps.points!.data as any[];
+      const alternateIndex = sourceUsesSourceIndexes
+        ? points.findIndex(point => point.__source.index === pickedIndex)
+        : (points[pickedIndex]?.__source.index ?? -1);
+      alternateInfo = {
+        ...info,
+        color: new Uint8Array(this.encodePickingColor(alternateIndex))
+      };
+    }
     for (const layer of this.getSubLayers()) {
       if (layer.id.startsWith(pointLayerIdPrefix) === sourceIsPoints) {
-        layer.updateAutoHighlight(info);
+        const targetUsesSourceIndexes = layer instanceof IconLayer && layer.useSourceIndexes();
+        layer.updateAutoHighlight(
+          targetUsesSourceIndexes === sourceUsesSourceIndexes ? info : alternateInfo
+        );
       }
     }
   }
@@ -558,17 +578,29 @@ export default class GeoJsonLayer<
           };
         }
 
-        pointLayers.push(
-          new PointsLayer(
-            forwardedProps,
-            this.getSubLayerProps({
-              id,
-              updateTriggers: forwardedProps.updateTriggers,
-              highlightedObjectIndex
-            }),
-            pointsLayerProps
-          )
+        let pointLayer = new PointsLayer(
+          forwardedProps,
+          this.getSubLayerProps({
+            id,
+            updateTriggers: forwardedProps.updateTriggers,
+            highlightedObjectIndex
+          }),
+          pointsLayerProps
         );
+        if (
+          highlightedObjectIndex !== this.props.highlightedObjectIndex &&
+          pointLayer instanceof IconLayer &&
+          pointLayer.useSourceIndexes() &&
+          !Object.prototype.hasOwnProperty.call(
+            this.props._subLayerProps?.[id] || {},
+            'highlightedObjectIndex'
+          )
+        ) {
+          pointLayer = pointLayer.clone({
+            highlightedObjectIndex: this.props.highlightedObjectIndex
+          });
+        }
+        pointLayers.push(pointLayer);
       }
     }
     return pointLayers;

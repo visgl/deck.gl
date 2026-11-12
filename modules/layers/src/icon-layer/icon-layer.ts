@@ -310,9 +310,12 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     /* eslint-enable max-len */
   }
 
-  /** Whether picking indices refer to rows wrapped by a composite layer. */
-  protected useSourceIndexes(data = this.props.data): boolean {
-    return !this.state?.columns && Boolean((data as any)[0]?.__source);
+  /** @internal Whether picking indices refer to rows wrapped by a composite layer. */
+  useSourceIndexes(data = this.props.data): boolean {
+    const hasColumns = Object.entries(COLUMN_DEFINITIONS).some(
+      ([name, definition]) => definition.prop !== false && this.props[name]
+    );
+    return !hasColumns && !this.state?.columns && Boolean((data as any)[0]?.__source);
   }
 
   private _initializeRowIndexes(): void {
