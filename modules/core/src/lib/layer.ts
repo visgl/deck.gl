@@ -111,6 +111,7 @@ const defaultProps: DefaultProps<LayerProps> = {
     optional: true
   },
   columnsQuery: {type: 'object', value: null, optional: true, compare: COLUMNS_QUERY_COMPARE_DEPTH},
+  queryOutput: 'batches',
   dataTransform: {type: 'function', value: null, optional: true},
   onDataLoad: {type: 'function', value: null, optional: true},
   onError: {type: 'function', value: null, optional: true},
