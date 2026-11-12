@@ -22,7 +22,7 @@ export function projectColumns(
     throw new Error('columnsQuery requires Arrow table data');
   }
   // A mapping evaluates one expression per named output column, preserving row alignment.
-  if (typeof query === 'object' && !('select' in query)) {
+  if (typeof query === 'object' && (!('select' in query) || !Array.isArray(query.select))) {
     return projectExpressionColumns(data, query as ColumnExpressionQuery, parser);
   }
   const {select, where, limit} = normalizeQuery(data, query as ColumnsQuery | string, parser);
