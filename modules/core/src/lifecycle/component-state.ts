@@ -276,10 +276,11 @@ export default class ComponentState<ComponentT extends Component> {
     let data: any[] = [];
     let count = 0;
     let arrowBatches: import('apache-arrow').RecordBatch[] = [];
+    let lastResult: unknown = data;
 
     for await (const chunk of iterable) {
-      if (!this.component) {
-        // This component state has been finalized
+      if (!this.component || loadCount !== asyncProp.pendingLoadCount) {
+        // The layer was finalized or a newer data stream superseded this one.
         return;
       }
 
@@ -302,6 +303,7 @@ export default class ComponentState<ComponentT extends Component> {
           arrowBatches.push(chunk);
         }
         const table = new Table(arrowBatches);
+        lastResult = table;
         this._setAsyncPropValue(propName, table, loadCount);
         continue;
       }
@@ -321,10 +323,13 @@ export default class ComponentState<ComponentT extends Component> {
       });
 
       count = data.length;
+      lastResult = data;
       this._setAsyncPropValue(propName, data, loadCount);
     }
 
-    this._onResolve(propName, data);
+    if (this.component && loadCount === asyncProp.pendingLoadCount) {
+      this._onResolve(propName, lastResult);
+    }
   }
 
   // Give the app a chance to post process the loaded data
