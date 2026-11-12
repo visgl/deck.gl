@@ -312,3 +312,47 @@ Limitations:
 - The layer destroys removed adapters. Create a new one for each switch to CPU.
 - After writing to a buffer in place, call the adapter's `setNeedsUpdate()`.
 - CPU timings include readback. Compare end-to-end frame times.
+
+
+### GraphScreenGridAggregator
+
+`GraphScreenGridAggregator` is an opt-in implementation for `ScreenGridLayer` that
+composes luma graph operations. It supports COUNT, SUM, MIN, MAX and MEAN with
+accessor-generated attributes or borrowed GPUVector inputs:
+
+```typescript
+import {ScreenGridLayer, GraphScreenGridAggregator} from '@deck.gl/aggregation-layers';
+
+new ScreenGridLayer({
+  data,
+  getPosition: d => d.position,
+  aggregator: new GraphScreenGridAggregator(),
+  colorDomain: [0, 100]
+});
+```
+
+The layer initializes and destroys the aggregator. Create a new instance when
+switching back to it after replacing or removing the layer. Its output stays in
+GPUVectors; automatic domains and picking request asynchronous metadata snapshots.
+Input shader extensions, including `DataFilterExtension`, `ClipExtension`, and
+`BrushingExtension`, run as deck-specific graph operations before grouped reduction.
+Their selection masks and modified weights stay on the GPU. Extensions currently
+use accessor-generated attributes; borrowed GPUVector inputs require no extensions.
+
+It requires a WebGPU device. Borrowed position vectors must already use the custom view coordinate system; accessor-generated
+positions can use the layer's ordinary CPU preprojection. Weights must be finite. Omitting
+`aggregator` selects the existing default implementation.
+
+Custom aggregators can set `supportsExtensions` to `false` to reject unsupported
+shader extensions when the layer adopts them. Set `requiresProjectedPositions` to
+`true` when borrowed position vectors must already use the view coordinate system.
+
+Aggregators can call the supplied `onNeedsRedraw` callback to request another draw,
+for example when retrying an asynchronous metadata copy.
+
+
+Custom aggregators can implement `setShaderContext(context)` to receive the layer's
+shader plugins and `getAttributeBindings()` callback after initialization and when
+extensions change. The callback resolves current GPU attributes and buffer layouts
+from the owning layer. Aggregators borrow these bindings and must release their own
+compiled shader resources when the context changes or the aggregator is destroyed.

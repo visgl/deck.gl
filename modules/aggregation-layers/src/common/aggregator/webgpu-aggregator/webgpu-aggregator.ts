@@ -4,6 +4,8 @@
 
 import {project32, _GPUVectorModel as GPUVectorModel, _deepEqual as deepEqual} from '@deck.gl/core';
 import {Buffer, type Device, type Texture, type Framebuffer} from '@luma.gl/core';
+import {aggregationUniforms} from './aggregation-uniforms';
+import {snapshotUniformProps} from '../../utils/prop-utils';
 import {getFilterSource} from './filter.wgsl';
 import {Computation, type ModelProps} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shaders';
@@ -21,48 +23,6 @@ export type WebGPUAggregatorOptions = {
   binning: string;
   binOptions: ShaderModule;
 };
-
-const aggregationUniforms = {
-  name: 'aggregation',
-  source: `struct AggregationUniforms {
-    counts: vec4u,
-    operations: vec4u,
-    binRange: vec4i,
-    positionLayout: vec4u,
-    lowLayout: vec4u,
-    weightLayout0: vec4u,
-    weightLayout1: vec4u,
-    weightLayout2: vec4u,
-    dispatchWidth: u32,
-  };
-  @group(0) @binding(auto) var<uniform> aggregation: AggregationUniforms;`,
-  uniformTypes: {
-    counts: 'vec4<u32>',
-    operations: 'vec4<u32>',
-    binRange: 'vec4<i32>',
-    positionLayout: 'vec4<u32>',
-    lowLayout: 'vec4<u32>',
-    weightLayout0: 'vec4<u32>',
-    weightLayout1: 'vec4<u32>',
-    weightLayout2: 'vec4<u32>',
-    dispatchWidth: 'u32'
-  }
-} as const;
-
-// Keep plain uniform values by value, but retain resource identity and revision.
-function snapshotUniformProps(value: any, depth = 4): any {
-  if (!value || typeof value !== 'object' || depth === 0) return value;
-  if (Array.isArray(value) || ArrayBuffer.isView(value))
-    return Array.from(value as ArrayLike<unknown>);
-  if (Object.getPrototypeOf(value) !== Object.prototype) {
-    return typeof value.updateTimestamp === 'number'
-      ? {resource: value, revision: value.updateTimestamp}
-      : value;
-  }
-  return Object.fromEntries(
-    Object.entries(value).map(([key, entry]) => [key, snapshotUniformProps(entry, depth - 1)])
-  );
-}
 
 /** Shared dense-bin compute reduction. Layer adapters supply only bin assignment. @internal */
 export class WebGPUAggregator implements Aggregator {

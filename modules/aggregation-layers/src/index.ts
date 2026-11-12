@@ -26,7 +26,10 @@ export type {
   Aggregator,
   AggregationOperation,
   AggregationProps,
+  AggregationShaderContext,
   WebGLAggregatorProps,
   CPUAggregatorProps,
   ReadbackAggregatorProps
 } from './common/aggregator/index';
+
+export {GraphScreenGridAggregator} from './screen-grid-layer/graph-screen-grid-aggregator';

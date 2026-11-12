@@ -61,6 +61,9 @@ export default abstract class AggregationLayer<
       return;
     }
     const {positions, weights, aggregator, extensions} = this.props;
+    if (aggregator?.requiresProjectedPositions && this.state.preproject) {
+      throw new Error('GPU aggregation positions must use the custom view coordinate system');
+    }
     if ((!aggregator && this.state.aggregatorType !== 'webgpu') || extensions.length || !weights) {
       throw new Error('GPU columns require a compatible aggregator, weights, and no extensions');
     }
@@ -174,6 +177,9 @@ export default abstract class AggregationLayer<
   // Extend Layer.updateState to update the Aggregator instance
   // returns true if aggregator is changed
   updateState(params: UpdateParameters<this>): boolean {
+    if (this.props.aggregator?.supportsExtensions === false && this.props.extensions.length) {
+      throw new Error('The supplied aggregator does not support shader extensions');
+    }
     super.updateState(params);
     if (this.props.weights && !this.props.positions) {
       throw new Error('GPU aggregation weights require positions');
@@ -201,8 +207,21 @@ export default abstract class AggregationLayer<
         // Extension changes refresh the supplied instance without destroying it.
         aggregator.setNeedsUpdate();
       }
+      aggregator.setShaderContext?.({
+        shaders: this.getAggregationShaders(),
+        getAttributeBindings: () => {
+          const manager = this.getCurrentLayer()!.getAttributeManager()!;
+          return {
+            attributes: manager.getGPUVectors(),
+            bufferLayouts: manager
+              .getBufferLayouts()
+              .map(layout => ({...layout, stepMode: 'instance' as const}))
+          };
+        }
+      });
       aggregator.setProps({
         onError: error => this.getCurrentLayer()?.raiseError(error, 'aggregation'),
+        onNeedsRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
         attributes: this.getAttributeManager()?.attributes,
         positions: this.props.positions,
         weights: this.props.weights
