@@ -12,6 +12,10 @@ conversion; cell layers preserve source-feature identity while expanding identif
 See [Using with Arrow](./developer-guide/using-with-arrow.md) for shared rules and each
 layer's prop descriptions for supported inputs.
 
+### Idle rendering
+
+`Deck` stops requesting animation frames while nothing needs a redraw. Prop changes, data loading, transitions, interaction and canvas resizes resume the loop. Set `_animate` to redraw every frame.
+
 ### Async CPU aggregation of GPU inputs
 
 [`ReadbackAggregator`](./api-reference/aggregation-layers/cpu-aggregator.md#readbackaggregator) runs CPU aggregation on GPUVector inputs, so you can compare CPU and GPU timings on the same buffers.

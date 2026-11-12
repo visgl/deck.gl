@@ -325,7 +325,7 @@ The array of effects to be rendered. A lighting effect will be added if an empty
 
 * Default: `false`
 
-(Experimental) Forces deck.gl to redraw layers every animation frame. Normally deck.gl layers are only redrawn if any change is detected.
+(Experimental) Forces deck.gl to redraw layers every animation frame. Normally deck.gl layers are only redrawn if any change is detected, and no animation frames are requested while nothing changes.
 
 
 ### Interaction Settings
@@ -608,7 +608,7 @@ Receives arguments:
 
 #### `_onMetrics` (Function) {#_onmetrics}
 
-(Experimental) Called once every second with performance metrics.
+(Experimental) Called once every second with performance metrics. Not called while no animation frames are requested.
 
 Receives arguments:
 
