@@ -145,3 +145,25 @@ a structured selection, provide `sqlParser.parseExpression` for an expression or
 `sqlParser.parsePredicate` for a `where` clause.
 The query runs after `dataTransform`. Accessor fallbacks see the selected fields. Picking returns the original source row,
 including fields omitted by the query. Explicit column props take precedence.
+
+### Streaming query output
+
+For an asynchronous iterable of Arrow `RecordBatch` objects, `queryOutput` controls how
+successive batches become the layer's `data` table:
+
+```ts
+new ScatterplotLayer({
+  id: 'live-points',
+  data: recordBatchStream,
+  columnsQuery: {select: ['positions', 'radii']},
+  queryOutput: 'snapshots'
+});
+```
+
+- `queryOutput: 'batches'` (default) appends each Arrow record batch to the accumulated table.
+- `queryOutput: 'snapshots'` replaces the prior table with each complete result batch.
+
+The stream yields plain Apache Arrow `RecordBatch` objects, without metadata wrappers. The
+layer interprets them according to its declared `queryOutput`. This prop controls streamed
+data consumption, not SQL execution; `columnsQuery` projects each current table.
+
