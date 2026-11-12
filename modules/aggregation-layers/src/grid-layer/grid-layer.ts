@@ -17,7 +17,6 @@ import {
   PickingInfo,
   Position,
   Viewport,
-  _GlobeViewport,
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
@@ -356,18 +355,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUGridAggregator {
     if (type === 'webgpu')
-      return new WebGPUGridAggregator(this.context.device, {
-        shaders: this.getAggregationShaders(),
-        requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
-        bindAttributes: model => {
-          const layer = this.getCurrentLayer()! as this;
-          const manager = layer.getAttributeManager()!;
-          model.setGPUAttributes(
-            manager.getGPUVectors(),
-            manager.getBufferLayouts().map(layout => ({...layout, stepMode: 'instance' as const}))
-          );
-        }
-      });
+      return new WebGPUGridAggregator(this.context.device, this.getComputeAggregatorOptions());
     if (type === 'cpu') {
       const {gridAggregator, cellSize} = this.props;
       return new CPUAggregator({
@@ -441,19 +429,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const {props, oldProps, changeFlags} = params;
     const {aggregator} = this.state;
-    this.state.metadataRequired =
-      !props.colorDomain ||
-      !props.elevationDomain ||
-      Boolean(props.pickable) ||
-      props.onSetColorDomain !== noop ||
-      props.onSetElevationDomain !== noop ||
-      props.colorScaleType === 'quantile' ||
-      props.colorScaleType === 'ordinal' ||
-      props.lowerPercentile > 0 ||
-      props.upperPercentile < 100 ||
-      props.elevationLowerPercentile > 0 ||
-      props.elevationUpperPercentile < 100 ||
-      props.elevationScaleType === 'quantile';
+    this.state.metadataRequired = this.needsAggregationMetadata(props, noop);
     aggregator.setProps({readback: this.state.metadataRequired});
     if (
       (changeFlags.dataChanged || !this.state.dataAsArray) &&
@@ -587,49 +563,6 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
-  override setShaderModuleProps(props: Record<string, any>): void {
-    // Geometry clipping uses projected bounds, which must share the reduction viewport.
-    if (
-      props.clip &&
-      this.state?.aggregatorType === 'webgpu' &&
-      !this.state.clipByInstance &&
-      // Globe clipping already uses camera-independent Mercator bounds from ClipExtension.
-      !(this.state.aggregatorViewport instanceof _GlobeViewport)
-    ) {
-      const bounds = (this.props as this['props'] & {clipBounds: number[]}).clipBounds;
-      if (bounds) {
-        const viewport = this.state.aggregatorViewport;
-        const a = this.projectPosition([bounds[0], bounds[1], 0], {viewport});
-        const b = this.projectPosition([bounds[2], bounds[3], 0], {viewport});
-        const sourceCrs = this.internalState!.sourceCrs;
-        const longitudeCoordinates =
-          (typeof this.props.coordinateSystem !== 'string' ||
-            !['cartesian', 'meter-offsets', 'lnglat-offsets'].includes(
-              this.props.coordinateSystem
-            )) &&
-          sourceCrs?.coordinateFrame === 'geographic' &&
-          sourceCrs.axis.startsWith('en') &&
-          sourceCrs.xUnit.degreesPerUnit === 1 &&
-          sourceCrs.yUnit.degreesPerUnit === 1;
-        if (bounds[0] - bounds[2] > 180 && viewport.isGeospatial && longitudeCoordinates)
-          b[0] += 512;
-        props = {
-          ...props,
-          clip: {
-            ...props.clip,
-            bounds: [
-              Math.min(a[0], b[0]),
-              Math.min(a[1], b[1]),
-              Math.max(a[0], b[0]),
-              Math.max(a[1], b[1])
-            ]
-          }
-        };
-      }
-    }
-    super.setShaderModuleProps(props);
-  }
-
   override draw(opts) {
     // Replaces render time viewport with our own
     if (opts.shaderModuleProps.project) {
@@ -750,13 +683,14 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       elevationUpperPercentile,
       elevationDomain
     } = this.props;
+    const pendingMetadata = aggregator.getResultValues && !aggregator.getResultValues(0);
     if (
-      this.state.metadataRequired &&
-      aggregator.getResultValues &&
-      aggregator.binCount &&
-      !aggregator.getResultValues(0)
-    )
-      return null;
+      pendingMetadata &&
+      (!colorDomain || !elevationDomain || this.needsAggregationScaleValues())
+    ) {
+      return this.state.retainedAggregationLayer?.clone({pickable: false}) || null;
+    }
+    if (pendingMetadata && !this.needsAggregationScaleValues()) this.prepareRawAggregationScales();
     const CellLayerClass = this.getSubLayerClass('cells', GridCellLayer);
     const binAttribute = aggregator.getBins();
 
@@ -784,11 +718,12 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       return null;
     }
 
-    return new CellLayerClass(
+    const cellLayer = new CellLayerClass(
       this.getSubLayerProps({
         id: 'cells'
       }),
       {
+        ...(pendingMetadata ? {pickable: false} : {}),
         numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,
@@ -826,6 +761,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         extensions: []
       }
     );
+    this.retainAggregationLayer(cellLayer, this.state.binIdRange);
+    return cellLayer;
   }
 
   getPickingInfo(params: GetPickingInfoParams): GridLayerPickingInfo<DataT> {

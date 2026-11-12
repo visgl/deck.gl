@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {Buffer} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
@@ -225,9 +225,7 @@ test('Hexagon GPU columns share two-channel output and update prefixes', async (
   }
 });
 
-test('Hexagon retains CPU aggregation for quantile elevation and integer weights', async ({
-  skip
-}) => {
+test('Hexagon supports quantile elevation and retains integer fallback', async ({skip}) => {
   const device = await getWebGPUTestDevice();
   if (!device) return skip();
   await testLayerAsync({
@@ -245,8 +243,9 @@ test('Hexagon retains CPU aggregation for quantile elevation and integer weights
           elevationDomain: [0, 10],
           elevationScaleType: 'quantile'
         },
-        onAfterUpdate({layer}) {
-          expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+        async onAfterUpdate({layer}) {
+          expect(layer.state.aggregator).toBeInstanceOf(WebGPUHexagonAggregator);
+          await vi.waitFor(() => expect(layer.state.aggregator.isLoaded).toBe(true));
         }
       },
       {

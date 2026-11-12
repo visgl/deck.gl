@@ -10,8 +10,9 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ### Hexagon compute aggregation
 
-HexagonLayer supports WebGPU aggregation with explicit color and elevation domains,
-using the shared reducer and GPUVector rendering path.
+On WebGPU devices, [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md#compute-aggregation)
+aggregates in compute shaders, including automatic domains, picking, quantile and ordinal
+scales, percentiles, and extensions.
 
 ### ScreenGrid and Grid compute rendering features
 

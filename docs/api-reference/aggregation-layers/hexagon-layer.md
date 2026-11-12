@@ -191,13 +191,12 @@ CPU aggregation is used as fallback in the following cases:
 
 ##### Compute aggregation
 
-On a WebGPU device, HexagonLayer uses compute aggregation with explicit `colorDomain`
-and `elevationDomain`. Accessor data and GPU columns are supported; GPU positions require explicit `dataBounds`.
-
-Picking, extensions, domain callbacks, percentile filtering, quantile scales, and ordinal
-color scales use CPU aggregation instead. Dense grids exceeding
-device buffer limits also use CPU aggregation for accessor data. GPU-only inputs require
-a compatible compute configuration. Columns requiring CPU preprojection are unsupported.
+On a WebGPU device, HexagonLayer aggregates in compute shaders when `gpuAggregation` is true.
+Automatic domains, picking, domain callbacks, distribution scales, and percentiles copy results
+back to the CPU after each change. Previous cells remain visible while rendering waits for
+new domains or scales. Explicit domains with ordinary scales let cells render without waiting
+for picking data. Extensions work with accessor data. [GPU column inputs](./aggregator.md#gpu-column-inputs)
+also need `dataBounds`. Data over the device buffer limits uses CPU aggregation.
 
 #### `radius` (number, optional) {#radius}
 

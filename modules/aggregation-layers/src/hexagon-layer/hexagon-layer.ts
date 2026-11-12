@@ -287,6 +287,7 @@ export default class HexagonLayer<
       colors?: AttributeWithScale;
       elevations?: AttributeWithScale;
 
+      metadataRequired?: boolean;
       binIdRange: [number, number][];
       aggregatorViewport: Viewport;
     } & AggregationLayer<any>['state'];
@@ -303,25 +304,7 @@ export default class HexagonLayer<
       return 'cpu';
     }
 
-    // Feature guards are temporary until metadata, scales, and extension filtering
-    // are connected to this adapter. Input formats and device limits still need validation.
-    if (
-      gpuAggregation &&
-      this.context.device.type === 'webgpu' &&
-      this.props.colorDomain &&
-      this.props.elevationDomain &&
-      !this.props.pickable &&
-      !this.props.extensions.length &&
-      this.props.onSetColorDomain === noop &&
-      this.props.onSetElevationDomain === noop &&
-      this.props.colorScaleType !== 'quantile' &&
-      this.props.colorScaleType !== 'ordinal' &&
-      this.props.elevationScaleType !== 'quantile' &&
-      this.props.lowerPercentile === 0 &&
-      this.props.upperPercentile === 100 &&
-      this.props.elevationLowerPercentile === 0 &&
-      this.props.elevationUpperPercentile === 100
-    ) {
+    if (gpuAggregation && this.context.device.type === 'webgpu') {
       if (
         (!this.props.positions &&
           !WebGPUHexagonAggregator.supportsData(this.props.data, [
@@ -377,7 +360,8 @@ export default class HexagonLayer<
   }
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUHexagonAggregator {
-    if (type === 'webgpu') return new WebGPUHexagonAggregator(this.context.device);
+    if (type === 'webgpu')
+      return new WebGPUHexagonAggregator(this.context.device, this.getComputeAggregatorOptions());
     if (type === 'cpu') {
       const {hexagonAggregator, radius} = this.props;
       return new CPUAggregator({
@@ -452,6 +436,8 @@ export default class HexagonLayer<
 
     const {props, oldProps, changeFlags} = params;
     const {aggregator} = this.state;
+    this.state.metadataRequired = this.needsAggregationMetadata(props, noop);
+    aggregator.setProps({readback: this.state.metadataRequired});
     if (
       (changeFlags.dataChanged || !this.state.dataAsArray) &&
       (props.getColorValue || props.getElevationValue)
@@ -594,7 +580,11 @@ export default class HexagonLayer<
     if (channel === 0) {
       const result = aggregator.getResult(0)!;
       this.setState({
-        colors: new AttributeWithScale(result, aggregator.binCount)
+        colors: new AttributeWithScale(
+          result,
+          aggregator.binCount,
+          aggregator.getResultValues?.(channel)
+        )
       });
       if (props.onSetColorDomain !== noop) {
         props.onSetColorDomain(aggregator.getResultDomain(0));
@@ -602,7 +592,11 @@ export default class HexagonLayer<
     } else if (channel === 1) {
       const result = aggregator.getResult(1)!;
       this.setState({
-        elevations: new AttributeWithScale(result, aggregator.binCount)
+        elevations: new AttributeWithScale(
+          result,
+          aggregator.binCount,
+          aggregator.getResultValues?.(channel)
+        )
       });
       if (props.onSetElevationDomain !== noop) {
         props.onSetElevationDomain(aggregator.getResultDomain(1));
@@ -692,6 +686,14 @@ export default class HexagonLayer<
       elevationUpperPercentile,
       elevationDomain
     } = this.props;
+    const pendingMetadata = aggregator.getResultValues && !aggregator.getResultValues(0);
+    if (
+      pendingMetadata &&
+      (!colorDomain || !elevationDomain || this.needsAggregationScaleValues())
+    ) {
+      return this.state.retainedAggregationLayer?.clone({pickable: false}) || null;
+    }
+    if (pendingMetadata && !this.needsAggregationScaleValues()) this.prepareRawAggregationScales();
     const CellLayerClass = this.getSubLayerClass('cells', HexagonCellLayer);
     const binAttribute = aggregator.getBins();
 
@@ -719,11 +721,12 @@ export default class HexagonLayer<
       return null;
     }
 
-    return new CellLayerClass(
+    const cellLayer = new CellLayerClass(
       this.getSubLayerProps({
         id: 'cells'
       }),
       {
+        ...(pendingMetadata ? {pickable: false} : {}),
         numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,
@@ -763,6 +766,8 @@ export default class HexagonLayer<
         extensions: []
       }
     );
+    this.retainAggregationLayer(cellLayer, this.state.binIdRange);
+    return cellLayer;
   }
 
   getPickingInfo(params: GetPickingInfoParams): HexagonLayerPickingInfo<DataT> {
