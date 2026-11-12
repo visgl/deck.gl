@@ -11,7 +11,7 @@ import type {ColumnDefinitions} from './layer-columns';
 import AttributeManager from './attribute/attribute-manager';
 import GPUVectorModel from './luma-upstream/gpu-vector-model';
 import UniformTransitionManager from './uniform-transition-manager';
-import {diffProps, validateProps} from '../lifecycle/props';
+import {validateProps} from '../lifecycle/props';
 import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
@@ -28,7 +28,7 @@ import pickingModule, {
   PICKING_INVALID_INDEX
 } from '../shaderlib/picking/picking';
 
-import Component from '../lifecycle/component';
+import StatefulComponent from '../lifecycle/stateful-component';
 import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import {areCRSEqual, resolveCRS} from '../utils/crs';
 import {supportsSourceCRS} from '../shaderlib/project/coordinate-systems';
@@ -220,7 +220,7 @@ type SharedLayerState = {
   [key: string]: unknown;
 };
 
-export default abstract class Layer<PropsT extends {} = {}> extends Component<
+export default abstract class Layer<PropsT extends {} = {}> extends StatefulComponent<
   PropsT & Required<LayerProps>
 > {
   static defaultProps: DefaultProps = defaultProps;
@@ -1239,24 +1239,13 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   _transferState(oldLayer: Layer<PropsT>): void {
     debug(TRACE_MATCHED, this, this === oldLayer);
 
-    const {state, internalState} = oldLayer;
-
     if (this === oldLayer) {
       return;
     }
 
-    // Move internalState
-    this.internalState = internalState as LayerState<this>;
+    this.transferComponentState(oldLayer);
 
-    // Move state
-    this.state = state;
-    // We keep the state ref on old layers to support async actions
-    // oldLayer.state = null;
-
-    // Ensure any async props are updated
-    this.internalState.setAsyncProps(this.props);
-
-    this._diffProps(this.props, this.internalState.getOldProps() as Layer<PropsT>['props']);
+    this._diffProps(this.props, this.internalState!.getOldProps() as Layer<PropsT>['props']);
   }
 
   /** (Internal) Called by layer manager when a new layer is added or an existing layer is matched with a new instance */
@@ -1542,7 +1531,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       can be update correctly with minimal effort */
   private _diffProps(newProps: Layer<PropsT>['props'], oldProps: Layer<PropsT>['props']) {
     const changeFlags = {
-      ...diffProps(newProps, oldProps),
+      ...this.diffComponentProps(newProps, oldProps),
       projectionChanged: !areCRSEqual(newProps.coordinateSystem, oldProps.coordinateSystem)
     };
 
