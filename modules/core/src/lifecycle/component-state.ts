@@ -275,15 +275,43 @@ export default class ComponentState<ComponentT extends Component> {
     const loadCount = asyncProp.pendingLoadCount;
     let data: any[] = [];
     let count = 0;
+    let arrowBatches: import('apache-arrow').RecordBatch[] = [];
+    let lastResult: unknown = data;
 
     for await (const chunk of iterable) {
-      if (!this.component) {
-        // This component state has been finalized
+      if (!this.component || loadCount !== asyncProp.pendingLoadCount) {
+        // The layer was finalized or a newer data stream superseded this one.
         return;
       }
 
-      // @ts-expect-error (2339) dataTransform is not decared in base component props
-      const {dataTransform} = this.component.props;
+      // @ts-expect-error (2339) layer-only props are not declared on Component
+      const {dataTransform, queryOutput = 'batches'} = this.component.props;
+      // Arrow is an optional peer dependency: load it only for Arrow RecordBatch streams.
+      const isArrowChunk = Boolean(
+        chunk && typeof chunk.numRows === 'number' &&
+        Array.isArray(chunk.schema?.fields) && typeof chunk.getChild === 'function'
+      );
+      if (isArrowChunk) {
+        const {Table, RecordBatch} = await import('apache-arrow');
+        if (!(chunk instanceof RecordBatch)) {
+          this._onError(propName, new Error('Expected an Arrow RecordBatch in the query stream.'));
+          return;
+        }
+        if (queryOutput === 'snapshots') {
+          arrowBatches = [chunk];
+        } else {
+          // Preserve Arrow columnar storage without converting to row objects.
+          arrowBatches.push(chunk);
+        }
+        const table = new Table(arrowBatches);
+        lastResult = table;
+        this._setAsyncPropValue(propName, table, loadCount);
+        continue;
+      }
+      if (queryOutput === 'snapshots') {
+        this._onError(propName, new Error('queryOutput: snapshots requires Arrow RecordBatch chunks.'));
+        return;
+      }
       if (dataTransform) {
         data = dataTransform(chunk, data) as any[];
       } else {
@@ -297,10 +325,13 @@ export default class ComponentState<ComponentT extends Component> {
       });
 
       count = data.length;
+      lastResult = data;
       this._setAsyncPropValue(propName, data, loadCount);
     }
 
-    this._onResolve(propName, data);
+    if (this.component && loadCount === asyncProp.pendingLoadCount) {
+      this._onResolve(propName, lastResult);
+    }
   }
 
   // Give the app a chance to post process the loaded data

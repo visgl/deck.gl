@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {isArrowTable} from '../arrow/upstream-math/is-arrow-table';
 import {createIterable} from '../utils/iterable-utils';
 import {deepEqual} from '../utils/deep-equal';
 import type {UpdateParameters} from './layer';
@@ -584,11 +585,17 @@ export class LayerColumns {
       Boolean(lowAttribute) && positionOptions.fp64
         ? new Float32Array(Math.max(1, length) * size)
         : undefined;
+    const tableData = isArrowTable(props.data);
     const pack = (
       value: any,
       target: Float32Array | Uint8Array | Uint8ClampedArray | Uint32Array,
       offset: number
     ) => {
+      // Arrow list rows are vectors with get(index), rather than indexed arrays.
+      if (tableData && typeof value?.get === 'function' && Number.isInteger(value.length)) {
+        const list = value;
+        value = Array.from({length: Math.min(size, list.length)}, (_, index) => list.get(index));
+      }
       if (lowAttribute) positionOptions.onPosition?.(value);
       if (Boolean(lowAttribute) && positionOptions.transform)
         value = positionOptions.transform(value);

@@ -7,6 +7,7 @@ import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import ComponentState from '../lifecycle/component-state';
 
 import type Layer from './layer';
+import type {ColumnsQuery, LayerData, SQLParser} from '../types/layer-props';
 import type AttributeManager from './attribute/attribute-manager';
 import type Viewport from '../viewports/viewport';
 import type UniformTransitionManager from './uniform-transition-manager';
@@ -28,6 +29,15 @@ export type ChangeFlags = {
 };
 
 export default class LayerState<LayerT extends Layer> extends ComponentState<LayerT> {
+  /** Current request and its projected table, retained across matched layer instances. */
+  columnsQuery?: {
+    source: unknown;
+    query: ColumnsQuery | string;
+    parser?: SQLParser;
+    pending: boolean;
+    result?: LayerData<unknown>;
+    sourceRowIndices?: {get(index: number): number | null};
+  };
   attributeManager: AttributeManager | null;
   needsRedraw: boolean;
   needsUpdate: boolean;

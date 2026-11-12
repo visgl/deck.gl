@@ -24,8 +24,17 @@ equivalent row and Arrow inputs.
 ## Column layouts
 
 For an existing Arrow table, `table.getChild('radius')` returns a vector suitable for `radii`
-when the field is numeric. Passing a table as `data` alone does not bind its fields to column
-props. Separate longitude and latitude fields must first be combined into fixed-size lists.
+when the field is numeric. ScatterplotLayer can also discover compatible fields by their exact
+column prop names from a table passed as `data`:
+
+```ts
+new ScatterplotLayer({id: 'points', data: table}); // table has a positions field
+```
+
+Explicit column props take precedence. Missing or incompatible fields use the existing accessors,
+which receive Arrow rows. This also works with a promise that resolves to a table.
+Other layers still require explicit column props. Combine separate longitude and latitude fields
+into fixed-size lists before supplying positions.
 
 | Column | Shape | Overrides |
 | --- | --- | --- |
@@ -105,3 +114,56 @@ Column inputs must use the following Arrow types.
 
 Dictionary, string, and variable-size list inputs are unsupported. Null values and invalid
 transformed values raise conversion errors, even when the schema is compatible.
+
+### Selecting fields with a query
+
+ScatterplotLayer can project a loaded Arrow table before resolving column inputs. Use
+`columnsQuery.select` to keep fields by name, rename them, or compute fields with SQL strings or math.gl expression ASTs.
+Use `where` and `limit` to restrict the rows before evaluating expressions.
+
+```ts
+import {sqlParser} from '@deck.gl/core/sql';
+
+new Deck({
+  sqlParser,
+  layers: [
+    new ScatterplotLayer({
+      id: 'points',
+      data: tablePromise,
+      columnsQuery: `SELECT ARRAY[longitude, latitude]::DOUBLE PRECISION[2] AS positions,
+        size AS radii`
+    })
+  ]
+});
+```
+
+The loaded `data` table is the implicit source. `FROM data` is optional.
+
+Column queries require Apache Arrow 21.2 or later with the current loaders.gl evaluator.
+Structured selections can pass expression and predicate ASTs directly. To use strings inside
+a structured selection, provide `sqlParser.parseExpression` for an expression or
+`sqlParser.parsePredicate` for a `where` clause.
+The query runs after `dataTransform`. Accessor fallbacks see the selected fields. Picking returns the original source row,
+including fields omitted by the query. Explicit column props take precedence.
+
+### Streaming query output
+
+For an asynchronous iterable of Arrow `RecordBatch` objects, `queryOutput` controls how
+successive batches become the layer's `data` table:
+
+```ts
+new ScatterplotLayer({
+  id: 'live-points',
+  data: recordBatchStream,
+  columnsQuery: {select: ['positions', 'radii']},
+  queryOutput: 'snapshots'
+});
+```
+
+- `queryOutput: 'batches'` (default) appends each Arrow record batch to the accumulated table.
+- `queryOutput: 'snapshots'` replaces the prior table with each complete result batch.
+
+The stream yields plain Apache Arrow `RecordBatch` objects, without metadata wrappers. The
+layer interprets them according to its declared `queryOutput`. This prop controls streamed
+data consumption, not SQL execution; `columnsQuery` projects each current table.
+

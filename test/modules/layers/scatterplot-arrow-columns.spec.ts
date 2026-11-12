@@ -4,13 +4,14 @@
 
 import {afterAll, beforeAll, expect, test, vi} from 'vitest';
 import {GPUDataEvaluator} from '@luma.gl/graph/gpu-simple-graph';
+import {parseSQLExpression, parseSQLPredicate} from '@math.gl/core/sql';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {device, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {ArrowConverter} from '@deck.gl/core/arrow';
 import {Texture} from '@luma.gl/core';
 import {GPUVectorModel} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
-import {Field, FixedSizeList, Float32, Uint8, vectorFromArray} from 'apache-arrow';
+import {Field, FixedSizeList, Float32, Table, Uint8, vectorFromArray} from 'apache-arrow';
 
 const bufferPoolSize = GPUDataEvaluator.bufferPoolSize;
 beforeAll(() => {
@@ -787,4 +788,214 @@ test('Scatterplot borrows GPU-only positions without reading them for bounds', a
     columns.destroy();
     buffer.destroy();
   }
+});
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Scatterplot resolves Arrow table data on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      return skip();
+    }
+    const data = new Table({
+      positions: positions([
+        [0, 0],
+        [1, 1]
+      ]),
+      radius: vectorFromArray([2, 3], new Float32())
+    });
+    const listFallbackData = new Table({
+      position: positions([
+        [2, 3],
+        [4, 5]
+      ]),
+      radii: vectorFromArray([2, 3], new Float32())
+    });
+    const getRadius = vi.fn(row => row.radius);
+    const loadedTables = new Set();
+    const checkTable = ({layer}: {layer: ScatterplotLayer}) => {
+      if (!layer.isLoaded) {
+        return;
+      }
+      loadedTables.add(layer.props.data);
+      expect(layer.state.columns).toBeDefined();
+      expect(layer.getNumInstances()).toBe(2);
+      const info = layer.getPickingInfo({
+        info: {index: 1, color: null, layer, picked: true, x: 0, y: 0, pixelRatio: 1},
+        mode: 'query',
+        sourceLayer: null
+      });
+      expect(info.object.radius).toBe(3);
+      expect(getRadius).toHaveBeenCalled();
+    };
+    await testLayerAsync({
+      Layer: ScatterplotLayer,
+      device: testDevice,
+      draw: false,
+      testCases: [
+        {props: {data, getRadius}, onAfterUpdate: checkTable},
+        {updateProps: {data: Promise.resolve(new Table(data.batches))}, onAfterUpdate: checkTable},
+        {
+          updateProps: {data: listFallbackData},
+          onAfterUpdate: async ({layer}) => {
+            if (!layer.isLoaded) {
+              return;
+            }
+            const {instancePositions} = (layer.state.columns as any).prepared.columns;
+            const bytes = await instancePositions.data[0].buffer.readAsync();
+            expect(Array.from(new Float32Array(bytes.buffer, bytes.byteOffset, 6))).toEqual([
+              2, 3, 0, 4, 5, 0
+            ]);
+            expect(layer.getBounds()).toEqual([
+              [2, 3, 0],
+              [4, 5, 0]
+            ]);
+          }
+        },
+        {
+          updateProps: {data: [{position: [0, 0], radius: 1}]},
+          onAfterUpdate: ({layer}) => {
+            expect(layer.state.columns).toBeUndefined();
+            expect(layer.getNumInstances()).toBe(1);
+          }
+        }
+      ],
+      onError: error => {
+        throw error;
+      }
+    });
+    expect(loadedTables.size).toBe(2);
+  });
+}
+
+test('Scatterplot projects promised loader data and updates query aliases', async () => {
+  const table = new Table({
+    positions: positions([
+      [0, 0],
+      [1, 1]
+    ]),
+    size: vectorFromArray([2, 3], new Float32()),
+    alternate: vectorFromArray([4, 5], new Float32()),
+    label: vectorFromArray(['Oak', 'Birch'])
+  });
+  const data = {shape: 'arrow-table' as const, data: table};
+  const radii = vectorFromArray([7, 8], new Float32());
+  const onDataLoad = vi.fn();
+  let initialProjection: unknown;
+  const onError = vi.fn();
+  const checkRadius =
+    (expected: number, projected: boolean) =>
+    async ({layer}: {layer: ScatterplotLayer}) => {
+      if (!layer.isLoaded) {
+        return;
+      }
+      expect(layer.props.data).toBe(data);
+      const {instanceRadius} = (layer.state.columns as any).prepared.columns;
+      if (instanceRadius.data) {
+        const bytes = await instanceRadius.data[0].buffer.readAsync();
+        expect(new Float32Array(bytes.buffer, bytes.byteOffset, 1)[0]).toBe(expected);
+      } else {
+        expect(instanceRadius.value[0]).toBe(expected);
+      }
+      const info = layer.getPickingInfo({
+        info: {index: 1, color: null, layer, picked: true, x: 0, y: 0, pixelRatio: 1},
+        mode: 'query',
+        sourceLayer: null
+      });
+      expect(info.object.label).toBe('Birch');
+      expect(info.object.alternate).toBe(5);
+      if (projected) {
+        const result = layer.internalState?.columnsQuery?.result;
+        expect(result && 'getChild' in result && result.getChild('alternate')).toBeNull();
+      }
+    };
+  await testLayerAsync({
+    Layer: ScatterplotLayer,
+    device,
+    draw: false,
+    onError: error => {
+      if (!String(error).includes('missing')) {
+        throw error;
+      }
+      onError(error);
+    },
+    testCases: [
+      {
+        props: {
+          data: Promise.resolve(data),
+          onDataLoad,
+          columnsQuery: {
+            select: [
+              'positions',
+              {as: 'radii', expression: parseSQLExpression('size + 0')},
+              'label'
+            ]
+          }
+        },
+        onAfterUpdate: async params => {
+          await checkRadius(2, true)(params);
+          if (params.layer.isLoaded) {
+            initialProjection = params.layer.internalState?.columnsQuery?.result;
+          }
+        }
+      },
+      {
+        updateProps: {
+          columnsQuery: {
+            select: [
+              'positions',
+              {as: 'radii', expression: parseSQLExpression('size + 0')},
+              'label'
+            ]
+          }
+        },
+        onAfterUpdate: ({layer}) => {
+          expect(initialProjection).toBeDefined();
+          expect(layer.isLoaded).toBe(true);
+          expect(layer.internalState?.columnsQuery?.result).toBe(initialProjection);
+        }
+      },
+      {
+        updateProps: {
+          radii,
+          columnsQuery: {select: ['positions', {as: 'radii', column: 'alternate'}, 'label']}
+        },
+        onAfterUpdate: checkRadius(7, true)
+      },
+      {
+        updateProps: {radii: null},
+        onAfterUpdate: checkRadius(4, true)
+      },
+      {
+        updateProps: {columnsQuery: null},
+        onAfterUpdate: checkRadius(1, false)
+      },
+      {
+        updateProps: {
+          columnsQuery: {
+            select: ['positions'],
+            where: parseSQLPredicate('size > 2')
+          }
+        },
+        onAfterUpdate: ({layer}) => {
+          if (!layer.isLoaded) {
+            return;
+          }
+          expect(layer.getNumInstances()).toBe(1);
+          const info = layer.getPickingInfo({
+            info: {index: 0, color: null, layer, picked: true, x: 0, y: 0, pixelRatio: 1},
+            mode: 'query',
+            sourceLayer: null
+          });
+          expect(info.object.label).toBe('Birch');
+        }
+      },
+      {
+        updateProps: {columnsQuery: {select: ['missing']}}
+      }
+    ]
+  });
+  expect(onDataLoad).toHaveBeenCalledOnce();
+  expect(onDataLoad.mock.calls[0][0]).toBe(data);
+  expect(onError).toHaveBeenCalledOnce();
+  expect(String(onError.mock.calls[0][0])).toContain('missing');
 });

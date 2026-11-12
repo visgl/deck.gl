@@ -114,6 +114,8 @@ export type {UpdateParameters} from './lib/layer';
 export type {DeckProps} from './lib/deck';
 export type {
   LayerProps,
+  ColumnsQuery,
+  SQLParser,
   CompositeLayerProps,
   Accessor,
   AccessorContext,

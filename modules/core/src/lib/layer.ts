@@ -5,6 +5,7 @@
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/core/webgl';
+import {unwrapArrowTable} from '../arrow/unwrap-arrow-table';
 import {isArrowTable} from '../arrow/upstream-math/is-arrow-table';
 import {resolveColumns} from './resolve-columns';
 import type {ColumnDefinitions} from './layer-columns';
@@ -48,11 +49,25 @@ import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
 import type {DefaultProps} from '../lifecycle/prop-types';
-import type {LayerData, LayerProps} from '../types/layer-props';
+import type {ColumnsQuery, LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {AttributeOptions, BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
 import {PickingProps} from '@luma.gl/shaders';
+
+// Query expressions may contain nested AST nodes.
+const COLUMNS_QUERY_COMPARE_DEPTH = -1;
+
+function usesSQLParser(query: ColumnsQuery | string): boolean {
+  return (
+    typeof query === 'string' ||
+    typeof query.where === 'string' ||
+    query.select.some(
+      field =>
+        typeof field !== 'string' && 'expression' in field && typeof field.expression === 'string'
+    )
+  );
+}
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -95,6 +110,8 @@ const defaultProps: DefaultProps<LayerProps> = {
     value: data => data && data.__diff,
     optional: true
   },
+  columnsQuery: {type: 'object', value: null, optional: true, compare: COLUMNS_QUERY_COMPARE_DEPTH},
+  queryOutput: 'batches',
   dataTransform: {type: 'function', value: null, optional: true},
   onDataLoad: {type: 'function', value: null, optional: true},
   onError: {type: 'function', value: null, optional: true},
@@ -352,7 +369,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Returns true if all async resources are loaded */
   get isLoaded(): boolean {
     return this.internalState
-      ? !this._coordinateSystemLoading && !this.internalState.isAsyncPropLoading()
+      ? !this._coordinateSystemLoading &&
+          !this.internalState.isAsyncPropLoading() &&
+          !this.internalState.columnsQuery?.pending
       : false;
   }
 
@@ -555,7 +574,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
 
     // Use container library to get a count for any ES6 container or object
-    return count(this.props.data);
+    return count(this.getColumnData());
   }
 
   /** Buffer layout describes how many attribute values are packed for each data object
@@ -592,7 +611,87 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     definitions: ColumnDefinitions,
     useTable = false
   ): Record<string, unknown> {
-    return resolveColumns(this.props, definitions, useTable);
+    const data = useTable ? this.getColumnData() : this.props.data;
+    const props =
+      data === this.props.data ? this.props : Object.create(this.props, {data: {value: data}});
+    return resolveColumns(props, definitions, useTable);
+  }
+
+  /** Returns the table used by column-aware layers while leaving the loaded prop intact. */
+  protected getColumnData(): LayerData<unknown> {
+    if (this.props.columnsQuery) {
+      const request = this.internalState?.columnsQuery;
+      return request &&
+        request.source === this.props.data &&
+        request.parser ===
+          (usesSQLParser(this.props.columnsQuery) ? this.context?.sqlParser : undefined) &&
+        deepEqual(request?.query, this.props.columnsQuery, COLUMNS_QUERY_COMPARE_DEPTH)
+        ? (request.result ?? EMPTY_ARRAY)
+        : EMPTY_ARRAY;
+    }
+    return (unwrapArrowTable(this.props.data) ?? this.props.data) as LayerData<unknown>;
+  }
+
+  /** Schedules a projection once the current source has loaded. */
+  private updateColumnsQuery(): void {
+    const state = this.internalState!;
+    const {data, columnsQuery: query} = this.props;
+    if (!query || state.isAsyncPropLoading('data')) {
+      if (state.columnsQuery) {
+        state.columnsQuery = undefined;
+        this.setChangeFlags({dataChanged: 'columnsQuery input changed'});
+      }
+      return;
+    }
+    const parser = usesSQLParser(query) ? this.context.sqlParser : undefined;
+    const previous = state.columnsQuery;
+    if (
+      previous &&
+      previous.source === data &&
+      previous.parser === parser &&
+      deepEqual(previous.query, query, COLUMNS_QUERY_COMPARE_DEPTH)
+    ) {
+      return;
+    }
+    const request = {source: data, query, parser, pending: true, result: undefined} as NonNullable<
+      typeof state.columnsQuery
+    >;
+    state.columnsQuery = request;
+    this.setChangeFlags({dataChanged: 'columnsQuery input changed'});
+
+    const activeLayer = () => {
+      const layer = state.layer;
+      return state.columnsQuery === request &&
+        layer &&
+        layer.props.data === data &&
+        (!usesSQLParser(query) || layer.context.sqlParser === parser) &&
+        deepEqual(layer.props.columnsQuery, query, COLUMNS_QUERY_COMPARE_DEPTH) &&
+        !state.isAsyncPropLoading('data')
+        ? layer
+        : null;
+    };
+    void import('../arrow/columns-query')
+      .then(({projectColumns}) => projectColumns(data, query, parser))
+      .then(
+        ({table, sourceRowIndices}) => {
+          const layer = activeLayer();
+          if (layer) {
+            request.result = table;
+            request.sourceRowIndices = sourceRowIndices;
+            request.pending = false;
+            layer.setChangeFlags({dataChanged: 'columnsQuery result changed'});
+            layer.setNeedsUpdate();
+          }
+        },
+        error => {
+          const layer = activeLayer();
+          if (layer) {
+            request.pending = false;
+            layer.setNeedsUpdate();
+            layer.raiseError(error, 'evaluating columnsQuery');
+          }
+        }
+      );
   }
 
   /** Called once to set up the initial state. Layers can create WebGL resources here. */
@@ -706,11 +805,17 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const {index} = info;
 
     if (index >= 0) {
-      // If props.data is an indexable array, get the object
-      if (Array.isArray(this.props.data)) {
-        info.object = this.props.data[index];
-      } else if (isArrowTable(this.props.data)) {
-        info.object = this.props.data.get(index);
+      const data = this.getColumnData();
+      if (Array.isArray(data)) {
+        info.object = data[index];
+      } else if (isArrowTable(data)) {
+        const request = this.internalState?.columnsQuery;
+        if (request?.result === data) {
+          const source = unwrapArrowTable(request.source);
+          info.object = source?.get(request.sourceRowIndices?.get(index) ?? index);
+        } else {
+          info.object = data.get(index);
+        }
       }
     }
 
@@ -842,14 +947,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const numInstances = this.getNumInstances();
     const startIndices = this.getStartIndices();
 
+    const data = this.getColumnData();
     attributeManager.update({
-      data: props.data,
+      data,
       numInstances,
       startIndices,
       props,
       transitions: props.transitions,
       // @ts-ignore (TS2339) property attribute is not present on some acceptable data types
-      buffers: props.data.attributes,
+      buffers: data.attributes,
       context: this
     });
 
@@ -1268,6 +1374,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     )
       return;
     this._updatePreprojection(this.internalState?.viewport || this.context.viewport);
+    this.updateColumnsQuery();
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.needsUpdate();
     // End lifecycle method

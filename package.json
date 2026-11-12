@@ -48,7 +48,11 @@
   "browser": {
     "jsdom": false
   },
+  "resolutions": {
+    "apache-arrow": "^21.2.0"
+  },
   "devDependencies": {
+    "apache-arrow": "^21.2.0",
     "@deck.gl-community/panels": "^9.4.2",
     "@floating-ui/dom": "^1.7.5",
     "@loaders.gl/core": "5.0.0-beta.7",
