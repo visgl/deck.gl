@@ -1,6 +1,6 @@
 {
   "name": "@deck.gl/proposals",
-  "version": "10.0.0-alpha.3",
+  "version": "10.0.0-alpha.1",
   "private": true,
   "description": "Private experimental deck.gl layers and effects",
   "license": "MIT",
@@ -53,20 +53,20 @@
   ],
   "sideEffects": false,
   "dependencies": {
-    "@deck.gl/core": "9.4.0-beta.4",
-    "@deck.gl/extensions": "9.4.0-beta.4",
-    "@deck.gl/geo-layers": "9.4.0-beta.4",
-    "@deck.gl/layers": "9.4.0-beta.4",
+    "@deck.gl/core": "10.0.0-alpha.1",
+    "@deck.gl/extensions": "10.0.0-alpha.1",
+    "@deck.gl/geo-layers": "10.0.0-alpha.1",
+    "@deck.gl/layers": "10.0.0-alpha.1",
     "@loaders.gl/core": "5.0.0-beta.8",
     "@loaders.gl/tiles": "5.0.0-beta.8",
-    "@math.gl/web-mercator": "5.0.0-beta.8",
+    "@luma.gl/anari": "10.0.0-alpha.14",
     "@luma.gl/core": "10.0.0-alpha.14",
     "@luma.gl/engine": "10.0.0-alpha.14",
-    "@luma.gl/anari": "10.0.0-alpha.14",
     "@luma.gl/graph": "10.0.0-alpha.14",
     "@luma.gl/shaders": "10.0.0-alpha.14",
     "@math.gl/core": "5.0.0-beta.8",
-    "@math.gl/earth": "5.0.0-beta.8"
+    "@math.gl/earth": "5.0.0-beta.8",
+    "@math.gl/web-mercator": "5.0.0-beta.8"
   },
   "peerDependencies": {
     "apache-arrow": ">=17.0.0"
