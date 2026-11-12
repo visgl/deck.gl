@@ -82,6 +82,11 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     };
   }
 
+  /** TextLayer maps character picking indices back to its own data rows. */
+  protected useSourceIndexes(): boolean {
+    return false;
+  }
+
   initializeState() {
     super.initializeState();
 
