@@ -24,7 +24,7 @@ import type {
   ImageSourceMetadata,
   ImageType
 } from '@loaders.gl/core/loader-utils';
-import {createDataSource} from '@loaders.gl/core';
+import {createDataSourceSync} from '@loaders.gl/core';
 import {ImageSource, WMSSource} from '@loaders.gl/ogc/wms';
 import {WGS84ToPseudoMercator} from './utils';
 
@@ -166,13 +166,13 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     }
 
     if (typeof props.data === 'string') {
-      return createDataSource(props.data, [WMSSource], {
+      return createDataSourceSync(props.data, [WMSSource], {
         wms: {},
         core: {
           type: props.serviceType,
           loadOptions: props.loadOptions
         }
-      }) as ImageSource;
+      });
     }
 
     throw new Error('invalid image source in props.data');
