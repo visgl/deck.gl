@@ -167,10 +167,10 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
 
     if (typeof props.data === 'string') {
       return createDataSourceSync(props.data, [WMSSource], {
-        wms: {},
+        ...props.loadOptions,
         core: {
-          type: props.serviceType,
-          loadOptions: props.loadOptions
+          ...props.loadOptions?.core,
+          type: props.serviceType
         }
       });
     }

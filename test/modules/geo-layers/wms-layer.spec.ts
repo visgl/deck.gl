@@ -14,9 +14,12 @@ import {equals} from '@math.gl/core';
 
 test.each([undefined, 'wms'] as const)('WMSLayer creates a URL source (%s)', serviceType => {
   const data = 'https://example.com/maps';
-  const layer = new WMSLayer(serviceType ? {data, serviceType} : {data});
+  const loadOptions = {wms: {wmsParameters: {version: '1.1.1'}}};
+  const layer = new WMSLayer(serviceType ? {data, loadOptions, serviceType} : {data, loadOptions});
 
-  expect(layer._createImageSource(layer.props)).toBeInstanceOf(WMSImageSource);
+  const source = layer._createImageSource(layer.props);
+  expect(source).toBeInstanceOf(WMSImageSource);
+  expect(source).toMatchObject({wmsParameters: {version: '1.1.1'}});
 });
 
 test.skip('WMSLayer', async () => {
