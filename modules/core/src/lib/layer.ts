@@ -49,7 +49,7 @@ import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
 import type {DefaultProps} from '../lifecycle/prop-types';
-import type {ColumnsQuery, LayerData, LayerProps} from '../types/layer-props';
+import type {ColumnExpressionQuery, ColumnsQuery, LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {AttributeOptions, BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
@@ -58,11 +58,15 @@ import {PickingProps} from '@luma.gl/shaders';
 // Query expressions may contain nested AST nodes.
 const COLUMNS_QUERY_COMPARE_DEPTH = -1;
 
-function usesSQLParser(query: ColumnsQuery | string): boolean {
+function usesSQLParser(query: ColumnsQuery | ColumnExpressionQuery | string): boolean {
+  if (typeof query === 'string') return true;
+  if (!('select' in query) || !Array.isArray(query.select)) {
+    return Object.values(query).some(expression => typeof expression === 'string');
+  }
+  const structured = query as ColumnsQuery;
   return (
-    typeof query === 'string' ||
-    typeof query.where === 'string' ||
-    query.select.some(
+    typeof structured.where === 'string' ||
+    structured.select.some(
       field =>
         typeof field !== 'string' && 'expression' in field && typeof field.expression === 'string'
     )

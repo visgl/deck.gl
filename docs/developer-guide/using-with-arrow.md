@@ -167,3 +167,37 @@ The stream yields plain Apache Arrow `RecordBatch` objects, without metadata wra
 layer interprets them according to its declared `queryOutput`. This prop controls streamed
 data consumption, not SQL execution; `columnsQuery` projects each current table.
 
+
+### Per-column SQL expressions
+
+For row-preserving attribute generation, `columnsQuery` accepts a mapping from output column
+names to SQL expression strings (or portable expression ASTs). Each expression evaluates over
+**every input row in the original order**; it does not accept a `SELECT` statement or
+`WHERE`, `LIMIT`, `OFFSET`, `GROUP BY`, or `ORDER BY`.
+
+```ts
+new ScatterplotLayer({
+  id: 'points',
+  data: arrowTable,
+  columnsQuery: {
+    positions: 'FLOAT32x2(longitude, latitude)',
+    radii: 'SQRT(population)::REAL',
+    fillColors: 'RGBA8(red, green, blue, 1.0)'
+  }
+});
+```
+
+Pass `sqlParser` to `Deck` when using expression strings, as in the full-query example above.
+The output name comes from the object property, so `SELECT` and `AS` are unnecessary.
+
+deck.gl temporarily implements typed vector constructors locally:
+`FLOAT32x2/x3/x4`, `FLOAT64x2/x3/x4`, `RGBA8`, `RGBA16`,
+`RGBA16F`, and `RGBA32F`.
+Each constructs a fixed-size Arrow list. `RGBA8` and `RGBA16` accept floating-point
+channels, clamp to [0, 1], then round to [0, 255] or [0, 65535].
+Other constructors retain floating-point components without color normalization.
+Null in any component nulls the entire output vector; non-finite component values error.
+These local functions are currently supported as top-level column expressions.
+
+Use the existing `SELECT` query form for table-level filtering or projection;
+per-column expression mappings deliberately do not alter row cardinality.
