@@ -281,3 +281,8 @@ test('TimelineWidget', async () => {
   testInstance.click('.deck-widget-timeline-pause');
   expect(onPlayingChange).toHaveBeenCalledWith(false);
 });
+
+test('TimelineWidget - id: uses the id prop, defaults to timeline', () => {
+  expect(new TimelineWidget({id: 'playback'}).id).toBe('playback');
+  expect(new TimelineWidget().id).toBe('timeline');
+});
