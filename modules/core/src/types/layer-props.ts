@@ -136,7 +136,7 @@ export type TextureSource =
 export type LayerDataSource<DataType> =
   | LayerData<DataType>
   | string
-  | AsyncIterable<DataType[]>
+  | AsyncIterable<DataType[] | import('apache-arrow').RecordBatch>
   | ArrowTableResult
   | Promise<LayerData<DataType> | ArrowTableResult>
   | null;
@@ -155,6 +155,8 @@ export type LayerProps = {
   data?: unknown;
   /** Projects loaded Arrow data into fields used by column-aware layers. */
   columnsQuery?: ColumnsQuery | string | null;
+  /** Interpret streamed query results as append-only batches or full replacement snapshots. */
+  queryOutput?: 'batches' | 'snapshots';
   /**
    * Callback to determine if two data values are equal.
    */
