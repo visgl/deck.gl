@@ -56,23 +56,11 @@ export class WidgetManager {
   private containers: {[id: string]: HTMLDivElement} = {};
   /** Viewport provided to widget on redraw */
   private lastViewports: {[id: string]: Viewport} = {};
-  /** Parent element size, updated by the resize observer */
-  private parentSize: {width: number; height: number} | null = null;
-  private resizeObserver: ResizeObserver | null = null;
 
   constructor({deck, parentElement}: WidgetManagerProps) {
     this.deck = deck;
     parentElement?.classList.add('deck-widget-container');
     this.parentElement = parentElement;
-    if (parentElement && typeof ResizeObserver !== 'undefined') {
-      this.resizeObserver = new ResizeObserver(() => {
-        this._readParentSize();
-        if (this.containers[ROOT_CONTAINER_ID]) {
-          this._updateContainer(ROOT_CONTAINER_ID);
-        }
-      });
-      this.resizeObserver.observe(parentElement);
-    }
   }
 
   getWidgets(): Widget[] {
@@ -89,8 +77,6 @@ export class WidgetManager {
   }
 
   finalize() {
-    this.resizeObserver?.disconnect();
-    this.resizeObserver = null;
     for (const widget of this.getWidgets()) {
       this._removeWidget(widget);
     }
@@ -283,6 +269,9 @@ export class WidgetManager {
       viewContainer.style.pointerEvents = 'none';
       viewContainer.style.position = 'absolute';
       viewContainer.style.overflow = 'hidden';
+      if (containerId === ROOT_CONTAINER_ID) {
+        Object.assign(viewContainer.style, {left: '0', top: '0', width: '100%', height: '100%'});
+      }
       this.parentElement?.append(viewContainer);
       this.containers[containerId] = viewContainer;
     }
@@ -300,44 +289,31 @@ export class WidgetManager {
 
   private _updateContainers() {
     for (const id in this.containers) {
-      this._updateContainer(id);
+      const container = this.containers[id];
+      if (id === ROOT_CONTAINER_ID) {
+        // The root fills its parent through CSS; the deck size covers a parent without a size
+        container.style.minWidth = `${this.deck.width}px`;
+        container.style.minHeight = `${this.deck.height}px`;
+        continue;
+      }
+
+      const viewport = this.lastViewports[id];
+      if (viewport) {
+        const bounds = this._getContainerBounds(viewport);
+        container.style.display = 'block';
+        // Align the container with the view
+        container.style.left = `${bounds.x}px`;
+        container.style.top = `${bounds.y}px`;
+        container.style.width = `${bounds.width}px`;
+        container.style.height = `${bounds.height}px`;
+      } else {
+        container.style.display = 'none';
+      }
     }
   }
 
-  private _updateContainer(id: string) {
-    const viewport = this.lastViewports[id] || null;
-    const visible = id === ROOT_CONTAINER_ID || viewport;
-
-    const container = this.containers[id];
-    if (visible) {
-      const bounds = this._getContainerBounds(viewport);
-      container.style.display = 'block';
-      // Align the container with the view
-      container.style.left = `${bounds.x}px`;
-      container.style.top = `${bounds.y}px`;
-      container.style.width = `${bounds.width}px`;
-      container.style.height = `${bounds.height}px`;
-    } else {
-      container.style.display = 'none';
-    }
-  }
-
-  private _readParentSize(): {width: number; height: number} {
-    this.parentSize = {
-      width: this.parentElement?.clientWidth || 0,
-      height: this.parentElement?.clientHeight || 0
-    };
-    return this.parentSize;
-  }
-
-  /** Resolves a root container or view container in the shared widget coordinate system. */
-  private _getContainerBounds(viewport: Viewport | null): WidgetCanvasBounds {
-    if (!viewport) {
-      // Without a resize observer, read the parent size on every redraw
-      const {width, height} = (this.resizeObserver && this.parentSize) || this._readParentSize();
-      return {x: 0, y: 0, width: width || this.deck.width, height: height || this.deck.height};
-    }
-
+  /** Resolves a view container in the shared widget coordinate system. */
+  private _getContainerBounds(viewport: Viewport): WidgetCanvasBounds {
     const canvasBounds = this.getCanvasBounds(viewport);
     return {
       x: canvasBounds.x + viewport.x,
