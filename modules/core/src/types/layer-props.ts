@@ -32,6 +32,8 @@ type ArrowTableData = {
 type ArrowTableResult = {readonly shape: 'arrow-table'; readonly data: ArrowTableData};
 
 /** Projects source Arrow fields and SQL expressions for layer column resolution. */
+export type ColumnExpressionQuery = Readonly<Record<string, string | Expression>>;
+
 export type ColumnsQuery = {
   readonly select: readonly (
     | string
@@ -154,7 +156,7 @@ export type LayerProps = {
    */
   data?: unknown;
   /** Projects loaded Arrow data into fields used by column-aware layers. */
-  columnsQuery?: ColumnsQuery | string | null;
+  columnsQuery?: ColumnsQuery | ColumnExpressionQuery | string | null;
   /** Interpret streamed query results as append-only batches or full replacement snapshots. */
   queryOutput?: 'batches' | 'snapshots';
   /**
