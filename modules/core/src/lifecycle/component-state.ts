@@ -275,6 +275,7 @@ export default class ComponentState<ComponentT extends Component> {
     const loadCount = asyncProp.pendingLoadCount;
     let data: any[] = [];
     let count = 0;
+    let arrowBatches: import('apache-arrow').RecordBatch[] = [];
 
     for await (const chunk of iterable) {
       if (!this.component) {
@@ -282,8 +283,31 @@ export default class ComponentState<ComponentT extends Component> {
         return;
       }
 
-      // @ts-expect-error (2339) dataTransform is not decared in base component props
-      const {dataTransform} = this.component.props;
+      // @ts-expect-error (2339) layer-only props are not declared on Component
+      const {dataTransform, queryOutput = 'batches'} = this.component.props;
+      // Arrow is an optional peer dependency: load it only for Arrow RecordBatch streams.
+      const isArrowChunk = Boolean(
+        chunk && typeof chunk.numRows === 'number' &&
+        Array.isArray(chunk.schema?.fields) && typeof chunk.getChild === 'function'
+      );
+      if (isArrowChunk) {
+        const {Table, RecordBatch} = await import('apache-arrow');
+        if (!(chunk instanceof RecordBatch)) {
+          throw new Error('Expected an Arrow RecordBatch in the query stream.');
+        }
+        if (queryOutput === 'snapshots') {
+          arrowBatches = [chunk];
+        } else {
+          // Preserve Arrow columnar storage without converting to row objects.
+          arrowBatches.push(chunk);
+        }
+        const table = new Table(arrowBatches);
+        this._setAsyncPropValue(propName, table, loadCount);
+        continue;
+      }
+      if (queryOutput === 'snapshots') {
+        throw new Error('queryOutput: snapshots requires Arrow RecordBatch chunks.');
+      }
       if (dataTransform) {
         data = dataTransform(chunk, data) as any[];
       } else {
