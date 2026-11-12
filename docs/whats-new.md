@@ -4,6 +4,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Idle rendering
+
+`Deck` stops requesting animation frames while nothing needs a redraw. Prop changes, data loading, transitions, interaction and canvas resizes resume the loop. Set `_animate` to redraw every frame.
+
 ### Async CPU aggregation of GPU inputs
 
 [`ReadbackAggregator`](./api-reference/aggregation-layers/cpu-aggregator.md#readbackaggregator) runs CPU aggregation on GPUVector inputs, so you can compare CPU and GPU timings on the same buffers.

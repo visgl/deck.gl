@@ -5,6 +5,7 @@
 import './attribute';
 import './resource';
 import './deck.spec';
+import './deck-frame-loop.spec';
 import './deck-picker.spec';
 import './layer.spec';
 import './composite-layer.spec';

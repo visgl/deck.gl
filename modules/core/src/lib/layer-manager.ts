@@ -172,12 +172,14 @@ export default class LayerManager {
   /** Layers will be redrawn (in next animation frame) */
   setNeedsRedraw(reason: string): void {
     this._needsRedraw = this._needsRedraw || reason;
+    this.context.deck?._requestFrame();
   }
 
   /** Layers will be updated deeply (in next animation frame)
     Potentially regenerating attributes and sub layers */
   setNeedsUpdate(reason: string): void {
     this._needsUpdate = this._needsUpdate || reason;
+    this.context.deck?._requestFrame();
   }
 
   /** Gets a list of currently rendered layers. Optionally filter by id. */

@@ -94,6 +94,8 @@ type ViewManagerProps<ViewsT extends ViewOrViews> = {
   onInteractionStateChange?: (state: InteractionState) => void;
   /** Release view-scoped resources when a descriptor leaves the active view set. */
   onViewRemoved?: (viewId: string) => void;
+  /** Called when viewports need to be rebuilt and redrawn */
+  onNeedsUpdate?: () => void;
   onError?: (error: Error) => void;
   pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[] | null} | null;
   width?: number;
@@ -126,6 +128,7 @@ export default class ViewManager<ViewsT extends View[]> {
     onViewStateChange?: (params: ViewStateChangeParameters) => void;
     onInteractionStateChange?: (state: InteractionState) => void;
     onViewRemoved?: (viewId: string) => void;
+    onNeedsUpdate?: () => void;
     onError?: (error: Error) => void;
   };
   private _pickPosition?: (
@@ -168,6 +171,7 @@ export default class ViewManager<ViewsT extends View[]> {
       onViewStateChange: props.onViewStateChange,
       onInteractionStateChange: props.onInteractionStateChange,
       onViewRemoved: props.onViewRemoved,
+      onNeedsUpdate: props.onNeedsUpdate,
       onError: props.onError
     };
     this._pickPosition = props.pickPosition;
@@ -209,6 +213,7 @@ export default class ViewManager<ViewsT extends View[]> {
   setNeedsUpdate(reason: string): void {
     this._needsUpdate = this._needsUpdate || reason;
     this._needsRedraw = this._needsRedraw || reason;
+    this._eventCallbacks.onNeedsUpdate?.();
   }
 
   /** Checks each viewport for transition updates */
