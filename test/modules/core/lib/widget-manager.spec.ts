@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {WidgetManager} from '@deck.gl/core/lib/widget-manager';
 import {Widget, WebMercatorViewport, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
@@ -48,6 +48,11 @@ class TestWidget extends Widget<TestWidgetProps> {
     this.isVisible = false;
   }
 }
+
+const waitForFrames = () =>
+  new Promise<void>(resolve => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
 
 const mockDeckInstance = {
   width: 600,
@@ -238,6 +243,64 @@ test('WidgetManager#onRedraw#without viewId uses parent size', () => {
   expect(container.style.height, 'root container height uses parent size').toBe('800px');
 
   widgetManager.finalize();
+});
+
+test('WidgetManager#onRedraw#without viewId does not read parent size on each redraw', () => {
+  const parentElement = document.createElement('div');
+  let parentSizeReads = 0;
+  Object.defineProperty(parentElement, 'clientWidth', {
+    get: () => {
+      parentSizeReads++;
+      return 1200;
+    }
+  });
+  Object.defineProperty(parentElement, 'clientHeight', {value: 800});
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
+
+  widgetManager.addDefault(new TestWidget({id: 'A'}));
+  widgetManager.onRedraw({viewports: [], layers: []});
+  widgetManager.onRedraw({viewports: [], layers: []});
+  widgetManager.onRedraw({viewports: [], layers: []});
+  expect(parentSizeReads, 'parent size is read once').toBe(1);
+  expect(widgetManager.containers['root'].style.width, 'root container uses parent size').toBe(
+    '1200px'
+  );
+
+  widgetManager.finalize();
+});
+
+test('WidgetManager#onRedraw#without viewId follows parent resize', async () => {
+  const parentElement = document.createElement('div');
+  parentElement.style.width = '300px';
+  parentElement.style.height = '200px';
+  document.body.append(parentElement);
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
+
+  widgetManager.addDefault(new TestWidget({id: 'A'}));
+  widgetManager.onRedraw({viewports: [], layers: []});
+  const container = widgetManager.containers['root'];
+  expect(container.style.width, 'root container uses parent width').toBe('300px');
+
+  parentElement.style.width = '500px';
+  parentElement.style.height = '250px';
+  await waitForFrames();
+  expect(container.style.width, 'root container width follows parent').toBe('500px');
+  expect(container.style.height, 'root container height follows parent').toBe('250px');
+
+  widgetManager.finalize();
+  parentElement.remove();
+});
+
+test('WidgetManager#finalize disconnects resize observer', () => {
+  const disconnect = vi.spyOn(ResizeObserver.prototype, 'disconnect');
+  const widgetManager = new WidgetManager({
+    deck: mockDeckInstance,
+    parentElement: document.createElement('div')
+  });
+
+  widgetManager.finalize();
+  expect(disconnect, 'resize observer is disconnected').toHaveBeenCalledTimes(1);
+  disconnect.mockRestore();
 });
 
 test('WidgetManager#onRedraw#viewId uses canvas offset', () => {
