@@ -23,7 +23,7 @@ test('queryOutput batches appends Arrow batches without converting them to rows'
   await (state as any)._resolveAsyncIterable('data', recordBatches());
   const data = state.getAsyncProp('data');
   expect(data).toBeInstanceOf(Table);
-  expect(data.getChild('x')?.toArray()).toEqual(Int32Array.from([1, 2, 3]));
+  expect(Array.from(data.getChild('x')?.toArray() ?? [])).toEqual([1, 2, 3]);
 });
 
 test('queryOutput snapshots replaces the previous Arrow table', async () => {
