@@ -88,6 +88,7 @@ function getPickingColorAttribute(attributes: Record<string, Attribute>): Attrib
 const defaultProps: DefaultProps<LayerProps> = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
+  _queryProps: {type: 'object', value: null, optional: true, compare: -1},
   dataComparator: {type: 'function', value: null, optional: true},
   _dataDiff: {
     type: 'function',
@@ -1285,6 +1286,45 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     this._diffProps(this.props, this.internalState.getOldProps() as Layer<PropsT>['props']);
   }
 
+  /** Schedule aggregate-derived overrides when query inputs change. */
+  private _updateQueryProps(): void {
+    const state = this.internalState;
+    if (!state || state.isAsyncPropLoading('data')) return;
+    const {data, _queryProps: queries} = this.props;
+    if (!queries || !Object.keys(queries).length) {
+      if (state.queryPropsRequest) {
+        state.queryPropsRequest = undefined;
+        this.setDerivedProps(null);
+      }
+      return;
+    }
+    const previous = state.queryPropsRequest;
+    if (previous?.source === data && deepEqual(previous.queries, queries, -1)) return;
+    if (!isArrowTable(data)) {
+      this.raiseError(new Error('_queryProps requires an Apache Arrow table'), 'evaluating _queryProps');
+      return;
+    }
+    const request = {source: data, queries: {...queries}};
+    state.queryPropsRequest = request;
+    void import('../arrow/query-props')
+      .then(({evaluateQueryProps}) => evaluateQueryProps(data, request.queries))
+      .then(values => {
+        const layer = state.layer;
+        if (
+          layer && state.queryPropsRequest === request &&
+          layer.props.data === data &&
+          deepEqual(layer.props._queryProps, request.queries, -1)
+        ) {
+          layer.setDerivedProps(values as Partial<Layer<PropsT>['props']>);
+        }
+      })
+      .catch(error => {
+        if (state.queryPropsRequest === request && state.layer) {
+          state.layer.raiseError(error, 'evaluating _queryProps');
+        }
+      });
+  }
+
   /** (Internal) Called by layer manager when a new layer is added or an existing layer is matched with a new instance */
   _update(): void {
     if (
@@ -1294,6 +1334,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     )
       return;
     this._updatePreprojection(this.internalState?.viewport || this.context.viewport);
+    this._updateQueryProps();
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.needsUpdate();
     // End lifecycle method
