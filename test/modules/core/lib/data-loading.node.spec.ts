@@ -264,3 +264,21 @@ test('equivalent nested URL options do not restart an active batch load', async 
   expect(fetch).toHaveBeenCalledOnce();
   await vi.waitFor(() => expect(complete).toHaveBeenCalledExactlyOnceWith('data', [1, 2]));
 });
+
+test('replacing fetch Headers reloads an active batch URL', () => {
+  const fetch = vi.fn(async function* () {
+    yield [1];
+  });
+  const options = (token: string) => ({
+    core: {fetch: {headers: new Headers({Authorization: token})}}
+  });
+  const {layer, state} = makeState({
+    data: 'points.csv',
+    _dataLoadingMode: 'batched',
+    loadOptions: options('first'),
+    fetch
+  });
+  state.setAsyncProps(layer.props);
+  state.setAsyncProps(layer.clone({loadOptions: options('second')}).props);
+  expect(fetch).toHaveBeenCalledTimes(2);
+});
