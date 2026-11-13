@@ -168,7 +168,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   billboard: false,
   antialiasing: true,
 
-  getPosition: {type: 'accessor', arrow: true, value: defaultPosition},
+  getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
   getRadius: {type: 'accessor', arrow: true, value: 1},
   getFillColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},

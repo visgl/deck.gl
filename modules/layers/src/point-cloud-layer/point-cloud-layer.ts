@@ -44,7 +44,7 @@ const defaultProps: DefaultProps<PointCloudLayerProps> = {
   pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
   antialiasing: false,
 
-  getPosition: {type: 'accessor', arrow: true, value: defaultPosition},
+  getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
   getNormal: {type: 'accessor', arrow: true, value: DEFAULT_NORMAL},
   getColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   positions: {type: 'object', value: null, optional: true},

@@ -181,7 +181,12 @@ const defaultProps: DefaultProps<ScenegraphLayerProps> = {
 
   positions: {type: 'object', value: null, optional: true},
   colors: {type: 'object', value: null, optional: true},
-  getPosition: {type: 'accessor', arrow: true, value: (x: any) => x.position},
+  getPosition: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['array'],
+    value: (x: any) => x.position
+  },
   getColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
 
   // flat or pbr

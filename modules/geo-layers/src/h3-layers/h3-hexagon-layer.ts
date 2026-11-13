@@ -49,7 +49,12 @@ const defaultProps: DefaultProps<H3HexagonLayerProps> = {
   highPrecision: 'auto',
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   centerHexagon: null,
-  getHexagon: {type: 'accessor', arrow: true, value: (x: any) => x.hexagon},
+  getHexagon: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['string'],
+    value: (x: any) => x.hexagon
+  },
   extruded: true
 };
 

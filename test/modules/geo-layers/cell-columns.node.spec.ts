@@ -170,3 +170,30 @@ test('cell style accessors accept Arrow columns alongside identifier callbacks',
   expect(child.props.getS2Token(child.props.data[0])).toBe('89c25');
   expect(child.props.getElevation(child.props.data[1], {index: 1})).toBe(20);
 });
+
+test('style updates retain rows from a one-shot iterator and convert Int64 styles', () => {
+  function* source() {
+    yield {token: '89c25'};
+  }
+  const layer = new S2Layer({
+    data: source(),
+    getS2Token: row => row.token,
+    getElevation: vectorFromArray([10n], new Int64())
+  });
+  layer.state = {} as typeof layer.state;
+  layer.renderLayers();
+
+  const updated = layer.clone({getElevation: vectorFromArray([20n], new Int64())});
+  updated.state = layer.state;
+  const child = updated.renderLayers() as any;
+  const row = child.props.data[0];
+  expect(child.props.getS2Token(row)).toBe('89c25');
+  expect(child.props.getElevation(row, {index: 0})).toBe(20);
+});
+
+test('H3 cluster style constants pass through to the polygon layer', () => {
+  const layer = new H3ClusterLayer({getElevation: 20, getFillColor: [1, 2, 3]});
+  layer.state = {polygons: []};
+  expect(layer.indexToBounds().getElevation).toBe(20);
+  expect(layer.indexToBounds().getFillColor).toEqual([1, 2, 3]);
+});

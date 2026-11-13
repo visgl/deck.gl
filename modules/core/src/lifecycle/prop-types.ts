@@ -75,6 +75,8 @@ type AccessorPropType<T = any> = BasePropType<T> & {
   type: 'accessor';
   /** Accept Arrow vectors in addition to constants and callbacks on opted-in accessors. */
   arrow?: boolean;
+  /** Accepted constant types when the default value is a callback. */
+  constantTypes?: readonly ('array' | 'string' | 'bigint')[];
 };
 type FunctionPropType<T = Function> = BasePropType<T> & {
   type: 'function';
@@ -162,6 +164,7 @@ const TYPE_DEFINITIONS = {
       return (
         (Boolean(propType.arrow) && isArrowVector(value)) ||
         valueType === 'function' ||
+        propType.constantTypes?.some(type => type === valueType) ||
         valueType === getTypeOf(propType.value)
       );
     },

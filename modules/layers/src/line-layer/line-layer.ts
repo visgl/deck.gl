@@ -34,8 +34,18 @@ const defaultTargetPosition = (x: any) => x.targetPosition;
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<LineLayerProps> = {
-  getSourcePosition: {type: 'accessor', arrow: true, value: defaultSourcePosition},
-  getTargetPosition: {type: 'accessor', arrow: true, value: defaultTargetPosition},
+  getSourcePosition: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['array'],
+    value: defaultSourcePosition
+  },
+  getTargetPosition: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['array'],
+    value: defaultTargetPosition
+  },
   getColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   getWidth: {type: 'accessor', arrow: true, value: 1},
   sourcePositions: {type: 'object', value: null, optional: true},

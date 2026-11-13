@@ -42,8 +42,18 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
   widths: {type: 'object', value: null, optional: true},
   heights: {type: 'object', value: null, optional: true},
   tilts: {type: 'object', value: null, optional: true},
-  getSourcePosition: {type: 'accessor', arrow: true, value: defaultSourcePosition},
-  getTargetPosition: {type: 'accessor', arrow: true, value: defaultTargetPosition},
+  getSourcePosition: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['array'],
+    value: defaultSourcePosition
+  },
+  getTargetPosition: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['array'],
+    value: defaultTargetPosition
+  },
   getSourceColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   getTargetColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   getWidth: {type: 'accessor', arrow: true, value: 1},

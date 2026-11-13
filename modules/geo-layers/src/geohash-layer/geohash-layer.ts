@@ -9,7 +9,12 @@ import {getGeohashPolygon} from './geohash-utils';
 import {hasCellColumns, getCellValue, renderCellColumns} from '../geo-cell-layer/cell-columns';
 
 const defaultProps: DefaultProps<GeohashLayerProps> = {
-  getGeohash: {type: 'accessor', arrow: true, value: (d: any) => d.geohash}
+  getGeohash: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['string'],
+    value: (d: any) => d.geohash
+  }
 };
 
 /** All properties supported by GeohashLayer. */

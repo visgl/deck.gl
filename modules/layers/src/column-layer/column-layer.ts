@@ -83,7 +83,7 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   stroked: false,
   flatShading: false,
 
-  getPosition: {type: 'accessor', arrow: true, value: defaultPosition},
+  getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
   getFillColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', arrow: true, value: 1},
