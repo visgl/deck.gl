@@ -62,8 +62,19 @@ export class HeightMapBuilder {
     return this.fbo;
   }
 
-  /** Called every render cycle to check if the framebuffer needs update */
-  shouldUpdate({layers, viewport}: {layers: Layer[]; viewport: Viewport}): boolean {
+  /**
+   * Called every render cycle to check if the framebuffer needs update.
+   * `padding` widens the layers' bounds by that many pixels of the viewport on each side.
+   */
+  shouldUpdate({
+    layers,
+    viewport,
+    padding = 0
+  }: {
+    layers: Layer[];
+    viewport: Viewport;
+    padding?: number;
+  }): boolean {
     const layersChanged =
       layers.length !== this.layers.length ||
       layers.some(
@@ -84,6 +95,11 @@ export class HeightMapBuilder {
       this.layers = layers;
       this.layersBounds = layers.map(layer => layer.getBounds());
       this.layersBoundsCommon = joinLayerBounds(layers, getMercatorReferenceViewport(viewport));
+      if (this.layersBoundsCommon && padding) {
+        const margin = padding / viewport.scale;
+        const [minX, minY, maxX, maxY] = this.layersBoundsCommon;
+        this.layersBoundsCommon = [minX - margin, minY - margin, maxX + margin, maxY + margin];
+      }
     }
 
     const viewportChanged = !this.lastViewport || !viewport.equals(this.lastViewport);

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Parameters, RenderPipelineParameters} from '@luma.gl/core';
+import {Framebuffer, Parameters, RenderPipelineParameters} from '@luma.gl/core';
 import {Layer, Viewport, _LayersPass as LayersPass, LayersPassRenderOptions} from '@deck.gl/core';
 import type {HeightMapBuilder} from './height-map-builder';
 import type {TerrainCover} from './terrain-cover';
@@ -78,6 +78,22 @@ export class TerrainPass extends LayersPass {
     });
   }
 
+  /** Draws draped layers into a framebuffer of another renderer, over what it holds */
+  renderDrapedLayers(
+    target: Framebuffer,
+    viewport: Viewport,
+    opts: Partial<TerrainPassRenderOptions>
+  ) {
+    this.render({
+      ...opts,
+      target,
+      pass: 'terrain-cover-external',
+      layers: opts.layers!,
+      viewports: [viewport],
+      clearCanvas: false
+    });
+  }
+
   protected getLayerParameters(
     layer: Layer<{}>,
     layerIndex: number,
@@ -87,6 +103,7 @@ export class TerrainPass extends LayersPass {
       ...layer.props.parameters,
       blend: true,
       depthCompare: 'always',
+      depthWriteEnabled: false,
       ...(layer.props.operation.includes('terrain') && TERRAIN_BLENDING)
     };
   }

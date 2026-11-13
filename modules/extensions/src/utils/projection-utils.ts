@@ -31,6 +31,12 @@ export function lngLatToMercatorCommon(lngLat: number[]): [number, number] {
   return [x, y];
 }
 
+/** Unproject absolute Mercator common space to lng/lat. */
+export function mercatorCommonToLngLat(xy: number[]): [number, number] {
+  const [lng, lat] = MERCATOR_REFERENCE_VIEWPORT.unprojectPosition([xy[0], xy[1], 0]);
+  return [lng, lat];
+}
+
 /** Returns a Mercator viewport for bounds computation, bypassing GlobeView. */
 export function getMercatorReferenceViewport(viewport: Viewport): Viewport {
   return viewport.isGeospatial ? MERCATOR_REFERENCE_VIEWPORT : viewport;
