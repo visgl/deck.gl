@@ -833,7 +833,7 @@ test('Layer#derivedProps overrides effective props without mutating user props',
       },
       {
         updateProps: {},
-        onBeforeUpdate: ({layer}) => layer.setComputedOpacity(0.75),
+        onBeforeUpdate: ({layer}) => (layer as DerivedLayer).setComputedOpacity(0.75),
         onAfterUpdate: ({layer}) => {
           expect(layer.props.opacity).toBe(0.25);
           expect(updates.at(-1)).toBe(0.75);
@@ -842,7 +842,7 @@ test('Layer#derivedProps overrides effective props without mutating user props',
       },
       {
         updateProps: {},
-        onBeforeUpdate: ({layer}) => layer.setComputedOpacity(null),
+        onBeforeUpdate: ({layer}) => (layer as DerivedLayer).setComputedOpacity(null),
         onAfterUpdate: ({layer}) => {
           expect(layer.props.opacity).toBe(0.25);
           expect(updates.at(-1)).toBe(0.25);
@@ -882,7 +882,7 @@ test('Layer#derivedProps numeric values participate in uniform transitions', () 
         updateProps: {},
         onBeforeUpdate: ({layer}) => {
           timeline.setTime(100);
-          layer.setComputedOpacity(1);
+          (layer as DerivedLayer).setComputedOpacity(1);
         },
         onAfterUpdate: () => expect(draws.at(-1)).toBe(0)
       },
