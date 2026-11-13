@@ -116,6 +116,7 @@ export type {
   LayerProps,
   CompositeLayerProps,
   Accessor,
+  ArrowAccessor,
   AccessorContext,
   AccessorFunction,
   LayerData,
@@ -169,6 +170,7 @@ export {
   LayerColumns as _LayerColumns,
   type ColumnDefinition as _ColumnDefinition
 } from './lib/layer-columns';
+export {resolveColumns as _resolveColumns} from './lib/resolve-columns';
 
 export {
   makePathShaderWGSL as _makePathShaderWGSL,
@@ -179,3 +181,5 @@ export {
   pathUniforms as _pathUniforms,
   type PathProps as _PathProps
 } from './shaderlib/path/path-uniforms';
+
+export {isArrowVector as _isArrowVector} from './arrow/upstream-math/is-arrow-vector';

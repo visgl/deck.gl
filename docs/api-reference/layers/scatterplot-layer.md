@@ -243,87 +243,21 @@ If `true`, rendered circles always face the camera. If `false` circles face up (
 
 If `true`, circles are rendered with smoothed edges. If `false`, circles are rendered with rough edges. Antialiasing can cause artifacts on edges of overlapping circles. Also, antialiasing isn't supported in FirstPersonView. 
 
-### Arrow Columns
-
-See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
-
-These examples draw the same two circles.
-
-<Tabs groupId="scatterplot-input">
-<TabItem value="rows" label="Row accessors">
-
-```js
-import {ScatterplotLayer} from '@deck.gl/layers';
-
-const layer = new ScatterplotLayer({
-  data: [
-    {position: [-122.4, 37.74], radius: 100},
-    {position: [-122.41, 37.75], radius: 200}
-  ],
-  getPosition: d => d.position,
-  getRadius: d => d.radius,
-  getFillColor: [255, 140, 0]
-});
-```
-
-</TabItem>
-<TabItem value="arrow" label="Arrow columns">
-
-```js
-import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
-import {ScatterplotLayer} from '@deck.gl/layers';
-
-const positions = vectorFromArray(
-  [[-122.4, 37.74], [-122.41, 37.75]],
-  new FixedSizeList(2, new Field('value', new Float32(), false))
-);
-const radii = vectorFromArray([100, 200], new Float32());
-const layer = new ScatterplotLayer({positions, radii, getFillColor: [255, 140, 0]});
-```
-
-
-</TabItem>
-</Tabs>
-
-#### `positions` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric XY or XYZ fixed-size lists specifying circle centers. Overrides [`getPosition`](#getposition).
-
-#### `radii` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric scalar radii in `radiusUnits`. Overrides [`getRadius`](#getradius).
-
-#### `fillColors` (Arrow Vector, optional)
-
-* Default: `null`
-
-RGB or RGBA fixed-size lists specifying fill colors. Overrides [`getFillColor`](#getfillcolor).
-
-#### `lineColors` (Arrow Vector, optional)
-
-* Default: `null`
-
-RGB or RGBA fixed-size lists specifying outline colors. Overrides [`getLineColor`](#getlinecolor).
-
-#### `lineWidths` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric scalar outline widths in `lineWidthUnits`. Overrides [`getLineWidth`](#getlinewidth).
 
 ### Data Accessors
 
-#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
+
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#positions-and-other-vectors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-#### `getRadius` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getradius}
+* If an Arrow vector is provided, each row supplies a numeric fixed-size list matching the accessor’s dimensions.
+
+
+#### `getRadius` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#scalars), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getradius}
 
 * Default: `1`
 
@@ -331,6 +265,8 @@ The radius of each object, in units specified by `radiusUnits` (default meters).
 
 * If a number is provided, it is used as the radius for all objects.
 * If a function is provided, it is called on each object to retrieve its radius.
+* If an Arrow vector is provided, each numeric value supplies one object’s radius.
+
 
 #### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
@@ -343,27 +279,31 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 
 It will be overridden by `getLineColor` and `getFillColor` if these new accessors are specified.
 
-#### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
+#### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#colors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the filled color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
+* If an Arrow vector is provided, each numeric RGB/RGBA fixed-size list supplies one object’s color.
 * If not provided, it falls back to `getColor`.
 
-#### `getLineColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
+
+#### `getLineColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#colors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the outline color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
+* If an Arrow vector is provided, each numeric RGB/RGBA fixed-size list supplies one object’s color.
 * If not provided, it falls back to `getColor`.
 
-#### `getLineWidth` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinewidth}
+
+#### `getLineWidth` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#scalars), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinewidth}
 
 * Default: `1`
 
@@ -371,7 +311,9 @@ The width of the outline of each object, in units specified by `lineWidthUnits` 
 
 * If a number is provided, it is used as the outline width for all objects.
 * If a function is provided, it is called on each object to retrieve its outline width.
+* If an Arrow vector is provided, each numeric value supplies one object’s outline width.
 * If not provided, it falls back to `strokeWidth`.
+
 
 #### `getPixelOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
 

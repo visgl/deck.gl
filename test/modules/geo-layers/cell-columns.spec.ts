@@ -14,13 +14,13 @@ import {
 } from '@deck.gl/geo-layers';
 import {Table, vectorFromArray} from 'apache-arrow';
 
-for (const [Layer, cell] of [
-  [H3HexagonLayer, '8928308280fffff'],
-  [H3ClusterLayer, '8928308280fffff'],
-  [S2Layer, '89c25'],
-  [GeohashLayer, '9q8yy'],
-  [QuadkeyLayer, '120'],
-  [A5Layer, '2e80000000000000']
+for (const [Layer, accessor, cell] of [
+  [H3HexagonLayer, 'getHexagon', '8928308280fffff'],
+  [H3ClusterLayer, 'getHexagons', '8928308280fffff'],
+  [S2Layer, 'getS2Token', '89c25'],
+  [GeohashLayer, 'getGeohash', '9q8yy'],
+  [QuadkeyLayer, 'getQuadkey', '120'],
+  [A5Layer, 'getPentagon', '2e80000000000000']
 ] as const) {
   test(`${Layer.layerName} renders cell columns and replaces feature styles`, () => {
     const cells = vectorFromArray([cell]);
@@ -32,20 +32,28 @@ for (const [Layer, cell] of [
       testCases: [
         {
           title: 'initialize columns',
-          props: {cells, elevations: vectorFromArray([10]), extruded: true, pickable: true}
+          props: {
+            [accessor]: cells,
+            getElevation: vectorFromArray([10]),
+            extruded: true,
+            pickable: true
+          }
         },
         {title: 'opacity update', updateProps: {opacity: 0.5}},
-        {title: 'replace styles', updateProps: {elevations: vectorFromArray([20])}},
+        {title: 'replace styles', updateProps: {getElevation: vectorFromArray([20])}},
         {
           title: 'replace geometry',
-          updateProps: {cells: vectorFromArray([cell, cell]), elevations: vectorFromArray([30, 40])}
+          updateProps: {
+            [accessor]: vectorFromArray([cell, cell]),
+            getElevation: vectorFromArray([30, 40])
+          }
         }
       ].map(testCase => ({
         ...testCase,
         onAfterUpdate: ({layer, subLayer}) => {
           expect(subLayer).toBeTruthy();
           const rows = subLayer.props.data;
-          if (previousCells === layer.props.cells) {
+          if (previousCells === layer.props[accessor]) {
             expect(subLayer.props.dataComparator(rows, previousRows)).toBe(true);
             expect(subLayer.internalState.changeFlags.dataChanged).toBeFalsy();
             for (const update of geometryUpdates) expect(update).not.toHaveBeenCalled();
@@ -62,11 +70,11 @@ for (const [Layer, cell] of [
           };
           watchGeometry(subLayer);
           expect(geometryUpdates.length).toBeGreaterThan(0);
-          previousCells = layer.props.cells;
+          previousCells = layer.props[accessor];
           previousRows = rows;
-          expect(rows.length).toBe(layer.props.cells.length);
+          expect(rows.length).toBe(layer.props[accessor].length);
           expect(subLayer.props.getElevation(rows[0], {index: 0})).toBe(
-            layer.props.elevations.get(0)
+            layer.props.getElevation.get(0)
           );
         }
       })),
@@ -78,6 +86,7 @@ for (const [Layer, cell] of [
 }
 
 for (const Layer of [H3HexagonLayer, H3ClusterLayer]) {
+  const accessor = Layer === H3HexagonLayer ? 'getHexagon' : 'getHexagons';
   test(`${Layer.layerName} restores accessor geometry when cells are removed`, () => {
     const id = '8928308280fffff';
     testLayer({
@@ -85,14 +94,17 @@ for (const Layer of [H3HexagonLayer, H3ClusterLayer]) {
       testCases: [
         {
           title: 'initialize columns',
-          props: {data: [{hexagon: id, hexagons: [id]}], cells: vectorFromArray([id])}
+          props: {data: [{hexagon: id, hexagons: [id]}], [accessor]: vectorFromArray([id])}
         },
-        {title: 'restore accessors', updateProps: {cells: null}}
+        {
+          title: 'restore accessors',
+          updateProps: {[accessor]: row => row[accessor === 'getHexagon' ? 'hexagon' : 'hexagons']}
+        }
       ].map(testCase => ({
         ...testCase,
         onAfterUpdate: ({layer, subLayer}) => {
           expect(subLayer).toBeTruthy();
-          if (!layer.props.cells) {
+          if (typeof layer.props[accessor] === 'function') {
             if (layer instanceof H3HexagonLayer) expect(layer.state.resolution).toBe(9);
             else expect(layer.state.polygons.length).toBeGreaterThan(0);
           }
@@ -138,7 +150,7 @@ test('Arrow table style updates skip descendant polygon tessellation', () => {
     Layer: S2Layer,
     testCases: [
       {
-        props: {data, cells, elevations: vectorFromArray([10])},
+        props: {data, getS2Token: cells, getElevation: vectorFromArray([10])},
         onAfterUpdate: ({subLayer}) => {
           const fill = subLayer
             .getSubLayers()[0]
@@ -149,7 +161,7 @@ test('Arrow table style updates skip descendant polygon tessellation', () => {
         }
       },
       {
-        updateProps: {opacity: 0.5, elevations: vectorFromArray([20])},
+        updateProps: {opacity: 0.5, getElevation: vectorFromArray([20])},
         onAfterUpdate: () => {
           expect(geometryUpdate).not.toHaveBeenCalled();
           geometryUpdate.mockRestore();

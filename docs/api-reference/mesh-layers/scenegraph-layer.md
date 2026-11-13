@@ -247,22 +247,29 @@ Only read when scenegraph property changes.
 
 ### Data Accessors
 
+Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
 
-#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#positions-and-other-vectors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 - Default: `object => object.position`
 
 Method called to retrieve the center position for each object in the `data` stream.
 
+* If an Arrow vector is provided, each row supplies a numeric fixed-size list matching the accessor’s dimensions.
 
-#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
+
+#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#colors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 - Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied. Only used if `texture` is empty.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied. Only used if `texture` is empty.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
+
+* If an Arrow vector is provided, each row supplies a numeric RGB/RGBA fixed-size list.
+
 
 #### `getOrientation` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getorientation}
 
@@ -316,15 +323,3 @@ The maximum size in pixels for one unit of the scene.
 ## Source
 
 [modules/mesh-layers/src/scenegraph-layer](https://github.com/visgl/deck.gl/tree/master/modules/mesh-layers/src/scenegraph-layer)
-
-### Instance columns
-
-`positions` and `colors` accept Arrow columns or compatible GPUVectors in instance
-order. Positions use three components and GPU colors use `unorm8x4`. Omitted
-columns use the corresponding accessors. Instance transform accessors continue to
-control orientation, scale, translation, and transform matrices.
-
-Aligned chunks preserve global picking indices. `numInstances` defaults to the
-column length. GPUVectors and their buffers remain caller-owned. GPU-only positions
-cannot be CPU-preprojected and do not provide CPU bounds. Column inputs currently
-require extensions and transitions to be disabled.

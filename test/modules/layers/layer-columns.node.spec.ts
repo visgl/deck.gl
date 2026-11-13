@@ -18,15 +18,27 @@ function positions() {
   );
 }
 function props() {
-  return {positions: positions(), data: [], getRadius: 1};
+  return {getPosition: positions(), data: [], getRadius: 1};
 }
 
 function makeColumns(device: NullDevice) {
   return new LayerColumns(
     device,
     {
-      positions: {attribute: 'positions', accessor: 'getPosition', semantic: 'position', size: 3},
-      radii: {attribute: 'radius', accessor: 'getRadius', semantic: 'scalar', size: 1}
+      positions: {
+        attribute: 'positions',
+        accessor: 'getPosition',
+        arrowAccessor: true,
+        semantic: 'position',
+        size: 3
+      },
+      radii: {
+        attribute: 'radius',
+        accessor: 'getRadius',
+        arrowAccessor: true,
+        semantic: 'scalar',
+        size: 1
+      }
     },
     'test'
   );
@@ -40,7 +52,11 @@ test('LayerColumns rejects mismatched columns without destroying the previous up
   const old = (columns as any).prepared;
   const buffer = old.columns.positions.data[0].buffer;
   const buffers = vi.spyOn(device, 'createBuffer');
-  await columns.update({...props(), radii: vectorFromArray([1], new Float32())}, () => {}, error);
+  await columns.update(
+    {...props(), getRadius: vectorFromArray([1], new Float32())},
+    () => {},
+    error
+  );
   expect(error).toHaveBeenCalledOnce();
   expect((columns as any).prepared).toBe(old);
   expect(buffer.destroyed).toBe(false);

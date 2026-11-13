@@ -12,7 +12,7 @@ import {
 } from '@luma.gl/graph/arrow';
 import {getArrowConversionFormat} from './arrow-schema';
 
-/** Arrow columns or borrowed GPU vectors accepted by layer column props. */
+/** Resolved Arrow accessor columns or borrowed GPU vectors used during preparation. */
 export type ColumnSource = Pick<Vector, 'length' | 'type' | 'data'> | GPUVector;
 
 /** Layer-oriented semantics, for numeric, position, scalar, and color conversion. */

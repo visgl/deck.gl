@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {FixedSizeList, Float, Int} from 'apache-arrow';
+
 import {
   Layer,
   _GPUVectorModel as DeckGPUVectorModel,
@@ -13,9 +15,9 @@ import {
   LayerDataSource,
   UpdateParameters,
   Unit,
-  AccessorFunction,
   Position,
   Accessor,
+  ArrowAccessor,
   Color,
   Material,
   DefaultProps,
@@ -81,11 +83,11 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   stroked: false,
   flatShading: false,
 
-  getPosition: {type: 'accessor', value: defaultPosition},
-  getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getLineWidth: {type: 'accessor', value: 1},
-  getElevation: {type: 'accessor', value: 1000},
+  getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
+  getFillColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getLineColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getLineWidth: {type: 'accessor', arrow: true, value: 1},
+  getElevation: {type: 'accessor', arrow: true, value: 1000},
   material: true,
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
@@ -208,9 +210,10 @@ type _ColumnLayerProps<DataT> = ColumnLayerColumnProps & {
 
   /**
    * Method called to retrieve the position of each column.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default object => object.position
    */
-  getPosition?: AccessorFunction<DataT, Position>;
+  getPosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
 
   /**
    * @deprecated Use getFilledColor and getLineColor instead
@@ -219,29 +222,33 @@ type _ColumnLayerProps<DataT> = ColumnLayerColumnProps & {
 
   /**
    * Fill collor value or accessor.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 0, 255]
    */
-  getFillColor?: Accessor<DataT, Color>;
+  getFillColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
 
   /**
    * Line color value or accessor.
    *
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 0, 255]
    */
-  getLineColor?: Accessor<DataT, Color>;
+  getLineColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
 
   /**
    * The elevation of each cell in meters.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default 1000
    */
-  getElevation?: Accessor<DataT, number>;
+  getElevation?: ArrowAccessor<DataT, number, Int | Float>;
 
   /**
    * The width of the outline of the column, in units specified by `lineWidthUnits`.
    *
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default 1
    */
-  getLineWidth?: Accessor<DataT, number>;
+  getLineWidth?: ArrowAccessor<DataT, number, Int | Float>;
 };
 
 /** Render extruded cylinders (tessellated regular polygons) at given coordinates. */

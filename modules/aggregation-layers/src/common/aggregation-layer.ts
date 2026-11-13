@@ -27,9 +27,13 @@ export type AggregationLayerProps<DataT> = CompositeLayerProps & {
   data: LayerDataSource<DataT>;
   /** Layer-owned aggregator instance. Omit to retain CPU/WebGL selection. */
   aggregator?: Aggregator | null;
-  /** Borrowed GPU position column; requires a custom aggregator and bypasses accessors. */
+  /** Borrowed GPU position column; requires a custom aggregator and bypasses accessors.
+   * @experimental
+   */
   positions?: GPUVector | null;
-  /** Borrowed scalar columns in channel order; required with positions. */
+  /** Borrowed scalar columns in channel order; required with positions.
+   * @experimental
+   */
   weights?: readonly GPUVector[] | null;
   /** Bounds in input coordinates for GPU positions used by world-space binning. */
   dataBounds?: [number[], number[]] | null;

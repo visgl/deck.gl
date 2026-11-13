@@ -161,55 +161,38 @@ Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/compo
 
 ### Data Accessors
 
-#### `getQuadkey` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getquadkey}
+#### `getQuadkey` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#cell-identifiers), optional) {#getquadkey}
 
 Called for each data object to retrieve the quadkey string identifier.
 
 * default: `object => object.quadkey`
 
+* If an Arrow vector is provided, each row supplies a cell identifier or a list of identifiers belonging to one source feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for supported encodings and picking behavior.
 
-### Column Inputs
 
-#### `cells` (object, optional) {#cells}
+#### `getFillColor` (Accessor | Arrow Vector, optional) {#getfillcolor}
 
-* Default: `null`
+* Default: `[0, 0, 0, 255]`
 
-A CPU-readable Arrow column of cell identifiers. Each row contains one cell or a list of cells
-belonging to one feature. String and dictionary-encoded string columns are accepted.
+The fill color of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
 
-When `data` is supplied, its row count must match `cells`. Omitted styling columns use accessors
-with the original feature and source row index. Null cells and GPU-only columns are unsupported.
-`highlightedObjectIndex` selects an expanded cell row in column mode. Picking reports
-the source feature index.
-See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates) for updates.
+#### `getLineColor` (Accessor | Arrow Vector, optional) {#getlinecolor}
 
-#### `fillColors` (object, optional) {#fillcolors}
+* Default: `[0, 0, 0, 255]`
 
-* Default: `null`
+The outline color of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
 
-RGBA fill colors as a CPU-readable Arrow column in source feature order. Requires `cells`
-and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+#### `getLineWidth` (Accessor | Arrow Vector, optional) {#getlinewidth}
 
-#### `lineColors` (object, optional) {#linecolors}
+* Default: `1`
 
-* Default: `null`
+The outline width of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
 
-RGBA outline colors as a CPU-readable Arrow column in source feature order. Requires `cells`
-and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+#### `getElevation` (Accessor | Arrow Vector, optional) {#getelevation}
 
-#### `lineWidths` (object, optional) {#linewidths}
+* Default: `1000`
 
-* Default: `null`
-
-Outline widths as a CPU-readable Arrow column in source feature order. Requires `cells`
-and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
-
-#### `elevations` (object, optional) {#elevations}
-
-* Default: `null`
-
-Elevations as a CPU-readable Arrow column in source feature order. Requires `cells`
-and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+The elevation of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
 
 
 ## Sub Layers
