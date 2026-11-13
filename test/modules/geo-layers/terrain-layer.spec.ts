@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
+import {device, generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
@@ -35,6 +35,30 @@ const TEST_TERRAIN_MESH = {
 
 const fetchTerrainFixture: NonNullable<TerrainLayer['props']['fetch']> = (_url, {propName}) =>
   Promise.resolve(propName === 'texture' ? new ImageData(1, 1) : TEST_TERRAIN_MESH);
+
+test('TerrainLayer applies the loaded elevation range with a stationary viewport', async () => {
+  const viewport = new MapView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: -122, latitude: 37, zoom: 13, pitch: 50}
+  })!;
+  const layer = new TerrainLayer({
+    elevationData: 'terrain/{z}/{x}/{y}.png',
+    fetch: fetchTerrainFixture
+  });
+  const layerManager = new LayerManager(device, {viewport});
+  try {
+    layerManager.setLayers([layer]);
+    await expect
+      .poll(() => {
+        layerManager.updateLayers();
+        return (layer.getSubLayers()[0] as TileLayer).props.zRange;
+      })
+      .toEqual([0, 1]);
+  } finally {
+    layerManager.finalize();
+  }
+});
 
 class TestTerrainLayer extends TerrainLayer {
   static layerName = 'TestTerrainLayer';
