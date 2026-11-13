@@ -10,7 +10,10 @@ no converter registration or separate layer class is required.
 ## Input modes
 
 These are usage patterns, not values of a `mode` prop. Supplying any column enables column
-processing; omitting all columns uses the normal accessor path.
+processing; omitting all columns uses the normal accessor path. Scatterplot also accepts Arrow
+vectors through `getRadius`, `getLineWidth`, `getFillColor`, and `getLineColor`. These accessors
+use the same column preparation, loading, and validation rules. Explicit column props take
+precedence over Arrow accessors. GPUVector inputs remain exclusive to column props.
 
 | Pattern | Inputs | Use when |
 | --- | --- | --- |

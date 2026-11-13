@@ -10,6 +10,7 @@ import {
   UNIT,
   _GPUVectorModel as DeckGPUVectorModel
 } from '@deck.gl/core';
+import type {FixedSizeList, Float, Int} from 'apache-arrow';
 import {GPUVectorModel, GPUVectorGeometry, Geometry, makeGPUVectorGeometry} from '@luma.gl/engine';
 
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
@@ -27,6 +28,7 @@ import type {
   LayerDataSource,
   UpdateParameters,
   Accessor,
+  ArrowAccessor,
   Unit,
   Position,
   Color,
@@ -111,25 +113,25 @@ type _ScatterplotLayerProps<DataT> = ScatterplotColumnProps & {
    */
   getPosition?: Accessor<DataT, Position>;
   /**
-   * Radius accessor.
+   * Radius constant, row accessor, or numeric Arrow vector converted to Float32.
    * @default 1
    */
-  getRadius?: Accessor<DataT, number>;
+  getRadius?: ArrowAccessor<DataT, number, Int | Float>;
   /**
-   * Fill color accessor.
+   * Fill color constant, row accessor, or numeric RGB/RGBA Arrow column converted to RGBA8.
    * @default [0, 0, 0, 255]
    */
-  getFillColor?: Accessor<DataT, Color>;
+  getFillColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
   /**
-   * Stroke color accessor.
+   * Stroke color constant, row accessor, or numeric RGB/RGBA Arrow column converted to RGBA8.
    * @default [0, 0, 0, 255]
    */
-  getLineColor?: Accessor<DataT, Color>;
+  getLineColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
   /**
-   * Stroke width accessor.
+   * Stroke width constant, row accessor, or numeric Arrow vector converted to Float32.
    * @default 1
    */
-  getLineWidth?: Accessor<DataT, number>;
+  getLineWidth?: ArrowAccessor<DataT, number, Int | Float>;
   /**
    * Pixel offset accessor, [x, y] in pixels.
    * @default [0, 0]
@@ -166,10 +168,10 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   antialiasing: true,
 
   getPosition: {type: 'accessor', value: defaultPosition},
-  getRadius: {type: 'accessor', value: 1},
-  getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getLineWidth: {type: 'accessor', value: 1},
+  getRadius: {type: 'accessor', arrow: true, value: 1},
+  getFillColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getLineColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getLineWidth: {type: 'accessor', arrow: true, value: 1},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
   positions: {type: 'object', value: null, optional: true},
   radii: {type: 'object', value: null, optional: true},

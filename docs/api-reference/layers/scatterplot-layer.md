@@ -247,6 +247,30 @@ If `true`, circles are rendered with smoothed edges. If `false`, circles are ren
 
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
 
+`getRadius`, `getLineWidth`, `getFillColor`, and `getLineColor` also accept Arrow vectors.
+They use the same conversion and lifecycle as the corresponding column props. Explicit
+`radii`, `lineWidths`, `fillColors`, and `lineColors` take precedence when both are supplied.
+
+Scalar vectors accept Arrow integer and floating-point types and convert to Float32.
+Color vectors accept numeric `FixedSizeList` columns with three or four components:
+integer colors use 0–255, floating-point colors use 0–1, and missing alpha becomes opaque.
+Colors are clamped and converted to RGBA8. Constants and callback results keep the usual
+0–255 color convention.
+
+```js
+const layer = new ScatterplotLayer({
+  data: rows,
+  getPosition: row => row.position,
+  getRadius: table.getChild('radius'),
+  getFillColor: table.getChild('color')
+});
+```
+
+Arrow accessors enable column mode, including its restrictions on nulls, matching row counts
+and chunk layouts, transitions, and extensions. Replace vectors to update their contents.
+`getPosition` and `getPixelOffset` continue to accept only constants or callbacks.
+Accessors do not accept `GPUVector`; use the separate column props for GPU-resident inputs.
+
 These examples draw the same two circles.
 
 <Tabs groupId="scatterplot-input">
