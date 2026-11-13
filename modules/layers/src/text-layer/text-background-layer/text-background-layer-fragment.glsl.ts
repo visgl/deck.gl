@@ -44,9 +44,27 @@ vec4 get_stroked_fragColor(float dist) {
 }
 
 void main(void) {
+#ifdef MODULE_COLLISION
+  if (collision.visibilityPass) {
+    // Run other extensions' fragment tests, so parts of the label that ClipExtension discards are
+    // not tested. The color itself is not used. The greedy placement pass skips them, so a clipped
+    // label still writes all of its placement data.
+    if (!collision.placementPass) {
+      geometry.uv = uv;
+      vec4 filteredColor = vec4(1.0);
+      DECKGL_FILTER_COLOR(filteredColor, geometry);
+    }
+    fragColor = collision_getBoundsData();
+    return;
+  }
+  // The collision map holds full rectangles, matching the bounds the visibility pass tests
+  bool roundCorners = !collision.sort;
+#else
+  bool roundCorners = true;
+#endif
   geometry.uv = uv;
 
-  if (textBackground.borderRadius != vec4(0.0)) {
+  if (roundCorners && textBackground.borderRadius != vec4(0.0)) {
     float distToEdge = round_rect(uv, dimensions, textBackground.borderRadius);
     float shapeAlpha = smoothedge(-distToEdge, 0.0);
     if (shapeAlpha == 0.0) {

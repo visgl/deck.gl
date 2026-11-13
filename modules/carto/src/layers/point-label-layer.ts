@@ -43,6 +43,8 @@ class EnhancedTextBackgroundLayer extends TextBackgroundLayer {
 type EnhancedTextLayerProps = TextLayerProps & {
   renderBackground?: boolean;
   collisionBackgroundPadding?: TextLayerProps['backgroundPadding'];
+  /** Read by CollisionFilterExtension: id of the TextLayer whose collision result to use */
+  _collisionLabelId?: string;
 };
 
 // TextLayer which includes modified text-background-layer-vertex shader and uses a separate
@@ -65,8 +67,10 @@ class EnhancedTextLayer extends TextLayer {
     const charactersLayer = layers[1];
     const {renderBackground, collisionBackgroundPadding} = this.props as EnhancedTextLayerProps;
 
+    // Only the primary label tests collisions; the secondary label shares its result.
     const collisionBackgroundLayer =
       backgroundLayer &&
+      Boolean(collisionBackgroundPadding) &&
       new EnhancedTextBackgroundLayer(backgroundLayer.props, {
         id: `${this.id}-collision-background`,
         padding: collisionBackgroundPadding
@@ -295,20 +299,23 @@ export default class PointLabelLayer<
     } = this.props;
     const getPixelOffset = this.calculatePixelOffset(false);
     const collisionBackgroundPadding = this.calculateBackgroundPadding();
+    // Text doesn't update via updateTrigger for some reason
+    const primaryLayer = this.renderTextLayer(`${updateTriggers.getText}-primary`, {
+      background: true,
+      renderBackground: background,
+      getText,
+      getPixelOffset,
+      collisionBackgroundPadding
+    });
     const out = [
-      // Text doesn't update via updateTrigger for some reason
-      this.renderTextLayer(`${updateTriggers.getText}-primary`, {
-        background: true,
-        renderBackground: background,
-        getText,
-        getPixelOffset,
-        collisionBackgroundPadding
-      }),
+      primaryLayer,
       Boolean(getSecondaryText) &&
         this.renderTextLayer(`${updateTriggers.getSecondaryText}-secondary`, {
           getText: getSecondaryText,
           getPixelOffset: this.calculatePixelOffset(true),
           getAlignmentBaseline: 'top',
+          // Only the primary label tests collisions; the secondary label shares its result
+          _collisionLabelId: primaryLayer.id,
           // updateTriggers: {getText: updateTriggers.getSecondaryText},
 
           // Optional overrides
