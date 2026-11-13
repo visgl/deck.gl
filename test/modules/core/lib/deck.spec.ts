@@ -1398,6 +1398,42 @@ test('Deck#getView with single view', async () => {
   });
 });
 
+test('Deck#controller prop does not modify the views array', async () => {
+  const mapView = new MapView({id: 'map'});
+  const views: MapView[] = [mapView];
+  Object.freeze(views);
+
+  await new Promise<void>((resolve, reject) => {
+    const deck = new Deck({
+      device,
+      width: 1,
+      height: 1,
+
+      views,
+      controller: true,
+
+      viewState: {
+        longitude: 0,
+        latitude: 0,
+        zoom: 12
+      },
+
+      onLoad: () => {
+        try {
+          expect(views[0], 'views array is unchanged').toBe(mapView);
+          expect(mapView.props.controller, 'original view is unchanged').toBeFalsy();
+          expect(deck.getView('map')?.props.controller, 'controller is applied').toBeTruthy();
+
+          deck.finalize();
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      }
+    });
+  });
+});
+
 test('Deck#getView with multiple views', async () => {
   await new Promise<void>((resolve, reject) => {
     const deck = new Deck({
