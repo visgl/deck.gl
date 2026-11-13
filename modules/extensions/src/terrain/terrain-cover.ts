@@ -207,15 +207,9 @@ export class TerrainCover {
   }
 
   delete() {
-    const {fbo, pickingFbo} = this;
-    if (fbo) {
-      fbo.colorAttachments[0].destroy();
-      fbo.destroy();
-    }
-    if (pickingFbo) {
-      pickingFbo.colorAttachments[0].destroy();
-      pickingFbo.destroy();
-    }
+    // Render targets own their textures (see createRenderTarget)
+    this.fbo?.destroy();
+    this.pickingFbo?.destroy();
   }
 }
 

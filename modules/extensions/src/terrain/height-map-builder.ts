@@ -136,9 +136,7 @@ export class HeightMapBuilder {
   }
 
   delete() {
-    if (this.fbo) {
-      this.fbo.colorAttachments[0].delete();
-      this.fbo.delete();
-    }
+    // The render target owns its texture (see createRenderTarget)
+    this.fbo?.destroy();
   }
 }

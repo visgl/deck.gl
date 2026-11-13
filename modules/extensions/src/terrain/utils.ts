@@ -13,7 +13,7 @@ export function createRenderTarget(
     interpolate?: boolean;
   }
 ) {
-  return device.createFramebuffer({
+  const framebuffer = device.createFramebuffer({
     id: opts.id,
     colorAttachments: [
       device.createTexture({
@@ -38,4 +38,7 @@ export function createRenderTarget(
       })
     ]
   });
+  // The framebuffer owns its texture so that resize() and destroy() release it
+  framebuffer.attachResource(framebuffer.colorAttachments[0].texture);
+  return framebuffer;
 }
