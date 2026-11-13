@@ -245,3 +245,25 @@ test('prepared descriptors preserve their converter and invalidate caches on bac
   expect(av.projectionSignature).not.toBe(bv.projectionSignature);
   expect(av.sizeScaleSignature).not.toBe(bv.sizeScaleSignature);
 });
+
+test('prepared descriptors without execution identities reuse only the same object', async () => {
+  const base = (await resolveCRS('EPSG:3857'))!;
+  const first = {...base, executionIdentity: undefined};
+  const second = {...first};
+  const a = new CustomProjectionView({crs: first});
+  const same = new CustomProjectionView({crs: first});
+  const b = new CustomProjectionView({crs: second});
+  expect(a.equals(same)).toBe(true);
+  expect(a.equals(b)).toBe(false);
+  a.initialize();
+  same.initialize();
+  b.initialize();
+  const dimensions = {width: 800, height: 600, viewState};
+  const av = a.makeViewport(dimensions)!;
+  const sameViewport = same.makeViewport(dimensions)!;
+  const bv = b.makeViewport(dimensions)!;
+  expect(av.projectionSignature).toBe(sameViewport.projectionSignature);
+  expect(av.sizeScaleSignature).toBe(sameViewport.sizeScaleSignature);
+  expect(av.projectionSignature).not.toBe(bv.projectionSignature);
+  expect(av.sizeScaleSignature).not.toBe(bv.sizeScaleSignature);
+});
