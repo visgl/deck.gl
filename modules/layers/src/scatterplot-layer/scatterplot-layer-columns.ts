@@ -6,6 +6,7 @@ import type {Device} from '@luma.gl/core';
 import type {ColumnSource} from '@deck.gl/core/arrow';
 import {
   _LayerColumns as LayerColumns,
+  _resolveColumns as resolveColumns,
   type _ColumnDefinition as ColumnDefinition
 } from '@deck.gl/core';
 
@@ -20,6 +21,7 @@ export const SCATTERPLOT_COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = 
   radii: {
     attribute: 'instanceRadius',
     accessor: 'getRadius',
+    arrowAccessor: true,
     semantic: 'scalar',
     size: 1,
     defaultValue: 1
@@ -27,18 +29,21 @@ export const SCATTERPLOT_COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = 
   fillColors: {
     attribute: 'instanceFillColors',
     accessor: 'getFillColor',
+    arrowAccessor: true,
     semantic: 'color',
     size: 4
   },
   lineColors: {
     attribute: 'instanceLineColors',
     accessor: 'getLineColor',
+    arrowAccessor: true,
     semantic: 'color',
     size: 4
   },
   lineWidths: {
     attribute: 'instanceLineWidths',
     accessor: 'getLineWidth',
+    arrowAccessor: true,
     semantic: 'scalar',
     size: 1,
     defaultValue: 1
@@ -65,11 +70,9 @@ export type ScatterplotColumnProps = {
   lineWidths?: ColumnSource | null;
 };
 
-/** Returns whether any Arrow column prop is present. */
-export function hasScatterplotColumns(props: ScatterplotColumnProps): boolean {
-  return Object.entries(SCATTERPLOT_COLUMN_DEFINITIONS).some(
-    ([name, definition]) => definition.prop !== false && Boolean(props[name])
-  );
+/** Returns whether a column prop or an opted-in Arrow accessor drives the layer. */
+export function hasScatterplotColumns(props: Readonly<Record<string, unknown>>): boolean {
+  return Object.keys(resolveColumns(props, SCATTERPLOT_COLUMN_DEFINITIONS)).length > 0;
 }
 
 /** Prepares Scatterplot columns using the shared column implementation. */

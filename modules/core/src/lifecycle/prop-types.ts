@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {isArrowVector} from '../arrow/upstream-math/is-arrow-vector';
 import {createTexture, destroyTexture} from '../utils/texture';
 import {deepEqual} from '../utils/deep-equal';
 
@@ -72,6 +73,8 @@ type ArrayPropType<T = any[]> = BasePropType<T> & {
 };
 type AccessorPropType<T = any> = BasePropType<T> & {
   type: 'accessor';
+  /** Accept Arrow vectors in addition to constants and callbacks on opted-in accessors. */
+  arrow?: boolean;
 };
 type FunctionPropType<T = Function> = BasePropType<T> & {
   type: 'function';
@@ -156,9 +159,16 @@ const TYPE_DEFINITIONS = {
   accessor: {
     validate(value, propType: AccessorPropType) {
       const valueType = getTypeOf(value);
-      return valueType === 'function' || valueType === getTypeOf(propType.value);
+      return (
+        (Boolean(propType.arrow) && isArrowVector(value)) ||
+        valueType === 'function' ||
+        valueType === getTypeOf(propType.value)
+      );
     },
     equal(value1, value2, propType: AccessorPropType) {
+      if (propType.arrow && (isArrowVector(value1) || isArrowVector(value2))) {
+        return value1 === value2;
+      }
       if (typeof value2 === 'function') {
         return true;
       }

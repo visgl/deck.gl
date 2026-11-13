@@ -4,6 +4,14 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Scatterplot Arrow accessors
+
+ScatterplotLayer accepts Arrow vectors through `getRadius`, `getLineWidth`, `getFillColor`,
+and `getLineColor`, using the shared column preparation path and luma.gl conversions.
+Numeric scalars become Float32 and RGB/RGBA colors become RGBA8. Explicit column props
+retain precedence. See [ScatterplotLayer](./api-reference/layers/scatterplot-layer.md#arrow-columns)
+for supported types and column-mode limitations.
+
 ### Async CPU aggregation of GPU inputs
 
 [`ReadbackAggregator`](./api-reference/aggregation-layers/cpu-aggregator.md#readbackaggregator) runs CPU aggregation on GPUVector inputs, so you can compare CPU and GPU timings on the same buffers.

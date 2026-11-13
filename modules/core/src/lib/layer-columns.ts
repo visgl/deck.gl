@@ -25,6 +25,8 @@ export type ColumnDefinition = {
   semantic: 'position' | 'scalar' | 'color' | 'vector';
   size: number;
   prop?: boolean;
+  /** Select an Arrow vector supplied through the matching accessor, after an explicit column. */
+  arrowAccessor?: boolean;
   defaultValue?: number;
 };
 

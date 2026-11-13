@@ -788,3 +788,71 @@ test('Scatterplot borrows GPU-only positions without reading them for bounds', a
     buffer.destroy();
   }
 });
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Scatterplot Arrow accessors convert values and restore row accessors on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) return skip();
+    const {Float64, Int16} = await import('apache-arrow');
+    const fillColors = vectorFromArray(
+      [
+        [1, 0.5, 0],
+        [0, 0, 1]
+      ],
+      new FixedSizeList(3, new Field('value', new Float32(), false))
+    );
+    let checks = 0;
+    await testLayerAsync({
+      Layer: ScatterplotLayer,
+      device: testDevice,
+      testCases: [
+        {props: {data: [{position: [0, 0]}, {position: [1, 1]}], getRadius: 1}},
+        {
+          updateProps: {
+            getRadius: vectorFromArray([2, 4], new Int16()),
+            getLineWidth: vectorFromArray([0.5, 1.5], new Float64()),
+            getFillColor: fillColors,
+            getLineColor: fillColors
+          },
+          onAfterUpdate: async ({layer}) => {
+            if (!layer.isLoaded) return;
+            const columns = (layer.state.columns as any).prepared.columns;
+            for (const name of ['instanceFillColors', 'instanceLineColors']) {
+              const bytes = await columns[name].data[0].buffer.readAsync();
+              expect(Array.from(bytes.slice(0, 8))).toEqual([255, 128, 0, 255, 0, 0, 255, 255]);
+            }
+            for (const [name, expected] of [
+              ['instanceRadius', [2, 4]],
+              ['instanceLineWidths', [0.5, 1.5]]
+            ] as const) {
+              const bytes = await columns[name].data[0].buffer.readAsync();
+              expect(Array.from(new Float32Array(bytes.buffer, bytes.byteOffset, 2))).toEqual(
+                expected
+              );
+            }
+            expect(layer.getNumInstances()).toBe(2);
+            checks++;
+          }
+        },
+        {
+          updateProps: {
+            getRadius: () => 3,
+            getLineWidth: 1,
+            getFillColor: [255, 0, 0],
+            getLineColor: [0, 0, 0]
+          },
+          onAfterUpdate: ({layer}) => {
+            expect(layer.state.columns).toBeUndefined();
+            expect(layer.getAttributeManager()).toBeTruthy();
+          }
+        }
+      ],
+      onError: error => {
+        throw error;
+      }
+    });
+    expect(checks).toBeGreaterThan(0);
+  });
+}
