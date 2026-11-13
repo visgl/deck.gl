@@ -831,7 +831,9 @@ test.each(['terrain', 'extension'])(
       expect(pick?.layer?.id).toBe(overlay.id);
       expect(pick?.coordinate?.[2]).toBeCloseTo(1000, 0);
     } finally {
+      const gl = deck.getCanvas()?.getContext('webgl2');
       deck.finalize();
+      gl?.getExtension('WEBGL_lose_context')?.loseContext();
     }
   }
 );
