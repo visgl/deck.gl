@@ -77,6 +77,10 @@ Paths and polygons can follow curved projected edges with the experimental [`_pr
 
 Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
 
+### TextLayer
+
+[`TextLayer`](./api-reference/layers/text-layer.md) adds [`getLetterSpacing`](./api-reference/layers/text-layer.md#getletterspacing), which spaces the characters of each row, and [`getTextAlign`](./api-reference/layers/text-layer.md#gettextalign), which aligns the rows of a multi-line text block independently of its anchor.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
