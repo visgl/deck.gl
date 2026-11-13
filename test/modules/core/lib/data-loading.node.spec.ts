@@ -239,3 +239,28 @@ test('mixed Arrow and row streams fail instead of discarding earlier rows', asyn
     expect(complete).not.toHaveBeenCalled();
   }
 });
+
+test('equivalent nested URL options do not restart an active batch load', async () => {
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => {
+    release = resolve;
+  });
+  const fetch = vi.fn(async function* () {
+    yield [1];
+    await gate;
+    yield [2];
+  });
+  const options = () => ({core: {fetch: {headers: {Authorization: 'token'}}}});
+  const {layer, state, progress, complete} = makeState({
+    data: 'points.csv',
+    _dataLoadingMode: 'batched',
+    loadOptions: options(),
+    fetch
+  });
+  state.setAsyncProps(layer.props);
+  await vi.waitFor(() => expect(progress).toHaveBeenCalledOnce());
+  state.setAsyncProps(layer.clone({opacity: 0.5, loadOptions: options()}).props);
+  release();
+  expect(fetch).toHaveBeenCalledOnce();
+  await vi.waitFor(() => expect(complete).toHaveBeenCalledExactlyOnceWith('data', [1, 2]));
+});

@@ -115,7 +115,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
       layer && typeof value === 'string' && mode !== 'auto'
         ? {mode, loaders: layer.props.loaders, options: layer.getLoadOptions()}
         : undefined;
-    const changed = !deepEqual(this.dataRequest, request, 3);
+    const changed = !deepEqual(this.dataRequest, request, -1);
     this.dataRequest = request;
     return changed;
   }
