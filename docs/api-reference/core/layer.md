@@ -940,3 +940,29 @@ The original prop remains declarative; the calculated override participates in n
 prop diffing and uniform transitions. Omitting `_queryProps` restores the original value.
 This initial implementation is Arrow-table-only and recomputes on data or query changes;
 it does not implement streaming incremental accumulation.
+
+### Row-wise accessor expressions (experimental)
+
+`_queryProps` also accepts `get*` accessor keys. These are row-preserving SQL expressions
+compiled against the same Arrow input table, rather than aggregate reductions:
+
+```ts
+new ScatterplotLayer({
+  data: arrowTable,
+  _queryProps: {
+    radiusScale: '100 / MAX(population)', // one numeric value
+    getPosition: 'FLOAT32x2(longitude, latitude)', // one position per row
+    getRadius: 'SQRT(population)',
+    getFillColor: 'RGBA8(red, green, blue, 1)' // normalized floats -> bytes
+  }
+});
+```
+
+The `QueryProps<Props>` utility selects numeric property keys and function-valued `get*`
+accessor keys from each concrete layer's prop type. Expressions yield pure row-indexed
+accessors internally, and changes invalidate the matching attributes. The source must be
+an Apache Arrow table. SQL statements, filtering, sorting, and aggregation within a
+row-wise accessor expression are not supported. The local convenience constructors
+`FLOAT32x2/x3/x4`, `FLOAT64x2/x3/x4`, and `RGBA8` are recognized; arbitrary
+scalar expressions are compiled by math.gl. The constructor support is temporary,
+pending consolidation with the column-expression implementation.
