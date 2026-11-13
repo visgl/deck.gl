@@ -2,32 +2,28 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {AccessorFunction, DefaultProps} from '@deck.gl/core';
+import {ArrowAccessor, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {getS2Polygon} from './s2-utils';
 
-import {
-  cellColumnDefaults,
-  renderCellColumns,
-  type CellColumnProps
-} from '../geo-cell-layer/cell-columns';
+import {hasCellColumns, getCellValue, renderCellColumns} from '../geo-cell-layer/cell-columns';
 
 const defaultProps: DefaultProps<S2LayerProps> = {
-  ...cellColumnDefaults,
-  getS2Token: {type: 'accessor', value: (d: any) => d.token}
+  getS2Token: {type: 'accessor', arrow: true, value: (d: any) => d.token}
 };
 
 /** All properties supported by S2Layer. */
 export type S2LayerProps<DataT = unknown> = _S2LayerProps<DataT> & GeoCellLayerProps<DataT>;
 
 /** Properties added by S2Layer. */
-type _S2LayerProps<DataT> = CellColumnProps & {
+type _S2LayerProps<DataT> = {
   /**
    * Called for each data object to retrieve the quadkey string identifier.
    *
    * By default, it reads `token` property of data object.
+   * Also accepts an Arrow vector of identifiers or identifier lists in source-feature order.
    */
-  getS2Token?: AccessorFunction<DataT, string>;
+  getS2Token?: ArrowAccessor<DataT, string>;
 };
 
 /** Render filled and/or stroked polygons based on the [S2](http://s2geometry.io/) geospatial indexing system. */
@@ -40,7 +36,7 @@ export default class S2Layer<DataT = any, ExtraProps extends {} = {}> extends Ge
 
   /** Routes cell columns through source-preserving geometry and style accessors. */
   renderLayers() {
-    if (this.props.cells)
+    if (hasCellColumns(this.props, 'getS2Token'))
       return renderCellColumns(this, 'getS2Token', false, {
         row: this.getSubLayerRow.bind(this),
         accessor: this.getSubLayerAccessor.bind(this),
@@ -56,7 +52,7 @@ export default class S2Layer<DataT = any, ExtraProps extends {} = {}> extends Ge
       data,
       _normalize: false,
       positionFormat: 'XY',
-      getPolygon: (x: DataT, objectInfo) => getS2Polygon(getS2Token(x, objectInfo))
+      getPolygon: (x: DataT, objectInfo) => getS2Polygon(getCellValue(getS2Token, x, objectInfo))
     };
   }
 }

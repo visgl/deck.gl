@@ -175,12 +175,6 @@ new ScreenGridLayer({
 });
 ```
 
-This path also accepts `positions` and `weights` GPUVectors without a custom
-aggregator. Positions must be single-chunk `float32x2` or `float32x3`, and weights
-must be a single-chunk `float32` vector. Buffers need `STORAGE` or `COPY_SRC` usage;
-non-storage inputs are copied on the GPU. Custom views require GPU positions in
-the view's coordinate system. Accessor inputs use the normal position conversion.
-GPU-column inputs with extensions or positions requiring CPU preprojection remain unsupported.
 Unsupported binary input formats retain CPU aggregation for accessor-backed data.
 
 

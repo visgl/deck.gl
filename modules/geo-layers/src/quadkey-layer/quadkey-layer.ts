@@ -2,19 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {AccessorFunction, DefaultProps} from '@deck.gl/core';
+import {ArrowAccessor, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {getQuadkeyPolygon} from './quadkey-utils';
 
-import {
-  cellColumnDefaults,
-  renderCellColumns,
-  type CellColumnProps
-} from '../geo-cell-layer/cell-columns';
+import {hasCellColumns, getCellValue, renderCellColumns} from '../geo-cell-layer/cell-columns';
 
 const defaultProps: DefaultProps<QuadkeyLayerProps> = {
-  ...cellColumnDefaults,
-  getQuadkey: {type: 'accessor', value: (d: any) => d.quadkey}
+  getQuadkey: {type: 'accessor', arrow: true, value: (d: any) => d.quadkey}
 };
 
 /** All properties supported by QuadkeyLayer. */
@@ -22,13 +17,14 @@ export type QuadkeyLayerProps<DataT = unknown> = _QuadkeyLayerProps<DataT> &
   GeoCellLayerProps<DataT>;
 
 /** Properties added by QuadkeyLayer. */
-type _QuadkeyLayerProps<DataT> = CellColumnProps & {
+type _QuadkeyLayerProps<DataT> = {
   /**
    * Called for each data object to retrieve the quadkey string identifier.
    *
    * By default, it reads `quadkey` property of data object.
+   * Also accepts an Arrow vector of identifiers or identifier lists in source-feature order.
    */
-  getQuadkey?: AccessorFunction<DataT, string>;
+  getQuadkey?: ArrowAccessor<DataT, string>;
 };
 
 /** Render filled and/or stroked polygons based on the [Quadkey](https://towardsdatascience.com/geospatial-indexing-with-quadkeys-d933dff01496) geospatial indexing system. */
@@ -41,7 +37,7 @@ export default class QuadkeyLayer<DataT = any, ExtraProps extends {} = {}> exten
 
   /** Routes cell columns through source-preserving geometry and style accessors. */
   renderLayers() {
-    if (this.props.cells)
+    if (hasCellColumns(this.props, 'getQuadkey'))
       return renderCellColumns(this, 'getQuadkey', false, {
         row: this.getSubLayerRow.bind(this),
         accessor: this.getSubLayerAccessor.bind(this),
@@ -60,7 +56,8 @@ export default class QuadkeyLayer<DataT = any, ExtraProps extends {} = {}> exten
       _normalize: false,
       positionFormat: 'XY',
 
-      getPolygon: (x: DataT, objectInfo) => getQuadkeyPolygon(getQuadkey(x, objectInfo), coverage),
+      getPolygon: (x: DataT, objectInfo) =>
+        getQuadkeyPolygon(getCellValue(getQuadkey, x, objectInfo), coverage),
       updateTriggers: {getPolygon: coverage}
     };
   }

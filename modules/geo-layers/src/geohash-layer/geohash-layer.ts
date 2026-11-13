@@ -2,19 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {AccessorFunction, DefaultProps} from '@deck.gl/core';
+import {ArrowAccessor, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {getGeohashPolygon} from './geohash-utils';
 
-import {
-  cellColumnDefaults,
-  renderCellColumns,
-  type CellColumnProps
-} from '../geo-cell-layer/cell-columns';
+import {hasCellColumns, getCellValue, renderCellColumns} from '../geo-cell-layer/cell-columns';
 
 const defaultProps: DefaultProps<GeohashLayerProps> = {
-  ...cellColumnDefaults,
-  getGeohash: {type: 'accessor', value: (d: any) => d.geohash}
+  getGeohash: {type: 'accessor', arrow: true, value: (d: any) => d.geohash}
 };
 
 /** All properties supported by GeohashLayer. */
@@ -22,13 +17,14 @@ export type GeohashLayerProps<DataT = unknown> = _GeohashLayerProps<DataT> &
   GeoCellLayerProps<DataT>;
 
 /** Properties added by GeohashLayer. */
-type _GeohashLayerProps<DataT> = CellColumnProps & {
+type _GeohashLayerProps<DataT> = {
   /**
    * Called for each data object to retrieve the geohash string identifier.
    *
    * By default, it reads `geohash` property of data object.
+   * Also accepts an Arrow vector of identifiers or identifier lists in source-feature order.
    */
-  getGeohash?: AccessorFunction<DataT, string>;
+  getGeohash?: ArrowAccessor<DataT, string>;
 };
 
 /** Render filled and/or stroked polygons based on the [Geohash](https://en.wikipedia.org/wiki/Geohash) geospatial indexing system. */
@@ -41,7 +37,7 @@ export default class GeohashLayer<DataT = any, ExtraProps extends {} = {}> exten
 
   /** Routes cell columns through source-preserving geometry and style accessors. */
   renderLayers() {
-    if (this.props.cells)
+    if (hasCellColumns(this.props, 'getGeohash'))
       return renderCellColumns(this, 'getGeohash', false, {
         row: this.getSubLayerRow.bind(this),
         accessor: this.getSubLayerAccessor.bind(this),
@@ -57,7 +53,8 @@ export default class GeohashLayer<DataT = any, ExtraProps extends {} = {}> exten
       data,
       _normalize: false,
       positionFormat: 'XY',
-      getPolygon: (x: DataT, objectInfo) => getGeohashPolygon(getGeohash(x, objectInfo))
+      getPolygon: (x: DataT, objectInfo) =>
+        getGeohashPolygon(getCellValue(getGeohash, x, objectInfo))
     };
   }
 }

@@ -110,8 +110,9 @@ type _ScatterplotLayerProps<DataT> = ScatterplotColumnProps & {
 
   /**
    * Center position accessor.
+   * Accepts a constant, row callback, or numeric Arrow column.
    */
-  getPosition?: Accessor<DataT, Position>;
+  getPosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
   /**
    * Radius constant, row accessor, or numeric Arrow vector converted to Float32.
    * @default 1
@@ -167,7 +168,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   billboard: false,
   antialiasing: true,
 
-  getPosition: {type: 'accessor', value: defaultPosition},
+  getPosition: {type: 'accessor', arrow: true, value: defaultPosition},
   getRadius: {type: 'accessor', arrow: true, value: 1},
   getFillColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},

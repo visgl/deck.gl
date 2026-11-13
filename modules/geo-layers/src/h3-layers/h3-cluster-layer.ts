@@ -4,20 +4,15 @@
 
 import {cellsToMultiPolygon, H3IndexInput} from 'h3-js';
 
-import {AccessorFunction, createIterable, UpdateParameters, DefaultProps} from '@deck.gl/core';
+import {ArrowAccessor, createIterable, UpdateParameters, DefaultProps} from '@deck.gl/core';
 import {default as H3HexagonLayer} from './h3-hexagon-layer';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {normalizeLongitudes} from './h3-utils';
 
-import {
-  cellColumnDefaults,
-  renderCellColumns,
-  type CellColumnProps
-} from '../geo-cell-layer/cell-columns';
+import {hasCellColumns, getCellValue, renderCellColumns} from '../geo-cell-layer/cell-columns';
 
 const defaultProps: DefaultProps<H3ClusterLayerProps> = {
-  ...cellColumnDefaults,
-  getHexagons: {type: 'accessor', value: (d: any) => d.hexagons}
+  getHexagons: {type: 'accessor', arrow: true, value: (d: any) => d.hexagons}
 };
 
 /** All properties supported by H3ClusterLayer. */
@@ -25,13 +20,14 @@ export type H3ClusterLayerProps<DataT = unknown> = _H3ClusterLayerProps<DataT> &
   GeoCellLayerProps<DataT>;
 
 /** Properties added by H3ClusterLayer. */
-type _H3ClusterLayerProps<DataT> = CellColumnProps & {
+type _H3ClusterLayerProps<DataT> = {
   /**
    * Called for each data object to retrieve the hexagon identifiers.
    *
    * By default, it reads `hexagons` property of data object.
+   * Also accepts an Arrow vector of identifiers or identifier lists in source-feature order.
    */
-  getHexagons?: AccessorFunction<DataT, H3IndexInput[]>;
+  getHexagons?: ArrowAccessor<DataT, H3IndexInput[]>;
 };
 
 export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellLayer<
@@ -50,9 +46,9 @@ export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> ext
   }
 
   updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
-    if (props.cells) return;
+    if (hasCellColumns(props, 'getHexagons')) return;
     if (
-      oldProps.cells ||
+      hasCellColumns(oldProps, 'getHexagons') ||
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getHexagons)
     ) {
@@ -62,7 +58,7 @@ export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> ext
       const {iterable, objectInfo} = createIterable(data);
       for (const object of iterable) {
         objectInfo.index++;
-        const hexagons = getHexagons(object, objectInfo);
+        const hexagons = getCellValue(getHexagons, object, objectInfo);
         const multiPolygon = cellsToMultiPolygon(hexagons, true);
 
         for (const polygon of multiPolygon) {
@@ -80,7 +76,7 @@ export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> ext
 
   /** Routes cell columns through source-preserving geometry and style accessors. */
   renderLayers() {
-    if (this.props.cells)
+    if (hasCellColumns(this.props, 'getHexagons'))
       return renderCellColumns(this, 'getHexagons', true, {
         row: this.getSubLayerRow.bind(this),
         accessor: this.getSubLayerAccessor.bind(this),
@@ -96,10 +92,10 @@ export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> ext
       data: this.state.polygons,
       getPolygon: d => d.polygon,
 
-      getElevation: this.getSubLayerAccessor(getElevation),
-      getFillColor: this.getSubLayerAccessor(getFillColor),
-      getLineColor: this.getSubLayerAccessor(getLineColor),
-      getLineWidth: this.getSubLayerAccessor(getLineWidth)
+      getElevation: this.getSubLayerAccessor((row, info) => getCellValue(getElevation, row, info)),
+      getFillColor: this.getSubLayerAccessor((row, info) => getCellValue(getFillColor, row, info)),
+      getLineColor: this.getSubLayerAccessor((row, info) => getCellValue(getLineColor, row, info)),
+      getLineWidth: this.getSubLayerAccessor((row, info) => getCellValue(getLineWidth, row, info))
     };
   }
 }

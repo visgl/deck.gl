@@ -420,6 +420,8 @@ If not specified, the layer uses the following defaults to create a linearly smo
 
 ### Data Accessors
 
+Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
+
 #### `getIcon` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#geticon}
 
 - Default: `d => d.icon`
@@ -443,14 +445,16 @@ the following properties.
 The image loaded from `url` is always resized to fit the box defined by `[width, height]` while preserving its aspect ratio.
 
 
-#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#positions-and-other-vectors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 - Default: `d => d.position`
 
 Method called to retrieve the position of each object, returns `[lng, lat, z]`.
 
+* If an Arrow vector is provided, each row supplies a numeric fixed-size list matching the accessor’s dimensions.
 
-#### `getSize` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsize}
+
+#### `getSize` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#scalars), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsize}
 
 - Default: `1`
 
@@ -459,18 +463,23 @@ The size of each object, in units specified by `sizeUnits` (default pixels). By 
 - If a number is provided, it is used as the size for all objects.
 - If a function is provided, it is called on each object to retrieve its size.
 
+* If an Arrow vector is provided, each row supplies a numeric value.
 
-#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
+
+#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#colors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 - Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 - If an array is provided, it is used as the color for all objects.
 - If a function is provided, it is called on each object to retrieve its color.
 - If `mask` = false, only the alpha component will be used to control the opacity of the icon.
 
-#### `getAngle` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getangle}
+* If an Arrow vector is provided, each row supplies a numeric RGB/RGBA fixed-size list.
+
+
+#### `getAngle` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#scalars), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getangle}
 
 - Default: `0`
 
@@ -479,7 +488,10 @@ The rotating angle  of each object, in degrees.
 - If a number is provided, it is used as the angle for all objects.
 - If a function is provided, it is called on each object to retrieve its angle.
 
-#### `getPixelOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
+* If an Arrow vector is provided, each row supplies a numeric value.
+
+
+#### `getPixelOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#positions-and-other-vectors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
 
 - Default: `[0, 0]`
 
@@ -489,6 +501,9 @@ Screen space offset relative to the `coordinates` in pixel unit.
 * If a function is provided, it is called on each object to retrieve its offset.
 
 ### Callbacks
+
+* If an Arrow vector is provided, each row supplies a numeric fixed-size list matching the accessor’s dimensions.
+
 
 #### `onIconError` (Function) {#oniconerror}
 
@@ -511,39 +526,6 @@ This section is about the special requirements when [supplying attributes direct
 If `data.attributes.getIcon` is supplied, since its value can only be a typed array, `iconMapping` can only use integers as keys.
 
 
-### Arrow Columns
-
-See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
-
-#### `positions` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric XY or XYZ fixed-size lists specifying icon anchors. Overrides [`getPosition`](#getposition).
-
-#### `sizes` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric scalar icon sizes in `sizeUnits`. Overrides [`getSize`](#getsize).
-
-#### `colors` (Arrow Vector, optional)
-
-* Default: `null`
-
-RGB or RGBA fixed-size lists specifying icon colors. Overrides [`getColor`](#getcolor).
-
-#### `angles` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric scalar rotations in degrees. Overrides [`getAngle`](#getangle).
-
-#### `pixelOffsets` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric XY fixed-size lists specifying offsets in pixels. Overrides [`getPixelOffset`](#getpixeloffset).
 
 ## Remarks
 

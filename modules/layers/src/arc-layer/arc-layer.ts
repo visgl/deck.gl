@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {FixedSizeList, Float, Int} from 'apache-arrow';
+
 import {
   Layer,
   project32,
@@ -12,9 +14,8 @@ import {
   LayerProps,
   LayerDataSource,
   Unit,
-  AccessorFunction,
   Position,
-  Accessor,
+  ArrowAccessor,
   Color,
   DefaultProps,
   _GPUVectorModel as DeckGPUVectorModel
@@ -41,13 +42,13 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
   widths: {type: 'object', value: null, optional: true},
   heights: {type: 'object', value: null, optional: true},
   tilts: {type: 'object', value: null, optional: true},
-  getSourcePosition: {type: 'accessor', value: defaultSourcePosition},
-  getTargetPosition: {type: 'accessor', value: defaultTargetPosition},
-  getSourceColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getTargetColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getWidth: {type: 'accessor', value: 1},
-  getHeight: {type: 'accessor', value: 1},
-  getTilt: {type: 'accessor', value: 0},
+  getSourcePosition: {type: 'accessor', arrow: true, value: defaultSourcePosition},
+  getTargetPosition: {type: 'accessor', arrow: true, value: defaultTargetPosition},
+  getSourceColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getTargetColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getWidth: {type: 'accessor', arrow: true, value: 1},
+  getHeight: {type: 'accessor', arrow: true, value: 1},
+  getTilt: {type: 'accessor', arrow: true, value: 0},
 
   greatCircle: false,
   numSegments: {type: 'number', value: 50, min: 1},
@@ -112,45 +113,52 @@ type _ArcLayerProps<DataT> = ArcColumnProps & {
 
   /**
    * Method called to retrieve the source position of each object.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default object => object.sourcePosition
    */
-  getSourcePosition?: AccessorFunction<DataT, Position>;
+  getSourcePosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
 
   /**
    * Method called to retrieve the target position of each object.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default object => object.targetPosition
    */
-  getTargetPosition?: AccessorFunction<DataT, Position>;
+  getTargetPosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
 
   /**
    * The rgba color is in the format of `[r, g, b, [a]]`.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 0, 255]
    */
-  getSourceColor?: Accessor<DataT, Color>;
+  getSourceColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
 
   /**
    * The rgba color is in the format of `[r, g, b, [a]]`.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 0, 255]
    */
-  getTargetColor?: Accessor<DataT, Color>;
+  getTargetColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
 
   /**
    * The line width of each object, in units specified by `widthUnits`.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default 1
    */
-  getWidth?: Accessor<DataT, number>;
+  getWidth?: ArrowAccessor<DataT, number, Int | Float>;
 
   /**
    * Multiplier of layer height. `0` will make the layer flat.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default 1
    */
-  getHeight?: Accessor<DataT, number>;
+  getHeight?: ArrowAccessor<DataT, number, Int | Float>;
 
   /**
    * Use to tilt the arc to the side if you have multiple arcs with the same source and target positions.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default 0
    */
-  getTilt?: Accessor<DataT, number>;
+  getTilt?: ArrowAccessor<DataT, number, Int | Float>;
 };
 
 /** Render raised arcs joining pairs of source and target coordinates. */

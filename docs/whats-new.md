@@ -4,13 +4,13 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
-### Scatterplot Arrow accessors
+### Arrow accessor inputs
 
-ScatterplotLayer accepts Arrow vectors through `getRadius`, `getLineWidth`, `getFillColor`,
-and `getLineColor`, using the shared column preparation path and luma.gl conversions.
-Numeric scalars become Float32 and RGB/RGBA colors become RGBA8. Explicit column props
-retain precedence. See [ScatterplotLayer](./api-reference/layers/scatterplot-layer.md#arrow-columns)
-for supported types and column-mode limitations.
+Layers with column support accept Arrow vectors directly through their existing accessors,
+including positions, colors, and scalar values. Numeric rendering inputs use shared luma.gl
+conversion; cell layers preserve source-feature identity while expanding identifiers.
+See [Using with Arrow](./developer-guide/using-with-arrow.md) for shared rules and each
+layer's prop descriptions for supported inputs.
 
 ### Async CPU aggregation of GPU inputs
 
@@ -27,10 +27,6 @@ Compute aggregation now supports automatic domains, picking metadata, accessor-b
 extensions, and Grid distribution scales and percentile filtering. Explicit-domain rendering
 continues to consume GPU vectors directly; CPU-facing metadata uses asynchronous snapshots.
 
-### Heatmap GPU column inputs
-
-HeatmapLayer accepts borrowed position and weight GPUVectors on WebGPU, including strided columns and shorter row prefixes.
-
 ### Grid compute aggregation
 
 `GridLayer` supports two-channel compute aggregation with explicit color and elevation domains.
@@ -44,11 +40,10 @@ implementation shares column preparation and reduction kernels with ScreenGrid. 
 picking and extensions disabled. SUM, MEAN, MIN, MAX, and COUNT produce GPUVector
 outputs consumed directly by the cell layer. See [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#compute-aggregation).
 
-### Custom aggregators and GPUVector inputs
+### Custom aggregators
 
 GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer now accept custom aggregator
-instances. Custom aggregators can consume GPUVector position/weight columns and publish
-GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and
+instances. Custom aggregators can publish GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and
 channel values. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
 result layouts, and supported scales and contours.
 
@@ -59,9 +54,9 @@ constant-buffer binding and render-target format tracking to luma.gl. WebGPU
 layer draws restore dynamic render-pass parameters after drawing. Custom shader
 plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-guide.md).
 
-### ScatterplotLayer Arrow columns
+### ScatterplotLayer Arrow accessors
 
-ScatterplotLayer accepts Arrow vectors for positions and styling, with accessor and binary fallbacks. See [Using with Arrow](./developer-guide/using-with-arrow.md) for shared requirements and examples.
+ScatterplotLayer accepts Arrow vectors through its position and styling accessors, alongside row callbacks and binary inputs. See [Using with Arrow](./developer-guide/using-with-arrow.md) for shared requirements and examples.
 
 ### deck.gl v10 examples (Experimental)
 
