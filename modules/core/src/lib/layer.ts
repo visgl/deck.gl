@@ -865,20 +865,46 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
   }
 
+  /** Resolve internal overrides without changing the caller's declarative props. */
+  private _getDerivedProps(
+    props: Layer<PropsT>['props'],
+    overrides = this.internalState?.derivedProps
+  ): Layer<PropsT>['props'] {
+    if (!overrides || !Object.keys(overrides).length) return props;
+    return Object.assign(Object.create(props), overrides);
+  }
+
+  /**
+   * Set internal, synchronous effective prop values (e.g. query-derived statistics).
+   * Unlike async props, this works for normal numeric/color/array props.
+   * Changes participate in standard prop diffing and uniform transitions.
+   */
+  protected setDerivedProps(overrides: Partial<Layer<PropsT>['props']> | null): void {
+    const state = this.internalState;
+    if (!state) return;
+    const previous = this._getDerivedProps(this.props);
+    const next = overrides ? {...overrides} : undefined;
+    const current = this._getDerivedProps(this.props, next);
+    if (!state.derivedOldProps) state.derivedOldProps = previous;
+    state.derivedProps = next;
+    this._diffProps(current, previous);
+    this.setNeedsUpdate();
+  }
+
   /** Update uniform (prop) transitions. This is called in updateState, may result in model updates. */
-  private _updateUniformTransition(): Layer<PropsT>['props'] {
+  private _updateUniformTransition(baseProps = this.props): Layer<PropsT>['props'] {
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
     const {uniformTransitions} = this.internalState;
     if (uniformTransitions.active) {
       // clone props
       const propsInTransition = uniformTransitions.update();
-      const props = Object.create(this.props);
+      const props = Object.create(baseProps);
       for (const key in propsInTransition) {
         Object.defineProperty(props, key, {value: propsInTransition[key]});
       }
       return props;
     }
-    return this.props;
+    return baseProps;
   }
 
   /** Updater for the automatically populated instancePickingColors attribute */
@@ -1283,7 +1309,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const internalState = this.internalState as LayerState<this>;
 
     const currentViewport = context.viewport;
-    const propsInTransition = this._updateUniformTransition();
+    const propsInTransition = this._updateUniformTransition(this._getDerivedProps(currentProps));
     internalState.propsInTransition = propsInTransition;
     // Use the first eligible viewport retained by this layer for lifecycle updates
     // In multi-view applications, a layer may only be drawn in one of the views
@@ -1355,6 +1381,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       this._clearChangeFlags();
       internalState.needsUpdate = false;
       internalState.preprojectionChanged = false;
+      internalState.derivedOldProps = undefined;
       internalState.resetOldProps();
     }
   }
@@ -1661,7 +1688,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return {
       props: this.props,
       // @ts-ignore TS2531 this method can only be called internally with internalState assigned
-      oldProps: this.internalState.getOldProps() as PropsT,
+      oldProps: (this.internalState.derivedOldProps ||
+        this._getDerivedProps(this.internalState.getOldProps() as Layer<PropsT>['props'])) as PropsT,
       context: this.context,
       // @ts-ignore TS2531 this method can only be called internally with internalState assigned
       changeFlags: this.internalState.changeFlags
