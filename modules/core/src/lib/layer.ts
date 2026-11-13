@@ -883,16 +883,16 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   protected setDerivedProps(overrides: Partial<Layer<PropsT>['props']> | null): void {
     const state = this.internalState;
     if (!state) return;
+    const oldOverrides = state.derivedProps || {};
     const previous = this._getDerivedProps(this.props);
     const next = overrides ? {...overrides} : undefined;
     const current = this._getDerivedProps(this.props, next);
     if (!state.derivedOldProps) state.derivedOldProps = previous;
     state.derivedProps = next;
     this._diffProps(current, previous);
-    // Accessor overrides change attribute inputs, independently of updateTriggers.
-    for (const key of new Set([...Object.keys(state.derivedProps || {}), ...Object.keys(previous)])) {
-      if (key.startsWith('get') && typeof current[key] !== typeof previous[key] ||
-          key.startsWith('get') && current[key] !== previous[key]) {
+    // An updated accessor is an attribute input change, not merely a uniform change.
+    for (const key of new Set([...Object.keys(oldOverrides), ...Object.keys(next || {})])) {
+      if (key.startsWith('get') && previous[key] !== current[key]) {
         this.invalidateAttribute(key);
       }
     }
@@ -1313,7 +1313,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         this.raiseError(new Error(`_queryProps.${name} requires an expression string`), 'evaluating _queryProps');
         return;
       }
-      if (name.startsWith('get') && typeof prop === 'function') {
+      if (name.startsWith('get') && (typeof prop === 'function' || typeof prop === 'number' || Array.isArray(prop))) {
         accessorQueries[name] = expression;
       } else if (typeof prop === 'number') {
         aggregateQueries[name] = expression;
