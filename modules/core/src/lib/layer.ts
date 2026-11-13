@@ -883,12 +883,19 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   protected setDerivedProps(overrides: Partial<Layer<PropsT>['props']> | null): void {
     const state = this.internalState;
     if (!state) return;
+    const oldOverrides = state.derivedProps || {};
     const previous = this._getDerivedProps(this.props);
     const next = overrides ? {...overrides} : undefined;
     const current = this._getDerivedProps(this.props, next);
     if (!state.derivedOldProps) state.derivedOldProps = previous;
     state.derivedProps = next;
     this._diffProps(current, previous);
+    // An updated accessor is an attribute input change, not merely a uniform change.
+    for (const key of new Set([...Object.keys(oldOverrides), ...Object.keys(next || {})])) {
+      if (key.startsWith('get') && previous[key] !== current[key]) {
+        this.invalidateAttribute(key);
+      }
+    }
     this.setNeedsUpdate();
   }
 
@@ -1298,9 +1305,20 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       }
       return;
     }
-    for (const name of Object.keys(queries)) {
-      if (name === '_queryProps' || typeof (this.props as Record<string, unknown>)[name] !== 'number') {
-        this.raiseError(new Error(`_queryProps.${name} must target an existing numeric layer prop`), 'evaluating _queryProps');
+    const aggregateQueries: Record<string, string> = {};
+    const accessorQueries: Record<string, string> = {};
+    for (const [name, expression] of Object.entries(queries)) {
+      const prop = (this.props as Record<string, unknown>)[name];
+      if (typeof expression !== 'string' || !expression.trim()) {
+        this.raiseError(new Error(`_queryProps.${name} requires an expression string`), 'evaluating _queryProps');
+        return;
+      }
+      if (name.startsWith('get') && (typeof prop === 'function' || typeof prop === 'number' || Array.isArray(prop))) {
+        accessorQueries[name] = expression;
+      } else if (typeof prop === 'number') {
+        aggregateQueries[name] = expression;
+      } else {
+        this.raiseError(new Error(`_queryProps.${name} requires a numeric prop or get* accessor`), 'evaluating _queryProps');
         return;
       }
     }
@@ -1312,16 +1330,24 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
     const request = {source: data, queries: {...queries}};
     state.queryPropsRequest = request;
-    void import('../arrow/query-props')
-      .then(({evaluateQueryProps}) => evaluateQueryProps(data, request.queries))
-      .then(values => {
+    void Promise.all([
+      Object.keys(aggregateQueries).length
+        ? import('../arrow/query-props').then(({evaluateQueryProps}) =>
+            evaluateQueryProps(data, aggregateQueries))
+        : Promise.resolve({}),
+      Object.keys(accessorQueries).length
+        ? import('../arrow/query-accessor-props').then(({evaluateQueryAccessorProps}) =>
+            evaluateQueryAccessorProps(data, accessorQueries))
+        : Promise.resolve({})
+    ])
+      .then(([aggregates, accessors]) => {
         const layer = state.layer;
         if (
           layer && state.queryPropsRequest === request &&
           layer.props.data === data &&
           deepEqual(layer.props._queryProps, request.queries, -1)
         ) {
-          layer.setDerivedProps(values as Partial<Layer<PropsT>['props']>);
+          layer.setDerivedProps({...aggregates, ...accessors} as Partial<Layer<PropsT>['props']>);
         }
       })
       .catch(error => {

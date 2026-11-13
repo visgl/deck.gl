@@ -116,9 +116,15 @@ export type LayerDataSource<DataType> =
 /**
  * Base Layer prop types
  */
-/** Query strings for numeric layer properties, preserving concrete prop-name autocomplete. */
+/** Aggregate expressions for numeric props, and row expressions for get* accessors. */
 export type QueryProps<Props> = {
-  [K in keyof Props as NonNullable<Props[K]> extends number ? K : never]?: string;
+  [K in keyof Props as NonNullable<Props[K]> extends number
+    ? K
+    : K extends `get${string}`
+      ? Extract<NonNullable<Props[K]>, (...args: any[]) => unknown> extends never
+        ? never
+        : K
+      : never]?: string;
 };
 
 export type LayerProps<ExtraProps = {}> = {
