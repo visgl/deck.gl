@@ -6,6 +6,7 @@ import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
 import type {QueryProps} from '../../../../modules/core/src/types/layer-props';
 import {evaluateQueryProps} from '../../../../modules/core/src/arrow/query-props';
+import {evaluateQueryAccessorProps} from '../../../../modules/core/src/arrow/query-accessor-props';
 
 test('_queryProps evaluates aggregate-derived numeric layer values', async () => {
   const table = tableFromArrays({population: [4, 9, 16]});
@@ -34,4 +35,29 @@ test('QueryProps maps only numeric properties to optional SQL strings', () => {
   // @ts-expect-error Boolean props are not queryable in the initial numeric-only API.
   const invalid: QueryProps<Props> = {pickable: 'COUNT(*)'};
   expect(invalid).toBeDefined();
+});
+
+test('_queryProps evaluates accessor expressions row by row', async () => {
+  const table = tableFromArrays({
+    x: [1, 2], y: [3, 4],
+    size: [9, 16], red: [1, 0.5], green: [0, 0.5], blue: [0, 0.5]
+  });
+  const accessors = await evaluateQueryAccessorProps(table, {
+    getPosition: 'FLOAT32x2(x, y)',
+    getRadius: 'SQRT(size)',
+    getFillColor: 'RGBA8(red, green, blue, 1)'
+  });
+  expect(accessors.getPosition(null, {index: 0})).toEqual([1, 3]);
+  expect(accessors.getPosition(null, {index: 1})).toEqual([2, 4]);
+  expect(accessors.getRadius(null, {index: 1})).toBe(4);
+  expect(accessors.getFillColor(null, {index: 0})).toEqual([255, 0, 0, 255]);
+  expect(accessors.getFillColor(null, {index: 1})).toEqual([128, 128, 128, 255]);
+});
+
+test('_queryProps accessor expressions reject statements and incorrect vector arity', async () => {
+  const table = tableFromArrays({x: [1], y: [2]});
+  await expect(evaluateQueryAccessorProps(table, {getPosition: 'SELECT x WHERE x > 0'}))
+    .rejects.toThrow();
+  await expect(evaluateQueryAccessorProps(table, {getPosition: 'FLOAT32x2(x)'}))
+    .rejects.toThrow('requires exactly 2 arguments');
 });
