@@ -6,13 +6,15 @@ import * as React from 'react';
 import {createElement} from 'react';
 import {View} from '@deck.gl/core';
 import {inheritsFrom} from './inherits-from';
-import evaluateChildren, {isComponent} from './evaluate-children';
+import evaluateChildren, {extractMaps, isComponent} from './evaluate-children';
 
 import type {ViewOrViews} from '../deckgl';
 import type {Deck, Viewport} from '@deck.gl/core';
 import {DeckGlContext, type DeckGLContextValue} from './deckgl-context';
 
-// Iterate over views and reposition children associated with views
+// Iterate over views and reposition children associated with views.
+// `maps` go before the canvas and `children` after it, so that z-index free siblings of the canvas
+// stack around it, while map controls (z-index: 2) can still rise above it.
 // TODO - Can we supply a similar function for the non-React case?
 export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
   children,
@@ -22,18 +24,19 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
   children: React.ReactNode[];
   deck?: Deck<ViewsT>;
   ContextProvider?: React.Context<DeckGLContextValue>['Provider'];
-}): React.ReactNode[] {
+}): {maps: React.ReactNode[]; children: React.ReactNode[]} {
   // @ts-expect-error accessing protected property
   const {viewManager} = deck || {};
 
   if (!viewManager || !viewManager.views.length) {
-    return [];
+    return {maps: [], children: []};
   }
 
   const views: Record<
     string,
     {
       viewport: Viewport;
+      maps: React.ReactNode[];
       children: React.ReactNode[];
     }
   > = {};
@@ -70,16 +73,18 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
       if (!views[viewId]) {
         views[viewId] = {
           viewport,
+          maps: [],
           children: []
         };
       }
-      views[viewId].children.push(viewChildren);
+      views[viewId].children.push(extractMaps(viewChildren, views[viewId].maps));
     }
   }
 
   // Render views
-  return Object.keys(views).map(viewId => {
-    const {viewport, children: viewChildren} = views[viewId];
+  const maps: React.ReactNode[] = [];
+  const wrappedChildren = Object.keys(views).map(viewId => {
+    const {viewport, maps: viewMaps, children: viewChildren} = views[viewId];
     const {x, y, width, height} = viewport;
     const style = {
       position: 'absolute',
@@ -88,11 +93,6 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
       width,
       height
     };
-
-    const key = `view-${viewId}`;
-    // If children is passed as an array, React will throw the "each element in a list needs
-    // a key" warning. Sending each child as separate arguments removes this requirement.
-    const viewElement = createElement('div', {key, id: key, style}, ...viewChildren);
 
     const contextValue: DeckGLContextValue = {
       deck,
@@ -108,7 +108,21 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
       },
       widgets: []
     };
-    const providerKey = `view-${viewId}-context`;
-    return createElement(ContextProvider, {key: providerKey, value: contextValue}, viewElement);
+
+    const wrapChildren = (key: string, elements: React.ReactNode[]) =>
+      // If children is passed as an array, React will throw the "each element in a list needs
+      // a key" warning. Sending each child as separate arguments removes this requirement.
+      createElement(
+        ContextProvider,
+        {key: `${key}-context`, value: contextValue},
+        createElement('div', {key, id: key, style}, ...elements)
+      );
+
+    if (viewMaps.length) {
+      maps.push(wrapChildren(`view-${viewId}--map`, viewMaps));
+    }
+    return wrapChildren(`view-${viewId}`, viewChildren);
   });
+
+  return {maps, children: wrappedChildren};
 }

@@ -280,7 +280,7 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
 
     // Render the background elements (typically react-map-gl instances)
     // using the view descriptors
-    const childrenUnderViews = positionChildrenUnderViews({
+    const {maps, children: childrenUnderViews} = positionChildrenUnderViews({
       children: jsxProps.children,
       deck: thisRef.deck,
       ContextProvider
@@ -300,7 +300,7 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
         className: 'deck-events-root',
         style: {width, height}
       },
-      [canvas, childrenUnderViews]
+      [maps, canvas, childrenUnderViews]
     );
 
     const widgetRoot = createElement('div', {

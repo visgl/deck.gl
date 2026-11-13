@@ -180,7 +180,7 @@ This is useful when you need to specify custom rendering logic for a child:
 
 Additional Notes:
 
-* The DeckGL components own `canvas` element is added last to the child list, to sit on top of all the base components, however Z index can be used to override this.
+* A react-map-gl `Map` child is rendered before the DeckGL component's own `canvas` element, and other children after it. Map controls (`z-index: 2`) stay above the canvas.
 * Child repositioning is done with CSS styling on a wrapper div.
 * Children that do not belong to any `<View>` tag and are functions are called with the properties of the default view.
 * Children that do not belong to any `<View>` tag and are valid React elements are rendered as is.

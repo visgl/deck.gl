@@ -1561,3 +1561,56 @@ test('Deck waits for asynchronous viewports before initializing and updating lay
     deck.finalize();
   }
 });
+
+webglTest('Deck#hides the canvas a shared device canvas replaces', async () => {
+  const {luma} = await import('@luma.gl/core');
+  const {webgl2Adapter} = await import('@luma.gl/core/webgl');
+  const sharedDevice = await luma.createDevice({
+    type: 'webgl',
+    adapters: [webgl2Adapter],
+    createCanvasContext: {container: document.createElement('div'), width: 8, height: 8}
+  });
+  const parent = document.createElement('div');
+  const canvas = document.createElement('canvas');
+  canvas.style.display = 'block';
+  parent.append(canvas);
+  document.body.append(parent);
+  const createDeck = () =>
+    new Deck({
+      device: sharedDevice,
+      parent,
+      canvas,
+      initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+      layers: []
+    });
+
+  let deck = createDeck();
+  await waitForRender(deck);
+  expect(canvas.style.display, 'canvas is hidden while the shared canvas draws').toBe('none');
+
+  const sharedCanvas = sharedDevice.getDefaultCanvasContext().canvas as HTMLCanvasElement;
+  expect(canvas.nextElementSibling, 'shared canvas takes its place').toBe(sharedCanvas);
+
+  deck.finalize();
+  expect(canvas.style.display, 'canvas display is restored on finalize').toBe('block');
+  expect(sharedCanvas.isConnected, 'shared canvas is taken out on finalize').toBe(false);
+
+  deck = createDeck();
+  await waitForRender(deck);
+  expect(canvas.style.display, 'canvas is hidden again by a Deck reusing the device').toBe('none');
+  expect(canvas.nextElementSibling, 'shared canvas takes its place again').toBe(sharedCanvas);
+
+  // A shared canvas already in the DOM, as after a React StrictMode effect remount
+  deck.finalize();
+  canvas.after(sharedCanvas);
+  deck = createDeck();
+  await waitForRender(deck);
+  expect(canvas.style.display, 'canvas is hidden when the shared canvas is already in place').toBe(
+    'none'
+  );
+
+  deck.finalize();
+  sharedDevice.loseDevice();
+  sharedDevice.destroy();
+  parent.remove();
+});
