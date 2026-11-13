@@ -16,6 +16,7 @@ import type {Buffer, Parameters} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
 import type {Matrix4Like} from '@math.gl/core';
+import type {RecordBatch, Table} from 'apache-arrow';
 
 /** Arrow table interface accepted by layers without requiring the optional Arrow peer. */
 type ArrowTableData = {
@@ -99,9 +100,7 @@ export type TextureSource =
 
 /** Stream chunks accepted by the layer's asynchronous data loading path. */
 type LayerDataStream<T> = AsyncIterable<
-  | T[]
-  | import('apache-arrow').RecordBatch
-  | {readonly shape: 'arrow-table'; readonly data: import('apache-arrow').Table}
+  T[] | RecordBatch | {readonly shape: 'arrow-table'; readonly data: Table}
 >;
 
 /**
