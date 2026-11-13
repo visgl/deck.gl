@@ -1436,6 +1436,47 @@ test('Deck#getView with multiple views', async () => {
   });
 });
 
+test('Deck#cursor is only written when it changes', async () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    getCursor: ({isHovering}) => (isHovering ? 'pointer' : 'grab')
+  });
+  await waitForRender(deck);
+
+  const {style} = deck.getCanvas()!;
+  let cursorWrites = 0;
+  Object.defineProperty(style, 'cursor', {
+    configurable: true,
+    get: () => style.getPropertyValue('cursor'),
+    set: value => {
+      cursorWrites++;
+      style.setProperty('cursor', value);
+    }
+  });
+
+  // @ts-expect-error testing private method
+  deck._updateCursor();
+  // @ts-expect-error testing private method
+  deck._updateCursor();
+  expect(style.cursor, 'cursor is set').toBe('grab');
+  expect(cursorWrites, 'unchanged cursor is not written').toBe(0);
+
+  // @ts-expect-error testing private state
+  deck.cursorState.isHovering = true;
+  // @ts-expect-error testing private method
+  deck._updateCursor();
+  // @ts-expect-error testing private method
+  deck._updateCursor();
+  expect(style.cursor, 'cursor is updated').toBe('pointer');
+  expect(cursorWrites, 'changed cursor is written once').toBe(1);
+
+  delete (style as {cursor?: string}).cursor;
+  deck.finalize();
+});
+
 test('Deck#props omitted are unchanged', async () => {
   const layer = new ScatterplotLayer({
     id: 'scatterplot-global-data',

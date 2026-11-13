@@ -269,6 +269,9 @@ export class WidgetManager {
       viewContainer.style.pointerEvents = 'none';
       viewContainer.style.position = 'absolute';
       viewContainer.style.overflow = 'hidden';
+      if (containerId === ROOT_CONTAINER_ID) {
+        Object.assign(viewContainer.style, {left: '0', top: '0', width: '100%', height: '100%'});
+      }
       this.parentElement?.append(viewContainer);
       this.containers[containerId] = viewContainer;
     }
@@ -286,11 +289,16 @@ export class WidgetManager {
 
   private _updateContainers() {
     for (const id in this.containers) {
-      const viewport = this.lastViewports[id] || null;
-      const visible = id === ROOT_CONTAINER_ID || viewport;
-
       const container = this.containers[id];
-      if (visible) {
+      if (id === ROOT_CONTAINER_ID) {
+        // The root fills its parent through CSS; the deck size covers a parent without a size
+        container.style.minWidth = `${this.deck.width}px`;
+        container.style.minHeight = `${this.deck.height}px`;
+        continue;
+      }
+
+      const viewport = this.lastViewports[id];
+      if (viewport) {
         const bounds = this._getContainerBounds(viewport);
         container.style.display = 'block';
         // Align the container with the view
@@ -304,17 +312,8 @@ export class WidgetManager {
     }
   }
 
-  /** Resolves a root container or view container in the shared widget coordinate system. */
-  private _getContainerBounds(viewport: Viewport | null): WidgetCanvasBounds {
-    if (!viewport) {
-      return {
-        x: 0,
-        y: 0,
-        width: this.parentElement?.clientWidth || this.deck.width,
-        height: this.parentElement?.clientHeight || this.deck.height
-      };
-    }
-
+  /** Resolves a view container in the shared widget coordinate system. */
+  private _getContainerBounds(viewport: Viewport): WidgetCanvasBounds {
     const canvasBounds = this.getCanvasBounds(viewport);
     return {
       x: canvasBounds.x + viewport.x,

@@ -1616,13 +1616,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const cursor = this.props.getCursor(this.cursorState);
     if (this._isMultiCanvasMode()) {
       for (const target of Object.values(this._canvasManager.targets)) {
-        target.canvas.style.cursor = cursor;
+        if (target.canvas.style.cursor !== cursor) {
+          target.canvas.style.cursor = cursor;
+        }
       }
       return;
     }
 
     const container = this.props.parent || this.canvas;
-    if (container) {
+    if (container && container.style.cursor !== cursor) {
       container.style.cursor = cursor;
     }
   }
