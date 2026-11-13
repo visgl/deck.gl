@@ -22,11 +22,11 @@
  * period or phase depend on billboard, elevation, or offset configuration.
  */
 export type Defines = {
-  // Defines passed externally
+  // Defines added to the assembled shader variants.
   /**
-   * Enable high precision dash rendering.
+   * Continue dash phase across the complete path.
    */
-  HIGH_PRECISION_DASH?: boolean;
+  DASH_MODE_PATH?: boolean;
   /**
    * Set whenever the dash shaders are injected. It guards PathLayer's additional arclength
    * varyings and the dash stage of the shared PathStyle pipeline.
@@ -89,7 +89,7 @@ if (pathStyle.dashUnits == 1) {
 }
 pathStyle_dashArray = instanceDashArrays * (dashUnitPixels / dashWidthPixels);
 
-#ifdef HIGH_PRECISION_DASH
+#ifdef DASH_MODE_PATH
 // instanceDashOffsets accumulates common-space distance on the CPU. Convert it to pixels, then
 // divide by the pixel half-width so both extrusion branches use the same dash coordinate.
 vec2 dashOffsetAndLength = (instanceDashOffsets * project.scale) / dashWidthPixels;
@@ -234,7 +234,7 @@ float dashPatternCoverage(
       // half a dash in so both ends finish on a joint. Rounding up to at least one period
       // matters - a run shorter than half a period used to round to zero, which made
       // unitLength infinite and rendered it solid.
-#ifdef HIGH_PRECISION_DASH
+#ifdef DASH_MODE_PATH
       // Justify across the entire path rather than each segment separately, so the gaps stay
       // even instead of being stretched by a different amount on every segment. pathStyle_dashOffset
       // already carries the distance to the start of this segment, reduced modulo this same
@@ -247,7 +247,7 @@ float dashPatternCoverage(
       // Bound the solid interval to that period so coverage and duty cycle remain valid.
       solidLength = min(solidLength, unitLength);
       offset = solidLength / 2.0;
-#ifdef HIGH_PRECISION_DASH
+#ifdef DASH_MODE_PATH
       offset += pathStyle_dashOffset;
 #endif
     }
