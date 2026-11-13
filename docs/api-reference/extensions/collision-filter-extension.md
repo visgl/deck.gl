@@ -112,9 +112,23 @@ The priority is a number in the range -1000 -> 1000, values outside will be clam
 * If a number is provided, it is used for all objects in the layer.
 * If a function is provided, it is called on each object to retrieve its priority.
 
+## Using with TextLayer
+
+Text labels are tested over their entire projected glyph bounds, after applying `getPixelOffset`, `getTextAnchor`, `getAlignmentBaseline`, `getAngle`, and the layer's size settings. Every character in a label shares the same visibility. This also applies to `GeoJsonLayer` with `pointType: 'text'` and its corresponding text accessors.
+
+TextLayer projects a rectangle covering each label. Whitespace and empty lines do not enlarge the glyph bounds. When `background: true`, the background rectangle, including `backgroundPadding`, is used instead. No visible background or `alphaCutoff` override is required for text collision filtering.
+
+Use `collisionTestProps: {sizeScale: 1.5}` to enlarge the collision rectangles. The tested bounds follow the overridden size settings, including `sizeMinPixels` and `sizeMaxPixels`, so labels remain visible when using a non-centered anchor.
+
+Every candidate label, including one that is hidden, reserves its rectangle in the collision map. In a chain of overlapping labels, a hidden label can therefore still hide a lower-priority neighbor that it overlaps.
+
+A label does not collide with other objects that render the same row: other sublayers of its parent layer, such as a `GeoJsonLayer` point's circle or icon, or top-level layers in the group that use the same `data` object.
+
+The rectangles include the spaces between lines, so labels may hide before their visible glyphs touch. Multiline edge overlaps and smaller labels contained inside larger ones are both detected.
+
 ## Using with transparent layers
 
-The `CollisionFilterExtension` samples at the anchor point of a feature when calculating collisions. Layers must ensure that a pixel is rendered at this location when the picking pass is drawn.
+For layers other than TextLayer, the `CollisionFilterExtension` samples at the anchor point of a feature when calculating collisions. Layers must ensure that a pixel is rendered at this location when the picking pass is drawn.
 
 A common issue is with the `IconLayer`, which [discards transparent pixels](https://deck.gl/docs/api-reference/layers/icon-layer#alphacutoff). To avoid this, use `alphaCutoff: -1`. A similar issue occurs when the anchor point of the `IconLayer` is too close to the edge of the image, to be safe include a few pixels of padding, e.g.
 
@@ -126,9 +140,10 @@ iconMapping: {
 
 ## Limitations
 
+- Each collision group supports at most 16,777,215 source objects. Groups containing text are also limited to `floor(maxTextureDimension2D / 4)² - 1` objects, where `maxTextureDimension2D` is the device's maximum 2D texture dimension. Counts include non-text objects in the group; text characters and backgrounds share their label's ID, and labels of separate layers that use the same `data` object count separately. Binary data with `rowIndexes` counts up to its highest row index. If either limit is exceeded, a warning is logged and collision filtering is disabled for the entire group until its object count is within the limits again.
 - Accessors are not supported in `collisionTestProps`
 - Given that collisions is performed on the GPU, the layers of `@deck.gl/aggregation-layers` module that does aggregation on the CPU, for example `CPUGridLayer` and `HexagonLayer`, are not supported.
-- The collision is point-in-polygon, specifically is computed by comparing the anchor point of a feature with the rasterized screen-space areas of other features. While good for realtime applications, generally this will not give the same results as a full collision test would.
+- Non-text layers use point-in-polygon collision tests: the feature's anchor is compared with the rasterized areas of other features. TextLayer tests full projected rectangles at the collision map’s pixel resolution.
 
 ## Source
 
