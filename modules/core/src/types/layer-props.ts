@@ -116,7 +116,12 @@ export type LayerDataSource<DataType> =
 /**
  * Base Layer prop types
  */
-export type LayerProps = {
+/** Query strings for numeric layer properties, preserving concrete prop-name autocomplete. */
+export type QueryProps<Props> = {
+  [K in keyof Props as NonNullable<Props[K]> extends number ? K : never]?: string;
+};
+
+export type LayerProps<ExtraProps = {}> = {
   /**
    * Unique identifier of the layer.
    */
@@ -125,6 +130,8 @@ export type LayerProps = {
    * The data to visualize.
    */
   data?: unknown;
+  /** Experimental aggregate expressions used to derive numeric layer properties. */
+  _queryProps?: Readonly<QueryProps<ExtraProps & {opacity?: number; numInstances?: number}>> | null;
   /**
    * Callback to determine if two data values are equal.
    */

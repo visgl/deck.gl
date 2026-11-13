@@ -91,7 +91,7 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
 };
 
 /** All properties supported by ColumnLayer. */
-export type ColumnLayerProps<DataT = unknown> = _ColumnLayerProps<DataT> & LayerProps;
+export type ColumnLayerProps<DataT = unknown> = _ColumnLayerProps<DataT> & LayerProps<_ColumnLayerProps<DataT>>;
 
 /** Properties added by ColumnLayer. */
 type _ColumnLayerProps<DataT> = ColumnLayerColumnProps & {

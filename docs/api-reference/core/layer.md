@@ -918,3 +918,25 @@ Returns:
 ## Source
 
 [modules/core/src/lib/layer.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/lib/layer.ts)
+
+#### `_queryProps` (Object, experimental) {#_queryprops}
+
+Derives numeric layer props from aggregate expressions evaluated against an Apache Arrow table
+supplied as `data`. For example:
+
+```ts
+new ScatterplotLayer({
+  data: arrowTable,
+  _queryProps: {
+    radiusScale: '100 / MAX(population)'
+  },
+  transitions: {radiusScale: 500}
+});
+```
+
+Supports `MIN`, `MAX`, `AVG`, `SUM`, and `COUNT` combined with numeric
+arithmetic. Each output must be a finite number and target an existing numeric layer prop.
+The original prop remains declarative; the calculated override participates in normal
+prop diffing and uniform transitions. Omitting `_queryProps` restores the original value.
+This initial implementation is Arrow-table-only and recomputes on data or query changes;
+it does not implement streaming incremental accumulation.
