@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {ArrowAccessor, DefaultProps} from '@deck.gl/core';
+import type {Vector} from 'apache-arrow';
+
+import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {cellToBoundary, hexToU64} from 'a5-js';
 import {flattenPolygon} from '../h3-layers/h3-utils';
@@ -13,7 +15,6 @@ const defaultProps: DefaultProps<A5LayerProps> = {
   getPentagon: {
     type: 'accessor',
     arrow: true,
-    constantTypes: ['string', 'bigint'],
     value: (d: any) => d.pentagon
   }
 };
@@ -29,7 +30,7 @@ type _A5LayerProps<DataT> = {
    * By default, it reads `pentagon` property of data object.
    * Also accepts an Arrow vector of identifiers or identifier lists in source-feature order.
    */
-  getPentagon?: ArrowAccessor<DataT, string | bigint>;
+  getPentagon?: AccessorFunction<DataT, string | bigint> | Vector;
 };
 
 /** Render filled and/or stroked polygons based on the [A5](https://a5geo.org) geospatial indexing system. */

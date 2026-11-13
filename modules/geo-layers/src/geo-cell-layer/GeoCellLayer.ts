@@ -8,6 +8,7 @@ import {PolygonLayer, PolygonLayerProps} from '@deck.gl/layers';
 
 const defaultProps: DefaultProps<GeoCellLayerProps> = {
   ...PolygonLayer.defaultProps,
+  data: {type: 'data', value: [], async: true, materializeIterator: true},
   getFillColor: {type: 'accessor', arrow: true, value: [0, 0, 0, 255]},
   getLineColor: {type: 'accessor', arrow: true, value: [0, 0, 0, 255]},
   getLineWidth: {type: 'accessor', arrow: true, value: 1},

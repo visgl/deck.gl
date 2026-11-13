@@ -76,7 +76,7 @@ type AccessorPropType<T = any> = BasePropType<T> & {
   /** Accept Arrow vectors in addition to constants and callbacks on opted-in accessors. */
   arrow?: boolean;
   /** Accepted constant types when the default value is a callback. */
-  constantTypes?: readonly ('array' | 'string' | 'bigint')[];
+  constantTypes?: readonly 'array'[];
 };
 type FunctionPropType<T = Function> = BasePropType<T> & {
   type: 'function';
@@ -90,6 +90,8 @@ type FunctionPropType<T = Function> = BasePropType<T> & {
 };
 type DataPropType<T = any> = BasePropType<T> & {
   type: 'data';
+  /** Resolve one-shot synchronous iterators into reusable rows. */
+  materializeIterator?: boolean;
 };
 type ImagePropType = BasePropType<TextureSource | null> & {
   type: 'image';
@@ -215,7 +217,17 @@ const TYPE_DEFINITIONS = {
       }
       const {dataTransform} = component.props;
       if (dataTransform) {
-        return dataTransform(value);
+        value = dataTransform(value);
+      }
+      if (
+        propType.materializeIterator &&
+        typeof value?.next === 'function' &&
+        value[Symbol.iterator]?.() === value
+      ) {
+        return Array.from(value);
+      }
+      if (dataTransform) {
+        return value;
       }
       // Detect loaders.gl v4 table format
       if (

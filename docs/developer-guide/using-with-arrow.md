@@ -16,7 +16,7 @@ An Arrow vector represents one value per object. Obtain a vector from a table wi
 `table.getChild('fieldName')`, or construct one with `vectorFromArray`.
 
 Pass a vector directly to an accessor that supports Arrow. The accessor has one input:
-a constant for all objects, a callback evaluated per object, or a column with one value per object.
+a callback evaluated per object, a column with one value per object, or a constant where the prop supports one.
 There is no separate CPU column prop to configure. Accessors do not accept GPUVector inputs.
 
 For example, these ScatterplotLayer inputs draw the same two circles:

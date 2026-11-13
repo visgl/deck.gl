@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {Vector} from 'apache-arrow';
+
 import {
   getResolution,
   cellToLatLng,
@@ -12,7 +14,7 @@ import {
   H3Index
 } from 'h3-js';
 import {
-  ArrowAccessor,
+  AccessorFunction,
   CompositeLayer,
   createIterable,
   Layer,
@@ -52,7 +54,6 @@ const defaultProps: DefaultProps<H3HexagonLayerProps> = {
   getHexagon: {
     type: 'accessor',
     arrow: true,
-    constantTypes: ['string'],
     value: (x: any) => x.hexagon
   },
   extruded: true
@@ -84,7 +85,7 @@ type _H3HexagonLayerProps<DataT> = {
    * By default, it reads `hexagon` property of data object.
    * Also accepts an Arrow vector of identifiers or identifier lists in source-feature order.
    */
-  getHexagon?: ArrowAccessor<DataT, string>;
+  getHexagon?: AccessorFunction<DataT, string> | Vector;
   /**
    * Whether to extrude polygons.
    * @default true
