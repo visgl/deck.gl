@@ -61,3 +61,21 @@ test('_queryProps accessor expressions reject statements and incorrect vector ar
   await expect(evaluateQueryAccessorProps(table, {getPosition: 'FLOAT32x2(x)'}))
     .rejects.toThrow('requires exactly 2 arguments');
 });
+
+test('QueryProps includes function-valued get* accessors but not unrelated props', () => {
+  type Props = {
+    radiusScale?: number;
+    getPosition?: (object: unknown, context: {index: number}) => [number, number];
+    getFillColor?: [number, number, number, number] | ((object: unknown) => number[]);
+    pickable?: boolean;
+  };
+  const valid: QueryProps<Props> = {
+    radiusScale: 'MAX(value)',
+    getPosition: 'FLOAT32x2(x, y)',
+    getFillColor: 'RGBA8(r, g, b, 1)'
+  };
+  expect(valid.getPosition).toBe('FLOAT32x2(x, y)');
+  // @ts-expect-error Boolean props cannot use query expressions.
+  const bad: QueryProps<Props> = {pickable: 'COUNT(*)'};
+  expect(bad).toBeDefined();
+});
