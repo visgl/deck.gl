@@ -139,6 +139,13 @@ export class HeightMapBuilder {
     if (this.fbo) {
       this.fbo.colorAttachments[0].delete();
       this.fbo.delete();
+      this.fbo = undefined;
     }
+    this.renderViewport = null;
+    this.lastViewport = null;
+    this.layers = [];
+    this.layersBounds = [];
+    this.layersBoundsCommon = null;
+    this.bounds = null;
   }
 }

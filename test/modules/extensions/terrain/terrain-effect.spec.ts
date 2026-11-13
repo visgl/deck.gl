@@ -115,6 +115,21 @@ test('TerrainEffect', async () => {
   expect(uniforms.mode, 'TERRAIN_MODE.NONE').toBe(TERRAIN_MODE.NONE);
   expect(model.bindings.terrain_map?.width, 'Terrain cover using empty texture').toBe(1);
 
+  // Removing all terrain must release its framebuffers and let extensions draw flat.
+  const heightMap = terrainEffect.heightMap?.getRenderFramebuffer();
+  expect(heightMap).toBeTruthy();
+  await lifecycle.update({layers: [geoLayer.clone({})]});
+  const flat = lifecycle.layers.find(l => l.id === pathLayer.id)!;
+  expect(getLayerUniforms(flat).mode).toBe(TERRAIN_MODE.NONE);
+  expect(heightMap?.destroyed).toBe(true);
+  expect(terrainEffect.terrainCovers.size).toBe(0);
+
+  // Restore terrain and remove the extension on the same live layer.
+  const unextended = geoLayer.clone({extensions: []});
+  await lifecycle.update({layers: [terrainLayer.clone({}), unextended]});
+  const unextendedPath = lifecycle.layers.find(l => l.id === pathLayer.id)!;
+  expect(getLayerUniforms(unextendedPath).mode).toBe(TERRAIN_MODE.NONE);
+
   lifecycle.finalize();
 });
 
