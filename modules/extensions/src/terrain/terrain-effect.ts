@@ -151,7 +151,7 @@ export class TerrainEffect implements Effect {
   }
 
   private _releaseTerrainTargets(): void {
-    this.heightMap?.delete();
+    this.heightMap?.reset();
     for (const terrainCover of this.terrainCovers.values()) {
       terrainCover.delete();
     }

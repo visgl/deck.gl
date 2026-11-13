@@ -1087,8 +1087,9 @@ export default class DeckPicker {
     if (pickedLayer && !isDraped) {
       return [pickedLayer];
     }
-    // For draped layers or when no layer was picked, use terrain layers for depth
-    return pickableLayers.filter(l => l.props.operation.includes('terrain'));
+    const terrainLayers = pickableLayers.filter(l => l.props.operation.includes('terrain'));
+    // Draped geometry draws at its own height when no terrain is available.
+    return pickedLayer && terrainLayers.length === 0 ? [pickedLayer] : terrainLayers;
   }
 
   /**
