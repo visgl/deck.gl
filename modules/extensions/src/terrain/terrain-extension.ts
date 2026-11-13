@@ -48,6 +48,14 @@ export default class TerrainExtension extends LayerExtension {
   ) {
     const {props, oldProps} = params;
 
+    // updateState also runs when the extension is added to an existing layer.
+    if (
+      oldProps.extensions &&
+      !oldProps.extensions.some(extension => extension instanceof TerrainExtension)
+    ) {
+      TerrainExtension.prototype.initializeState.call(this);
+    }
+
     if (
       this.state.terrainDrawMode &&
       props.terrainDrawMode === oldProps.terrainDrawMode &&

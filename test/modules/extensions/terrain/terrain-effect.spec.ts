@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {Deck, WebMercatorViewport} from '@deck.gl/core';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 import {TerrainEffect} from '@deck.gl/extensions/terrain/terrain-effect';
 import {TERRAIN_MODE} from '@deck.gl/extensions/terrain/shader-module';
@@ -14,6 +14,32 @@ import {TerrainLoader} from '@loaders.gl/raster/terrain/index';
 import {device, getLayerUniforms} from '@deck.gl/test-utils/vitest';
 import {geojson} from 'deck.gl-test/data';
 import {LifecycleTester} from '../utils';
+
+test('TerrainExtension installs terrain when added to a live layer', async () => {
+  const layer = new GeoJsonLayer({id: 'live-terrain-layer', data: geojson});
+  const parent = document.createElement('div');
+  document.body.append(parent);
+  const deck = new Deck({
+    device,
+    parent,
+    width: 100,
+    height: 100,
+    initialViewState: {longitude: -122.4, latitude: 37.8, zoom: 10},
+    layers: [layer]
+  });
+  try {
+    await vi.waitFor(() => expect(layer.internalState).toBeTruthy());
+    deck.setProps({layers: [layer.clone({extensions: [new TerrainExtension()]})]});
+    await vi.waitFor(() =>
+      expect(deck.effectManager.getEffects().some(effect => effect.id === 'terrain-effect')).toBe(
+        true
+      )
+    );
+  } finally {
+    deck.finalize();
+    parent.remove();
+  }
+});
 
 test('TerrainEffect', async () => {
   const terrainEffect = new TerrainEffect();
