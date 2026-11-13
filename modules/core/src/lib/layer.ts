@@ -1298,6 +1298,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       }
       return;
     }
+    for (const name of Object.keys(queries)) {
+      if (name === '_queryProps' || typeof (this.props as Record<string, unknown>)[name] !== 'number') {
+        this.raiseError(new Error(`_queryProps.${name} must target an existing numeric layer prop`), 'evaluating _queryProps');
+        return;
+      }
+    }
     const previous = state.queryPropsRequest;
     if (previous?.source === data && deepEqual(previous.queries, queries, -1)) return;
     if (!isArrowTable(data)) {
