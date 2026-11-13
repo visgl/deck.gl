@@ -393,6 +393,18 @@ export default class LayerManager {
         needsUpdate = `Uniform transition in ${layer}`;
         break;
       }
+      // A layer can be marked after its own update in this cycle, e.g. a composite layer whose state
+      // is set from a sublayer callback (TerrainLayer's onViewportLoad). Update it in the next cycle.
+      // A layer that waits for its viewport or coordinate system was not updated in this cycle. It is
+      // once they are ready, which requests the next cycle itself
+      if (
+        layer.internalState?.needsUpdate &&
+        layer.isCoordinateSystemLoaded &&
+        this.isViewportReady(layer)
+      ) {
+        needsUpdate = `${layer} marked during update`;
+        break;
+      }
     }
 
     this._needsUpdate = needsUpdate;

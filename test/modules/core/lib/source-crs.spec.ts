@@ -229,6 +229,37 @@ test('An initialized layer also waits when its new source CRS is pending', async
   }
 });
 
+test('A layer that waits for its source CRS does not request repeated updates', async () => {
+  const request = deferredCRS();
+  vi.spyOn(projectionEngine, 'getCRS').mockReturnValue(request.promise);
+  const manager = new LayerManager(device, {viewport: new WebMercatorViewport()});
+  manager.setProps({onError: vi.fn()});
+  let layer = new PositionLayer({
+    id: 'waiting-source',
+    data: [[20, 60, 120]],
+    getPosition: p => p
+  });
+  try {
+    manager.setLayers([layer]);
+    layer = layer.clone({coordinateSystem: 'test:waiting-invalid'});
+    manager.setLayers([layer]);
+    // e.g. an async prop resolves while the source CRS loads
+    layer.setNeedsUpdate();
+    manager.updateLayers();
+    expect(manager.needsUpdate(), 'no repeated update while the source CRS loads').toBeFalsy();
+
+    const error = new Error('Invalid CRS');
+    request.reject(error);
+    await expect(resolveCRS('test:waiting-invalid')).rejects.toBe(error);
+    layer.setNeedsUpdate();
+    manager.updateLayers();
+    expect(manager.needsUpdate(), 'no repeated update after the source CRS failed').toBeFalsy();
+  } finally {
+    manager.finalize();
+    vi.restoreAllMocks();
+  }
+});
+
 test('A layer in the custom viewport target CRS retains native attributes and GPU transforms', () => {
   const viewport = createTestViewport();
   const manager = new LayerManager(device, {viewport});
