@@ -4,6 +4,7 @@
 
 // deck.gl, MIT license
 import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
+import {equalLoaderOptions} from '../utils/loader-utils';
 import ComponentState from '../lifecycle/component-state';
 
 import type Layer from './layer';
@@ -28,6 +29,12 @@ export type ChangeFlags = {
 };
 
 export default class LayerState<LayerT extends Layer> extends ComponentState<LayerT> {
+  private dataRequest?: {
+    mode: LayerT['props']['_dataLoadingMode'];
+    loaders: LayerT['props']['loaders'];
+    options: unknown;
+  };
+
   attributeManager: AttributeManager | null;
   needsRedraw: boolean;
   needsUpdate: boolean;
@@ -97,6 +104,28 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
   }
 
   /* Override base Component methods with Layer-specific handling */
+
+  protected _didAsyncRequestChange(propName: string, value: unknown): boolean {
+    if (propName !== 'data') {
+      return false;
+    }
+    const layer = this.layer;
+    const mode = layer?.props._dataLoadingMode ?? 'auto';
+    const request =
+      layer && typeof value === 'string' && mode !== 'auto'
+        ? {mode, loaders: layer.props.loaders, options: layer.getLoadOptions()}
+        : undefined;
+    const changed = !equalLoaderOptions(this.dataRequest, request);
+    this.dataRequest = request;
+    return changed;
+  }
+
+  protected _onProgress(propName: string, value: unknown) {
+    const layer = this.layer;
+    if (propName === 'data' && layer) {
+      layer.props._onDataProgress?.(value, {propName, layer});
+    }
+  }
 
   protected _fetch(propName, url: string) {
     const layer = this.layer;

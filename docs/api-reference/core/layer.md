@@ -60,7 +60,7 @@ deck.gl layers typically expect `data` to be one of the following types:
 - Any non-iterable object that contains a `length` field. deck.gl will not attempt to interpret its format, but simply call each accessor `length` times. (See remark below)
 - `String`: an URL pointing to the data source. deck.gl will attempt to fetch the remote content and parse it as JSON. The resulting object is then used as the value of the `data` prop.
 - `Promise`: the resolved value will be used as the value of the `data` prop.
-- `AsyncIterable`: an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object that yields data in batches. The default implementation expects each batch to be an array of data objects; one may change this behavior by supplying a custom `dataTransform` callback.
+- `AsyncIterable`: an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object that yields data in batches. Batches may be row arrays, Arrow record batches, or Arrow tables. Promises resolving to an async iterable are also supported. Row-array processing can be customized with `dataTransform`.
 
 ##### data.attributes
 
@@ -311,13 +311,39 @@ The function receives two arguments:
 And should return `true` if the two values are considered equal (no update needed), or `false` if the data has changed.
 
 
+#### `_dataLoadingMode` (string, optional) **Experimental** {#_dataloadingmode}
+
+* Default: `'auto'`
+
+Controls how URL data is loaded and how streamed data is consumed:
+
+| Mode | URL loading | Stream consumption |
+| --- | --- | --- |
+| `'auto'` | Load completely using loaders.gl `load` | Append application-supplied chunks |
+| `'batched'` | Stream using loaders.gl `loadInBatches` | Append chunks |
+| `'snapshots'` | Stream using loaders.gl `loadInBatches` | Replace all data with each Arrow result |
+
+Streams can yield row arrays, Arrow `RecordBatch` objects, or Arrow tables.
+Each snapshot replaces the previous table with the entire current result. A snapshot can be one
+Arrow record batch or an Arrow table containing multiple record batches. Do not
+mix Arrow and row chunks in one stream. Deck discards loader metadata and passes plain row arrays or Arrow tables to layer props and callbacks.
+
+`loaders` and `loadOptions` are forwarded to loaders.gl. Changing the mode, or changing loaders
+or load options while batch loading is active, reloads the same URL. A custom `fetch` retains
+control over URL loading and may return an iterable or a promise resolving to one.
+
+Arrow is an optional dependency, imported only when an Arrow chunk arrives. `dataTransform`
+applies to row chunks; transform Arrow chunks in the producer instead. See
+[Streaming Arrow data](../../developer-guide/using-with-arrow.md#streaming-arrow-data).
+
+
 #### `dataTransform` (Function, optional) {#datatransform}
 
 Executed to manipulate remote data when it's fetched. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.
 
 The function receives two arguments:
 
-- `data` - the newly fetched data
+- `data` - the newly fetched data. A complete Arrow load supplies an Apache Arrow `Table`.
 - `previousData` - (only available when `data` is an async iterable) the previously loaded data. If `dataTransform` is not supplied, the new data chunk is appended to the previous data array.
 
 And must return a valid `data` object: an array, an iterable or a non-iterable object that contains a `length` field. See documentation of the `data` prop for details.
@@ -561,6 +587,18 @@ The function receives the following arguments:
 The function is expected to return a Promise that resolves to loaded data.
 
 * Default: `load(url, loaders, loadOptions)`
+
+
+#### `_onDataProgress` (Function, optional) **Experimental** {#_ondataprogress}
+
+Called after each accepted streamed data batch is applied. Receives `(value, context)`, where
+`value` is the accumulated row array or Arrow table (the replacement table in snapshot mode),
+and `context` contains `layer` and `propName` (`'data'`). Metadata batches do not trigger this
+callback. It also applies to application-supplied streams in `'auto'` mode.
+
+`onDataLoad` runs once at successful stream completion. An empty stream completes with `[]`
+and no progress callback. Iterator errors use the layer's error handler. Replaced or finalized
+streams do not publish subsequent progress, completion, or error callbacks.
 
 
 #### `onDataLoad` (Function, optional) {#ondataload}

@@ -16,6 +16,7 @@ import type {Buffer, Parameters} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
 import type {Matrix4Like} from '@math.gl/core';
+import type {RecordBatch, Table} from 'apache-arrow';
 
 /** Arrow table interface accepted by layers without requiring the optional Arrow peer. */
 type ArrowTableData = {
@@ -97,20 +98,23 @@ export type TextureSource =
   | HTMLVideoElement
   | ImageBitmap;
 
+/** Stream chunks accepted by the layer's asynchronous data loading path. */
+type LayerDataStream<T> = AsyncIterable<T[] | RecordBatch | Table>;
+
 /**
  * Typical types that can be supplied to the `data` property. Can be either:
  * * An `Iterable` - a list of objects to visualize.
  * * A non-iterable - an object with a `length` field.
  * * A `Promise` whose resolved value will be used as the value of the `data` prop.
- * * An `AsyncIterable` that yields data in batches. Each batch is expected to be an array of objects.
+ * * An `AsyncIterable` yielding row arrays, Arrow record batches, or Arrow tables.
  * * `string` - a URL to load data from
  * * `null` - empty data
  */
 export type LayerDataSource<DataType> =
   | LayerData<DataType>
   | string
-  | AsyncIterable<DataType[]>
-  | Promise<LayerData<DataType>>
+  | LayerDataStream<DataType>
+  | Promise<LayerData<DataType> | LayerDataStream<DataType>>
   | null;
 
 /**
@@ -125,6 +129,13 @@ export type LayerProps = {
    * The data to visualize.
    */
   data?: unknown;
+  /**
+   * Experimental loading mode. Defaults to `auto`: load URLs completely and append supplied streams.
+   * `batched` streams and appends data; `snapshots` streams and replaces data with each Arrow result.
+   */
+  _dataLoadingMode?: 'auto' | 'batched' | 'snapshots';
+  /** Experimental callback invoked with current data after each streamed batch is applied. */
+  _onDataProgress?: ((data: unknown, context: {propName: string; layer: Layer}) => void) | null;
   /**
    * Callback to determine if two data values are equal.
    */

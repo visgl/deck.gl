@@ -105,3 +105,41 @@ Column inputs must use the following Arrow types.
 
 Dictionary, string, and variable-size list inputs are unsupported. Null values and invalid
 transformed values raise conversion errors, even when the schema is compatible.
+
+## Streaming Arrow data
+
+Layers can consume an async iterable of Apache Arrow `RecordBatch` objects or
+Arrow `Table` objects. Promises resolving to these iterables are also
+supported. Arrow remains an optional dependency and is loaded only when an Arrow chunk arrives.
+
+```ts
+new ScatterplotLayer({
+  id: 'streamed-points',
+  data: recordBatchStream,
+  _dataLoadingMode: 'batched',
+  getPosition: row => [row.longitude, row.latitude],
+  getRadius: row => row.radius,
+  _onDataProgress: table => console.log(table.numRows)
+});
+```
+
+The experimental `_dataLoadingMode` prop controls loading and accumulation:
+
+- `'auto'` (default) loads URLs completely and appends chunks from application-supplied streams.
+- `'batched'` loads URLs with loaders.gl `loadInBatches` and appends each batch to the current table.
+- `'snapshots'` also loads URLs in batches, but replaces the entire table with each Arrow result.
+  Each yield contains all rows to display at that point. It can be one record batch or a
+  table containing multiple record batches.
+
+Set `loaders` and `loadOptions` as usual when streaming a URL. The selected loader must produce
+supported batches. Deck discards loader metadata and exposes Arrow tables to apps. Arrow batches
+retain their columnar storage; they are not converted to row objects. Do not mix Arrow and row
+chunks in one stream. An empty Arrow snapshot clears the table while retaining its schema.
+
+`_onDataProgress` receives the current accumulated or replacement table after each accepted batch.
+`onDataLoad` runs once when the stream finishes. An empty stream completes with an empty array
+and no progress callback. Replaced or finalized streams cannot publish further callbacks.
+
+`dataTransform` retains its existing behavior for row-array streams; it is not applied to Arrow
+chunks. Transform Arrow data in the producer before yielding it. This loading feature does not
+select fields or execute SQL; use accessors or explicit column props as with other Arrow inputs.
