@@ -15,7 +15,7 @@ in float instanceLineWidths;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
 #ifdef USE_ROW_INDEXES
-in float rowIndexes;
+in uint rowIndexes;
 #endif
 in vec2 instancePixelOffset;
 

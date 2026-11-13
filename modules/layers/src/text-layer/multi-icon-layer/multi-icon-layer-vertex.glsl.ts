@@ -13,7 +13,7 @@ in vec3 instancePositions64Low;
 in float instanceSizes;
 in float instanceAngles;
 in vec4 instanceColors;
-in float rowIndexes;
+in uint rowIndexes;
 in vec4 instanceIconFrames;
 in float instanceColorModes;
 in vec2 instanceOffsets;

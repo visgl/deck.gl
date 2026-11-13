@@ -14,7 +14,7 @@ in float instanceSizes;
 in float instanceAngles;
 in vec4 instanceColors;
 #ifdef USE_ROW_INDEXES
-in float rowIndexes;
+in uint rowIndexes;
 #endif
 in vec4 instanceIconFrames;
 in float instanceColorModes;
