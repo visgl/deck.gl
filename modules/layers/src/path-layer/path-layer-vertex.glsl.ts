@@ -19,7 +19,7 @@ in vec3 instanceEndPositions64Low;
 in vec3 instanceRightPositions64Low;
 in float instanceStrokeWidths;
 in vec4 instanceColors;
-in float rowIndexes;
+in uint rowIndexes;
 
 uniform float opacity;
 

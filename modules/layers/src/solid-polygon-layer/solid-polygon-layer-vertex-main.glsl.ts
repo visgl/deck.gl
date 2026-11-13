@@ -6,7 +6,7 @@ export default `\
 
 in vec4 fillColors;
 in vec4 lineColors;
-in float rowIndexes;
+in uint rowIndexes;
 
 out vec4 vColor;
 
