@@ -41,7 +41,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         ...(index === 0
           ? {
               props: {
-                positions: positions([[0, 0]]),
+                getPosition: positions([[0, 0]]),
                 getFillColor: [255, 0, 0, 0],
                 getLineColor: () => [0, 255, 0, 0],
                 colorFormat
@@ -109,23 +109,21 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           {
             props: {
               data: [{}, {}, {}],
-              positions: source,
-              radii,
-              fillColors: colors,
-              getPosition,
-              getRadius
+              getPosition: source,
+              getRadius: radii,
+              getFillColor: colors
             }
           },
           {updateProps: {radiusScale: 2}},
           {
             updateProps: {
-              positions: positions([
+              getPosition: positions([
                 [3, 3, 3],
                 [4, 4, 4],
                 [5, 5, 5]
               ]),
-              radii: undefined,
-              fillColors: vectorFromArray(
+              getRadius,
+              getFillColor: vectorFromArray(
                 [
                   [255, 0, 0, 255],
                   [0, 255, 0, 255],
@@ -135,7 +133,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
               )
             }
           },
-          {updateProps: {positions: undefined, fillColors: undefined}}
+          {updateProps: {getPosition, getFillColor: [0, 0, 0, 255]}}
         ].map((testCase, index) => ({
           ...testCase,
           onAfterUpdate: async ({layer}) => {
@@ -229,7 +227,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
                   [11, 21]
                 ],
                 getPosition: row => row,
-                radii: vectorFromArray([1, 2], new Float32()),
+                getRadius: vectorFromArray([1, 2], new Float32()),
                 coordinateSystem: 'WGS84'
               }
             }
@@ -267,7 +265,7 @@ test('Scatterplot rejects extensions when entering or updating Arrow mode', asyn
       {props: {data: [{}, {}], getPosition: () => [0, 0]}},
       {
         updateProps: {
-          positions: positions([
+          getPosition: positions([
             [0, 0],
             [1, 1]
           ]),
@@ -305,7 +303,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         testCases: [
           {
             props: {
-              positions: positions([
+              getPosition: positions([
                 [0, 0],
                 [1, 1]
               ]),
@@ -346,7 +344,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       device: testDevice,
       testCases: [
         {
-          props: {radii: vectorFromArray([1, 2], new Float32())},
+          props: {getRadius: vectorFromArray([1, 2], new Float32())},
           onAfterUpdate: ({layer}) => expect(layer.getNumInstances()).toBe(0)
         },
         {
@@ -377,7 +375,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       testCases: [
         {
           props: {
-            positions: positions([
+            getPosition: positions([
               [0, 0],
               [1, 1]
             ]),
@@ -421,7 +419,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       testCases: [
         {
           props: {
-            radii: vectorFromArray([1, 2], new Float32()),
+            getRadius: vectorFromArray([1, 2], new Float32()),
             data: new Promise(resolve =>
               setTimeout(() => resolve([{position: [0, 0]}, {position: [1, 1]}]), 100)
             )
@@ -464,14 +462,14 @@ test('Scatterplot WebGPU column mode fits the minimum vertex buffer limit', asyn
       {
         props: {
           data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}},
-          positions: positions([
+          getPosition: positions([
             [0, 0],
             [1, 1]
           ]),
-          radii: scalar,
-          fillColors: colors,
-          lineColors: colors,
-          lineWidths: scalar,
+          getRadius: scalar,
+          getFillColor: colors,
+          getLineColor: colors,
+          getLineWidth: scalar,
           getPixelOffset: (_row, {index}) => [index, index]
         },
         onAfterUpdate: ({layer}) => {
@@ -504,9 +502,9 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       Layer: ScatterplotLayer,
       device: testDevice,
       testCases: [
-        {props: {data, radii: vectorFromArray([1, 2], new Float32())}},
+        {props: {data, getRadius: vectorFromArray([1, 2], new Float32())}},
         {
-          updateProps: {radii: undefined},
+          updateProps: {getRadius: 1},
           onAfterUpdate: ({layer}) => {
             expect(layer.getAttributeManager()).not.toBeNull();
             expect(layer.getModels()).toHaveLength(1);
@@ -545,7 +543,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         Layer: ScatterplotLayer,
         device: testDevice,
         testCases: [
-          {props: {positions: source, data: {length: 2}}},
+          {props: {getPosition: source, data: {length: 2}}},
           {
             updateProps: {data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}}},
             onBeforeUpdate: () => {
@@ -600,7 +598,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         Layer: ScatterplotLayer,
         device: testDevice,
         testCases: [
-          {props: {positions: source, data: {length: 2}}},
+          {props: {getPosition: source, data: {length: 2}}},
           {
             updateProps: {data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}}},
             onBeforeUpdate: () => {
@@ -643,7 +641,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       testCases: [
         {
           props: {
-            positions: positions([
+            getPosition: positions([
               [0, 0],
               [1, 1]
             ]),
@@ -691,7 +689,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       testCases: [
         {
           props: {
-            positions: positions([
+            getPosition: positions([
               [0, 0],
               [1, 1]
             ]),
@@ -730,7 +728,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       testCases: [
         {
           props: {
-            positions: positions([
+            getPosition: positions([
               [0, 0],
               [1, 1]
             ]),
@@ -768,7 +766,7 @@ test('Scatterplot borrows GPU-only positions without reading them for bounds', a
     await columns.update(
       {
         data: {length: 2, attributes: {getPosition: {buffer, size: 3}}},
-        radii: vectorFromArray([1, 2], new Float32()),
+        getRadius: vectorFromArray([1, 2], new Float32()),
         getFillColor: [0, 0, 0, 255],
         getLineColor: [0, 0, 0, 255],
         getLineWidth: 1

@@ -206,11 +206,13 @@ Check [the lighting guide](../../developer-guide/using-effects.md#material-setti
 
 ### Data Accessors
 
-#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#positions-and-other-vectors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 * Default: `x => x.position`
 
 Method called to retrieve the bottom-left corner (`[minX, minY]`) of each cell.
+
+* If an Arrow vector is provided, each row supplies this value for one cell. See [Using with Arrow](../../developer-guide/using-with-arrow.md#positions-and-other-vectors) for supported types and conversion.
 
 
 #### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
@@ -222,7 +224,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-#### `getElevation` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
+#### `getElevation` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#scalars), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
 
 * Default: `1000`
 
@@ -230,6 +232,8 @@ The elevation of each cell in meters.
 
 * If a number is provided, it is used as the elevation for all objects.
 * If a function is provided, it is called on each object to retrieve its elevation.
+
+* If an Arrow vector is provided, each row supplies this value for one cell. See [Using with Arrow](../../developer-guide/using-with-arrow.md#scalars) for supported types and conversion.
 
 
 ## Source

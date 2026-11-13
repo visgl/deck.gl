@@ -36,7 +36,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       usage: Buffer.VERTEX
     });
     const layer = new SimpleMeshLayer({
-      positions,
+      getPosition: positions,
       data: {length: 2, attributes: {instanceModelMatrix: {buffer, offset: 4, stride: 52}}},
       mesh,
       getTranslation: [10, 0, 0],
@@ -79,7 +79,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       expect((await deck.pickObjectAsync({x: 98, y: 64}))?.index).toBe(1);
       expect(getTranslation).toHaveBeenCalledTimes(2);
       const accessorLayer = layer.clone({
-        positions: null,
+        getPosition: row => row.position,
         data: [{position: [-24, 0, 0]}, {position: [24, 0, 0]}]
       });
       deck.setProps({layers: [accessorLayer]});

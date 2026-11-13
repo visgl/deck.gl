@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {FixedSizeList, Float, Int} from 'apache-arrow';
+
 import {
   Layer,
   project32,
@@ -28,7 +30,7 @@ import {
   prepareMeshColumnTransforms,
   TRANSFORM_ACCESSORS
 } from '../utils/mesh-columns';
-import type {ColumnSource} from '@deck.gl/core/arrow';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
 import {scenegraphUniforms, ScenegraphProps} from './scenegraph-layer-uniforms';
@@ -45,6 +47,7 @@ import {
   Position,
   Color,
   Accessor,
+  ArrowAccessor,
   DefaultProps
 } from '@deck.gl/core';
 
@@ -105,16 +108,17 @@ type _ScenegraphLayerProps<DataT> = {
         layer: ScenegraphLayer<DataT>;
       }) => PBREnvironment);
 
-  /** Anchor position accessor. */
-  /** Arrow column or GPUVector of instance positions. */
-  positions?: ColumnSource | null;
-  /** Arrow column or GPUVector of instance colors. */
-  colors?: ColumnSource | null;
-  getPosition?: Accessor<DataT, Position>;
+  /** @experimental GPU-resident column. */
+  positions?: GPUVector | null;
+  /** @experimental GPU-resident column. */
+  colors?: GPUVector | null;
+  /** Anchor position constant, callback, or Arrow XY/XYZ column. */
+  getPosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
   /** Color value or accessor.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [255, 255, 255, 255]
    */
-  getColor?: Accessor<DataT, Color>;
+  getColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
   /**
    * Orientation in [pitch, yaw, roll] in degrees.
    * @see https://en.wikipedia.org/wiki/Euler_angles
@@ -177,8 +181,8 @@ const defaultProps: DefaultProps<ScenegraphLayerProps> = {
 
   positions: {type: 'object', value: null, optional: true},
   colors: {type: 'object', value: null, optional: true},
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
-  getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getPosition: {type: 'accessor', arrow: true, value: (x: any) => x.position},
+  getColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
 
   // flat or pbr
   _lighting: 'flat',
@@ -302,7 +306,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
   /** Converts instance columns independently of glTF assets and animation. */
   private updateColumns(params: UpdateParameters<this>): void {
-    if (!this.props.positions && !this.props.colors) {
+    if (!Object.keys(this.resolveColumns(COLUMN_DEFINITIONS)).length) {
       if (!this.state.columns) return;
       this.state.columns.destroy();
       this.state.columns = undefined;

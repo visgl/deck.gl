@@ -181,3 +181,5 @@ export {
   pathUniforms as _pathUniforms,
   type PathProps as _PathProps
 } from './shaderlib/path/path-uniforms';
+
+export {isArrowVector as _isArrowVector} from './arrow/upstream-math/is-arrow-vector';

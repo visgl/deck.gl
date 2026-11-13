@@ -193,9 +193,10 @@ and are passed directly to the cell layer.
 
 ```typescript
 new GridLayer({
-  positions: positionVector,
-  weights: [colorWeightVector, elevationWeightVector],
-  dataBounds: [[-123, 37], [-122, 38]],
+  data,
+  getPosition: d => d.position,
+  getColorWeight: d => d.colorWeight,
+  getElevationWeight: d => d.elevationWeight,
   cellSize: 1000,
   colorAggregation: 'SUM',
   elevationAggregation: 'MEAN',
@@ -204,12 +205,7 @@ new GridLayer({
 });
 ```
 
-Accessor-based data and single-chunk `float32x2`/`float32x3` position vectors with two
-`float32` weight vectors are supported. GPU columns require `dataBounds` and buffers with
-`STORAGE` or `COPY_SRC` usage. Columns used in custom views must already use that view's
-coordinate system.
-
-Extensions currently require accessor data rather than GPU columns. Custom JavaScript
+Custom JavaScript
 callbacks and grids exceeding device limits use CPU aggregation.
 
 #### `cellSize` (number, optional) {#cellsize}

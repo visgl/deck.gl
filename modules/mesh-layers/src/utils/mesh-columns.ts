@@ -19,10 +19,17 @@ export const MESH_COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = {
   positions: {
     attribute: 'instancePositions',
     accessor: 'getPosition',
+    arrowAccessor: true,
     semantic: 'position',
     size: 3
   },
-  colors: {attribute: 'instanceColors', accessor: 'getColor', semantic: 'color', size: 4}
+  colors: {
+    attribute: 'instanceColors',
+    accessor: 'getColor',
+    arrowAccessor: true,
+    semantic: 'color',
+    size: 4
+  }
 };
 for (const attribute of TRANSFORM_ATTRIBUTES) {
   MESH_COLUMN_DEFINITIONS[attribute] = {

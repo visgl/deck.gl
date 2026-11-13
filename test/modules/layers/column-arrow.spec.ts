@@ -49,10 +49,10 @@ for (const [Layer, backend] of [ColumnLayer, GridCellLayer].flatMap(Layer =>
           throw error;
         },
         testCases: [
-          {props: {positions: source, extruded: true, wireframe: true, numInstances: 3}},
+          {props: {getPosition: source, extruded: true, wireframe: true, numInstances: 3}},
           {updateProps: {extruded: false, stroked: true}},
           {updateProps: {diskResolution: 6, flatShading: true}},
-          {updateProps: {positions: null, data: [{position: [0, 0, 0]}]}}
+          {updateProps: {getPosition: row => row.position, data: [{position: [0, 0, 0]}]}}
         ].map((testCase, index) => ({
           ...testCase,
           onAfterUpdate: async ({layer}) => {

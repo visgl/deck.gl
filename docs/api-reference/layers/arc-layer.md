@@ -220,76 +220,42 @@ When enabled, this prop computes edge coverage in the shader. When disabled, the
 Other antialiasing techniques have different trade-offs; see [Antialiasing and Multisampling](https://luma.gl/docs/api-guide/gpu/gpu-antialiasing) in the luma.gl docs.
 
 
-### Arrow Columns
-
-See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
-
-#### `sourcePositions` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric XY or XYZ fixed-size lists specifying source positions. Overrides [`getSourcePosition`](#getsourceposition).
-
-#### `targetPositions` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric XY or XYZ fixed-size lists specifying target positions. Overrides [`getTargetPosition`](#gettargetposition).
-
-#### `sourceColors` (Arrow Vector, optional)
-
-* Default: `null`
-
-RGB or RGBA fixed-size lists specifying source colors. Overrides [`getSourceColor`](#getsourcecolor).
-
-#### `targetColors` (Arrow Vector, optional)
-
-* Default: `null`
-
-RGB or RGBA fixed-size lists specifying target colors. Overrides [`getTargetColor`](#gettargetcolor).
-
-#### `widths` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric scalar widths in `widthUnits`. Overrides [`getWidth`](#getwidth).
-
-#### `heights` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric scalar height multipliers. Overrides [`getHeight`](#getheight).
-
-#### `tilts` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric scalar tilt angles in degrees. Overrides [`getTilt`](#gettilt).
 
 ### Data Accessors
 
-#### `getSourcePosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsourceposition}
+Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
+
+#### `getSourcePosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#positions-and-other-vectors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsourceposition}
 
 * Default: `object => object.sourcePosition`
 
 Method called to retrieve the source position of each object.
 
-#### `getTargetPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gettargetposition}
+* If an Arrow vector is provided, each row supplies a numeric fixed-size list matching the accessor’s dimensions.
+
+
+#### `getTargetPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#positions-and-other-vectors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gettargetposition}
 
 * Default: `object => object.targetPosition`
 
 Method called to retrieve the target position of each object.
 
-#### `getSourceColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsourcecolor}
+* If an Arrow vector is provided, each row supplies a numeric fixed-size list matching the accessor’s dimensions.
+
+
+#### `getSourceColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#colors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsourcecolor}
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the source color for all objects.
 * If a function is provided, it is called on each object to retrieve its source color.
 
-#### `getTargetColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gettargetcolor}
+* If an Arrow vector is provided, each row supplies a numeric RGB/RGBA fixed-size list.
+
+
+#### `getTargetColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#colors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gettargetcolor}
 
 * Default `[0, 0, 0, 255]`
 
@@ -298,7 +264,10 @@ The rgba color at the target, in `r, g, b, [a]`. Each component is in the 0-255 
 * If an array is provided, it is used as the target color for all objects.
 * If a function is provided, it is called on each object to retrieve its target color.
 
-#### `getWidth` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getwidth}
+* If an Arrow vector is provided, each row supplies a numeric RGB/RGBA fixed-size list.
+
+
+#### `getWidth` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#scalars), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getwidth}
 
 * Default: `1`
 
@@ -307,18 +276,27 @@ The line width of each object, in units specified by `widthUnits` (default pixel
 * If a number is provided, it is used as the line width for all objects.
 * If a function is provided, it is called on each object to retrieve its line width.
 
-#### `getHeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getheight}
+* If an Arrow vector is provided, each row supplies a numeric value.
+
+
+#### `getHeight` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#scalars), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getheight}
 
 * Default: `1`
 
 Multiplier of layer height. `0` will make the layer flat.
 
-#### `getTilt` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gettilt}
+* If an Arrow vector is provided, each row supplies a numeric value.
+
+
+#### `getTilt` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#scalars), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gettilt}
 
 * Default: `0`
 
 Use to tilt the arc to the side if you have multiple arcs with the same source and target positions.
 In degrees, can be positive or negative (`-90 to +90`).
+
+* If an Arrow vector is provided, each row supplies a numeric value.
+
 
 ## Remarks
 

@@ -41,7 +41,12 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         draw: false,
         testCases: [
           {
-            props: {data: [{}, {}, {}], sourcePositions, targetPositions, getWidth},
+            props: {
+              data: [{}, {}, {}],
+              getSourcePosition: sourcePositions,
+              getTargetPosition: targetPositions,
+              getWidth
+            },
             onAfterUpdate: async ({layer}) => {
               if (!layer.isLoaded) return;
               expect(layer.getAttributeManager()).toBeNull();
@@ -108,13 +113,13 @@ test('ArcLayer reports WebGPU vertex buffer limits for many varying attributes',
   try {
     await columns.update(
       {
-        sourcePositions: position,
-        targetPositions: position,
-        sourceColors: color,
-        targetColors: color,
-        widths: scalar,
-        heights: scalar,
-        tilts: scalar
+        getSourcePosition: position,
+        getTargetPosition: position,
+        getSourceColor: color,
+        getTargetColor: color,
+        getWidth: scalar,
+        getHeight: scalar,
+        getTilt: scalar
       },
       () => {},
       error,
@@ -126,12 +131,12 @@ test('ArcLayer reports WebGPU vertex buffer limits for many varying attributes',
     error.mockClear();
     await columns.update(
       {
-        sourcePositions: position,
-        targetPositions: position,
-        sourceColors: color,
-        targetColors: color,
-        widths: scalar,
-        heights: scalar,
+        getSourcePosition: position,
+        getTargetPosition: position,
+        getSourceColor: color,
+        getTargetColor: color,
+        getWidth: scalar,
+        getHeight: scalar,
         getTilt: 0
       },
       () => {},
@@ -155,8 +160,8 @@ test('ArcLayer keeps picking indexes distinct across WebGPU chunks', async ({ski
   const layer = new ArcLayer({
     id: 'chunk-picking',
     data: [{id: 0}, {id: 1}],
-    sourcePositions: positions([[-20, -20]]).concat(positions([[-20, 20]])),
-    targetPositions: positions([[20, -20]]).concat(positions([[20, 20]])),
+    getSourcePosition: positions([[-20, -20]]).concat(positions([[-20, 20]])),
+    getTargetPosition: positions([[20, -20]]).concat(positions([[20, 20]])),
     getHeight: 0,
     getWidth: 10,
     pickable: true

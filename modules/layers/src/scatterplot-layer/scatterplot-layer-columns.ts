@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {Device} from '@luma.gl/core';
-import type {ColumnSource} from '@deck.gl/core/arrow';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
 import {
   _LayerColumns as LayerColumns,
   _resolveColumns as resolveColumns,
@@ -15,6 +15,7 @@ export const SCATTERPLOT_COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = 
   positions: {
     attribute: 'instancePositions',
     accessor: 'getPosition',
+    arrowAccessor: true,
     semantic: 'position',
     size: 3
   },
@@ -56,18 +57,18 @@ export const SCATTERPLOT_COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = 
     prop: false
   }
 };
-/** Explicit column props override the matching accessors when supplied. */
+/** Experimental GPU-resident columns. CPU columns are supplied through accessors. */
 export type ScatterplotColumnProps = {
-  /** Arrow XY/XYZ position column overriding getPosition. */
-  positions?: ColumnSource | null;
-  /** Arrow numeric radius column overriding getRadius. */
-  radii?: ColumnSource | null;
-  /** Arrow RGB/RGBA fill column overriding getFillColor. */
-  fillColors?: ColumnSource | null;
-  /** Arrow RGB/RGBA stroke column overriding getLineColor. */
-  lineColors?: ColumnSource | null;
-  /** Arrow numeric stroke width column overriding getLineWidth. */
-  lineWidths?: ColumnSource | null;
+  /** @experimental GPU-resident column. */
+  positions?: GPUVector | null;
+  /** @experimental GPU-resident column. */
+  radii?: GPUVector | null;
+  /** @experimental GPU-resident column. */
+  fillColors?: GPUVector | null;
+  /** @experimental GPU-resident column. */
+  lineColors?: GPUVector | null;
+  /** @experimental GPU-resident column. */
+  lineWidths?: GPUVector | null;
 };
 
 /** Returns whether a column prop or an opted-in Arrow accessor drives the layer. */

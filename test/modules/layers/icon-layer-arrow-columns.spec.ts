@@ -30,7 +30,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       data: [{icon: 'a'}, {icon: 'b'}],
       iconAtlas: atlas,
       iconMapping: {a: {x: 0, y: 0, width: 2, height: 1}, b: {x: 2, y: 0, width: 2, height: 1}},
-      positions,
+      getPosition: positions,
       getSize: 8,
       pickable: true
     });

@@ -41,8 +41,8 @@ for (const [Layer, accessor, cell] of cases) {
       const layer = new Layer({
         id: 'cells',
         data: rows,
-        cells,
-        elevations: vectorFromArray([10, 20]),
+        [accessor]: cells,
+        getElevation: vectorFromArray([10, 20]),
         getFillColor: (_: unknown, info: {index: number}) => [info.index, 0, 0, 255]
       } as never);
       const child = layer.renderLayers() as any;
@@ -63,21 +63,21 @@ for (const [Layer, accessor, cell] of cases) {
 
 test('numeric H3 cells retain uint64 precision', () => {
   const id = 0x8928308280fffffn;
-  const layer = new H3HexagonLayer({cells: vectorFromArray([id], new Uint64())});
+  const layer = new H3HexagonLayer({getHexagon: vectorFromArray([id], new Uint64())});
   const child = layer.renderLayers() as any;
   expect(child.props.getHexagon(child.props.data[0])).toBe(id.toString(16));
 });
 
 test('cell and style counts are validated', () => {
   const layer = new S2Layer({
-    cells: vectorFromArray(['89c25']),
-    elevations: vectorFromArray([1, 2])
+    getS2Token: vectorFromArray(['89c25']),
+    getElevation: vectorFromArray([1, 2])
   });
   expect(() => layer.renderLayers()).toThrow('lengths must match');
 });
 
 test('H3 column wrapper leaves viewport updates to its child', () => {
-  const layer = new H3HexagonLayer({cells: vectorFromArray(['8928308280fffff'])});
+  const layer = new H3HexagonLayer({getHexagon: vectorFromArray(['8928308280fffff'])});
   expect(
     layer.shouldUpdateState({
       props: layer.props,
@@ -92,7 +92,7 @@ test('H3 column wrapper leaves viewport updates to its child', () => {
 
 test('generated rows clear source data hooks', () => {
   const layer = new S2Layer({
-    cells: vectorFromArray(['89c25']),
+    getS2Token: vectorFromArray(['89c25']),
     dataTransform: rows => rows,
     dataComparator: () => true,
     _dataDiff: () => []
@@ -106,21 +106,21 @@ test('generated rows clear source data hooks', () => {
 
 test('signed S2 identifiers preserve their unsigned token', () => {
   const cell = BigInt.asIntN(64, 0x89c2500000000000n);
-  const layer = new S2Layer({cells: vectorFromArray([cell], new Int64())});
+  const layer = new S2Layer({getS2Token: vectorFromArray([cell], new Int64())});
   const child = layer.renderLayers() as any;
   expect(child.props.getS2Token(child.props.data[0])).toBe('89c25');
 });
 
 test('Int64 H3 identifiers retain all bits', () => {
   const cell = 0x8928308280fffffn;
-  const layer = new H3HexagonLayer({cells: vectorFromArray([cell], new Int64())});
+  const layer = new H3HexagonLayer({getHexagon: vectorFromArray([cell], new Int64())});
   const child = layer.renderLayers() as any;
   expect(child.props.getHexagon(child.props.data[0])).toBe(cell.toString(16));
 });
 
 test('signed A5 identifiers become unsigned bigint values', () => {
   const cell = 0xae80000000000000n;
-  const layer = new A5Layer({cells: vectorFromArray([BigInt.asIntN(64, cell)], new Int64())});
+  const layer = new A5Layer({getPentagon: vectorFromArray([BigInt.asIntN(64, cell)], new Int64())});
   const child = layer.renderLayers() as any;
   expect(child.props.getPentagon(child.props.data[0])).toBe(cell);
 });
@@ -130,7 +130,7 @@ test('cell rows compare source features by identity, including cyclic and built-
   const source: any = {date: new Date(0), values: new Map([['height', 1]])};
   source.self = source;
   const makeRows = (feature: any) =>
-    (new H3ClusterLayer({cells, data: [feature]}).renderLayers() as any).props;
+    (new H3ClusterLayer({getHexagons: cells, data: [feature]}).renderLayers() as any).props;
   const first = makeRows(source);
   const same = makeRows(source);
   expect(same.dataComparator(same.data, first.data)).toBe(true);
@@ -143,11 +143,30 @@ test('cell rows compare source features by identity, including cyclic and built-
 test('Arrow source-table identity survives fresh row wrappers', () => {
   const data = new Table({value: vectorFromArray([1])});
   const cells = vectorFromArray(['89c25']);
-  const makeRows = table => (new S2Layer({data: table, cells}).renderLayers() as any).props;
+  const makeRows = table =>
+    (new S2Layer({data: table, getS2Token: cells}).renderLayers() as any).props;
   const first = makeRows(data);
   const next = makeRows(data);
   expect(first.data[0].__source.object).not.toBe(next.data[0].__source.object);
   expect(next.dataComparator(next.data, first.data)).toBe(true);
   const changed = makeRows(new Table({value: vectorFromArray([2])}));
   expect(changed.dataComparator(changed.data, first.data)).toBe(false);
+});
+
+test('cell style accessors accept Arrow columns alongside identifier callbacks', () => {
+  const data = [{cell: '89c25'}, {cell: '89c25'}];
+  const layer = new S2Layer({
+    data,
+    getS2Token: (row, info) => {
+      expect(info.data).toBe(data);
+      expect(info.target).toEqual([]);
+      expect(data[info.index]).toBe(row);
+      return row.cell;
+    },
+    getElevation: vectorFromArray([10, 20])
+  });
+  const child = layer.renderLayers() as any;
+  expect(child.props.data).toHaveLength(2);
+  expect(child.props.getS2Token(child.props.data[0])).toBe('89c25');
+  expect(child.props.getElevation(child.props.data[1], {index: 1})).toBe(20);
 });

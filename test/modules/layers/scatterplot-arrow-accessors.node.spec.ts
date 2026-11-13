@@ -6,16 +6,7 @@ import {expect, test, vi} from 'vitest';
 import {NullDevice} from '@luma.gl/core/test-utils';
 import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {ScatterplotLayer, type ScatterplotLayerProps} from '@deck.gl/layers';
-import {
-  Field,
-  FixedSizeList,
-  Float32,
-  Float64,
-  Int16,
-  Table,
-  Uint8,
-  vectorFromArray
-} from 'apache-arrow';
+import {Field, FixedSizeList, Float32, Float64, Int16, Uint8, vectorFromArray} from 'apache-arrow';
 import {validateProps, diffProps} from '../../../modules/core/src/lifecycle/props';
 import {resolveColumns} from '../../../modules/core/src/lib/resolve-columns';
 import {
@@ -45,9 +36,11 @@ function checkAccessorTypes(gpu: GPUVector) {
   const radius: ScatterplotLayerProps = {id: 'types', data: [], getRadius: gpu};
   // @ts-expect-error GPU vectors remain exclusive to column props.
   const color: ScatterplotLayerProps = {id: 'types', data: [], getFillColor: gpu};
-  // @ts-expect-error Position accessors have not opted into Arrow columns.
-  const position: ScatterplotLayerProps = {id: 'types', data: [], getPosition: colors};
-  return [radius, color, position];
+  // @ts-expect-error Pixel offset accessors have not opted into Arrow columns.
+  const position: ScatterplotLayerProps = {id: 'types', data: [], getPixelOffset: colors};
+  // @ts-expect-error Experimental column props accept GPU vectors only.
+  const column: ScatterplotLayerProps = {id: 'types', data: [], radii};
+  return [radius, color, position, column];
 }
 void checkAccessorTypes;
 
@@ -60,28 +53,17 @@ test('Scatterplot validates Arrow accessors and compares column identity', () =>
     diffProps(layer.clone({getRadius: radii.slice()}).props, layer.props).propsChanged
   ).toBeTruthy();
   expect(diffProps(layer.clone({getRadius: () => 1}).props, layer.props).propsChanged).toBeTruthy();
-  expect(() => validateProps(new ScatterplotLayer({getPosition: colors as any}).props)).toThrow(
-    'getPosition'
+  expect(() => validateProps(new ScatterplotLayer({getPixelOffset: colors as any}).props)).toThrow(
+    'getPixelOffset'
   );
 });
 
-test('Explicit columns override Arrow accessors, which override table fields', () => {
-  const explicit = vectorFromArray([6, 8], new Float64());
-  expect(
-    resolveColumns(
-      {data: new Table({radii: explicit}), getRadius: radii},
-      SCATTERPLOT_COLUMN_DEFINITIONS,
-      true
-    ).radii
-  ).toBe(radii);
-  expect(
-    resolveColumns({radii: explicit, getRadius: radii}, SCATTERPLOT_COLUMN_DEFINITIONS).radii
-  ).toBe(explicit);
-  expect(
-    resolveColumns({radii: null, getRadius: radii}, SCATTERPLOT_COLUMN_DEFINITIONS).radii
-  ).toBe(radii);
+test('Arrow accessors select columns without a competing CPU column prop', () => {
+  expect(resolveColumns({getRadius: radii}, SCATTERPLOT_COLUMN_DEFINITIONS).radii).toBe(radii);
+  expect(() => resolveColumns({radii}, SCATTERPLOT_COLUMN_DEFINITIONS)).toThrow(
+    'requires a GPUVector'
+  );
   expect(resolveColumns({getRadius: radii}, {radii: {accessor: 'getRadius'}})).toEqual({});
-  expect(hasScatterplotColumns({getPosition: colors} as any)).toBe(false);
   expect(hasScatterplotColumns(new ScatterplotLayer({getRadius: 2}).props)).toBe(false);
 });
 

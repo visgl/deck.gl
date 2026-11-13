@@ -243,47 +243,19 @@ If `true`, rendered circles always face the camera. If `false` circles face up (
 
 If `true`, circles are rendered with smoothed edges. If `false`, circles are rendered with rough edges. Antialiasing can cause artifacts on edges of overlapping circles. Also, antialiasing isn't supported in FirstPersonView. 
 
-### Arrow Columns
-
-See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
-
-#### `positions` (Arrow Vector, optional) {#positions}
-
-* Default: `null`
-
-Numeric XY or XYZ fixed-size lists specifying circle centers. Overrides [`getPosition`](#getposition).
-
-#### `radii` (Arrow Vector, optional) {#radii}
-
-* Default: `null`
-
-Numeric scalar radii in `radiusUnits`. Overrides [`getRadius`](#getradius).
-
-#### `fillColors` (Arrow Vector, optional) {#fillcolors}
-
-* Default: `null`
-
-RGB or RGBA fixed-size lists specifying fill colors. Overrides [`getFillColor`](#getfillcolor).
-
-#### `lineColors` (Arrow Vector, optional) {#linecolors}
-
-* Default: `null`
-
-RGB or RGBA fixed-size lists specifying outline colors. Overrides [`getLineColor`](#getlinecolor).
-
-#### `lineWidths` (Arrow Vector, optional) {#linewidths}
-
-* Default: `null`
-
-Numeric scalar outline widths in `lineWidthUnits`. Overrides [`getLineWidth`](#getlinewidth).
 
 ### Data Accessors
 
-#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
+
+#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#positions-and-other-vectors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
+
+* If an Arrow vector is provided, each row supplies a numeric fixed-size list matching the accessor’s dimensions.
+
 
 #### `getRadius` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#scalars), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getradius}
 
@@ -295,7 +267,6 @@ The radius of each object, in units specified by `radiusUnits` (default meters).
 * If a function is provided, it is called on each object to retrieve its radius.
 * If an Arrow vector is provided, each numeric value supplies one object’s radius.
 
-Ignored when [`radii`](#radii) is supplied. Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
 
 #### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
@@ -319,7 +290,6 @@ For arrays and callback results, the rgba color is in the format of `[r, g, b, [
 * If an Arrow vector is provided, each numeric RGB/RGBA fixed-size list supplies one object’s color.
 * If not provided, it falls back to `getColor`.
 
-Ignored when [`fillColors`](#fillcolors) is supplied. Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
 
 #### `getLineColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#colors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
 
@@ -332,7 +302,6 @@ For arrays and callback results, the rgba color is in the format of `[r, g, b, [
 * If an Arrow vector is provided, each numeric RGB/RGBA fixed-size list supplies one object’s color.
 * If not provided, it falls back to `getColor`.
 
-Ignored when [`lineColors`](#linecolors) is supplied. Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
 
 #### `getLineWidth` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#scalars), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinewidth}
 
@@ -345,7 +314,6 @@ The width of the outline of each object, in units specified by `lineWidthUnits` 
 * If an Arrow vector is provided, each numeric value supplies one object’s outline width.
 * If not provided, it falls back to `strokeWidth`.
 
-Ignored when [`lineWidths`](#linewidths) is supplied. Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
 
 #### `getPixelOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
 

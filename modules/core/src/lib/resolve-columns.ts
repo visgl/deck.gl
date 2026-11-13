@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {isArrowVector} from '../arrow/upstream-math/is-arrow-vector';
 import {isArrowTable} from '../arrow/upstream-math/is-arrow-table';
 import {getArrowConversionFormat} from '../arrow/upstream-luma/arrow-schema';
@@ -25,6 +26,11 @@ export function resolveColumns(
     }
     const source = props[name];
     if (source != null) {
+      if (!(source instanceof GPUVector)) {
+        throw new Error(
+          `Experimental column prop ${name} requires a GPUVector; pass Arrow vectors to ${definition.accessor ?? 'an Arrow accessor'}`
+        );
+      }
       columns[name] = source as ColumnSource;
       continue;
     }
