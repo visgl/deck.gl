@@ -99,16 +99,14 @@ export type TextureSource =
   | ImageBitmap;
 
 /** Stream chunks accepted by the layer's asynchronous data loading path. */
-type LayerDataStream<T> = AsyncIterable<
-  T[] | RecordBatch | {readonly shape: 'arrow-table'; readonly data: Table}
->;
+type LayerDataStream<T> = AsyncIterable<T[] | RecordBatch | Table>;
 
 /**
  * Typical types that can be supplied to the `data` property. Can be either:
  * * An `Iterable` - a list of objects to visualize.
  * * A non-iterable - an object with a `length` field.
  * * A `Promise` whose resolved value will be used as the value of the `data` prop.
- * * An `AsyncIterable` yielding row arrays, Arrow record batches, or loaders.gl Arrow table batches.
+ * * An `AsyncIterable` yielding row arrays, Arrow record batches, or Arrow tables.
  * * `string` - a URL to load data from
  * * `null` - empty data
  */

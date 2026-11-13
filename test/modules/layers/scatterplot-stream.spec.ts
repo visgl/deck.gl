@@ -32,7 +32,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       });
       async function* stream() {
         yield source.slice(0, 1).batches[0];
-        yield {shape: 'arrow-table' as const, data: source.slice(1)};
+        yield source.slice(1);
       }
       const loaded = vi.fn();
       let verified = false;

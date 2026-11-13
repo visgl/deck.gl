@@ -8,7 +8,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Layers support `_dataLoadingMode: 'auto' | 'batched' | 'snapshots'` for complete URL loading,
 appended batches, or replacement Arrow snapshots. `_onDataProgress` reports each accepted batch.
-Streams support Arrow record batches and loaders.gl table wrappers without converting Arrow
+Streams support Arrow record batches and tables without converting Arrow
 columns to rows. See [Layer](./api-reference/core/layer.md#_dataloadingmode).
 
 ### Async CPU aggregation of GPU inputs

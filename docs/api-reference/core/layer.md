@@ -60,7 +60,7 @@ deck.gl layers typically expect `data` to be one of the following types:
 - Any non-iterable object that contains a `length` field. deck.gl will not attempt to interpret its format, but simply call each accessor `length` times. (See remark below)
 - `String`: an URL pointing to the data source. deck.gl will attempt to fetch the remote content and parse it as JSON. The resulting object is then used as the value of the `data` prop.
 - `Promise`: the resolved value will be used as the value of the `data` prop.
-- `AsyncIterable`: an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object that yields data in batches. Batches may be row arrays, Arrow record batches, or loaders.gl Arrow table batches. Promises resolving to an async iterable are also supported. Row-array processing can be customized with `dataTransform`.
+- `AsyncIterable`: an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object that yields data in batches. Batches may be row arrays, Arrow record batches, or Arrow tables. Promises resolving to an async iterable are also supported. Row-array processing can be customized with `dataTransform`.
 
 ##### data.attributes
 
@@ -323,11 +323,10 @@ Controls how URL data is loaded and how streamed data is consumed:
 | `'batched'` | Stream using loaders.gl `loadInBatches` | Append chunks |
 | `'snapshots'` | Stream using loaders.gl `loadInBatches` | Replace all data with each Arrow result |
 
-Streams can yield row arrays, Arrow `RecordBatch` objects, or loaders.gl Arrow table batches.
+Streams can yield row arrays, Arrow `RecordBatch` objects, or Arrow tables.
 Each snapshot replaces the previous table with the entire current result. A snapshot can be one
-Arrow record batch or a loaders.gl Arrow table batch containing multiple record batches. Do not
-mix Arrow and row chunks in one stream. Metadata batches are ignored; table wrappers are unwrapped before
-updating data or invoking callbacks. Row-oriented loaders.gl table batches are also unwrapped.
+Arrow record batch or an Arrow table containing multiple record batches. Do not
+mix Arrow and row chunks in one stream. Deck discards loader metadata and passes plain row arrays or Arrow tables to layer props and callbacks.
 
 `loaders` and `loadOptions` are forwarded to loaders.gl. Changing the mode, or changing loaders
 or load options while batch loading is active, reloads the same URL. A custom `fetch` retains

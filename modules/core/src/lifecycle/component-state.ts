@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {isArrowTable} from '../arrow/upstream-math/is-arrow-table';
+import {unwrapLoaderArrowResult} from '../utils/loader-utils';
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {
   COMPONENT_SYMBOL,
@@ -215,7 +216,10 @@ export default class ComponentState<ComponentT extends Component> {
 
     const asyncProp = this.asyncProps[propName];
     if (asyncProp) {
-      value = this._postProcessValue(asyncProp, value);
+      value = this._postProcessValue(
+        asyncProp,
+        propName === 'data' ? unwrapLoaderArrowResult(value) : value
+      );
       asyncProp.resolvedValue = value;
       asyncProp.pendingLoadCount++;
       asyncProp.resolvedLoadCount = asyncProp.pendingLoadCount;
@@ -259,7 +263,10 @@ export default class ComponentState<ComponentT extends Component> {
           if (propName === 'data' && isAsyncIterable(data)) {
             return this._resolveAsyncIterable(propName, data, loadCount);
           }
-          data = this._postProcessValue(asyncProp, data);
+          data = this._postProcessValue(
+            asyncProp,
+            propName === 'data' ? unwrapLoaderArrowResult(data) : data
+          );
           this._setAsyncPropValue(propName, data, loadCount);
           if (this.component && loadCount === asyncProp.pendingLoadCount) {
             this._onResolve(propName, data);
@@ -312,16 +319,9 @@ export default class ComponentState<ComponentT extends Component> {
         }
         // @ts-expect-error (2339) layer-only props are not declared on Component
         const {dataTransform, _dataLoadingMode = 'auto'} = this.component.props;
-        // Arrow is an optional peer dependency: load it only for Arrow RecordBatch streams.
-        const wrappedTable =
-          chunk?.shape === 'arrow-table' && isArrowTable(chunk.data) ? chunk.data : null;
-        const isArrowChunk = Boolean(
-          chunk &&
-            typeof chunk.numRows === 'number' &&
-            Array.isArray(chunk.schema?.fields) &&
-            typeof chunk.getChild === 'function'
-        );
-        if (isArrowChunk || wrappedTable) {
+        // Arrow is an optional peer dependency. Import it only for Arrow inputs.
+        const arrow = unwrapLoaderArrowResult(chunk);
+        if (isArrowTable(arrow)) {
           if (chunkKind === 'rows') {
             throw new Error('Cannot mix Arrow and row chunks');
           }
@@ -330,9 +330,9 @@ export default class ComponentState<ComponentT extends Component> {
           if (!this.component || loadCount !== asyncProp.pendingLoadCount) {
             return;
           }
-          const batches = wrappedTable?.batches ?? [chunk];
+          const batches = 'batches' in arrow ? arrow.batches : [arrow];
           if (batches.some(batch => !(batch instanceof RecordBatch))) {
-            throw new Error('Expected Arrow RecordBatch chunks');
+            throw new Error('Expected Arrow Tables or RecordBatches');
           }
           if (_dataLoadingMode === 'snapshots') {
             arrowBatches = [...batches];
@@ -340,7 +340,7 @@ export default class ComponentState<ComponentT extends Component> {
             // Preserve Arrow columnar storage without converting to row objects.
             arrowBatches.push(...batches);
           }
-          const table = new Table(wrappedTable?.schema ?? chunk.schema, arrowBatches);
+          const table = new Table(arrow.schema, arrowBatches);
           lastResult = table;
           this._setAsyncPropValue(propName, table, loadCount);
           if (this.component && loadCount === asyncProp.pendingLoadCount) {

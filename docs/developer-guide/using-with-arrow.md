@@ -108,8 +108,8 @@ transformed values raise conversion errors, even when the schema is compatible.
 
 ## Streaming Arrow data
 
-Layers can consume an async iterable of Apache Arrow `RecordBatch` objects or loaders.gl
-`{shape: 'arrow-table', data: table}` batches. Promises resolving to these iterables are also
+Layers can consume an async iterable of Apache Arrow `RecordBatch` objects or
+Arrow `Table` objects. Promises resolving to these iterables are also
 supported. Arrow remains an optional dependency and is loaded only when an Arrow chunk arrives.
 
 ```ts
@@ -129,10 +129,10 @@ The experimental `_dataLoadingMode` prop controls loading and accumulation:
 - `'batched'` loads URLs with loaders.gl `loadInBatches` and appends each batch to the current table.
 - `'snapshots'` also loads URLs in batches, but replaces the entire table with each Arrow result.
   Each yield contains all rows to display at that point. It can be one record batch or a
-  loaders.gl Arrow table batch containing multiple record batches.
+  table containing multiple record batches.
 
 Set `loaders` and `loadOptions` as usual when streaming a URL. The selected loader must produce
-supported batches. Metadata batches are discarded and table wrappers are unwrapped. Arrow batches
+supported batches. Deck discards loader metadata and exposes Arrow tables to apps. Arrow batches
 retain their columnar storage; they are not converted to row objects. Do not mix Arrow and row
 chunks in one stream. An empty Arrow snapshot clears the table while retaining its schema.
 

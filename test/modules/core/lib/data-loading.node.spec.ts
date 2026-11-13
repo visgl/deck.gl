@@ -282,3 +282,20 @@ test('replacing fetch Headers reloads an active batch URL', () => {
   state.setAsyncProps(layer.clone({loadOptions: options('second')}).props);
   expect(fetch).toHaveBeenCalledTimes(2);
 });
+
+test('a bare Arrow table replaces the previous snapshot with all its batches', async () => {
+  const {state, run, progress} = makeState({_dataLoadingMode: 'snapshots'});
+  const replacement = new Table([...second.batches, ...first.batches]);
+  await run(chunks(first.batches[0], replacement));
+  expect(Array.from(state.getAsyncProp('data').getChild('x'))).toEqual([3, 1, 2]);
+  expect(progress.mock.calls[1][1]).toBeInstanceOf(Table);
+});
+
+test('complete loading exposes a bare Arrow table to layer props and callbacks', async () => {
+  const {state, complete} = makeState();
+  state.setAsyncProps({
+    data: Promise.resolve({shape: 'arrow-table', data: first})
+  } as never);
+  await vi.waitFor(() => expect(complete).toHaveBeenCalledExactlyOnceWith('data', first));
+  expect(state.getAsyncProp('data')).toBe(first);
+});
