@@ -77,6 +77,11 @@ Paths and polygons can follow curved projected edges with the experimental [`_pr
 
 Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
 
+### Other Improvements
+
+- New [`Deck.hasActiveTransitions`](./api-reference/core/deck.md#hasactivetransitions) method reports whether any view state, layer prop or attribute transition is in progress.
+- New [`Deck.waitForFrameReady`](./api-reference/core/deck.md#waitforframeready) method resolves once a frame has been rendered with all data loaded and transitions finished.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
