@@ -16,6 +16,7 @@ import type {NumberArray4} from '@math.gl/core';
 
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
+import type {RenderPassTimestamps} from '../lib/frame-timer';
 import type View from '../views/view';
 import type Layer from '../lib/layer';
 import type CompositeLayer from '../lib/composite-layer';
@@ -63,6 +64,8 @@ export type LayersPassRenderOptions = {
   shaderModuleProps?: any;
   /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
   preRenderStats?: Record<string, any>;
+  /** If supplied, called once per render pass to get the timestamps that pass should write */
+  getRenderPassTimestamps?: (() => RenderPassTimestamps | null) | null;
 };
 
 export type DrawLayerParameters = {
@@ -124,7 +127,14 @@ export default class LayersPass extends Pass {
       parameters.scissorRect = options.scissorRect as NumberArray4;
     }
 
-    const {shaderModuleProps, viewports, views, onViewportActive, clearStack = true} = options;
+    const {
+      shaderModuleProps,
+      viewports,
+      views,
+      onViewportActive,
+      clearStack = true,
+      getRenderPassTimestamps
+    } = options;
     const pass = options.pass || 'unknown';
     const submitEachRenderPass = this.device.type === 'webgpu';
 
@@ -166,7 +176,8 @@ export default class LayersPass extends Pass {
             parameters,
             clearColor: clearColor as NumberArray4,
             clearDepth,
-            clearStencil
+            clearStencil,
+            ...getRenderPassTimestamps?.()
           });
 
           try {
