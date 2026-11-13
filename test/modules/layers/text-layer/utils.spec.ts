@@ -62,6 +62,18 @@ test('TextLayer - utils#buildMapping', () => {
   expect(mapping, 'mapping should match.').toEqual(expected);
 });
 
+test('TextLayer - utils#buildMapping with empty character set', () => {
+  const {mapping, canvasHeight} = buildMapping({
+    characterSet: new Set(),
+    measureText: () => ({advance: 0, width: 0, ascent: 0, descent: 0}),
+    buffer: 2,
+    maxCanvasWidth: 16
+  });
+
+  expect(mapping, 'mapping should be empty.').toEqual({});
+  expect(canvasHeight, 'canvasHeight should not be 0.').toBe(1);
+});
+
 test('TextLayer - utils#buildMapping with cache', () => {
   const options = {
     characterSet: new Set('pq'),

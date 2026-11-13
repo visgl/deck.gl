@@ -102,7 +102,8 @@ export function buildMapping({
     xOffset: x,
     yOffsetMin: yMin,
     yOffsetMax: yMax,
-    canvasHeight: nextPowOfTwo(yMax)
+    // An empty character set would give a 0-height canvas, which WebGPU cannot upload
+    canvasHeight: nextPowOfTwo(Math.max(yMax, 1))
   };
 }
 
