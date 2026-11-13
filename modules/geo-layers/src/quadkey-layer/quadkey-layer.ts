@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {ArrowAccessor, DefaultProps} from '@deck.gl/core';
+import type {Vector} from 'apache-arrow';
+
+import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {getQuadkeyPolygon} from './quadkey-utils';
 
@@ -12,7 +14,6 @@ const defaultProps: DefaultProps<QuadkeyLayerProps> = {
   getQuadkey: {
     type: 'accessor',
     arrow: true,
-    constantTypes: ['string'],
     value: (d: any) => d.quadkey
   }
 };
@@ -29,7 +30,7 @@ type _QuadkeyLayerProps<DataT> = {
    * By default, it reads `quadkey` property of data object.
    * Also accepts an Arrow vector of identifiers or identifier lists in source-feature order.
    */
-  getQuadkey?: ArrowAccessor<DataT, string>;
+  getQuadkey?: AccessorFunction<DataT, string> | Vector;
 };
 
 /** Render filled and/or stroked polygons based on the [Quadkey](https://towardsdatascience.com/geospatial-indexing-with-quadkeys-d933dff01496) geospatial indexing system. */

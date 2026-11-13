@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
+import LayerState from '../../../modules/core/src/lib/layer-state';
 import {
   H3HexagonLayer,
   H3ClusterLayer,
@@ -180,11 +181,15 @@ test('style updates retain rows from a one-shot iterator and convert Int64 style
     getS2Token: row => row.token,
     getElevation: vectorFromArray([10n], new Int64())
   });
-  layer.state = {} as typeof layer.state;
+  const state = new LayerState({layer, attributeManager: null});
+  layer.internalState = state;
+  state.setAsyncProps(layer.props);
   layer.renderLayers();
 
   const updated = layer.clone({getElevation: vectorFromArray([20n], new Int64())});
-  updated.state = layer.state;
+  updated.internalState = state;
+  state.component = updated;
+  state.setAsyncProps(updated.props);
   const child = updated.renderLayers() as any;
   const row = child.props.data[0];
   expect(child.props.getS2Token(row)).toBe('89c25');

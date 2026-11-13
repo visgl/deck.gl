@@ -29,31 +29,6 @@ export function getCellValue(input: any, row: any, info: {index: number; data?: 
       : input;
 }
 
-type CellColumnState = {source: IterableIterator<unknown>; rows: unknown[]};
-
-/** Materialize a one-shot iterator once, so later updates can still access its rows. */
-function getSourceRows(layer: CompositeLayer, data: any): unknown[] {
-  if (data && typeof data.get === 'function') {
-    return Array.from({length: data.numRows}, (_, index) => data.get(index));
-  }
-  const {iterable} = createIterable(data);
-  if (typeof data?.next !== 'function' || iterable !== data) {
-    return Array.from(iterable);
-  }
-  const state = layer.state as
-    | (typeof layer.state & {cellColumnRows?: CellColumnState})
-    | undefined;
-  const retained = state?.cellColumnRows;
-  if (retained && retained.source === data) {
-    return retained.rows;
-  }
-  const rows = Array.from(iterable);
-  if (state) {
-    state.cellColumnRows = {source: data, rows};
-  }
-  return rows;
-}
-
 /** Expands cell rows while retaining the source feature for styling and picking. */
 export function renderCellColumns(
   layer: CompositeLayer,
@@ -66,7 +41,10 @@ export function renderCellColumns(
   }
 ): Layer {
   const props = layer.props as Record<string, any>;
-  const rows = getSourceRows(layer, props.data);
+  const rows =
+    props.data && typeof props.data.get === 'function'
+      ? Array.from({length: props.data.numRows}, (_, index) => props.data.get(index))
+      : Array.from(createIterable(props.data).iterable);
   const cellInput = props[accessor];
   const arrowInputs = [
     cellInput,

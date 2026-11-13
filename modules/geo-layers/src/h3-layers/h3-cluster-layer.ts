@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {Vector} from 'apache-arrow';
+
 import {cellsToMultiPolygon, H3IndexInput} from 'h3-js';
 
 import {
   Accessor,
-  ArrowAccessor,
+  AccessorFunction,
   createIterable,
   UpdateParameters,
   DefaultProps
@@ -22,7 +24,6 @@ const defaultProps: DefaultProps<H3ClusterLayerProps> = {
   getHexagons: {
     type: 'accessor',
     arrow: true,
-    constantTypes: ['array'],
     value: (d: any) => d.hexagons
   }
 };
@@ -39,7 +40,7 @@ type _H3ClusterLayerProps<DataT> = {
    * By default, it reads `hexagons` property of data object.
    * Also accepts an Arrow vector of identifiers or identifier lists in source-feature order.
    */
-  getHexagons?: ArrowAccessor<DataT, H3IndexInput[]>;
+  getHexagons?: AccessorFunction<DataT, H3IndexInput[]> | Vector;
 };
 
 export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> extends GeoCellLayer<
