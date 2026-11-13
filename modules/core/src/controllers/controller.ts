@@ -91,7 +91,7 @@ export type ControllerOptions = {
   dragMode?: 'pan' | 'rotate';
   /** Screen position that remains fixed while zooming. Default `'pointer'`. */
   zoomAround?: 'center' | 'pointer';
-  /** Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`. */
+  /** Enable inertia after pointer panning/rotation and trackpad pinch. Touch pinch ends at the last live zoom to avoid lift-frame jumps. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`. */
   inertia?: boolean | number;
   /** Bounding box of content that the controller is constrained in */
   maxBounds?:
@@ -893,7 +893,17 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     }
     const {inertia} = this;
     const {_lastPinchEvent} = pinchEventWorkaround;
-    if (this.touchZoom && inertia && _lastPinchEvent && event.scale !== _lastPinchEvent.scale) {
+    // Touch pinch-end commonly carries a noisy final scale as fingers lift.
+    // Applying inertia to that frame can fling the zoom and blocks the next
+    // gesture for the full inertia duration. Trackpad pinch inertia is stable.
+    const isTouchPinch = event.pointerType === 'touch';
+    if (
+      this.touchZoom &&
+      inertia &&
+      !isTouchPinch &&
+      _lastPinchEvent &&
+      event.scale !== _lastPinchEvent.scale
+    ) {
       const pos = this.getCenter(event);
       const zoomPosition = this.getZoomPosition(pos);
       let newControllerState = this.controllerState.rotateEnd();
