@@ -4,15 +4,27 @@
 
 import {cellsToMultiPolygon, H3IndexInput} from 'h3-js';
 
-import {ArrowAccessor, createIterable, UpdateParameters, DefaultProps} from '@deck.gl/core';
+import {
+  Accessor,
+  ArrowAccessor,
+  createIterable,
+  UpdateParameters,
+  DefaultProps
+} from '@deck.gl/core';
 import {default as H3HexagonLayer} from './h3-hexagon-layer';
+import type {Color} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {normalizeLongitudes} from './h3-utils';
 
 import {hasCellColumns, getCellValue, renderCellColumns} from '../geo-cell-layer/cell-columns';
 
 const defaultProps: DefaultProps<H3ClusterLayerProps> = {
-  getHexagons: {type: 'accessor', arrow: true, value: (d: any) => d.hexagons}
+  getHexagons: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['array'],
+    value: (d: any) => d.hexagons
+  }
 };
 
 /** All properties supported by H3ClusterLayer. */
@@ -88,14 +100,15 @@ export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> ext
   indexToBounds(): Partial<GeoCellLayer['props']> {
     const {getElevation, getFillColor, getLineColor, getLineWidth} = this.props;
 
+    // Arrow styles have already been handled by renderCellColumns.
     return {
       data: this.state.polygons,
       getPolygon: d => d.polygon,
 
-      getElevation: this.getSubLayerAccessor((row, info) => getCellValue(getElevation, row, info)),
-      getFillColor: this.getSubLayerAccessor((row, info) => getCellValue(getFillColor, row, info)),
-      getLineColor: this.getSubLayerAccessor((row, info) => getCellValue(getLineColor, row, info)),
-      getLineWidth: this.getSubLayerAccessor((row, info) => getCellValue(getLineWidth, row, info))
+      getElevation: this.getSubLayerAccessor(getElevation as Accessor<DataT, number>),
+      getFillColor: this.getSubLayerAccessor(getFillColor as Accessor<DataT, Color>),
+      getLineColor: this.getSubLayerAccessor(getLineColor as Accessor<DataT, Color>),
+      getLineWidth: this.getSubLayerAccessor(getLineWidth as Accessor<DataT, number>)
     };
   }
 }

@@ -213,7 +213,12 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
   alphaCutoff: {type: 'number', value: 0.05, min: 0, max: 1},
 
-  getPosition: {type: 'accessor', arrow: true, value: (x: any) => x.position},
+  getPosition: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['array'],
+    value: (x: any) => x.position
+  },
   getIcon: {type: 'accessor', value: (x: any) => x.icon},
   getColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   getSize: {type: 'accessor', arrow: true, value: 1},

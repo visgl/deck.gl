@@ -242,7 +242,7 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   wireframe: false,
   // Optional material for 'lighting' shader module
   material: true,
-  getPosition: {type: 'accessor', arrow: true, value: defaultPosition},
+  getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
   getColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees

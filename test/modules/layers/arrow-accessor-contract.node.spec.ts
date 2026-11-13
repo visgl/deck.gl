@@ -137,3 +137,15 @@ for (const [LayerClass, accessor] of [
     expect(() => validateProps(layer.props)).not.toThrow();
   });
 }
+
+test('callback defaults allow constant positions on Arrow-enabled accessors', () => {
+  const position = [0, 0, 0] as const;
+  for (const layer of [
+    new ScatterplotLayer({getPosition: position}),
+    new ArcLayer({getSourcePosition: position, getTargetPosition: position}),
+    new ColumnLayer({getPosition: position}),
+    new PointCloudLayer({getPosition: position})
+  ]) {
+    expect(() => validateProps(layer.props)).not.toThrow();
+  }
+});

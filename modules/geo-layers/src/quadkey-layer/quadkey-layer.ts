@@ -9,7 +9,12 @@ import {getQuadkeyPolygon} from './quadkey-utils';
 import {hasCellColumns, getCellValue, renderCellColumns} from '../geo-cell-layer/cell-columns';
 
 const defaultProps: DefaultProps<QuadkeyLayerProps> = {
-  getQuadkey: {type: 'accessor', arrow: true, value: (d: any) => d.quadkey}
+  getQuadkey: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['string'],
+    value: (d: any) => d.quadkey
+  }
 };
 
 /** All properties supported by QuadkeyLayer. */

@@ -10,7 +10,12 @@ import {flattenPolygon} from '../h3-layers/h3-utils';
 import {hasCellColumns, getCellValue, renderCellColumns} from '../geo-cell-layer/cell-columns';
 
 const defaultProps: DefaultProps<A5LayerProps> = {
-  getPentagon: {type: 'accessor', arrow: true, value: (d: any) => d.pentagon}
+  getPentagon: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['string', 'bigint'],
+    value: (d: any) => d.pentagon
+  }
 };
 
 /** All properties supported by A5Layer. */

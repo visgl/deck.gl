@@ -9,7 +9,7 @@ import {getS2Polygon} from './s2-utils';
 import {hasCellColumns, getCellValue, renderCellColumns} from '../geo-cell-layer/cell-columns';
 
 const defaultProps: DefaultProps<S2LayerProps> = {
-  getS2Token: {type: 'accessor', arrow: true, value: (d: any) => d.token}
+  getS2Token: {type: 'accessor', arrow: true, constantTypes: ['string'], value: (d: any) => d.token}
 };
 
 /** All properties supported by S2Layer. */
