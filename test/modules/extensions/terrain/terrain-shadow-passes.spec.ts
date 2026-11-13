@@ -77,6 +77,7 @@ test('LightingEffect binds shadow samplers in terrain, collision and picking dra
     resolveFrame = resolve;
   });
   const errors: Error[] = [];
+  let context: WebGL2RenderingContext | undefined;
   const deck = new Deck({
     width: 128,
     height: 128,
@@ -86,7 +87,10 @@ test('LightingEffect binds shadow samplers in terrain, collision and picking dra
     effects: [lighting],
     layerFilter: ({layer, renderPass}) =>
       layer.id !== 'terrain' || !renderPass.startsWith('picking'),
-    onAfterRender: () => resolveFrame(),
+    onAfterRender: ({gl}) => {
+      context = gl;
+      resolveFrame();
+    },
     onError: error => errors.push(error)
   });
   try {
@@ -99,5 +103,6 @@ test('LightingEffect binds shadow samplers in terrain, collision and picking dra
     expect(hit?.layer?.id).toBe('pick-target');
   } finally {
     deck.finalize();
+    context?.getExtension('WEBGL_lose_context')?.loseContext();
   }
 });
