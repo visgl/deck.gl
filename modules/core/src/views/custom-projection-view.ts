@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import View from './view';
-import {resolveCRS} from '../utils/crs';
+import {getProjectionExecutionKey, isCRSDescriptor, resolveCRS} from '../utils/crs';
 import {deepEqual} from '../utils/deep-equal';
 import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/geospatial/projection/core';
 import type {CommonViewProps, CommonViewState} from './view';
@@ -33,8 +33,8 @@ export type CustomProjectionViewState = {
 /** Configuration for a custom planar projection. */
 export type CustomProjectionViewProps = CommonViewProps<CustomProjectionViewState> &
   Pick<CustomProjectionViewportOptions, 'orthographic'> & {
-    /** Planar CRS identifier, PROJ string, WKT, PROJJSON or spatial reference accepted by math.gl. */
-    crs: TypeScriptCRSInput;
+    /** Planar CRS definition or immutable prepared math.gl descriptor with a WGS84 converter. */
+    crs: TypeScriptCRSInput | CRSDescriptor;
   };
 
 /** A planar WGS84 view with a target CRS resolved by math.gl.
@@ -58,13 +58,21 @@ export default class CustomProjectionView extends View<
     const {crs, ...props} = this.props;
     const {crs: otherCrs, ...otherProps} = view.props;
     // Structured CRS definitions can nest more deeply than View's layout and controller props.
-    return deepEqual(crs, otherCrs, -1) && deepEqual(props, otherProps, 2);
+    const sameCrs =
+      isCRSDescriptor(crs) || isCRSDescriptor(otherCrs)
+        ? isCRSDescriptor(crs) &&
+          isCRSDescriptor(otherCrs) &&
+          getProjectionExecutionKey(crs) === getProjectionExecutionKey(otherCrs) &&
+          deepEqual(crs.renderingBounds, otherCrs.renderingBounds, -1)
+        : deepEqual(crs, otherCrs, -1);
+    return sameCrs && deepEqual(props, otherProps, 2);
   }
   /** Resolve the target CRS once for this view before creating its synchronous viewport. */
   initialize(): void | Promise<void> {
     if (this.#crs) return;
     if (this.#initialization) return this.#initialization;
-    const resolved = resolveCRS(this.props.crs);
+    const {crs} = this.props;
+    const resolved = isCRSDescriptor(crs) ? crs : resolveCRS(crs);
     const setCrs = (crs: CRSDescriptor | null) => {
       if (!crs || crs.coordinateFrame !== 'projected') {
         throw new Error('CustomProjectionView requires a projected CRS');

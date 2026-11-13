@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {getProjectionExecutionKey} from '../utils/crs';
 import Viewport from './viewport';
 import type {ViewportOptions, DistanceScales, ProjectPositionOptions} from './viewport';
 import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
@@ -96,8 +97,9 @@ export default class CustomProjectionViewport extends Viewport {
     this.pitch = pitch;
     this.bearing = bearing;
     this.isGeospatial = true;
-    this.signature = JSON.stringify([crs.signature, this.resolution]);
-    this.sizeScaleSignature = JSON.stringify([crs.signature, crs.renderingBounds]);
+    const executionKey = getProjectionExecutionKey(crs);
+    this.signature = JSON.stringify([executionKey, this.resolution]);
+    this.sizeScaleSignature = JSON.stringify([executionKey, crs.renderingBounds]);
     const [[minX, minY], [maxX, maxY]] = crs.renderingBounds;
     const finiteBounds =
       [minX, minY, maxX, maxY].every(Number.isFinite) && maxX > minX && maxY > minY;

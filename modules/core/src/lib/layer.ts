@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable react/no-direct-mutation-state */
+import {getProjectionExecutionKey} from '../utils/crs';
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/core/webgl';
 import {isArrowTable} from '../arrow/upstream-math/is-arrow-table';
@@ -385,7 +386,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       internalState.sourceCrs?.signature,
       needsPreprojection
         ? viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL
-          ? viewport.crs?.signature
+          ? getProjectionExecutionKey(viewport.crs!)
           : 'WGS84'
         : null
     ]);
