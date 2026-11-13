@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import {device, generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
-import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
+import {TerrainLayer, TileLayer, Tile2DHeader} from '@deck.gl/geo-layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TerrainLoader} from '@loaders.gl/raster/terrain/index';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
@@ -47,14 +47,41 @@ test('TerrainLayer applies the loaded elevation range with a stationary viewport
     fetch: fetchTerrainFixture
   });
   const layerManager = new LayerManager(device, {viewport});
+  const readTileRange = () => {
+    layerManager.updateLayers();
+    return (layer.getSubLayers()[0] as TileLayer).props.zRange;
+  };
   try {
     layerManager.setLayers([layer]);
-    await expect
-      .poll(() => {
-        layerManager.updateLayers();
-        return (layer.getSubLayers()[0] as TileLayer).props.zRange;
-      })
-      .toEqual([0, 1]);
+    await expect.poll(readTileRange).toEqual([0, 1]);
+
+    for (const [bounds, expected] of [
+      [
+        [-3, 0],
+        [-3, 1]
+      ],
+      [
+        [0, 4],
+        [-3, 4]
+      ]
+    ]) {
+      const tile = new Tile2DHeader({x: 0, y: 0, z: 0});
+      tile.content = [
+        {
+          ...TEST_TERRAIN_MESH,
+          header: {
+            boundingBox: [
+              [-1, -1, bounds[0]],
+              [1, 1, bounds[1]]
+            ]
+          }
+        },
+        null
+      ];
+      const tileLayer = layer.getSubLayers()[0] as TileLayer;
+      tileLayer.props.onViewportLoad?.([tile]);
+      await expect.poll(readTileRange).toEqual(expected);
+    }
   } finally {
     layerManager.finalize();
   }
