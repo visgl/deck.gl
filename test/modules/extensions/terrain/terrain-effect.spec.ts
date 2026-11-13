@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {Deck, WebMercatorViewport} from '@deck.gl/core';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 import {TerrainEffect} from '@deck.gl/extensions/terrain/terrain-effect';
 import {TERRAIN_MODE} from '@deck.gl/extensions/terrain/shader-module';
@@ -14,6 +14,32 @@ import {TerrainLoader} from '@loaders.gl/raster/terrain/index';
 import {device, getLayerUniforms} from '@deck.gl/test-utils/vitest';
 import {geojson} from 'deck.gl-test/data';
 import {LifecycleTester} from '../utils';
+
+test('TerrainExtension installs terrain when added to a live layer', async () => {
+  const layer = new GeoJsonLayer({id: 'live-terrain-layer', data: geojson});
+  const parent = document.createElement('div');
+  document.body.append(parent);
+  const deck = new Deck({
+    device,
+    parent,
+    width: 100,
+    height: 100,
+    initialViewState: {longitude: -122.4, latitude: 37.8, zoom: 10},
+    layers: [layer]
+  });
+  try {
+    await vi.waitFor(() => expect(layer.internalState).toBeTruthy());
+    deck.setProps({layers: [layer.clone({extensions: [new TerrainExtension()]})]});
+    await vi.waitFor(() =>
+      expect(deck.effectManager.getEffects().some(effect => effect.id === 'terrain-effect')).toBe(
+        true
+      )
+    );
+  } finally {
+    deck.finalize();
+    parent.remove();
+  }
+});
 
 test('TerrainEffect', async () => {
   const terrainEffect = new TerrainEffect();
@@ -114,6 +140,33 @@ test('TerrainEffect', async () => {
   uniforms = getLayerUniforms(meshLayer);
   expect(uniforms.mode, 'TERRAIN_MODE.NONE').toBe(TERRAIN_MODE.NONE);
   expect(model.bindings.terrain_map?.width, 'Terrain cover using empty texture').toBe(1);
+
+  // Removing all terrain must release its framebuffers and let extensions draw flat.
+  const heightMap = terrainEffect.heightMap?.getRenderFramebuffer();
+  expect(heightMap).toBeTruthy();
+  await lifecycle.update({layers: [geoLayer.clone({})]});
+  const flat = lifecycle.layers.find(l => l.id === pathLayer.id)!;
+  expect(getLayerUniforms(flat).mode).toBe(TERRAIN_MODE.NONE);
+  expect(heightMap?.destroyed).toBe(true);
+  expect(terrainEffect.terrainCovers.size).toBe(0);
+
+  // Restore terrain while the same layer still needs both render targets.
+  const restoredTerrain = terrainLayer.clone({});
+  await lifecycle.update({layers: [restoredTerrain, geoLayer.clone({})]});
+  const restoredPath = lifecycle.layers.find(l => l.id === pathLayer.id)!;
+  const restoredPoints = lifecycle.layers.find(l => l.id === scatterplotLayer.id)!;
+  const rebuiltHeightMap = terrainEffect.heightMap?.getRenderFramebuffer();
+  expect(rebuiltHeightMap).toBeTruthy();
+  expect(rebuiltHeightMap).not.toBe(heightMap);
+  expect(terrainEffect.terrainCovers.size).toBeGreaterThan(0);
+  expect(getLayerUniforms(restoredPath).mode).toBe(TERRAIN_MODE.SKIP);
+  expect(getLayerUniforms(restoredPoints).mode).toBe(TERRAIN_MODE.USE_HEIGHT_MAP);
+
+  // Remove the extension on the same live layer.
+  const unextended = geoLayer.clone({extensions: []});
+  await lifecycle.update({layers: [restoredTerrain, unextended]});
+  const unextendedPath = lifecycle.layers.find(l => l.id === pathLayer.id)!;
+  expect(getLayerUniforms(unextendedPath).mode).toBe(TERRAIN_MODE.NONE);
 
   lifecycle.finalize();
 });

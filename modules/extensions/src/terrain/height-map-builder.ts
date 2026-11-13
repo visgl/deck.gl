@@ -49,6 +49,18 @@ export class HeightMapBuilder {
     this.device = device;
   }
 
+  /** Release the render target and invalidate its cached geometry for reuse. */
+  reset() {
+    this.delete();
+    this.fbo = undefined;
+    this.renderViewport = null;
+    this.lastViewport = null;
+    this.layers = [];
+    this.layersBounds = [];
+    this.layersBoundsCommon = null;
+    this.bounds = null;
+  }
+
   /** Returns the height map framebuffer for read/write access.
    * Returns null when the texture is invalid.
    */

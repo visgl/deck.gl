@@ -10,6 +10,7 @@ import {TerrainCover} from './terrain-cover';
 import {TerrainPass} from './terrain-pass';
 import {TerrainPickingPass, TerrainPickingPassRenderOptions} from './terrain-picking-pass';
 import {HeightMapBuilder} from './height-map-builder';
+import TerrainExtension from './terrain-extension';
 
 import type {Effect, EffectContext, PreRenderOptions, Layer, Viewport} from '@deck.gl/core';
 
@@ -21,6 +22,8 @@ export class TerrainEffect implements Effect {
 
   /** true if picking in the current pass */
   private isPicking: boolean = false;
+  /** Picking reuses the terrain availability of the frame it picks from. */
+  private hasTerrain: boolean = false;
   /** true if should use in the current pass */
   private isDrapingEnabled: boolean = false;
   /** An empty texture as placeholder */
@@ -72,18 +75,24 @@ export class TerrainEffect implements Effect {
     );
 
     const terrainLayers = layers.filter(l => l.props.operation.includes('terrain'));
+    if (!isPicking) {
+      this.hasTerrain = terrainLayers.length > 0;
+    }
     if (terrainLayers.length === 0) {
+      if (!isPicking) {
+        this._releaseTerrainTargets();
+      }
       return;
     }
 
     if (!isPicking) {
-      const offsetLayers = layers.filter(l => l.state.terrainDrawMode === 'offset');
+      const offsetLayers = layers.filter(l => getTerrainDrawMode(l) === 'offset');
       if (offsetLayers.length > 0) {
         this._updateHeightMap(terrainLayers, viewport, opts);
       }
     }
 
-    const drapeLayers = layers.filter(l => l.state.terrainDrawMode === 'drape');
+    const drapeLayers = layers.filter(l => getTerrainDrawMode(l) === 'drape');
     // Filter out the terrain effect itself to avoid feedback loops when rendering terrain covers
     // (the terrain cover FBO would be both read and written to). Other effects like MaskEffect
     // need to be passed through so they can apply to draped layers.
@@ -107,7 +116,7 @@ export class TerrainEffect implements Effect {
       };
     }
 
-    const {terrainDrawMode} = layer.state;
+    const terrainDrawMode = this.hasTerrain ? getTerrainDrawMode(layer) : undefined;
     const terrainCover = this.isDrapingEnabled ? (this.terrainCovers.get(layer.id) ?? null) : null;
 
     // Communicate cover FBO availability to getLayerParameters for blend factor selection
@@ -135,17 +144,18 @@ export class TerrainEffect implements Effect {
       this.dummyHeightMap = undefined;
     }
 
-    if (this.heightMap) {
-      this.heightMap.delete();
-      this.heightMap = undefined;
-    }
+    this._releaseTerrainTargets();
+    this.heightMap = undefined;
 
+    deck._removeDefaultShaderPlugin(terrainPlugin);
+  }
+
+  private _releaseTerrainTargets(): void {
+    this.heightMap?.reset();
     for (const terrainCover of this.terrainCovers.values()) {
       terrainCover.delete();
     }
     this.terrainCovers.clear();
-
-    deck._removeDefaultShaderPlugin(terrainPlugin);
   }
 
   private _updateHeightMap(terrainLayers: Layer[], viewport: Viewport, opts: PreRenderOptions) {
@@ -257,5 +267,12 @@ export class TerrainEffect implements Effect {
     for (const id of idsToRemove) {
       this.terrainCovers.delete(id);
     }
+  }
+}
+
+// A live layer can keep its previous state after its extensions change.
+function getTerrainDrawMode(layer: Layer): 'drape' | 'offset' | undefined {
+  if (layer.props.extensions.some(extension => extension instanceof TerrainExtension)) {
+    return layer.state.terrainDrawMode as 'drape' | 'offset' | undefined;
   }
 }
