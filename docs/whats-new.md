@@ -61,7 +61,7 @@ plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-
 
 ### ScatterplotLayer Arrow columns
 
-ScatterplotLayer accepts Arrow vectors for positions and styling, with accessor and binary fallbacks. See [Using with Arrow](./developer-guide/using-with-arrow.md) for modes and [tabbed examples](./api-reference/layers/scatterplot-layer.md#arrow-columns).
+ScatterplotLayer accepts Arrow vectors for positions and styling, with accessor and binary fallbacks. See [Using with Arrow](./developer-guide/using-with-arrow.md) for shared requirements and examples.
 
 ### deck.gl v10 examples (Experimental)
 
