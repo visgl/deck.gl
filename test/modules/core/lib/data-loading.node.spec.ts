@@ -292,10 +292,12 @@ test('a bare Arrow table replaces the previous snapshot with all its batches', a
 });
 
 test('complete loading exposes a bare Arrow table to layer props and callbacks', async () => {
-  const {state, complete} = makeState();
+  const dataTransform = vi.fn(<T>(value: unknown) => value as T);
+  const {state, complete} = makeState({dataTransform});
   state.setAsyncProps({
     data: Promise.resolve({shape: 'arrow-table', data: first})
   } as never);
   await vi.waitFor(() => expect(complete).toHaveBeenCalledExactlyOnceWith('data', first));
   expect(state.getAsyncProp('data')).toBe(first);
+  expect(dataTransform).toHaveBeenLastCalledWith(first);
 });
