@@ -34,10 +34,10 @@ export type TooltipWidgetProps = WidgetProps;
 
 export class TooltipWidget extends Widget<TooltipWidgetProps> {
   static defaultProps: Required<TooltipWidgetProps> = {
-    ...Widget.defaultProps
+    ...Widget.defaultProps,
+    id: 'default-tooltip'
   };
 
-  id = 'default-tooltip';
   placement: WidgetPlacement = 'fill';
   className = 'deck-tooltip';
 
