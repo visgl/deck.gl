@@ -273,6 +273,6 @@ export class TerrainEffect implements Effect {
 // A live layer can keep its previous state after its extensions change.
 function getTerrainDrawMode(layer: Layer): 'drape' | 'offset' | undefined {
   if (layer.props.extensions.some(extension => extension instanceof TerrainExtension)) {
-    return layer.state.terrainDrawMode;
+    return layer.state.terrainDrawMode as 'drape' | 'offset' | undefined;
   }
 }
