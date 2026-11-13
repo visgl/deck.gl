@@ -4,7 +4,7 @@
 
 // deck.gl, MIT license
 import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
-import {deepEqual} from '../utils/deep-equal';
+import {equalLoaderOptions} from '../utils/loader-utils';
 import ComponentState from '../lifecycle/component-state';
 
 import type Layer from './layer';
@@ -115,7 +115,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
       layer && typeof value === 'string' && mode !== 'auto'
         ? {mode, loaders: layer.props.loaders, options: layer.getLoadOptions()}
         : undefined;
-    const changed = !deepEqual(this.dataRequest, request, -1, true);
+    const changed = !equalLoaderOptions(this.dataRequest, request);
     this.dataRequest = request;
     return changed;
   }
