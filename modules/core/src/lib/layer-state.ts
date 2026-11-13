@@ -75,6 +75,10 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
   uniformTransitions!: UniformTransitionManager;
   /** Populated during uniform transition to replace user-supplied values */
   propsInTransition?: LayerT['props'];
+  /** Internal effective prop overrides, preserved when layer instances are matched. */
+  derivedProps?: Partial<LayerT['props']>;
+  /** Snapshot of effective props before the first derived update in a frame. */
+  derivedOldProps?: LayerT['props'];
 
   constructor({
     attributeManager,
