@@ -128,7 +128,8 @@ The experimental `_dataLoadingMode` prop controls loading and accumulation:
 - `'auto'` (default) loads URLs completely and appends chunks from application-supplied streams.
 - `'batched'` loads URLs with loaders.gl `loadInBatches` and appends each batch to the current table.
 - `'snapshots'` also loads URLs in batches, but replaces the entire table with each Arrow result.
-  Each result must contain all rows to display at that point, rather than a patch.
+  Each yield contains all rows to display at that point. It can be one record batch or a
+  loaders.gl Arrow table batch containing multiple record batches.
 
 Set `loaders` and `loadOptions` as usual when streaming a URL. The selected loader must produce
 supported batches. Metadata batches are discarded and table wrappers are unwrapped. Arrow batches

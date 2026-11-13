@@ -324,8 +324,9 @@ Controls how URL data is loaded and how streamed data is consumed:
 | `'snapshots'` | Stream using loaders.gl `loadInBatches` | Replace all data with each Arrow result |
 
 Streams can yield row arrays, Arrow `RecordBatch` objects, or loaders.gl Arrow table batches.
-Snapshot mode requires Arrow chunks containing the entire current result. Do not mix Arrow and
-row chunks in one stream. Metadata batches are ignored; table wrappers are unwrapped before
+Each snapshot replaces the previous table with the entire current result. A snapshot can be one
+Arrow record batch or a loaders.gl Arrow table batch containing multiple record batches. Do not
+mix Arrow and row chunks in one stream. Metadata batches are ignored; table wrappers are unwrapped before
 updating data or invoking callbacks. Row-oriented loaders.gl table batches are also unwrapped.
 
 `loaders` and `loadOptions` are forwarded to loaders.gl. Changing the mode, or changing loaders
