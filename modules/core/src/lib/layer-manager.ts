@@ -10,7 +10,7 @@ import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import debug from '../debug/index';
 import {flatten} from '../utils/flatten';
-import {Stats} from '@probe.gl/stats';
+import {Stats} from 'probe.gl/stats';
 import ResourceManager from './resource/resource-manager';
 import ProjectionScaleResources from './projection-scale-resources';
 
