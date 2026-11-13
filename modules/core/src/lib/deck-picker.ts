@@ -18,6 +18,7 @@ import type {Stats} from 'probe.gl/stats';
 import type {Framebuffer} from '@luma.gl/core';
 import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
+import type LayerExtension from './layer-extension';
 import type {Effect} from './effect';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
@@ -1077,7 +1078,12 @@ export default class DeckPicker {
       return [];
     }
     const {pickedLayer} = pickInfo;
-    const isDraped = pickedLayer?.state?.terrainDrawMode === 'drape';
+    const isDraped =
+      pickedLayer?.state?.terrainDrawMode === 'drape' &&
+      pickedLayer.props.extensions.some(
+        extension =>
+          (extension.constructor as typeof LayerExtension).extensionName === 'TerrainExtension'
+      );
     if (pickedLayer && !isDraped) {
       return [pickedLayer];
     }

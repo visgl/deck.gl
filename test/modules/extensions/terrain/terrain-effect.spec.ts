@@ -150,9 +150,21 @@ test('TerrainEffect', async () => {
   expect(heightMap?.destroyed).toBe(true);
   expect(terrainEffect.terrainCovers.size).toBe(0);
 
-  // Restore terrain and remove the extension on the same live layer.
+  // Restore terrain while the same layer still needs both render targets.
+  const restoredTerrain = terrainLayer.clone({});
+  await lifecycle.update({layers: [restoredTerrain, geoLayer.clone({})]});
+  const restoredPath = lifecycle.layers.find(l => l.id === pathLayer.id)!;
+  const restoredPoints = lifecycle.layers.find(l => l.id === scatterplotLayer.id)!;
+  const rebuiltHeightMap = terrainEffect.heightMap?.getRenderFramebuffer();
+  expect(rebuiltHeightMap).toBeTruthy();
+  expect(rebuiltHeightMap).not.toBe(heightMap);
+  expect(terrainEffect.terrainCovers.size).toBeGreaterThan(0);
+  expect(getLayerUniforms(restoredPath).mode).toBe(TERRAIN_MODE.SKIP);
+  expect(getLayerUniforms(restoredPoints).mode).toBe(TERRAIN_MODE.USE_HEIGHT_MAP);
+
+  // Remove the extension on the same live layer.
   const unextended = geoLayer.clone({extensions: []});
-  await lifecycle.update({layers: [terrainLayer.clone({}), unextended]});
+  await lifecycle.update({layers: [restoredTerrain, unextended]});
   const unextendedPath = lifecycle.layers.find(l => l.id === pathLayer.id)!;
   expect(getLayerUniforms(unextendedPath).mode).toBe(TERRAIN_MODE.NONE);
 
