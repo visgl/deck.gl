@@ -9,7 +9,7 @@ import {
   type TileSource,
   type TileSourceMetadata
 } from '@loaders.gl/core/loader-utils';
-import {Stats} from '@probe.gl/stats';
+import {Stats} from 'probe.gl/stats';
 import type {Tileset2DAdapter} from './adapter';
 import {Matrix4, equals, NumericArray} from '@math.gl/core';
 

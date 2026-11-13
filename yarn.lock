@@ -2422,19 +2422,12 @@
   dependencies:
     "@webcomponents/shadycss" "^1.9.1"
 
-"@probe.gl/bench@^4.1.1":
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/@probe.gl/bench/-/bench-4.1.1.tgz#6cd124f8cf64419e7394b0b983084e55f1fa03c5"
-  integrity sha512-iM616wxjVyU7k70CxPr39ytHtDM/RqsliXTXli9nhg9feXLAr4P545KCpeveIBHvzJ9MENLe2NF+Z110+QJMYg==
-  dependencies:
-    "@probe.gl/log" "4.1.1"
-
-"@probe.gl/env@4.1.1", "@probe.gl/env@^4.1.1":
+"@probe.gl/env@4.1.1":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@probe.gl/env/-/env-4.1.1.tgz#b683cfdfee5bf9456a2eeaf58c70978309f85fcd"
   integrity sha512-+68seNDMVsEegRB47pFA/Ws1Fjy8agcFYXxzorKToyPcD6zd+gZ5uhwoLd7TzsSw6Ydns//2KEszWn+EnNHTbA==
 
-"@probe.gl/log@4.1.1", "@probe.gl/log@^4.1.1":
+"@probe.gl/log@4.1.1":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@probe.gl/log/-/log-4.1.1.tgz#9b916545fed02971a3ac05fdb620ad5bd4dadb4d"
   integrity sha512-kcZs9BT44pL7hS1OkRGKYRXI/SN9KejUlPD+BY40DguRLzdC5tLG/28WGMyfKdn/51GT4a0p+0P8xvDn1Ez+Kg==
