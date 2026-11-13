@@ -39,6 +39,7 @@ export type LightingEffectProps = Record<string, PointLight | DirectionalLight |
 // Class to manage ambient, point and directional light sources in deck
 export default class LightingEffect implements Effect {
   id = 'lighting-effect';
+  useInPicking = true;
   props!: LightingEffectProps;
   shadowColor: [number, number, number, number] = DEFAULT_SHADOW_COLOR;
   context?: EffectContext;
@@ -109,8 +110,15 @@ export default class LightingEffect implements Effect {
     this.props = props;
   }
 
-  preRender({layers, layerFilter, viewports, onViewportActive, views}: PreRenderOptions) {
-    if (!this.shadow) return;
+  preRender({
+    layers,
+    layerFilter,
+    viewports,
+    onViewportActive,
+    views,
+    isPicking
+  }: PreRenderOptions) {
+    if (isPicking || !this.shadow) return;
 
     // create light matrix every frame to make sure always updated from light source
     this.shadowMatrices = this._calculateMatrices();
@@ -132,6 +140,7 @@ export default class LightingEffect implements Effect {
         }
       });
     }
+    return {didRender: true};
   }
 
   getShaderModuleProps(layer: Layer, otherShaderModuleProps: Record<string, any>) {
