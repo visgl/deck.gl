@@ -125,6 +125,8 @@ export type LayerProps = {
    * The data to visualize.
    */
   data?: unknown;
+  /** Experimental aggregate expressions used to derive numeric layer properties. */
+  _queryProps?: Readonly<Record<string, string>> | null;
   /**
    * Callback to determine if two data values are equal.
    */
