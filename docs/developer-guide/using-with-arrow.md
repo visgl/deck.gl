@@ -1,81 +1,102 @@
 # Using with Arrow
 
-ArcLayer, ColumnLayer, IconLayer, LineLayer, PointCloudLayer, ScatterplotLayer, and
-SimpleMeshLayer accept Apache Arrow vectors through column props. Use columns to
-provide attributes directly from Arrow data.
+Columnar data stores each attribute, such as position or color, in a separate column.
+Layers that support Apache Arrow vectors can convert these columns into rendering attributes
+without requiring an application to construct a JavaScript object for each row.
+
+Each layer's prop descriptions specify which accessors and column props accept Arrow vectors.
+This guide covers their shared input, conversion, and update rules.
 
 Install `apache-arrow` alongside `@deck.gl/layers`. The layer loads its converter when needed;
 no converter registration or separate layer class is required.
 
-## Input modes
+## Supplying columns
 
-These are usage patterns, not values of a `mode` prop. Supplying any column enables column
-processing; omitting all columns uses the normal accessor path. Scatterplot also accepts Arrow
-vectors through `getRadius`, `getLineWidth`, `getFillColor`, and `getLineColor`. These accessors
-use the same column preparation, loading, and validation rules. Explicit column props take
-precedence over Arrow accessors. GPUVector inputs remain exclusive to column props.
+An Arrow vector represents one value per object. Obtain a vector from a table with
+`table.getChild('fieldName')`, or construct one with `vectorFromArray`.
 
-| Pattern | Inputs | Use when |
-| --- | --- | --- |
-| Row accessors | `data` and accessors | Your application has row objects. |
-| Arrow columns | `positions`, styling columns, constant accessors | Your attributes are columnar. |
-| Mixed inputs | Columns plus row data or binary attributes | Some attributes or metadata remain in rows. |
+Pass a vector to an accessor that supports Arrow, or to a dedicated column prop such as
+`positions` or `radii`. Both use the same preparation path. A dedicated column prop overrides
+its matching accessor when both are supplied. Accessors accept Arrow vectors, constants, or
+row callbacks; GPUVector inputs are supported only by column props that document them.
 
-The [tabbed API examples](../api-reference/layers/scatterplot-layer.md#arrow-columns) show
-equivalent row and Arrow inputs.
-
-## Column layouts
-
-For an existing Arrow table, `table.getChild('radius')` returns a vector suitable for `radii`
-when the field is numeric. Passing a table as `data` alone does not bind its fields to column
-props. Separate longitude and latitude fields must first be combined into fixed-size lists.
-
-| Column | Shape | Overrides |
-| --- | --- | --- |
-| `positions` | Numeric XY or XYZ fixed-size lists | `getPosition` |
-| `radii` | Numeric scalars | `getRadius` |
-| `elevations` | Numeric scalars | `getElevation` |
-| `fillColors` | RGB or RGBA fixed-size lists | `getFillColor` |
-| `lineColors` | RGB or RGBA fixed-size lists | `getLineColor` |
-| `lineWidths` | Numeric scalars | `getLineWidth` |
-
-Available column props depend on the layer; see its API reference.
-
-Floating-point colors use 0–1; integer colors use 0–255. Columns must have equal lengths and
-must not contain nulls. Layer settings such as `radiusUnits`, `radiusScale`, `stroked`, and
-`coordinateSystem` still apply.
-
-## Mixed inputs
-
-A supplied column overrides its accessor; omitted columns use accessor or binary fallbacks.
-Keep row metadata in the same order as the columns when you need labels or other application
-fields. Nonempty `data` must have the same length as the columns.
+For example, these ScatterplotLayer inputs draw the same two circles:
 
 ```js
 import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
+const data = [
+  {position: [-122.4, 37.74], radius: 100},
+  {position: [-122.41, 37.75], radius: 200}
+];
+const radii = vectorFromArray([100, 200], new Float32());
 const positions = vectorFromArray(
-  [[-122.4, 37.74], [-122.41, 37.75]],
+  data.map(row => row.position),
   new FixedSizeList(2, new Field('value', new Float32(), false))
 );
-const data = [{name: 'First', radius: 100}, {name: 'Second', radius: 200}];
-const layer = new ScatterplotLayer({
+
+// Row callbacks
+const rowsLayer = new ScatterplotLayer({
   data,
-  positions,
-  getRadius: d => d.radius,
-  getFillColor: [255, 140, 0],
-  pickable: true,
-  onClick: info => {
-    if (info.index >= 0) console.log(data[info.index].name);
-  }
+  getPosition: row => row.position,
+  getRadius: row => row.radius
 });
+
+// An Arrow accessor alongside row data
+const mixedLayer = new ScatterplotLayer({data, getRadius: radii});
+
+// Dedicated column props, without row data
+const columnsLayer = new ScatterplotLayer({positions, radii});
 ```
 
+Passing a table as `data` does not by itself select fields for these props; follow the layer's
+API reference for field selection. Separate longitude and latitude fields must first be
+combined into fixed-size lists when supplying a position column.
 
-With columns alone, use constant fallback accessors for omitted attributes. A row accessor
-cannot read fields from absent row objects. Existing `data.attributes` binary attributes can
-also supply omitted attributes, including constant descriptors.
+## Column layouts and conversion
+
+Layers select a conversion based on the meaning of the prop. Conversion uses luma.gl and
+preserves the source vector. Supported shapes depend on the prop; an accessor accepting a
+scalar column does not also accept a position or color column.
+
+### Scalars
+
+Numeric scalar columns accept Arrow integer and floating-point types and convert to Float32.
+Values retain the prop's units: for example, Scatterplot radii use `radiusUnits` and are
+multiplied by `radiusScale`. Conversion can lose precision for values not representable in Float32.
+
+### Colors
+
+Color columns accept numeric `FixedSizeList` values with three (RGB) or four (RGBA) components.
+Integer channels use 0–255; floating-point channels use 0–1. Conversion clamps channels to the
+valid range and rounds them to RGBA8 (`unorm8x4`). RGB inputs receive opaque alpha.
+
+These ranges apply to Arrow columns. Constant arrays and callback results keep the layer's
+usual color convention, typically 0–255 for all channels.
+
+### Positions and other vectors
+
+Position columns require numeric fixed-size lists with two (XY) or three (XYZ) components.
+Other numeric vector columns use the width specified by their prop. Layer coordinate-system
+settings continue to apply to positions.
+
+Dictionary, string, and variable-size list inputs are unsupported by these numeric conversions.
+Null values and invalid transformed values raise conversion errors, even when the schema is compatible.
+
+## Mixed inputs
+
+Supplying any Arrow column, including through a supported accessor, enables column processing.
+Missing inputs use their normal constants, row callbacks, or `data.attributes` binary fallbacks.
+An explicitly supplied column takes precedence over these fallbacks.
+
+Keep row metadata in the same order as the columns when you need labels or other application
+fields. Nonempty `data` must have the same length as the columns. Picking indexes refer to
+these logical rows, including when the columns have multiple chunks.
+
+With columns alone, use constant fallback accessors for omitted attributes. A row callback
+cannot read fields from absent row objects. Binary attributes can also supply omitted
+attributes, including constant descriptors.
 
 ## Loading and updates
 
@@ -85,26 +106,17 @@ Deck's `onAfterRender` runs after a frame, not specifically after an Arrow conve
 Conversion errors are reported through the layer's `onError` callback.
 
 Keep vectors stable between renders and supply new vectors when their contents change.
-Chunked columns must have identical chunk lengths and draw in aligned ranges, preserving logical row indexes for picking.
+Chunked columns must have identical chunk lengths and draw in aligned ranges.
 Arrow data still requires conversion and GPU upload; this is not a zero-copy rendering promise.
 The layer manages GPU buffers it creates during conversion and releases them when replaced or removed.
 `numInstances` can limit rendering to a prefix of the columns.
 
 ## Limitations
 
-Column mode rejects nulls, mismatched lengths or chunk structures, attribute transitions, and layer extensions.
-Use the normal accessor path when you need those features. See the
-[ScatterplotLayer API](../api-reference/layers/scatterplot-layer.md#arrow-columns) and
-[loading data guide](./loading-data.md) for more details.
+Arrow columns must have equal lengths and matching chunk structures, and must not contain nulls.
+The current column path does not support attribute transitions or layer extensions. These
+limitations apply whether a column is supplied through an accessor or a dedicated column prop.
+Use row accessors when you need those features.
 
-## Schema validation
-
-Column inputs must use the following Arrow types.
-
-- Positions require numeric fixed-size lists with two or three components.
-- Scalars accept integer or floating-point fields.
-- Colors accept numeric RGB or RGBA fixed-size lists.
-- Numeric vectors use their fixed-size list width.
-
-Dictionary, string, and variable-size list inputs are unsupported. Null values and invalid
-transformed values raise conversion errors, even when the schema is compatible.
+See each layer's prop descriptions for supported inputs and the [loading data guide](./loading-data.md)
+for other ways to provide data.
