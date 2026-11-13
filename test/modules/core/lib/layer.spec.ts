@@ -799,3 +799,104 @@ test('Layer#updateModules', async () => {
     onError: err => expect(err).toBeFalsy()
   });
 });
+
+test('Layer#derivedProps overrides effective props without mutating user props', () => {
+  const updates: number[] = [];
+  const draws: number[] = [];
+
+  class DerivedLayer extends Layer {
+    initializeState() {}
+
+    setComputedOpacity(opacity: number | null) {
+      this.setDerivedProps(opacity === null ? null : {opacity});
+    }
+
+    updateState() {
+      updates.push(this.props.opacity);
+    }
+
+    draw() {
+      draws.push(this.props.opacity);
+    }
+  }
+
+  testLayer({
+    Layer: DerivedLayer,
+    testCases: [
+      {
+        props: {id: 'derived', data: [], opacity: 0.25},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.props.opacity).toBe(0.25);
+          expect(updates.at(-1)).toBe(0.25);
+          expect(draws.at(-1)).toBe(0.25);
+        }
+      },
+      {
+        updateProps: {},
+        onBeforeUpdate: ({layer}) => layer.setComputedOpacity(0.75),
+        onAfterUpdate: ({layer}) => {
+          expect(layer.props.opacity).toBe(0.25);
+          expect(updates.at(-1)).toBe(0.75);
+          expect(draws.at(-1)).toBe(0.75);
+        }
+      },
+      {
+        updateProps: {},
+        onBeforeUpdate: ({layer}) => layer.setComputedOpacity(null),
+        onAfterUpdate: ({layer}) => {
+          expect(layer.props.opacity).toBe(0.25);
+          expect(updates.at(-1)).toBe(0.25);
+          expect(draws.at(-1)).toBe(0.25);
+        }
+      }
+    ],
+    onError: error => { throw error; }
+  });
+});
+
+test('Layer#derivedProps numeric values participate in uniform transitions', () => {
+  const timeline = new Timeline();
+  const draws: number[] = [];
+
+  class DerivedLayer extends Layer {
+    initializeState() {}
+
+    setComputedOpacity(value: number) {
+      this.setDerivedProps({opacity: value});
+    }
+
+    draw() {
+      draws.push(this.props.opacity);
+    }
+  }
+
+  testLayer({
+    Layer: DerivedLayer,
+    timeline,
+    testCases: [
+      {
+        props: {id: 'derived-transition', data: [], opacity: 0, transitions: {opacity: 200}},
+        onBeforeUpdate: () => timeline.setTime(0)
+      },
+      {
+        updateProps: {},
+        onBeforeUpdate: ({layer}) => {
+          timeline.setTime(100);
+          layer.setComputedOpacity(1);
+        },
+        onAfterUpdate: () => expect(draws.at(-1)).toBe(0)
+      },
+      {
+        updateProps: {},
+        onBeforeUpdate: () => timeline.setTime(200),
+        onAfterUpdate: () => expect(draws.at(-1)).toBeCloseTo(0.5)
+      },
+      {
+        updateProps: {},
+        onBeforeUpdate: () => timeline.setTime(300),
+        onAfterUpdate: () => expect(draws.at(-1)).toBe(1)
+      }
+    ],
+    onError: error => { throw error; }
+  });
+});
