@@ -77,6 +77,10 @@ Paths and polygons can follow curved projected edges with the experimental [`_pr
 
 Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
 
+### Core
+
+- Binary attributes in `data.attributes` accept an optional `version` and `dataRange`, so buffers rewritten in place are re-uploaded, fully or by row range, without creating new objects. See [data.attributes](./api-reference/core/layer.md#dataattributes).
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026

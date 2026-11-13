@@ -43,6 +43,7 @@ import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {CoordinateSystem} from './constants';
 import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import type Attribute from './attribute/attribute';
+import {getVersionedBinarySnapshot, isBinaryInputUnchanged} from './attribute/attribute';
 import type {Model, GPUVectorModel as LumaGPUVectorModel} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
@@ -1347,6 +1348,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
       const modelChanged = this.getModels()[0] !== oldModels[0];
       this._postUpdate(updateParams, modelChanged);
+      // @ts-ignore (TS2339) property attributes is not present on some acceptable data types
+      this._recordBinaryAttributeVersions(this.props.data?.attributes);
       // End subclass lifecycle methods
     } finally {
       // Restore shared context
@@ -1546,6 +1549,19 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       projectionChanged: !areCRSEqual(newProps.coordinateSystem, oldProps.coordinateSystem)
     };
 
+    // A versioned binary attribute rewritten in place leaves `data` unchanged. Handle its version
+    // bump like a change of the update trigger with the same key, which is an attribute or
+    // accessor name. Layers that consume the input directly, such as composite layers or
+    // `getPath` tessellation, then update as well.
+    // @ts-ignore (TS2339) property attributes is not present on some acceptable data types
+    const versionsChanged = this._diffBinaryAttributeVersions(newProps.data?.attributes);
+    if (versionsChanged) {
+      changeFlags.updateTriggersChanged = {
+        ...changeFlags.updateTriggersChanged,
+        ...versionsChanged
+      };
+    }
+
     // iterate over changedTriggers
     if (changeFlags.updateTriggersChanged) {
       for (const key in changeFlags.updateTriggersChanged) {
@@ -1570,6 +1586,42 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
 
     return this.setChangeFlags(changeFlags);
+  }
+
+  /** Returns the keys of versioned `data.attributes` entries that changed since the last update */
+  private _diffBinaryAttributeVersions(
+    buffers?: Record<string, TypedArray | Buffer | BinaryAttribute>
+  ): Record<string, true> | false {
+    // @ts-ignore (TS2531) internalState is always defined when this method is called
+    const snapshots = this.internalState.binaryAttributeSnapshots;
+    let changed: Record<string, true> | false = false;
+    for (const key in buffers) {
+      const input = buffers[key];
+      if (
+        input &&
+        (input as BinaryAttribute).version !== undefined &&
+        !isBinaryInputUnchanged(null, snapshots[key] || null, input)
+      ) {
+        changed = changed || {};
+        changed[key] = true;
+      }
+    }
+    return changed;
+  }
+
+  /** Records the versioned `data.attributes` entries that this update applied */
+  private _recordBinaryAttributeVersions(
+    buffers?: Record<string, TypedArray | Buffer | BinaryAttribute>
+  ): void {
+    const snapshots: Record<string, BinaryAttribute> = {};
+    for (const key in buffers) {
+      const snapshot = buffers[key] && getVersionedBinarySnapshot(buffers[key]);
+      if (snapshot) {
+        snapshots[key] = snapshot;
+      }
+    }
+    // @ts-ignore (TS2531) internalState is always defined when this method is called
+    this.internalState.binaryAttributeSnapshots = snapshots;
   }
 
   /** (Internal) called by layer manager to perform extra props validation (in development only) */

@@ -389,24 +389,7 @@ export default class DataColumn<Options, State> {
       opts = data;
     }
 
-    const accessor: DataColumnSettings<Options> = {...this.settings, ...opts};
-
-    if (ArrayBuffer.isView(opts.value)) {
-      if (!opts.type) {
-        // Deduce data type
-        const is64Bit = this.doublePrecision && opts.value instanceof Float64Array;
-        if (is64Bit) {
-          accessor.type = 'float32';
-        } else {
-          const type = dataTypeFromTypedArray(opts.value);
-          // (lint wants to remove the cast)
-          // eslint-disable-next-line
-          accessor.type = (accessor.normalized ? type.replace('int', 'norm') : type) as DataType;
-        }
-      }
-      accessor.bytesPerElement = opts.value.BYTES_PER_ELEMENT;
-      accessor.stride = getStride(accessor);
-    }
+    const accessor = this._getDataAccessor(opts);
 
     state.bounds = null; // clear cached bounds
 
@@ -534,6 +517,31 @@ export default class DataColumn<Options, State> {
     state.constant = false;
     state.externalBuffer = null;
     return true;
+  }
+
+  /** The accessor that `setData` derives from an input, including its inferred data type */
+  protected _getDataAccessor(
+    opts: {value?: NumericArray; normalized?: boolean} & Partial<BufferAccessor>
+  ): DataColumnSettings<Options> {
+    const accessor: DataColumnSettings<Options> = {...this.settings, ...opts};
+
+    if (ArrayBuffer.isView(opts.value)) {
+      if (!opts.type) {
+        // Deduce data type
+        const is64Bit = this.doublePrecision && opts.value instanceof Float64Array;
+        if (is64Bit) {
+          accessor.type = 'float32';
+        } else {
+          const type = dataTypeFromTypedArray(opts.value);
+          // (lint wants to remove the cast)
+          // eslint-disable-next-line
+          accessor.type = (accessor.normalized ? type.replace('int', 'norm') : type) as DataType;
+        }
+      }
+      accessor.bytesPerElement = opts.value.BYTES_PER_ELEMENT;
+      accessor.stride = getStride(accessor);
+    }
+    return accessor;
   }
 
   // PRIVATE HELPER METHODS
