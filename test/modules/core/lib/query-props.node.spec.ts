@@ -4,6 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
+import type {QueryProps} from '../../../../modules/core/src/types/layer-props';
 import {evaluateQueryProps} from '../../../../modules/core/src/arrow/query-props';
 
 test('_queryProps evaluates aggregate-derived numeric layer values', async () => {
@@ -24,4 +25,13 @@ test('_queryProps rejects row-level expressions and nonfinite results', async ()
     .rejects.toThrow('inside aggregates');
   await expect(evaluateQueryProps(table, {radiusScale: '1 / MIN(population)'}))
     .rejects.toThrow('finite number');
+});
+
+test('QueryProps maps only numeric properties to optional SQL strings', () => {
+  type Props = {radiusScale?: number; opacity?: number; pickable?: boolean; name?: string};
+  const valid: QueryProps<Props> = {radiusScale: 'MAX(radius)', opacity: 'AVG(opacity)'};
+  expect(valid.radiusScale).toBe('MAX(radius)');
+  // @ts-expect-error Boolean props are not queryable in the initial numeric-only API.
+  const invalid: QueryProps<Props> = {pickable: 'COUNT(*)'};
+  expect(invalid).toBeDefined();
 });
