@@ -14,7 +14,7 @@ import {
   PickingInfo
 } from './picking/pick-info';
 import type {RenderStats} from '../passes/layers-pass';
-import type {Stats} from '@probe.gl/stats';
+import type {Stats} from 'probe.gl/stats';
 import type {Framebuffer} from '@luma.gl/core';
 import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';

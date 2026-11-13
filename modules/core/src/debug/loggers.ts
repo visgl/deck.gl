@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Log} from '@probe.gl/log';
+import type {Log} from 'probe.gl/log';
 
 const logState: {
   attributeUpdateStart: number;

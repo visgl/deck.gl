@@ -33,7 +33,7 @@ import type {
 } from '@luma.gl/core';
 import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 
-import {Stats} from '@probe.gl/stats';
+import {Stats} from 'probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
