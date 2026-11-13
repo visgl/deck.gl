@@ -118,7 +118,14 @@ export type LayerDataSource<DataType> =
  */
 /** Query strings for numeric layer properties, preserving concrete prop-name autocomplete. */
 export type QueryProps<Props> = {
-  [K in keyof Props as NonNullable<Props[K]> extends number ? K : never]?: string;
+  [K in keyof Props as
+    NonNullable<Props[K]> extends number
+      ? K
+      : K extends `get${string}`
+        ? Extract<NonNullable<Props[K]>, (...args: any[]) => unknown> extends never
+          ? never
+          : K
+        : never]?: string;
 };
 
 export type LayerProps<ExtraProps = {}> = {
@@ -130,7 +137,7 @@ export type LayerProps<ExtraProps = {}> = {
    * The data to visualize.
    */
   data?: unknown;
-  /** Experimental aggregate expressions used to derive numeric layer properties. */
+  /** Experimental SQL expressions for numeric layer props and row-wise accessors. */
   _queryProps?: Readonly<QueryProps<ExtraProps & {opacity?: number; numInstances?: number}>> | null;
   /**
    * Callback to determine if two data values are equal.
