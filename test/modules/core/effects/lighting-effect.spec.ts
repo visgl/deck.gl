@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {LightingEffect} from '@deck.gl/core';
 import {_CameraLight as CameraLight, DirectionalLight, PointLight} from '@deck.gl/core';
 import {MapView, LayerManager, WebMercatorViewport} from '@deck.gl/core';
@@ -153,12 +153,18 @@ test('LightingEffect#preRender, cleanup', () => {
   const effectContext = makeMockContext(device, layerManager);
   lightingEffect.setup(effectContext);
 
-  lightingEffect.preRender({
+  const options = {
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     viewports: [testViewport],
     pixelRatio: 1
-  });
+  };
+
+  expect(lightingEffect.preRender(options)).toEqual({didRender: true});
+  expect(lightingEffect.useInPicking).toBe(true);
+  const renderShadowMap = vi.spyOn(lightingEffect.shadowPasses[0], 'render');
+  lightingEffect.preRender({...options, isPicking: true});
+  expect(renderShadowMap).not.toHaveBeenCalled();
 
   expect(lightingEffect.shadowPasses.length, 'LightingEffect creates shadow passes').toBe(2);
   expect(lightingEffect.dummyShadowMap, 'LightingEffect creates dummy shadow map').toBeTruthy();
