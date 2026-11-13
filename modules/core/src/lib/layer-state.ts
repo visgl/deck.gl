@@ -79,6 +79,11 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
   derivedProps?: Partial<LayerT['props']>;
   /** Snapshot of effective props before the first derived update in a frame. */
   derivedOldProps?: LayerT['props'];
+  /** Latest aggregate query request, retained across matched layer instances. */
+  queryPropsRequest?: {
+    source: unknown;
+    queries: Readonly<Record<string, string>>;
+  };
 
   constructor({
     attributeManager,
