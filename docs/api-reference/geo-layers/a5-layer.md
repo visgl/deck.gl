@@ -183,6 +183,52 @@ For more information on representing the A5 cell, see [A5 Cell Representation](h
 * default: `object => object.pentagon`
 
 
+### Column Inputs
+
+#### `cells` (object, optional) {#cells}
+
+* Default: `null`
+
+A CPU-readable Arrow column of cell identifiers. Each row contains one cell or a list of cells
+belonging to one feature. String and dictionary-encoded string columns are accepted.
+Arrow `Int64` and `Uint64` identifiers are accepted without losing precision. Signed values
+are interpreted as unsigned 64-bit cell identifiers.
+
+When `data` is supplied, its row count must match `cells`. Omitted styling columns use accessors
+with the original feature and source row index. Null cells and GPU-only columns are unsupported.
+`highlightedObjectIndex` selects an expanded cell row in column mode. Picking reports
+the source feature index.
+See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates) for updates.
+
+#### `fillColors` (object, optional) {#fillcolors}
+
+* Default: `null`
+
+RGBA fill colors as a CPU-readable Arrow column in source feature order. Requires `cells`
+and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+
+#### `lineColors` (object, optional) {#linecolors}
+
+* Default: `null`
+
+RGBA outline colors as a CPU-readable Arrow column in source feature order. Requires `cells`
+and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+
+#### `lineWidths` (object, optional) {#linewidths}
+
+* Default: `null`
+
+Outline widths as a CPU-readable Arrow column in source feature order. Requires `cells`
+and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+
+#### `elevations` (object, optional) {#elevations}
+
+* Default: `null`
+
+Elevations as a CPU-readable Arrow column in source feature order. Requires `cells`
+and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+
+
 ## Sub Layers
 
 The `A5Layer` renders the following sublayers:
@@ -193,4 +239,3 @@ The `A5Layer` renders the following sublayers:
 ## Source
 
 [modules/geo-layers/src/a5-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/a5-layer)
-

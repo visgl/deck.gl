@@ -13,8 +13,9 @@ import {
 } from '@deck.gl/core';
 import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
+import type {ClipExtensionProps} from '@deck.gl/extensions';
 
-import {Matrix4} from '@math.gl/core';
+import {Matrix4, equals} from '@math.gl/core';
 import {MVTWorkerLoader} from '@loaders.gl/tiles/mvt';
 import {convertBinaryFeatureCollectionToGeojson} from '@loaders.gl/core/geoarrow';
 
@@ -265,12 +266,13 @@ export default class MVTLayer<
   }
 
   renderSubLayers(
-    props: TileLayer['props'] & {
-      id: string;
-      data: ParsedMvtTile;
-      _offset: number;
-      tile: Tile2DHeader<ParsedMvtTile>;
-    }
+    props: TileLayer['props'] &
+      ClipExtensionProps & {
+        id: string;
+        data: ParsedMvtTile;
+        _offset: number;
+        tile: Tile2DHeader<ParsedMvtTile>;
+      }
   ): Layer | null | LayersList {
     const {x, y, z} = props.tile.index;
     const worldScale = Math.pow(2, z);
@@ -290,8 +292,25 @@ export default class MVTLayer<
     props.modelMatrix = modelMatrix;
     props.coordinateOrigin = [xOffset, yOffset, 0];
     props.coordinateSystem = 'OSMTile512';
-    if (this.context.viewport.crs?.signature === 'OSMTile512') {
-      // Rectangular common-space clipping is only valid for the Mercator target.
+
+    // A tiler writes a feature into the buffer of every tile it touches, so each tile must paint
+    // only its own area or the shared geometry is drawn once per tile. This applies to the point
+    // sub layers too: a point inside a neighbor's buffer is emitted by both tiles. `ClipExtension`
+    // clips those by anchor rather than by geometry, so a label or icon still overhangs the edge.
+    // `clip_isInBounds` is half-open, so a feature exactly on a shared edge is drawn by one tile
+    // rather than both.
+    // The tile, in tile-local coordinates
+    const tileClipBounds: [number, number, number, number] = [0, 0, 1, 1];
+    // ClipExtension's default clipBounds is the same unit square, so only other bounds were set
+    // by the caller
+    if (props.clipBounds && !equals(props.clipBounds, tileClipBounds)) {
+      log.warn(
+        `${this.id}: clipBounds is reserved by MVTLayer, which clips each sub layer to its tile`
+      )();
+    }
+    props.clipBounds = tileClipBounds;
+    // A second ClipExtension would inject the same shader declarations twice and fail to compile
+    if (!props.extensions?.some(extension => extension instanceof ClipExtension)) {
       props.extensions = [...(props.extensions || []), new ClipExtension()];
     }
 

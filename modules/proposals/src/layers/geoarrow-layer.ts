@@ -32,9 +32,9 @@ export type GeoArrowLayerProps = Omit<LayerProps, 'data'> & {
     | ArrowScatterplotLayerProps['getFillColor']
     | ArrowSolidPolygonLayerProps['getFillColor'];
   /** Linestring color. */
-  getColor?: ArrowPathLayerProps['color'];
+  colors?: ArrowPathLayerProps['colors'];
   /** Linestring width. */
-  getWidth?: ArrowPathLayerProps['width'];
+  widths?: ArrowPathLayerProps['widths'];
   /** Optional pre-tessellated polygon interpretation. */
   tessellated?: ArrowSolidPolygonLayerProps['tessellated'];
   /** GPU model selection forwarded to the selected native renderer. */
@@ -52,8 +52,8 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       geometryType,
       getRadius,
       getFillColor,
-      getColor,
-      getWidth,
+      colors,
+      widths,
       tessellated,
       model,
       ...layerProps
@@ -75,8 +75,8 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
           id: `${this.props.id}-paths`,
           data,
           paths: geometry.columnName,
-          color: getColor,
-          width: getWidth,
+          colors,
+          widths,
           model
         } as ArrowPathLayerProps);
       case 'geoarrow.polygon':

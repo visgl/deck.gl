@@ -5,6 +5,9 @@
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/core/webgl';
+import {isArrowTable} from '../arrow/upstream-math/is-arrow-table';
+import {resolveColumns} from './resolve-columns';
+import type {ColumnDefinitions} from './layer-columns';
 import AttributeManager from './attribute/attribute-manager';
 import GPUVectorModel from './luma-upstream/gpu-vector-model';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -580,6 +583,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   // / LIFECYCLE METHODS - overridden by the layer subclasses
 
+  /**
+   * Returns selected column inputs, optionally including compatible fields from loaded Arrow data.
+   * Explicit props take precedence. Unselected columns use binary attributes or accessors.
+   * Selected inputs are returned without conversion or ownership changes.
+   */
+  protected resolveColumns(
+    definitions: ColumnDefinitions,
+    useTable = false
+  ): Record<string, unknown> {
+    return resolveColumns(this.props, definitions, useTable);
+  }
+
   /** Called once to set up the initial state. Layers can create WebGL resources here. */
   abstract initializeState(context: LayerContext): void;
 
@@ -694,6 +709,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       // If props.data is an indexable array, get the object
       if (Array.isArray(this.props.data)) {
         info.object = this.props.data[index];
+      } else if (isArrowTable(this.props.data)) {
+        info.object = this.props.data.get(index);
       }
     }
 
@@ -1051,7 +1068,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
      This method may be overriden by layer implementations */
   disablePickingIndex(objectIndex: number) {
     const data = this.props.data as LayerData<any>;
-    if (!('attributes' in data)) {
+    if (!('attributes' in data) || isArrowTable(data)) {
       this._disablePickingIndex(objectIndex);
       return;
     }
@@ -1395,7 +1412,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const webGPUDrawParameters =
         context.device instanceof WebGLDevice ? null : splitWebGPUDrawParameters(parameters);
 
-      applyModelParameters(this.getModels(), parameters, webGPUDrawParameters);
+      applyModelParameters(this.getModels(), parameters, webGPUDrawParameters, offsets);
 
       // Call subclass lifecycle method
       if (context.device instanceof WebGLDevice) {
@@ -1423,7 +1440,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           this.draw(opts);
         });
       } else {
-        renderPass.withParameters(webGPUDrawParameters?.renderPassParameters || {}, () => {
+        const previousParameters = renderPass.getParameters();
+        try {
+          renderPass.setParameters(webGPUDrawParameters?.renderPassParameters || {});
           const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
           for (const extension of this.props.extensions) {
@@ -1431,7 +1450,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           }
 
           this.draw(opts);
-        });
+        } finally {
+          renderPass.setParameters(previousParameters);
+        }
       }
     } finally {
       this.props = currentProps;
@@ -1702,13 +1723,19 @@ function splitWebGPUDrawParameters(parameters: LumaParameters): {
 function applyModelParameters(
   models: LumaGPUVectorModel[],
   parameters: LumaParameters,
-  webGPUDrawParameters: ReturnType<typeof splitWebGPUDrawParameters> | null
+  webGPUDrawParameters: ReturnType<typeof splitWebGPUDrawParameters> | null,
+  polygonOffset: number[]
 ): void {
   for (const model of models) {
     if (model.device.type === 'webgpu') {
       // TODO(ibgreen): model.setParameters currently wipes parameters. Semantics TBD.
       model.setParameters({
         ...model.parameters,
+        // WebGPU depth bias, like WebGL polygon offset, applies only to triangles.
+        ...(model.topology.startsWith('triangle') && {
+          depthBias: Math.round(polygonOffset[1]),
+          depthBiasSlopeScale: polygonOffset[0]
+        }),
         ...webGPUDrawParameters?.pipelineParameters
       });
     } else {

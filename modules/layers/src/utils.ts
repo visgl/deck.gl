@@ -2,6 +2,39 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+type CRSUnits = {
+  coordinateFrame: string;
+  xUnit: {metersPerUnit?: number};
+  yUnit: {metersPerUnit?: number};
+  zUnit: {metersPerUnit?: number};
+};
+
+/** Return the per-axis scale needed to measure projected coordinates in meters. */
+export function getMetersPerUnit(
+  crs: CRSUnits | null | undefined
+): [number, number, number] | null {
+  if (!crs || (crs.coordinateFrame !== 'projected' && crs.coordinateFrame !== 'geocentric')) {
+    return null;
+  }
+  const x = crs.xUnit.metersPerUnit;
+  const y = crs.yUnit.metersPerUnit;
+  const z = crs.zUnit.metersPerUnit;
+  if (
+    typeof x !== 'number' ||
+    !Number.isFinite(x) ||
+    x <= 0 ||
+    typeof y !== 'number' ||
+    !Number.isFinite(y) ||
+    y <= 0 ||
+    typeof z !== 'number' ||
+    !Number.isFinite(z) ||
+    z <= 0
+  ) {
+    return null;
+  }
+  return [x, y, z];
+}
+
 // Assume data array is sorted by <accessor>
 // Replaces the specified range with a new subarray
 // Mutates the data array

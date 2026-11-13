@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {WebGLDevice} from '@luma.gl/core/webgl';
+import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
+import {getAggregatorValueReader} from '../../../../modules/aggregation-layers/src/contour-layer/value-reader';
 import type {ShaderModule} from '@luma.gl/shaders';
 import {test, expect} from 'vitest';
 import {Attribute} from '@deck.gl/core';
@@ -379,3 +382,154 @@ webglTest('CPUAggregator#setNeedsUpdate', () => {
   attributes.education.delete();
   aggregator.destroy();
 });
+
+webglTest.each([1, 2] as const)('WebGLAggregator#GPUVector outputs (%i dimensions)', dimensions => {
+  const aggregator = new WebGLAggregator(device, {
+    dimensions,
+    channelCount: 2,
+    bufferLayout: [],
+    vs:
+      dimensions === 1
+        ? 'void getBin(out int id) { id = 0; } void getValue(out vec2 value) { value = vec2(1.0); }'
+        : 'void getBin(out ivec2 id) { id = ivec2(0); } void getValue(out vec2 value) { value = vec2(1.0); }'
+  });
+  const range = (count: number): [number, number][] =>
+    dimensions === 1
+      ? [[0, count]]
+      : [
+          [0, count],
+          [0, 1]
+        ];
+  expect(aggregator.getBins()).toBeNull();
+  expect(aggregator.getResult(0)).toBeNull();
+  aggregator.setProps({binIdRange: range(4)});
+  const bins = aggregator.getBins()!;
+  const first = aggregator.getResult(0)!;
+  const second = aggregator.getResult(1)!;
+  expect(bins).toBeInstanceOf(GPUVector);
+  expect(bins.format).toBe(dimensions === 1 ? 'float32' : 'float32x2');
+  expect(bins.length).toBe(4);
+  expect(first.format).toBe('float32');
+  expect(second.length).toBe(4);
+  const firstData = getGPUVectorData(first);
+  const secondData = getGPUVectorData(second);
+  expect(secondData.buffer).toBe(firstData.buffer);
+  expect(secondData.byteOffset).toBe(4);
+  expect(secondData.byteStride).toBe(8);
+  expect(aggregator.getResult(2)).toBeNull();
+  expect(aggregator.getBins()).toBe(bins);
+  expect(aggregator.getResult(1)).toBe(second);
+
+  if (dimensions === 2) {
+    firstData.buffer.write(new Float32Array([1, 10, 2, 20, 3, 30, 4, 40]));
+    const reader = getAggregatorValueReader({aggregator, binIdRange: range(4), channel: 1})!;
+    expect([reader(0, 0), reader(3, 0)]).toEqual([10, 40]);
+    expect(reader(4, 0)).toBeNaN();
+  }
+
+  // Shrinking reuses storage, but the vector must expose the new logical length.
+  for (const count of [2, 0, 4]) {
+    aggregator.setProps({binIdRange: range(count)});
+    const resized = aggregator.getResult(1)!;
+    expect(resized.length).toBe(count);
+    expect(aggregator.getBins()!.length).toBe(count);
+    expect(getGPUVectorData(resized).buffer).toBe(firstData.buffer);
+    expect(resized).not.toBe(second);
+    expect(firstData.buffer.destroyed).toBe(false);
+  }
+  // Borrowed vectors never dispose of the aggregator's storage.
+  aggregator.getResult(1)!.destroy();
+  expect(firstData.buffer.destroyed).toBe(false);
+  aggregator.setProps({binIdRange: range(8)});
+  expect(aggregator.getResult(0)!.length).toBe(8);
+  expect(getGPUVectorData(aggregator.getResult(0)!).buffer).not.toBe(firstData.buffer);
+  expect(firstData.buffer.destroyed).toBe(true);
+  const finalBuffer = getGPUVectorData(aggregator.getResult(0)!).buffer;
+  aggregator.setProps({binIdRange: range(NaN)});
+  expect(aggregator.binCount).toBe(0);
+  expect(aggregator.getBins()!.length).toBe(0);
+  expect(aggregator.getResult(0)!.length).toBe(0);
+  aggregator.destroy();
+  expect(finalBuffer.destroyed).toBe(true);
+});
+
+webglTest.each([
+  {dimensions: 1 as const, emptyEnd: 1},
+  {dimensions: 2 as const, emptyEnd: 1},
+  {dimensions: 1 as const, emptyEnd: NaN},
+  {dimensions: 2 as const, emptyEnd: Infinity}
+])(
+  'WebGLAggregator#empty draws ($dimensions dimensions, end=$emptyEnd)',
+  ({dimensions, emptyEnd}) => {
+    const gl = (device as WebGLDevice).gl;
+    // Other suites share this context; only attribute errors from this test to these draws.
+    while (gl.getError() !== gl.NO_ERROR) {}
+    const aggregator = new WebGLAggregator(device, {
+      dimensions,
+      channelCount: 2,
+      bufferLayout: [],
+      operations: ['SUM', 'SUM'],
+      vs:
+        dimensions === 1
+          ? 'void getBin(out int id) { id = 1; } void getValue(out vec2 value) { value = vec2(2.0, 5.0); }'
+          : 'void getBin(out ivec2 id) { id = ivec2(1, 0); } void getValue(out vec2 value) { value = vec2(2.0, 5.0); }'
+    });
+    try {
+      // Start empty, recover, empty populated storage, then recover with new values.
+      for (const [end, pointCount] of [
+        [emptyEnd, 3],
+        [3, 3],
+        [emptyEnd, 5],
+        [3, 7]
+      ]) {
+        const binIdRange: [number, number][] =
+          dimensions === 1
+            ? [[1, end]]
+            : [
+                [1, end],
+                [0, 1]
+              ];
+        aggregator.setProps({binIdRange, pointCount});
+        expect(gl.getError(), 'allocation errors').toBe(gl.NO_ERROR);
+        aggregator.update();
+        aggregator.preDraw();
+        expect(gl.getError(), 'draw errors').toBe(gl.NO_ERROR);
+        const count = end === 3 ? 2 : 0;
+        expect(aggregator.binCount).toBe(count);
+        expect(aggregator.getBins()!.length).toBe(count);
+        expect(aggregator.getResult(0)!.length).toBe(count);
+        expect(aggregator.getResult(1)!.length).toBe(count);
+        expect(binaryAttributeToArray(aggregator.getBins(), count)).toEqual(
+          count ? (dimensions === 1 ? [1, 2] : [1, 0, 2, 0]) : []
+        );
+        expect(binaryAttributeToArray(aggregator.getResult(0), count)).toEqual(
+          count ? [pointCount * 2, NaN] : []
+        );
+        expect(binaryAttributeToArray(aggregator.getResult(1), count)).toEqual(
+          count ? [pointCount * 5, NaN] : []
+        );
+        if (dimensions === 2) {
+          const reader = getAggregatorValueReader({aggregator, binIdRange, channel: 1});
+          if (count) {
+            expect(reader!(1, 0)).toBe(pointCount * 5);
+            expect(
+              getAggregatorValueReader({
+                aggregator,
+                binIdRange: [
+                  [1, Infinity],
+                  [0, 1]
+                ],
+                channel: 1
+              })
+            ).toBeNull();
+          } else {
+            expect(reader).toBeNull();
+          }
+        }
+        expect(gl.getError(), `GPU errors after range end ${end}`).toBe(gl.NO_ERROR);
+      }
+    } finally {
+      aggregator.destroy();
+    }
+  }
+);

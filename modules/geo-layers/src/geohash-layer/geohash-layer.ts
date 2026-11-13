@@ -6,7 +6,14 @@ import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {getGeohashPolygon} from './geohash-utils';
 
+import {
+  cellColumnDefaults,
+  renderCellColumns,
+  type CellColumnProps
+} from '../geo-cell-layer/cell-columns';
+
 const defaultProps: DefaultProps<GeohashLayerProps> = {
+  ...cellColumnDefaults,
   getGeohash: {type: 'accessor', value: (d: any) => d.geohash}
 };
 
@@ -15,7 +22,7 @@ export type GeohashLayerProps<DataT = unknown> = _GeohashLayerProps<DataT> &
   GeoCellLayerProps<DataT>;
 
 /** Properties added by GeohashLayer. */
-type _GeohashLayerProps<DataT> = {
+type _GeohashLayerProps<DataT> = CellColumnProps & {
   /**
    * Called for each data object to retrieve the geohash string identifier.
    *
@@ -31,6 +38,17 @@ export default class GeohashLayer<DataT = any, ExtraProps extends {} = {}> exten
 > {
   static layerName = 'GeohashLayer';
   static defaultProps = defaultProps;
+
+  /** Routes cell columns through source-preserving geometry and style accessors. */
+  renderLayers() {
+    if (this.props.cells)
+      return renderCellColumns(this, 'getGeohash', false, {
+        row: this.getSubLayerRow.bind(this),
+        accessor: this.getSubLayerAccessor.bind(this),
+        props: this.getSubLayerProps.bind(this)
+      });
+    return super.renderLayers();
+  }
 
   indexToBounds(): Partial<GeoCellLayer['props']> | null {
     const {data, getGeohash} = this.props;

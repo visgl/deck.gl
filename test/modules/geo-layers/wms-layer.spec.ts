@@ -7,9 +7,20 @@
 import {test, expect} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
+import {WMSImageSource} from '@loaders.gl/ogc/wms';
 import {projectionEngine} from '@math.gl/geospatial/projection';
 import {WGS84ToPseudoMercator} from '@deck.gl/geo-layers/wms-layer/utils';
 import {equals} from '@math.gl/core';
+
+test.each([undefined, 'wms'] as const)('WMSLayer creates a URL source (%s)', serviceType => {
+  const data = 'https://example.com/maps';
+  const loadOptions = {wms: {wmsParameters: {version: '1.1.1'}}};
+  const layer = new WMSLayer(serviceType ? {data, loadOptions, serviceType} : {data, loadOptions});
+
+  const source = layer._createImageSource(layer.props);
+  expect(source).toBeInstanceOf(WMSImageSource);
+  expect(source).toMatchObject({wmsParameters: {version: '1.1.1'}});
+});
 
 test.skip('WMSLayer', async () => {
   const testCases = generateLayerTests({

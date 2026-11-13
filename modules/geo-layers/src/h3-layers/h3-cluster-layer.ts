@@ -9,7 +9,14 @@ import {default as H3HexagonLayer} from './h3-hexagon-layer';
 import GeoCellLayer, {GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {normalizeLongitudes} from './h3-utils';
 
+import {
+  cellColumnDefaults,
+  renderCellColumns,
+  type CellColumnProps
+} from '../geo-cell-layer/cell-columns';
+
 const defaultProps: DefaultProps<H3ClusterLayerProps> = {
+  ...cellColumnDefaults,
   getHexagons: {type: 'accessor', value: (d: any) => d.hexagons}
 };
 
@@ -18,7 +25,7 @@ export type H3ClusterLayerProps<DataT = unknown> = _H3ClusterLayerProps<DataT> &
   GeoCellLayerProps<DataT>;
 
 /** Properties added by H3ClusterLayer. */
-type _H3ClusterLayerProps<DataT> = {
+type _H3ClusterLayerProps<DataT> = CellColumnProps & {
   /**
    * Called for each data object to retrieve the hexagon identifiers.
    *
@@ -42,8 +49,10 @@ export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> ext
     H3HexagonLayer._checkH3Lib();
   }
 
-  updateState({props, changeFlags}: UpdateParameters<this>): void {
+  updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
+    if (props.cells) return;
     if (
+      oldProps.cells ||
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getHexagons)
     ) {
@@ -67,6 +76,17 @@ export default class H3ClusterLayer<DataT = any, ExtraProps extends {} = {}> ext
 
       this.setState({polygons});
     }
+  }
+
+  /** Routes cell columns through source-preserving geometry and style accessors. */
+  renderLayers() {
+    if (this.props.cells)
+      return renderCellColumns(this, 'getHexagons', true, {
+        row: this.getSubLayerRow.bind(this),
+        accessor: this.getSubLayerAccessor.bind(this),
+        props: this.getSubLayerProps.bind(this)
+      });
+    return super.renderLayers();
   }
 
   indexToBounds(): Partial<GeoCellLayer['props']> {

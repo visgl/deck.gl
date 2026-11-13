@@ -6,7 +6,15 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
-### luma.gl v10 alpha.10
+### WebGLAggregator outputs
+
+`WebGLAggregator.getBins()` and `getResult(channel)` now return borrowed `GPUVector`
+views instead of binary attribute descriptors. They can still be passed directly
+as layer binary attributes. For direct buffer access, use `getGPUVectorData(vector)`
+from `@luma.gl/graph/gpu-data` and read its `buffer`, `byteOffset`, and `byteStride`
+instead of the former descriptor's `buffer`, `offset`, and `stride` fields.
+
+### luma.gl v10 alpha.11
 
 The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from
 `@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and
@@ -66,9 +74,14 @@ of both rendering model classes. Narrow to `Model` when accessing material-speci
 or model pipeline parameters instead. `LayersPassRenderOptions.colorMask` still
 applies to layer draws and preserves masked WebGL attachment clears.
 
+`RenderPass.withParameters` is removed in alpha.11. For custom render-pass state
+overrides, save `renderPass.getParameters()`, apply overrides with `setParameters`,
+and restore the saved parameters in a `finally` block. Deck.gl handles this for
+layer and extension draws.
+
 ### loaders.gl and math.gl v5 beta
 
-Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.4`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.8`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
 | Previous import | Replacement import |
 | --- | --- |
@@ -111,10 +124,6 @@ Distance scales now describe world units for any CRS, so the same API supports g
 `viewport.resolution` now controls subdivision detail across CRSs with different units. Higher values generate finer geometry. It defaults to `0` (subdivision disabled), including for `GlobeView`, so applications can opt into the additional processing and memory overhead.
 
 To retain an old degree step `d`, set `resolution: 360 / d`; for example, the former `GlobeView` default of 10 degrees becomes `resolution: 36`. Custom layers should use `viewport.getSubdivisionStep(sourceCrs)` for a step in their source CRS units instead of interpreting `viewport.resolution` directly.
-
-#### GlobeView position
-
-`GlobeView` now applies `viewState.position` as meter offsets to the east, north and up at every zoom, matching `MapView`. Camera offsets follow the local directions consistently across locations and the zoom-12 projection transition. If your application compensated for the former globe-axis interpretation below zoom 12, update those offsets to use local east, north and up.
 
 ### Layer
 
@@ -171,6 +180,10 @@ const commonPosition2 = layer.projectPosition(lnglat, {
 ```
 
 ## Upgrading to v9.4
+
+### GlobeView meter offsets
+
+Below zoom 12, `GlobeView` now applies camera and layer meter offsets east, north and up, matching `MapView`. If your application compensated for the previous orientation, update its offsets or remove the compensating rotation.
 
 ### pydeck lighting
 

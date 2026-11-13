@@ -14,7 +14,7 @@ import {
 import {getMapLibreProjection} from './compatibility';
 import {resolveMapLibreLayerGroups} from './resolve-layer-groups';
 
-import type {DeckProps} from '@deck.gl/core';
+import type {DeckProps, LayersList} from '@deck.gl/core';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 import type {ControlPosition, IControl, Map as MapLibreMap} from 'maplibre-gl';
 
@@ -50,6 +50,8 @@ export default class MapLibreOverlay implements IControl {
   private _deck?: Deck<any>;
   private _map?: MapLibreMap;
   private _container?: HTMLDivElement;
+  /** Layers whose groups were last resolved into the map, while a newer resolve is deferred */
+  private _appliedLayers?: LayersList;
   private readonly _interleaved: boolean;
 
   private _lastMouseDownPoint?: {x: number; y: number; clientX: number; clientY: number};
@@ -77,7 +79,7 @@ export default class MapLibreOverlay implements IControl {
   /** Updates partial properties of the underlying Deck instance. */
   setProps(props: MapLibreOverlayProps): void {
     if (this._interleaved && props.layers) {
-      resolveMapLibreLayerGroups(this._map, this._props.layers, props.layers);
+      this._resolveLayerGroups(this._props.layers, props.layers);
     }
 
     Object.assign(this._props, this._filterProps(props));
@@ -226,7 +228,7 @@ export default class MapLibreOverlay implements IControl {
     });
 
     map.on('styledata', this._handleStyleChange);
-    resolveMapLibreLayerGroups(map, [], this._props.layers);
+    this._resolveLayerGroups([], this._props.layers);
 
     return document.createElement('div');
   }
@@ -250,15 +252,43 @@ export default class MapLibreOverlay implements IControl {
 
   private _onRemoveInterleaved(map: MapLibreMap): void {
     map.off('styledata', this._handleStyleChange);
+    map.off('sourcedata', this._handleSourceData);
+    const appliedLayers = this._appliedLayers ?? this._props.layers;
+    this._appliedLayers = undefined;
     try {
-      resolveMapLibreLayerGroups(map, this._props.layers, []);
+      resolveMapLibreLayerGroups(map, appliedLayers, []);
     } finally {
       removeMapLibreDeckInstance(map);
     }
   }
 
+  /** Resolves layer groups now, or once the style and its sources finish loading. */
+  private _resolveLayerGroups(oldLayers?: LayersList, newLayers?: LayersList): void {
+    const map = this._map;
+    if (!map) {
+      return;
+    }
+
+    map.off('sourcedata', this._handleSourceData);
+    if (map.isStyleLoaded()) {
+      resolveMapLibreLayerGroups(map, this._appliedLayers ?? oldLayers, newLayers);
+      this._appliedLayers = undefined;
+    } else {
+      // `map.isStyleLoaded()` also waits for sources and tiles, so the last `styledata` event can
+      // fire before layer groups can be added. Retry once a `sourcedata` event finds it loaded.
+      this._appliedLayers ??= oldLayers;
+      map.on('sourcedata', this._handleSourceData);
+    }
+  }
+
+  private _handleSourceData = () => {
+    if (this._map?.isStyleLoaded()) {
+      this._resolveLayerGroups(this._props.layers, this._props.layers);
+    }
+  };
+
   private _handleStyleChange = () => {
-    resolveMapLibreLayerGroups(this._map, this._props.layers, this._props.layers);
+    this._resolveLayerGroups(this._props.layers, this._props.layers);
     if (!this._map) {
       return;
     }

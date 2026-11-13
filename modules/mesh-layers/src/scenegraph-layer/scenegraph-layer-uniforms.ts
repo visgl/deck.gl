@@ -7,6 +7,7 @@ import type {ShaderModule} from '@luma.gl/shaders';
 
 const uniformBlockWGSL = /* wgsl */ `\
 struct ScenegraphUniforms {
+  rowIndexOffset: f32,
   sizeScale: f32,
   sizeMinPixels: f32,
   sizeMaxPixels: f32,
@@ -20,6 +21,7 @@ var<uniform> scenegraph: ScenegraphUniforms;
 
 const uniformBlockGLSL = /* glsl */ `\
 layout(std140) uniform scenegraphUniforms {
+  float rowIndexOffset;
   float sizeScale;
   float sizeMinPixels;
   float sizeMaxPixels;
@@ -29,6 +31,7 @@ layout(std140) uniform scenegraphUniforms {
 `;
 
 export type ScenegraphProps = {
+  rowIndexOffset?: number;
   sizeScale: number;
   sizeMinPixels: number;
   sizeMaxPixels: number;
@@ -42,6 +45,7 @@ export const scenegraphUniforms = {
   vs: uniformBlockGLSL,
   fs: uniformBlockGLSL,
   uniformTypes: {
+    rowIndexOffset: 'f32',
     sizeScale: 'f32',
     sizeMinPixels: 'f32',
     sizeMaxPixels: 'f32',

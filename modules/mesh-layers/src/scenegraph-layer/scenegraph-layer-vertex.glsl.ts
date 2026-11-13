@@ -45,7 +45,7 @@ void main(void) {
   #endif
 
   geometry.worldPosition = instancePositions;
-  geometry.pickingColor = picking_getPickingColorFromInstanceID();
+  geometry.pickingColor = picking_getPickingColorFromIndex(scenegraph.rowIndexOffset + float(gl_InstanceID));
 
   mat3 instanceModelMatrix = mat3(instanceModelMatrixCol0, instanceModelMatrixCol1, instanceModelMatrixCol2);
 

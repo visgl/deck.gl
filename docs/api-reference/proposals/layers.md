@@ -2,10 +2,10 @@
 
 Private home for experimental GPU-resident, Arrow, atmospheric, and particle layers. Import these from `@deck.gl/proposals/layers`; the following focused GPU layer entry points remain available.
 
-- `@deck.gl/proposals/layers/path-layer`: `GPUPathLayer`
-- `@deck.gl/proposals/layers/polygon-layer`: `GPUPolygonLayer`
-- `@deck.gl/proposals/layers/solid-polygon-layer`: `GPUSolidPolygonLayer`
-- `@deck.gl/proposals/layers/text-layer`: `GPUTextLayer`
+- `@deck.gl/proposals/layers/path-layer`: `StoragePathLayer`
+- `@deck.gl/proposals/layers/polygon-layer`: `StoragePolygonLayer`
+- `@deck.gl/proposals/layers/solid-polygon-layer`: `StorageSolidPolygonLayer`
+- `@deck.gl/proposals/layers/text-layer`: `StorageTextLayer`
 
 Inputs are borrowed. Paths use storage buffers; polygon fills currently use vertex attributes. Text rendering depends on the supplied luma.gl text strategy.
 

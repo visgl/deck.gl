@@ -78,14 +78,16 @@ export class WebGLAggregationTransform {
     model.shaderInputs.setProps({aggregatorTransform: aggregatorTransformProps});
 
     // Only destroy existing buffer if it is not large enough
-    const binBufferByteLength = binCount * binIdRange.length * 4;
+    // Transform feedback cannot bind zero-byte buffers. Logical output length stays binCount.
+    const capacity = Math.max(1, binCount);
+    const binBufferByteLength = capacity * binIdRange.length * 4;
     if (!this.binBuffer || this.binBuffer.byteLength < binBufferByteLength) {
       this.binBuffer?.destroy();
       this.binBuffer = this.device.createBuffer({byteLength: binBufferByteLength});
       transformFeedback.setBuffer('binIds', this.binBuffer);
     }
 
-    const valueBufferByteLength = binCount * this.channelCount * 4;
+    const valueBufferByteLength = capacity * this.channelCount * 4;
     if (!this.valueBuffer || this.valueBuffer.byteLength < valueBufferByteLength) {
       this.valueBuffer?.destroy();
       this.valueBuffer = this.device.createBuffer({byteLength: valueBufferByteLength});

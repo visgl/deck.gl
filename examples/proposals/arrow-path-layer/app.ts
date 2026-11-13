@@ -10,12 +10,12 @@ import {getArrowLayerTooltip} from '../arrow-layer-tooltip';
 import {ArrowPathDataSource, type ArrowPathDataSourceUpdate} from './arrow-path-data-source';
 import {MEASURE_SWEEP_DURATION} from '../shared/arrow/arrow-lines/arrow-line-data';
 
-const PATH_COLOR: ArrowPathLayerProps['color'] = [199, 219, 245, 235];
-const PATH_COLOR_COLUMN: ArrowPathLayerProps['color'] = {
+const PATH_COLOR: ArrowPathLayerProps['colors'] = [199, 219, 245, 235];
+const PATH_COLOR_COLUMN: ArrowPathLayerProps['colors'] = {
   source: 'colors',
   nullValue: [199, 219, 245, 235]
 };
-const PATH_WIDTH_COLUMN: ArrowPathLayerProps['width'] = {source: 'widths', nullValue: 0.0035};
+const PATH_WIDTH_COLUMN: ArrowPathLayerProps['widths'] = {source: 'widths', nullValue: 0.0035};
 
 /** Creates the standalone or website-hosted Deck path-layer example. */
 export function createArrowPathLayerDeck(
@@ -76,8 +76,8 @@ function setPathLayer(
         model: dataSource.model ?? 'auto',
         data: dataSource.asyncIterator,
         paths: 'paths',
-        color: dataSource.colorColumn ? PATH_COLOR_COLUMN : PATH_COLOR,
-        width: dataSource.widthColumn ? PATH_WIDTH_COLUMN : 0.0035,
+        colors: dataSource.colorColumn ? PATH_COLOR_COLUMN : PATH_COLOR,
+        widths: dataSource.widthColumn ? PATH_WIDTH_COLUMN : 0.0035,
         currentTime,
         trailLength: dataSource.trailLength,
         temporalEnabled: dataSource.temporalEnabled,

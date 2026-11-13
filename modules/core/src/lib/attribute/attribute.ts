@@ -18,7 +18,12 @@ import {bufferLayoutEqual} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
 import {Buffer, getTypedArrayFromDataType} from '@luma.gl/core';
 import type {Device, BufferLayout} from '@luma.gl/core';
-import {GPUConstant, GPUVector, getGPUVectorFormatInfo} from '@luma.gl/graph/gpu-data';
+import {
+  GPUConstant,
+  GPUVector,
+  getGPUVectorData,
+  getGPUVectorFormatInfo
+} from '@luma.gl/graph/gpu-data';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 
@@ -76,7 +81,7 @@ type AttributeInternalState = {
   /** Legacy: external binary supplied via attribute name */
   lastExternalBuffer: TypedArray | Buffer | BinaryAttribute | null;
   /** External binary supplied via accessor name */
-  binaryValue: TypedArray | Buffer | BinaryAttribute | null;
+  binaryValue: TypedArray | Buffer | BinaryAttribute | GPUVector | null;
   binaryAccessor: Accessor<any, any> | null;
   needsUpdate: string | boolean;
   needsRedraw: string | boolean;
@@ -131,6 +136,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
   layoutChanged(): boolean {
     return this.state.layoutChanged;
+  }
+
+  /** Requests a new model buffer layout, e.g. when this attribute replaces a transition buffer */
+  setLayoutChanged(): void {
+    this.state.layoutChanged = true;
   }
 
   setAccessor(accessor: DataColumnSettings<AttributeOptions>) {
@@ -370,7 +380,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   // If the returned value from the accessor is the same as the attribute value, set it directly
   // Otherwise use the auto updater for transform/normalization
   setBinaryValue(
-    buffer?: TypedArray | Buffer | BinaryAttribute,
+    buffer?: TypedArray | Buffer | BinaryAttribute | GPUVector,
     startIndices: NumericArray | null = null
   ): boolean {
     const {state, settings} = this;
@@ -386,6 +396,13 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return false;
     }
 
+    if (buffer instanceof GPUVector) {
+      assert(
+        buffer.length >= this.numInstances,
+        'GPUVector attribute is shorter than the draw count'
+      );
+    }
+
     // The source buffer can be unchanged while its projection/model matrix is invalidated.
     if (state.binaryValue === buffer && !(settings.transform && this.needsUpdate())) {
       this.clearNeedsUpdate();
@@ -393,6 +410,26 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
     state.binaryValue = buffer;
     this.setNeedsRedraw();
+
+    if (buffer instanceof GPUVector) {
+      if (!buffer.format) throw new Error('GPUVector attributes require a format');
+      const info = getGPUVectorFormatInfo(buffer.format);
+      const type = info.type;
+      if (type === 'float16') throw new Error('GPUVector float16 attributes are not supported');
+      assert(
+        !info.vertexList && !info.valueList,
+        'GPUVector attributes require fixed-width values'
+      );
+      const chunk = getGPUVectorData(buffer);
+      assert(chunk.buffer instanceof Buffer, 'GPUVector attributes require a concrete Buffer');
+      buffer = {
+        buffer: chunk.buffer as Buffer,
+        type,
+        size: info.components,
+        offset: chunk.byteOffset,
+        stride: chunk.byteStride
+      };
+    }
 
     const needsUpdate = settings.transform || startIndices !== this.startIndices;
 

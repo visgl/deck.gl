@@ -316,3 +316,15 @@ The maximum size in pixels for one unit of the scene.
 ## Source
 
 [modules/mesh-layers/src/scenegraph-layer](https://github.com/visgl/deck.gl/tree/master/modules/mesh-layers/src/scenegraph-layer)
+
+### Instance columns
+
+`positions` and `colors` accept Arrow columns or compatible GPUVectors in instance
+order. Positions use three components and GPU colors use `unorm8x4`. Omitted
+columns use the corresponding accessors. Instance transform accessors continue to
+control orientation, scale, translation, and transform matrices.
+
+Aligned chunks preserve global picking indices. `numInstances` defaults to the
+column length. GPUVectors and their buffers remain caller-owned. GPU-only positions
+cannot be CPU-preprojected and do not provide CPU bounds. Column inputs currently
+require extensions and transitions to be disabled.

@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, it} from 'vitest';
+import {ArrowPathRendererLayer} from '../../../src/layers/path-layer/arrow-path-renderer-layer';
 import {ArrowPathLayer, ArrowPolygonLayer, ArrowTextLayer} from '@deck.gl/proposals/layers';
 import {makeGPUVectorFromArrow, makeArrowFixedSizeListVector} from '@luma.gl/graph/arrow';
 import type {Model} from '@luma.gl/engine';
@@ -12,7 +13,34 @@ import {
   convertArrowLayerColorVector,
   readArrowLayerGPUVector
 } from '../../../src/layers/arrow-layer-input';
-import {assertLayerArrowVectorFormat} from '../../../src/layers/arrow-gpu-layer-utils';
+import {
+  assertLayerArrowVectorFormat,
+  makeLayerGPUVectorFromArrow
+} from '../../../src/layers/arrow-gpu-layer-utils';
+
+it('Arrow GPU layer adapters resolve Table and RecordBatch columns', () => {
+  const device = new NullDevice({});
+  const positions = makeArrowFixedSizeListVector(
+    new arrow.Float32(),
+    2,
+    new Float32Array([1, 2, 3, 4])
+  );
+  const table = new arrow.Table({positions});
+  try {
+    for (const data of [table, table.batches[0]]) {
+      const vector = makeLayerGPUVectorFromArrow(device, data, 'positions', {
+        name: 'positions',
+        id: 'test-positions',
+        format: 'float32x2'
+      });
+      expect(vector.length).toBe(2);
+      expect(vector.format).toBe('float32x2');
+      vector.destroy();
+    }
+  } finally {
+    device.destroy();
+  }
+});
 
 it('Arrow GPU layer adapters reject columns whose storage does not match the GPU format', () => {
   const float32Positions = makeArrowFixedSizeListVector(
@@ -49,7 +77,7 @@ it('Arrow deck layers do not use AttributeManager for Arrow GPU vectors', () => 
 });
 
 it('Arrow deck layers expose their active draw models to Deck', () => {
-  const pathLayer = new ArrowPathLayer({id: 'path'});
+  const pathLayer = new ArrowPathRendererLayer({id: 'path'});
   const polygonLayer = new ArrowPolygonLayer({id: 'polygon'});
   const textLayer = new ArrowTextLayer({id: 'text'});
   const pathModel = {id: 'path-model'} as Model;

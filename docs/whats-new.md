@@ -4,9 +4,49 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
-### luma.gl v10 alpha.10
+### Async CPU aggregation of GPU inputs
 
-The v10 packages use luma.gl alpha.10. Layer models delegate typed vector and
+[`ReadbackAggregator`](./api-reference/aggregation-layers/cpu-aggregator.md#readbackaggregator) runs CPU aggregation on GPUVector inputs, so you can compare CPU and GPU timings on the same buffers.
+
+### Hexagon compute aggregation
+
+HexagonLayer supports WebGPU aggregation with explicit color and elevation domains,
+using the shared reducer and GPUVector rendering path.
+
+### ScreenGrid and Grid compute rendering features
+
+Compute aggregation now supports automatic domains, picking metadata, accessor-based
+extensions, and Grid distribution scales and percentile filtering. Explicit-domain rendering
+continues to consume GPU vectors directly; CPU-facing metadata uses asynchronous snapshots.
+
+### Heatmap GPU column inputs
+
+HeatmapLayer accepts borrowed position and weight GPUVectors on WebGPU, including strided columns and shorter row prefixes.
+
+### Grid compute aggregation
+
+`GridLayer` supports two-channel compute aggregation with explicit color and elevation domains.
+Color and elevation results stay in GPU vectors consumed directly by the cell layer. The
+implementation shares column preparation and reduction kernels with ScreenGrid. See
+[GridLayer](./api-reference/aggregation-layers/grid-layer.md#compute-aggregation).
+
+### ScreenGrid compute aggregation
+
+`ScreenGridLayer` can aggregate on WebGPU using an explicit `colorDomain`, with
+picking and extensions disabled. SUM, MEAN, MIN, MAX, and COUNT produce GPUVector
+outputs consumed directly by the cell layer. See [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#compute-aggregation).
+
+### Custom aggregators and GPUVector inputs
+
+GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer now accept custom aggregator
+instances. Custom aggregators can consume GPUVector position/weight columns and publish
+GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and
+channel values. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
+result layouts, and supported scales and contours.
+
+### luma.gl v10 alpha.13
+
+The v10 packages use luma.gl alpha.13. Layer models delegate typed vector and
 constant-buffer binding and render-target format tracking to luma.gl. WebGPU
 layer draws restore dynamic render-pass parameters after drawing. Custom shader
 plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-guide.md).
@@ -21,11 +61,17 @@ The website gallery includes three new sections: Arrow Layers, Visual Effects, a
 
 ### Extension updates
 
+[`MaskExtension`](./api-reference/extensions/mask-extension.md) supports up to four masks on WebGPU in map and globe views, including inverted masks and picking.
+
 Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) with `countItems` to report how many objects pass numeric or category filters.
 
 ### Custom projections (Experimental)
 
 [`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/geospatial/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
+
+Custom projection inverse conversions that return non-finite coordinates are reported as invalid, consistent with conversions that throw.
+
+Paths and polygons can follow curved projected edges with the experimental [`_projectionTolerance`](./api-reference/layers/path-layer.md#_projectiontolerance) prop.
 
 ### Layer source CRS (Experimental)
 

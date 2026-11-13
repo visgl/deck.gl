@@ -3,24 +3,25 @@
 // Copyright (c) vis.gl contributors
 
 import type {Device} from '@luma.gl/core';
-import type {GPUVectorFormat} from '@luma.gl/graph/gpu-data';
-import {DataType, type RecordBatch, type Vector} from 'apache-arrow';
-import {uploadArrowVector, type PreparedArrowGPUVector} from './arrow-to-gpu-vector';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
+import {type RecordBatch, type Vector} from 'apache-arrow';
+import {
+  convertArrowColumnToGPUVector,
+  type ArrowColumnGPUVectorOptions,
+  type PreparedArrowColumnGPUVector
+} from '@luma.gl/graph/arrow';
+import {getArrowConversionFormat} from './arrow-schema';
 
-/** Structural Arrow input contract, without loading Arrow in accessor-only layers. */
-export type ColumnSource = Pick<Vector, 'length' | 'type' | 'data'>;
+/** Arrow columns or borrowed GPU vectors accepted by layer column props. */
+export type ColumnSource = Pick<Vector, 'length' | 'type' | 'data'> | GPUVector;
 
 /** Layer-oriented semantics, for numeric, position, scalar, and color conversion. */
 export type ArrowConverterSemantic = 'auto' | 'numeric' | 'position' | 'scalar' | 'color';
 
 /** Conversion options. Null rows are rejected unless validity preservation is requested. */
-export type ArrowConverterOptions = {
-  name?: string;
-  format?: GPUVectorFormat;
-  /** Preserve high/low components after numeric conversion. */
-  fp64?: boolean;
-  /** Transform numeric rows before packing, e.g. source-coordinate conversion. */
-  transform?: (value: number[]) => readonly number[];
+export type ArrowConverterOptions = Partial<
+  Pick<ArrowColumnGPUVectorOptions, 'name' | 'format' | 'fp64' | 'transform'>
+> & {
   /** Selects conversion rules; positions preserve XY/XYZ width, colors default to RGBA8. */
   semantic?: ArrowConverterSemantic;
   /** Preserve validity for consumers that understand nulls, or reject them (default). */
@@ -37,7 +38,7 @@ export type ArrowConverterColumn = ArrowConverterOptions & {
 export type ArrowConverterSchema = Readonly<Record<string, ArrowConverterColumn>>;
 
 /** A caller-owned converted vector with its cumulative source row offset. */
-export type ArrowConvertedChunk = PreparedArrowGPUVector & {
+export type ArrowConvertedChunk = PreparedArrowColumnGPUVector & {
   /** First source row represented by this chunk. */
   rowOffset: number;
 };
@@ -45,7 +46,7 @@ export type ArrowConvertedChunk = PreparedArrowGPUVector & {
 /** Aligned converted columns from one record batch. Destroy releases every owned column. */
 export type ArrowConvertedBatch = {
   /** Converted columns keyed by the requested output names. */
-  columns: Record<string, PreparedArrowGPUVector>;
+  columns: Record<string, PreparedArrowColumnGPUVector>;
   /** First source row represented by this batch. */
   rowOffset: number;
   /** Number of rows shared by all columns. */
@@ -64,7 +65,7 @@ export type ArrowConverterIteratorOptions = {
 };
 
 /**
- * Experimental Arrow-to-GPU conversion boundary, intended for eventual luma.gl upstreaming.
+ * Layer-oriented semantics and streaming around luma.gl Arrow-to-GPU conversion.
  * Uploads preserve Arrow chunks. Results own their allocations and must be destroyed by callers;
  * the converter retains no output buffers. Streaming pulls one input per requested output.
  */
@@ -76,36 +77,13 @@ export class ArrowConverter {
   async convert(
     vector: Vector,
     options: ArrowConverterOptions = {}
-  ): Promise<PreparedArrowGPUVector> {
+  ): Promise<PreparedArrowColumnGPUVector> {
     const {semantic = 'auto', nullPolicy = 'reject', ...conversion} = options;
-    if (
-      semantic === 'position' &&
-      (!DataType.isFixedSizeList(vector.type) || ![2, 3].includes(vector.type.listSize))
-    ) {
-      throw new Error('Arrow positions must be FixedSizeList[2] or FixedSizeList[3]');
-    }
-    if (semantic === 'scalar' && !DataType.isInt(vector.type) && !DataType.isFloat(vector.type)) {
-      throw new Error('Arrow scalar input must be numeric');
-    }
-    let format = conversion.format;
-    if (!format) {
-      if (semantic === 'color') format = 'unorm8x4';
-      if (semantic === 'scalar') format = 'float32';
-      if (semantic === 'position') {
-        if (!DataType.isFixedSizeList(vector.type) || ![2, 3].includes(vector.type.listSize)) {
-          throw new Error('Arrow positions must be FixedSizeList[2] or FixedSizeList[3]');
-        }
-        format = vector.type.listSize === 2 ? 'float32x2' : 'float32x3';
-      }
-    }
-    if (!format) {
-      const width = DataType.isFixedSizeList(vector.type) ? vector.type.listSize : 1;
-      format = (width === 1 ? 'float32' : `float32x${width}`) as GPUVectorFormat;
-    }
-    return uploadArrowVector(this.device, vector, {
+    const format = getArrowConversionFormat(vector.type, options);
+    return convertArrowColumnToGPUVector(this.device, vector, {
       name: conversion.name,
       format,
-      color: semantic === 'color',
+      color: semantic === 'color' || format === 'unorm8x4',
       preserveNulls: nullPolicy === 'preserve',
       fp64: conversion.fp64,
       transform: conversion.transform
@@ -117,7 +95,7 @@ export class ArrowConverter {
     batch: RecordBatch,
     schema: ArrowConverterSchema
   ): Promise<ArrowConvertedBatch> {
-    const columns: Record<string, PreparedArrowGPUVector> = Object.create(null);
+    const columns: Record<string, PreparedArrowColumnGPUVector> = Object.create(null);
     try {
       for (const [name, {source, ...options}] of Object.entries(schema)) {
         // The resolver supports nested paths and also validates missing columns.

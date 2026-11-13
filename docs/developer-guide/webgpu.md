@@ -83,9 +83,14 @@ The table below covers the public layer exports from the layer packages. It is d
 - `A5Layer` inherits its WebGPU rendering from `PolygonLayer` and supports both bigint and hexadecimal A5 cell identifiers.
 - `Tile3DLayer` supports point-cloud, glTF scenegraph, and I3S mesh tile content on WebGPU.
 
+ScreenGridLayer and GridLayer can aggregate on the GPU with automatic domains and picking
+metadata. GridLayer also supports percentile filtering and quantile/ordinal color scales.
+CPU-facing metadata uses asynchronous snapshots; explicit-domain rendering without picking
+or distribution scales keeps the result path on the GPU.
+
 ## Extensions
 
-The table below covers the public extensions in `@deck.gl/extensions`. Most remain WebGL-only because they rely on GLSL shader injections, GLSL-only shader modules, or extra render/picking passes that have not been ported to WebGPU. `BrushingExtension` and `ClipExtension` support standard rendering primitives on WebGPU. Custom and aggregation-specific shaders still need compatible hooks.
+The table below covers the public extensions in `@deck.gl/extensions`. Most remain WebGL-only because they rely on GLSL shader injections, GLSL-only shader modules, or extra render/picking passes that have not been ported to WebGPU. `BrushingExtension` and `ClipExtension` support standard rendering primitives on WebGPU. Custom shaders need compatible hooks. ScreenGridLayer and GridLayer execute compatible extension hooks on input points before reduction; DataFilterExtension filtering and ClipExtension are covered by aggregation regression tests.
 
 | Module | Extension | WebGL | WebGPU |
 | --- | --- | --- | --- |
@@ -96,7 +101,7 @@ The table below covers the public extensions in `@deck.gl/extensions`. Most rema
 | `@deck.gl/extensions` | `FillStyleExtension` | ✅ | ❌ |
 | `@deck.gl/extensions` | `ClipExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `CollisionFilterExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `MaskExtension` | ✅ | ❌ |
+| `@deck.gl/extensions` | `MaskExtension` | ✅ | ✅ |
 
 ## Effects
 

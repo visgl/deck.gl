@@ -18,21 +18,21 @@ import type {GPUVectorLayerPickingInfo} from '../utils/gpu-vector-picking';
 export type {GPUVectorLayerPickingInfo} from '../utils/gpu-vector-picking';
 
 /** GPU-native prepared text props. Input text batches and atlas resources are borrowed. */
-export type GPUTextLayerProps = Omit<LayerProps, 'data'> & {
+export type StorageTextLayerProps = Omit<LayerProps, 'data'> & {
   textData: GPUTextData | readonly GPUTextData[];
   /** Optional Deck-specific shader overrides applied to the prepared text strategy. */
   modelProps?: ModelProps;
 };
 
-type GPUTextLayerState = {
+type StorageTextLayerState = {
   renderer: TextRenderer | null;
-  boundTextData: GPUTextLayerProps['textData'] | null;
+  boundTextData: StorageTextLayerProps['textData'] | null;
   boundModelProps: ModelProps | undefined;
 };
 
 /** Deck host for caller-owned GPUTextData produced by any text adapter. */
-export class GPUTextLayer extends Layer<GPUTextLayerProps> {
-  static override layerName = 'GPUTextLayer';
+export class StorageTextLayer extends Layer<StorageTextLayerProps> {
+  static override layerName = 'StorageTextLayer';
 
   override getAttributeManager() {
     return null;
@@ -46,11 +46,11 @@ export class GPUTextLayer extends Layer<GPUTextLayerProps> {
       }),
       boundTextData: this.props.textData,
       boundModelProps: this.props.modelProps
-    } satisfies GPUTextLayerState);
+    } satisfies StorageTextLayerState);
   }
 
   override updateState({props}: UpdateParameters<this>): void {
-    const state = this.state as GPUTextLayerState;
+    const state = this.state as StorageTextLayerState;
     if (props.textData !== state.boundTextData || props.modelProps !== state.boundModelProps) {
       state.renderer?.setProps({data: props.textData, modelProps: props.modelProps});
       this.setState({boundTextData: props.textData, boundModelProps: props.modelProps});
@@ -58,12 +58,12 @@ export class GPUTextLayer extends Layer<GPUTextLayerProps> {
   }
 
   override getModels(): Model[] {
-    const renderer = (this.state as GPUTextLayerState | undefined)?.renderer;
+    const renderer = (this.state as StorageTextLayerState | undefined)?.renderer;
     return renderer ? [getTextRendererModel(renderer)] : [];
   }
 
   override draw({renderPass}: {renderPass: RenderPass}): void {
-    (this.state as GPUTextLayerState).renderer?.draw(renderPass);
+    (this.state as StorageTextLayerState).renderer?.draw(renderPass);
   }
 
   override getPickingInfo({info}: {info: PickingInfo}): PickingInfo {
@@ -85,7 +85,7 @@ export class GPUTextLayer extends Layer<GPUTextLayerProps> {
   }
 
   override finalizeState(context: LayerContext): void {
-    (this.state as GPUTextLayerState | undefined)?.renderer?.destroy();
+    (this.state as StorageTextLayerState | undefined)?.renderer?.destroy();
     this.setState({renderer: null, boundTextData: null, boundModelProps: undefined});
     super.finalizeState(context);
   }

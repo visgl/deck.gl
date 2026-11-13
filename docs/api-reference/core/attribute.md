@@ -72,3 +72,13 @@ Returns a `Buffer` object associated with this attribute, if any.
 Returns a map from shader attribute names to luma.gl `GPUVector` or `GPUConstant` objects. Unallocated attributes are omitted. A double-precision attribute exposes separate high and low shader entries; varying high and low entries share their backing buffer.
 
 Vectors wrap existing buffers without copying or taking ownership. Their formats, byte offsets, strides, and lengths describe the current attribute storage. Reacquire the map after updates: retaining a vector does not keep an attribute's replaced or deleted buffer alive. Constants contain one raw, unnormalized row, including the original integer format for normalized colors.
+
+
+### GPUVector inputs
+
+Accessor entries in `data.attributes` can contain borrowed luma `GPUVector` objects.
+The attribute preserves the vector's identity, buffer offset, and stride, so supplying the
+same vector again does not rebind unchanged storage. Supply a new vector when its layout changes.
+Vectors must provide a format and one fixed-width chunk backed by a concrete buffer, with
+at least as many rows as the draw count. Float16 and variable-length formats are unsupported.
+The caller owns the vector and its buffer. Attributes requiring CPU transforms need CPU data.

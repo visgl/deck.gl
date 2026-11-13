@@ -3,7 +3,7 @@
   "description": "deck.gl core library",
   "license": "MIT",
   "type": "module",
-  "version": "9.4.0-beta.4",
+  "version": "10.0.0-alpha.1",
   "publishConfig": {
     "access": "public"
   },
@@ -35,13 +35,13 @@
       "require": "./dist/index.cjs"
     },
     "./arrow": {
-      "types": "./dist/lib/luma-upstream/arrow-converter.d.ts",
+      "types": "./dist/arrow/upstream-luma/arrow-converter.d.ts",
       "visgl:webgl-only": {
-        "import": "./dist.webgl-only/lib/luma-upstream/arrow-converter.js",
-        "require": "./dist.webgl-only/lib/luma-upstream/arrow-converter.cjs"
+        "import": "./dist.webgl-only/arrow/upstream-luma/arrow-converter.js",
+        "require": "./dist.webgl-only/arrow/upstream-luma/arrow-converter.cjs"
       },
-      "import": "./dist/lib/luma-upstream/arrow-converter.js",
-      "require": "./dist/lib/luma-upstream/arrow-converter.cjs"
+      "import": "./dist/arrow/upstream-luma/arrow-converter.js",
+      "require": "./dist/arrow/upstream-luma/arrow-converter.cjs"
     }
   },
   "files": [
@@ -58,16 +58,16 @@
     "prepublishOnly": "npm run build-debugger && npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "5.0.0-beta.4",
-    "@loaders.gl/images": "5.0.0-beta.4",
-    "@luma.gl/core": "10.0.0-alpha.10",
-    "@luma.gl/engine": "10.0.0-alpha.10",
-    "@luma.gl/graph": "10.0.0-alpha.10",
-    "@luma.gl/shaders": "10.0.0-alpha.10",
-    "@math.gl/core": "5.0.0-beta.4",
-    "@math.gl/earth": "5.0.0-beta.4",
-    "@math.gl/geospatial": "5.0.0-beta.4",
-    "@math.gl/web-mercator": "5.0.0-beta.4",
+    "@loaders.gl/core": "5.0.0-beta.8",
+    "@loaders.gl/images": "5.0.0-beta.8",
+    "@luma.gl/core": "10.0.0-alpha.14",
+    "@luma.gl/engine": "10.0.0-alpha.14",
+    "@luma.gl/graph": "10.0.0-alpha.14",
+    "@luma.gl/shaders": "10.0.0-alpha.14",
+    "@math.gl/core": "5.0.0-beta.8",
+    "@math.gl/earth": "5.0.0-beta.8",
+    "@math.gl/geospatial": "5.0.0-beta.8",
+    "@math.gl/web-mercator": "5.0.0-beta.8",
     "@probe.gl/env": "^4.1.1",
     "@probe.gl/log": "^4.1.1",
     "@probe.gl/stats": "^4.1.1",

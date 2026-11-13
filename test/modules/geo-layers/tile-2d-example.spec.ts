@@ -26,6 +26,12 @@ test('shared tileset demo renders both styles and minimap, compares caches, and 
         : originalFetch(url, options)
     );
   let root = createRoot(parent);
+  const unmount = () => {
+    // Release the demo's context before the next mount or test uses a context.
+    const gl = parent.querySelector('canvas')?.getContext('webgl2');
+    root.unmount();
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
+  };
   let latest: TileDemoStats | undefined;
   const onStatsChange = (stats: TileDemoStats) => {
     latest = stats;
@@ -85,7 +91,7 @@ test('shared tileset demo renders both styles and minimap, compares caches, and 
       expect(parent.querySelector('canvas')!.getBoundingClientRect().width).toBe(340)
     );
     expect(parent.querySelector('[role=alert]')).toBeNull();
-    root.unmount();
+    unmount();
     expect(parent.querySelector('canvas')).toBeNull();
     latest = undefined;
     root = createRoot(parent);
@@ -93,7 +99,7 @@ test('shared tileset demo renders both styles and minimap, compares caches, and 
     await loaded(1);
     expect(parent.querySelector<HTMLInputElement>('input')!.checked).toBe(true);
   } finally {
-    root.unmount();
+    unmount();
     fetch.mockRestore();
     parent.remove();
   }

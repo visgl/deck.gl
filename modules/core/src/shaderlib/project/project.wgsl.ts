@@ -169,13 +169,17 @@ fn project_size_vec4(meters: vec4<f32>) -> vec4<f32> {
 }
 
 // Returns a rotation matrix aligning the z‑axis with the given up vector.
+// On the globe, ux points east and uy north. Longitude 0 lies on -y and the north pole on +z.
+// At a pole, ux is the limit of east along the longitude that up retains; it is +x only when up
+// lies exactly on the polar axis.
 fn project_get_orientation_matrix(up: vec3<f32>) -> mat3x3<f32> {
   let uz = normalize(up);
-  let ux = select(
-    vec3<f32>(1.0, 0.0, 0.0),
-    normalize(vec3<f32>(uz.y, -uz.x, 0.0)),
-    abs(uz.z) == 1.0
-  );
+  // Tangent on XY plane
+  let horizontalLength = length(uz.xy);
+  var ux = vec3<f32>(1.0, 0.0, 0.0);
+  if (horizontalLength > 0.0) {
+    ux = vec3<f32>(-uz.y, uz.x, 0.0) / horizontalLength;
+  }
   let uy = cross(uz, ux);
   return mat3x3<f32>(ux, uy, uz);
 }
@@ -229,7 +233,9 @@ fn project_mercator_(lnglat: vec2<f32>) -> vec2<f32> {
 fn project_globe_(lnglatz: vec3<f32>) -> vec3<f32> {
   let lambda = radians(lnglatz.x);
   let phi = radians(lnglatz.y);
-  let cosPhi = cos(phi);
+  // Preserve longitude at the poles despite GPU cosine rounding to zero or negative.
+  var cosPhi = cos(phi);
+  if (abs(lnglatz.y) == 90.0) { cosPhi = max(abs(cosPhi), 1e-7); }
   let D = (lnglatz.z / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
   return vec3<f32>(
     sin(lambda) * cosPhi,
@@ -319,7 +325,7 @@ fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> v
     }
     if (project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS) {
       let enuMatrix = project_get_orientation_matrix(project.commonOrigin);
-      let offsetCommon = (enuMatrix * vec3<f32>(-position_world.x, -position_world.y, position_world.z)) * project.commonUnitsPerMeter;
+      let offsetCommon = (enuMatrix * position_world.xyz) * project.commonUnitsPerMeter;
       return vec4<f32>(project.commonOrigin + offsetCommon, position_world.w);
     }
   }

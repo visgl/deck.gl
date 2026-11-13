@@ -17,7 +17,7 @@ import {DynamicBuffer} from '@luma.gl/core/dynamic';
 import type {GPUVectorModel, GPUVectorModelInputs} from '@luma.gl/engine';
 import {GPUConstant, GPUVector, getGPUVectorFormatInfo} from '@luma.gl/graph/gpu-data';
 
-import type {ColumnSource} from './luma-upstream/arrow-converter';
+import {resolveColumns} from './resolve-columns';
 
 export type ColumnDefinition = {
   attribute: string;
@@ -27,6 +27,9 @@ export type ColumnDefinition = {
   prop?: boolean;
   defaultValue?: number;
 };
+
+/** Definitions keyed by public column name, including internal inputs. */
+export type ColumnDefinitions = Readonly<Record<string, Partial<ColumnDefinition>>>;
 
 type PositionOptions = {
   transform?: ((value: number[]) => readonly number[]) | null;
@@ -79,7 +82,8 @@ export class LayerColumns {
     private readonly device: Device,
     private readonly definitions: Record<string, ColumnDefinition>,
     private readonly name: string,
-    private readonly useRowIndexes = false
+    private readonly useRowIndexes = false,
+    private readonly useTable = false
   ) {}
 
   /** Supplies shader input layouts while asynchronous conversion has not produced buffers yet. */
@@ -191,7 +195,7 @@ export class LayerColumns {
         changed();
         return;
       }
-      const {ArrowConverter} = await import('./luma-upstream/arrow-converter');
+      const {ArrowConverter} = await import('../arrow/upstream-luma/arrow-converter');
       const converter = new ArrowConverter(this.device);
       const columns: Columns = {};
       let bounds: [number[], number[]] | undefined;
@@ -214,26 +218,44 @@ export class LayerColumns {
           }
         }
       };
+      const sources = resolveColumns(props, this.definitions, this.useTable);
       let length: number | undefined;
       let chunkLengths: number[] | undefined;
       for (const [name, definition] of Object.entries(this.definitions)) {
-        const source =
-          definition.prop === false ? undefined : (props[name] as ColumnSource | undefined);
+        const source = sources[name];
         if (!source) continue;
-        const result = await converter.convert(source as Parameters<typeof converter.convert>[0], {
-          name,
-          semantic: definition.semantic === 'vector' ? 'numeric' : definition.semantic,
-          ...(definition.semantic === 'position'
-            ? {
-                format: 'float32x3',
-                transform: value => {
-                  positionOptions.onPosition!(value);
-                  return positionOptions.transform ? positionOptions.transform(value) : value;
-                },
-                fp64: positionOptions.fp64
-              }
-            : {})
-        });
+        if (source instanceof GPUVector) {
+          const format =
+            definition.semantic === 'color'
+              ? 'unorm8x4'
+              : definition.size === 1
+                ? 'float32'
+                : 'float32x' + definition.size;
+          if (source.format !== format)
+            throw new Error('GPU column format must match the shader input');
+          if (definition.semantic === 'position') {
+            if (positionOptions.transform)
+              throw new Error('GPU positions cannot be CPU-preprojected');
+            boundsAvailable = false;
+          }
+        }
+        const result =
+          source instanceof GPUVector
+            ? {vector: source, residualVector: undefined, destroy() {}}
+            : await converter.convert(source as Parameters<typeof converter.convert>[0], {
+                name,
+                semantic: definition.semantic === 'vector' ? 'numeric' : definition.semantic,
+                ...(definition.semantic === 'position'
+                  ? {
+                      format: 'float32x3',
+                      transform: value => {
+                        positionOptions.onPosition!(value);
+                        return positionOptions.transform ? positionOptions.transform(value) : value;
+                      },
+                      fp64: positionOptions.fp64
+                    }
+                  : {})
+              });
         results.push(result);
         if (version !== this.version) {
           for (const result of results) result.destroy();
@@ -259,7 +281,7 @@ export class LayerColumns {
         throw new Error('data rows must match Arrow column lengths');
       const fallbacks = prepareFallbacks?.(rows, length, resource => results.push(resource));
       for (const [name, definition] of Object.entries(this.definitions)) {
-        if (definition.prop === false || !props[name]) {
+        if (!sources[name]) {
           columns[definition.attribute] = await this.makeAccessorColumn(
             props,
             definition.accessor,
@@ -337,7 +359,11 @@ export class LayerColumns {
   }
 
   /** Draws matching batches using luma's managed uniform ranges and constant bindings. */
-  draw(model: GPUVectorModel, renderPass: RenderPass, onBatch?: (offset: number) => void): void {
+  draw(
+    model: GPUVectorModel,
+    renderPass: RenderPass,
+    onBatch?: (offset: number, rowCount: number) => void
+  ): void {
     const prepared = this.prepared;
     if (!prepared?.length) return;
     const vectors: GPUVectorModelInputs = {};
@@ -390,7 +416,7 @@ export class LayerColumns {
     model.setAttributeVectors({...vectors, ...constants}, layouts);
     model.drawBatches(renderPass, {
       vectors,
-      onBatch: batch => onBatch?.(batch.rowIndexOffset)
+      onBatch: batch => onBatch?.(batch.rowIndexOffset, batch.rowCount)
     });
   }
 

@@ -3,20 +3,37 @@
 // Copyright (c) vis.gl contributors
 
 import type {Attribute, BinaryAttribute} from '@deck.gl/core';
+import type {Device} from '@luma.gl/core';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
+
+/** Borrowed aggregation output; vectors use single-chunk float32 scalar/XY storage. */
+export type AggregationResult = BinaryAttribute | GPUVector;
 
 /** Method used to reduce a list of values to one number */
 export type AggregationOperation = 'SUM' | 'MEAN' | 'MIN' | 'MAX' | 'COUNT';
 
 /** Baseline inputs to an Aggregator */
 export type AggregationProps = {
+  /** Request asynchronous CPU metadata for domains, picking, and distribution scales. */
+  readback?: boolean;
   /** Number of data points */
   pointCount: number;
-  /** The input data */
+  /** Dense bin ranges, with inclusive starts and exclusive ends. */
+  binIdRange?: [number, number][];
+  /** Projection and extension uniforms supplied before drawing. */
+  shaderModuleProps?: Record<string, any>;
+  /** Borrowed position vector, replacing accessor-generated positions when supplied. */
+  positions?: GPUVector | null;
+  /** Borrowed scalar weight vectors, in aggregation channel order. */
+  weights?: readonly GPUVector[] | null;
+  /** The input data. Attribute.getGPUVector() exposes typed shader columns. */
   attributes: {[id: string]: Attribute};
   /** How to aggregate the values inside a bin, defined for each channel */
   operations: AggregationOperation[];
   /** Additional options to control bin sorting, e.g. bin size */
   binOptions: Record<string, number | number[]>;
+  /** Report an asynchronous backend failure to the owning layer. */
+  onError?: (error: Error) => void;
   /** Callback after a channel is updated */
   onUpdate?: (event: {channel: number}) => void;
 };
@@ -54,6 +71,11 @@ export type AggregatedBin = {
  *
  */
 export interface Aggregator {
+  /** Whether output and requested asynchronous metadata are ready. */
+  readonly isLoaded?: boolean;
+  /** Called once when the layer adopts this instance, before setProps. */
+  initialize?(device: Device): void;
+
   /** Update aggregation props */
   setProps(props: Partial<AggregationProps>): void;
 
@@ -75,10 +97,13 @@ export interface Aggregator {
   get binCount(): number;
 
   /** Returns an accessor to the bins. */
-  getBins(): BinaryAttribute | null;
+  getBins(): AggregationResult | null;
 
   /** Returns an accessor to the output for a given channel. */
-  getResult(channel: number): BinaryAttribute | null;
+  getResult(channel: number): AggregationResult | null;
+
+  /** Optional completed CPU snapshot for distribution scales; GPU outputs stay borrowed. */
+  getResultValues?(channel: number): Float32Array | null;
 
   /** Returns the [min, max] of aggregated values for a given channel. */
   getResultDomain(channel: number): [min: number, max: number];

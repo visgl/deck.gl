@@ -1380,92 +1380,95 @@
   dependencies:
     call-bind "^1.0.8"
 
-"@loaders.gl/archives@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/archives/-/archives-5.0.0-beta.4.tgz#a6ddc356482889537f5a432bdd9ac5309458c10d"
-  integrity sha512-TKnzcEMdSXJkmeVDuzLihb3Ukd7PEPwuchVgFBkZdPr2zDOsWRXlbrQF6fKtsMVsQpnPZ8Diw7/SKn9iv0r9hw==
+"@loaders.gl/archives@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@loaders.gl/archives/-/archives-5.0.0-beta.8.tgz#ecb00367953c831dbb0058731abb72c037c9bec5"
+  integrity sha512-8lG7uJ5k2S7TpaxVlVq+lyhn/c1a7W3VMUuCJmH8QY59cZU0rlSuW7Wof3ufRV9Bpj/P3BdmPyHa8KmbobHq7Q==
   dependencies:
-    "@loaders.gl/compression" "5.0.0-beta.4"
-    "@loaders.gl/crypto" "5.0.0-beta.4"
+    "@loaders.gl/compression" "5.0.0-beta.8"
+    "@loaders.gl/crypto" "5.0.0-beta.8"
 
-"@loaders.gl/compression@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/compression/-/compression-5.0.0-beta.4.tgz#3d61e2e13b520ab123aef0f73ec750d888da6f52"
-  integrity sha512-3E4TrwaAa6y+9YPy4LaPwe4zWO+RseV0UMpRmUdozd694QsZLkg4JeZ+p/cpuiJtu/NUu5X4pylvBoYQyJ0B8Q==
+"@loaders.gl/compression@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@loaders.gl/compression/-/compression-5.0.0-beta.8.tgz#628e5252dadaa63722dff761b504bd56f8e6eaa8"
+  integrity sha512-UWa1irLyvTmZTfNOIabj3y55V28rBJULjAo7aJqArQdT+QcEFEnn0azJU88FRj9pHJVKTc5jok1o7E52zgLrxg==
   dependencies:
     compress-utils "^0.12.0"
 
-"@loaders.gl/core@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-5.0.0-beta.4.tgz#160d9e4d5a6d9f8acbc696ea8a83c237cefc29ce"
-  integrity sha512-59BB2lmeGDvt2fpanf5xTMk+YBzMsOP2VerqSbsfHOShLCsbvM2ZPv8d/Vvd06Hr3TvJSr93+sEG5ArBUKaXLg==
+"@loaders.gl/core@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@loaders.gl/core/-/core-5.0.0-beta.8.tgz#3c50ded55a8dc9be5468f057015ee9e97e9af49d"
+  integrity sha512-1psOBTxRfXavMlQVdLtpmZSQIhKYLYHxAJ7QYF5rcU34zI4HQ3aWGqSlezzDy5JcU+zfbDBDrtNbw40OauopIw==
   dependencies:
-    "@math.gl/core" "5.0.0-beta.4"
-    "@math.gl/geometry" "5.0.0-beta.4"
-    "@math.gl/geospatial" "5.0.0-beta.4"
+    "@math.gl/arrow" "5.0.0-beta.8"
+    "@math.gl/core" "5.0.0-beta.8"
+    "@math.gl/expressions" "5.0.0-beta.8"
+    "@math.gl/geometry" "5.0.0-beta.8"
+    "@math.gl/geospatial" "5.0.0-beta.8"
+    "@math.gl/tasks" "5.0.0-beta.8"
     "@types/geojson" "^7946.0.7"
     apache-arrow ">= 17.0.0"
     probe.gl "^5.0.0"
     zod "^4.1.12"
 
-"@loaders.gl/crypto@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/crypto/-/crypto-5.0.0-beta.4.tgz#5a4da91a0f903e5ff319898254aa0687754898ba"
-  integrity sha512-3Yn0x7FPRxDMnUrrjbj+1QtacLHXD4UQC3RzCazshcHQPWlOZ0OrkLQ44iaqSl8welyknECmTv1OmSLCY+3uEA==
+"@loaders.gl/crypto@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@loaders.gl/crypto/-/crypto-5.0.0-beta.8.tgz#0e90001a7948c3ecb1f9b4945938f96f88c68035"
+  integrity sha512-w9PHRC94yUHaPQm4jvFiVunWT49D2pRAsIhUZNRSh69w04rtK+i+ZvAW9hEppyMo/IRasiDi2Uc0MEbOjL6fLg==
 
-"@loaders.gl/documents@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/documents/-/documents-5.0.0-beta.4.tgz#5d042e3740dc4736cb05d9500c9af5e730a9f49f"
-  integrity sha512-MDiKOlvLVjyw9mKb2D5EwLMDBo3nqH3U2QYbSZTRKlbm3iGz9ce0m+nwy4kQRObbQlpCK6euElBl5i2LidSTuA==
+"@loaders.gl/documents@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@loaders.gl/documents/-/documents-5.0.0-beta.8.tgz#404f04ceab727d263a7e9ba502896f05a974319d"
+  integrity sha512-JEMPWL+gy1iUrOyPM3qFcB2TiEI5UQIsCoZQsi5mOCnFnTfslVbduWk7eXZjf2evGZeqJImP+/S6gIAfAwRlSg==
 
-"@loaders.gl/images@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-5.0.0-beta.4.tgz#bbb201bc0fabc0bf4a1acc4f3721edff33162c75"
-  integrity sha512-cVD3UIq+r8oSp92ISsY/lGPtYZGFhyWFqqL74BG+cV1XWbZf8d/IL2i7KzSKs6JrZXxhIvyyNQcDSiu4Z9nVjA==
+"@loaders.gl/images@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@loaders.gl/images/-/images-5.0.0-beta.8.tgz#5c8a13c5b1fdf86241892c8674ec5904319bcd82"
+  integrity sha512-/LX6t0h6elpGNY//HC6BiVHGJeXkpEDLIXCeeUK0He4ZBpaMS3gbmp+e3mBm1DiR93Ki/VF+aCLociX6MmwKOw==
   dependencies:
-    "@math.gl/core" "5.0.0-beta.4"
+    "@math.gl/core" "5.0.0-beta.8"
     zod "^4.1.12"
 
-"@loaders.gl/ogc@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/ogc/-/ogc-5.0.0-beta.4.tgz#d6adea9cb1c6694a39678535d694c36662888b2a"
-  integrity sha512-bnZec2B0GfNhkySsijMWO9nPUqBc4qgFvnrPWrr5fHxYT9JbSu+QeXQ7PSVyl06Pb7Z8F1HykBAQ083WLzHv4Q==
+"@loaders.gl/ogc@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@loaders.gl/ogc/-/ogc-5.0.0-beta.8.tgz#335e34342b08c5b709024c1e1e3a6de85a6872db"
+  integrity sha512-fEdbFReBj6SEtV4wKJVh55ngDHgjx1Mj4zOPpt2w+C99H++l90eXlTEyTC0zLr1FIPZPgLCOoFjs5YSGzK0e0A==
   dependencies:
-    "@loaders.gl/documents" "5.0.0-beta.4"
-    "@loaders.gl/images" "5.0.0-beta.4"
-    "@loaders.gl/raster" "5.0.0-beta.4"
-    "@math.gl/geospatial" "5.0.0-beta.4"
+    "@loaders.gl/documents" "5.0.0-beta.8"
+    "@loaders.gl/images" "5.0.0-beta.8"
+    "@loaders.gl/raster" "5.0.0-beta.8"
+    "@math.gl/geospatial" "5.0.0-beta.8"
     lerc "^4.2.0"
 
-"@loaders.gl/pointclouds@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/pointclouds/-/pointclouds-5.0.0-beta.4.tgz#f6af96bb77d48516448bb13e98dedae6b817ee0b"
-  integrity sha512-kHGUy7XFJJyxSRiOmRYSmVUQt4VW6MZGWjgmD9b92VM8fU3b09IEeVBWDd/VEv00g3RahyIogon7wVEVhQCiCA==
+"@loaders.gl/pointclouds@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@loaders.gl/pointclouds/-/pointclouds-5.0.0-beta.8.tgz#29ed36fda7a5d2fb97011dfb8f8333a64509f0b2"
+  integrity sha512-YnBM4gJXj9POueA0b/W1LpJEwEofDdDNrRQpjQLiXY8/DLiuIDHtU5FVZEqTqHrrtgm2snBgRoM+JM2TQI0LKw==
   dependencies:
-    "@math.gl/geospatial" "5.0.0-beta.4"
+    "@math.gl/geospatial" "5.0.0-beta.8"
     apache-arrow ">= 17.0.0"
   optionalDependencies:
     copc "0.0.8"
     laz-perf "^0.0.7"
 
-"@loaders.gl/raster@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/raster/-/raster-5.0.0-beta.4.tgz#db1633860f61471f0ba1ccac4d30744e8021a26c"
-  integrity sha512-J92Qn3LMxjilrGw2KEqhLjGTS2nk/NFYkq9b1ryKxwfglraVxCqzgVu+4gdvNyLwcWrDz7HZ6djo9X/OwOnz2Q==
+"@loaders.gl/raster@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@loaders.gl/raster/-/raster-5.0.0-beta.8.tgz#88623e115c3db333d52b5cfcb379d8d2dcee79a1"
+  integrity sha512-jQ+PN14Nt/ldatp+p0nj8oCTse9bng+5eMTLw1jvcqgejpkCRRQqH/WINJSljxb9rFj6F+lHcPnoYadyTqrrwg==
   dependencies:
-    "@loaders.gl/documents" "5.0.0-beta.4"
-    "@loaders.gl/images" "5.0.0-beta.4"
-    "@math.gl/geospatial" "5.0.0-beta.4"
+    "@loaders.gl/documents" "5.0.0-beta.8"
+    "@loaders.gl/images" "5.0.0-beta.8"
+    "@math.gl/geospatial" "5.0.0-beta.8"
 
-"@loaders.gl/scene@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/scene/-/scene-5.0.0-beta.4.tgz#10a3d3b6fc07d1f0343c56dbc3c5caca62b54b3f"
-  integrity sha512-uwPv88JNim7WEIucCTXxB6sJMm6hsZ+d5kpP0ZPBqXnZRdvP2d8h8ZMOxG4SWC99VlsVbEithtk08YrU94U2Rw==
+"@loaders.gl/scene@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@loaders.gl/scene/-/scene-5.0.0-beta.8.tgz#b3df3328518a5588557791a540d5450892b67180"
+  integrity sha512-sJBHxWlizoAlN/51MmShRdrfe7bpKce6OPYxviypxmTpJZg/4POK4kBBTaQwRhN2r4h7DiN0OQMaIQ5fNTaCvw==
   dependencies:
-    "@loaders.gl/documents" "5.0.0-beta.4"
-    "@loaders.gl/images" "5.0.0-beta.4"
-    "@math.gl/core" "5.0.0-beta.4"
-    "@math.gl/geometry" "5.0.0-beta.4"
+    "@loaders.gl/documents" "5.0.0-beta.8"
+    "@loaders.gl/images" "5.0.0-beta.8"
+    "@math.gl/core" "5.0.0-beta.8"
+    "@math.gl/geometry" "5.0.0-beta.8"
     zod "^4.1.12"
   optionalDependencies:
     draco3d "1.5.7"
@@ -1478,63 +1481,65 @@
     "@types/geojson" "^7946.0.7"
     apache-arrow ">= 17.0.0"
 
-"@loaders.gl/tables@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/tables/-/tables-5.0.0-beta.4.tgz#a3c19c5eab22e82fc8c14f154a5de212d9383aef"
-  integrity sha512-FpXvpMA6p01zu3gjTCR9tUbuK1G2VOPKB5m7bFDezxxUTPsEWMR25plBWGOQuw0WRNRqhroUzgx+dFfV9SIsWg==
+"@loaders.gl/tables@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@loaders.gl/tables/-/tables-5.0.0-beta.8.tgz#6db34080a3b40fee4ef5666ec84337de6c1caf1a"
+  integrity sha512-YJc8duHjBwgu8fUPQaIQ/n7qUQbVu9OdcYRn1SsVEgvIMF8WRRi8ZXXBdVU3Tc71BjXLUjj+ZUs5bJ6hiMGYCA==
   dependencies:
-    "@loaders.gl/compression" "5.0.0-beta.4"
-    "@loaders.gl/documents" "5.0.0-beta.4"
-    "@math.gl/geospatial" "5.0.0-beta.4"
+    "@loaders.gl/compression" "5.0.0-beta.8"
+    "@loaders.gl/documents" "5.0.0-beta.8"
+    "@math.gl/arrow" "5.0.0-beta.8"
+    "@math.gl/geospatial" "5.0.0-beta.8"
     apache-arrow ">= 17.0.0"
     probe.gl "^5.0.0"
   optionalDependencies:
     parquet-wasm "0.7.2"
 
-"@loaders.gl/tiles-3d@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/tiles-3d/-/tiles-3d-5.0.0-beta.4.tgz#76404f54aac33c923280eb9cb706ff99ed53d961"
-  integrity sha512-XnKvIc7Jfrf8GJDFuShTM5+umJwy/RXPljCN2+SL60yD2NAuTvpm23qfNvbPgnvxctw9+1lkYOmEveIvZwV/uw==
+"@loaders.gl/tiles-3d@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@loaders.gl/tiles-3d/-/tiles-3d-5.0.0-beta.8.tgz#310e6e33ddb3e15c055cdd105d0f8a7690cb2b4d"
+  integrity sha512-nKB57Tnmw5SRhjozo3MR5fEWkpxUbvX+zYahA46AWDCjqMBuiijYISYA5Bn1byOf8DE2VFaHknHSYLvZlF+zVw==
   dependencies:
-    "@loaders.gl/archives" "5.0.0-beta.4"
-    "@loaders.gl/compression" "5.0.0-beta.4"
-    "@loaders.gl/images" "5.0.0-beta.4"
-    "@loaders.gl/pointclouds" "5.0.0-beta.4"
-    "@loaders.gl/scene" "5.0.0-beta.4"
-    "@math.gl/core" "5.0.0-beta.4"
-    "@math.gl/dggs" "5.0.0-beta.4"
-    "@math.gl/earth" "5.0.0-beta.4"
-    "@math.gl/geometry" "5.0.0-beta.4"
-    "@math.gl/geospatial" "5.0.0-beta.4"
+    "@loaders.gl/archives" "5.0.0-beta.8"
+    "@loaders.gl/compression" "5.0.0-beta.8"
+    "@loaders.gl/images" "5.0.0-beta.8"
+    "@loaders.gl/pointclouds" "5.0.0-beta.8"
+    "@loaders.gl/scene" "5.0.0-beta.8"
+    "@math.gl/core" "5.0.0-beta.8"
+    "@math.gl/dggs" "5.0.0-beta.8"
+    "@math.gl/earth" "5.0.0-beta.8"
+    "@math.gl/geometry" "5.0.0-beta.8"
+    "@math.gl/geospatial" "5.0.0-beta.8"
     probe.gl "^5.0.0"
     zod "^4.1.12"
 
-"@loaders.gl/tiles@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/tiles/-/tiles-5.0.0-beta.4.tgz#df63fccecc73aa181ae98b7595705d4c47f008a9"
-  integrity sha512-T5sZtqC4+wSzwVd84gM86ilVsXprN3v7LB8+Mor1BH/zWhgh3mxEp7GySadBKuSH19dTdf93GMYNogpcIMqOww==
+"@loaders.gl/tiles@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@loaders.gl/tiles/-/tiles-5.0.0-beta.8.tgz#3e790e164b948a78261c9597e4e015fe50095a26"
+  integrity sha512-gPIcRlN5l4SaWzWp6qcf8SvOix6otoDTF9O5beEMfL/lH5d4usBAWgx/V843vOypQwTZLHTr0Ge3H6oIPfOJiQ==
   dependencies:
-    "@loaders.gl/compression" "5.0.0-beta.4"
-    "@loaders.gl/images" "5.0.0-beta.4"
-    "@loaders.gl/tables" "5.0.0-beta.4"
-    "@loaders.gl/tiles-3d" "5.0.0-beta.4"
+    "@loaders.gl/compression" "5.0.0-beta.8"
+    "@loaders.gl/images" "5.0.0-beta.8"
+    "@loaders.gl/tables" "5.0.0-beta.8"
+    "@loaders.gl/tiles-3d" "5.0.0-beta.8"
     "@maplibre/mlt" "^1.1.6"
-    "@math.gl/geometry" "5.0.0-beta.4"
-    "@math.gl/geospatial" "5.0.0-beta.4"
+    "@math.gl/arrow" "5.0.0-beta.8"
+    "@math.gl/geometry" "5.0.0-beta.8"
+    "@math.gl/geospatial" "5.0.0-beta.8"
     apache-arrow "^21.2.0"
     pbf "^3.2.1"
     pmtiles "^4.5.0"
     probe.gl "^5.0.0"
     zod "^4.1.12"
 
-"@luma.gl/anari@10.0.0-alpha.10":
-  version "10.0.0-alpha.10"
-  resolved "https://registry.npmjs.org/@luma.gl/anari/-/anari-10.0.0-alpha.10.tgz#4c85737a2e23573a4f04f8950f8bd5a8e0b8c2d3"
-  integrity sha512-a8op0erW1hYk+0SWUrp3QNPhoqyIpR5wfTpnUgwrqb8YRMWOgqefmIQAnaOV3BO1I1dyIDO2NfEZAiLuwd2iEQ==
+"@luma.gl/anari@10.0.0-alpha.14":
+  version "10.0.0-alpha.14"
+  resolved "https://registry.npmjs.org/@luma.gl/anari/-/anari-10.0.0-alpha.14.tgz#7912368941e708430a291004a5a5706fa3dba921"
+  integrity sha512-3J+IR8Isbqh76eUcabRv53+zBRmtCdLuP9YYQ+kvwi1lYN+B2i+rudKm1HTYQ+Xg0LXyIUA5HfwOOjZjU+6Ulw==
   dependencies:
-    "@luma.gl/graph" "10.0.0-alpha.10"
-    "@math.gl/core" "5.0.0-beta.4"
-    "@math.gl/geometry" "~5.0.0-beta.4"
+    "@luma.gl/graph" "10.0.0-alpha.14"
+    "@math.gl/core" "5.0.0-beta.8"
+    "@math.gl/geometry" "~5.0.0-beta.8"
     zod "^4.4.3"
 
 "@luma.gl/constants@^9.0.0":
@@ -1542,43 +1547,45 @@
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.0.27.tgz#65d65fa1ea407fd5f74bfa92dfba43261be33763"
   integrity sha512-NBkMim3u0xt4UDe4e69L6E/pq5XNxfX60GrggJDzfilVRfIbx5XwKhBXTyNjjtNEk4oc6uYLHWd/05jGRHcfLg==
 
-"@luma.gl/core@10.0.0-alpha.10":
-  version "10.0.0-alpha.10"
-  resolved "https://registry.npmjs.org/@luma.gl/core/-/core-10.0.0-alpha.10.tgz#930a2b9905dec2c9e0fac19b63dc91d735372772"
-  integrity sha512-F0iLpKqCsertPIJ96leUMyXoPCfNLX+i+x0PTXSB0LMbxiTljvn1jSA3yM7/kylZlrGA8Gq/eGjO2A52eq4IMg==
+"@luma.gl/core@10.0.0-alpha.14":
+  version "10.0.0-alpha.14"
+  resolved "https://registry.npmjs.org/@luma.gl/core/-/core-10.0.0-alpha.14.tgz#b7c13fed4e65ff5f8dd4583ae266436e1ca78119"
+  integrity sha512-zVkRk0Dxn41qui9IbplTNBJlUKZ8xmC/a5A4ExGc54lgV3odIR82qV+M53bU6ohIGHVi1becTGjmIVRx7W/14w==
   dependencies:
-    "@luma.gl/shaders" "10.0.0-alpha.10"
-    "@math.gl/core" "~5.0.0-beta.4"
+    "@luma.gl/shaders" "10.0.0-alpha.14"
+    "@math.gl/core" "~5.0.0-beta.8"
     "@types/offscreencanvas" "^2019.7.3"
     "@webgpu/types" "^0.1.69"
     probe.gl "^5.0.0"
 
-"@luma.gl/engine@10.0.0-alpha.10":
-  version "10.0.0-alpha.10"
-  resolved "https://registry.npmjs.org/@luma.gl/engine/-/engine-10.0.0-alpha.10.tgz#7f183a19f8d46e77b9f605aa44c5aec1205f6311"
-  integrity sha512-Mz4MZLU6M/9Q2s/SePKcsus9NiABUtoFHKwJCgl3/lgSQWx8EffTOo/oCTydgm33Oqk+pwtcMncBrMqyvWK4jg==
+"@luma.gl/engine@10.0.0-alpha.14":
+  version "10.0.0-alpha.14"
+  resolved "https://registry.npmjs.org/@luma.gl/engine/-/engine-10.0.0-alpha.14.tgz#69a632f99acdb299c16eeaeae4685bba3178c32c"
+  integrity sha512-UCVN+yKFxHlzcJ/Hu8Hsjo1N8MkEW+SJXgKQtECP+BKq3ZROxdIjulcfoXgp3D8wMEIojgK5JJylCYlWQLd7Xw==
   dependencies:
-    "@luma.gl/graph" "10.0.0-alpha.10"
+    "@luma.gl/graph" "10.0.0-alpha.14"
     "@mapbox/tiny-sdf" "^2.0.7"
-    "@math.gl/core" "~5.0.0-beta.4"
-    "@math.gl/geometry" "~5.0.0-beta.4"
+    "@math.gl/core" "~5.0.0-beta.8"
+    "@math.gl/geometry" "~5.0.0-beta.8"
     probe.gl "^5.0.0"
 
-"@luma.gl/graph@10.0.0-alpha.10":
-  version "10.0.0-alpha.10"
-  resolved "https://registry.npmjs.org/@luma.gl/graph/-/graph-10.0.0-alpha.10.tgz#e2799bb714aa36165bbcc4f867f43fffad028281"
-  integrity sha512-q0XWy6MHOv5mhDyIcMbTdeiWXMXHv9S8cCrzSU3ASXMyF5RjAsuGEQcsD+bAoqAUBgMkPlx66ecn1Lj2Q0wI9A==
+"@luma.gl/graph@10.0.0-alpha.14":
+  version "10.0.0-alpha.14"
+  resolved "https://registry.npmjs.org/@luma.gl/graph/-/graph-10.0.0-alpha.14.tgz#e1c8d621c73c83a6a6479e71cb5dcb9f0137fb2d"
+  integrity sha512-KXKea7KhsNaLtmzwxhfMeIChUY4ye9yMU5Acgu2usY0d7ZCFh54YiHpCEkn96453jDV9xPOdNadskqo4N85bIg==
   dependencies:
-    "@math.gl/core" "~5.0.0-beta.4"
-    "@math.gl/geospatial" "~5.0.0-beta.4"
+    "@math.gl/arrow" "~5.0.0-beta.8"
+    "@math.gl/core" "~5.0.0-beta.8"
+    "@math.gl/expressions" "~5.0.0-beta.8"
+    "@math.gl/geospatial" "~5.0.0-beta.8"
     probe.gl "^5.0.0"
 
-"@luma.gl/shaders@10.0.0-alpha.10":
-  version "10.0.0-alpha.10"
-  resolved "https://registry.npmjs.org/@luma.gl/shaders/-/shaders-10.0.0-alpha.10.tgz#3992497643d0ddddb521b07551e8fc2cfaf7f69c"
-  integrity sha512-S+ojM6kS1spB1VqCiE/JU5Fk+DwZF6KAdBv5/ToEDh4OeqYeAnOP1L5GGDaEE5uFaov9aYX6ZeCq5wH5Fl77jA==
+"@luma.gl/shaders@10.0.0-alpha.14":
+  version "10.0.0-alpha.14"
+  resolved "https://registry.npmjs.org/@luma.gl/shaders/-/shaders-10.0.0-alpha.14.tgz#fabdcd66e4b670ce019e35bc169a2b19943a85e7"
+  integrity sha512-LZLJJeOlI3o11bkHW/LzWmJsa1hu4GCXY9oKGnVHkqn7PUke4geZbnY9+hRNFw5uNHCrO0/xEGUnLfKFNTDFSQ==
   dependencies:
-    "@math.gl/core" "~5.0.0-beta.4"
+    "@math.gl/core" "~5.0.0-beta.8"
 
 "@lumino/algorithm@^1.9.0", "@lumino/algorithm@^1.9.2":
   version "1.9.2"
@@ -1899,6 +1906,15 @@
     "@types/geojson" "^7946.0.16"
     pbf "^5.1.0"
 
+"@math.gl/arrow@5.0.0-beta.8", "@math.gl/arrow@~5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@math.gl/arrow/-/arrow-5.0.0-beta.8.tgz#b186ecaccd66e68342e366f26210f06b91bddddf"
+  integrity sha512-qdIn3V2lRJ5n2JPVqrMgwIqSQLOShQgzYCJyJDAwD0HVw00vhthZn5WY+vPPjH0nbaR/kR0Aj2izsULquf5KVA==
+  dependencies:
+    "@math.gl/core" "5.0.0-beta.8"
+    "@math.gl/geometry" "5.0.0-beta.8"
+    "@math.gl/tasks" "5.0.0-beta.8"
+
 "@math.gl/core@4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@math.gl/core/-/core-4.1.0.tgz#2f4a1644c6f8fb50aacae57a02f1297f933aefbd"
@@ -1906,58 +1922,76 @@
   dependencies:
     "@math.gl/types" "4.1.0"
 
-"@math.gl/core@5.0.0-beta.4", "@math.gl/core@~5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@math.gl/core/-/core-5.0.0-beta.4.tgz#efaa06d03638a6d3d8bf44533a7e5341df77a312"
-  integrity sha512-FXyDkeS4Dgs7tRmr6rPz2KO7HC+K304HCeavOx5yRtBX9YJuOWLDZiJ84nQq096JZaBYX+5xiMXTrftCVhTS/g==
+"@math.gl/core@5.0.0-beta.8", "@math.gl/core@~5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@math.gl/core/-/core-5.0.0-beta.8.tgz#5663529187afe6329da3ffcc804572387917a5c0"
+  integrity sha512-5aJzRyUe0kAoCHsenFHd4/Gkqe0TLMOexggi1oHp5chrIETN878LjSChE8NRVA3RGL3uK6GeW00fZfC8kSeDcQ==
 
-"@math.gl/dggs@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@math.gl/dggs/-/dggs-5.0.0-beta.4.tgz#59d6786d4d99982def5f0461db395572a8670f73"
-  integrity sha512-CpomkcR/dNfRXBUx2h991uhrcV12SsSZbPtkMkDeAgoydKgr9W7RWtG9Xa0i85yHGqcqg57yAYQLmPUYBkvj+g==
+"@math.gl/dggs@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@math.gl/dggs/-/dggs-5.0.0-beta.8.tgz#0bddf6582113e3530cab82fe2229628bb7252ace"
+  integrity sha512-VXbnin/2NPaMEqm9llTKdT2ierjT4LXjONNOYoffDRn9K3uVLXHnRFq4NcTOo8JqyJNhitkH5Amz81O79yE9Ww==
   dependencies:
-    "@math.gl/core" "5.0.0-beta.4"
+    "@math.gl/core" "5.0.0-beta.8"
     a5-js "^0.10.0"
     h3-js "^4.5.0"
     open-location-code "^1.0.3"
 
-"@math.gl/earth@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@math.gl/earth/-/earth-5.0.0-beta.4.tgz#2c827fe2aac2c81d7833952f405757c207e1ad52"
-  integrity sha512-pJ5A9Ubf5SH0+aUPFga5PCLQYBjX+Du0HAvitQuuZXPOpJNXYmEHJ2LGZmW9oBvlkaYTih7yNSD4ujFOsvBSDw==
+"@math.gl/earth@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@math.gl/earth/-/earth-5.0.0-beta.8.tgz#2549c1e12ed90f78bcd170ffc7ba919bf0fb9777"
+  integrity sha512-dlrnanUTbAiCZEDufK/xd7w465VVKnzx6TNwDXU7n4GNPlDEbnHMc/mELHnTcT88IwLvYo9QyOMVkhXZSxxQsQ==
   dependencies:
-    "@math.gl/core" "5.0.0-beta.4"
+    "@math.gl/core" "5.0.0-beta.8"
     astronomy-engine "2.1.19"
 
-"@math.gl/geometry@5.0.0-beta.4", "@math.gl/geometry@~5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@math.gl/geometry/-/geometry-5.0.0-beta.4.tgz#4de19945a661cfa9dc9c513f3ba18ed118c78f9c"
-  integrity sha512-EV+1GA0hYxvoZYkfC9LkbphEhmRp5BLVWJN96O3f3aWu3UWFrUkOoPDZcANgyIEJvxpBckn1iUzC8RAJT23brA==
+"@math.gl/expressions@5.0.0-beta.8", "@math.gl/expressions@~5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@math.gl/expressions/-/expressions-5.0.0-beta.8.tgz#77f828a0f24feecf3dc7778125f4584dbb80ab00"
+  integrity sha512-V1oJJtKWKcFnTHGcJjod9DxLCDziZfN6jlTO8Mj7n8Q/syo4eNvvsWytJbYxby0HcwEfxl0ZIroZkZUcOKvnnA==
   dependencies:
-    "@math.gl/core" "5.0.0-beta.4"
+    "@math.gl/arrow" "5.0.0-beta.8"
+    "@math.gl/core" "5.0.0-beta.8"
+    "@math.gl/geometry" "5.0.0-beta.8"
+    "@math.gl/tasks" "5.0.0-beta.8"
 
-"@math.gl/geospatial@5.0.0-beta.4", "@math.gl/geospatial@~5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@math.gl/geospatial/-/geospatial-5.0.0-beta.4.tgz#085133f9644d23af49a5a8674fa0fb58c920150d"
-  integrity sha512-hTRQ4UfrTcxzJP1EKVVsuBy/KLPx/8zlK9oBdGkmZA+fS56+VVaRlYPWJZhKDJ9BwRdZ4RRuMaSVF5jUOkgrzQ==
+"@math.gl/geometry@5.0.0-beta.8", "@math.gl/geometry@~5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@math.gl/geometry/-/geometry-5.0.0-beta.8.tgz#3239f8c7427690f90565e6a2fcda8128369df9b3"
+  integrity sha512-CHK7HHkHCFjxySpBzNOkvXTtLEIgZOqyQSv0GQMLtdSKEh3x8Q+X+ansiZ/EfvHk6jkfv/HQAySzgL4s7uM0tw==
+  dependencies:
+    "@math.gl/core" "5.0.0-beta.8"
+
+"@math.gl/geospatial@5.0.0-beta.8", "@math.gl/geospatial@~5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@math.gl/geospatial/-/geospatial-5.0.0-beta.8.tgz#0c24fe14925f512d895c4a93501cf74fba1a6952"
+  integrity sha512-c16Vb2pJrVceKpsVh6IercBC1F5jZR2PXt9noAf7uDsTyUSpsxcm1IVDMHfz9Od5DXeUhcsQCjq8Re4t0M/mdQ==
   dependencies:
     "@mapbox/martini" "0.2.0"
-    "@math.gl/core" "5.0.0-beta.4"
-    "@math.gl/geometry" "5.0.0-beta.4"
-    "@math.gl/web-mercator" "5.0.0-beta.4"
+    "@math.gl/arrow" "5.0.0-beta.8"
+    "@math.gl/core" "5.0.0-beta.8"
+    "@math.gl/expressions" "5.0.0-beta.8"
+    "@math.gl/geometry" "5.0.0-beta.8"
+    "@math.gl/tasks" "5.0.0-beta.8"
+    "@math.gl/web-mercator" "5.0.0-beta.8"
     polygon-clipping "0.15.7"
+
+"@math.gl/tasks@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@math.gl/tasks/-/tasks-5.0.0-beta.8.tgz#3dc3a2c2df98a682eca53b6aa9e418a354e0b82d"
+  integrity sha512-KNy9fVivBk2d0NThFl76UTN8clG+Xt+MxlrPTSs/8nEzU53qlg0l2Xay8OQUFhHmjAh6dn8mDomc3pIiOnmquA==
 
 "@math.gl/types@4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@math.gl/types/-/types-4.1.0.tgz#ce28c06bcfe07d21311e00aeb25de82fecf7f393"
   integrity sha512-clYZdHcmRvMzVK5fjeDkQlHUzXQSNdZ7s4xOqC3nJPgz4C/TZkUecTo9YS4PruZqtDda/ag4erndP0MIn40dGA==
 
-"@math.gl/web-mercator@5.0.0-beta.4":
-  version "5.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-5.0.0-beta.4.tgz#bd746836dd753500867f2cbe324eacb92ab5f822"
-  integrity sha512-LIwcZFavFGSuyChPkH5jEW203MvXW41KpNlaeUkV+PhFMTTcvYZgn15Dzpqumzjzb17UwAFzffY9ajSk8TXp+A==
+"@math.gl/web-mercator@5.0.0-beta.8":
+  version "5.0.0-beta.8"
+  resolved "https://registry.npmjs.org/@math.gl/web-mercator/-/web-mercator-5.0.0-beta.8.tgz#197e50b2ee59d1e28c7eca466bda540bc6e1adba"
+  integrity sha512-Ci4eWsHgwYXRTKGqnr3kPsAIMFNTo0dlV5sUZ0nHaIkgj+koohMF/krnS7/+1pbkgiMGmiqOVStDlP8RwGYn4Q==
   dependencies:
-    "@math.gl/core" "5.0.0-beta.4"
+    "@math.gl/core" "5.0.0-beta.8"
 
 "@math.gl/web-mercator@^4.1.0":
   version "4.1.0"

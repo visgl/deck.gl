@@ -166,3 +166,149 @@ The number of bins in the aggregated result.
 ## Source
 
 [modules/aggregation-layers/src/common/aggregator/aggregator.ts](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/common/aggregator/aggregator.ts)
+
+## Supplying an aggregator to a layer
+
+`ScreenGridLayer`, `GridLayer`, `HexagonLayer`, and `ContourLayer` accept an optional
+`aggregator` instance. When omitted, the layer creates its default aggregator using the
+existing layer settings.
+
+```typescript
+new ScreenGridLayer({
+  data,
+  aggregator: new CustomAggregator()
+});
+```
+
+The layer owns the supplied instance and destroys it when replaced or finalized. Keep the
+same instance across layer updates; do not share it between layers or reuse it after disposal.
+An optional `initialize(device)` method is called when the layer adopts the instance, before
+`setProps`, so the constructor need not have access to a device. Extension changes mark the
+same custom instance dirty without destroying or reinitializing it. The default implementations
+are still recreated on extension changes.
+
+Custom implementations receive `binIdRange`, `binOptions`, operations, and projection/extension
+settings through `setProps`. Accessor inputs remain available as `Attribute` objects; `Attribute.getGPUVector()`
+exposes their typed GPU columns. Allocate outputs in `update()` before sublayers are built,
+and encode GPU work in `preDraw()` before those sublayers draw. Notify `onUpdate` when a
+channel's output changes, following the existing aggregator lifecycle.
+
+### GPU column inputs
+
+The optional `positions` and `weights` props pass borrowed luma `GPUVector` columns directly
+to a custom aggregator, bypassing accessor generation. `positions.length` determines the
+input count unless `numInstances` explicitly selects a shorter prefix. `weights` contains one
+column for ScreenGridLayer/ContourLayer, or two columns
+(color then elevation) for GridLayer/HexagonLayer. Each weight column must have the same
+length as positions. The custom aggregator defines supported input formats and chunking.
+GridLayer, HexagonLayer, and ContourLayer also require `dataBounds: [min, max]` in input
+coordinates because GPU-only positions cannot supply CPU bounds.
+
+Position columns remain in their input coordinate system. The custom aggregator is responsible
+for converting them into the binning coordinate system, including any custom projection.
+Projection settings retain the layer's coordinate system, origin, and model matrix for these
+columns; accessor-generated position attributes have already applied CPU preprojection.
+
+```typescript
+new ScreenGridLayer({
+  positions: positionVector,
+  weights: [weightVector],
+  aggregator: new CustomAggregator(),
+  colorDomain: [0, 100]
+});
+```
+
+Input columns remain caller-owned. Replace column references when their data changes, or
+explicitly invalidate the aggregator when updating storage in place. GPU column inputs require
+a custom aggregator, except for the built-in [ScreenGrid](./screen-grid-layer.md#compute-aggregation) and
+[Grid](./grid-layer.md#compute-aggregation) compute paths,
+and do not support layer extensions or accessor fallbacks.
+
+### GPU column results
+
+`getBins()` and `getResult(channel)` may return either the existing `BinaryAttribute` or a
+borrowed `GPUVector`. Cell rendering uses the same AttributeManager/`GPUVectorModel` path as
+accessor-backed layers, including ArcLayer. The vector adapter preserves offsets and strides
+without uploading, copying, or reading the buffer. Results require one concrete
+buffer chunk: `float32x2` bin IDs and `float32` channel values. Result vectors and
+buffers remain owned by the aggregator, and must stay valid through sublayer drawing.
+
+Domains are returned as JavaScript arrays by `getResultDomain()`. Supplying explicit
+color/elevation domains and omitting domain callbacks avoids automatic domain readback for
+custom aggregators. Explicit domain callbacks receive the aggregation domain through
+`getResultDomain()`.
+
+Percentile and ordinal scales access results on the CPU. Picking uses `getBin()`.
+ContourLayer uses CPU-readable results for marching squares.
+
+### Asynchronous result metadata
+
+Picking and percentile scales need results on the CPU. An aggregator can copy its GPU
+results asynchronously and return the copy from `getResultValues(channel)`. Set `isLoaded`
+to false while the copy is pending, then call `onUpdate` when it is ready. Rendering
+continues to use the GPU buffers returned by `getResult()`.
+
+### Comparing GPU and CPU aggregation with the same inputs
+
+[`ReadbackAggregator`](./cpu-aggregator.md#readbackaggregator) aggregates GPU column inputs
+on the CPU, so you can compare CPU and GPU aggregation on the same buffers. It copies the
+columns back first, and the layer reports `isLoaded: false` until aggregation finishes.
+Columns need `COPY_SRC` usage. See the [constructor docs](./cpu-aggregator.md#readbackaggregator)
+for accepted formats. Strided and interleaved columns work.
+
+For Cartesian GridLayer inputs, compare the native WebGPU aggregator with the CPU adapter.
+Both branches use the same WebGPU device; WebGL does not accept these borrowed columns:
+
+```typescript
+import {GridLayer, ReadbackAggregator} from '@deck.gl/aggregation-layers';
+import {Deck, OrthographicView} from '@deck.gl/core';
+import {luma} from '@luma.gl/core';
+import {webgpuAdapter} from '@luma.gl/webgpu';
+
+const device = await luma.createDevice({adapters: [webgpuAdapter], type: 'webgpu'});
+// Create positionVector and weight vectors on this same device.
+
+const createCPUAggregator = () => new ReadbackAggregator({
+  dimensions: 2,
+  weightAttributes: ['colorWeights', 'elevationWeights'],
+  getBin: {
+    sources: ['positions'],
+    getValue: ({positions}, index, {cellSizeCommon, cellOriginCommon}) => [
+      Math.floor((positions[0] - cellOriginCommon[0]) / cellSizeCommon[0]),
+      Math.floor((positions[1] - cellOriginCommon[1]) / cellSizeCommon[1])
+    ]
+  },
+  getValue: [
+    {sources: ['colorWeights'], getValue: ({colorWeights}) => colorWeights},
+    {sources: ['elevationWeights'], getValue: ({elevationWeights}) => elevationWeights}
+  ]
+});
+
+// Keep the adapter while CPU mode is active; replace it on each switch back to CPU.
+let cpuAggregator = null;
+function render(useCPU) {
+  if (useCPU && !cpuAggregator) cpuAggregator = createCPUAggregator();
+  if (!useCPU) cpuAggregator = null;
+  return new GridLayer({
+    coordinateSystem: 'cartesian',
+    gpuAggregation: true,
+    positions: positionVector,
+    weights: [colorWeightVector, elevationWeightVector],
+    dataBounds,
+    cellSize: 10,
+    colorDomain: [0, 100],
+    elevationDomain: [0, 100],
+    aggregator: useCPU ? cpuAggregator : undefined
+  });
+}
+const deck = new Deck({device, views: new OrthographicView(), layers: [render(false)]});
+// Switch modes with deck.setProps({layers: [render(useCPU)]}).
+```
+
+Limitations:
+
+- `getBin` receives untransformed positions. Project other coordinate systems in `getBin`.
+- Layer extensions do not apply. Picking returns bins, not original JavaScript objects.
+- The layer destroys removed adapters. Create a new one for each switch to CPU.
+- After writing to a buffer in place, call the adapter's `setNeedsUpdate()`.
+- CPU timings include readback. Compare end-to-end frame times.
