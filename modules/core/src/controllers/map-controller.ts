@@ -70,13 +70,17 @@ export type MapStateProps = {
   minZoom?: number;
   maxPitch?: number;
   minPitch?: number;
+  /** Minimum bearing in degrees, supported by GlobeController. Defaults to no limit. */
+  minBearing?: number;
+  /** Maximum bearing in degrees, supported by GlobeController. Defaults to no limit. */
+  maxBearing?: number;
 
   /** Normalize viewport props to fit map height into viewport. Default `true` */
   normalize?: boolean;
 
   maxBounds?: ControllerProps['maxBounds'];
   maxBoundsPadding?: ControllerProps['maxBoundsPadding'];
-  /** Enables elastic bounds and zoom constraints during interaction. Defaults to `false`. */
+  /** Enables elastic constraints during continuous interaction. Defaults to `false`. */
   rubberBand?: boolean;
   /** Globe navigation policy, forwarded by GlobeController. Default `'map'`. */
   navigation?: ControllerProps['navigation'];
@@ -148,6 +152,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       minZoom = 0,
       maxPitch = 60,
       minPitch = 0,
+      minBearing,
+      maxBearing,
 
       /** Interaction states, required to calculate change during transform */
       /* The point on map being grabbed when the operation first started */
@@ -193,6 +199,9 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         minZoom,
         maxPitch,
         minPitch,
+        // GlobeController-only limits stay out of view states unless supplied.
+        ...((minBearing === undefined ? {} : {minBearing}) as {minBearing: number}),
+        ...((maxBearing === undefined ? {} : {maxBearing}) as {maxBearing: number}),
         normalize,
         position,
         maxBounds,
@@ -269,30 +278,36 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
    * Start rotating
    * @param {[Number, Number]} pos - position on screen where the center is
    */
-  rotateStart({pos}: {pos: [number, number]}): MapState {
+  rotateStart({pos}: {pos: [number, number]}, constraintContext?: ConstraintContext): MapState {
     const altitude = this.getAltitude?.(pos);
 
-    return this._getUpdatedState({
-      startRotatePos: pos,
-      startRotateLngLat: altitude !== undefined ? this._unproject3D(pos, altitude) : undefined,
-      startBearing: this.getViewportProps().bearing,
-      startPitch: this.getViewportProps().pitch
-    });
+    return this._getUpdatedState(
+      {
+        startRotatePos: pos,
+        startRotateLngLat: altitude !== undefined ? this._unproject3D(pos, altitude) : undefined,
+        startBearing: this.getViewportProps().bearing,
+        startPitch: this.getViewportProps().pitch
+      },
+      constraintContext
+    );
   }
 
   /**
    * Rotate
    * @param {[Number, Number]} pos - position on screen where the center is
    */
-  rotate({
-    pos,
-    deltaAngleX = 0,
-    deltaAngleY = 0
-  }: {
-    pos?: [number, number];
-    deltaAngleX?: number;
-    deltaAngleY?: number;
-  }): MapState {
+  rotate(
+    {
+      pos,
+      deltaAngleX = 0,
+      deltaAngleY = 0
+    }: {
+      pos?: [number, number];
+      deltaAngleX?: number;
+      deltaAngleY?: number;
+    },
+    constraintContext?: ConstraintContext
+  ): MapState {
     const {startRotatePos, startRotateLngLat, startBearing, startPitch} = this.getState();
 
     if (!startRotatePos || startBearing === undefined || startPitch === undefined) {
@@ -300,7 +315,13 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     }
     let newRotation;
     if (pos) {
-      newRotation = this._getNewRotation(pos, startRotatePos, startPitch, startBearing);
+      newRotation = this._getNewRotation(
+        pos,
+        startRotatePos,
+        startPitch,
+        startBearing,
+        constraintContext
+      );
     } else {
       newRotation = {
         bearing: startBearing + deltaAngleX,
@@ -316,26 +337,32 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       });
       // Use panByPosition3D if available (WebMercatorViewport), otherwise fall back to panByPosition
       const panMethod = 'panByPosition3D' in rotatedViewport ? 'panByPosition3D' : 'panByPosition';
-      return this._getUpdatedState({
-        ...newRotation,
-        ...rotatedViewport[panMethod](startRotateLngLat, startRotatePos)
-      });
+      return this._getUpdatedState(
+        {
+          ...newRotation,
+          ...rotatedViewport[panMethod](startRotateLngLat, startRotatePos)
+        },
+        constraintContext
+      );
     }
 
-    return this._getUpdatedState(newRotation);
+    return this._getUpdatedState(newRotation, constraintContext);
   }
 
   /**
    * End rotating
    * Must call if `rotateStart()` was called
    */
-  rotateEnd(): MapState {
-    return this._getUpdatedState({
-      startRotatePos: null,
-      startRotateLngLat: null,
-      startBearing: null,
-      startPitch: null
-    });
+  rotateEnd(constraintContext?: ConstraintContext): MapState {
+    return this._getUpdatedState(
+      {
+        startRotatePos: null,
+        startRotateLngLat: null,
+        startBearing: null,
+        startPitch: null
+      },
+      constraintContext
+    );
   }
 
   /**
@@ -651,7 +678,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     pos: [number, number],
     startPos: [number, number],
     startPitch: number,
-    startBearing: number
+    startBearing: number,
+    _constraintContext?: ConstraintContext
   ): {
     pitch: number;
     bearing: number;
