@@ -90,7 +90,10 @@ export async function evaluateQueryProps(
 
   return Object.fromEntries(
     Object.entries(expressions).map(([name, expression]) => {
-      const value = evaluate(expression as any, results);
+      const raw = evaluate(expression as any, results);
+      const value = typeof raw === 'bigint' && raw <= BigInt(Number.MAX_SAFE_INTEGER) && raw >= BigInt(Number.MIN_SAFE_INTEGER)
+        ? Number(raw)
+        : raw;
       if (typeof value !== 'number' || !Number.isFinite(value)) {
         throw new Error(`_queryProps.${name} must evaluate to a finite number`);
       }
