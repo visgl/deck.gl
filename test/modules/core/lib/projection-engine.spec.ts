@@ -9,6 +9,7 @@ import {
   Deck,
   Layer,
   LayerManager,
+  MapView,
   WebMercatorViewport,
   _CustomProjectionView as CustomProjectionView
 } from '@deck.gl/core';
@@ -296,5 +297,39 @@ test('late source failures from a replaced engine do not affect the new layer co
     expect(errors).not.toHaveBeenCalled();
   } finally {
     manager.finalize();
+  }
+});
+
+test('engine replacement reinitializes application-defined views', () => {
+  class EngineView extends MapView {
+    #engine?: CRSEngine;
+    initialize({projectionEngine}: {projectionEngine?: CRSEngine} = {}) {
+      this.#engine = projectionEngine;
+    }
+    get engine() {
+      return this.#engine;
+    }
+  }
+  const a = engine(vi.fn(async () => descriptor(2)));
+  const b = engine(vi.fn(async () => descriptor(4)));
+  const view = new EngineView({id: 'application-view'});
+  const props = {
+    views: [view],
+    width: 400,
+    height: 300,
+    viewState: {longitude: 0, latitude: 0, zoom: 0}
+  };
+  const first = new ViewManager({...props, projectionEngine: a});
+  const second = new ViewManager({...props, projectionEngine: a});
+  try {
+    expect((first.getView(view.id) as EngineView).engine).toBe(a);
+    first.setProps({projectionEngine: b});
+    expect((first.getView(view.id) as EngineView).engine).toBe(b);
+    expect((second.getView(view.id) as EngineView).engine).toBe(a);
+    first.setProps({projectionEngine: null});
+    expect((first.getView(view.id) as EngineView).engine).toBe(defaultProjectionEngine);
+  } finally {
+    first.finalize();
+    second.finalize();
   }
 });

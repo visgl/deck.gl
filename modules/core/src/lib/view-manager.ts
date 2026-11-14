@@ -420,12 +420,13 @@ export default class ViewManager<ViewsT extends View[]> {
     const previousViews = this.views;
     // Custom views own engine-specific async state. Clone caller definitions so sharing
     // a View across Deck instances cannot change another manager's engine or viewport.
+    // Engine replacement also reinitializes application-defined View subclasses.
     // Retain pending and ready views, but let a fresh descriptor retry failed initialization.
     views = views.map(view => {
       const previous = previousViews.find(candidate => candidate.id === view.id);
       return !engineChanged && previous && !this._failedViews.has(previous) && previous.equals(view)
         ? previous
-        : view instanceof CustomProjectionView
+        : engineChanged || view instanceof CustomProjectionView
           ? view.clone({})
           : view;
     });
