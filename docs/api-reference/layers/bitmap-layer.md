@@ -148,6 +148,9 @@ The image data will be converted to a [Texture](https://luma.gl/docs/api-referen
 
 #### `bounds` (number[4] | Position[4]) {#bounds}
 
+When `positions` is supplied, it defines the rendered mesh. For GPU-only positions, `bounds`
+provides the footprint for view fitting.
+
 Supported formats:
 
 - Coordinates of the bounding box of the bitmap `[left, bottom, right, top]`
@@ -155,6 +158,38 @@ Supported formats:
 
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
 `top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
+
+#### `positions` (object, optional) {#positions}
+
+* Default: `null`
+
+Mesh vertex positions, replacing the quad from `bounds`. Accepts numeric Arrow XY/XYZ
+fixed-size lists or a `float32x2`/`float32x3` GPUVector. With GPU-only positions,
+set `bounds` to the footprint for view fitting.
+
+#### `texCoords` (object, optional) {#texcoords}
+
+* Default: `null`
+
+Texture coordinates per vertex as Arrow XY fixed-size lists or a `float32x2` GPUVector.
+Supply with `positions` and the same vertex count. `(0, 0)` is the image's top-left corner.
+These coordinates take precedence over `_imageCoordinateSystem`.
+
+#### `indices` (object, optional) {#indices}
+
+* Default: `null`
+
+Optional `uint16` or `uint32` triangle indices. Without indices, every three vertices form
+a triangle. Removing all mesh props restores the quad from `bounds`.
+
+Remarks:
+
+* Each input must be a single Arrow chunk or GPU buffer.
+* GPUVector inputs remain owned by the application. Keep them alive while the layer uses them.
+* GPU-only positions require a view that does not convert positions on the CPU.
+* Mesh inputs cannot be async iterables, and mesh changes do not transition.
+* Mesh inputs cannot be combined with a positive `_projectionTolerance`.
+* See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates) for updates.
 
 #### `_projectionTolerance` (number, optional) {#_projectiontolerance}
 

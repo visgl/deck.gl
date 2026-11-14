@@ -15,6 +15,7 @@ export default defineConfig({
       '@deck.gl/proposals/effects/query': resolve(root, 'modules/proposals/src/effects/query'),
       '@deck.gl/proposals/layers': resolve(root, 'modules/proposals/src/layers'),
       '@deck.gl/proposals/effects': resolve(root, 'modules/proposals/src/effects'),
+      '@deck.gl/core/arrow': resolve(root, 'modules/core/src/lib/luma-upstream/arrow-converter.ts'),
       '@deck.gl/core': resolve(root, 'modules/core/src'),
       '@deck.gl/layers': resolve(root, 'modules/layers/src'),
       '@deck.gl/geo-layers': resolve(root, 'modules/geo-layers/src'),

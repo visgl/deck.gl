@@ -4,7 +4,7 @@
 
 import {
   Layer,
-  _GPUVectorModel as GPUVectorModel,
+  _GPUVectorModel as DeckGPUVectorModel,
   color as colorModule,
   project32,
   picking,
@@ -19,7 +19,8 @@ import {
   Position,
   DefaultProps
 } from '@deck.gl/core';
-import type {Model} from '@luma.gl/engine';
+import {GPUVectorModel} from '@luma.gl/engine';
+import {BitmapLayerMesh, hasBitmapMesh, type BitmapMeshProps} from './bitmap-layer-mesh';
 import type {SamplerProps, Texture} from '@luma.gl/core';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
@@ -32,6 +33,9 @@ import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
 const defaultProps: DefaultProps<BitmapLayerProps> = {
+  positions: {type: 'object', value: null, compare: false},
+  texCoords: {type: 'object', value: null, compare: false},
+  indices: {type: 'object', value: null, compare: false},
   image: {type: 'image', value: null, async: true},
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
   _imageCoordinateSystem: 'default',
@@ -54,7 +58,7 @@ export type BitmapBoundingBox =
   | [Position, Position, Position, Position];
 
 /** Properties added by BitmapLayer. */
-type _BitmapLayerProps = {
+type _BitmapLayerProps = BitmapMeshProps & {
   data: never;
   /**
    * The image to display.
@@ -137,7 +141,8 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   state!: {
     subdivisionStep?: number;
     disablePicking?: boolean;
-    model?: Model;
+    model?: GPUVectorModel;
+    typedMesh?: BitmapLayerMesh;
     mesh?: any;
     coordinateConversion: number;
     bounds: [number, number, number, number];
@@ -152,7 +157,42 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
+  /** Uses mesh vertices as rows for extension attributes. */
+  getNumInstances(): number {
+    return this.state?.typedMesh?.getVertexCount() ?? super.getNumInstances();
+  }
+
+  /** Includes pending Arrow conversion in the layer loading state. */
+  get isLoaded(): boolean {
+    return !this.state?.typedMesh?.loading && super.isLoaded;
+  }
+
+  /** Uses CPU mesh bounds, or the supplied footprint for GPU-only positions. */
+  getBounds(): [number[], number[]] | null {
+    if (!this.state?.typedMesh) return super.getBounds();
+    if (this.state.typedMesh.bounds) return this.state.typedMesh.bounds;
+    const {bounds} = this.props;
+    if (isRectangularBounds(bounds))
+      return [
+        [Math.min(bounds[0], bounds[2]), Math.min(bounds[1], bounds[3]), 0],
+        [Math.max(bounds[0], bounds[2]), Math.max(bounds[1], bounds[3]), 0]
+      ];
+    return [0, 1].map(side =>
+      [0, 1, 2].map(i => Math[side ? 'max' : 'min'](...bounds.map(point => point[i] || 0)))
+    ) as [number[], number[]];
+  }
+
+  /** Cancels mesh preparation and releases converted buffers on removal. */
+  finalizeState(context) {
+    super.finalizeState(context);
+    this.state.typedMesh?.destroy();
+  }
+
   initializeState() {
+    this.initializeMeshAttributes();
+  }
+
+  private initializeMeshAttributes(): void {
     const attributeManager = this.getAttributeManager()!;
 
     const noAlloc = true;
@@ -199,11 +239,26 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
-  updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
+  updateState(params: UpdateParameters<this>): void {
+    if (hasBitmapMesh(this.props)) {
+      if (this.props._projectionTolerance) {
+        throw new Error('_projectionTolerance is not supported with bitmap mesh inputs');
+      }
+      this.updateMeshState(params);
+      return;
+    }
+    const {props, oldProps, changeFlags} = params;
+    const leavingMesh = Boolean(this.state.typedMesh);
+    if (leavingMesh) {
+      this.state.model?.destroy();
+      this.state.typedMesh!.destroy();
+      this.state.typedMesh = undefined;
+      this.initializeMeshAttributes();
+    }
     // setup model first
     const attributeManager = this.getAttributeManager()!;
 
-    if (changeFlags.extensionsChanged) {
+    if (leavingMesh || changeFlags.extensionsChanged) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       attributeManager.invalidateAll();
@@ -211,6 +266,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
 
     const subdivisionStep = this.getSubdivisionStep();
     if (
+      leavingMesh ||
       props.bounds !== oldProps.bounds ||
       changeFlags.projectionChanged ||
       this.state.subdivisionStep !== subdivisionStep ||
@@ -230,6 +286,51 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       this.setState({mesh, subdivisionStep, ...this._getCoordinateUniforms()});
     } else if (props._imageCoordinateSystem !== oldProps._imageCoordinateSystem) {
       this.setState(this._getCoordinateUniforms());
+    }
+  }
+
+  /** Converts changed mesh inputs while retaining the last successful replacement. */
+  private updateMeshState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
+    const enteringMesh = !this.state.typedMesh;
+    if (enteringMesh) {
+      this.getAttributeManager()!.remove(['indices', 'positions', 'texCoords']);
+      this.state.typedMesh = new BitmapLayerMesh(this.context.device);
+    }
+    if (enteringMesh || changeFlags.extensionsChanged) {
+      this.state.model?.destroy();
+      this.state.model = new DeckGPUVectorModel(this.context.device, {
+        ...this.getShaders(),
+        id: this.props.id,
+        topology: 'triangle-list',
+        isInstanced: false,
+        inferDrawCount: 'no',
+        vertexCount: 0
+      });
+      this.state.typedMesh!.bind(this.state.model);
+    }
+    if (
+      enteringMesh ||
+      changeFlags.projectionChanged ||
+      !deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
+      !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1) ||
+      props.positions !== oldProps.positions ||
+      props.texCoords !== oldProps.texCoords ||
+      props.indices !== oldProps.indices
+    ) {
+      void this.state.typedMesh!.update(
+        props,
+        {
+          transform: this.usePositionTransforms().transform?.bind(this),
+          fp64: this.use64bitPositions()
+        },
+        () => {
+          this.state.typedMesh!.bind(this.state.model!);
+          this.getAttributeManager()!.invalidateAll();
+          this.setState({coordinateConversion: 0, bounds: [0, 0, 0, 0]});
+          this.setNeedsUpdate();
+        },
+        error => this.raiseError(error, 'preparing bitmap mesh')
+      );
     }
   }
 
@@ -312,7 +413,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     );
   }
 
-  protected _getModel(): Model {
+  protected _getModel(): GPUVectorModel {
     /*
       0,0 --- 1,0
        |       |
@@ -326,7 +427,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
             .filter(layout => layout.name !== 'indices')
         : this.getAttributeManager()!.getBufferLayouts();
 
-    return new GPUVectorModel(this.context.device, {
+    return new DeckGPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout,
