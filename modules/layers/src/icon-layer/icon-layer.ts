@@ -39,7 +39,9 @@ import type {
   Unit,
   UpdateParameters,
   LayerContext,
-  DefaultProps
+  DefaultProps,
+  GetPickingInfoParams,
+  PickingInfo
 } from '@deck.gl/core';
 
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
@@ -221,7 +223,8 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    const useRowIndexes = Boolean((this.props.data as any)?.attributes?.rowIndexes);
+    const useRowIndexes =
+      this.useSourceIndexes() || Boolean((this.props.data as any)?.attributes?.rowIndexes);
     return super.getShaders({
       vs,
       fs,
@@ -301,19 +304,34 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         transition: true,
         bufferGroup: 'icon-instance-data',
         accessor: 'getPixelOffset'
-      },
-      ...((this.props.data as any)?.attributes?.rowIndexes
-        ? {
-            /** Caller-provided logical picking index per icon instance. */
-            rowIndexes: {
-              size: 1,
-              type: 'uint32',
-              noAlloc: true
-            }
-          }
-        : {})
+      }
     });
+    this._initializeRowIndexes();
     /* eslint-enable max-len */
+  }
+
+  /** @internal Whether picking indices refer to rows wrapped by a composite layer. */
+  useSourceIndexes(data = this.props.data): boolean {
+    const hasColumns = Object.entries(COLUMN_DEFINITIONS).some(
+      ([name, definition]) => definition.prop !== false && this.props[name]
+    );
+    return !hasColumns && !this.state?.columns && Boolean((data as any)[0]?.__source);
+  }
+
+  private _initializeRowIndexes(): void {
+    const useSourceIndexes = this.useSourceIndexes();
+    if (useSourceIndexes || (this.props.data as any)?.attributes?.rowIndexes) {
+      this.getAttributeManager()!.addInstanced({
+        rowIndexes: {
+          size: 1,
+          type: 'uint32',
+          noAlloc: !useSourceIndexes,
+          accessor: useSourceIndexes
+            ? (object, {index}) => object.__source?.index ?? index
+            : undefined
+        }
+      });
+    }
   }
 
   /* eslint-disable max-statements, complexity */
@@ -354,13 +372,44 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       iconManager.packIcons(data, getIcon as AccessorFunction<any, UnpackedIcon>);
     }
 
-    if (!this._updateColumnState(params) && changeFlags.extensionsChanged) {
-      this.state.model?.destroy();
-      this.state.model = this._getModel();
-      this.getAttributeManager()!.invalidateAll();
+    if (!this._updateColumnState(params)) {
+      const sourceIndexesChanged =
+        this.useSourceIndexes(data) !== this.useSourceIndexes(oldProps.data);
+      if (sourceIndexesChanged) {
+        attributeManager!.remove(['rowIndexes']);
+        this._initializeRowIndexes();
+      }
+      if (changeFlags.extensionsChanged || sourceIndexesChanged) {
+        this.state.model?.destroy();
+        this.state.model = this._getModel();
+        this.getAttributeManager()!.invalidateAll();
+      }
     }
   }
   /* eslint-enable max-statements, complexity */
+
+  /** Resolve a picked icon to its wrapped row before the composite layer unwraps it. */
+  getPickingInfo(params: GetPickingInfoParams): PickingInfo {
+    const info = super.getPickingInfo(params);
+    if (this.useSourceIndexes() && info.index >= 0) {
+      info.object = (this.props.data as any[]).find(row => row.__source.index === info.index);
+    }
+    return info;
+  }
+
+  /** Disable every icon from a source row during multi-depth picking. */
+  disablePickingIndex(objectIndex: number): void {
+    if (this.useSourceIndexes()) {
+      const data = this.props.data as any[];
+      for (let index = 0; index < data.length; index++) {
+        if (data[index].__source.index === objectIndex) {
+          this._disablePickingIndex(index);
+        }
+      }
+    } else {
+      super.disablePickingIndex(objectIndex);
+    }
+  }
 
   /** Switches between Arrow and accessor models when column props change. */
   private _updateColumnState(params: UpdateParameters<this>): boolean {
