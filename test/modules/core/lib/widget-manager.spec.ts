@@ -513,3 +513,22 @@ test('WidgetManager#onHover, onEvent#viewId', () => {
 
   widgetManager.finalize();
 });
+
+test('WidgetManager#setProps#replaces a widget of another class with the same id', () => {
+  class OtherTestWidget extends TestWidget {}
+
+  const container = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement: container});
+
+  const widget = new TestWidget({id: 'shared', version: 1});
+  widgetManager.setProps({widgets: [widget]});
+
+  const otherWidget = new OtherTestWidget({id: 'shared', version: 2});
+  widgetManager.setProps({widgets: [otherWidget]});
+  expect(widgetManager.getWidgets(), 'the new class is used').toEqual([otherWidget]);
+  expect(widget.isVisible, 'old widget is removed').toBe(false);
+  expect(widget.props.version, 'old widget keeps its own props').toBe(1);
+  expect(otherWidget.isVisible, 'new widget is added').toBe(true);
+
+  widgetManager.finalize();
+});

@@ -198,7 +198,9 @@ export class WidgetManager {
         // Widget is new
         this._addWidget(widget);
       } else if (
-        // Widget placement changed
+        // Widget class or placement changed. Widgets are the same only if they share a
+        // constructor and an id, so another class's props are never passed to the old widget.
+        oldWidget.constructor !== widget.constructor ||
         oldWidget.viewId !== widget.viewId ||
         oldWidget.placement !== widget.placement
       ) {
