@@ -14,8 +14,12 @@ import {Stats} from 'probe.gl/stats';
 import ResourceManager from './resource/resource-manager';
 import ProjectionScaleResources from './projection-scale-resources';
 
-import {resolveCRS, areCRSEqual} from '../utils/crs';
-import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/geospatial/projection/core';
+import {resolveCRS, areCRSEqual, getProjectionEngine} from '../utils/crs';
+import type {
+  CRSEngine,
+  CRSDescriptor,
+  TypeScriptCRSInput
+} from '@math.gl/geospatial/projection/core';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 
@@ -27,6 +31,8 @@ const TRACE_SET_LAYERS = 'layerManager.setLayers';
 const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
 
 export type LayerContext = {
+  /** Caller-owned CRS and transform factory selected by Deck. */
+  projectionEngine: CRSEngine;
   layerManager: LayerManager;
   resourceManager: ResourceManager;
   deck?: Deck<any>;
@@ -49,6 +55,7 @@ export type LayerContext = {
 export type LayersList = (Layer | undefined | false | null | LayersList)[];
 
 export type LayerManagerProps = {
+  projectionEngine?: CRSEngine | null;
   deck?: Deck<any>;
   stats?: Stats;
   viewport?: Viewport | null;
@@ -103,6 +110,7 @@ export default class LayerManager {
     this.projectionScaleResources = new ProjectionScaleResources(device);
 
     this.context = {
+      projectionEngine: getProjectionEngine(props?.projectionEngine),
       mousePosition: null,
       userData: {},
       layerManager: this,
@@ -191,6 +199,15 @@ export default class LayerManager {
 
   /** Set props needed for layer rendering and picking. */
   setProps(props: any): void {
+    if ('projectionEngine' in props) {
+      const engine = getProjectionEngine(props.projectionEngine);
+      if (engine !== this.context.projectionEngine) {
+        this.context.projectionEngine = engine;
+        this._coordinateSystems.clear();
+        this.setNeedsUpdate('projectionEngine changed');
+        for (const layer of this.layers) layer.setChangeFlags({projectionChanged: true});
+      }
+    }
     if ('layerFilter' in props && props.layerFilter !== this._layerFilter) {
       this._layerFilter = props.layerFilter;
       this.setNeedsUpdate('layerFilter changed');
@@ -488,7 +505,9 @@ export default class LayerManager {
       entry = {coordinateSystem, layer};
       this._coordinateSystems.set(layer.id, entry);
       const resolved =
-        coordinateSystem === viewport.crs?.signature ? viewport.crs! : resolveCRS(coordinateSystem);
+        coordinateSystem === viewport.crs?.signature
+          ? viewport.crs!
+          : resolveCRS(coordinateSystem, this.context.projectionEngine);
       if (resolved instanceof Promise) {
         entry.pending = resolved;
         const request = entry;

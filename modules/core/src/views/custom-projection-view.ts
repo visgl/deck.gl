@@ -3,9 +3,18 @@
 // Copyright (c) vis.gl contributors
 
 import View from './view';
-import {getProjectionExecutionKey, isCRSDescriptor, resolveCRS} from '../utils/crs';
+import {
+  getProjectionExecutionKey,
+  isCRSDescriptor,
+  resolveCRS,
+  defaultProjectionEngine
+} from '../utils/crs';
 import {deepEqual} from '../utils/deep-equal';
-import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/geospatial/projection/core';
+import type {
+  CRSEngine,
+  CRSDescriptor,
+  TypeScriptCRSInput
+} from '@math.gl/geospatial/projection/core';
 import type {CommonViewProps, CommonViewState} from './view';
 import CustomProjectionViewport from '../viewports/custom-projection-viewport';
 import type {CustomProjectionViewportOptions} from '../viewports/custom-projection-viewport';
@@ -47,6 +56,8 @@ export default class CustomProjectionView extends View<
   static displayName = 'CustomProjectionView';
   // Private slots can hold async state even though View seals its public properties.
   #crs?: CRSDescriptor;
+  #engine?: CRSEngine;
+  #generation = 0;
   #initialization?: Promise<void>;
   constructor(props: CustomProjectionViewProps) {
     super(props);
@@ -67,17 +78,28 @@ export default class CustomProjectionView extends View<
         : deepEqual(crs, otherCrs, -1);
     return sameCrs && deepEqual(props, otherProps, 2);
   }
-  /** Resolve the target CRS once for this view before creating its synchronous viewport. */
-  initialize(): void | Promise<void> {
+  /** Resolve the target CRS once per selected engine before creating a synchronous viewport. */
+  initialize({
+    projectionEngine = defaultProjectionEngine
+  }: {
+    projectionEngine?: CRSEngine;
+  } = {}): void | Promise<void> {
+    if (this.#engine !== projectionEngine) {
+      this.#engine = projectionEngine;
+      this.#crs = undefined;
+      this.#initialization = undefined;
+      this.#generation++;
+    }
+    const generation = this.#generation;
     if (this.#crs) return;
     if (this.#initialization) return this.#initialization;
     const {crs} = this.props;
-    const resolved = isCRSDescriptor(crs) ? crs : resolveCRS(crs);
+    const resolved = isCRSDescriptor(crs) ? crs : resolveCRS(crs, projectionEngine);
     const setCrs = (crs: CRSDescriptor | null) => {
       if (!crs || crs.coordinateFrame !== 'projected') {
         throw new Error('CustomProjectionView requires a projected CRS');
       }
-      this.#crs = crs;
+      if (generation === this.#generation) this.#crs = crs;
     };
     if (resolved instanceof Promise) {
       this.#initialization = resolved.then(setCrs);

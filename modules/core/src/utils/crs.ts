@@ -5,6 +5,7 @@
 import {getCRSExecutionKey} from '@math.gl/geospatial/crs';
 import {projectionEngine} from '@math.gl/geospatial/projection';
 import type {
+  CRSEngine,
   CRSConversion,
   CRSDescriptor,
   TypeScriptCRSInput
@@ -40,7 +41,28 @@ export const WGS84_CRS: CRSDescriptor = {
   converter: {WGS84: {from: identity, to: identity, normalize: identity}}
 };
 
-const resolvedCRS = new Map<string, CRSDescriptor | Promise<CRSDescriptor>>([
+/** Default shared math.gl engine; injected engines remain caller-owned. */
+export const defaultProjectionEngine = projectionEngine;
+
+/** Validate the descriptor-capable math.gl factory before changing rendering state. */
+export function getProjectionEngine(engine?: CRSEngine | null): CRSEngine {
+  const resolved = engine ?? defaultProjectionEngine;
+  if (
+    typeof resolved.getCRS !== 'function' ||
+    typeof resolved.createProjection !== 'function' ||
+    typeof resolved.createProjectionAsync !== 'function'
+  ) {
+    throw new Error('projectionEngine requires getCRS, createProjection and createProjectionAsync');
+  }
+  return resolved;
+}
+
+const engineCaches = new WeakMap<CRSEngine, Map<string, CRSDescriptor | Promise<CRSDescriptor>>>();
+const engineIds = new WeakMap<CRSEngine, number>();
+const descriptorEngines = new WeakMap<CRSDescriptor, number>();
+let nextEngineId = 0;
+
+const defaultResolvedCRS = new Map<string, CRSDescriptor | Promise<CRSDescriptor>>([
   [WGS84_CRS.signature, WGS84_CRS],
   [GLOBE_CRS.signature, GLOBE_CRS],
   [OSM_TILE_CRS.signature, OSM_TILE_CRS]
@@ -59,7 +81,8 @@ export function areCRSEqual(a: TypeScriptCRSInput, b: TypeScriptCRSInput): boole
  * Cartesian positions and meter offsets do not declare an absolute source CRS.
  */
 export function resolveCRS(
-  coordinateSystem: TypeScriptCRSInput
+  coordinateSystem: TypeScriptCRSInput,
+  engine: CRSEngine = defaultProjectionEngine
 ): CRSDescriptor | Promise<CRSDescriptor> | null {
   let definition = coordinateSystem;
   switch (typeof coordinateSystem === 'string' ? coordinateSystem.toLowerCase() : null) {
@@ -79,12 +102,23 @@ export function resolveCRS(
       definition = 'EPSG:4978';
       break;
   }
+  let resolvedCRS = engineCaches.get(engine);
+  if (!resolvedCRS) {
+    resolvedCRS = engine === defaultProjectionEngine ? defaultResolvedCRS : new Map();
+    engineCaches.set(engine, resolvedCRS);
+    engineIds.set(engine, nextEngineId++);
+  }
   // Key structured definitions by their contents so newly allocated equivalent inputs share loading.
   const key = typeof definition === 'string' ? definition : JSON.stringify(definition);
   const existing = resolvedCRS.get(key);
   if (existing) return existing;
-  const pending = projectionEngine.getCRS(definition).then(
+  const pending = engine.getCRS(definition).then(
     crs => {
+      // Keep caller metadata untouched while namespacing rendering caches by factory.
+      if (engine !== defaultProjectionEngine) {
+        crs = {...crs, getRenderingScale: crs.getRenderingScale.bind(crs)};
+        descriptorEngines.set(crs, engineIds.get(engine)!);
+      }
       resolvedCRS.set(key, crs);
       resolvedCRS.set(crs.signature, crs);
       return crs;
@@ -116,7 +150,14 @@ let nextDescriptorId = 0;
 /** Unknown execution identity permits reuse only for the same descriptor object. */
 export function getProjectionExecutionKey(crs: CRSDescriptor): string | number {
   const key = getCRSExecutionKey(crs);
+  const engineId = descriptorEngines.get(crs);
+  if (engineId !== undefined)
+    return JSON.stringify(['engine', engineId, key ?? getDescriptorId(crs)]);
   if (key !== null) return key;
+  return getDescriptorId(crs);
+}
+
+function getDescriptorId(crs: CRSDescriptor): number {
   let id = descriptorIds.get(crs);
   if (id === undefined) {
     id = nextDescriptorId++;

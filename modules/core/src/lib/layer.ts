@@ -383,7 +383,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // Only the source-to-packed conversion affects attributes. Camera precision,
     // target common space and subdivision are handled separately from packing.
     const signature = JSON.stringify([
-      internalState.sourceCrs?.signature,
+      internalState.sourceCrs ? getProjectionExecutionKey(internalState.sourceCrs) : null,
       needsPreprojection
         ? viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL
           ? getProjectionExecutionKey(viewport.crs!)
@@ -1191,7 +1191,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
             : 'cartesian'
           : this.props.coordinateSystem;
       const sourceCrs =
-        this._sourceCrs === undefined ? resolveCRS(coordinateSystem) : this._sourceCrs;
+        this._sourceCrs === undefined
+          ? resolveCRS(coordinateSystem, this.context.projectionEngine)
+          : this._sourceCrs;
       // LayerManager resolves asynchronous descriptors before initialization.
       assert(!(sourceCrs instanceof Promise));
       this.internalState.sourceCrs = sourceCrs;

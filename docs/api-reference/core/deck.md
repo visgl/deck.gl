@@ -263,6 +263,43 @@ Notes:
 - All the lifecycle methods other than `draw` are still triggered even a if a layer is filtered out using this method.
 - To select a layer's initial viewport, accept it in `layerFilter` with `isPicking: false` and `renderPass: 'screen'`. The first matching viewport supplies its initial projection context. The filter runs before initialization, so use layer props rather than initialized state. If none match, initialization uses the shared viewport context.
 
+#### `projectionEngine` (object, optional) {#projectionengine}
+
+Defaults to deck.gl's shared math.gl projection engine. Supply a caller-owned math.gl
+`CRSEngine` to control CRS resolution and conversion:
+
+```ts
+import {Deck, _CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
+import {createProjectionEngine} from '@math.gl/geospatial/projection/core';
+import {equalEarth} from '@math.gl/geospatial/projection/projections/eqearth';
+
+const projectionEngine = createProjectionEngine({projections: [equalEarth]});
+const deck = new Deck({
+  projectionEngine,
+  views: new CustomProjectionView({crs: '+proj=eqearth +datum=WGS84 +units=m'}),
+  initialViewState: {center: [0, 0, 0], zoom: 1}
+});
+```
+
+The engine implements `getCRS`, `createProjection`, and `createProjectionAsync`.
+It must return math.gl-compatible descriptors with units, rendering bounds, sizing
+and synchronous prepared converters. Register the algorithms and resources needed
+by your application before use. A transform-only `ProjectionEngine` without
+`getCRS` is not sufficient for geographic views.
+
+Custom projection views and layer source `coordinateSystem` definitions use this
+engine. Prepared view descriptors bypass resolution. Built-in geographic/Cartesian
+aliases and the MapView/GlobeView projection models retain their existing semantics.
+The engine is also available to custom layers as `this.context.projectionEngine`.
+
+Keep the engine and its configuration stable. Deck does not mutate or dispose it.
+Replace the engine object to apply changed plugins, aliases, grids or backend behavior;
+`deck.setProps({projectionEngine: null})` restores the default. CRS resolution is
+shared only within an engine, and replacement invalidates dependent views and layer
+conversions even for identical CRS definitions. Removed views and obsolete source
+loads cannot publish into their replacements. Resolution failures reach `onError`.
+Async compilation does not make per-vertex conversion asynchronous or move it to a worker.
+
 #### `views` (View | View[]) {#views}
 
 * Default: `new MapView()`

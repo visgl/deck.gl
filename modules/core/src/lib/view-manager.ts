@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {defaultProjectionEngine, getProjectionEngine} from '../utils/crs';
+import type {CRSEngine} from '@math.gl/geospatial/projection/core';
+import CustomProjectionView from '../views/custom-projection-view';
+
 import {deepEqual} from '../utils/deep-equal';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
@@ -88,6 +92,7 @@ type CanvasDimensions = {
 
 /** Internal view, controller, and canvas-routing properties supplied by Deck. */
 type ViewManagerProps<ViewsT extends ViewOrViews> = {
+  projectionEngine?: CRSEngine | null;
   views: ViewsT;
   viewState: ViewStateObject<ViewsT> | null;
   onViewStateChange?: (params: ViewStateChangeParameters<AnyViewStateOf<ViewsT>>) => void;
@@ -113,6 +118,7 @@ export default class ViewManager<ViewsT extends View[]> {
   controllers: {[viewId: string]: Controller<any> | null};
   timeline: Timeline;
 
+  private _projectionEngine: CRSEngine = defaultProjectionEngine;
   private _viewports: Viewport[];
   private _failedViews = new WeakSet<View>();
   private _viewportMap: {[viewId: string]: Viewport};
@@ -310,8 +316,14 @@ export default class ViewManager<ViewsT extends View[]> {
 
   /** Update the manager with new Deck props */
   setProps(props: Partial<ViewManagerProps<ViewsT>>) {
-    if (props.views) {
-      this._setViews(props.views);
+    const engine =
+      'projectionEngine' in props
+        ? getProjectionEngine(props.projectionEngine)
+        : this._projectionEngine;
+    const engineChanged = engine !== this._projectionEngine;
+    this._projectionEngine = engine;
+    if (props.views || engineChanged) {
+      this._setViews(props.views || this.views, engineChanged);
     }
 
     if (props.viewState) {
@@ -402,18 +414,22 @@ export default class ViewManager<ViewsT extends View[]> {
 
   // Update the view descriptor list and set change flag if needed
   // Does not actually rebuild the `Viewport`s until `getViewports` is called
-  private _setViews(views: View[]): void {
+  private _setViews(views: View[], engineChanged = false): void {
     views = flatten(views, Boolean);
 
     const previousViews = this.views;
+    // Custom views own engine-specific async state. Clone caller definitions so sharing
+    // a View across Deck instances cannot change another manager's engine or viewport.
     // Retain pending and ready views, but let a fresh descriptor retry failed initialization.
     views = views.map(view => {
       const previous = previousViews.find(candidate => candidate.id === view.id);
-      return previous && !this._failedViews.has(previous) && previous.equals(view)
+      return !engineChanged && previous && !this._failedViews.has(previous) && previous.equals(view)
         ? previous
-        : view;
+        : view instanceof CustomProjectionView
+          ? view.clone({})
+          : view;
     });
-    const viewsChanged = this._diffViews(views, previousViews);
+    const viewsChanged = engineChanged || this._diffViews(views, previousViews);
     if (viewsChanged) {
       const viewIds = new Set(views.map(view => view.id));
       for (const view of this.views) {
@@ -433,7 +449,7 @@ export default class ViewManager<ViewsT extends View[]> {
         else log.error(String(error))();
       };
       try {
-        const initialization = view.initialize();
+        const initialization = view.initialize({projectionEngine: this._projectionEngine});
         if (initialization) {
           initialization
             .then(() => {
