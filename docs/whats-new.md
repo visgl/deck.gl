@@ -4,6 +4,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Caller-owned projection engines
+
+Deck accepts a [`projectionEngine`](./api-reference/core/deck.md#projectionengine) for custom-view and layer-source CRS resolution, defaulting to its existing math.gl engine. Engines are caller-owned; replacing one refreshes dependent conversions without sharing CRS caches across factories.
+
 ### Async CPU aggregation of GPU inputs
 
 [`ReadbackAggregator`](./api-reference/aggregation-layers/cpu-aggregator.md#readbackaggregator) runs CPU aggregation on GPUVector inputs, so you can compare CPU and GPU timings on the same buffers.

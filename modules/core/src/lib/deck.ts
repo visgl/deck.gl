@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {defaultProjectionEngine, getProjectionEngine} from '../utils/crs';
+import type {CRSEngine} from '@math.gl/geospatial/projection/core';
+
 import LayerManager from './layer-manager';
 import ViewManager, {DEFAULT_CANVAS_ID} from './view-manager';
 import MapView from '../views/map-view';
@@ -202,6 +205,9 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   _animate?: boolean;
   /** (Experimental) If set to `false`, force disables all picking features, disregarding the `pickable` prop set in any layer. */
   _pickable?: boolean;
+  /** Caller-owned math.gl CRS engine. Null restores the default engine. */
+  projectionEngine?: CRSEngine | null;
+
   /** (Experimental) Fine-tune attribute memory usage. See documentation for details. */
   _typedArrayManagerProps?: TypedArrayManagerOptions;
   /** An array of Widget instances to be added to the parent element. */
@@ -288,6 +294,7 @@ const defaultProps: DeckProps = {
   _animate: false,
   _pickable: true,
   _typedArrayManagerProps: {},
+  projectionEngine: defaultProjectionEngine,
   _customRender: null,
   widgets: [],
 
@@ -412,6 +419,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   private _lastPointerDownInfoPromise: Promise<PickingInfo> | null = null;
 
   constructor(props: DeckProps<ViewsT>) {
+    getProjectionEngine(props.projectionEngine);
     const initialProps = props;
     // @ts-ignore views
     this.props = {...defaultProps, ...props};
@@ -516,6 +524,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Partially update props */
   setProps(props: DeckProps<ViewsT>): void {
+    if ('projectionEngine' in props) getProjectionEngine(props.projectionEngine);
     this.stats.get('setProps Time').timeStart();
 
     if ('onLayerHover' in props) {
@@ -1682,6 +1691,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this.viewManager = new ViewManager({
+      projectionEngine: this.props.projectionEngine,
       timeline,
       eventManager: this.eventManager,
       eventManagers: this.eventManagers,
@@ -1703,6 +1713,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager(this.device, {
+      projectionEngine: this.props.projectionEngine,
       deck: this,
       stats: this.stats,
       viewport,

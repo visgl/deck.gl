@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {CRSEngine} from '@math.gl/geospatial/projection/core';
+
 import Viewport from '../viewports/viewport';
 import {parsePosition, getPosition, LayoutExpression} from '../utils/positions';
 import {deepEqual} from '../utils/deep-equal';
@@ -116,7 +118,7 @@ export default abstract class View<
   }
 
   /** Prepare asynchronous resources before this view can create a viewport. */
-  initialize(): void | Promise<void> {}
+  initialize(_context?: {projectionEngine?: CRSEngine}): void | Promise<void> {}
 
   equals(view: this): boolean {
     if (this === view) {

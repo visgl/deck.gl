@@ -231,8 +231,9 @@ test('ViewManager retries failed structured CRS with an equivalent new view', as
     viewState: {center: [0, 0, 0], zoom: 0}
   });
   try {
+    const initializedView = manager.views[0];
     manager.setProps({views: [view.clone({crs: structuredClone(definition)})]});
-    expect(manager.views[0]).toBe(view);
+    expect(manager.views[0]).toBe(initializedView);
     expect(getCRS).toHaveBeenCalledTimes(1);
     const error = new Error('Temporary module load failure');
     request.reject(error);
@@ -240,14 +241,16 @@ test('ViewManager retries failed structured CRS with an equivalent new view', as
     expect(manager.getViewports()).toHaveLength(0);
     const replacement = view.clone({crs: structuredClone(definition)});
     manager.setProps({views: [replacement]});
-    expect(manager.views[0]).toBe(replacement);
+    const initializedReplacement = manager.views[0];
+    expect(initializedReplacement).not.toBe(initializedView);
+    expect(initializedReplacement.equals(replacement)).toBe(true);
     expect(getCRS).toHaveBeenCalledTimes(2);
-    await replacement.initialize();
+    await manager.views[0].initialize();
     manager.updateViewports();
     expect(manager.getViewports()).toHaveLength(1);
     const viewport = manager.getViewports()[0];
     manager.setProps({views: [replacement.clone({crs: structuredClone(definition)})]});
-    expect(manager.views[0]).toBe(replacement);
+    expect(manager.views[0]).toBe(initializedReplacement);
     expect(manager.getViewports()[0]).toBe(viewport);
     expect(getCRS).toHaveBeenCalledTimes(2);
     expect(onError).toHaveBeenCalledTimes(1);
