@@ -4,7 +4,7 @@
 
 import Viewport from '../viewports/viewport';
 import {parsePosition, getPosition, LayoutExpression} from '../utils/positions';
-import {deepEqual} from '../utils/deep-equal';
+import {deepEqualExcept} from '../utils/deep-equal';
 import {deepMergeViewState} from '../utils/deep-merge';
 import type Controller from '../controllers/controller';
 import type {ControllerOptions} from '../controllers/controller';
@@ -12,6 +12,8 @@ import type {TransitionProps} from '../controllers/transition-manager';
 import type {Padding} from '../viewports/viewport';
 import type {ConstructorOf} from '../types/types';
 import type {Parameters} from '@luma.gl/core';
+
+const ID_KEY = ['id'] as const;
 
 export type CommonViewState = TransitionProps;
 
@@ -95,7 +97,13 @@ export default abstract class View<
     // @ts-ignore
     this.id = id || this.constructor.displayName || 'view';
 
-    this.props = {...props, id: this.id};
+    // Like layer props, the default `id` lives on the prototype, so `Object.hasOwn(props, 'id')`
+    // tells an id the app passed from the default. `props.id` reads the resolved id either way.
+    const viewProps: ViewProps = Object.assign(Object.create({id: this.id}), props);
+    if (!id) {
+      delete viewProps.id;
+    }
+    this.props = viewProps;
 
     // Extents
     this._x = parsePosition(x);
@@ -124,7 +132,12 @@ export default abstract class View<
     }
 
     // To correctly compare padding use depth=2
-    return this.constructor === view.constructor && deepEqual(this.props, view.props, 2);
+    // `id` is an own prop only when it was passed, so compare the resolved ids instead
+    return (
+      this.constructor === view.constructor &&
+      this.id === view.id &&
+      deepEqualExcept(this.props, view.props, 2, ID_KEY)
+    );
   }
 
   /** Clone this view with modified props */
@@ -146,7 +159,8 @@ export default abstract class View<
       return null;
     }
     const ViewportType = this.getViewportType(viewState);
-    return new ViewportType({...viewState, ...this.props, ...viewportDimensions});
+    // Spreading props drops the default `id`, which lives on the prototype
+    return new ViewportType({...viewState, ...this.props, id: this.id, ...viewportDimensions});
   }
 
   getViewStateId(): string {

@@ -63,11 +63,15 @@ export abstract class Widget<
   rootElement?: HTMLDivElement | null;
 
   constructor(props: PropsT) {
-    this.props = {
-      // @ts-expect-error `defaultProps` may not exist on constructor
-      ...(this.constructor.defaultProps as Required<PropsT>),
-      ...props
-    };
+    // @ts-expect-error `defaultProps` may not exist on constructor
+    const {id, ...defaultProps} = this.constructor.defaultProps as Required<PropsT>;
+    // Like layer props, the default `id` lives on the prototype, so `Object.hasOwn(props, 'id')`
+    // tells an id the app passed from the default. `props.id` reads the resolved id either way.
+    const widgetProps: Required<PropsT> = Object.assign(Object.create({id}), defaultProps, props);
+    if (props?.id === undefined) {
+      delete (widgetProps as WidgetProps).id;
+    }
+    this.props = widgetProps;
     // @ts-expect-error TODO(ib) - why is id considered optional even though we use Required<>
     this.id = this.props.id;
   }
