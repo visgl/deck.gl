@@ -24,7 +24,7 @@ import {Deck} from '@deck.gl/core';
 
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
-import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 
 
 
@@ -98,9 +98,9 @@ import {Deck} from '@deck.gl/core';
 
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
-import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 
-import type {Tileset3D} from '@loaders.gl/tiles';
+import type {Tileset3D} from '@loaders.gl/tiles-3d';
 
 
 
@@ -176,11 +176,11 @@ import {DeckGL} from '@deck.gl/react';
 
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
-import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 
 import type {MapViewState} from '@deck.gl/core';
 
-import type {Tileset3D} from '@loaders.gl/tiles';
+import type {Tileset3D} from '@loaders.gl/tiles-3d';
 
 
 
@@ -258,7 +258,7 @@ function App() {
 ```
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
-import {I3SLoader} from '@loaders.gl/i3s';
+import {I3SLoader} from '@loaders.gl/tiles-3d/i3s';
 
 
 
@@ -383,7 +383,7 @@ On top of the [default options](https://deck.gl/next/docs/api-reference/core/lay
 * `tileset`: Forward parameters to the [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1) instance after fetching the tileset metadata.
 
 ```
-import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 

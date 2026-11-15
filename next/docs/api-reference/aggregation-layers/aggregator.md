@@ -189,3 +189,37 @@ The number of bins in the aggregated result.
 ## Source[​](#source "Direct link to Source")
 
 [modules/aggregation-layers/src/common/aggregator/aggregator.ts](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/common/aggregator/aggregator.ts)
+
+## Supplying an aggregator to a layer[​](#supplying-an-aggregator-to-a-layer "Direct link to Supplying an aggregator to a layer")
+
+`ScreenGridLayer`, `GridLayer`, `HexagonLayer`, and `ContourLayer` accept an optional `aggregator` instance. When omitted, the layer creates its default aggregator using the existing layer settings.
+
+```
+new ScreenGridLayer({
+
+  data,
+
+  aggregator: new CustomAggregator()
+
+});
+```
+
+The layer owns the supplied instance and destroys it when replaced or finalized. Keep the same instance across layer updates; do not share it between layers or reuse it after disposal. An optional `initialize(device)` method is called when the layer adopts the instance, before `setProps`, so the constructor need not have access to a device. Extension changes mark the same custom instance dirty without destroying or reinitializing it. The default implementations are still recreated on extension changes.
+
+Custom implementations receive `binIdRange`, `binOptions`, operations, and projection/extension settings through `setProps`. Accessor inputs remain available as `Attribute` objects; `Attribute.getGPUVector()` exposes their typed GPU columns. Allocate outputs in `update()` before sublayers are built, and encode GPU work in `preDraw()` before those sublayers draw. Notify `onUpdate` when a channel's output changes, following the existing aggregator lifecycle.
+
+### GPU column results[​](#gpu-column-results "Direct link to GPU column results")
+
+`getBins()` and `getResult(channel)` may return either the existing `BinaryAttribute` or a borrowed `GPUVector`. Cell rendering uses the same AttributeManager/`GPUVectorModel` path as accessor-backed layers, including ArcLayer. The vector adapter preserves offsets and strides without uploading, copying, or reading the buffer. Results require one concrete buffer chunk: `float32x2` bin IDs and `float32` channel values. Result vectors and buffers remain owned by the aggregator, and must stay valid through sublayer drawing.
+
+Domains are returned as JavaScript arrays by `getResultDomain()`. Supplying explicit color/elevation domains and omitting domain callbacks avoids automatic domain readback for custom aggregators. Explicit domain callbacks receive the aggregation domain through `getResultDomain()`.
+
+Percentile and ordinal scales access results on the CPU. Picking uses `getBin()`. ContourLayer uses CPU-readable results for marching squares.
+
+### Asynchronous result metadata[​](#asynchronous-result-metadata "Direct link to Asynchronous result metadata")
+
+Picking and percentile scales need results on the CPU. An aggregator can copy its GPU results asynchronously and return the copy from `getResultValues(channel)`. Set `isLoaded` to false while the copy is pending, then call `onUpdate` when it is ready. Rendering continues to use the GPU buffers returned by `getResult()`.
+
+### Comparing GPU and CPU aggregation with the same inputs[​](#comparing-gpu-and-cpu-aggregation-with-the-same-inputs "Direct link to Comparing GPU and CPU aggregation with the same inputs")
+
+[`ReadbackAggregator`](https://deck.gl/next/docs/api-reference/aggregation-layers/cpu-aggregator.md#readbackaggregator) aggregates GPU column inputs on the CPU, so you can compare CPU and GPU aggregation on the same buffers. It copies the columns back first, and the layer reports `isLoaded: false` until aggregation finishes. Columns need `COPY_SRC` usage. See the [constructor docs](https://deck.gl/next/docs/api-reference/aggregation-layers/cpu-aggregator.md#readbackaggregator) for accepted formats. Strided and interleaved columns work.

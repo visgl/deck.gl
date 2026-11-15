@@ -2,6 +2,8 @@
 
 The `BrushingExtension` adds GPU-based data brushing functionalities to layers. It allows the layer to show/hide objects based on the current pointer position.
 
+Brushing works with rendering primitives in `@deck.gl/layers` and `@deck.gl/mesh-layers`, including composite layers that use those primitives. It composes with `ClipExtension` on layers that support clipping. Custom layers must expose the [extension shader hooks](https://deck.gl/next/docs/developer-guide/custom-layers/layer-extensions.md#webgpu-shader-plugins).
+
 [deck.gl BrushingExtension](https://codepen.io/vis-gl/embed/NWbxdKP?height=450\&theme-id=light\&default-tab=result)
 
 ```

@@ -204,14 +204,14 @@ The post-processing effect applies screen space pixel manipulation effects to th
 
 *Interactive demo of PostProcessEffect*
 
-`@luma.gl/effects` provides a collection of [shader modules](https://luma.gl/docs/api-reference/shadertools/shader-passes/image-processing) that implements some common image processing algorithms. You may also refer to their source code to see how to implement your own.
+`@luma.gl/engine/effects` provides a collection of [shader modules](https://luma.gl/docs/api-reference/shadertools/shader-passes/image-processing) that implements some common image processing algorithms. You may also refer to their source code to see how to implement your own.
 
 * JavaScript
 * TypeScript
 * React
 
 ```
-import {brightnessContrast} from '@luma.gl/effects';
+import {brightnessContrast} from '@luma.gl/engine/effects';
 
 import {Deck, PostProcessEffect} from '@deck.gl/core';
 
@@ -249,7 +249,7 @@ const deckInstance = new Deck({
 ```
 
 ```
-import {brightnessContrast, BrightnessContrastProps} from '@luma.gl/effects';
+import {brightnessContrast, BrightnessContrastProps} from '@luma.gl/engine/effects';
 
 import {Deck, PostProcessEffect} from '@deck.gl/core';
 
@@ -279,7 +279,7 @@ import React from 'react';
 
 import {DeckGL} from '@deck.gl/react';
 
-import {brightnessContrast, BrightnessContrastProps} from '@luma.gl/effects';
+import {brightnessContrast, BrightnessContrastProps} from '@luma.gl/engine/effects';
 
 import {PostProcessEffect} from '@deck.gl/core';
 

@@ -124,7 +124,7 @@ All layers support a [loaders](https://deck.gl/next/docs/api-reference/core/laye
 For example, the following code adds the [CSVLoader](https://loaders.gl/modules/csv/docs/api-reference/csv-loader) to support CSV/TSV files:
 
 ```
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 
 
 
@@ -156,7 +156,7 @@ new HexagonLayer({
 The following code adds the [LASLoader](https://loaders.gl/modules/las/docs/api-reference/las-loader) to support LAS/LAZ files:
 
 ```
-import {LASLoader} from '@loaders.gl/las';
+import {LASLoader} from '@loaders.gl/pointclouds/las';
 
 
 
@@ -390,7 +390,7 @@ new MVTLayer({
 
     mvt: {
 
-      // cp node_modules/@loaders.gl/mvt/dist/mvt-worker.js static/mvt-worker.js
+      // cp node_modules/@loaders.gl/tiles/dist/mvt-worker.js static/mvt-worker.js
 
       workerUrl: '/static/mvt-worker.js'
 
@@ -404,7 +404,7 @@ new MVTLayer({
 If the layer is used in an environment that does not support web workers, or you need to debug the loader code on the main thread, you may import the full loader like this:
 
 ```
-import {MVTLoader} from '@loaders.gl/mvt';
+import {MVTLoader} from '@loaders.gl/tiles/mvt';
 
 new MVTLayer({
 
@@ -520,7 +520,7 @@ Or more directly, import the [parse](https://loaders.gl/modules/core/docs/api-re
 ```
 import {parse} from '@loaders.gl/core';
 
-import {GLTFLoader} from '@loaders.gl/gltf';
+import {GLTFLoader} from '@loaders.gl/scene/gltf';
 
 
 

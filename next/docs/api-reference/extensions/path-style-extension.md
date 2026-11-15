@@ -56,8 +56,6 @@ function getRoadLayer(path) {
 }
 ```
 
-> `PathStyleExtension` currently requires WebGL. Layers that use it do not render on WebGPU.
-
 ## Installation[​](#installation "Direct link to Installation")
 
 To install the dependencies from NPM:
@@ -206,7 +204,6 @@ Three differences cause most surprises:
 
 ## Limitations[​](#limitations "Direct link to Limitations")
 
-* Requires WebGL. Layers that use `PathStyleExtension` do not render on WebGPU.
 * `getDashArray` takes a single dash and gap. Dash-dot patterns are not supported.
 * `ScatterplotLayer` and `TextLayer` support `getDashArray` and `dashGapPickable` only.
 * WebGL2 guarantees 16 vertex attributes and `PathLayer` already uses 13. A dash pattern, `'path'` mode, and an offset use one each, so enabling all three leaves no room for another extension that adds attributes.

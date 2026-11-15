@@ -269,10 +269,40 @@ In the right context, enabling GPU aggregation can significantly speed up your a
 CPU aggregation is used as fallback in the following cases:
 
 * The current browser does not support GPU aggregation
-* The layer is rendered with WebGPU, which does not support WebGL GPU aggregation
+* The compute aggregation requirements below are not met when using a WebGPU device
 * `gridAggregator` is defined
 * `getColorValue` is defined
 * `getElevationValue` is defined
+
+#### Compute aggregation[​](#compute-aggregation "Direct link to Compute aggregation")
+
+On a WebGPU device, `GridLayer` uses compute aggregation when `gpuAggregation` is enabled. Color and elevation are aggregated independently using `SUM`, `MEAN`, `MIN`, `MAX`, or `COUNT`. Results remain in GPU buffers and are passed directly to the cell layer.
+
+```
+new GridLayer({
+
+  data,
+
+  getPosition: d => d.position,
+
+  getColorWeight: d => d.colorWeight,
+
+  getElevationWeight: d => d.elevationWeight,
+
+  cellSize: 1000,
+
+  colorAggregation: 'SUM',
+
+  elevationAggregation: 'MEAN',
+
+  colorDomain: [0, 100],
+
+  elevationDomain: [0, 50]
+
+});
+```
+
+Custom JavaScript callbacks and grids exceeding device limits use CPU aggregation.
 
 #### `cellSize` (number, optional)[​](#cellsize "Direct link to cellsize")
 
@@ -654,6 +684,22 @@ The [PickingInfo.object](https://deck.gl/next/docs/developer-guide/interactivity
 The GridLayer renders the following sublayers:
 
 * `cells` - a custom layer that extends the [ColumnLayer](https://deck.gl/next/docs/api-reference/layers/column-layer.md).
+
+## GPUVector inputs 🧪[​](#gpuvector-inputs-unstable "Direct link to GPUVector inputs 🧪")
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
+
+* `positions` – `float32x2` or `float32x3` – A single-chunk position vector.
+* `weights` – `float32` – Two matching single-chunk vectors, in color and elevation order.
+* `dataBounds` – `[min, max]` – Bounds in input coordinates.
+
+Notes:
+
+* The built-in WebGPU compute path requires buffers with `STORAGE` or `COPY_SRC` usage.
+* Use positions in the view's coordinate system for custom views.
+* The compute path requires a configuration without extensions or CPU position preprojection.
 
 ## Source[​](#source "Direct link to Source")
 

@@ -64,7 +64,7 @@ const map = new Map({
 
   container: 'map',
 
-  style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  style: 'https://tiles.openfreemap.org/styles/positron',
 
   center: [0.45, 51.47],
 
@@ -100,7 +100,7 @@ const deckOverlay = new MapLibreOverlay({
 
       getRadius: 1000,
 
-      beforeId: 'watername_ocean' // In interleaved mode render the layer under map labels
+      beforeId: 'waterway_line_label' // In interleaved mode render the layer under map labels
 
     })
 
@@ -166,7 +166,7 @@ function App() {
 
       getRadius: 1000,
 
-      beforeId: 'watername_ocean' // In interleaved mode render the layer under map labels
+      beforeId: 'waterway_line_label' // In interleaved mode render the layer under map labels
 
     })
 
@@ -188,7 +188,7 @@ function App() {
 
       }}
 
-      mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+      mapStyle="https://tiles.openfreemap.org/styles/positron"
 
     >
 
@@ -225,7 +225,7 @@ The reverse-controlled option is supported by the pre-built scripting bundle, an
 
   new DeckGL({
 
-    mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+    mapStyle: 'https://tiles.openfreemap.org/styles/positron',
 
     initialViewState: {
 
@@ -325,7 +325,7 @@ function App() {
 
     >
 
-      <Map mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" />
+      <Map mapStyle="https://tiles.openfreemap.org/styles/positron" />
 
     </DeckGL>
 
@@ -354,7 +354,7 @@ When you choose the reverse-controlled option, the `DeckGL` React component acts
 
 There are paid map tile servers such as [MapTiler](https://www.maptiler.com/), [Stadia Maps](https://stadiamaps.com/), and [AWS Location Service](https://docs.aws.amazon.com/location/latest/developerguide/map-concepts.html).
 
-deck.gl public demos use [CARTO free basemaps](https://carto.com/basemaps) as a non-commercial application. Checkout [this guide](https://deck.gl/next/docs/api-reference/carto/basemap.md) to start using it.
+deck.gl public demos use [OpenFreeMap](https://openfreemap.org/) basemaps. See the [OpenFreeMap quick start guide](https://openfreemap.org/quick_start/) to use them in your application.
 
 If you host your own map tiles, you will need a custom map style JSON that points to your own [vector tile source](https://maplibre.org/maplibre-style-spec/), this custom style must match the schema of your tile source.
 

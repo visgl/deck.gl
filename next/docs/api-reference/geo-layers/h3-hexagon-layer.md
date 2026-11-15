@@ -10,9 +10,12 @@ The `H3HexagonLayer` renders hexagons from the [H3](https://h3geo.org/) geospati
 
 <!-- -->
 
-* JavaScript
-* TypeScript
-* React
+* Classic accessors
+* Arrow inputs
+
+- JavaScript
+- TypeScript
+- React
 
 ```
 import {Deck} from '@deck.gl/core';
@@ -198,6 +201,28 @@ function App() {
 }
 ```
 
+```
+import {Utf8, vectorFromArray} from 'apache-arrow';
+
+import {H3HexagonLayer} from '@deck.gl/geo-layers';
+
+
+
+const cells = vectorFromArray(['8928308280fffff'], new Utf8());
+
+
+
+const layer = new H3HexagonLayer({
+
+  getHexagon: cells,
+
+  getFillColor: [255, 140, 0]
+
+});
+```
+
+See [Using with Arrow](https://deck.gl/next/docs/developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
 ## Installation[​](#installation "Direct link to Installation")
 
 To install the dependencies from NPM:
@@ -274,11 +299,37 @@ Hexagon radius multiplier, between 0 - 1. When `coverage` = 1, hexagon is render
 
 ### Data Accessors[​](#data-accessors "Direct link to Data Accessors")
 
-#### `getHexagon` ([Accessor\<string>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional)[​](#gethexagon "Direct link to gethexagon")
+#### `getHexagon` (Accessor | arrow\.Vector, optional)[​](#gethexagon "Direct link to gethexagon")
 
 * Default: `object => object.hexagon`
 
 Method called to retrieve the [H3](https://h3geo.org/) hexagon index of each object. Note that all hexagons within one `H3HexagonLayer` must use the same [resolution](https://h3geo.org/docs/core-library/restable).
+
+Each Arrow row supplies one identifier or a list of identifiers for one source feature. See [cell identifier columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#cell-identifiers) for supported encodings and picking behavior.
+
+#### `getFillColor` (constant | Accessor | arrow\.Vector, optional)[​](#getfillcolor "Direct link to getfillcolor")
+
+* Default: `[0, 0, 0, 255]`
+
+The fill color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getLineColor` (constant | Accessor | arrow\.Vector, optional)[​](#getlinecolor "Direct link to getlinecolor")
+
+* Default: `[0, 0, 0, 255]`
+
+The outline color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getLineWidth` (constant | Accessor | arrow\.Vector, optional)[​](#getlinewidth "Direct link to getlinewidth")
+
+* Default: `1`
+
+The outline width of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getElevation` (constant | Accessor | arrow\.Vector, optional)[​](#getelevation "Direct link to getelevation")
+
+* Default: `1000`
+
+The elevation of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
 ## Sub Layers[​](#sub-layers "Direct link to Sub Layers")
 

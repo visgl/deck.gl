@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkproject_website=self.webpackChunkproject_website||[]).push([["4607"],{27474(e,s,t){t.d(s,{XMLLoaderWithParser:()=>a});var r=t(22970);let{preload:o,...p}=t(20629).J,a={...p,parse:async(e,s)=>(0,r.u)(new TextDecoder().decode(e),{...a.options.xml,...s?.xml}),parseTextSync:(e,s)=>(0,r.u)(e,{...a.options.xml,...s?.xml})}}}]);
+//# sourceMappingURL=4607.be5d29f9.js.map

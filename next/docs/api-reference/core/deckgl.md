@@ -9,7 +9,7 @@ Make sure to read the [Using deck.gl Scripting API](https://deck.gl/next/docs/ge
 ```
 new deck.DeckGL({
 
-  mapStyle: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
+  mapStyle: 'https://tiles.openfreemap.org/styles/positron',
 
   initialViewState: {
 

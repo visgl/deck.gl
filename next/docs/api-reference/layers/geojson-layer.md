@@ -569,7 +569,7 @@ In general this format is not intended to be human readable, and rather than bei
 At the top level the data is grouped by geometry type, into points, lines and polygons:
 
 ```
-import type {BinaryFeatureCollection} from '@loaders.gl/schema';
+import type {BinaryFeatureCollection} from '@loaders.gl/core/schema';
 
 
 
@@ -593,7 +593,7 @@ When the `GeoJsonLayer` detects this data structure it assumes it is dealing wit
 For GeoJSON features of type `Point` or `MultiPoint`, the positions are encoded as a flat interleaved array with associated properties grouped by point:
 
 ```
-import type {BinaryPointFeature} from '@loaders.gl/schema';
+import type {BinaryPointFeature} from '@loaders.gl/core/schema';
 
 
 
@@ -619,7 +619,7 @@ data.points = {
 GeoJSON features of type `LineString` and `MultiLineString` are represented in a similar manner, with the addition of a `pathIndices` array, which contains a series of offsets into the `positions` array, specifying the vertex index where each line begins.
 
 ```
-import type {BinaryLineFeature} from '@loaders.gl/schema';
+import type {BinaryLineFeature} from '@loaders.gl/core/schema';
 
 
 
@@ -647,7 +647,7 @@ data.lines = {
 Polygons are an extension of the idea introduced with lines, but instead of `pathIndices` the `polygonIndicies` array specifies the vertex index where each polygon starts. Because polygons can have holes, the offsets for the outer and inner rings are stored separately in the `primitivePolygonIndices` array.
 
 ```
-import type {BinaryPolygonFeature} from '@loaders.gl/schema';
+import type {BinaryPolygonFeature} from '@loaders.gl/core/schema';
 
 
 
@@ -760,7 +760,7 @@ data.points = {
 ```
 import type {FeatureCollection} from 'geojson';
 
-import type {BinaryPointFeature} from '@loaders.gl/schema';
+import type {BinaryPointFeature} from '@loaders.gl/core/schema';
 
 
 

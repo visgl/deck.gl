@@ -2,6 +2,12 @@
 
 <!-- -->
 
+[OpenFreeMap](https://openfreemap.org/) [© OpenMapTiles](https://openmaptiles.org/) Data from
+
+<!-- -->
+
+[OpenStreetMap](https://www.openstreetmap.org/copyright)
+
 Edit on Codepen
 
 The `MVTLayer` is a derived `TileLayer` that makes it possible to visualize very large datasets through MVTs ([Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/)). Behaving like `TileLayer`, it will only load, decode and render MVTs containing features that are visible within the current viewport.
@@ -29,11 +35,7 @@ const layer = new MVTLayer({
 
   id: 'MVTLayer',
 
-  data: [
-
-    'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-
-  ],
+  data: 'https://tiles.openfreemap.org/planet',
 
   minZoom: 0,
 
@@ -116,6 +118,22 @@ new Deck({
   layers: [layer]
 
 });
+
+
+
+const attribution = document.createElement('div');
+
+attribution.innerHTML = '<a href="https://openfreemap.org/">OpenFreeMap</a> <a href="https://openmaptiles.org/">© OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+Object.assign(attribution.style, {
+
+  position: 'absolute', right: '0', bottom: '0',
+
+  background: 'rgba(255,255,255,0.8)', padding: '0 5px', font: '12px/20px sans-serif'
+
+});
+
+document.body.appendChild(attribution);
 ```
 
 ```
@@ -145,11 +163,7 @@ const layer = new MVTLayer<PropertiesType>({
 
   id: 'MVTLayer',
 
-  data: [
-
-    'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-
-  ],
+  data: 'https://tiles.openfreemap.org/planet',
 
   minZoom: 0,
 
@@ -232,6 +246,22 @@ new Deck({
   layers: [layer]
 
 });
+
+
+
+const attribution = document.createElement('div');
+
+attribution.innerHTML = '<a href="https://openfreemap.org/">OpenFreeMap</a> <a href="https://openmaptiles.org/">© OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+Object.assign(attribution.style, {
+
+  position: 'absolute', right: '0', bottom: '0',
+
+  background: 'rgba(255,255,255,0.8)', padding: '0 5px', font: '12px/20px sans-serif'
+
+});
+
+document.body.appendChild(attribution);
 ```
 
 ```
@@ -267,11 +297,7 @@ function App() {
 
     id: 'MVTLayer',
 
-    data: [
-
-      'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-
-    ],
+    data: 'https://tiles.openfreemap.org/planet',
 
     minZoom: 0,
 
@@ -335,28 +361,44 @@ function App() {
 
 
 
-  return <DeckGL
+  return <>
 
-    initialViewState={{
+    <DeckGL
 
-      longitude: -122.4,
+      initialViewState={{
 
-      latitude: 37.74,
+        longitude: -122.4,
 
-      zoom: 11
+        latitude: 37.74,
 
-    }}
+        zoom: 11
 
-    controller
+      }}
 
-    getTooltip={({object}: MVTLayerPickingInfo<PropertiesType>) => object && (object.properties.name || object.properties.layerName)}
+      controller
 
-    layers={[layer]}
+      getTooltip={({object}: MVTLayerPickingInfo<PropertiesType>) => object && (object.properties.name || object.properties.layerName)}
 
-  />;
+      layers={[layer]}
+
+    />
+
+    <div style={{position: 'absolute', right: 0, bottom: 0, background: 'rgba(255,255,255,0.8)', padding: '0 5px', font: '12px/20px sans-serif'}}>
+
+      <a href="https://openfreemap.org/">OpenFreeMap</a>{' '}
+
+      <a href="https://openmaptiles.org/">© OpenMapTiles</a> Data from{' '}
+
+      <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
+
+    </div>
+
+  </>;
 
 }
 ```
+
+When rendering OpenFreeMap tiles directly with `MVTLayer`, include visible attribution as above. MapLibre basemaps display their TileJSON attribution automatically.
 
 ## Installation[​](#installation "Direct link to Installation")
 
@@ -483,6 +525,8 @@ Remarks:
 
 ## Tile[​](#tile "Direct link to Tile")
 
+Tiles are loaded in tile-local coordinates. Sublayers declare `coordinateSystem: 'OSMTile512'`, with a tile-specific model matrix and origin mapping positions to a 512-unit Mercator world (X eastward, Y southward, Z in meters). Each sublayer converts these positions for the active viewport.
+
 Aside from all members of the [Tile](https://deck.gl/next/docs/api-reference/geo-layers/tile-layer.md#tile) class, tile instances from the `MVTLayer` also include the following fields:
 
 #### `dataInWGS84` (Feature\[])[​](#datainwgs84 "Direct link to datainwgs84")
@@ -514,6 +558,10 @@ new MVTLayer({
 
 })
 ```
+
+## Remarks[​](#remarks "Direct link to Remarks")
+
+* `clipBounds` has no effect. Sub layers are always clipped to their own tile. Use [`extent`](https://deck.gl/next/docs/api-reference/geo-layers/tile-layer.md#extent) to limit the area that is rendered.
 
 ## Source[​](#source "Direct link to Source")
 

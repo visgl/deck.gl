@@ -18,7 +18,7 @@ Parameters:
 ## Example[​](#example "Direct link to Example")
 
 ```
-import {brightnessContrast} from '@luma.gl/effects';
+import {brightnessContrast} from '@luma.gl/engine/effects';
 
 import {PostProcessEffect} from '@deck.gl/core';
 

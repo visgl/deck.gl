@@ -10,9 +10,12 @@ The `LineLayer` renders straight lines joining pairs of source and target coordi
 
 <!-- -->
 
-* JavaScript
-* TypeScript
-* React
+* Classic accessors
+* Arrow inputs
+
+- JavaScript
+- TypeScript
+- React
 
 ```
 import {Deck} from '@deck.gl/core';
@@ -224,6 +227,32 @@ function App() {
 }
 ```
 
+```
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+
+import {LineLayer} from '@deck.gl/layers';
+
+
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+
+const targets = vectorFromArray([[-122.41, 37.75]], positionType);
+
+
+
+const layer = new LineLayer({
+
+  getSourcePosition: positions,
+
+  getTargetPosition: targets
+
+});
+```
+
+See [Using with Arrow](https://deck.gl/next/docs/developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
 ## Installation[​](#installation "Direct link to Installation")
 
 To install the dependencies from NPM:
@@ -304,28 +333,36 @@ Other antialiasing techniques have different trade-offs; see [Antialiasing and M
 
 ### Data Accessors[​](#data-accessors "Direct link to Data Accessors")
 
-#### `getSourcePosition` ([Accessor\<Position>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getsourceposition "Direct link to getsourceposition")
+Arrow inputs follow the shared [column requirements and limitations](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#limitations).
+
+#### `getSourcePosition` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getsourceposition "Direct link to getsourceposition")
 
 * Default: `object => object.sourcePosition`
 
 Method called to retrieve the source position of each object.
 
-#### `getTargetPosition` ([Accessor\<Position>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#gettargetposition "Direct link to gettargetposition")
+An Arrow vector supplies one value per object. See [position columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
+
+#### `getTargetPosition` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#gettargetposition "Direct link to gettargetposition")
 
 * Default: `object => object.targetPosition`
 
 Method called to retrieve the target position of each object.
 
-#### `getColor` ([Accessor\<Color>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getcolor "Direct link to getcolor")
+An Arrow vector supplies one value per object. See [position columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
+
+#### `getColor` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getcolor "Direct link to getcolor")
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-#### `getWidth` ([Accessor\<number>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getwidth "Direct link to getwidth")
+An Arrow vector supplies one value per object. See [color columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#colors) for requirements.
+
+#### `getWidth` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getwidth "Direct link to getwidth")
 
 * Default: `1`
 
@@ -334,21 +371,23 @@ The line width of each object, in units specified by `widthUnits` (default pixel
 * If a number is provided, it is used as the line width for all objects.
 * If a function is provided, it is called on each object to retrieve its line width.
 
-## Remarks[​](#remarks "Direct link to Remarks")
+An Arrow vector supplies one value per object. See [scalar columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#scalars) for requirements.
 
-### Using with GlobeView[​](#using-with-globeview "Direct link to Using with GlobeView")
+## GPUVector inputs 🧪[​](#gpuvector-inputs-unstable "Direct link to GPUVector inputs 🧪")
 
-When using this layer with [GlobeView](https://deck.gl/next/docs/api-reference/core/globe-view.md) or MapLibre's globe projection, lines may be invisible when viewed from certain angles because `GlobeView` enables back-face culling by default. To ensure lines are visible from both sides, set:
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
 
-```
-new LineLayer({
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
 
-  // ...other props
+* `sourcePositions` – `float32x3` – Source positions in XYZ order.
+* `targetPositions` – `float32x3` – Target positions in XYZ order.
+* `colors` – `unorm8x4` – Packed RGBA colors.
+* `widths` – `float32`
 
-  parameters: {cullMode: 'none'}
+Notes:
 
-});
-```
+* Supply one value per rendered instance, in instance order.
+* See [Direct GPUVector inputs](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#direct-gpuvector-inputs) for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source[​](#source "Direct link to Source")
 

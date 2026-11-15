@@ -271,9 +271,15 @@ In the right context, enabling GPU aggregation can significantly speed up your a
 CPU aggregation is used as fallback in the following cases:
 
 * The current browser does not support GPU aggregation
-* `gridAggregator` is defined
+* `hexagonAggregator` is defined
 * `getColorValue` is defined
 * `getElevationValue` is defined
+
+##### Compute aggregation[​](#compute-aggregation "Direct link to Compute aggregation")
+
+On a WebGPU device, HexagonLayer uses compute aggregation with explicit `colorDomain` and `elevationDomain`.
+
+Picking, extensions, domain callbacks, percentile filtering, quantile scales, and ordinal color scales use CPU aggregation instead. Dense grids exceeding device buffer limits also use CPU aggregation.
 
 #### `radius` (number, optional)[​](#radius "Direct link to radius")
 
@@ -644,6 +650,7 @@ This callback will be called when hexagon elevation domain has been calculated.
 
 The [PickingInfo.object](https://deck.gl/next/docs/developer-guide/interactivity.md#the-pickinginfo-object) field returned by hover/click events of this layer represents an aggregated hexagon. The object contains the following fields:
 
+* `position` (number\[] | null) - Center of the picked hexagon in the source CRS, or `null` when inverse projection is unavailable.
 * `col` (number) - Column index of the picked hexagon.
 * `row` (number) - Row index of the picked hexagon.
 * `colorValue` (number) - Aggregated color value, as determined by `getColorWeight` and `colorAggregation`
@@ -657,6 +664,21 @@ The [PickingInfo.object](https://deck.gl/next/docs/developer-guide/interactivity
 The HexagonLayer renders the following sublayers:
 
 * `cells` - a [ColumnLayer](https://deck.gl/next/docs/api-reference/layers/column-layer.md) rendering the aggregated columns.
+
+## GPUVector inputs 🧪[​](#gpuvector-inputs-unstable "Direct link to GPUVector inputs 🧪")
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
+
+* `positions` – A GPUVector of input positions.
+* `weights` – Matching weight vectors in color and elevation order.
+* `dataBounds` – `[min, max]` – Bounds in input coordinates.
+
+Notes:
+
+* GPU inputs require a compatible WebGPU compute configuration with explicit color and elevation domains.
+* The GPU position path requires a coordinate system that the layer can use without CPU preprojection.
 
 ## Source[​](#source "Direct link to Source")
 

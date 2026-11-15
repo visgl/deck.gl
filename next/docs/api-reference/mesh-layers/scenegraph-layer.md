@@ -10,9 +10,12 @@ The `ScenegraphLayer` renders a number of instances of a complete glTF scenegrap
 
 <!-- -->
 
-* JavaScript
-* TypeScript
-* React
+* Classic accessors
+* Arrow inputs
+
+- JavaScript
+- TypeScript
+- React
 
 ```
 import {Deck} from '@deck.gl/core';
@@ -216,6 +219,30 @@ function App() {
 }
 ```
 
+```
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+
+
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+
+
+
+const layer = new ScenegraphLayer({
+
+  getPosition: positions,
+
+  scenegraph: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb'
+
+});
+```
+
+See [Using with Arrow](https://deck.gl/next/docs/developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
 ## Installation[​](#installation "Direct link to Installation")
 
 To install the dependencies from NPM:
@@ -327,20 +354,26 @@ Only read when scenegraph property changes.
 
 ### Data Accessors[​](#data-accessors "Direct link to Data Accessors")
 
-#### `getPosition` ([Accessor\<Position>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getposition "Direct link to getposition")
+Arrow inputs follow the shared [column requirements and limitations](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#limitations).
+
+#### `getPosition` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getposition "Direct link to getposition")
 
 * Default: `object => object.position`
 
 Method called to retrieve the center position for each object in the `data` stream.
 
-#### `getColor` ([Accessor\<Color>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getcolor "Direct link to getcolor")
+An Arrow vector supplies one value per object. See [position columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
+
+#### `getColor` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getcolor "Direct link to getcolor")
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied. Only used if `texture` is empty.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied. Only used if `texture` is empty.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
+
+An Arrow vector supplies one value per object. See [color columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#colors) for requirements.
 
 #### `getOrientation` ([Accessor\<number\[3\]>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional)[​](#getorientation "Direct link to getorientation")
 
@@ -389,6 +422,20 @@ The minimum size in pixels for one unit of the scene.
 * Default: `Number.MAX_SAFE_INTEGER`
 
 The maximum size in pixels for one unit of the scene.
+
+## GPUVector inputs 🧪[​](#gpuvector-inputs-unstable "Direct link to GPUVector inputs 🧪")
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
+
+* `positions` – `float32x3` – Positions in XYZ order.
+* `colors` – `unorm8x4` – Packed RGBA colors.
+
+Notes:
+
+* Supply one value per rendered instance, in instance order.
+* See [Direct GPUVector inputs](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#direct-gpuvector-inputs) for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source[​](#source "Direct link to Source")
 

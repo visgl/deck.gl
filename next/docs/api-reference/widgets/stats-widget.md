@@ -4,6 +4,12 @@
 
 <!-- -->
 
+[OpenFreeMap](https://openfreemap.org/) [© OpenMapTiles](https://openmaptiles.org/) Data from
+
+<!-- -->
+
+[OpenStreetMap](https://www.openstreetmap.org/copyright)
+
 Displays performance and debugging statistics from deck.gl, luma.gl, or custom probe.gl stats objects in a collapsible widget. When collapsed, it shows the current FPS in a compact button UI.
 
 * JavaScript

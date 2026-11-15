@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkproject_website=self.webpackChunkproject_website||[]).push([["2728"],{67115(a,e,s){s.d(e,{DracoJavaScriptLoaderWithParser:()=>w});var r=s(76690),t=s(62492),c=s(20721);let{preload:p,...i}=s(13659).V,w={...i,parse:async(a,e,s)=>await (0,c.j)(a,e,async()=>await (0,t._8)((0,r.$j)(e),"js"),s)}}}]);
+//# sourceMappingURL=2728.313aed7e.js.map

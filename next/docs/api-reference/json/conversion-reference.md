@@ -299,7 +299,7 @@ Often deck.gl visualizations require access to particular enumerations. For this
 For example, when this configuration is passed to the `JSONConverter`–
 
 ```
-import GL from '@luma.gl/webgl/constants';
+import {GL} from '@luma.gl/core/webgl-constants';
 
 
 

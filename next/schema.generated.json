@@ -92,6 +92,10 @@
                 "type": "string",
                 "const": "MapView"
               },
+              "resolution": {
+                "type": "number",
+                "description": "Subdivision intervals around the earth. Default 0 disables subdivision."
+              },
               "id": {
                 "type": "string",
                 "description": "A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view."
@@ -575,6 +579,10 @@
                 "type": "string",
                 "const": "FirstPersonView"
               },
+              "resolution": {
+                "type": "number",
+                "description": "Subdivision intervals around the earth. Default 0 disables subdivision."
+              },
               "id": {
                 "type": "string",
                 "description": "A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view."
@@ -1049,6 +1057,10 @@
                 "type": "string",
                 "const": "OrbitView"
               },
+              "resolution": {
+                "type": "number",
+                "description": "Subdivision intervals around the earth. Default 0 disables subdivision."
+              },
               "id": {
                 "type": "string",
                 "description": "A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view."
@@ -1520,6 +1532,10 @@
               "@@type": {
                 "type": "string",
                 "const": "OrthographicView"
+              },
+              "resolution": {
+                "type": "number",
+                "description": "Subdivision intervals around the earth. Default 0 disables subdivision."
               },
               "id": {
                 "type": "string",
@@ -2165,6 +2181,17 @@
                 "default": true
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -2257,10 +2284,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -2388,6 +2411,17 @@
                 "default": "Number.MAX_SAFE_INTEGER"
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -2480,10 +2514,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -2654,6 +2684,17 @@
                 "default": "Number.MAX_SAFE_INTEGER"
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -2746,10 +2787,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -2888,10 +2925,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -2935,6 +2968,17 @@
                 "description": "Enable GPU-based object highlighting. Default false."
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -3382,6 +3426,17 @@
                 "default": "none"
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -3474,10 +3529,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -3653,10 +3704,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -3698,6 +3745,17 @@
               "autoHighlight": {
                 "type": "boolean",
                 "description": "Enable GPU-based object highlighting. Default false."
+              },
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
               },
               "modelMatrix": {
                 "type": "array",
@@ -3846,6 +3904,17 @@
                 "default": 0.05
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -3938,10 +4007,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -4053,6 +4118,17 @@
                 "deprecated": "Use `pointSize` instead"
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -4145,10 +4221,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -4369,6 +4441,17 @@
                 "default": "Number.MAX_SAFE_INTEGER"
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -4461,10 +4544,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -4607,10 +4686,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -4654,6 +4729,17 @@
                 "description": "Enable GPU-based object highlighting. Default false."
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -4945,6 +5031,17 @@
                 "deprecated": "Use `jointRounded` and `capRounded` instead"
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -5037,10 +5134,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -5246,6 +5339,17 @@
                 "default": "CW"
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -5338,10 +5442,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -5768,6 +5868,17 @@
                 "type": "boolean"
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -5860,10 +5971,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -6012,6 +6119,17 @@
                 "default": 1
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -6104,10 +6222,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -6243,6 +6357,17 @@
                 "default": "SUM"
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -6335,10 +6460,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -6536,7 +6657,10 @@
               },
               "elevationScaleType": {
                 "type": "string",
-                "const": "linear",
+                "enum": [
+                  "linear",
+                  "quantile"
+                ],
                 "description": "Scaling function used to determine the elevation of the grid cell, only supports 'linear'. Supported Values are 'linear' and 'quantile'.",
                 "default": "linear"
               },
@@ -6556,6 +6680,17 @@
                 "default": true
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -6648,10 +6783,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -6778,6 +6909,17 @@
                 "default": 0.005
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -6870,10 +7012,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -7094,6 +7232,17 @@
                 "default": true
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -7186,10 +7335,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -7330,6 +7475,17 @@
                 "default": 500
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -7422,10 +7578,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -7567,10 +7719,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -7614,6 +7762,17 @@
                 "description": "Enable GPU-based object highlighting. Default false."
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -7889,10 +8048,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -7934,6 +8089,17 @@
               "autoHighlight": {
                 "type": "boolean",
                 "description": "Enable GPU-based object highlighting. Default false."
+              },
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
               },
               "modelMatrix": {
                 "type": "array",
@@ -8044,10 +8210,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -8091,6 +8253,17 @@
                 "description": "Enable GPU-based object highlighting. Default false."
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -8348,10 +8521,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -8395,6 +8564,17 @@
                 "description": "Enable GPU-based object highlighting. Default false."
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -8746,10 +8926,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -8791,6 +8967,17 @@
               "autoHighlight": {
                 "type": "boolean",
                 "description": "Enable GPU-based object highlighting. Default false."
+              },
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
               },
               "modelMatrix": {
                 "type": "array",
@@ -8926,10 +9113,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -8973,6 +9156,17 @@
                 "description": "Enable GPU-based object highlighting. Default false."
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -9195,10 +9389,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -9242,6 +9432,17 @@
                 "description": "Enable GPU-based object highlighting. Default false."
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -9548,10 +9749,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -9595,6 +9792,17 @@
                 "description": "Enable GPU-based object highlighting. Default false."
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -9872,10 +10080,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -9917,6 +10121,17 @@
               "autoHighlight": {
                 "type": "boolean",
                 "description": "Enable GPU-based object highlighting. Default false."
+              },
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
               },
               "modelMatrix": {
                 "type": "array",
@@ -10054,10 +10269,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -10099,6 +10310,17 @@
               "autoHighlight": {
                 "type": "boolean",
                 "description": "Enable GPU-based object highlighting. Default false."
+              },
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
               },
               "modelMatrix": {
                 "type": "array",
@@ -10223,10 +10445,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -10268,6 +10486,17 @@
               "autoHighlight": {
                 "type": "boolean",
                 "description": "Enable GPU-based object highlighting. Default false."
+              },
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
               },
               "modelMatrix": {
                 "type": "array",
@@ -10475,10 +10704,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -10522,6 +10747,17 @@
                 "description": "Enable GPU-based object highlighting. Default false."
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -10776,10 +11012,6 @@
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
               },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
-              },
               "wrapLongitude": {
                 "type": "boolean",
                 "description": "(Geospatial only) normalize geometries that cross the 180th meridian. Default false."
@@ -10823,6 +11055,17 @@
                 "description": "Enable GPU-based object highlighting. Default false."
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -11093,6 +11336,17 @@
                 "default": false
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -11185,10 +11439,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -11349,6 +11599,17 @@
                 "default": "Number.MAX_SAFE_INTEGER"
               },
               "data": {},
+              "coordinateSystem": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              },
               "modelMatrix": {
                 "type": "array",
                 "items": {
@@ -11441,10 +11702,6 @@
                 "minItems": 3,
                 "maxItems": 3,
                 "description": "The coordinate origin of the data."
-              },
-              "coordinateSystem": {
-                "$ref": "#/definitions/CoordinateSystem",
-                "description": "The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view."
               },
               "wrapLongitude": {
                 "type": "boolean",
@@ -13578,17 +13835,6 @@
       ],
       "description": "Rendering operation of the layer."
     },
-    "CoordinateSystem": {
-      "type": "string",
-      "enum": [
-        "default",
-        "lnglat",
-        "meter-offsets",
-        "lnglat-offsets",
-        "cartesian"
-      ],
-      "description": "The coordinate system that positions/dimensions are defined in."
-    },
     "FontSettings": {
       "type": "object",
       "properties": {
@@ -13772,7 +14018,8 @@
         "never",
         "no-overlap",
         "best-available"
-      ]
+      ],
+      "description": "Built-in refinement mode or custom per-consumer visibility callback."
     },
     "ZRange": {
       "type": "array",
@@ -13787,7 +14034,8 @@
           "title": "maxZ"
         }
       ],
-      "maxItems": 2
+      "maxItems": 2,
+      "description": "Inclusive elevation bounds used for selection."
     },
     "H3Index": {
       "type": "string",
@@ -13814,7 +14062,8 @@
           "title": "maxY"
         }
       ],
-      "maxItems": 4
+      "maxItems": 4,
+      "description": "Axis-aligned bounds [minX, minY, maxX, maxY]."
     },
     "WidgetPlacement": {
       "type": "string",

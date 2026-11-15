@@ -4,6 +4,12 @@
 
 <!-- -->
 
+[OpenFreeMap](https://openfreemap.org/) [© OpenMapTiles](https://openmaptiles.org/) Data from
+
+<!-- -->
+
+[OpenStreetMap](https://www.openstreetmap.org/copyright)
+
 This widget shows a spinning indicator while any deck.gl layers are loading data.
 
 * JavaScript

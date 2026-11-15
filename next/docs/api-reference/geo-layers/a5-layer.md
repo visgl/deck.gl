@@ -10,9 +10,12 @@ The `A5Layer` renders filled and/or stroked polygons based on the [A5](https://a
 
 <!-- -->
 
-* JavaScript
-* TypeScript
-* React
+* Classic accessors
+* Arrow inputs
+
+- JavaScript
+- TypeScript
+- React
 
 ```
 import {Deck} from '@deck.gl/core';
@@ -25,7 +28,7 @@ const layer = new A5Layer({
 
   id: 'A5Layer',
 
-  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5v1.json',
 
   
 
@@ -93,7 +96,7 @@ const layer = new A5Layer<DataType>({
 
   id: 'A5Layer',
 
-  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5v1.json',
 
   
 
@@ -167,7 +170,7 @@ function App() {
 
     id: 'A5Layer',
 
-    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5v1.json',
 
     
 
@@ -216,6 +219,28 @@ function App() {
 }
 ```
 
+```
+import {Utf8, vectorFromArray} from 'apache-arrow';
+
+import {A5Layer} from '@deck.gl/geo-layers';
+
+
+
+const cells = vectorFromArray(['2e80000000000000'], new Utf8());
+
+
+
+const layer = new A5Layer({
+
+  getPentagon: cells,
+
+  getFillColor: [255, 140, 0]
+
+});
+```
+
+See [Using with Arrow](https://deck.gl/next/docs/developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
 ## Installation[​](#installation "Direct link to Installation")
 
 To install the dependencies from NPM:
@@ -262,7 +287,7 @@ Inherits from all [Base Layer](https://deck.gl/next/docs/api-reference/core/laye
 
 ### Data Accessors[​](#data-accessors "Direct link to Data Accessors")
 
-#### `getPentagon` ([Accessor\<bigint | string>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getpentagon "Direct link to getpentagon")
+#### `getPentagon` (Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getpentagon "Direct link to getpentagon")
 
 Called for each data object to retrieve the identifier of the A5 pentagon cell. May return one of the following:
 
@@ -272,6 +297,32 @@ Called for each data object to retrieve the identifier of the A5 pentagon cell. 
 For more information on representing the A5 cell, see [A5 Cell Representation](https://a5geo.org/docs/api-reference/indexing#cell-representation)
 
 * default: `object => object.pentagon`
+
+Each Arrow row supplies one identifier or a list of identifiers for one source feature. See [cell identifier columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#cell-identifiers) for supported encodings and picking behavior.
+
+#### `getFillColor` (constant | Accessor | arrow\.Vector, optional)[​](#getfillcolor "Direct link to getfillcolor")
+
+* Default: `[0, 0, 0, 255]`
+
+The fill color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getLineColor` (constant | Accessor | arrow\.Vector, optional)[​](#getlinecolor "Direct link to getlinecolor")
+
+* Default: `[0, 0, 0, 255]`
+
+The outline color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getLineWidth` (constant | Accessor | arrow\.Vector, optional)[​](#getlinewidth "Direct link to getlinewidth")
+
+* Default: `1`
+
+The outline width of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getElevation` (constant | Accessor | arrow\.Vector, optional)[​](#getelevation "Direct link to getelevation")
+
+* Default: `1000`
+
+The elevation of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
 ## Sub Layers[​](#sub-layers "Direct link to Sub Layers")
 

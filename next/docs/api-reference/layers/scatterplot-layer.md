@@ -10,9 +10,12 @@ The `ScatterplotLayer` renders circles at given coordinates.
 
 <!-- -->
 
-* JavaScript
-* TypeScript
-* React
+* Classic accessors
+* Arrow inputs
+
+- JavaScript
+- TypeScript
+- React
 
 ```
 import {Deck} from '@deck.gl/core';
@@ -218,6 +221,30 @@ function App() {
 }
 ```
 
+```
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+
+
+
+const layer = new ScatterplotLayer({
+
+  getPosition: positions,
+
+  getRadius: vectorFromArray([100], new Float32())
+
+});
+```
+
+See [Using with Arrow](https://deck.gl/next/docs/developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
 ## Installation[​](#installation "Direct link to Installation")
 
 To install the dependencies from NPM:
@@ -336,13 +363,17 @@ If `true`, circles are rendered with smoothed edges. If `false`, circles are ren
 
 ### Data Accessors[​](#data-accessors "Direct link to Data Accessors")
 
-#### `getPosition` ([Accessor\<Position>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getposition "Direct link to getposition")
+Arrow inputs follow the shared [column requirements and limitations](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#limitations).
+
+#### `getPosition` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getposition "Direct link to getposition")
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-#### `getRadius` ([Accessor\<number>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getradius "Direct link to getradius")
+An Arrow vector supplies one value per object. See [position columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
+
+#### `getRadius` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getradius "Direct link to getradius")
 
 * Default: `1`
 
@@ -350,6 +381,8 @@ The radius of each object, in units specified by `radiusUnits` (default meters).
 
 * If a number is provided, it is used as the radius for all objects.
 * If a function is provided, it is called on each object to retrieve its radius.
+
+An Arrow vector supplies one value per object. See [scalar columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#scalars) for requirements.
 
 #### `getColor` ([Accessor\<Color>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getcolor "Direct link to getcolor")
 
@@ -360,29 +393,35 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-It will be overridden by `getLineColor` and `getFillColor` if these new accessors are specified.
+This prop supplies the fallback for `getLineColor` and `getFillColor`.
 
-#### `getFillColor` ([Accessor\<Color>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getfillcolor "Direct link to getfillcolor")
+#### `getFillColor` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getfillcolor "Direct link to getfillcolor")
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the filled color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
-* If not provided, it falls back to `getColor`.
 
-#### `getLineColor` ([Accessor\<Color>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getlinecolor "Direct link to getlinecolor")
+An Arrow vector supplies one value per object. See [color columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#colors) for requirements.
+
+The default value comes from `getColor` when supplied.
+
+#### `getLineColor` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getlinecolor "Direct link to getlinecolor")
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the outline color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
-* If not provided, it falls back to `getColor`.
 
-#### `getLineWidth` ([Accessor\<number>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getlinewidth "Direct link to getlinewidth")
+An Arrow vector supplies one value per object. See [color columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#colors) for requirements.
+
+The default value comes from `getColor` when supplied.
+
+#### `getLineWidth` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getlinewidth "Direct link to getlinewidth")
 
 * Default: `1`
 
@@ -390,7 +429,10 @@ The width of the outline of each object, in units specified by `lineWidthUnits` 
 
 * If a number is provided, it is used as the outline width for all objects.
 * If a function is provided, it is called on each object to retrieve its outline width.
-* If not provided, it falls back to `strokeWidth`.
+
+An Arrow vector supplies one value per object. See [scalar columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#scalars) for requirements.
+
+The default value comes from `strokeWidth` when supplied.
 
 #### `getPixelOffset` ([Accessor\<number\[2\]>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getpixeloffset "Direct link to getpixeloffset")
 
@@ -400,6 +442,23 @@ Screen space offset relative to the `coordinates` in pixel unit.
 
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.
+
+## GPUVector inputs 🧪[​](#gpuvector-inputs-unstable "Direct link to GPUVector inputs 🧪")
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
+
+* `positions` – `float32x3` – Positions in XYZ order.
+* `radii` – `float32`
+* `fillColors` – `unorm8x4` – Packed RGBA fill colors.
+* `lineColors` – `unorm8x4` – Packed RGBA outline colors.
+* `lineWidths` – `float32`
+
+Notes:
+
+* Supply one value per rendered instance, in instance order.
+* See [Direct GPUVector inputs](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#direct-gpuvector-inputs) for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source[​](#source "Direct link to Source")
 

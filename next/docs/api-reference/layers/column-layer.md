@@ -10,9 +10,12 @@ The `ColumnLayer` renders extruded cylinders (tessellated regular polygons) at g
 
 <!-- -->
 
-* JavaScript
-* TypeScript
-* React
+* Classic accessors
+* Arrow inputs
+
+- JavaScript
+- TypeScript
+- React
 
 ```
 import {Deck} from '@deck.gl/core';
@@ -204,6 +207,30 @@ function App() {
 }
 ```
 
+```
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+
+import {ColumnLayer} from '@deck.gl/layers';
+
+
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+
+
+
+const layer = new ColumnLayer({
+
+  getPosition: positions,
+
+  getElevation: vectorFromArray([100], new Float32())
+
+});
+```
+
+See [Using with Arrow](https://deck.gl/next/docs/developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
 ## Installation[​](#installation "Direct link to Installation")
 
 To install the dependencies from NPM:
@@ -356,33 +383,41 @@ This is an object that contains material props for [lighting effect](https://dec
 
 ### Data Accessors[​](#data-accessors "Direct link to Data Accessors")
 
-#### `getPosition` ([Accessor\<Position>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getposition "Direct link to getposition")
+Arrow inputs follow the shared [column requirements and limitations](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#limitations).
+
+#### `getPosition` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getposition "Direct link to getposition")
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each column, in `[x, y]`. An optional third component can be used to set the elevation of the bottom.
 
-#### `getFillColor` ([Accessor\<Color>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getfillcolor "Direct link to getfillcolor")
+An Arrow vector supplies one value per object. See [position columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
+
+#### `getFillColor` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getfillcolor "Direct link to getfillcolor")
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 * If not provided, it falls back to `getColor`.
 
-#### `getLineColor` ([Accessor\<Color>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getlinecolor "Direct link to getlinecolor")
+An Arrow vector supplies one value per object. See [color columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#colors) for requirements.
+
+#### `getLineColor` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getlinecolor "Direct link to getlinecolor")
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the outline color for all columns.
 * If a function is provided, it is called on each object to retrieve its outline color.
 * If not provided, it falls back to `getColor`.
 
-#### `getElevation` ([Accessor\<number>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getelevation "Direct link to getelevation")
+An Arrow vector supplies one value per object. See [color columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#colors) for requirements.
+
+#### `getElevation` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getelevation "Direct link to getelevation")
 
 * Default: `1000`
 
@@ -391,7 +426,9 @@ The elevation of each cell in meters.
 * If a number is provided, it is used as the elevation for all objects.
 * If a function is provided, it is called on each object to retrieve its elevation.
 
-#### `getLineWidth` ([Accessor\<number>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getlinewidth "Direct link to getlinewidth")
+An Arrow vector supplies one value per object. See [scalar columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#scalars) for requirements.
+
+#### `getLineWidth` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getlinewidth "Direct link to getlinewidth")
 
 * Default: `1`
 
@@ -399,6 +436,25 @@ The width of the outline of the column, in units specified by `lineWidthUnits` (
 
 * If a number is provided, it is used as the outline width for all columns.
 * If a function is provided, it is called on each object to retrieve its outline width.
+
+An Arrow vector supplies one value per object. See [scalar columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#scalars) for requirements.
+
+## GPUVector inputs 🧪[​](#gpuvector-inputs-unstable "Direct link to GPUVector inputs 🧪")
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
+
+* `positions` – `float32x3` – Positions in XYZ order.
+* `elevations` – `float32`
+* `fillColors` – `unorm8x4` – Packed RGBA fill colors.
+* `lineColors` – `unorm8x4` – Packed RGBA outline colors.
+* `lineWidths` – `float32`
+
+Notes:
+
+* Supply one value per rendered instance, in instance order.
+* See [Direct GPUVector inputs](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#direct-gpuvector-inputs) for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source[​](#source "Direct link to Source")
 

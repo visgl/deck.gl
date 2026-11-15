@@ -144,6 +144,12 @@ General Performance Expectations
 
 - [Performance Optimization](https://deck.gl/next/docs/developer-guide/performance.md): General Performance Expectations
 
+#### projection-domains
+
+Applications written against math.gl's projection interfaces can use external projection engines through a CRS descriptor adapter. That adapter converts coordinates; it does not supply geometry clipping, antimeridian topology or triangulation. Applications that need those operations can preprocess geometry with the external engine and render the result in deck.gl's Cartesian coordinate system.
+
+- [Projection domains and worker preprocessing](https://deck.gl/next/docs/developer-guide/projection-domains.md): Applications written against math.gl's projection interfaces can use external projection engines through a CRS descriptor adapter. That adapter converts coordinates; it does not supply geometry clipping, antimeridian topology or triangulation. Applications that need those operations can preprocess geometry with the external engine and render the result in deck.gl's Cartesian coordinate system.
+
 #### testing
 
 Testing WebGL2/WebGPU code is much harder than testing regular JavaScript. GPU and browser dependent commands may not run under Node. Rendering behavior differs cross platforms and hardware. Since it draws into a canvas, there is also no precisely verifiable output.
@@ -167,6 +173,12 @@ Effects are part of the render pipeline that affect the visuall of all layers. D
 The "Layer" is a core concept of deck.gl. A deck.gl layer is a packaged visualization type that takes a collection of datums, associate each with positions, colors, shapes, extrusions, etc., and renders them on a map.
 
 - [Using Layers](https://deck.gl/next/docs/developer-guide/using-layers.md): The "Layer" is a core concept of deck.gl. A deck.gl layer is a packaged visualization type that takes a collection of datums, associate each with positions, colors, shapes, extrusions, etc., and renders them on a map.
+
+#### using-with-arrow
+
+Columnar data stores each attribute, such as position or color, in a separate column.
+
+- [Using with Arrow](https://deck.gl/next/docs/developer-guide/using-with-arrow.md): Columnar data stores each attribute, such as position or color, in a separate column.
 
 #### views
 
@@ -233,8 +245,8 @@ Map styles often change what is drawn as the camera zooms: coarse summaries at l
 - [CompositeLayer Class](https://deck.gl/next/docs/api-reference/core/composite-layer.md): The CompositeLayer class is a subclass of the Layer Class, that customizes various layer lifecycle methods to help create sublayers and handle events from those layers.
 - [Controller](https://deck.gl/next/docs/api-reference/core/controller.md): The base class for all viewport controllers.
 - [CustomProjectionController (Experimental)](https://deck.gl/next/docs/api-reference/core/custom-projection-controller.md): CustomProjectionController is the default controller for CustomProjectionView. It extends Controller, using map-style gestures over a common-space ground plane.
-- [CustomProjectionView (Experimental)](https://deck.gl/next/docs/api-reference/core/custom-projection-view.md): CustomProjectionView renders a planar map using application-supplied coordinate conversion functions. It supports 2D map projections, not globe projections or arbitrary 3D coordinate transformations. Layers can still display altitude and extruded geometry. It uses CustomProjectionViewport and CustomProjectionController.
-- [CustomProjectionViewport (Experimental)](https://deck.gl/next/docs/api-reference/core/custom-projection-viewport.md): CustomProjectionViewport combines a planar map camera with application-supplied forward and inverse coordinate conversions. It is created by CustomProjectionView.
+- [CustomProjectionView (Experimental)](https://deck.gl/next/docs/api-reference/core/custom-projection-view.md): CustomProjectionView renders a planar map in a target CRS resolved by @math.gl/geospatial/projection. Input positions and camera centers use WGS84 longitude/latitude in degrees and altitude in meters. It supports planar projections, with altitude and extruded geometry, using CustomProjectionViewport and CustomProjectionController.
+- [CustomProjectionViewport (Experimental)](https://deck.gl/next/docs/api-reference/core/custom-projection-viewport.md): CustomProjectionViewport combines a planar map camera with a prepared target CRS descriptor. CustomProjectionView creates it after resolving that descriptor.
 - [Deck](https://deck.gl/next/docs/api-reference/core/deck.md): Deck is a class that takes deck.gl layer instances and viewport parameters, renders those layers as a transparent overlay, and handles events.
 - [DeckGL (Scripting Interface)](https://deck.gl/next/docs/api-reference/core/deckgl.md): DeckGL extends the core Deck class with some additional features such as Mapbox integration. It offers a convenient way to use deck.gl in prototype environments such as Codepen, JSFiddle and Observable.
 - [DirectionalLight](https://deck.gl/next/docs/api-reference/core/directional-light.md): Create a directional light source which emits from a specific direction.A directional light can be considered "infinitely" far away (like the Sun) and does not attenuate with distance. At most 5 directional lights can be supported.
@@ -274,7 +286,7 @@ Map styles often change what is drawn as the camera zooms: coarse summaries at l
 - [CollisionFilterExtension](https://deck.gl/next/docs/api-reference/extensions/collision-filter-extension.md): The CollisionFilterExtension allows layers to hide features which overlap with other features. An example is a dense ScatterplotLayer with many points which overlap: by using this extension points that collide with others are hidden such that only one of the colliding points is shown. The collisions are computed on the GPU in realtime, allowing the collisions to be updated smoothly on every frame.
 - [DataFilterExtension](https://deck.gl/next/docs/api-reference/extensions/data-filter-extension.md): The DataFilterExtension adds GPU-based data filtering functionalities to layers. It allows the layer to show/hide objects based on user-defined properties. This extension provides a significantly more performant alternative to filtering the data array on the CPU.
 - [FillStyleExtension](https://deck.gl/next/docs/api-reference/extensions/fill-style-extension.md): The FillStyleExtension adds selected features to layers that render a "fill", such as the PolygonLayer and ScatterplotLayer.
-- [Fp64Extension](https://deck.gl/next/docs/api-reference/extensions/fp64-extension.md): The Fp64Extension adds 64-bit precision to geospatial layers.
+- [Fp64Extension](https://deck.gl/next/docs/api-reference/extensions/fp64-extension.md): The Fp64Extension adds extended-precision Mercator projection to geospatial layers. It represents coordinates as high and low f32 terms using luma.gl's fp64 shader module; this is emulated double-single arithmetic, not native IEEE 754 binary64.
 - [MaskExtension](https://deck.gl/next/docs/api-reference/extensions/mask-extension.md): The MaskExtension allows layers to show/hide objects by a geofence. For example, a map may filter a list of user locations by the boundaries of a given country, or highlight part of a base map that is inside a user-drawn circle or lasso area. This extension provides a significantly more performant alternative to testing the data array against a bounding geometry on the CPU.
 - [@deck.gl/extensions](https://deck.gl/next/docs/api-reference/extensions/overview.md): Layer extensions are bonus features that you can optionally add to the core deck.gl layers. These features are not included in the layers by default because one or more of the following reasons:
 - [PathStyleExtension](https://deck.gl/next/docs/api-reference/extensions/path-style-extension.md): The PathStyleExtension adds dashes and offsets to the PathLayer and composite layers that render paths, such as PolygonLayer and GeoJsonLayer. It can also dash ScatterplotLayer outlines and TextLayer backgrounds.
@@ -340,6 +352,18 @@ For first-time deck.gl developers, it is helpful to read the following pages bef
 
 - [ScenegraphLayer](https://deck.gl/next/docs/api-reference/mesh-layers/scenegraph-layer.md): ScenegraphLayer renders glTF scenegraph models at given coordinates.
 - [SimpleMeshLayer](https://deck.gl/next/docs/api-reference/mesh-layers/simple-mesh-layer.md): The SimpleMeshLayer renders a number of instances of an arbitrary 3D geometry. For example, it can be used to visualize a fleet of 3d cars each with a position and an orientation over the map.
+
+#### proposals
+
+- [Arrow layers](https://deck.gl/next/docs/api-reference/proposals/arrow-layers.md): Overview
+- [Proposed effects](https://deck.gl/next/docs/api-reference/proposals/effects.md): Private home for experimental deck.gl effects. This package is not published.
+- [GPU layers](https://deck.gl/next/docs/api-reference/proposals/gpu-layers.md): Reusable deck.gl layers for geographic rendering that consume caller-owned GPU buffers.
+- [Proposed layers](https://deck.gl/next/docs/api-reference/proposals/layers.md): Private home for experimental GPU-resident, Arrow, atmospheric, and particle layers. Import these from @deck.gl/proposals/layers; the following focused GPU layer entry points remain available.
+- [MVT2DLayer](https://deck.gl/next/docs/api-reference/proposals/mvt-2d-layer.md): This layer is available from the private @deck.gl/proposals/layers module in a source checkout.
+- [Proposals](https://deck.gl/next/docs/api-reference/proposals/overview.md): The private @deck.gl/proposals module contains experimental APIs available from a deck.gl source checkout. Build the module with yarn build-private.
+- [Tile2DHeader](https://deck.gl/next/docs/api-reference/proposals/tile-2d-header.md): Tile2DHeader is a cache entry owned by Tileset2D. The same header and decoded content are reused by every Tile2DLayer or MVT2DLayer consumer selecting that tile. Applications normally receive it in renderSubLayers, tile callbacks, or picking info rather than instantiate it themselves.
+- [Tile2DLayer](https://deck.gl/next/docs/api-reference/proposals/tile-2d-layer.md): This layer is available from the private @deck.gl/proposals/layers module in a source checkout.
+- [Tileset2D](https://deck.gl/next/docs/api-reference/proposals/tileset-2d.md): Tileset2D manages tile loading and caching for both the new Tile2DLayer and the compatibility TileLayer. One instance can serve multiple layers and views. It owns tile headers, content, scheduling, cache eviction, TileSource metadata, stats, and subscriptions. New layers keep independent selection and visibility state per view.
 
 #### react
 

@@ -10,9 +10,12 @@ The `GridCellLayer` can render a grid-based heatmap. It is a variation of the [C
 
 <!-- -->
 
-* JavaScript
-* TypeScript
-* React
+* Classic accessors
+* Arrow inputs
+
+- JavaScript
+- TypeScript
+- React
 
 ```
 import {Deck} from '@deck.gl/core';
@@ -206,6 +209,30 @@ function App() {
 }
 ```
 
+```
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+
+import {GridCellLayer} from '@deck.gl/layers';
+
+
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+
+
+
+const layer = new GridCellLayer({
+
+  getPosition: positions,
+
+  getElevation: vectorFromArray([100], new Float32())
+
+});
+```
+
+See [Using with Arrow](https://deck.gl/next/docs/developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
 ## Installation[​](#installation "Direct link to Installation")
 
 To install the dependencies from NPM:
@@ -282,11 +309,13 @@ This is an object that contains material props for [lighting effect](https://dec
 
 ### Data Accessors[​](#data-accessors "Direct link to Data Accessors")
 
-#### `getPosition` ([Accessor\<Position>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getposition "Direct link to getposition")
+#### `getPosition` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getposition "Direct link to getposition")
 
 * Default: `x => x.position`
 
 Method called to retrieve the bottom-left corner (`[minX, minY]`) of each cell.
+
+An Arrow vector supplies one value per object. See [position columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
 
 #### `getColor` ([Accessor\<Color>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getcolor "Direct link to getcolor")
 
@@ -297,7 +326,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-#### `getElevation` ([Accessor\<number>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getelevation "Direct link to getelevation")
+#### `getElevation` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getelevation "Direct link to getelevation")
 
 * Default: `1000`
 
@@ -305,6 +334,16 @@ The elevation of each cell in meters.
 
 * If a number is provided, it is used as the elevation for all objects.
 * If a function is provided, it is called on each object to retrieve its elevation.
+
+An Arrow vector supplies one value per object. See [scalar columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#scalars) for requirements.
+
+## GPUVector inputs 🧪[​](#gpuvector-inputs-unstable "Direct link to GPUVector inputs 🧪")
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
+
+GridCellLayer accepts the [ColumnLayer GPUVector props](https://deck.gl/next/docs/api-reference/layers/column-layer.md#gpuvector-inputs-unstable).
 
 ## Source[​](#source "Direct link to Source")
 

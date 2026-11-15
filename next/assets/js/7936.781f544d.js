@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkproject_website=self.webpackChunkproject_website||[]).push([["7936"],{93219(e,r,a){a.d(r,{Draco3DLoaderWithParser:()=>d});var o=a(62492),s=a(20721);let{preload:t,...c}=a(13659).V,d={...c,parse:async(e,r,a)=>await (0,s.j)(e,r,async()=>await (0,o.wx)(function(e){let r=e?.modules?.draco3d;if(!r)throw Error('DracoLoader: backend "draco3d" requires options.modules.draco3d');return r}(r)),a)}}}]);
+//# sourceMappingURL=7936.781f544d.js.map

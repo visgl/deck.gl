@@ -8,16 +8,19 @@ The `SimpleMeshLayer` renders a number of instances of an arbitrary 3D geometry.
 
 <!-- -->
 
-* JavaScript
-* TypeScript
-* React
+* Classic accessors
+* Arrow inputs
+
+- JavaScript
+- TypeScript
+- React
 
 ```
 import {Deck} from '@deck.gl/core';
 
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
-import {OBJLoader} from '@loaders.gl/obj';
+import {OBJLoader} from '@loaders.gl/scene/obj';
 
 
 
@@ -73,7 +76,7 @@ import {Deck, PickingInfo} from '@deck.gl/core';
 
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
-import {OBJLoader} from '@loaders.gl/obj';
+import {OBJLoader} from '@loaders.gl/scene/obj';
 
 
 
@@ -145,7 +148,7 @@ import {DeckGL} from '@deck.gl/react';
 
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
-import {OBJLoader} from '@loaders.gl/obj';
+import {OBJLoader} from '@loaders.gl/scene/obj';
 
 import type {PickingInfo} from '@deck.gl/core';
 
@@ -216,12 +219,38 @@ function App() {
 }
 ```
 
+```
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+
+import {CubeGeometry} from '@luma.gl/engine';
+
+
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+
+
+
+const layer = new SimpleMeshLayer({
+
+  getPosition: positions,
+
+  mesh: new CubeGeometry()
+
+});
+```
+
+See [Using with Arrow](https://deck.gl/next/docs/developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
 `loaders.gl` offers a [category](https://loaders.gl/docs/specifications/category-mesh) of loaders for loading meshes from standard formats. For example, the following code adds support for PLY files:
 
 ```
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
-import {PLYLoader} from '@loaders.gl/ply';
+import {PLYLoader} from '@loaders.gl/pointclouds/ply';
 
 
 
@@ -285,6 +314,8 @@ The geometry to render for each data object. One of:
 * An URL to a mesh description file in a format supported by [loaders.gl](https://loaders.gl/docs/specifications/category-mesh). The appropriate loader will have to be registered via the loaders.gl `registerLoaders` function for this usage.
 
 * A luma.gl [Geometry](https://github.com/visgl/luma.gl/blob/8.5-release/modules/engine/docs/api-reference/geometry.md) instance
+
+* A luma.gl `GPUVectorGeometry` with shader inputs named `positions`, `normals`, `colors`, and `texCoords`. Works with Arrow columns and ordinary accessors.
 
 * An object containing the following fields:
 
@@ -358,13 +389,17 @@ This is an object that contains material props for [lighting effect](https://dec
 
 ### Data Accessors[​](#data-accessors "Direct link to Data Accessors")
 
-#### `getPosition` ([Accessor\<Position>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getposition "Direct link to getposition")
+Arrow inputs follow the shared [column requirements and limitations](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#limitations).
+
+#### `getPosition` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getposition "Direct link to getposition")
 
 * Default: `object => object.position`
 
 Method called to retrieve the center position for each object in the `data` stream.
 
-#### `getColor` ([Accessor\<Color>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getcolor "Direct link to getcolor")
+An Arrow vector supplies one value per object. See [position columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
+
+#### `getColor` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getcolor "Direct link to getcolor")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -374,6 +409,8 @@ The color is in the format of `[r, g, b, [a]]`. Each channel is a number between
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
+
+An Arrow vector supplies one value per object. See [color columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#colors) for requirements.
 
 #### `getOrientation` ([Accessor\<number\[3\]>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional)[​](#getorientation "Direct link to getorientation")
 
@@ -410,6 +447,25 @@ Explicitly define a 4x4 column-major model matrix for the mesh. If provided, wil
 
 * If an array is provided, it is used as the transform matrix for all objects.
 * If a function is provided, it is called on each object to retrieve its transform matrix.
+
+## Remarks[​](#remarks "Direct link to Remarks")
+
+* GPU mesh vertex attributes and indices must each fit in one chunk. Keep the geometry alive while the layer uses it and release it yourself.
+* With `_instanced: false`, GPU-only meshes do not report bounds.
+
+## GPUVector inputs 🧪[​](#gpuvector-inputs-unstable "Direct link to GPUVector inputs 🧪")
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
+
+* `positions` – `float32x3` – Positions in XYZ order.
+* `colors` – `unorm8x4` – Packed RGBA colors.
+
+Notes:
+
+* Supply one value per rendered instance, in instance order.
+* See [Direct GPUVector inputs](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#direct-gpuvector-inputs) for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source[​](#source "Direct link to Source")
 

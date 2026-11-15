@@ -4,6 +4,12 @@
 
 <!-- -->
 
+[OpenFreeMap](https://openfreemap.org/) [© OpenMapTiles](https://openmaptiles.org/) Data from
+
+<!-- -->
+
+[OpenStreetMap](https://www.openstreetmap.org/copyright)
+
 This widget renders an icon button with internal on/off state. It is useful for lightweight toggles such as layer visibility, mode switches, or filter controls.
 
 * JavaScript

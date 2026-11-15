@@ -4,6 +4,12 @@
 
 <!-- -->
 
+[OpenFreeMap](https://openfreemap.org/) [© OpenMapTiles](https://openmaptiles.org/) Data from
+
+<!-- -->
+
+[OpenStreetMap](https://www.openstreetmap.org/copyright)
+
 This widget captures and downloads the deck.gl screen (canvas). Click the widget to capture an image of the screen. The image will be downloaded by the browser into the user's "download" folder.
 
 info

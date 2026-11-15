@@ -8,6 +8,12 @@ It's recommended that you read the [Views and Projections guide](https://deck.gl
 
 [deck.gl GlobeView](https://codepen.io/vis-gl/embed/JjbdXjr?height=450\&theme-id=light\&default-tab=result)
 
+## Target CRS[​](#target-crs "Direct link to Target CRS")
+
+`GlobeViewport.crs` describes standard geocentric XYZ coordinates in meters on the existing deck.gl sphere, with radius 6370972 meters. The descriptor is defined locally using math.gl's geocentric projection plugin. The viewport retains its common-space orientation, radius, and altitude behavior during the CRS transition.
+
+Descriptor bounds enclose the reference sphere and describe a rendering target, not coordinate validity or limits on altitude.
+
 ## Limitations[​](#limitations "Direct link to Limitations")
 
 The goal of `GlobeView` is to provide a generic solution to rendering and navigating data in the 3D space.
@@ -20,7 +26,6 @@ The goal of `GlobeView` is to provide a generic solution to rendering and naviga
   <!-- -->
   * Aggregation layers: `HeatmapLayer`, `ContourLayer`
 * Support for `TerrainLayer` and [TerrainExtension](https://deck.gl/next/docs/api-reference/extensions/terrain-extension.md) is experimental.
-* [MaskExtension](https://deck.gl/next/docs/api-reference/extensions/mask-extension.md) is not supported in this view.
 
 When GeoJson paths and polygons are rendered with this view, the straight lines and flat surfaces are warped to the surface of the globe. Note that the warped edges still correspond to straight lines in the Mercator projection. To draw lines along the shortest distance on the globe, use the [GreatCircleLayer](https://deck.gl/next/docs/api-reference/geo-layers/great-circle-layer.md).
 
@@ -33,10 +38,6 @@ const view = new GlobeView({id, ...});
 ```
 
 `GlobeView` takes the same parameters as the [View](https://deck.gl/next/docs/api-reference/core/view.md) superclass constructor, plus the following:
-
-#### `resolution` (number, optional)[​](#resolution "Direct link to resolution")
-
-The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
 
 #### `nearZMultiplier` (number, optional)[​](#nearzmultiplier "Direct link to nearzmultiplier")
 
@@ -115,15 +116,7 @@ new SolidPolygonLayer({
 })
 ```
 
-* Discard all surfaces that face away from the camera by passing the following prop to `Deck`:
-
-```
-parameters: {
-
-  cull: true
-
-}
-```
+* Discard surfaces that face away from the camera. This is the default: `GlobeView` sets `parameters: {cullMode: 'back'}`, see [parameters](#parameters).
 
 ## Source[​](#source "Direct link to Source")
 

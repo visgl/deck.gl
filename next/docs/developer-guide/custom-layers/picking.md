@@ -125,13 +125,15 @@ By default, the `object` field of the picking `info` object is indexed from the 
 If your layer creates its own [Model](https://github.com/visgl/luma.gl/blob/8.5-release/modules/engine/docs/api-reference/model.md) object, add picking module to `modules` array.
 
 ```
-import {Model} from '@luma.gl/core';
+import {Model} from '@luma.gl/engine';
 
-import {picking} from '@deck.gl/core';
+import {picking, getShaderAssembler} from '@deck.gl/core';
 
 
 
-new Model(gl, {
+new Model(device, {
+
+  shaderAssembler: getShaderAssembler('glsl'),
 
   ...
 

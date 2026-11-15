@@ -363,6 +363,14 @@ The proper value depends on the source of your data. Most geometry formats [enfo
 
 ### Data Accessors[​](#data-accessors "Direct link to Data Accessors")
 
+#### `_projectionTolerance` (number, optional)[​](#_projectiontolerance "Direct link to _projectiontolerance")
+
+* Default: `0`
+
+> Note: This prop is experimental
+
+Maximum sampled boundary error in meters with a preprojecting viewport. Zero disables refinement. Requires `_normalize: true` and per-object styling. Applies to fill and outline; interiors and extruded sides are not refined. See [Adaptive refinement](https://deck.gl/next/docs/api-reference/core/custom-projection-view.md#adaptive-refinement).
+
 #### `getPolygon` ([Accessor\<PolygonGeometry>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getpolygon "Direct link to getpolygon")
 
 * default: `object => object.polygon`

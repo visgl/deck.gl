@@ -55,7 +55,7 @@ deck.gl layers typically expect `data` to be one of the following types:
 * Any non-iterable object that contains a `length` field. deck.gl will not attempt to interpret its format, but simply call each accessor `length` times. (See remark below)
 * `String`: an URL pointing to the data source. deck.gl will attempt to fetch the remote content and parse it as JSON. The resulting object is then used as the value of the `data` prop.
 * `Promise`: the resolved value will be used as the value of the `data` prop.
-* `AsyncIterable`: an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object that yields data in batches. The default implementation expects each batch to be an array of data objects; one may change this behavior by supplying a custom `dataTransform` callback.
+* `AsyncIterable`: an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object that yields data in batches. Batches may be row arrays, Arrow record batches, or Arrow tables. Promises resolving to an async iterable are also supported. Row-array processing can be customized with `dataTransform`.
 
 ##### data.attributes[​](#dataattributes "Direct link to data.attributes")
 
@@ -241,7 +241,7 @@ Normally only used when the application wants to work with coordinates that are 
 
 * Default: `'default'`
 
-Specifies how layer positions and offsets should be geographically interpreted. One of:
+Specifies the CRS of layer positions after `modelMatrix` and `coordinateOrigin` are applied. Built-in coordinate systems include:
 
 * `'default'`
 * `'cartesian'`
@@ -249,7 +249,11 @@ Specifies how layer positions and offsets should be geographically interpreted. 
 * `'meter-offsets'`
 * `'lnglat-offsets'`
 
-The default is to interpret positions as latitude and longitude, however it is also possible to interpret positions as meter offsets added to projection center specified by the `coordinateOrigin` prop.
+`'lnglat'`, `'WGS84'`, `'EPSG:4326'`, and `'EPSG:4979'` identify WGS84 longitude/latitude/elevation. `'globe'` identifies geocentric meter coordinates on deck.gl's existing sphere; `'EPSG:4978'` identifies WGS84 ellipsoid geocentric coordinates. Other CRS identifiers and PROJ strings are resolved by `@math.gl/geospatial/projection`. While resolution is pending, the layer waits before initialization or updates; failures are reported through the layer's error handler.
+
+In [multi-view applications](https://deck.gl/next/docs/developer-guide/views.md), the first viewport allowed by the layer filter determines the layer's CPU coordinate conversion. Use separate layer instances when views require different packed coordinate systems.
+
+`'default'` uses WGS84 in geospatial views and Cartesian coordinates in non-geospatial views. Shader-supported source CRSs retain their attribute coordinates. Other source CRSs are converted on the CPU to WGS84, or to the target CRS of a custom projection.
 
 See the article on [Coordinate Systems](https://deck.gl/next/docs/developer-guide/coordinate-systems.md) for details.
 
@@ -257,7 +261,7 @@ See the article on [Coordinate Systems](https://deck.gl/next/docs/developer-guid
 
 * Default: `[0, 0, 0]`
 
-Specifies a reference point for coordinates that are expressed as offsets. Used when the `coordinateSystem` is set to one of the following modes:
+For an absolute CRS, this value is added in source CRS units after `modelMatrix`, before projection. For offset modes, it specifies the geographic reference point:
 
 * `'cartesian'` (optional)
 * `'meter-offsets'` (required)
@@ -304,13 +308,53 @@ The function receives two arguments:
 
 And should return `true` if the two values are considered equal (no update needed), or `false` if the data has changed.
 
+#### `_dataLoadOptions` (string, optional) **Experimental**[​](#_dataloadoptions "Direct link to _dataloadoptions")
+
+* Default: `'auto'`
+
+Controls how URL data is loaded and how streamed data is consumed:
+
+| Mode          | URL loading                             | Stream consumption                      |
+| ------------- | --------------------------------------- | --------------------------------------- |
+| `'auto'`      | Load completely using loaders.gl `load` | Append application-supplied chunks      |
+| `'batched'`   | Stream using loaders.gl `loadInBatches` | Append chunks                           |
+| `'snapshots'` | Stream using loaders.gl `loadInBatches` | Replace all data with each Arrow result |
+
+Streams can yield row arrays, Arrow `RecordBatch` objects, or Arrow tables. Each snapshot replaces the previous table with the entire current result. A snapshot can be one Arrow record batch or an Arrow table containing multiple record batches. Do not mix Arrow and row chunks in one stream. Deck discards loader metadata and passes plain row arrays or Arrow tables to layer props and callbacks.
+
+`loaders` and `loadOptions` are forwarded to loaders.gl. Changing the mode, or changing loaders or load options while batch loading is active, reloads the same URL. A custom `fetch` retains control over URL loading and may return an iterable or a promise resolving to one.
+
+Arrow is an optional dependency, imported only when an Arrow chunk arrives. `dataTransform` applies to row chunks; transform Arrow chunks in the producer instead. See [Streaming Arrow data](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#streaming-arrow-data).
+
+#### `query` (string, optional)[​](#query "Direct link to query")
+
+SQL to execute through loaders.gl when `data` is an Arrow table, a promise resolving to an Arrow table, or a URL. The result becomes the layer's loaded data and is available to accessor queries, accessors, and picking. The layer's data is the implicit source. `FROM data` is optional.
+
+For URL inputs, provide a source-capable loader. Loaders that support query pushdown can optimize loading based on the supplied query. When the layer has a custom `fetch`, SQL runs on the Arrow table returned by that function. Set Deck's `sqlParser` prop to a parser that implements `parseQuery`.
+
+#### SQL accessor inputs[​](#sql-accessor-inputs "Direct link to SQL accessor inputs")
+
+Accessors that accept Arrow columns also accept `{sql: string}`. The expression evaluates against the loaded Arrow table after `query` and `dataTransform`. It returns one value per row, in source order. Use `query` for filtering or other operations that change the rows. Supply Deck with a `sqlParser` that implements `parseExpression`.
+
+An Arrow-enabled position accessor can reference columns by name. If the loaded `data` table has separate `longitude` and `latitude` columns, this packs them into a two-component 64-bit position for each row.
+
+```
+getPosition: {sql: 'FLOAT64x2(longitude, latitude)'}
+```
+
+If the table has `red`, `green`, and `blue` columns with floating-point values in the range 0–1, this packs them into an 8-bit RGBA color with full opacity.
+
+```
+getFillColor: {sql: 'RGBA8(red, green, blue, 1)'}
+```
+
 #### `dataTransform` (Function, optional)[​](#datatransform "Direct link to datatransform")
 
 Executed to manipulate remote data when it's fetched. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.
 
 The function receives two arguments:
 
-* `data` - the newly fetched data
+* `data` - the newly fetched data. A complete Arrow load supplies an Apache Arrow `Table`.
 * `previousData` - (only available when `data` is an async iterable) the previously loaded data. If `dataTransform` is not supplied, the new data chunk is appended to the previous data array.
 
 And must return a valid `data` object: an array, an iterable or a non-iterable object that contains a `length` field. See documentation of the `data` prop for details.
@@ -599,7 +643,7 @@ Out of the box, deck.gl supports loading JSON and image files (with [ImageLoader
 Support for addtional formats can be added by adding loaders to the `loaders` prop. For example, to load data from CSV files:
 
 ```
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 
 
 
@@ -648,6 +692,12 @@ The function is expected to return a Promise that resolves to loaded data.
 
 * Default: `load(url, loaders, loadOptions)`
 
+#### `onDataProgress` (Function, optional) **Experimental**[​](#ondataprogress "Direct link to ondataprogress")
+
+Called after each accepted streamed data batch is applied. Receives `(value, context)`, where `value` is the accumulated row array or Arrow table (the replacement table in snapshot mode), and `context` contains `layer` and `propName` (`'data'`). Metadata batches do not trigger this callback. It also applies to application-supplied streams in `'auto'` mode.
+
+`onDataLoad` runs once at successful stream completion. An empty stream completes with `[]` and no progress callback. Iterator errors use the layer's error handler. Replaced or finalized streams do not publish subsequent progress, completion, or error callbacks.
+
 #### `onDataLoad` (Function, optional)[​](#ondataload "Direct link to ondataload")
 
 Called when remote data is fully loaded. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.
@@ -671,11 +721,11 @@ Please refer to the luma.gl [GPU Parameters](https://luma.gl/docs/api-reference/
 
 * Default: `({layerIndex}) => [0, -layerIndex * 100]`
 
-When multiple layers are rendered on the same plane, [z-fighting](https://en.wikipedia.org/wiki/Z-fighting) may create undesirable artifacts. To improve the visual quality of composition, deck.gl allows layers to use `gl.polygonOffset` to apply an offset to its depth. By default, each layer is offset a small amount by its index so that layers are cleanly stacked from bottom to top.
+When multiple layers are rendered on the same plane, [z-fighting](https://en.wikipedia.org/wiki/Z-fighting) may create undesirable artifacts. To improve the visual quality of composition, deck.gl applies a depth offset. By default, each layer is offset a small amount by its index so that layers are cleanly stacked from bottom to top.
 
 This accessor takes a single parameter `uniform` - an object that contains the current render uniforms, and returns an array of two numbers `factor` and `units`. Negative values pull layer towards the camera, and positive values push layer away from the camera. For more information, refer to the [documentation](https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glPolygonOffset.xml) and [FAQ](https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm).
 
-If the accessor is assigned a falsy value, polygon offset will be set to `[0, 0]`.
+If the accessor is assigned a falsy value, polygon offset will be set to `[0, 0]`. On WebGPU, `units` is rounded to an integer and the offset applies only to triangle geometry. Explicit `parameters.depthBias` and `parameters.depthBiasSlopeScale` override the accessor.
 
 Remarks:
 
@@ -966,22 +1016,24 @@ Returns:
 
 #### `projectPosition`[​](#projectposition "Direct link to projectposition")
 
-Projects a coordinate to common space using the current viewport and layer coordinate system. Can be useful to calculate common-space angles and distances.
+To calculate common-space angles and distances, use `projectPosition` to convert coordinates from a resolved source CRS. With the default parameters, the result uses the same common-space origin as this layer's shader. Set `autoOffset: false` for absolute common-space coordinates.
 
 Parameters:
 
-* `coordinates` (number\[]) - `[x, y, z]` in this layer's coordinate system.
+* `coordinates` (number\[]) - `[x, y, z]` in the source CRS.
 
-* `params` (object, optional) - Projection parameters override. It accepts the following fields:
+* `params` (object, optional):
 
   <!-- -->
 
-  * `viewport` (Viewport) - defaults to `this.context.viewport`.
+  * `sourceCrs` (CRSDescriptor) - absolute CRS of the supplied coordinates. Defaults to the layer's resolved CRS. Passing a descriptor selects that CRS instead of the layer's coordinate-system mode.
+  * `coordinateSystem` (`'cartesian'` | `'meter-offsets'`) - selects local coordinates or meter offsets and takes precedence over `sourceCrs`.
+  * `viewport` ([Viewport](https://deck.gl/next/docs/api-reference/core/viewport.md)) - supplies the target projection; defaults to the layer's active viewport.
   * `modelMatrix` (Matrix4 | null) - defaults to `this.props.modelMatrix`. Pass `null` to skip the layer matrix.
-  * `coordinateOrigin` (number\[3]) - defaults to `this.props.coordinateOrigin`.
-  * `coordinateSystem` (string) - defaults to `this.props.coordinateSystem`.
-  * `fromCoordinateOrigin` (number\[3]) - defaults to passed `coordinateOrigin`.
-  * `fromCoordinateSystem` (string) - defaults to passed `coordinateSystem`.
+  * `coordinateOrigin` (number\[3]) - input origin applied before CRS conversion; defaults to `this.props.coordinateOrigin`.
+  * `autoOffset` (boolean) - defaults to `true`. Set to `false` to return absolute common-space coordinates.
+
+The supplied CRS and origin also determine the automatic common-space offset. Use `autoOffset: false` to compare positions projected with different parameter sets.
 
 Returns:
 
