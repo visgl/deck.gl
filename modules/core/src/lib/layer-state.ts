@@ -179,7 +179,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     const fetch = layer?.props.fetch;
     if (request?.query && layer) {
       layer.context.resourceManager?.unsubscribe({consumerId: layer.id, requestId: propName});
-      const defaultFetch = Layer.defaultProps.fetch as {value: Layer['props']['fetch']};
+      const {fetch: defaultFetch} = Layer.defaultProps as {fetch: {value: Layer['props']['fetch']}};
       if (fetch && fetch !== defaultFetch.value) {
         return this._prepareAsyncInput(propName, fetch(url, {propName, layer}));
       }
