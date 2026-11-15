@@ -24,6 +24,8 @@ const TILE_SIZE = 512;
 const MAX_MAPS = 3;
 // number of intervals on each screen axis, to sample the ground that a custom projection shows
 const VIEW_SAMPLES = 8;
+// number of intervals on each axis, to sample the area of use of a CRS
+const AREA_SAMPLES = 16;
 // tolerance in degrees, to detect a position that a CRS moved into its area of use
 const EPSILON = 1e-9;
 // for calculating bounding volume of a tile in a non-web-mercator viewport
@@ -293,9 +295,50 @@ function projectInAreaOfUse(viewport: _CustomProjectionViewport, position: numbe
 
 type ScreenRect = {x: number; y: number; width: number; height: number};
 
+const areaPositionsCache = new WeakMap<object, number[][]>();
+
+/**
+ * Returns WGS84 positions on a grid in the area of use of the CRS of a custom projection.
+ * A CRS that clamps positions shows its area of use: the positions of the world go into it.
+ */
+function getAreaPositions(viewport: _CustomProjectionViewport): number[][] {
+  let positions = areaPositionsCache.get(viewport.crs);
+  if (!positions) {
+    let minLng = Infinity;
+    let minLat = Infinity;
+    let maxLng = -Infinity;
+    let maxLat = -Infinity;
+    for (let lng = -180; lng <= 180; lng += 30) {
+      for (let lat = -90; lat <= 90; lat += 30) {
+        const normalized = tryConvert(() => viewport.crs.converter.WGS84.normalize([lng, lat]));
+        if (Number.isFinite(normalized[0]) && Number.isFinite(normalized[1])) {
+          minLng = Math.min(minLng, normalized[0]);
+          maxLng = Math.max(maxLng, normalized[0]);
+          minLat = Math.min(minLat, normalized[1]);
+          maxLat = Math.max(maxLat, normalized[1]);
+        }
+      }
+    }
+    positions = [];
+    for (let i = 0; i <= AREA_SAMPLES && minLng <= maxLng; i++) {
+      for (let j = 0; j <= AREA_SAMPLES; j++) {
+        positions.push([
+          minLng + (i / AREA_SAMPLES) * (maxLng - minLng),
+          minLat + (j / AREA_SAMPLES) * (maxLat - minLat),
+          0
+        ]);
+      }
+    }
+    areaPositionsCache.set(viewport.crs, positions);
+  }
+  return positions;
+}
+
 /**
  * Returns WGS84 positions of the ground that a custom projection shows in a screen rectangle.
- * The default rectangle is the complete viewport. The positions are samples on a grid.
+ * The default rectangle is the complete viewport.
+ * The positions are samples on a grid of the screen and on a grid of the area of use of the CRS.
+ * The second grid finds an area of use that is small on screen.
  * A screen position that the CRS cannot convert in the two directions shows no ground.
  */
 export function getGroundPositions(
@@ -320,6 +363,21 @@ export function getGroundPositions(
           // Longitude in the range [-180, 180)
           positions.push([lng - 360 * Math.floor((lng + 180) / 360), lat]);
         }
+      }
+    }
+  }
+  for (const position of getAreaPositions(viewport)) {
+    if (isFinitePosition(projectInAreaOfUse(viewport, position))) {
+      const [x, y, depth] = tryConvert(() => viewport.project(position));
+      if (
+        x >= rect.x &&
+        x <= rect.x + rect.width &&
+        y >= rect.y &&
+        y <= rect.y + rect.height &&
+        depth >= 0 &&
+        depth <= 1
+      ) {
+        positions.push([position[0] - 360 * Math.floor((position[0] + 180) / 360), position[1]]);
       }
     }
   }

@@ -644,6 +644,20 @@ test('getTileIndices#CustomProjectionView uses the elevation range in meters', a
   ).toEqual([]);
 });
 
+test('getTileIndices#CustomProjectionView finds an area of use that is small on screen', async () => {
+  // UTM zone 15 is approximately 12 pixels wide in this view
+  const viewport = await makeCustomProjectionViewport(UTM_15N, {center: [-90, 45, 0], zoom: 2});
+  const [x, y] = viewport.project([-93, 75]);
+  expect(x > 0 && x < 800 && y > 0 && y < 400, 'the north of the zone is on screen').toBe(true);
+  // The tile 0,0,2 contains the position [-93, 75]
+  expect(getTileIds(getTileIndices({viewport, zRange: null}))).toEqual([
+    '0,0,2',
+    '0,1,2',
+    '1,0,2',
+    '1,1,2'
+  ]);
+});
+
 test('getTileIndices#CustomProjectionView respects extent and maxZoom', async () => {
   const viewport = await makeCustomProjectionViewport(UTM_15N, {
     center: [-93.2, 45, 0],
