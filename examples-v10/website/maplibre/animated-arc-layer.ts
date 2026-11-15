@@ -27,7 +27,9 @@ const defaultProps: DefaultProps<AnimationProps> = {
   timeRange: {type: 'array', compare: true, value: [0, 1]}
 };
 
+/** Timestamp window layout for the GLSL shader stages. */
 const uniformBlock = `uniform flightTimeUniforms { vec2 timeRange; } flightTime;`;
+/** Shared time window uniforms for both shader backends. */
 const flightTimeUniforms = {
   name: 'flightTime',
   vs: uniformBlock,
@@ -42,13 +44,15 @@ export default class AnimatedArcLayer extends ArcLayer<unknown, Required<Animati
   static layerName = 'AnimatedArcLayer';
   static defaultProps = defaultProps;
 
-  override initializeState() {
-    super.initializeState();
-    this.getAttributeManager()?.addInstanced({
+  /** Binds timestamps when the layer uses the accessor model. */
+  protected override initializeAccessorAttributes() {
+    super.initializeAccessorAttributes();
+    this.getAttributeManager()!.addInstanced({
       instanceTimestamps: {size: 2, accessor: 'getTimestamps'}
     });
   }
 
+  /** Binds packed departure and arrival times to the Arrow model. */
   protected override getExtraColumnDefinitions(): Readonly<Record<string, ColumnDefinition>> {
     return {
       timestamps: {

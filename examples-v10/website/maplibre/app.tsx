@@ -32,6 +32,7 @@ const ANIMATION_SPEED = 60;
 const TIME_WINDOW = 1800; // 30 minutes
 const SEC_PER_DAY = 60 * 60 * 24;
 
+/** One flight with departure and arrival coordinates and timestamps. */
 export type Flight = {
   // Departure
   time1: number;

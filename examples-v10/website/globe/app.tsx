@@ -51,6 +51,7 @@ const sunLight = new SunLight({
 // create lighting effect with light sources
 const lightingEffect = new LightingEffect({ambientLight, sunLight});
 
+/** One flight with departure and arrival coordinates and timestamps. */
 export type Flight = {
   // Departure
   time1: number;

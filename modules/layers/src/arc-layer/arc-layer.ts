@@ -186,7 +186,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
 
   /** Bypasses attribute generation while Arrow columns drive the model. */
   protected _getAttributeManager() {
-    return hasArcColumns(this.props) ? null : super._getAttributeManager();
+    return this.hasColumns() ? null : super._getAttributeManager();
   }
 
   getNumInstances(): number {
@@ -229,7 +229,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   initializeState() {
-    if (hasArcColumns(this.props)) {
+    if (this.hasColumns()) {
       if (this.props.extensions.length)
         throw new Error('Arc Arrow columns do not support extensions');
       return;
@@ -237,7 +237,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     this.initializeAccessorAttributes();
   }
 
-  private initializeAccessorAttributes() {
+  /** Registers instance attributes for the accessor model, including after a mode switch. */
+  protected initializeAccessorAttributes() {
     const attributeManager = this.getAttributeManager()!;
 
     /* eslint-disable max-len */
@@ -295,7 +296,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   updateState(params: UpdateParameters<this>): void {
-    if (hasArcColumns(this.props)) {
+    if (this.hasColumns()) {
       this.updateColumnState(params);
       return;
     }
@@ -322,8 +323,13 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   /** Adds instance columns for subclass shaders when ArcLayer uses the Arrow path. */
-  protected getExtraColumnDefinitions(): Readonly<Record<string, ColumnDefinition>> {
-    return {};
+  protected getExtraColumnDefinitions(): Readonly<Record<string, ColumnDefinition>> | undefined {
+    return undefined;
+  }
+
+  /** Selects the same column definitions for initialization and updates. */
+  private hasColumns(): boolean {
+    return hasArcColumns(this.props, this.getExtraColumnDefinitions());
   }
 
   /** Updates the model and schedules conversion while Arrow columns are active. */

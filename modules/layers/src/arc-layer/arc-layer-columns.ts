@@ -83,8 +83,12 @@ export type ArcColumnProps = {
 };
 
 /** Returns whether a column prop selects the column path. */
-export function hasArcColumns(props: Readonly<Record<string, unknown>>): boolean {
-  return Object.keys(resolveColumns(props, DEFINITIONS)).length > 0;
+export function hasArcColumns(
+  props: Readonly<Record<string, unknown>>,
+  extraColumns?: Readonly<Record<string, ColumnDefinition>>
+): boolean {
+  const definitions = extraColumns ? {...DEFINITIONS, ...extraColumns} : DEFINITIONS;
+  return Object.keys(resolveColumns(props, definitions)).length > 0;
 }
 
 /** Prepares ArcLayer columns and accessor fallbacks. */

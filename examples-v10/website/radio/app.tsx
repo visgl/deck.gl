@@ -158,6 +158,7 @@ export default function App({
     return result;
   }, [data]);
 
+  /** Station coordinates used by the SQL position accessor. */
   const stationPositions = useMemo(
     () =>
       data &&

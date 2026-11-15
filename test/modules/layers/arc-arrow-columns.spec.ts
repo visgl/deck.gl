@@ -212,8 +212,8 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     const layer = new AnimatedArcLayer({
       id: 'flight-time',
       data,
-      getSourcePosition: {sql: 'FLOAT64x2(x, 0)'},
-      getTargetPosition: {sql: 'FLOAT64x2(y, 0)'},
+      getSourcePosition: backend === 'webgpu' ? {sql: 'FLOAT64x2(x, 0)'} : () => [-20, 0],
+      getTargetPosition: backend === 'webgpu' ? {sql: 'FLOAT64x2(y, 0)'} : () => [20, 0],
       getTimestamps: {sql: 'FLOAT32x2(start, arrival)'},
       getHeight: 0,
       getWidth: 14,
@@ -237,6 +237,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         () => {
           expect(errors).toEqual([]);
           expect(current.state?.columns?.length).toBe(1);
+          expect(current.getAttributeManager()).toBeNull();
           expect(current.isLoaded).toBe(true);
           deck.redraw('draw flight arcs');
         },

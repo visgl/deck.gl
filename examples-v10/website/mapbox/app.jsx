@@ -63,6 +63,7 @@ export default function App({data}) {
     return [lng, lat];
   }, [selectedPOI]);
 
+  /** Visitor rows used by the arc query regardless of the selected POI. */
   const arcs = useMemo(
     () =>
       data &&
