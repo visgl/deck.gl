@@ -90,7 +90,7 @@ export default function App({
     new PointCloudLayer({
       id: 'laz-point-cloud-layer',
       data: LAZ_SAMPLE,
-      loadInBatches: true,
+      _dataLoadOptions: 'batched',
       loadOptions: {
         core: {worker: false, batchSize: 25000, batchDebounceMs: 180},
         las: {shape: 'arrow-table', fp64: true, columns: ['POSITION']}
