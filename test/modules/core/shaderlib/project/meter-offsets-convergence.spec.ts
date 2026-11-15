@@ -54,12 +54,15 @@ const viewport = new CustomProjectionViewport({
 const metersPerCommonUnit = 1 / viewport.distanceScales.unitsPerWorldUnit[0];
 const gpuTest = device.type === 'webgl' ? test : test.skip;
 
-// A quarter turn and a scale of 2: [x, y] -> [-2y, 2x]
-const MODEL_MATRIX = new Matrix4().rotateZ(Math.PI / 2).scale(2);
+// A translation and a non-uniform scale do not commute with the rotation of the
+// grid convergence: [x, y] -> [2x + 300, y / 2 - 200]
+const MODEL_MATRIX = new Matrix4().translate([300, -200, 0]).scale([2, 0.5, 1]);
 
 const TEST_CASES: {
   title: string;
   position: [number, number, number];
+  /** Low part of a 64-bit position; the GPU adds it to `position` */
+  positionLow?: [number, number, number];
   modelMatrix?: Matrix4;
   /** Expected east/north meters from the origin */
   expected: [number, number];
@@ -71,9 +74,22 @@ const TEST_CASES: {
   {title: '5 km south-west', position: [-3000, -4000, 0], expected: [-3000, -4000]},
   {
     title: 'modelMatrix applies in meter space',
-    position: [1000, 500, 0],
+    position: [1000, 4000, 0],
     modelMatrix: MODEL_MATRIX,
-    expected: [-1000, 2000]
+    expected: [2300, 1800]
+  },
+  {
+    title: 'low part of a 64-bit position',
+    position: [1000, 0, 0],
+    positionLow: [0, 2000, 0],
+    expected: [1000, 2000]
+  },
+  {
+    title: 'low part of a 64-bit position with modelMatrix',
+    position: [1000, 0, 0],
+    positionLow: [0, 4000, 0],
+    modelMatrix: MODEL_MATRIX,
+    expected: [2300, 1800]
   }
 ];
 
@@ -89,7 +105,9 @@ test('project#meter-offsets follow the grid convergence of a custom projection (
   const convergence = Math.atan2(east[1] - center[1], east[0] - center[0]) / DEGREES_TO_RADIANS;
   expect(Math.abs(convergence), 'origin is away from the central meridian').toBeGreaterThan(2);
 
-  for (const {title, position, modelMatrix = null, expected} of TEST_CASES) {
+  for (const {title, position, positionLow, modelMatrix = null, expected} of TEST_CASES) {
+    // The CPU path has no low part
+    if (positionLow) continue;
     const actual = projectPosition(position, {
       viewport,
       coordinateSystem: 'meter-offsets',
@@ -106,7 +124,13 @@ test('project#meter-offsets follow the grid convergence of a custom projection (
 gpuTest(
   'project#meter-offsets follow the grid convergence of a custom projection (GPU)',
   async () => {
-    for (const {title, position, modelMatrix = null, expected} of TEST_CASES) {
+    for (const {
+      title,
+      position,
+      positionLow = [0, 0, 0],
+      modelMatrix = null,
+      expected
+    } of TEST_CASES) {
       const actual = await runOnGPU({
         vs: `#version 300 es
         out vec3 result;
@@ -121,7 +145,7 @@ gpuTest(
             coordinateOrigin: origin,
             modelMatrix
           },
-          test: {uPos: position, uPos64Low: [0, 0, 0]}
+          test: {uPos: position, uPos64Low: positionLow}
         }
       });
       expect(getErrorMeters(actual, expected) / Math.hypot(...expected), title).toBeLessThan(0.001);
@@ -147,6 +171,37 @@ test('project#meter-offsets use the per-axis scale where the Jacobian is unavail
     autoOffset: false
   });
   expect(actual[0]).toBeCloseTo(anchor[0] + 1000 * unitsPerMeter[0], 9);
+  expect(actual[1]).toBeCloseTo(anchor[1] + 2000 * unitsPerMeter[1], 9);
+  expect(project.getUniforms(props).modelMatrix, 'modelMatrix is unchanged').toEqual(
+    new Matrix4().toArray()
+  );
+});
+
+test('project#meter-offsets use the per-axis scale where the projection wraps', async () => {
+  // East and west of the antimeridian project to opposite edges of the map
+  const coordinateOrigin: [number, number, number] = [180, 0, 0];
+  const seamViewport = new CustomProjectionViewport({
+    crs: await projectionEngine.getCRS('EPSG:3857'),
+    center: [179, 0, 0],
+    zoom: 12,
+    width: 800,
+    height: 600
+  });
+  const targetOrigin = seamViewport.crs.converter.WGS84.from(coordinateOrigin);
+  const {unitsPerMeter} = seamViewport.getDistanceScales(targetOrigin);
+  const props = {
+    viewport: seamViewport,
+    coordinateSystem: 'meter-offsets' as const,
+    coordinateOrigin
+  };
+  const anchor = seamViewport.projectPosition(coordinateOrigin);
+  const actual = projectPosition([-1000, 2000, 0], {
+    ...props,
+    sourceCrs: null,
+    modelMatrix: null,
+    autoOffset: false
+  });
+  expect(actual[0]).toBeCloseTo(anchor[0] - 1000 * unitsPerMeter[0], 9);
   expect(actual[1]).toBeCloseTo(anchor[1] + 2000 * unitsPerMeter[1], 9);
   expect(project.getUniforms(props).modelMatrix, 'modelMatrix is unchanged').toEqual(
     new Matrix4().toArray()

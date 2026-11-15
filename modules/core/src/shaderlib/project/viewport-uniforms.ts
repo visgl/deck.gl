@@ -117,22 +117,36 @@ function calculateMeterOffsetsJacobian({
   if (!(Math.abs(dLng) < 1)) {
     return null;
   }
-  let jacobian: Vec4;
+  let center: number[];
+  let east: number[];
+  let west: number[];
+  let north: number[];
+  let south: number[];
   try {
-    const east = viewport.projectPosition([longitude + dLng, latitude, altitude]);
-    const west = viewport.projectPosition([longitude - dLng, latitude, altitude]);
-    const north = viewport.projectPosition([longitude, latitude + dLat, altitude]);
-    const south = viewport.projectPosition([longitude, latitude - dLat, altitude]);
-    jacobian = [
-      (east[0] - west[0]) / 2,
-      (east[1] - west[1]) / 2,
-      (north[0] - south[0]) / 2,
-      (north[1] - south[1]) / 2
-    ];
+    center = viewport.projectPosition([longitude, latitude, altitude]);
+    east = viewport.projectPosition([longitude + dLng, latitude, altitude]);
+    west = viewport.projectPosition([longitude - dLng, latitude, altitude]);
+    north = viewport.projectPosition([longitude, latitude + dLat, altitude]);
+    south = viewport.projectPosition([longitude, latitude - dLat, altitude]);
   } catch {
     return null;
   }
-  return jacobian.every(Number.isFinite) ? jacobian : null;
+  const jacobian: Vec4 = [
+    (east[0] - west[0]) / 2,
+    (east[1] - west[1]) / 2,
+    (north[0] - south[0]) / 2,
+    (north[1] - south[1]) / 2
+  ];
+  // The two one-sided differences agree where the projection is smooth. They do not
+  // agree where a sample wraps or clamps, for example across the antimeridian.
+  const tolerance = 1e-3 * Math.hypot(...jacobian);
+  const isSmooth = [
+    [east, west],
+    [north, south]
+  ].every(([after, before]) =>
+    [0, 1].every(i => Math.abs(after[i] + before[i] - 2 * center[i]) <= tolerance)
+  );
+  return isSmooth ? jacobian : null;
 }
 
 /**
