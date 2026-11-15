@@ -3,16 +3,17 @@
 // Copyright (c) vis.gl contributors
 
 import {MapLibreOverlay as DeckOverlay} from '@deck.gl/maplibre';
-import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
+import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
+import {sqlParser} from '@deck.gl/core/sql';
+import {JSONTableLoader} from '@loaders.gl/tables/json';
 import {Map, NavigationControl, setWorkerUrl} from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 setWorkerUrl(maplibreWorkerUrl);
 
-// source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
-const AIR_PORTS =
-  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
+// Natural Earth airport coordinates and attributes.
+const AIRPORTS = new URL('./airports.json', import.meta.url).href;
 
 const map = new Map({
   container: 'map',
@@ -25,31 +26,33 @@ const map = new Map({
 
 const deckOverlay = new DeckOverlay({
   interleaved: true,
+  sqlParser,
   layers: [
-    new GeoJsonLayer({
+    new ScatterplotLayer({
       id: 'airports',
-      data: AIR_PORTS,
-      // Styles
-      filled: true,
-      pointRadiusMinPixels: 2,
-      pointRadiusScale: 2000,
-      getPointRadius: f => 11 - f.properties.scalerank,
+      loaders: [JSONTableLoader],
+      data: AIRPORTS,
+      // Sahnewal (LUH), rank 9, longitude 75.95707224036518, latitude 30.850359856170176
+      query: 'SELECT *',
+      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+      getRadius: {sql: 'FLOAT32(11 - scalerank)'},
+      radiusMinPixels: 2,
+      radiusScale: 2000,
       getFillColor: [200, 0, 80, 180],
-      // Interactive props
       pickable: true,
       autoHighlight: true,
-      onClick: info =>
-        // eslint-disable-next-line
-        info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
-      // beforeId: 'waterway_line_label' // In interleaved mode, render the layer under map labels
+      onClick: ({object}) => {
+        if (object) alert(`${object.name} (${object.abbrev})`);
+      }
     }),
     new ArcLayer({
       id: 'arcs',
-      data: AIR_PORTS,
-      dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
-      // Styles
-      getSourcePosition: f => [-0.4531566, 51.4709959], // London
-      getTargetPosition: f => f.geometry.coordinates,
+      loaders: [JSONTableLoader],
+      data: AIRPORTS,
+      // Sahnewal (LUH), rank 9, longitude 75.95707224036518, latitude 30.850359856170176
+      query: 'SELECT * WHERE scalerank < 4',
+      getTargetPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+      getSourcePosition: [-0.4531566, 51.4709959],
       getSourceColor: [0, 128, 200],
       getTargetColor: [200, 0, 80],
       getWidth: 1

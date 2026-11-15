@@ -6,10 +6,16 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import {sqlParser} from '@deck.gl/core/sql';
+import {JSONTableLoader} from '@loaders.gl/tables/json';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 import type {Color, MapViewState, Widget} from '@deck.gl/core';
 import type {Device, DeviceProps} from '@luma.gl/core';
+
+function normalizedChannel(color: Color, index: number): number {
+  return (color[index] ?? 255) / 255;
+}
 
 const MALE_COLOR: Color = [0, 128, 255, 255];
 const FEMALE_COLOR: Color = [255, 0, 128, 255];
@@ -52,10 +58,27 @@ export default function App({
     new ScatterplotLayer<DataPoint>({
       id: 'scatter-plot',
       data,
+      loaders: [JSONTableLoader],
+      // Source row: [-73.986022, 40.730743, 2]
+      query:
+        typeof data === 'string'
+          ? 'SELECT column1 AS longitude, column2 AS latitude, column3 AS gender'
+          : null,
       radiusScale: radius,
       radiusMinPixels: 0.25,
-      getPosition: d => [d[0], d[1], 0],
-      getFillColor: d => (d[2] === 1 ? maleColor : femaleColor),
+      getPosition:
+        typeof data === 'string' ? {sql: 'FLOAT64x2(longitude, latitude)'} : d => [d[0], d[1], 0],
+      getFillColor:
+        typeof data === 'string'
+          ? {
+              sql: `RGBA8(${[0, 1, 2, 3]
+                .map(
+                  index =>
+                    `CASE WHEN gender = 1 THEN ${normalizedChannel(maleColor, index)} ELSE ${normalizedChannel(femaleColor, index)} END`
+                )
+                .join(', ')})`
+            }
+          : d => (d[2] === 1 ? maleColor : femaleColor),
       getRadius: 1,
       updateTriggers: {
         getFillColor: [maleColor, femaleColor]
@@ -66,6 +89,7 @@ export default function App({
 
   return (
     <DeckGL
+      sqlParser={sqlParser}
       device={device}
       deviceProps={deviceProps}
       layers={layers}

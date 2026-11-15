@@ -9,7 +9,7 @@ import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {load} from '@loaders.gl/core';
+import {sqlParser} from '@deck.gl/core/sql';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
@@ -72,17 +72,17 @@ function getTooltip({object}: PickingInfo) {
     ${count} Accidents`;
 }
 
-type DataPoint = [longitude: number, latitude: number];
+type DataPoint = {lng: number; lat: number};
 
 export default function App({
-  data = null,
+  data = DATA_URL,
   mapStyle = MAP_STYLE,
   radius = 1000,
   upperPercentile = 100,
   coverage = 1,
   device
 }: {
-  data?: DataPoint[] | null;
+  data?: DataPoint[] | string | null;
   mapStyle?: string;
   radius?: number;
   upperPercentile?: number;
@@ -96,10 +96,17 @@ export default function App({
       colorRange,
       coverage,
       data,
+      loaders: [CSVLoader],
+      // lng,lat
+      // -0.198465,51.505538
+      query:
+        typeof data === 'string'
+          ? 'SELECT lng, lat WHERE lng IS NOT NULL AND lat IS NOT NULL'
+          : null,
       elevationRange: [0, 3000],
-      elevationScale: data && data.length ? 50 : 0,
+      elevationScale: 50,
       extruded: true,
-      getPosition: d => d,
+      getPosition: ({lng, lat}) => [lng, lat],
       pickable: true,
       radius,
       upperPercentile,
@@ -118,6 +125,7 @@ export default function App({
 
   return (
     <DeckGL
+      sqlParser={sqlParser}
       device={device}
       layers={layers}
       effects={[lightingEffect]}
@@ -130,13 +138,6 @@ export default function App({
   );
 }
 
-export async function renderToDOM(container: HTMLDivElement) {
-  const root = createRoot(container);
-  root.render(<App />);
-
-  const data = (await load(DATA_URL, CSVLoader, {csv: {shape: 'object-row-table'}})).data;
-  const points: DataPoint[] = data
-    .map(d => (Number.isFinite(d.lng) ? [d.lng, d.lat] : null))
-    .filter(Boolean);
-  root.render(<App data={points} />);
+export function renderToDOM(container: HTMLDivElement) {
+  createRoot(container).render(<App />);
 }
