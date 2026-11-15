@@ -19,8 +19,8 @@ async function createIdleDeck(props: DeckProps = {}) {
   await new Promise<void>(resolve => {
     deck = new Deck({
       device,
-      width: 10,
-      height: 10,
+      width: 1,
+      height: 1,
       viewState: VIEW_STATE,
       layers: [new ScatterplotLayer({id: 'points', data: DATA, getPosition: d => d.position})],
       ...props,
