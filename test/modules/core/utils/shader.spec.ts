@@ -92,12 +92,7 @@ test('mergeShaders converts the inject field of each descriptor before the merge
     {
       name: 'layer-inject',
       injections: [
-        {stage: 'fragment', target: 'DECKGL_FILTER_COLOR', glsl: 'color.a *= 0.5;', order: 0}
-      ]
-    },
-    {
-      name: 'layer-inject',
-      injections: [
+        {stage: 'fragment', target: 'DECKGL_FILTER_COLOR', glsl: 'color.a *= 0.5;', order: 0},
         {
           stage: 'fragment',
           target: 'DECKGL_FILTER_COLOR',
@@ -136,11 +131,38 @@ test('mergeShaders keeps the target injections before the source injections', ()
     {inject: {'fs:#main-end': 'fragColor.r *= 0.5;'}}
   );
   expect('inject' in merged, 'inject key is removed').toBe(false);
-  expect(merged.plugins.map(plugin => plugin.injections[0].glsl)).toEqual([
+  expect(merged.plugins).toHaveLength(1);
+  expect(merged.plugins[0].injections.map(injection => injection.glsl)).toEqual([
     'fragColor.r = 1.0;',
     'fragColor.r *= 0.5;'
   ]);
   expect(convertLegacyInjections(merged), 'no later conversion').toBe(merged);
+});
+
+test('mergeShaders keeps the converted injections after the other plugins', () => {
+  // luma.gl assembles the `inject` option after the plugins
+  const merged = mergeShaders(
+    mergeShaders({plugins: [discardPlugin]}, {inject: {'fs:#main-end': 'a'}}),
+    {plugins: [colorPlugin], inject: {'fs:#main-end': 'b'}}
+  );
+  expect(merged.plugins).toEqual([
+    discardPlugin,
+    colorPlugin,
+    {
+      name: 'layer-inject',
+      injections: [
+        {stage: 'fragment', target: '#main-end', glsl: 'a', order: 0},
+        {stage: 'fragment', target: '#main-end', glsl: 'b', order: 0}
+      ]
+    }
+  ]);
+  // A merge without `inject` keeps this order
+  expect(mergeShaders(merged, {plugins: [{name: 'last'}]}).plugins.map(p => p.name)).toEqual([
+    'discard',
+    'color',
+    'last',
+    'layer-inject'
+  ]);
 });
 
 test('mergeShaders moves an array of shader injections to a plugin', () => {
@@ -151,10 +173,7 @@ test('mergeShaders moves an array of shader injections to a plugin', () => {
   const warnings = warn.mock.calls.length;
   warn.mockRestore();
   expect('inject' in merged, 'inject key is removed').toBe(false);
-  expect(merged.plugins).toEqual([
-    {name: 'layer-inject', injections: [fade]},
-    {name: 'layer-inject', injections: [tint]}
-  ]);
+  expect(merged.plugins).toEqual([{name: 'layer-inject', injections: [fade, tint]}]);
   expect(merged.plugins[0].injections[0], 'entries are not copied').toBe(fade);
   expect(warnings, 'the array form is not deprecated').toBe(0);
 
