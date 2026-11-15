@@ -30,6 +30,22 @@ export function getCellValue(input: any, row: any, info: {index: number; data?: 
       : input;
 }
 
+/** Decodes Arrow cell IDs into values accepted by the geometry accessors. */
+function decodeArrowCellIds(value: CellValue, accessor: string): (string | bigint)[] {
+  const values =
+    typeof value === 'string' || typeof value === 'bigint' ? [value] : Array.from(value);
+  return values.map(cell => {
+    if (typeof cell !== 'string' && typeof cell !== 'bigint')
+      throw new Error('cells must contain strings or 64-bit integers');
+    if (typeof cell === 'string') return cell;
+    const cellId = BigInt.asUintN(64, cell);
+    if (accessor === 'getPentagon') return cellId;
+    if (accessor === 'getS2Token') return cellId.toString(16).padStart(16, '0').replace(/0+$/, '');
+    if (accessor === 'getHexagon' || accessor === 'getHexagons') return cellId.toString(16);
+    throw new Error('This grid requires string cells');
+  });
+}
+
 /** Expands cell rows while retaining the source feature for styling and picking. */
 export function renderCellColumns(
   layer: CompositeLayer,
@@ -75,20 +91,9 @@ export function renderCellColumns(
   for (let index = 0; index < cells.length; index++) {
     const value = cells.get(index);
     if (value === null || value === undefined) throw new Error('cells cannot contain nulls');
-    const values =
-      typeof value === 'string' || typeof value === 'bigint' ? [value] : Array.from(value);
-    const ids = values.map(cell => {
-      if (typeof cell !== 'string' && typeof cell !== 'bigint')
-        throw new Error('cells must contain strings or 64-bit integers');
-      if (typeof cell === 'string') return cell;
-      const cellId = BigInt.asUintN(64, cell);
-      if (accessor === 'getPentagon') return cellId;
-      if (accessor === 'getS2Token')
-        return cellId.toString(16).padStart(16, '0').replace(/0+$/, '');
-      if (accessor === 'getHexagon' || accessor === 'getHexagons') return cellId.toString(16);
-      throw new Error('This grid requires string cells');
-    });
-    for (const cell of cluster ? [ids] : ids) {
+    const ids = isArrowVector(cellInput) ? decodeArrowCellIds(value, accessor) : null;
+    const cellRows = ids ? (cluster ? [ids] : ids) : [value];
+    for (const cell of cellRows) {
       data.push(
         callbacks.row(
           {cell, sourceIdentity: typeof props.data?.get === 'function' ? props.data : rows[index]},

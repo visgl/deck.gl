@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
+import {h3IndexToSplitLong} from 'h3-js';
 import LayerState from '../../../modules/core/src/lib/layer-state';
 import {
   H3HexagonLayer,
@@ -64,6 +65,19 @@ for (const [Layer, accessor, cell] of cases) {
     });
   }
 }
+
+test('H3ClusterLayer preserves split-long callback IDs with Arrow styling', () => {
+  const cell = h3IndexToSplitLong('8928308280fffff');
+  const layer = new H3ClusterLayer({
+    data: [{cells: [cell]}],
+    getHexagons: row => row.cells,
+    getElevation: vectorFromArray([10])
+  });
+  const child = layer.renderLayers() as any;
+  const row = child.props.data[0];
+  expect(child.props.getHexagons(row)).toEqual([cell]);
+  expect(child.props.getElevation(row, {index: 0})).toBe(10);
+});
 
 test('Arrow cell colors use normalized floats and byte-range integers', () => {
   const layer = new S2Layer({
