@@ -166,8 +166,8 @@ const config = {
             'proposal-examples': resolve('../examples/proposals'),
             'examples-root': resolve('../examples'),
             'website-examples': resolve('../examples/website'),
-            'arrow-proposal-examples': resolve('../examples-arrow/proposals'),
-            'arrow-website-examples': resolve('../examples-arrow/website'),
+            'v10-proposal-examples': resolve('../examples-v10/proposals'),
+            'v10-website-examples': resolve('../examples-v10/website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom')
           }

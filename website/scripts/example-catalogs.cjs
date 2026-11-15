@@ -4,5 +4,5 @@
 
 module.exports = [
   {id: 'examples', label: 'Examples', assetPath: 'v10-examples'},
-  {id: 'examples-arrow', label: 'Arrow Examples', assetPath: 'v10-examples-arrow'}
+  {id: 'examples-v10', label: 'v10 Examples', assetPath: 'v10-catalog-examples'}
 ];

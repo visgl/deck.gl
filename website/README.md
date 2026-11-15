@@ -1,12 +1,12 @@
 # Website example catalogs
 
-The website publishes Examples at `/examples` and Arrow Examples at
-`/examples-arrow` in the same build.
+The website publishes Examples at `/examples` and v10 Examples at
+`/examples-v10` in the same build.
 
-Edit their pages independently in `src/examples/` and `src/examples-arrow/`.
-Their sidebars are `src/examples-sidebar.js` and `src/examples-arrow-sidebar.js`.
+Edit their pages independently in `src/examples/` and `src/examples-v10/`.
+Their sidebars are `src/examples-sidebar.js` and `src/examples-v10-sidebar.js`.
 Demo implementations live in the repository's corresponding `examples/` and
-`examples-arrow/` directories. Shared website components provide layout and controls.
+`examples-v10/` directories. Shared website components provide layout and controls.
 
 The catalog configuration is in `scripts/example-catalogs.cjs`. Each catalog's
 v10 manifest selects the embedded demos built for that catalog.
