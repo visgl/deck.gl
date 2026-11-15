@@ -50,7 +50,12 @@ test('Experimental column selection rejects non-GPU input', () => {
 test('Table lookup selects compatible fields after explicit inputs', () => {
   const radii = vectorFromArray([1, 2], new Float32());
   const widths = vectorFromArray([3, 4], new Float32());
-  const data = new Table({radii, widths, invalid: vectorFromArray(['a', 'b']), internal: radii});
+  const data = new Table({
+    radii,
+    getWidth: widths,
+    invalid: vectorFromArray(['a', 'b']),
+    internal: radii
+  });
   const definitions = {
     radii: {semantic: 'scalar'},
     widths: {semantic: 'scalar', accessor: 'getWidth', arrowAccessor: true},
@@ -59,6 +64,7 @@ test('Table lookup selects compatible fields after explicit inputs', () => {
     missing: {semantic: 'scalar'}
   } as const;
   expect(resolveColumns({data}, definitions)).toEqual({});
+  expect(resolveColumns({data}, definitions, true).widths.data[0]).toBe(widths.data[0]);
   const result = resolveColumns({data, getWidth: radii, radii: null}, definitions, true);
   expect(Object.keys(result)).toEqual(['radii', 'widths']);
   expect(result.radii.data[0]).toBe(radii.data[0]);

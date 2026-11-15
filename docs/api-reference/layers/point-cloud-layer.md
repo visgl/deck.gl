@@ -150,6 +150,32 @@ const layer = new PointCloudLayer({
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
+
+  <TabItem value="query" label="Query">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {sqlParser} from '@deck.gl/core/sql';
+import {PointCloudLayer} from '@deck.gl/layers';
+import {tableFromArrays} from 'apache-arrow';
+
+const data = tableFromArrays({x: [0], y: [0], z: [0]});
+
+new Deck({
+  sqlParser,
+  layers: [
+    new PointCloudLayer({
+      data,
+      getPosition: {sql: 'FLOAT32x3(x, y, z)'}
+    })
+  ]
+});
+```
+
+See [Querying Arrow data](../../developer-guide/using-with-arrow.md#querying-arrow-data)
+for filtering rows and writing accessor expressions.
+
+  </TabItem>
 </Tabs>
 
 
