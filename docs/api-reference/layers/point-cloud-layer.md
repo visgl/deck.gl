@@ -210,16 +210,16 @@ Check [the lighting guide](../../developer-guide/using-effects.md#material-setti
 
 Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
 
-#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#positions-and-other-vectors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+#### `getPosition` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-* If an Arrow vector is provided, each row supplies a numeric fixed-size list matching the accessor’s dimensions.
+An Arrow vector supplies one value per object. See [position columns](../../developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
 
 
-#### `getNormal` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#positions-and-other-vectors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getnormal}
+#### `getNormal` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getnormal}
 
 * Default: `[0, 0, 1]`
 
@@ -228,10 +228,10 @@ The normal of each object, in `[nx, ny, nz]`.
 * If an array is provided, it is used as the normal for all objects.
 * If a function is provided, it is called on each object to retrieve its normal.
 
-* If an Arrow vector is provided, each row supplies a numeric fixed-size list matching the accessor’s dimensions.
+An Arrow vector supplies one numeric fixed-size list with three (XYZ) components per object. See [vector columns](../../developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
 
 
-#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#colors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
+#### `getColor` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -240,7 +240,7 @@ For arrays and callback results, the rgba color is in the format of `[r, g, b, [
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-* If an Arrow vector is provided, each row supplies a numeric RGB/RGBA fixed-size list.
+An Arrow vector supplies one value per object. See [color columns](../../developer-guide/using-with-arrow.md#colors) for requirements.
 
 
 ## Source

@@ -191,38 +191,38 @@ Hexagon radius multiplier, between 0 - 1. When `coverage` = 1, hexagon is render
 
 ### Data Accessors
 
-#### `getHexagon` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#cell-identifiers), optional) {#gethexagon}
+#### `getHexagon` (Accessor | arrow.Vector, optional) {#gethexagon}
 
 * Default: `object => object.hexagon`
 
 Method called to retrieve the [H3](https://h3geo.org/) hexagon index of each object. Note that all hexagons within one `H3HexagonLayer` must use the same [resolution](https://h3geo.org/docs/core-library/restable).
 
-* If an Arrow vector is provided, each row supplies a cell identifier or a list of identifiers belonging to one source feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for supported encodings and picking behavior.
+Each Arrow row supplies one identifier or a list of identifiers for one source feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for supported encodings and picking behavior.
 
 
-#### `getFillColor` (Accessor | Arrow Vector, optional) {#getfillcolor}
-
-* Default: `[0, 0, 0, 255]`
-
-The fill color of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
-
-#### `getLineColor` (Accessor | Arrow Vector, optional) {#getlinecolor}
+#### `getFillColor` (constant | Accessor | arrow.Vector, optional) {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`
 
-The outline color of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
+The fill color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
-#### `getLineWidth` (Accessor | Arrow Vector, optional) {#getlinewidth}
+#### `getLineColor` (constant | Accessor | arrow.Vector, optional) {#getlinecolor}
+
+* Default: `[0, 0, 0, 255]`
+
+The outline color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getLineWidth` (constant | Accessor | arrow.Vector, optional) {#getlinewidth}
 
 * Default: `1`
 
-The outline width of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
+The outline width of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
-#### `getElevation` (Accessor | Arrow Vector, optional) {#getelevation}
+#### `getElevation` (constant | Accessor | arrow.Vector, optional) {#getelevation}
 
 * Default: `1000`
 
-The elevation of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
+The elevation of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
 
 ## Sub Layers

@@ -284,16 +284,16 @@ This is an object that contains material props for [lighting effect](../core/lig
 
 Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
 
-#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#positions-and-other-vectors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+#### `getPosition` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each column, in `[x, y]`. An optional third component can be used to set the elevation of the bottom.
 
-* If an Arrow vector is provided, each row supplies a numeric fixed-size list matching the accessor’s dimensions.
+An Arrow vector supplies one value per object. See [position columns](../../developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
 
 
-#### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#colors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
+#### `getFillColor` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -303,10 +303,10 @@ For arrays and callback results, the rgba color is in the format of `[r, g, b, [
 * If a function is provided, it is called on each object to retrieve its color.
 * If not provided, it falls back to `getColor`.
 
-* If an Arrow vector is provided, each row supplies a numeric RGB/RGBA fixed-size list.
+An Arrow vector supplies one value per object. See [color columns](../../developer-guide/using-with-arrow.md#colors) for requirements.
 
 
-#### `getLineColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#colors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
+#### `getLineColor` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinecolor}
 
 * Default: `[0, 0, 0, 255]`
 
@@ -316,10 +316,10 @@ For arrays and callback results, the rgba color is in the format of `[r, g, b, [
 * If a function is provided, it is called on each object to retrieve its outline color.
 * If not provided, it falls back to `getColor`.
 
-* If an Arrow vector is provided, each row supplies a numeric RGB/RGBA fixed-size list.
+An Arrow vector supplies one value per object. See [color columns](../../developer-guide/using-with-arrow.md#colors) for requirements.
 
 
-#### `getElevation` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#scalars), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
+#### `getElevation` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getelevation}
 
 * Default: `1000`
 
@@ -328,10 +328,10 @@ The elevation of each cell in meters.
 * If a number is provided, it is used as the elevation for all objects.
 * If a function is provided, it is called on each object to retrieve its elevation.
 
-* If an Arrow vector is provided, each row supplies a numeric value.
+An Arrow vector supplies one value per object. See [scalar columns](../../developer-guide/using-with-arrow.md#scalars) for requirements.
 
 
-#### `getLineWidth` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#scalars), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinewidth}
+#### `getLineWidth` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getlinewidth}
 
 * Default: `1`
 
@@ -340,7 +340,7 @@ The width of the outline of the column, in units specified by `lineWidthUnits` (
 * If a number is provided, it is used as the outline width for all columns.
 * If a function is provided, it is called on each object to retrieve its outline width.
 
-* If an Arrow vector is provided, each row supplies a numeric value.
+An Arrow vector supplies one value per object. See [scalar columns](../../developer-guide/using-with-arrow.md#scalars) for requirements.
 
 
 ## Source

@@ -161,38 +161,38 @@ Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/compo
 
 ### Data Accessors
 
-#### `getQuadkey` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#cell-identifiers), optional) {#getquadkey}
+#### `getQuadkey` (Accessor | arrow.Vector, optional) {#getquadkey}
 
 Called for each data object to retrieve the quadkey string identifier.
 
 * default: `object => object.quadkey`
 
-* If an Arrow vector is provided, each row supplies a cell identifier or a list of identifiers belonging to one source feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for supported encodings and picking behavior.
+Each Arrow row supplies one identifier or a list of identifiers for one source feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for supported encodings and picking behavior.
 
 
-#### `getFillColor` (Accessor | Arrow Vector, optional) {#getfillcolor}
-
-* Default: `[0, 0, 0, 255]`
-
-The fill color of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
-
-#### `getLineColor` (Accessor | Arrow Vector, optional) {#getlinecolor}
+#### `getFillColor` (constant | Accessor | arrow.Vector, optional) {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`
 
-The outline color of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
+The fill color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
-#### `getLineWidth` (Accessor | Arrow Vector, optional) {#getlinewidth}
+#### `getLineColor` (constant | Accessor | arrow.Vector, optional) {#getlinecolor}
+
+* Default: `[0, 0, 0, 255]`
+
+The outline color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getLineWidth` (constant | Accessor | arrow.Vector, optional) {#getlinewidth}
 
 * Default: `1`
 
-The outline width of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
+The outline width of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
-#### `getElevation` (Accessor | Arrow Vector, optional) {#getelevation}
+#### `getElevation` (constant | Accessor | arrow.Vector, optional) {#getelevation}
 
 * Default: `1000`
 
-The elevation of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
+The elevation of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
 
 ## Sub Layers

@@ -165,36 +165,36 @@ Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/compo
 
 ### Data Accessors
 
-#### `getHexagons` ([Accessor&lt;string[]&gt;](../../developer-guide/using-layers.md#accessors) | [Arrow Vector](../../developer-guide/using-with-arrow.md#cell-identifiers), optional) {#gethexagons}
+#### `getHexagons` (Accessor | arrow.Vector, optional) {#gethexagons}
 
 Method called to retrieve the hexagon cluster from each object, as an array of [H3](https://h3geo.org/) hexagon indices. These hexagons are joined into polygons that represent the geospatial outline of the cluster.
 
-* If an Arrow vector is provided, each row supplies a cell identifier or a list of identifiers belonging to one source feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for supported encodings and picking behavior.
+Each value supplies the identifiers for one cluster. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for supported encodings and picking behavior.
 
 
-#### `getFillColor` (Accessor | Arrow Vector, optional) {#getfillcolor}
-
-* Default: `[0, 0, 0, 255]`
-
-The fill color of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
-
-#### `getLineColor` (Accessor | Arrow Vector, optional) {#getlinecolor}
+#### `getFillColor` (constant | Accessor | arrow.Vector, optional) {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`
 
-The outline color of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
+The fill color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
-#### `getLineWidth` (Accessor | Arrow Vector, optional) {#getlinewidth}
+#### `getLineColor` (constant | Accessor | arrow.Vector, optional) {#getlinecolor}
+
+* Default: `[0, 0, 0, 255]`
+
+The outline color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getLineWidth` (constant | Accessor | arrow.Vector, optional) {#getlinewidth}
 
 * Default: `1`
 
-The outline width of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
+The outline width of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
-#### `getElevation` (Accessor | Arrow Vector, optional) {#getelevation}
+#### `getElevation` (constant | Accessor | arrow.Vector, optional) {#getelevation}
 
 * Default: `1000`
 
-The elevation of each source feature. Accepts a constant, a row callback, or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for shared requirements.
+The elevation of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
 
 ## Sub Layers

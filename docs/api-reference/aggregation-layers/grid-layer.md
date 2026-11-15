@@ -205,8 +205,7 @@ new GridLayer({
 });
 ```
 
-Custom JavaScript
-callbacks and grids exceeding device limits use CPU aggregation.
+Custom JavaScript callbacks and grids exceeding device limits use CPU aggregation.
 
 #### `cellSize` (number, optional) {#cellsize}
 
