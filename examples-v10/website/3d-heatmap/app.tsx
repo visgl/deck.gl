@@ -9,7 +9,7 @@ import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {sqlParser} from '@deck.gl/core/sql';
+import {isArrowTable} from '@math.gl/arrow';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
@@ -72,11 +72,10 @@ function getTooltip({object}: PickingInfo) {
     ${count} Accidents`;
 }
 
-/** Position from a queried table or a preloaded coordinate pair. */
-type DataPoint = {lng: number; lat: number} | [number, number];
+/** Coordinates selected by the CSV query. */
+type DataPoint = {lng: number; lat: number};
 
 export default function App({
-  data = DATA_URL,
   mapStyle = MAP_STYLE,
   radius = 1000,
   upperPercentile = 100,
@@ -84,7 +83,6 @@ export default function App({
   device,
   onDataLoad
 }: {
-  data?: DataPoint[] | string | null;
   mapStyle?: string;
   radius?: number;
   upperPercentile?: number;
@@ -92,32 +90,27 @@ export default function App({
   device?: Device;
   onDataLoad?: (count: number) => void;
 }) {
-  const [loadedSource, setLoadedSource] = useState<string | null>(null);
-  const hasData = typeof data === 'string' ? loadedSource === data : Boolean(data?.length);
+  const [hasData, setHasData] = useState(false);
   const layers = [
     new HexagonLayer<DataPoint>({
       id: 'heatmap',
       gpuAggregation: true,
       colorRange,
       coverage,
-      data,
+      // Sample row (lng,lat): -0.198465,51.505538
+      data: DATA_URL,
       loaders: [CSVLoader],
-      // lng,lat
-      // -0.198465,51.505538
-      query:
-        typeof data === 'string'
-          ? 'SELECT lng, lat WHERE lng IS NOT NULL AND lat IS NOT NULL'
-          : null,
+      query: 'SELECT lng, lat WHERE lng IS NOT NULL AND lat IS NOT NULL',
       elevationRange: [0, 3000],
       elevationScale: hasData ? 50 : 0,
       onDataLoad: table => {
-        if (typeof data === 'string') {
-          setLoadedSource(data);
-          onDataLoad?.((table as {numRows: number}).numRows);
+        if (isArrowTable(table)) {
+          setHasData(true);
+          onDataLoad?.(table.numRows);
         }
       },
       extruded: true,
-      getPosition: point => (Array.isArray(point) ? point : [point.lng, point.lat]),
+      getPosition: ({lng, lat}) => [lng, lat],
       pickable: true,
       radius,
       upperPercentile,
@@ -136,7 +129,6 @@ export default function App({
 
   return (
     <DeckGL
-      sqlParser={sqlParser}
       device={device}
       layers={layers}
       effects={[lightingEffect]}

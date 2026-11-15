@@ -9,7 +9,7 @@ import {GridLayer} from '@deck.gl/aggregation-layers';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {sqlParser} from '@deck.gl/core/sql';
+import {isArrowTable} from '@math.gl/arrow';
 import type {Table} from 'apache-arrow';
 
 import type {Color, Layer, MapViewState, PickingInfo} from '@deck.gl/core';
@@ -128,8 +128,7 @@ const LOADERS = [CSVLoader];
 const LOAD_OPTIONS = {csv: {dynamicTyping: false}};
 
 /** Collects queried tree positions and statistics for the grid and tooltip. */
-function summarizeTrees(source: unknown): Trees {
-  const data = source as Table;
+function summarizeTrees(data: Table): Trees {
   const trees = data.toArray() as unknown as {
     longitude: number;
     latitude: number;
@@ -179,6 +178,9 @@ export default function App({
   /** Shares the queried tree positions with the grid bands and reports their count. */
   const onTreesLoaded = useCallback(
     (source: unknown) => {
+      if (!isArrowTable(source)) {
+        return;
+      }
       const result = summarizeTrees(source);
       setTrees(result);
       onDataLoad?.(result.length);
@@ -243,11 +245,11 @@ export default function App({
   layers.push(
     new ScatterplotLayer({
       id: 'trees',
-      loaders: LOADERS,
+      // Source fields: LIBELLEFRANCAIS;CIRCONFERENCE(CM);LATITUDE;LONGITUDE
+      // Sample row: Platane;0.0;48.9029892;2.4097097
       data: DATA_URL,
+      loaders: LOADERS,
       loadOptions: LOAD_OPTIONS,
-      // LIBELLEFRANCAIS;CIRCONFERENCE(CM);LATITUDE;LONGITUDE
-      // Platane;0.0;48.9029892;2.4097097
       query: `\
           SELECT
             LONGITUDE::DOUBLE PRECISION AS longitude,
@@ -293,7 +295,6 @@ export default function App({
 
   return (
     <DeckGL
-      sqlParser={sqlParser}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}

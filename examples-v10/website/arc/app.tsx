@@ -7,6 +7,7 @@ import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import {tableFromArrays} from 'apache-arrow';
 import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {scaleQuantile} from 'd3-scale';
@@ -68,7 +69,8 @@ type MigrationFlow = {
   quantile: number;
 };
 
-function calculateArcs(data: County[] | undefined, selectedCounty?: County) {
+/** Builds columnar arc endpoints and styling values for the selected county. */
+function makeArcTable(data: County[] | undefined, selectedCounty?: County) {
   if (!data || !data.length) {
     return null;
   }
@@ -95,7 +97,14 @@ function calculateArcs(data: County[] | undefined, selectedCounty?: County) {
     a.quantile = scale(Math.abs(a.value));
   });
 
-  return arcs;
+  return tableFromArrays({
+    source_longitude: Float64Array.from(arcs, arc => arc.source.properties.centroid[0]),
+    source_latitude: Float64Array.from(arcs, arc => arc.source.properties.centroid[1]),
+    target_longitude: Float64Array.from(arcs, arc => arc.target.properties.centroid[0]),
+    target_latitude: Float64Array.from(arcs, arc => arc.target.properties.centroid[1]),
+    value: Float64Array.from(arcs, arc => arc.value),
+    quantile: Uint8Array.from(arcs, arc => arc.quantile)
+  });
 }
 
 function getTooltip({object}: PickingInfo<County>) {
@@ -107,16 +116,18 @@ export default function App({
   device,
   data,
   strokeWidth = 1,
-  mapStyle = MAP_STYLE
+  mapStyle = MAP_STYLE,
+  onSelectCounty
 }: {
   device?: Device;
   data?: County[];
   strokeWidth?: number;
   mapStyle?: string;
+  onSelectCounty?: (county: County) => void;
 }) {
   const [selectedCounty, selectCounty] = useState<County>();
 
-  const arcs = useMemo(() => calculateArcs(data, selectedCounty), [data, selectedCounty]);
+  const arcs = useMemo(() => makeArcTable(data, selectedCounty), [data, selectedCounty]);
 
   const layers = [
     new GeoJsonLayer<CountyProperties>({
@@ -125,18 +136,24 @@ export default function App({
       stroked: false,
       filled: true,
       getFillColor: [0, 0, 0, 0],
-      onClick: ({object}) => selectCounty(object),
+      onClick: ({object}) => {
+        if (object) {
+          selectCounty(object);
+          onSelectCounty?.(object);
+        }
+      },
       pickable: true
     }),
-    new ArcLayer<MigrationFlow>({
-      id: 'arc',
-      data: arcs,
-      getSourcePosition: d => d.source.properties.centroid,
-      getTargetPosition: d => d.target.properties.centroid,
-      getSourceColor: d => (d.value > 0 ? inFlowColors : outFlowColors)[d.quantile],
-      getTargetColor: d => (d.value > 0 ? outFlowColors : inFlowColors)[d.quantile],
-      getWidth: strokeWidth
-    })
+    arcs &&
+      new ArcLayer<MigrationFlow>({
+        id: 'arc',
+        data: arcs,
+        getSourcePosition: {sql: 'FLOAT64x2(source_longitude, source_latitude)'},
+        getTargetPosition: {sql: 'FLOAT64x2(target_longitude, target_latitude)'},
+        getSourceColor: d => (d.value > 0 ? inFlowColors : outFlowColors)[d.quantile],
+        getTargetColor: d => (d.value > 0 ? outFlowColors : inFlowColors)[d.quantile],
+        getWidth: strokeWidth
+      })
   ];
 
   return (

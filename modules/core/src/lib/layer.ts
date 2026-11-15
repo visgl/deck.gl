@@ -1497,6 +1497,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     uniforms: any;
     parameters: LumaParameters;
   }): void {
+    // SQL accessors can defer the first update that creates the layer models.
+    if (this.props[ACCESSOR_QUERIES_SYMBOL] && !this.internalState?.propsInTransition) {
+      return;
+    }
     this._updateAttributeTransition();
 
     const currentProps = this.props;

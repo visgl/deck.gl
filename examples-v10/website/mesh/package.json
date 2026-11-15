@@ -9,6 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
+    "apache-arrow": "^21.2.0",
     "@loaders.gl/scene": "5.0.0-beta.8",
     "@math.gl/core": "5.0.0-beta.8",
     "deck.gl": "^9.0.0",

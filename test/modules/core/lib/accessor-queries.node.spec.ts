@@ -79,9 +79,15 @@ test('SQL accessors evaluate new batches in source order and reuse existing buff
   expect(Array.from(result.getChild('getPosition')!.get(2))).toEqual([2, 5]);
   expect(result.getChild('getPosition')!.get(1)).toBeNull();
   expect(Array.from(result.getChild('getRadius')!)).toEqual([6, 8, 10]);
-  expect(() => evaluateAccessorQueries(first, expressions, undefined)).toThrow(
-    'sqlParser.parseExpression'
-  );
+  const defaultTable = evaluateAccessorQueries(first, expressions, undefined);
+  const appended = evaluateAccessorQueries(data, expressions, undefined, {
+    source: first,
+    expressions,
+    parseExpression: undefined,
+    table: defaultTable
+  });
+  expect(appended.batches[0]).toBe(defaultTable.batches[0]);
+  expect(Array.from(appended.getChild('getRadius')!)).toEqual([6, 8, 10]);
 });
 
 test('SQL accessors select Arrow lists without copying or changing their type', () => {
@@ -120,13 +126,19 @@ test('layer updates wait for SQL accessor values on replacement data', async () 
     getPosition: {sql: 'FLOAT32x2(x, y)'}
   });
   const initialUpdate = vi.spyOn(first, 'updateState');
+  const draw = vi.spyOn(first, 'draw');
+  const renderPass = device.beginRenderPass({});
+
   try {
-    manager.setProps({sqlParser});
     manager.setLayers([first]);
     expect(initialUpdate).not.toHaveBeenCalled();
+    first._drawLayer({renderPass, shaderModuleProps: null, uniforms: {}, parameters: {}});
+    expect(draw).not.toHaveBeenCalled();
     await vi.waitFor(() => expect(first.isLoaded).toBe(true));
     manager.updateLayers();
     expect(initialUpdate).toHaveBeenCalledOnce();
+    first._drawLayer({renderPass, shaderModuleProps: null, uniforms: {}, parameters: {}});
+    expect(draw).toHaveBeenCalledOnce();
 
     const next = first.clone({data: tableFromArrays({x: [3], y: [4]})});
     const replacementUpdate = vi.spyOn(next, 'updateState');
@@ -137,6 +149,7 @@ test('layer updates wait for SQL accessor values on replacement data', async () 
     expect(replacementUpdate).toHaveBeenCalledOnce();
     expect(Array.from((next.props.getPosition as Vector).get(0))).toEqual([3, 4]);
   } finally {
+    renderPass.end();
     manager.finalize();
     device.destroy();
   }
@@ -168,4 +181,39 @@ test('a failed replacement load leaves the layer free to update its previous Arr
     manager.finalize();
     device.destroy();
   }
+});
+
+test('typed SQL colors clamp channels and propagate nulls', () => {
+  const data = tableFromArrays({red: [-1, null], green: [0.5, 0], blue: [2, 1]});
+  const result = evaluateAccessorQueries(
+    data,
+    {getFillColor: 'RGBA8(red, green, blue, 1)'},
+    sqlParser.parseExpression
+  );
+  const colors = result.getChild('getFillColor')!;
+  expect(Array.from(colors.get(0))).toEqual([0, 128, 255, 255]);
+  expect(colors.get(1)).toBeNull();
+  expect(() =>
+    evaluateAccessorQueries(
+      data,
+      {getFillColor: 'RGBA8(red, green, blue)'},
+      sqlParser.parseExpression
+    )
+  ).toThrow('requires exactly 4 arguments');
+});
+
+test('SQL colors normalize byte channels with arithmetic and CASE', () => {
+  const data = tableFromArrays({gender: [1, 2], altitude: new Float64Array([5000, 2500])});
+  const result = evaluateAccessorQueries(
+    data,
+    {
+      categorical: 'RGBA8(0, (CASE WHEN gender = 1 THEN 128 ELSE 0 END) / 255, 0, 1)',
+      continuous: 'RGBA8(0, 128 * altitude / (255 * 10000), 0, 1)'
+    },
+    undefined
+  );
+  expect(Array.from(result.getChild('categorical')!.get(0))).toEqual([0, 128, 0, 255]);
+  expect(Array.from(result.getChild('categorical')!.get(1))).toEqual([0, 0, 0, 255]);
+  expect(Array.from(result.getChild('continuous')!.get(0))).toEqual([0, 64, 0, 255]);
+  expect(Array.from(result.getChild('continuous')!.get(1))).toEqual([0, 32, 0, 255]);
 });

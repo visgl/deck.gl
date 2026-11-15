@@ -103,7 +103,7 @@ type PointPickResult = {
 };
 
 export type DeckProps<ViewsT extends ViewOrViews = null> = {
-  /** Optional parser for SQL strings in layer column queries. */
+  /** Overrides the default parser for layer queries and SQL accessors. */
   sqlParser?: SQLParser;
   /** Id of this Deck instance */
   id?: string;

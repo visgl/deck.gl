@@ -4,7 +4,6 @@
 
 import {MapLibreOverlay as DeckOverlay} from '@deck.gl/maplibre';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
-import {sqlParser} from '@deck.gl/core/sql';
 import {JSONTableLoader} from '@loaders.gl/tables/json';
 import {Map, NavigationControl, setWorkerUrl} from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
@@ -26,14 +25,13 @@ const map = new Map({
 
 const deckOverlay = new DeckOverlay({
   interleaved: true,
-  sqlParser,
   layers: [
     new ScatterplotLayer({
       id: 'airports',
-      loaders: [JSONTableLoader],
+      // Sample row: Sahnewal (LUH), scalerank 9, longitude 75.95707224036518, latitude 30.850359856170176
       data: AIRPORTS,
-      // Sahnewal (LUH), rank 9, longitude 75.95707224036518, latitude 30.850359856170176
-      query: 'SELECT *',
+      loaders: [JSONTableLoader],
+      loadOptions: {json: {shape: 'arrow-table'}},
       getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
       getRadius: {sql: 'FLOAT32(11 - scalerank)'},
       radiusMinPixels: 2,
@@ -47,9 +45,9 @@ const deckOverlay = new DeckOverlay({
     }),
     new ArcLayer({
       id: 'arcs',
-      loaders: [JSONTableLoader],
+      // Sample row: Sahnewal (LUH), scalerank 9, longitude 75.95707224036518, latitude 30.850359856170176
       data: AIRPORTS,
-      // Sahnewal (LUH), rank 9, longitude 75.95707224036518, latitude 30.850359856170176
+      loaders: [JSONTableLoader],
       query: 'SELECT * WHERE scalerank < 4',
       getTargetPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
       getSourcePosition: [-0.4531566, 51.4709959],

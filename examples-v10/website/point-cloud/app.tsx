@@ -7,10 +7,9 @@ import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
 import {OrbitView, LinearInterpolator} from '@deck.gl/core';
-import {sqlParser} from '@deck.gl/core/sql';
+import {isArrowTable} from '@math.gl/arrow';
 import {PointCloudLayer} from '@deck.gl/layers';
 
-import type {Table} from 'apache-arrow';
 import {LASLoader} from '@loaders.gl/pointclouds/las';
 import type {OrbitViewState, Widget} from '@deck.gl/core';
 import {Device} from '@luma.gl/core';
@@ -63,8 +62,10 @@ export default function App({
 
   /** Frames the camera once and reports the accumulated points after each batch. */
   const onDataProgress = useCallback(
-    (data: unknown) => {
-      const table = data as Table;
+    (table: unknown) => {
+      if (!isArrowTable(table)) {
+        return;
+      }
       const min = table.schema.metadata.get('las_mins');
       const max = table.schema.metadata.get('las_maxs');
       if (!framed.current && min && max) {
@@ -91,21 +92,20 @@ export default function App({
   const layers = [
     new PointCloudLayer({
       id: 'laz-point-cloud-layer',
+      // Sample row: {POSITION: [-0.25, 4.5, -5.76]}
       data: LAZ_SAMPLE,
+      loaders: [LASLoader],
       _dataLoadOptions: 'batched',
       loadOptions: {
         core: {worker: false, batchSize: 25000, batchDebounceMs: 180},
         las: {shape: 'arrow-table', fp64: true, columns: ['POSITION']}
       },
-      // First LAZ row: {POSITION: [-0.25, 4.5, -5.76]}
       getPosition: {sql: 'POSITION'},
       onDataProgress,
       getNormal: [0, 1, 0],
       getColor: [255, 255, 255],
       opacity: 0.5,
       pointSize: 0.5,
-      // Additional format support can be added here
-      loaders: [LASLoader],
       // TODO (kaapp) currently webgpu requirement to ensure instanceColors are supplied
       pickable: true
     })
@@ -114,7 +114,6 @@ export default function App({
   return (
     <DeckGL
       device={device}
-      sqlParser={sqlParser}
       views={new OrbitView({orbitAxis: 'Y', fovy: 50})}
       initialViewState={viewState}
       controller={{

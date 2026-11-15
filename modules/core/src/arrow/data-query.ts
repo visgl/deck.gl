@@ -5,6 +5,7 @@
 import {query, type Query, type QueryOptions} from '@loaders.gl/core/scan';
 import {unwrapLoaderArrowResult} from '../utils/loader-utils';
 import {isArrowTable} from './upstream-math/is-arrow-table';
+import {sqlParser as defaultSQLParser} from './upstream-math/sql-parser';
 import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {SQLParser} from '../types/layer-props';
 
@@ -16,11 +17,9 @@ export async function queryLayerData(
   options: unknown,
   parseQuery: SQLParser['parseQuery']
 ) {
-  if (!parseQuery) {
-    throw new Error('query requires sqlParser.parseQuery');
-  }
+  const parse = parseQuery ?? defaultSQLParser.parseQuery;
   const sqlParser = (statement: string) => {
-    const parsed = parseQuery(statement) as Query;
+    const parsed = parse(statement) as Query;
     return !('command' in parsed) && parsed.from === 'data' ? {...parsed, from: undefined} : parsed;
   };
   if (typeof input === 'string') {

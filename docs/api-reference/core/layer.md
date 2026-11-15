@@ -342,20 +342,19 @@ applies to row chunks; transform Arrow chunks in the producer instead. See
 SQL to execute through loaders.gl when `data` is an Arrow table, a promise resolving
 to an Arrow table, or a URL. The result becomes the layer's loaded data and is
 available to accessor queries, accessors, and picking. The layer's data is the
-implicit source. `FROM data` is optional.
+implicit source. `FROM data` is optional. Omit `query` to use the loaded data as-is.
 
 For URL inputs, provide a source-capable loader. Loaders that support query pushdown
 can optimize loading based on the supplied query. When the layer has a custom
-`fetch`, SQL runs on the Arrow table returned by that function. Set Deck's
-`sqlParser` prop to a parser that implements `parseQuery`.
+`fetch`, SQL runs on the Arrow table returned by that function. Deck loads the SQL
+parser on first use.
 
 #### SQL accessor inputs
 
 Accessors that accept Arrow columns also accept `{sql: string}`. The expression
 evaluates against the loaded Arrow table after `query` and `dataTransform`. It returns
 one value per row, in source order. Use `query` for filtering or other operations
-that change the rows. Supply Deck with a `sqlParser` that implements
-`parseExpression`.
+that change the rows.
 
 An Arrow-enabled position accessor can reference columns by name. If the
 loaded `data` table has separate `longitude` and `latitude` columns, this packs
