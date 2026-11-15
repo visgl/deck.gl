@@ -337,6 +337,40 @@ applies to row chunks; transform Arrow chunks in the producer instead. See
 [Streaming Arrow data](../../developer-guide/using-with-arrow.md#streaming-arrow-data).
 
 
+#### `query` (string, optional) {#query}
+
+SQL to execute through loaders.gl when `data` is an Arrow table, a promise resolving
+to an Arrow table, or a URL. The result becomes the layer's loaded data and is
+available to accessor queries, accessors, and picking. The layer's data is the
+implicit source. `FROM data` is optional.
+
+For URL inputs, provide a source-capable loader. Loaders that support query pushdown
+can optimize loading based on the supplied query. Set Deck's `sqlParser` prop to
+a parser that implements `parseQuery`.
+
+#### SQL accessor inputs
+
+Accessors that accept Arrow columns also accept `{sql: string}`. The expression
+evaluates against the loaded Arrow table after `query` and `dataTransform`. It returns
+one value per row, in source order. Use `query` for filtering or other operations
+that change the rows. Supply Deck with a `sqlParser` that implements
+`parseExpression`.
+
+An Arrow-enabled position accessor can reference columns by name. If the
+loaded `data` table has separate `longitude` and `latitude` columns, this packs
+them into a two-component 64-bit position for each row.
+
+```ts
+getPosition: {sql: 'FLOAT64x2(longitude, latitude)'}
+```
+
+If the table has `red`, `green`, and `blue` columns with floating-point values
+in the range 0–1, this packs them into an 8-bit RGBA color with full opacity.
+
+```ts
+getFillColor: {sql: 'RGBA8(red, green, blue, 1)'}
+```
+
 #### `dataTransform` (Function, optional) {#datatransform}
 
 Executed to manipulate remote data when it's fetched. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.

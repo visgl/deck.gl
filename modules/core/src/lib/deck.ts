@@ -42,6 +42,7 @@ import {EVENT_HANDLERS, RECOGNIZERS, RecognizerOptions} from './constants';
 import type {Effect} from './effect';
 import type {FilterContext} from '../passes/layers-pass';
 import type Layer from './layer';
+import type {SQLParser} from '../types/layer-props';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
 import type {EventManagerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
@@ -102,6 +103,8 @@ type PointPickResult = {
 };
 
 export type DeckProps<ViewsT extends ViewOrViews = null> = {
+  /** Optional parser for SQL strings in layer column queries. */
+  sqlParser?: SQLParser;
   /** Id of this Deck instance */
   id?: string;
   /** Width of the canvas, a number in pixels or a valid CSS string.

@@ -8,6 +8,8 @@ import {equalLoaderOptions} from '../utils/loader-utils';
 import ComponentState from '../lifecycle/component-state';
 
 import type Layer from './layer';
+import type {Table, Vector} from 'apache-arrow';
+import type {SQLParser} from '../types/layer-props';
 import type AttributeManager from './attribute/attribute-manager';
 import type Viewport from '../viewports/viewport';
 import type UniformTransitionManager from './uniform-transition-manager';
@@ -29,10 +31,21 @@ export type ChangeFlags = {
 };
 
 export default class LayerState<LayerT extends Layer> extends ComponentState<LayerT> {
-  /** Options used by the current URL stream. */
+  /** Evaluation of SQL accessors for the current loaded data. */
+  accessorQueries?: {
+    source: unknown;
+    expressions: Record<string, string>;
+    parseExpression: SQLParser['parseExpression'];
+    pending: boolean;
+    table?: Table;
+    columns?: Record<string, Vector>;
+  };
+  /** Options and parser used by the current data request. */
   private dataRequest?: {
-    mode: LayerT['props']['_dataLoadOptions'];
-    loaders: LayerT['props']['loaders'];
+    query?: string | null;
+    mode?: LayerT['props']['_dataLoadOptions'];
+    parser: SQLParser['parseQuery'];
+    loaders?: Layer['props']['loaders'];
     options: unknown;
   };
 
@@ -106,15 +119,32 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
 
   /* Override base Component methods with Layer-specific handling */
 
+  /** Reloads the same layer's data if its query parser is replaced or installed. */
+  refreshQueryParser(): void {
+    const layer = this.layer;
+    if (layer?.props.query && this.dataRequest?.parser !== layer.context.sqlParser?.parseQuery) {
+      this.setAsyncProps(layer.props);
+    }
+  }
+
+  /** Detects changes to the data request even when the original data is unchanged. */
   protected _didAsyncRequestChange(propName: string, value: unknown): boolean {
     if (propName !== 'data') {
       return false;
     }
     const layer = this.layer;
+    const query = layer?.props.query;
+    const isURL = typeof value === 'string';
     const mode = layer?.props._dataLoadOptions ?? 'auto';
     const request =
-      layer && typeof value === 'string' && mode !== 'auto'
-        ? {mode, loaders: layer.props.loaders, options: layer.getLoadOptions()}
+      layer && (query || (isURL && mode !== 'auto'))
+        ? {
+            query,
+            mode: isURL && !query ? mode : undefined,
+            parser: query ? layer.context.sqlParser?.parseQuery : undefined,
+            loaders: isURL ? layer.props.loaders : undefined,
+            options: isURL ? layer.getLoadOptions() : undefined
+          }
         : undefined;
     const changed = !equalLoaderOptions(this.dataRequest, request);
     this.dataRequest = request;
@@ -128,8 +158,28 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     }
   }
 
+  /** Evaluates SQL against the original input before resolving the data prop. */
+  protected _prepareAsyncInput(propName: string, value: unknown): unknown {
+    const request = propName === 'data' ? this.dataRequest : undefined;
+    if (!request?.query) {
+      return value;
+    }
+    const {query, parser} = request;
+    return Promise.resolve(value).then(async data => {
+      const {queryLayerData} = await import('../arrow/data-query');
+      return queryLayerData(data, query, undefined, undefined, parser);
+    });
+  }
+
   protected _fetch(propName, url: string) {
     const layer = this.layer;
+    const request = propName === 'data' ? this.dataRequest : undefined;
+    if (request?.query) {
+      const {query} = request;
+      return import('../arrow/data-query').then(({queryLayerData}) =>
+        queryLayerData(url, query, request.loaders, request.options, request.parser)
+      );
+    }
     const fetch = layer?.props.fetch;
     if (fetch) {
       return fetch(url, {propName, layer});

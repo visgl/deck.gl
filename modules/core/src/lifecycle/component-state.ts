@@ -148,6 +148,11 @@ export default class ComponentState<ComponentT extends Component> {
     return false;
   }
 
+  /** Prepares a non-URL input before resolving the async prop. */
+  protected _prepareAsyncInput(_propName: string, value: unknown): unknown {
+    return value;
+  }
+
   /** Reports the accumulated value after an accepted streamed batch. */
   protected _onProgress(propName: string, value: unknown) {} // eslint-disable-line @typescript-eslint/no-empty-function
 
@@ -165,6 +170,8 @@ export default class ComponentState<ComponentT extends Component> {
     // interpret value string as url and start a new load tracked by a promise
     if (typeof value === 'string') {
       value = this._fetch(propName, value);
+    } else {
+      value = this._prepareAsyncInput(propName, value);
     }
 
     // interprets promise and track the "loading"
@@ -333,7 +340,8 @@ export default class ComponentState<ComponentT extends Component> {
             return;
           }
           const batches = ('batches' in arrow ? arrow.batches : [arrow]).map(batch => {
-            if (batch instanceof RecordBatch) {
+            // Arrow 21.2 recognizes batches from other runtimes through instanceof.
+            if (Object.getPrototypeOf(batch) === RecordBatch.prototype) {
               return batch;
             }
             return normalizeArrowBatch(batch as import('apache-arrow').RecordBatch, arrowRuntime);
