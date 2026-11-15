@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {DataType, Vector} from 'apache-arrow';
 import type {CoordinateSystem} from '../lib/constants';
 import type Layer from '../lib/layer';
 import type LayerExtension from '../lib/layer-extension';
@@ -61,6 +62,13 @@ export type AccessorFunction<In, Out> = (
 
 /** Either a uniform value for all objects, or a function that returns a value for each object. */
 export type Accessor<In, Out> = Out | AccessorFunction<In, Out>;
+
+/** A constant, row callback, or Arrow column on accessors that explicitly support columns.
+ * GPUVector inputs are only supported by separate column props.
+ */
+export type ArrowAccessor<In, Out, ArrowType extends DataType = DataType> =
+  | Accessor<In, Out>
+  | Vector<ArrowType>;
 
 /** A position in the format of `[lng, lat, alt?]` or `[x, y, z?]` depending on the coordinate system.
  * See https://deck.gl/docs/developer-guide/coordinate-systems#positions
