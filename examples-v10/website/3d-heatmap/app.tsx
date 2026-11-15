@@ -9,7 +9,6 @@ import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {sqlParser} from '@deck.gl/core/sql';
 import {isArrowTable} from '@math.gl/arrow';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
@@ -130,7 +129,6 @@ export default function App({
 
   return (
     <DeckGL
-      sqlParser={sqlParser}
       device={device}
       layers={layers}
       effects={[lightingEffect]}

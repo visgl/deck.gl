@@ -7,7 +7,6 @@ import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
-import {sqlParser} from '@deck.gl/core/sql';
 import {tableFromArrays} from 'apache-arrow';
 import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
@@ -159,7 +158,6 @@ export default function App({
 
   return (
     <DeckGL
-      sqlParser={sqlParser}
       device={device}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}

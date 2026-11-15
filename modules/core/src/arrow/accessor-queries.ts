@@ -8,6 +8,7 @@ import {evaluateColumnExpression} from './column-constructors';
 import {isArrowTableAppend} from './column-query-append';
 import {unwrapLoaderArrowResult} from '../utils/loader-utils';
 import {isArrowTable} from './upstream-math/is-arrow-table';
+import {sqlParser} from './upstream-math/sql-parser';
 
 /** Evaluates row-preserving expressions, reusing prior batches for append-only data. */
 export function evaluateAccessorQueries(
@@ -25,9 +26,6 @@ export function evaluateAccessorQueries(
   if (!isArrowTable(data)) {
     throw new Error('SQL accessors require Arrow table data');
   }
-  if (!parseExpression) {
-    throw new Error('SQL accessors require sqlParser.parseExpression');
-  }
 
   const entries = Object.entries(expressions);
   const priorSource = unwrapLoaderArrowResult(previous?.source);
@@ -42,7 +40,8 @@ export function evaluateAccessorQueries(
   const input = canAppend
     ? new Table(data.schema, data.batches.slice(priorSource.batches.length))
     : data;
-  const parsed = entries.map(([name, sql]) => ({name, expression: parseExpression(sql)}));
+  const parse = parseExpression ?? sqlParser.parseExpression;
+  const parsed = entries.map(([name, sql]) => ({name, expression: parse(sql)}));
   const evaluate = (table: Table) => {
     const columns: Record<string, Vector> = Object.create(null);
     for (const {name, expression} of parsed) {

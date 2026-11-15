@@ -9,7 +9,6 @@ import {GridLayer} from '@deck.gl/aggregation-layers';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {sqlParser} from '@deck.gl/core/sql';
 import {isArrowTable} from '@math.gl/arrow';
 import type {Table} from 'apache-arrow';
 
@@ -296,7 +295,6 @@ export default function App({
 
   return (
     <DeckGL
-      sqlParser={sqlParser}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}

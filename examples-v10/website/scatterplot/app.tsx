@@ -6,18 +6,12 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
-import {sqlParser} from '@deck.gl/core/sql';
 import {isArrowTable} from '@math.gl/arrow';
 import {JSONTableLoader} from '@loaders.gl/tables/json';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 import type {Color, MapViewState, Widget} from '@deck.gl/core';
 import type {Device, DeviceProps} from '@luma.gl/core';
-
-/** Converts a color channel to the normalized range expected by RGBA8. */
-function normalizedChannel(color: Color, index: number): number {
-  return (color[index] ?? 255) / 255;
-}
 
 const MALE_COLOR: Color = [0, 128, 255, 255];
 const FEMALE_COLOR: Color = [255, 0, 128, 255];
@@ -54,6 +48,9 @@ export default function App({
   widgets?: Widget[];
   onDataLoad?: (count: number) => void;
 }) {
+  const [maleRed, maleGreen, maleBlue, maleAlpha = 255] = maleColor;
+  const [femaleRed, femaleGreen, femaleBlue, femaleAlpha = 255] = femaleColor;
+
   const layers = [
     new ScatterplotLayer({
       id: 'scatter-plot',
@@ -70,12 +67,12 @@ export default function App({
       radiusMinPixels: 0.25,
       getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
       getFillColor: {
-        sql: `RGBA8(${[0, 1, 2, 3]
-          .map(
-            index =>
-              `CASE WHEN gender = 1 THEN ${normalizedChannel(maleColor, index)} ELSE ${normalizedChannel(femaleColor, index)} END`
-          )
-          .join(', ')})`
+        sql: `RGBA8(
+          (CASE WHEN gender = 1 THEN ${maleRed} ELSE ${femaleRed} END) / 255,
+          (CASE WHEN gender = 1 THEN ${maleGreen} ELSE ${femaleGreen} END) / 255,
+          (CASE WHEN gender = 1 THEN ${maleBlue} ELSE ${femaleBlue} END) / 255,
+          (CASE WHEN gender = 1 THEN ${maleAlpha} ELSE ${femaleAlpha} END) / 255
+        )`
       },
       getRadius: 1,
       pickable: true
@@ -84,7 +81,6 @@ export default function App({
 
   return (
     <DeckGL
-      sqlParser={sqlParser}
       device={device}
       deviceProps={deviceProps}
       layers={layers}

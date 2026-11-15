@@ -22,11 +22,6 @@ export default defineConfig(async () => {
       dedupe: ['apache-arrow'],
 
       alias: [
-        {
-          find: '@deck.gl/core/sql',
-          replacement: join(rootDir, './modules/core/src/arrow/upstream-math/sql-parser.ts')
-        },
-
         ...Object.entries(aliases).map(([find, replacement]) => ({find, replacement})),
         // Use root dependencies
         {find: 'mjolnir.js', replacement: join(rootDir, './node_modules/mjolnir.js')},

@@ -79,9 +79,15 @@ test('SQL accessors evaluate new batches in source order and reuse existing buff
   expect(Array.from(result.getChild('getPosition')!.get(2))).toEqual([2, 5]);
   expect(result.getChild('getPosition')!.get(1)).toBeNull();
   expect(Array.from(result.getChild('getRadius')!)).toEqual([6, 8, 10]);
-  expect(() => evaluateAccessorQueries(first, expressions, undefined)).toThrow(
-    'sqlParser.parseExpression'
-  );
+  const defaultTable = evaluateAccessorQueries(first, expressions, undefined);
+  const appended = evaluateAccessorQueries(data, expressions, undefined, {
+    source: first,
+    expressions,
+    parseExpression: undefined,
+    table: defaultTable
+  });
+  expect(appended.batches[0]).toBe(defaultTable.batches[0]);
+  expect(Array.from(appended.getChild('getRadius')!)).toEqual([6, 8, 10]);
 });
 
 test('SQL accessors select Arrow lists without copying or changing their type', () => {
@@ -124,7 +130,6 @@ test('layer updates wait for SQL accessor values on replacement data', async () 
   const renderPass = device.beginRenderPass({});
 
   try {
-    manager.setProps({sqlParser});
     manager.setLayers([first]);
     expect(initialUpdate).not.toHaveBeenCalled();
     first._drawLayer({renderPass, shaderModuleProps: null, uniforms: {}, parameters: {}});

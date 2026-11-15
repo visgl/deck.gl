@@ -5,7 +5,6 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
-import {sqlParser} from '@deck.gl/core/sql';
 import {tableFromArrays} from 'apache-arrow';
 import {OrbitView, DirectionalLight, LightingEffect, AmbientLight} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
@@ -91,7 +90,6 @@ export default function App({device}) {
 
   return (
     <DeckGL
-      sqlParser={sqlParser}
       device={device}
       views={
         new OrbitView({

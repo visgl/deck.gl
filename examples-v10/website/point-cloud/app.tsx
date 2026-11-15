@@ -7,7 +7,6 @@ import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
 import {OrbitView, LinearInterpolator} from '@deck.gl/core';
-import {sqlParser} from '@deck.gl/core/sql';
 import {isArrowTable} from '@math.gl/arrow';
 import {PointCloudLayer} from '@deck.gl/layers';
 
@@ -115,7 +114,6 @@ export default function App({
   return (
     <DeckGL
       device={device}
-      sqlParser={sqlParser}
       views={new OrbitView({orbitAxis: 'Y', fovy: 50})}
       initialViewState={viewState}
       controller={{

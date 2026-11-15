@@ -4,7 +4,6 @@
 
 import {MapLibreOverlay as DeckOverlay} from '@deck.gl/maplibre';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
-import {sqlParser} from '@deck.gl/core/sql';
 import {JSONTableLoader} from '@loaders.gl/tables/json';
 import {Map, NavigationControl, setWorkerUrl} from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
@@ -26,7 +25,6 @@ const map = new Map({
 
 const deckOverlay = new DeckOverlay({
   interleaved: true,
-  sqlParser,
   layers: [
     new ScatterplotLayer({
       id: 'airports',
