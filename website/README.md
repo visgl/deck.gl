@@ -1,6 +1,6 @@
 # Website example catalogs
 
-The website publishes Examples at `/examples` and v10 Examples at
+The website publishes Examples at `/examples` and Examples v10 at
 `/examples-v10` in the same build.
 
 Edit their pages independently in `src/examples/` and `src/examples-v10/`.
