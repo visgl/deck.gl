@@ -120,7 +120,43 @@ test('convertLegacyInjections converts inject fields to GLSL plugins', () => {
   expect(shaders.plugins, 'input is not mutated').toEqual([discardPlugin]);
 
   const again = convertLegacyInjections(shaders);
-  expect(again.plugins[2], 'module plugin is stable').toBe(converted.plugins[2]);
+  expect(again.plugins, 'repeated conversion gives equal plugins').toEqual(converted.plugins);
+});
+
+test('convertLegacyInjections reads the current contents of a reused inject object', () => {
+  const inject: Record<string, string> = {};
+  const module = {name: 'reused', inject};
+  const shaders = {modules: [module]};
+
+  expect(convertLegacyInjections(shaders).plugins, 'empty inject gives no plugin').toBeUndefined();
+
+  inject['fs:#main-start'] = 'float first;';
+  expect(convertLegacyInjections(shaders).plugins, 'added entry is converted').toEqual([
+    {
+      name: 'reused-inject',
+      injections: [{stage: 'fragment', target: '#main-start', glsl: 'float first;', order: 0}]
+    }
+  ]);
+
+  inject['fs:#main-start'] = 'float second;';
+  expect(convertLegacyInjections(shaders).plugins, 'changed entry is converted').toEqual([
+    {
+      name: 'reused-inject',
+      injections: [{stage: 'fragment', target: '#main-start', glsl: 'float second;', order: 0}]
+    }
+  ]);
+});
+
+test('convertLegacyInjections warns once for inject fields that are merged on each call', () => {
+  const warn = vi.spyOn(log, 'warn');
+  // mergeShaders makes a new `inject` object each time two descriptors have the field.
+  const getShaders = () =>
+    mergeShaders({vs: 'vs', inject: {'vs:#decl': 'float a;'}}, {inject: {'fs:#decl': 'float b;'}});
+  convertLegacyInjections(getShaders());
+  convertLegacyInjections(getShaders());
+  const messages = warn.mock.calls.map(args => args[0]).filter(m => m.startsWith('getShaders()'));
+  warn.mockRestore();
+  expect(messages.length, 'at most one warning').toBeLessThanOrEqual(1);
 });
 
 test('convertLegacyInjections warns once for each inject field', () => {

@@ -8,8 +8,15 @@ type LegacyInjection = string | {injection: string; order?: number};
 type LegacyInjections = Record<string, LegacyInjection>;
 
 const INJECTION_KEY = /^(vs|fs):(#(?:decl|main-start|main-end)|[A-Za-z_][A-Za-z0-9_]*)$/;
-// Keep one plugin per legacy object so that repeated getShaders() calls return stable plugins.
-const legacyPlugins = new WeakMap<object, object | null>();
+// Messages already logged. Each deprecation message is logged one time.
+const warnedMessages = new Set<string>();
+
+function warnOnce(message: string): void {
+  if (!warnedMessages.has(message)) {
+    warnedMessages.add(message);
+    log.warn(message)();
+  }
+}
 
 // Merge two luma.gl shader descriptors
 export function mergeShaders(target, source) {
@@ -85,29 +92,26 @@ export function convertLegacyInjections(shaders) {
 }
 
 function getLegacyPlugin(inject: LegacyInjections, owner: string, name: string): object | null {
-  let plugin = legacyPlugins.get(inject);
-  if (plugin === undefined) {
-    log.warn(
-      `${owner}: "inject" is deprecated. Move the injections to a ShaderPlugin and pass it in "plugins"`
-    )();
-    const injections: object[] = [];
-    for (const key in inject) {
-      const match = INJECTION_KEY.exec(key);
-      if (!match) {
-        log.warn(`${owner}: injection "${key}" is not a named target and is ignored`)();
-        continue;
-      }
-      const value = inject[key];
-      const {injection, order = 0} = typeof value === 'string' ? {injection: value} : value;
-      injections.push({
-        stage: match[1] === 'vs' ? 'vertex' : 'fragment',
-        target: match[2],
-        glsl: injection,
-        order
-      });
+  warnOnce(
+    `${owner}: "inject" is deprecated. Move the injections to a ShaderPlugin and pass it in "plugins"`
+  );
+  // Read the current contents on each call. An application can change an `inject` object
+  // between two shader builds.
+  const injections: object[] = [];
+  for (const key in inject) {
+    const match = INJECTION_KEY.exec(key);
+    if (!match) {
+      warnOnce(`${owner}: injection "${key}" is not a named target and is ignored`);
+      continue;
     }
-    plugin = injections.length ? {name: `${name}-inject`, injections} : null;
-    legacyPlugins.set(inject, plugin);
+    const value = inject[key];
+    const {injection, order = 0} = typeof value === 'string' ? {injection: value} : value;
+    injections.push({
+      stage: match[1] === 'vs' ? 'vertex' : 'fragment',
+      target: match[2],
+      glsl: injection,
+      order
+    });
   }
-  return plugin;
+  return injections.length ? {name: `${name}-inject`, injections} : null;
 }
