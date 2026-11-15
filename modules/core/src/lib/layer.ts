@@ -19,7 +19,7 @@ import debug from '../debug/index';
 import assert from '../utils/assert';
 import memoize from '../utils/memoize';
 import {deepEqual} from '../utils/deep-equal';
-import {mergeShaders} from '../utils/shader';
+import {mergeShaders, convertLegacyInjections} from '../utils/shader';
 import {projectPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
 import pickingModule, {
@@ -622,7 +622,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     for (const extension of this.props.extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
-    return {...shaders, shaderAssembler: this.context.shaderAssembler};
+    return {...convertLegacyInjections(shaders), shaderAssembler: this.context.shaderAssembler};
   }
 
   /** Controls if updateState should be called. By default returns true if any prop has changed */

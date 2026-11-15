@@ -57,6 +57,11 @@ return {
 };
 ```
 
+`Layer.getShaders` converts a remaining `inject` field, on its result or on a shader module,
+to a GLSL-only plugin and logs a deprecation warning. Keys that are not a named target
+(`vs:NAME`, `fs:NAME`, `#decl`, `#main-start`, `#main-end`) are ignored with a warning.
+Models constructed outside `Layer.getShaders` do not get this conversion.
+
 Register `ShaderInjectionTarget` descriptors with `addShaderInjectionTarget`, using
 `{name, stage, glsl: {parameters}, wgsl: {parameters}}` instead of signature strings.
 Declare plugin targets in `injectionTargets`.

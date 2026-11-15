@@ -213,3 +213,38 @@ test('LayerExtension#CompositeLayer passthrough', () => {
 
   expect(MockExtension.finalizeCalled, 'finalizeState called').toBe(2);
 });
+
+test('LayerExtension#legacy inject fields reach the assembled shader', () => {
+  const TINT = 'color.rgb = vec3(1.0, 0.0, 0.0);';
+  const FADE = 'color.a *= 0.5;';
+
+  class LegacyInjectExtension extends LayerExtension {
+    static extensionName = 'LegacyInjectExtension';
+
+    getShaders() {
+      return {
+        modules: [{name: 'legacy-tint', inject: {'fs:DECKGL_FILTER_COLOR': TINT}}],
+        inject: {'fs:DECKGL_FILTER_COLOR': FADE}
+      };
+    }
+  }
+
+  testLayer({
+    Layer: ScatterplotLayer,
+    testCases: [
+      {
+        props: {
+          id: 'legacy-inject-layer',
+          data: [0, 1, 2],
+          getPosition: d => [d, 0],
+          extensions: [new LegacyInjectExtension()]
+        },
+        onAfterUpdate: ({layer}) => {
+          const {source} = layer.getModels()[0].pipeline.fs;
+          expect(source, 'module inject is assembled').toContain(TINT);
+          expect(source, 'getShaders inject is assembled').toContain(FADE);
+        }
+      }
+    ]
+  });
+});
