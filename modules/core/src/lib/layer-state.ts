@@ -7,7 +7,7 @@ import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import {equalLoaderOptions} from '../utils/loader-utils';
 import ComponentState from '../lifecycle/component-state';
 
-import type Layer from './layer';
+import Layer from './layer';
 import type {Table, Vector} from 'apache-arrow';
 import type {SQLParser} from '../types/layer-props';
 import type AttributeManager from './attribute/attribute-manager';
@@ -45,6 +45,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     query?: string | null;
     mode?: LayerT['props']['_dataLoadOptions'];
     parser: SQLParser['parseQuery'];
+    fetch?: Layer['props']['fetch'];
     loaders?: Layer['props']['loaders'];
     options: unknown;
   };
@@ -142,6 +143,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
             query,
             mode: isURL && !query ? mode : undefined,
             parser: query ? layer.context.sqlParser?.parseQuery : undefined,
+            fetch: isURL && query ? layer.props.fetch : undefined,
             loaders: isURL ? layer.props.loaders : undefined,
             options: isURL ? layer.getLoadOptions() : undefined
           }
@@ -174,13 +176,18 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
   protected _fetch(propName, url: string) {
     const layer = this.layer;
     const request = propName === 'data' ? this.dataRequest : undefined;
-    if (request?.query) {
+    const fetch = layer?.props.fetch;
+    if (request?.query && layer) {
+      layer.context.resourceManager?.unsubscribe({consumerId: layer.id, requestId: propName});
+      const defaultFetch = Layer.defaultProps.fetch as {value: Layer['props']['fetch']};
+      if (fetch && fetch !== defaultFetch.value) {
+        return this._prepareAsyncInput(propName, fetch(url, {propName, layer}));
+      }
       const {query} = request;
       return import('../arrow/data-query').then(({queryLayerData}) =>
         queryLayerData(url, query, request.loaders, request.options, request.parser)
       );
     }
-    const fetch = layer?.props.fetch;
     if (fetch) {
       return fetch(url, {propName, layer});
     }

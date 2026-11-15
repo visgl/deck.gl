@@ -345,8 +345,9 @@ available to accessor queries, accessors, and picking. The layer's data is the
 implicit source. `FROM data` is optional.
 
 For URL inputs, provide a source-capable loader. Loaders that support query pushdown
-can optimize loading based on the supplied query. Set Deck's `sqlParser` prop to
-a parser that implements `parseQuery`.
+can optimize loading based on the supplied query. When the layer has a custom
+`fetch`, SQL runs on the Arrow table returned by that function. Set Deck's
+`sqlParser` prop to a parser that implements `parseQuery`.
 
 #### SQL accessor inputs
 

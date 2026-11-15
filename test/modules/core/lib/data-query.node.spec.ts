@@ -89,3 +89,24 @@ test('reinstalling the query parser refreshes a reused layer', async () => {
     device.destroy();
   }
 });
+
+test('URL queries use a custom fetch and refresh when it changes', async () => {
+  const data = 'https://example.test/points';
+  const query = 'SELECT * WHERE value > 0';
+  const fetch = vi.fn(async () => tableFromArrays({value: [-1, 2]}));
+  const replacement = vi.fn(async () => tableFromArrays({value: [-1, 3]}));
+  const makeLayer = (load: typeof fetch) => {
+    const layer = new QueryLayer({data, query, fetch: load});
+    Object.assign(layer, {context: {sqlParser}});
+    return layer;
+  };
+  const first = makeLayer(fetch);
+  const state = new LayerState({attributeManager: null, layer: first});
+  state.setAsyncProps(first.props);
+  await vi.waitFor(() => expect(state.getAsyncProp('data').get(0)?.value).toBe(2));
+  expect(fetch).toHaveBeenCalledExactlyOnceWith(data, {propName: 'data', layer: first});
+
+  state.setAsyncProps(makeLayer(replacement).props);
+  await vi.waitFor(() => expect(state.getAsyncProp('data').get(0)?.value).toBe(3));
+  expect(replacement).toHaveBeenCalledOnce();
+});
