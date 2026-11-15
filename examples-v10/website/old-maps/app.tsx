@@ -8,6 +8,7 @@ import {Map, useControl} from 'react-map-gl/maplibre';
 import {MapLibreOverlay as DeckOverlay} from '@deck.gl/maplibre';
 import {BitmapLayer} from '@deck.gl/layers';
 
+import PinLayer from './pin-layer';
 import TourControls from './tour-controls';
 
 import type {MapRef, ViewStateChangeEvent} from 'react-map-gl/maplibre';
@@ -119,25 +120,34 @@ const MIN_MAP_SIZE = 16;
 // The maps on screen and large enough to see, as a comma-separated list of ids
 function getVisibleMapIds(map: MapLibreMap): string {
   const bounds = map.getBounds();
+  const viewWest = bounds.getWest();
+  const viewEast = bounds.getEast();
+  const viewLongitude = (viewWest + viewEast) / 2;
+  const repeat = map.getRenderWorldCopies();
   return OLD_MAPS.filter(({bounds: [west, south, east, north]}) => {
+    // Use the copy of the scan closest to the center of the visible longitude range.
+    const scanLongitude = (west + east) / 2;
+    const offset = repeat ? 360 * Math.round((viewLongitude - scanLongitude) / 360) : 0;
+    const scanWest = west + offset;
+    const scanEast = east + offset;
     if (
-      east < bounds.getWest() ||
-      west > bounds.getEast() ||
+      scanEast < viewWest ||
+      scanWest > viewEast ||
       north < bounds.getSouth() ||
       south > bounds.getNorth()
     ) {
       return false;
     }
-    const {x: x0, y: y0} = map.project([west, south]);
-    const {x: x1, y: y1} = map.project([east, north]);
+    const {x: x0, y: y0} = map.project([scanWest, south]);
+    const {x: x1, y: y1} = map.project([scanEast, north]);
     return Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) >= MIN_MAP_SIZE;
   })
     .map(m => m.id)
     .join(',');
 }
 
-function getTooltip({layer}: PickingInfo) {
-  const map = layer && OLD_MAPS.find(m => m.id === layer.id);
+function getTooltip({layer, object}: PickingInfo<OldMap>) {
+  const map = object ?? OLD_MAPS.find(m => m.id === layer?.id);
   return map ? `${map.title}\n${map.author}, ${map.date}` : null;
 }
 
@@ -156,6 +166,7 @@ export default function App({
   autoplay = true,
   opacity = 1,
   mapStyle = `${DATA_URL}/style.json`,
+  projection,
   onMapChange
 }: {
   device?: Device;
@@ -163,6 +174,8 @@ export default function App({
   autoplay?: boolean;
   opacity?: number;
   mapStyle?: string;
+  /** Projection used by the MapLibre basemap and deck.gl overlay. */
+  projection?: 'mercator' | 'globe';
   onMapChange?: (map: OldMap) => void;
 }) {
   const mapRef = useRef<MapRef>(null);
@@ -180,8 +193,8 @@ export default function App({
   const previousMap = OLD_MAPS[(currentIndex + OLD_MAPS.length - 1) % OLD_MAPS.length];
   const arrived = arrivedId === currentId;
 
-  const goTo = (id: string) => {
-    if (id !== currentId) {
+  const goTo = (id: string, revisit = false) => {
+    if (revisit || id !== currentId) {
       setCurrentId(id);
       setArrivedId(null);
       const {longitude, latitude, zoom, bearing = 0} = OLD_MAPS.find(m => m.id === id)!.viewState;
@@ -193,8 +206,8 @@ export default function App({
   };
 
   // Navigation from within the app, which the host is told about
-  const navigate = (map: OldMap) => {
-    goTo(map.id);
+  const navigate = (map: OldMap, revisit = false) => {
+    goTo(map.id, revisit);
     onMapChange?.(map);
   };
 
@@ -219,8 +232,9 @@ export default function App({
 
   // Only keep the current, upcoming and on-screen images on the GPU. Removed layers release
   // their textures, which matters for large scans on memory-constrained devices.
-  const layers = OLD_MAPS.filter(
-    m => m.id === currentId || m === nextMap || visibleIds.split(',').includes(m.id)
+  const visibleMapIds = visibleIds.split(',');
+  const bitmapLayers = OLD_MAPS.filter(
+    m => m.id === currentId || m === nextMap || visibleMapIds.includes(m.id)
   ).map(
     m =>
       new BitmapLayer({
@@ -228,9 +242,23 @@ export default function App({
         image: `${DATA_URL}/${m.id}.webp`,
         bounds: m.bounds,
         opacity,
+        visible: visibleMapIds.includes(m.id),
         pickable: true
       })
   );
+
+  const pins = new PinLayer<OldMap>({
+    id: 'old-map-pins',
+    data: OLD_MAPS.filter(m => !visibleMapIds.includes(m.id)),
+    getPosition: ({viewState: {longitude, latitude}}) => [longitude, latitude],
+    pickable: true,
+    onClick: ({object}: PickingInfo<OldMap>) => {
+      if (object) {
+        setPlaying(false);
+        navigate(object, true);
+      }
+    }
+  });
 
   return (
     <div style={{position: 'absolute', width: '100%', height: '100%', top: 0, left: 0}}>
@@ -242,13 +270,15 @@ export default function App({
         style={{isolation: 'isolate'}}
         initialViewState={OLD_MAPS[currentIndex].viewState}
         mapStyle={mapStyle}
+        projection={projection}
         // Exploring the map pauses the tour. Only user input carries an original event.
         onMoveStart={(e: TourMoveEvent) => e.originalEvent && setPlaying(false)}
+        onLoad={e => setVisibleIds(getVisibleMapIds(e.target))}
         onMove={(e: TourMoveEvent) => setVisibleIds(getVisibleMapIds(e.target))}
         // Ends when a flight lands or is interrupted, by the user or by the next flight
         onMoveEnd={(e: TourMoveEvent) => e.tourId && setArrivedId(e.tourId)}
       >
-        <DeckGLOverlay device={device} layers={layers} getTooltip={getTooltip} />
+        <DeckGLOverlay device={device} layers={[...bitmapLayers, pins]} getTooltip={getTooltip} />
       </Map>
       <TourControls
         playing={playing}
