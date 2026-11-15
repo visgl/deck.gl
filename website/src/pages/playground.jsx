@@ -16,7 +16,7 @@ const Container = styled.div`
 `;
 
 // react-ace does not work on the server side
-const App = React.lazy(() => import('@site/../examples/playground/src/app'));
+const App = React.lazy(() => import('examples-root/playground/src/app'));
 
 export default function Playground() {
   const schemaUrl = useBaseUrl('/schema.generated.json');

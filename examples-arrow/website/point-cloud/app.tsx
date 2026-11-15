@@ -1,0 +1,118 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+/* eslint-disable no-unused-vars */
+import React, {useState, useEffect, useCallback} from 'react';
+import {createRoot} from 'react-dom/client';
+import {DeckGL} from '@deck.gl/react';
+import {OrbitView, LinearInterpolator} from '@deck.gl/core';
+import {PointCloudLayer} from '@deck.gl/layers';
+
+import {LASLoader} from '@loaders.gl/pointclouds/las';
+import type {OrbitViewState, Widget} from '@deck.gl/core';
+import {Device} from '@luma.gl/core';
+
+// TODO - export from loaders?
+type LASMesh = (typeof LASLoader)['dataType'];
+
+// Data source: kaarta.com
+const LAZ_SAMPLE =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/point-cloud-laz/indoor.0.1.laz';
+
+const INITIAL_VIEW_STATE: OrbitViewState = {
+  target: [0, 0, 0],
+  rotationX: 0,
+  rotationOrbit: 0,
+  minZoom: 0,
+  maxZoom: 10,
+  zoom: 1
+};
+
+const transitionInterpolator = new LinearInterpolator(['rotationOrbit']);
+
+export default function App({
+  onLoad,
+  device,
+  widgets
+}: {
+  onLoad?: (data: {count: number; progress: number}) => void;
+  device?: Device;
+  widgets?: Widget[];
+}) {
+  const [viewState, updateViewState] = useState<OrbitViewState>(INITIAL_VIEW_STATE);
+  const [boundingBox, setBoundingBox] = useState<[number[], number[]] | null>(null);
+
+  useEffect(() => {
+    if (!boundingBox) {
+      return;
+    }
+    const rotateCamera = () => {
+      updateViewState(v => ({
+        ...v,
+        rotationOrbit: v.rotationOrbit! + 120,
+        transitionDuration: 2400,
+        transitionInterpolator,
+        onTransitionEnd: rotateCamera
+      }));
+    };
+    rotateCamera();
+  }, [boundingBox]);
+
+  const onDataLoad = useCallback((data: any) => {
+    const header = (data as LASMesh).header!;
+    const pos = (data as LASMesh).attributes.POSITION;
+    // TODO: (kaapp) webgpu won't allow us to just downgrade
+    // to Float32 and not supply the low value as webgl so kindly did.
+    const f64Pos = new Float64Array(pos.value.length);
+    for (let i = 0; i < pos.value.length; i++) {
+      f64Pos[i] = pos.value[i];
+    }
+    (data as LASMesh).attributes.POSITION.value = f64Pos;
+    if (header.boundingBox) {
+      const [min, max] = header.boundingBox;
+      updateViewState({
+        ...INITIAL_VIEW_STATE,
+        target: [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2]
+      });
+      setBoundingBox(header.boundingBox);
+    }
+
+    if (onLoad) {
+      onLoad({count: header.vertexCount, progress: 1});
+    }
+  }, []);
+
+  const layers = [
+    new PointCloudLayer<LASMesh>({
+      id: 'laz-point-cloud-layer',
+      data: LAZ_SAMPLE,
+      onDataLoad,
+      getNormal: [0, 1, 0],
+      getColor: [255, 255, 255],
+      opacity: 0.5,
+      pointSize: 0.5,
+      // Additional format support can be added here
+      loaders: [LASLoader],
+      // TODO (kaapp) currently webgpu requirement to ensure instanceColors are supplied
+      pickable: true
+    })
+  ];
+
+  return (
+    <DeckGL
+      device={device}
+      views={new OrbitView({orbitAxis: 'Y', fovy: 50})}
+      initialViewState={viewState}
+      controller={{
+        maxBounds: boundingBox
+      }}
+      layers={layers}
+      widgets={widgets}
+    />
+  );
+}
+
+export function renderToDOM(container: HTMLDivElement) {
+  createRoot(container).render(<App />);
+}
