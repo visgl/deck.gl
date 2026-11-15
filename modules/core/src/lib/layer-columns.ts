@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {packNormalizedColor} from '../utils/color';
 import {createIterable} from '../utils/iterable-utils';
 import {deepEqual} from '../utils/deep-equal';
 import type {UpdateParameters} from './layer';
@@ -28,6 +29,8 @@ export type ColumnDefinition = {
   /** Select an Arrow vector supplied through the matching accessor, after an explicit column. */
   arrowAccessor?: boolean;
   defaultValue?: number;
+  /** Built-in byte color to preserve when normalizing plain-array input. */
+  defaultColor?: readonly number[];
 };
 
 /** Definitions keyed by public column name, including internal inputs. */
@@ -118,6 +121,7 @@ export class LayerColumns {
       props.data !== this.request.source ||
       !deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
       props.colorFormat !== oldProps.colorFormat ||
+      props.normalizedColors !== oldProps.normalizedColors ||
       !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1) ||
       props.coordinateSystem !== oldProps.coordinateSystem ||
       Object.entries(this.definitions).some(
@@ -297,7 +301,8 @@ export class LayerColumns {
             definition.semantic === 'position' ? `${definition.attribute}64Low` : undefined,
             definition.defaultValue,
             fallbacks?.[definition.accessor],
-            definition.attribute
+            definition.attribute,
+            definition.defaultColor
           );
         }
       }
@@ -472,7 +477,8 @@ export class LayerColumns {
     lowAttribute?: string,
     defaultValue = 0,
     binaryOverride?: unknown,
-    attribute?: string
+    attribute?: string,
+    defaultColor?: readonly number[]
   ): Promise<GPUVector | GPUConstant> {
     let binaryColor = false;
     const binary =
@@ -597,6 +603,17 @@ export class LayerColumns {
       if (size === 1) {
         const scalar = Number.isFinite(value) ? value : value?.[0];
         target[offset] = Number.isFinite(scalar) ? scalar : defaultValue;
+        return;
+      }
+      if (
+        defaultColor &&
+        props.normalizedColors &&
+        !binaryColor &&
+        Array.isArray(value) &&
+        (typeof source === 'function' || value !== defaultColor)
+      ) {
+        packNormalizedColor(value, target, offset, props.colorFormat === 'RGB' ? 3 : size);
+        if (props.colorFormat === 'RGB') target[offset + 3] = 255;
         return;
       }
       for (let component = 0; component < size; component++) {

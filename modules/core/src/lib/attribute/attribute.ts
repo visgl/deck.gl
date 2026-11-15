@@ -9,6 +9,7 @@ import DataColumn, {
   BufferAccessor,
   DataColumnSettings
 } from './data-column';
+import {packNormalizedColor} from '../../utils/color';
 import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
@@ -67,6 +68,8 @@ export type AttributeOptions = DataColumnOptions<{
   accessor?: Accessor<any, any> | string | string[];
   /** @internal Identifies RGB(A) byte color accessors independently of their vertex format. */
   semanticType?: 'color';
+  /** @internal Interpret plain-array color accessor inputs as normalized values. */
+  normalizedColorInput?: boolean;
   /** Callback to map `accessor`'s return value to the attribute value. */
   transform?: ((value: any) => any) | null;
   /** Identifies the transform dependency; `projection` enables automatic position invalidation. */
@@ -302,7 +305,17 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
     const transformedValue =
       this.settings.transform && context ? this.settings.transform.call(context, value) : value;
-    this.setData({constant: true, value: transformedValue});
+    let constant = transformedValue;
+    if (
+      this.settings.semanticType === 'color' &&
+      this.settings.normalizedColorInput &&
+      Array.isArray(constant) &&
+      constant !== this.settings.defaultValue
+    ) {
+      constant = [];
+      packNormalizedColor(transformedValue, constant, 0, this.size);
+    }
+    this.setData({constant: true, value: constant});
     return true;
   }
 
@@ -603,6 +616,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
+    const normalizeColor =
+      settings.semanticType === 'color' && settings.normalizedColorInput && !state.binaryAccessor;
     const accessorFunc: Accessor<any, any> =
       state.binaryAccessor ||
       // @ts-ignore
@@ -626,7 +641,15 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
           (objectInfo.index < startIndices.length - 1
             ? startIndices[objectInfo.index + 1]
             : numInstances) - startIndices[objectInfo.index];
-        if (objectValue && Array.isArray(objectValue[0])) {
+        if (normalizeColor && Array.isArray(objectValue)) {
+          packNormalizedColor(objectValue, objectInfo.target, 0, size);
+          fillArray({
+            target: value,
+            source: objectInfo.target,
+            start: i,
+            count: numVertices
+          });
+        } else if (objectValue && Array.isArray(objectValue[0])) {
           let startIndex = i;
           for (const item of objectValue) {
             attribute._normalizeValue(item, value as TypedArray, startIndex);
@@ -645,7 +668,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         }
         i += numVertices * size;
       } else {
-        attribute._normalizeValue(objectValue, value as TypedArray, i);
+        if (normalizeColor && Array.isArray(objectValue)) {
+          packNormalizedColor(objectValue, value as TypedArray, i, size);
+        } else {
+          attribute._normalizeValue(objectValue, value as TypedArray, i);
+        }
         i += size;
       }
     }
