@@ -37,7 +37,7 @@ import LayerState, {ChangeFlags} from './layer-state';
 import {worldToPixels} from '@math.gl/web-mercator';
 import {vec3TransformMat4 as transformMat4} from '@math.gl/core';
 
-import {load} from '@loaders.gl/core';
+import {load, loadInBatches} from '@loaders.gl/core';
 
 import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {CoordinateSystem} from './constants';
@@ -96,6 +96,8 @@ const defaultProps: DefaultProps<LayerProps> = {
     optional: true
   },
   dataTransform: {type: 'function', value: null, optional: true},
+  _dataLoadOptions: 'auto',
+  onDataProgress: {type: 'function', value: null, optional: true},
   onDataLoad: {type: 'function', value: null, optional: true},
   onError: {type: 'function', value: null, optional: true},
   fetch: {
@@ -130,6 +132,11 @@ const defaultProps: DefaultProps<LayerProps> = {
             }
           }
         };
+      }
+
+      if (propName === 'data' && layer.props._dataLoadOptions !== 'auto') {
+        resourceManager.unsubscribe({consumerId: layer.id, requestId: propName});
+        return loadInBatches(url, loaders, loadOptions);
       }
 
       let inResourceManager = resourceManager.contains(url);

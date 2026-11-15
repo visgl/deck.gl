@@ -4,6 +4,13 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Experimental batch loading
+
+Layers support `_dataLoadOptions: 'auto' | 'batched' | 'snapshots'` for complete URL loading,
+appended batches, or replacement Arrow snapshots. `onDataProgress` reports each accepted batch.
+Streams support Arrow record batches and tables without converting Arrow
+columns to rows. See [Layer](./api-reference/core/layer.md#_dataloadoptions).
+
 ### Arrow accessor inputs
 
 Layers with column support accept Arrow vectors directly through their existing accessors,
