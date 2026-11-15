@@ -168,10 +168,6 @@ channels to [0, 1] and scale them to their integer ranges. A null component
 makes the output value null. Use typed vector constructors at the top level
 of an accessor expression.
 
-For async iterables of Arrow record batches, `queryOutput: 'batches'` appends
-each batch to the layer's data. `queryOutput: 'snapshots'` replaces the current
-table with each incoming batch.
-
 ## Matching table fields to accessors
 
 ScatterplotLayer uses matching, compatible Arrow table fields when an explicit
