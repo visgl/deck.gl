@@ -114,7 +114,7 @@ if (firstSectionHeading !== '## docs') {
 if (llmsTxt.includes('/docs/legacy/')) {
   fail('llms.txt contains a legacy guide');
 }
-if (llmsTxt.includes('/examples/')) {
+if (/\/examples(?:-arrow)?\//.test(llmsTxt)) {
   fail('llms.txt contains a standalone example page');
 }
 

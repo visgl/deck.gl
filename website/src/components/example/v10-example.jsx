@@ -6,8 +6,8 @@ import React from 'react';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
 /** Embeds a v10 example with its standalone controls and graphics device lifecycle. */
-export default function V10Example({id, title}) {
-  const sourceUrl = useBaseUrl(`/v10-examples/${id}/index.html`);
+export default function V10Example({id, title, assetPath = 'v10-examples'}) {
+  const sourceUrl = useBaseUrl(`/${assetPath}/${id}/index.html`);
   return (
     <iframe
       key={id}

@@ -5,3 +5,5 @@ build
 .docusaurus
 .swc
 static/v10-examples
+
+static/v10-examples-arrow

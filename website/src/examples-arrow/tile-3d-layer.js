@@ -1,0 +1,49 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import React, {Component} from 'react';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
+import App from 'arrow-website-examples/3d-tiles/app';
+
+import {makeExample} from '../components';
+
+class Tiles3DDemo extends Component {
+  static title = 'City of Melbourne 3D Point Cloud';
+
+  static hasDeviceTabs = true;
+
+  static code = `${GITHUB_TREE}/examples-arrow/website/3d-tiles`;
+
+  static parameters = {};
+
+  static mapStyle = MAPBOX_STYLES.DARK;
+
+  static renderInfo(meta) {
+    if (!meta.attributions) {
+      return null;
+    }
+    const {attributions} = meta;
+    return (
+      <div style={{marginTop: '0.5cm'}}>
+        <div style={{textAlign: 'center', borderStyle: 'groove'}}>
+          {Boolean(attributions.length) && <b>Tileset Credentials</b>}
+          {attributions.map(attribution => (
+            // eslint-disable-next-line react/no-danger
+            <div key={attribution.html} dangerouslySetInnerHTML={{__html: attribution.html}} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  _updateAttributions = attributions => {
+    this.props.onStateChange({attributions});
+  };
+
+  render() {
+    return <App {...this.props} updateAttributions={this._updateAttributions} />;
+  }
+}
+
+export default makeExample(Tiles3DDemo);

@@ -11,7 +11,7 @@ const darkCodeTheme = prismThemes.nightOwl;
 
 const {getSwcLoaderOptions, rspack} = require('@docusaurus/faster');
 const {resolve} = require('path');
-const examplesDirectory = require('./scripts/examples-directory.cjs');
+const exampleCatalogs = require('./scripts/example-catalogs.cjs');
 const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/';
 const websiteBasePathSegments = websiteBaseUrl.split('/').filter(Boolean);
 const websiteBasePath =
@@ -28,7 +28,6 @@ const config = {
   tagline: 'GPU-powered, highly performant large-scale data visualization',
   url: 'https://deck.gl',
   baseUrl: websiteBaseUrl,
-  customFields: {examplesDirectory},
   onBrokenLinks: 'throw',
   markdown: {
     hooks: {
@@ -133,8 +132,10 @@ const config = {
           includeDocs: true,
           includeVersionedDocs: false,
           includeGeneratedIndex: true,
-          // /examples is the only other docs instance; TEST-STATUS is an internal tracker.
-          excludeRoutes: ['/examples/**', '/docs/TEST-STATUS'].map(prefixWebsiteRoute)
+          // Exclude the example catalogs and internal test tracker.
+          excludeRoutes: [...exampleCatalogs.map(({id}) => `/${id}/**`), '/docs/TEST-STATUS'].map(
+            prefixWebsiteRoute
+          )
         }
       }
     ],
@@ -162,9 +163,11 @@ const config = {
             '@deck.gl/mesh-layers': resolve('../modules/mesh-layers/dist'),
             '@deck.gl/react': resolve('../modules/react/dist'),
             '@deck.gl/widgets': resolve('../modules/widgets/dist'),
-            'proposal-examples': resolve('..', examplesDirectory, 'proposals'),
-            'examples-root': resolve('..', examplesDirectory),
-            'website-examples': resolve('..', examplesDirectory, 'website'),
+            'proposal-examples': resolve('../examples/proposals'),
+            'examples-root': resolve('../examples'),
+            'website-examples': resolve('../examples/website'),
+            'arrow-proposal-examples': resolve('../examples-arrow/proposals'),
+            'arrow-website-examples': resolve('../examples-arrow/website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom')
           }
@@ -193,17 +196,17 @@ const config = {
         }
       }
     ],
-    [
+    ...exampleCatalogs.map(({id}) => [
       '@docusaurus/plugin-content-docs',
       {
-        id: 'examples',
-        path: './src/examples',
-        routeBasePath: 'examples',
-        sidebarPath: resolve('./src/examples-sidebar.js'),
+        id,
+        path: `./src/${id}`,
+        routeBasePath: id,
+        sidebarPath: resolve(`./src/${id}-sidebar.js`),
         breadcrumbs: false,
         docItemComponent: resolve('./src/components/example/doc-item-component.jsx')
       }
-    ]
+    ])
   ],
 
   themeConfig:
@@ -217,11 +220,11 @@ const config = {
           srcDark: 'images/visgl-logo-light.png'
         },
         items: [
-          {
-            to: '/examples',
+          ...exampleCatalogs.map(({id, label}) => ({
+            to: `/${id}`,
             position: 'left',
-            label: 'Examples'
-          },
+            label
+          })),
           {
             to: '/docs',
             position: 'left',
@@ -261,7 +264,7 @@ const config = {
               },
               {
                 label: 'Starter templates',
-                href: `https://github.com/visgl/deck.gl/tree/master/${examplesDirectory}/get-started`
+                href: 'https://github.com/visgl/deck.gl/tree/master/examples/get-started'
               },
               {
                 label: 'Playground',
