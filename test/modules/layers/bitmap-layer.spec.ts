@@ -5,7 +5,7 @@
 import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect} from 'vitest';
 
-import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {_GlobeViewport as GlobeViewport, LayerExtension} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
 import createMesh from '@deck.gl/layers/bitmap-layer/create-mesh';
@@ -421,6 +421,36 @@ test('BitmapLayer keeps its projected mesh when bounds are equal by value', () =
         onAfterUpdate({layer, oldState}) {
           expect(layer.state.mesh).not.toBe(oldState.mesh);
           expect(Math.max(...layer.state.mesh.positions)).toBe(2);
+        }
+      }
+    ]
+  });
+});
+
+test('BitmapLayer keeps its draw count when extensions change and bounds are equal by value', () => {
+  class TestExtension extends LayerExtension {
+    static extensionName = 'TestExtension';
+  }
+  const bounds = () => [0, 0, 1, 1];
+  testLayer({
+    Layer: BitmapLayer,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {bounds: bounds()},
+        onAfterUpdate({layer}) {
+          expect(layer.state.model.vertexCount).toBe(layer.state.mesh.vertexCount);
+        }
+      },
+      {
+        updateProps: {bounds: bounds(), extensions: [new TestExtension()]},
+        onAfterUpdate({layer, oldState}) {
+          expect(layer.state.mesh).toBe(oldState.mesh);
+          expect(layer.state.model).not.toBe(oldState.model);
+          expect(layer.state.model.vertexCount).toBe(layer.state.mesh.vertexCount);
+          expect(layer.state.model.vertexCount).toBeGreaterThan(0);
         }
       }
     ]

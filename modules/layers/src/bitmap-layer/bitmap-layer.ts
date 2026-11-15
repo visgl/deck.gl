@@ -206,6 +206,10 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     if (changeFlags.extensionsChanged) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
+      // A kept mesh does not go through the rebuild below: give the new model its count.
+      if (this.state.mesh) {
+        this.state.model.setVertexCount(this.state.mesh.vertexCount);
+      }
       attributeManager.invalidateAll();
     }
 
