@@ -1,0 +1,18 @@
+{
+  "marker": {
+    "x": 0,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": true
+  },
+  "marker-warning": {
+    "x": 128,
+    "y": 0,
+    "width": 128,
+    "height": 128,
+    "anchorY": 128,
+    "mask": false
+  }
+}

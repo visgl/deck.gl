@@ -106,9 +106,13 @@ export type HeatmapLayerProps<DataT = unknown> = _HeatmapLayerProps<DataT> &
   AggregationLayerProps<DataT>;
 
 type _HeatmapLayerProps<DataT> = {
-  /** Borrowed single-chunk float32x3 positions, bypassing the position accessor. */
+  /** Borrowed single-chunk float32x3 positions, bypassing the position accessor.
+   * @experimental
+   */
   positions?: GPUVector | null;
-  /** One borrowed scalar float32 weight vector with the same row count as positions. */
+  /** One borrowed scalar float32 weight vector with the same row count as positions.
+   * @experimental
+   */
   weights?: readonly GPUVector[] | null;
 
   /**

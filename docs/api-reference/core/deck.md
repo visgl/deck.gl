@@ -203,6 +203,14 @@ Notes:
 - GPU `parameters` supplied to a view override the global `parameters` for layers rendered in that view.
 - GPU `parameters` supplied to individual layers override both view and global `parameters` when that layer is rendered.
 
+#### `sqlParser` (object, optional) {#sqlparser}
+
+Overrides the parser for [layer queries](./layer.md#query) and Arrow accessor
+expressions. Deck loads the math.gl parser on first use. Supply `parseQuery` to
+override table query parsing and `parseExpression` to override accessor expression
+parsing.
+
+
 #### `layers` (LayersList) {#layers}
 
 * Default: `[]`

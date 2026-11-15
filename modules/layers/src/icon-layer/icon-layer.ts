@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {FixedSizeList, Float, Int} from 'apache-arrow';
+
 import {
   Layer,
   color,
@@ -27,12 +29,12 @@ import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
 import {getShaderWGSL} from './icon-layer.wgsl';
 import IconManager from './icon-manager';
-import type {ColumnSource} from '@deck.gl/core/arrow';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
 
 import type {
   LayerProps,
   LayerDataSource,
-  Accessor,
+  ArrowAccessor,
   AccessorFunction,
   Position,
   Color,
@@ -46,16 +48,16 @@ import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manag
 
 type _IconLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
-  /** Arrow column overriding `getPosition`. */
-  positions?: ColumnSource | null;
-  /** Arrow column overriding `getSize`. */
-  sizes?: ColumnSource | null;
-  /** Arrow column overriding `getColor`. */
-  colors?: ColumnSource | null;
-  /** Arrow column overriding `getAngle`. */
-  angles?: ColumnSource | null;
-  /** Arrow column overriding `getPixelOffset`. */
-  pixelOffsets?: ColumnSource | null;
+  /** @experimental GPU-resident column. */
+  positions?: GPUVector | null;
+  /** @experimental GPU-resident column. */
+  sizes?: GPUVector | null;
+  /** @experimental GPU-resident column. */
+  colors?: GPUVector | null;
+  /** @experimental GPU-resident column. */
+  angles?: GPUVector | null;
+  /** @experimental GPU-resident column. */
+  pixelOffsets?: GPUVector | null;
   /** A prepacked image that contains all icons. */
   iconAtlas?: string | Texture;
   /** Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. */
@@ -94,30 +96,34 @@ type _IconLayerProps<DataT> = {
    */
   alphaCutoff?: number;
 
-  /** Anchor position accessor. */
-  getPosition?: Accessor<DataT, Position>;
+  /** Anchor position constant, callback, or Arrow XY/XYZ column. */
+  getPosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
   /** Icon definition accessor.
    * Should return the icon id if using pre-packed icons (`iconAtlas` + `iconMapping`).
    * Return an object that defines the icon if using auto-packing.
    */
   getIcon?: AccessorFunction<DataT, string> | AccessorFunction<DataT, UnpackedIcon>;
   /** Icon color accessor.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 0, 255]
    */
-  getColor?: Accessor<DataT, Color>;
+  getColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
   /** Icon size accessor.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default 1
    */
-  getSize?: Accessor<DataT, number>;
+  getSize?: ArrowAccessor<DataT, number, Int | Float>;
   /** Icon rotation accessor, in degrees.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default 0
    */
-  getAngle?: Accessor<DataT, number>;
+  getAngle?: ArrowAccessor<DataT, number, Int | Float>;
   /**
    * Icon offsest accessor, in pixels.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0]
    */
-  getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
+  getPixelOffset?: ArrowAccessor<DataT, Readonly<[number, number]>, FixedSizeList<Int | Float>>;
   /**
    * Callback called if the attempt to fetch an icon returned by `getIcon` fails.
    */
@@ -135,21 +141,36 @@ const COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = {
   positions: {
     attribute: 'instancePositions',
     accessor: 'getPosition',
+    arrowAccessor: true,
     semantic: 'position',
     size: 3
   },
   sizes: {
     attribute: 'instanceSizes',
     accessor: 'getSize',
+    arrowAccessor: true,
     semantic: 'scalar',
     size: 1,
     defaultValue: 1
   },
-  colors: {attribute: 'instanceColors', accessor: 'getColor', semantic: 'color', size: 4},
-  angles: {attribute: 'instanceAngles', accessor: 'getAngle', semantic: 'scalar', size: 1},
+  colors: {
+    attribute: 'instanceColors',
+    accessor: 'getColor',
+    arrowAccessor: true,
+    semantic: 'color',
+    size: 4
+  },
+  angles: {
+    attribute: 'instanceAngles',
+    accessor: 'getAngle',
+    arrowAccessor: true,
+    semantic: 'scalar',
+    size: 1
+  },
   pixelOffsets: {
     attribute: 'instancePixelOffset',
     accessor: 'getPixelOffset',
+    arrowAccessor: true,
     semantic: 'vector',
     size: 2
   },
@@ -192,12 +213,17 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
   alphaCutoff: {type: 'number', value: 0.05, min: 0, max: 1},
 
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
+  getPosition: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['array'],
+    value: (x: any) => x.position
+  },
   getIcon: {type: 'accessor', value: (x: any) => x.icon},
-  getColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getSize: {type: 'accessor', value: 1},
-  getAngle: {type: 'accessor', value: 0},
-  getPixelOffset: {type: 'accessor', value: [0, 0]},
+  getColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getSize: {type: 'accessor', arrow: true, value: 1},
+  getAngle: {type: 'accessor', arrow: true, value: 0},
+  getPixelOffset: {type: 'accessor', arrow: true, value: [0, 0]},
 
   onIconError: {type: 'function', value: null, optional: true},
 
@@ -364,9 +390,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   /** Switches between Arrow and accessor models when column props change. */
   private _updateColumnState(params: UpdateParameters<this>): boolean {
-    const hasColumns = Object.entries(COLUMN_DEFINITIONS).some(
-      ([name, definition]) => definition.prop !== false && params.props[name]
-    );
+    const hasColumns = Object.keys(this.resolveColumns(COLUMN_DEFINITIONS)).length > 0;
     if (hasColumns) {
       this._updateColumns(params);
       return true;
