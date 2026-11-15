@@ -34,7 +34,6 @@ export default class ComponentState<ComponentT extends Component> {
   component: ComponentT | null;
   /** Called when async resolution or a derived override changes effective props. */
   onEffectivePropsUpdated?(props?: ComponentT['props'], oldProps?: ComponentT['props']): void;
-  onAsyncPropUpdated: (propName: string, value: any) => void;
 
   private asyncProps: Partial<Record<string, AsyncPropState>>;
   private oldProps: ComponentT['props'] | null;
@@ -45,7 +44,6 @@ export default class ComponentState<ComponentT extends Component> {
   constructor(component: ComponentT) {
     this.component = component;
     this.asyncProps = {}; // Prop values that the layer sees
-    this.onAsyncPropUpdated = () => {};
     this.oldProps = null; // Last props before update
     this.oldAsyncProps = null; // Last props before update, with async values copied.
   }
@@ -268,7 +266,6 @@ export default class ComponentState<ComponentT extends Component> {
       asyncProp.resolvedLoadCount = loadCount;
 
       // Call callback to inform listener
-      this.onAsyncPropUpdated(propName, value);
       this.onEffectivePropsUpdated?.();
     }
   }

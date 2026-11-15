@@ -4,7 +4,7 @@
 
 // loaders.gl, MIT license
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {_ComponentState as ComponentState, _Component as Component} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 import {load} from '@loaders.gl/core';
@@ -92,10 +92,8 @@ test('ComponentState#finalize', async () => {
   component.internalState = state;
   expect(state.component, 'state.component is present').toBe(component);
 
-  const updateCallbackCalled = {};
-  state.onAsyncPropUpdated = propName => {
-    updateCallbackCalled[propName] = true;
-  };
+  const onEffectivePropsUpdated = vi.fn();
+  state.onEffectivePropsUpdated = onEffectivePropsUpdated;
 
   const loadPromiseA = makePromise();
   const loadPromiseB = makePromise();
@@ -105,19 +103,13 @@ test('ComponentState#finalize', async () => {
   });
   loadPromiseA.resolve([]);
   await delay(0);
-  expect(
-    updateCallbackCalled['data'],
-    'onAsyncPropUpdated callback is called for data'
-  ).toBeTruthy();
-  expect(state.isAsyncPropLoading('A'), 'A is loaded').toBeFalsy();
+  expect(onEffectivePropsUpdated).toHaveBeenCalledTimes(1);
+  expect(state.isAsyncPropLoading('data'), 'data is loaded').toBeFalsy();
 
   state.finalize();
   loadPromiseB.resolve([]);
   await delay(0);
-  expect(
-    updateCallbackCalled['image'],
-    'onAsyncPropUpdated callback is not called for image'
-  ).toBeFalsy();
+  expect(onEffectivePropsUpdated).toHaveBeenCalledTimes(1);
 
   expect(state.component, 'state.component is dereferenced').toBeFalsy();
 });
