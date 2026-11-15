@@ -19,6 +19,9 @@ import {
   Uint64,
   List,
   Field,
+  FixedSizeList,
+  Float32,
+  Uint16,
   Dictionary,
   Int32,
   Int64
@@ -61,6 +64,24 @@ for (const [Layer, accessor, cell] of cases) {
     });
   }
 }
+
+test('Arrow cell colors use normalized floats and byte-range integers', () => {
+  const layer = new S2Layer({
+    getS2Token: vectorFromArray(['89c25']),
+    getFillColor: vectorFromArray(
+      [[1, 0.5, -1]],
+      new FixedSizeList(3, new Field('channel', new Float32()))
+    ),
+    getLineColor: vectorFromArray(
+      [[1, 128, 300, 64]],
+      new FixedSizeList(4, new Field('channel', new Uint16()))
+    )
+  });
+  const child = layer.renderLayers() as any;
+  const row = child.props.data[0];
+  expect(child.props.getFillColor(row, {index: 0})).toEqual([255, 128, 0, 255]);
+  expect(child.props.getLineColor(row, {index: 0})).toEqual([1, 128, 255, 64]);
+});
 
 test('numeric H3 cells retain uint64 precision', () => {
   const id = 0x8928308280fffffn;

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {Type} from 'apache-arrow';
 import {
   CompositeLayer,
   createIterable,
@@ -100,15 +101,28 @@ export function renderCellColumns(
   const styleProps: Record<string, unknown> = {};
   for (const name of styles) {
     const column = isArrowVector(props[name]) ? props[name] : null;
+    const isColor = name === 'getFillColor' || name === 'getLineColor';
+    // Arrow IPC type IDs keep the runtime optional.
+    const scale = column?.type.children?.[0]?.type.typeId === (3 satisfies Type.Float) ? 255 : 1;
     styleProps[name] = callbacks.accessor(
       column
         ? (_: unknown, info: {index: number; data?: unknown}) => {
             const value = column.get(info.index);
             if (value === null || value === undefined)
               throw new Error('Cell styles cannot contain nulls');
-            return name === 'getElevation' || name === 'getLineWidth'
-              ? Number(value)
-              : Array.from(value, Number);
+            if (!isColor) {
+              return Number(value);
+            }
+            const channels = Array.from(value as Iterable<number | bigint | null>, channel => {
+              if (channel == null) {
+                throw new Error('Cell colors cannot contain null channels');
+              }
+              return Math.round(Math.min(255, Math.max(0, Number(channel) * scale)));
+            });
+            if (channels.length === 3) {
+              channels.push(255);
+            }
+            return channels;
           }
         : props[name]
     );

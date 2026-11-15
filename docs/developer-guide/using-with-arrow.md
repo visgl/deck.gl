@@ -65,8 +65,7 @@ Color columns accept numeric `FixedSizeList` values with three (RGB) or four (RG
 Integer channels use 0–255. Floating-point channels use 0–1. Conversion clamps and rounds
 channels to RGBA8 (`unorm8x4`). RGB inputs receive opaque alpha.
 
-Constant arrays and callback results typically use 0–255 for all channels. Geographic cell
-layers also use 0–255 for their [Arrow color columns](#cell-styling).
+Constant arrays and callback results typically use 0–255 for all channels.
 
 ### Positions and other vectors
 
@@ -91,8 +90,7 @@ cell row. H3Cluster uses each row's identifiers as one cluster.
 ### Cell styling
 
 Style columns follow source-feature order. A value applies to all cells belonging to that
-feature. Color columns contain numeric RGB or RGBA fixed-size lists with channels in the
-0–255 range. Width and elevation columns contain numeric scalars. Nonempty `data` and style
+feature. Fill and outline colors follow the shared [Arrow color convention](#colors). Width and elevation columns contain numeric scalars. Nonempty `data` and style
 columns must match the identifier column's row count. Null identifiers and styles are unsupported.
 
 ## Mixed inputs
