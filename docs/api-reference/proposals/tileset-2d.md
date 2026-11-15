@@ -88,7 +88,7 @@ An external `Tileset2D` can be passed to one or more `Tile2DLayer` instances. Th
 ## Runtime API
 
 - `tiles`, `selectedTiles`, `visibleTiles`, `loadingTiles`, `unloadedTiles`, and `cacheByteSize` expose current cache state. `unloadedTiles` lists requests that have not settled; it is distinct from the cumulative `Unloaded Tiles` stat.
-- `stats` is a `@probe.gl/stats` `Stats` object with tile cache, visibility, loading, eviction, and consumer counters.
+- `stats` is a `probe.gl/stats` `Stats` object with tile cache, visibility, loading, eviction, and consumer counters.
 - `setOptions()` updates effective tileset options. Pass `{replace: true}` as the second argument to replace prior caller options instead of merging them.
 - `reloadAll()` marks required tiles stale and drops unused cached tiles. The compatibility-only default view retains its existing render list until a later traversal rebuilds it, preserving legacy reload rendering.
 - `subscribe()` listens for tile load, tile error, tile unload, metadata/config update, metadata error, and stats change events.

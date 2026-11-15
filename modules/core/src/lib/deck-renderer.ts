@@ -8,7 +8,7 @@ import debug from '../debug/index';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
 import type {RenderStats} from '../passes/layers-pass';
-import type {Stats} from '@probe.gl/stats';
+import type {Stats} from 'probe.gl/stats';
 import type Layer from './layer';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';

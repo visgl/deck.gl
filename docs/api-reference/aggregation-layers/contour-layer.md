@@ -270,6 +270,20 @@ The `ContourLayer` renders the following sublayers:
 * `bands` - For Isobands, rendered by [SolidPolygonLayer](../layers/solid-polygon-layer.md)
 
 
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
+
+- `positions` – A GPUVector of input positions.
+- `weights` – An array containing one matching weight vector.
+- `dataBounds` – `[min, max]` – Bounds in input coordinates.
+
+Notes:
+
+- Use a custom aggregator that accepts GPU inputs. It defines the supported formats and chunking.
+
 ## Source
 
 [modules/aggregation-layers/src/contour-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/contour-layer)

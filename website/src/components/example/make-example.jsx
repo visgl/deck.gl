@@ -15,8 +15,9 @@ import styled from 'styled-components';
 import InfoPanel from '../info-panel';
 import {loadData, joinPath} from '../../utils/data-utils';
 import {normalizeParam} from '../../utils/format-utils';
-import {cloneMapStyle, MAPBOX_STYLES} from '../../constants/defaults';
+import {cloneMapStyle, GITHUB_TREE, MAPBOX_STYLES} from '../../constants/defaults';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {DeviceTabs} from '../device-tabs';
 import {useStore} from '../../store/device-store';
 
@@ -108,6 +109,12 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
     // their existing, independently initialized WebGL path.
     const device = useStore(state => (DemoComponent.hasDeviceTabs ? state.device : undefined));
     const baseUrl = useBaseUrl('/');
+    const {siteConfig} = useDocusaurusContext();
+    const {examplesDirectory} = siteConfig.customFields;
+    const sourceLink = DemoComponent.code?.replace(
+      `${GITHUB_TREE}/examples/`,
+      `${GITHUB_TREE}/${examplesDirectory}/`
+    );
     const clonedMapStyle = useMemo(
       () => cloneMapStyle(mapStyle || MAPBOX_STYLES.BLANK),
       [mapStyle]
@@ -198,7 +205,7 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
               params={params}
               meta={meta}
               updateParam={updateParam}
-              sourceLink={DemoComponent.code}
+              sourceLink={sourceLink}
             >
               {DemoComponent.renderInfo(meta)}
             </InfoPanel>

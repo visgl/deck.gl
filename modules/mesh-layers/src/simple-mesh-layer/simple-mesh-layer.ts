@@ -1,3 +1,4 @@
+import type {FixedSizeList, Float, Int} from 'apache-arrow';
 // Note: This file will either be moved back to deck.gl or reformatted to web-monorepo standards
 // Disabling lint temporarily to facilitate copying code in and out of this repo
 /* eslint-disable */
@@ -42,6 +43,7 @@ import type {
   LayerDataSource,
   UpdateParameters,
   Accessor,
+  ArrowAccessor,
   Position,
   Color,
   TextureSource
@@ -51,7 +53,7 @@ import {
   prepareMeshColumnTransforms,
   TRANSFORM_ACCESSORS
 } from '../utils/mesh-columns';
-import type {ColumnSource} from '@deck.gl/core/arrow';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/core/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
 import {getMeshBoundingBox} from '@loaders.gl/core/schema';
@@ -154,25 +156,26 @@ function hasMeshNormals(mesh: Mesh): boolean {
 
 type _SimpleMeshLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
-  /** Arrow XY or XYZ instance anchors. Overrides `getPosition`. */
-  positions?: ColumnSource | null;
-  /** Arrow RGB or RGBA instance colors. Overrides `getColor`. */
-  colors?: ColumnSource | null;
+  /** @experimental GPU-resident column. */
+  positions?: GPUVector | null;
+  /** @experimental GPU-resident column. */
+  colors?: GPUVector | null;
   mesh: string | Mesh | Promise<Mesh> | null;
   texture?: string | TextureSource | Promise<TextureSource>;
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
   textureParameters?: SamplerProps | null;
 
-  /** Anchor position accessor. */
-  getPosition?: Accessor<DataT, Position>;
+  /** Anchor position constant, callback, or Arrow XY/XYZ column. */
+  getPosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
   /** Color value or accessor.
    * If `mesh` does not contain vertex colors, use this color to render each object.
    * If `mesh` contains vertex colors, then the two colors are mixed together.
    * Use `[255, 255, 255]` to use the original mesh colors.
    * If `texture` is assigned, then both colors will be ignored.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 0, 255]
    */
-  getColor?: Accessor<DataT, Color>;
+  getColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
   /**
    * Orientation in [pitch, yaw, roll] in degrees.
    * @see https://en.wikipedia.org/wiki/Euler_angles
@@ -239,8 +242,8 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   wireframe: false,
   // Optional material for 'lighting' shader module
   material: true,
-  getPosition: {type: 'accessor', value: defaultPosition},
-  getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
+  getColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
@@ -351,7 +354,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (mesh instanceof GPUVectorGeometry && mesh !== params.oldProps.mesh) {
       validateMeshChunks(mesh);
     }
-    if (params.props.positions || params.props.colors) {
+    if (Object.keys(this.resolveColumns(COLUMN_DEFINITIONS)).length) {
       this.updateColumnState(params);
       return;
     }

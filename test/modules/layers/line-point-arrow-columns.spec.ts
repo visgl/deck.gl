@@ -44,8 +44,8 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             {
               props:
                 kind === 'line'
-                  ? {data: [{}, {}], sourcePositions: first, targetPositions: second, getColor}
-                  : {data: [{}, {}], positions: first, getColor},
+                  ? {data: [{}, {}], getSourcePosition: first, getTargetPosition: second, getColor}
+                  : {data: [{}, {}], getPosition: first, getColor},
               onAfterUpdate: async ({layer}) => {
                 if (!layer.isLoaded) return;
                 expect(layer.getAttributeManager()).toBeNull();
@@ -102,11 +102,11 @@ for (const backend of ['webgl', 'webgpu'] as const) {
                 kind === 'line'
                   ? {
                       data: [{}, {}, {}],
-                      sourcePositions: column,
-                      targetPositions: column,
+                      getSourcePosition: column,
+                      getTargetPosition: column,
                       numInstances: 1
                     }
-                  : {data: [{}, {}, {}], positions: column, numInstances: 1},
+                  : {data: [{}, {}, {}], getPosition: column, numInstances: 1},
               onAfterUpdate: async ({layer}) => {
                 if (!layer.isLoaded) return;
                 expect(layer.getNumInstances()).toBe(1);
@@ -151,8 +151,8 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     const parent = document.createElement('div');
     document.body.appendChild(parent);
     const layer = new LineLayer({
-      sourcePositions: positions([[179, 0]]),
-      targetPositions: positions([[-179, 0]]),
+      getSourcePosition: positions([[179, 0]]),
+      getTargetPosition: positions([[-179, 0]]),
       getWidth: 8,
       wrapLongitude: true,
       pickable: true
@@ -221,7 +221,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         draw: false,
         testCases: [
           {
-            props: {data, colors},
+            props: {data, getColor: colors},
             onAfterUpdate: async ({layer}) => {
               if (!layer.isLoaded) return;
               expect(layer.getNumInstances()).toBe(2);
@@ -267,7 +267,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         testCases: [
           {
             props: {
-              positions: positions([
+              getPosition: positions([
                 [0, 0],
                 [1, 1]
               ]),
@@ -324,8 +324,8 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           {
             updateProps:
               kind === 'line'
-                ? {sourcePositions: column, targetPositions: column}
-                : {positions: column},
+                ? {getSourcePosition: column, getTargetPosition: column}
+                : {getPosition: column},
             onAfterUpdate: ({layer}) => {
               if (!layer.isLoaded) return;
               expect(layer.getAttributeManager()).toBeNull();
@@ -340,7 +340,9 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           },
           {
             updateProps:
-              kind === 'line' ? {sourcePositions: null, targetPositions: null} : {positions: null},
+              kind === 'line'
+                ? {getSourcePosition: null, getTargetPosition: row => row.position}
+                : {getPosition: row => row.position},
             onAfterUpdate: ({layer}) => {
               expect(layer.getAttributeManager()).not.toBeNull();
               expect(uploadedBuffer!.destroyed).toBe(true);
@@ -380,7 +382,7 @@ for (const kind of ['line', 'point'] as const) {
                   ? {getSourcePosition: values, instanceTargetPositions: values}
                   : {instancePositions: values}
             },
-            colors,
+            getColor: colors,
             numInstances: 2
           },
           onAfterUpdate: ({layer}) => {
