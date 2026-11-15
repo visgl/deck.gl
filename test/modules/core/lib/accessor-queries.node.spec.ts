@@ -120,10 +120,15 @@ test('layer updates wait for SQL accessor values on replacement data', async () 
     getPosition: {sql: 'FLOAT32x2(x, y)'}
   });
   const initialUpdate = vi.spyOn(first, 'updateState');
+  const draw = vi.spyOn(first, 'draw');
+  const renderPass = device.beginRenderPass({});
+
   try {
     manager.setProps({sqlParser});
     manager.setLayers([first]);
     expect(initialUpdate).not.toHaveBeenCalled();
+    first._drawLayer({renderPass, shaderModuleProps: null, uniforms: {}, parameters: {}});
+    expect(draw).not.toHaveBeenCalled();
     await vi.waitFor(() => expect(first.isLoaded).toBe(true));
     manager.updateLayers();
     expect(initialUpdate).toHaveBeenCalledOnce();
@@ -137,6 +142,7 @@ test('layer updates wait for SQL accessor values on replacement data', async () 
     expect(replacementUpdate).toHaveBeenCalledOnce();
     expect(Array.from((next.props.getPosition as Vector).get(0))).toEqual([3, 4]);
   } finally {
+    renderPass.end();
     manager.finalize();
     device.destroy();
   }

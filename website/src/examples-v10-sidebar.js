@@ -35,7 +35,7 @@ const sidebars = {
         'heatmap-layer',
         {type: 'doc', id: 'hexagon-layer', className: 'example-sidebar-arrow'},
         'icon-layer',
-        'line-layer',
+        {type: 'doc', id: 'line-layer', className: 'example-sidebar-arrow'},
         {type: 'doc', id: 'point-cloud-layer', className: 'example-sidebar-arrow'},
         {type: 'doc', id: 'scatterplot-layer', className: 'example-sidebar-arrow'},
         'scenegraph-layer',

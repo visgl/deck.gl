@@ -5,6 +5,8 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
+import {sqlParser} from '@deck.gl/core/sql';
+import {tableFromArrays} from 'apache-arrow';
 import {OrbitView, DirectionalLight, LightingEffect, AmbientLight} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
@@ -27,18 +29,19 @@ const INITIAL_VIEW_STATE = {
   zoom: 0
 };
 
+/** Builds one Arrow row per car in the sample grid. */
 const SAMPLE_DATA = (([xCount, yCount], spacing) => {
-  const data = [];
-  for (let x = 0; x < xCount; x++) {
-    for (let y = 0; y < yCount; y++) {
-      data.push({
-        position: [(x - (xCount - 1) / 2) * spacing, (y - (yCount - 1) / 2) * spacing],
-        color: [(x / (xCount - 1)) * 255, 128, (y / (yCount - 1)) * 255],
-        orientation: [(x / (xCount - 1)) * 60 - 30, 0, -90]
-      });
+  const columns = {x: [], y: [], red: [], blue: [], yaw: []};
+  for (let i = 0; i < xCount; i++) {
+    for (let j = 0; j < yCount; j++) {
+      columns.x.push((i - (xCount - 1) / 2) * spacing);
+      columns.y.push((j - (yCount - 1) / 2) * spacing);
+      columns.red.push(i / (xCount - 1));
+      columns.blue.push(j / (yCount - 1));
+      columns.yaw.push((i / (xCount - 1)) * 60 - 30);
     }
   }
-  return data;
+  return tableFromArrays(columns);
 })([10, 10], 120);
 
 const ambientLight = new AmbientLight({
@@ -73,9 +76,9 @@ export default function App({device}) {
       data: SAMPLE_DATA,
       mesh: MESH_URL,
       coordinateSystem: 'cartesian',
-      getPosition: d => d.position,
-      getColor: d => d.color,
-      getOrientation: d => d.orientation
+      getPosition: {sql: 'FLOAT64x2(x, y)'},
+      getColor: {sql: 'RGBA8(red, 0.5, blue, 1)'},
+      getOrientation: d => [d.yaw, 0, -90]
     }),
     // only needed when using shadows - a plane for shadows to drop on
     new SolidPolygonLayer({
@@ -90,6 +93,7 @@ export default function App({device}) {
 
   return (
     <DeckGL
+      sqlParser={sqlParser}
       device={device}
       views={
         new OrbitView({
