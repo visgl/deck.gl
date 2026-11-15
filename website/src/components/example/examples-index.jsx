@@ -12,11 +12,15 @@ import {MainExamples, ExamplesGroup, ExampleCard, ExampleHeader, ExampleTitle} f
 
 function renderItem(item, getThumbnail) {
   const imageUrl = useBaseUrl(getThumbnail(item));
-  const {label, href} = item;
+  const arrowLogoUrl = useBaseUrl('/images/apache-arrow-logo.png');
+  const {label, href, className} = item;
 
   return (
     <ExampleCard key={label} href={href}>
       <img width="100%" src={imageUrl} alt={label} />
+      {className === 'example-sidebar-arrow' && (
+        <img className="example-thumbnail-arrow" src={arrowLogoUrl} alt="Uses Apache Arrow data" />
+      )}
       <ExampleTitle>
         <span>{label}</span>
       </ExampleTitle>

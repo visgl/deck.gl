@@ -6,7 +6,7 @@ import React, {Component} from 'react';
 import {readableInteger} from '../utils/format-utils';
 import App, {colorRange} from 'v10-website-examples/3d-heatmap/app';
 
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 
 import {makeExample} from '../components';
 
@@ -17,12 +17,6 @@ class HexagonDemo extends Component {
 
   /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
-
-  /** Data sources loaded before rendering the demo. */
-  static data = {
-    url: `${DATA_URI}/heatmap-data.txt`,
-    worker: '/workers/heatmap-data-decoder.js'
-  };
 
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/3d-heatmap`;
@@ -84,15 +78,14 @@ class HexagonDemo extends Component {
 
   /** Renders the Arrow demo with the current controls and data. */
   render() {
-    /** Provides data, params for the example. */
-    const {data, params} = this.props;
+    const {params, onStateChange, mapStyle, device} = this.props;
 
     return (
       <App
-        {...this.props}
-        key={this.props.device?.type}
-        device={this.props.device}
-        data={data}
+        key={device?.type}
+        device={device}
+        mapStyle={mapStyle}
+        onDataLoad={count => onStateChange({count})}
         radius={params.radius.value}
         upperPercentile={params.upperPercentile.value}
         coverage={params.coverage.value}

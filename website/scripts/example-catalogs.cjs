@@ -4,5 +4,5 @@
 
 module.exports = [
   {id: 'examples', label: 'Examples'},
-  {id: 'examples-v10', label: 'v10 Examples'}
+  {id: 'examples-v10', label: 'Examples v10'}
 ];

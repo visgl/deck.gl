@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React from 'react';
+import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {load} from '@loaders.gl/core';
+import {sqlParser} from '@deck.gl/core/sql';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
@@ -72,23 +72,28 @@ function getTooltip({object}: PickingInfo) {
     ${count} Accidents`;
 }
 
-type DataPoint = [longitude: number, latitude: number];
+/** Position from a queried table or a preloaded coordinate pair. */
+type DataPoint = {lng: number; lat: number} | [number, number];
 
 export default function App({
-  data = null,
+  data = DATA_URL,
   mapStyle = MAP_STYLE,
   radius = 1000,
   upperPercentile = 100,
   coverage = 1,
-  device
+  device,
+  onDataLoad
 }: {
-  data?: DataPoint[] | null;
+  data?: DataPoint[] | string | null;
   mapStyle?: string;
   radius?: number;
   upperPercentile?: number;
   coverage?: number;
   device?: Device;
+  onDataLoad?: (count: number) => void;
 }) {
+  const [loadedSource, setLoadedSource] = useState<string | null>(null);
+  const hasData = typeof data === 'string' ? loadedSource === data : Boolean(data?.length);
   const layers = [
     new HexagonLayer<DataPoint>({
       id: 'heatmap',
@@ -96,10 +101,23 @@ export default function App({
       colorRange,
       coverage,
       data,
+      loaders: [CSVLoader],
+      // lng,lat
+      // -0.198465,51.505538
+      query:
+        typeof data === 'string'
+          ? 'SELECT lng, lat WHERE lng IS NOT NULL AND lat IS NOT NULL'
+          : null,
       elevationRange: [0, 3000],
-      elevationScale: data && data.length ? 50 : 0,
+      elevationScale: hasData ? 50 : 0,
+      onDataLoad: table => {
+        if (typeof data === 'string') {
+          setLoadedSource(data);
+          onDataLoad?.((table as {numRows: number}).numRows);
+        }
+      },
       extruded: true,
-      getPosition: d => d,
+      getPosition: point => (Array.isArray(point) ? point : [point.lng, point.lat]),
       pickable: true,
       radius,
       upperPercentile,
@@ -118,6 +136,7 @@ export default function App({
 
   return (
     <DeckGL
+      sqlParser={sqlParser}
       device={device}
       layers={layers}
       effects={[lightingEffect]}
@@ -130,13 +149,6 @@ export default function App({
   );
 }
 
-export async function renderToDOM(container: HTMLDivElement) {
-  const root = createRoot(container);
-  root.render(<App />);
-
-  const data = (await load(DATA_URL, CSVLoader, {csv: {shape: 'object-row-table'}})).data;
-  const points: DataPoint[] = data
-    .map(d => (Number.isFinite(d.lng) ? [d.lng, d.lat] : null))
-    .filter(Boolean);
-  root.render(<App data={points} />);
+export function renderToDOM(container: HTMLDivElement) {
+  createRoot(container).render(<App />);
 }

@@ -1,3 +1,10 @@
+---
+title: Examples v10
+---
+
 import {ExamplesIndex} from '../components';
+import {RestoreExamplesSidebar} from '../theme/NavbarItem';
+
+<RestoreExamplesSidebar />
 
 <ExamplesIndex getThumbnail={item => `/images/examples/${item.docId || item.label.toLowerCase()}.jpg`} />

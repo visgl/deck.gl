@@ -4,7 +4,7 @@
 
 import React, { Component } from 'react';
 import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
-import { MAPBOX_STYLES, DATA_URI, GITHUB_TREE } from '../constants/defaults';
+import { MAPBOX_STYLES, GITHUB_TREE } from '../constants/defaults';
 import { readableInteger } from '../utils/format-utils';
 import App from 'v10-website-examples/scatterplot/app';
 
@@ -20,12 +20,6 @@ class ScatterPlotDemo extends Component {
 
   /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
-
-  /** Data sources loaded before rendering the demo. */
-  static data = {
-    url: `${DATA_URI}/scatterplot-data.txt`,
-    worker: '/workers/scatterplot-data-decoder.js'
-  };
 
   /** Interactive controls and their initial values. */
   static parameters = {
@@ -55,16 +49,15 @@ class ScatterPlotDemo extends Component {
 
   /** Renders the Arrow demo with the current controls and data. */
   render() {
-    /** Provides params, data for the example. */
-    const { params, data } = this.props;
+    const {params, device, onStateChange} = this.props;
     /** Provides widgets for the example. */
     const widgets = [new StatsWidget({type: 'device'})];
 
     return (
       <App
-        key={this.props.device?.type}
-        device={this.props.device}
-        data={data}
+        key={device?.type}
+        device={device}
+        onDataLoad={points => onStateChange({points})}
         maleColor={params.colorM.value}
         femaleColor={params.colorF.value}
         radius={params.radius.value}

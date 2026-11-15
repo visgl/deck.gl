@@ -150,6 +150,7 @@ const config = {
             '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers/dist'),
             '@deck.gl/arcgis': resolve('../modules/arcgis/dist'),
             '@deck.gl/carto': resolve('../modules/carto/dist'),
+            '@deck.gl/core/sql': resolve('../modules/core/dist/arrow/upstream-math/sql-parser.js'),
             '@deck.gl/core/arrow': resolve('../modules/core/dist/arrow/upstream-luma/arrow-converter.js'),
             '@deck.gl/core': resolve('../modules/core/dist'),
             '@deck.gl/extensions': resolve('../modules/extensions/dist'),
@@ -167,6 +168,8 @@ const config = {
             'examples-root': resolve('../examples'),
             'website-examples': resolve('../examples/website'),
             'v10-website-examples': resolve('../examples-v10/website'),
+            // Use the same Arrow runtime for website loaders and workspace layer queries.
+            'apache-arrow$': resolve('../node_modules/apache-arrow/Arrow.dom.mjs'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom')
           }

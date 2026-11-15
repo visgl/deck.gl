@@ -9,7 +9,8 @@ import {GridLayer} from '@deck.gl/aggregation-layers';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {load} from '@loaders.gl/core';
+import {sqlParser} from '@deck.gl/core/sql';
+import type {Table} from 'apache-arrow';
 
 import type {Color, Layer, MapViewState, PickingInfo} from '@deck.gl/core';
 import type {GridLayerPickingInfo} from '@deck.gl/aggregation-layers';
@@ -121,25 +122,30 @@ function getBandOpacityStops(
   });
 }
 
-async function loadTrees(): Promise<Trees> {
-  const rows = (await load(DATA_URL, CSVLoader)).data as {
-    LIBELLEFRANCAIS: string;
-    'CIRCONFERENCE(CM)': number;
-    LATITUDE: number;
-    LONGITUDE: number;
-  }[];
-  const trees = rows.filter(d => Number.isFinite(d.LONGITUDE) && Number.isFinite(d.LATITUDE));
+/** Loads the Paris tree inventory from CSV. */
+const LOADERS = [CSVLoader];
+/** Leaves numeric conversion to the table query. */
+const LOAD_OPTIONS = {csv: {dynamicTyping: false}};
 
+/** Collects queried tree positions and statistics for the grid and tooltip. */
+function summarizeTrees(source: unknown): Trees {
+  const data = source as Table;
+  const trees = data.toArray() as unknown as {
+    longitude: number;
+    latitude: number;
+    LIBELLEFRANCAIS: string;
+    circumference: number;
+  }[];
   const positions = new Float64Array(trees.length * 3);
   const circumferences = new Float32Array(trees.length);
   let minLatitude = Infinity;
   let maxLatitude = -Infinity;
   trees.forEach((d, i) => {
-    positions[i * 3] = d.LONGITUDE;
-    positions[i * 3 + 1] = d.LATITUDE;
-    circumferences[i] = d['CIRCONFERENCE(CM)'];
-    minLatitude = Math.min(minLatitude, d.LATITUDE);
-    maxLatitude = Math.max(maxLatitude, d.LATITUDE);
+    positions[i * 3] = d.longitude;
+    positions[i * 3 + 1] = d.latitude;
+    circumferences[i] = d.circumference;
+    minLatitude = Math.min(minLatitude, d.latitude);
+    maxLatitude = Math.max(maxLatitude, d.latitude);
   });
 
   return {
@@ -170,14 +176,15 @@ export default function App({
   const [trees, setTrees] = useState<Trees | null>(null);
   const onViewStateChange = useCallback(({viewState}) => setZoom(viewState.zoom), []);
 
-  useEffect(() => {
-    loadTrees()
-      .then(result => {
-        setTrees(result);
-        onDataLoad?.(result.length);
-      })
-      .catch(console.error); // eslint-disable-line no-console
-  }, []);
+  /** Shares the queried tree positions with the grid bands and reports their count. */
+  const onTreesLoaded = useCallback(
+    (source: unknown) => {
+      const result = summarizeTrees(source);
+      setTrees(result);
+      onDataLoad?.(result.length);
+    },
+    [onDataLoad]
+  );
 
   // Keep `data` referentially stable, so that zooming never triggers re-aggregation.
   // Every layer reads the same typed array; each uploads its own GPU copy.
@@ -230,26 +237,40 @@ export default function App({
         })
       );
     });
-
-    const opacity = opacities[CELL_SIZES.length];
-    layers.push(
-      new ScatterplotLayer({
-        id: 'trees',
-        data,
-        radiusUnits: 'pixels',
-        getRadius: 1,
-        radiusScale: interpolateZoom(zoom, [
-          [16, 2],
-          [20, 6]
-        ]),
-        getFillColor: TREE_COLOR,
-        opacity,
-        visible: opacity > 0,
-        pickable: opacity >= 0.5,
-        parameters: {depthCompare: 'always'}
-      })
-    );
   }
+
+  const opacity = opacities[CELL_SIZES.length];
+  layers.push(
+    new ScatterplotLayer({
+      id: 'trees',
+      loaders: LOADERS,
+      data: DATA_URL,
+      loadOptions: LOAD_OPTIONS,
+      // LIBELLEFRANCAIS;CIRCONFERENCE(CM);LATITUDE;LONGITUDE
+      // Platane;0.0;48.9029892;2.4097097
+      query: `\
+          SELECT
+            LONGITUDE::DOUBLE PRECISION AS longitude,
+            LATITUDE::DOUBLE PRECISION AS latitude,
+            "CIRCONFERENCE(CM)"::DOUBLE PRECISION AS circumference,
+            LIBELLEFRANCAIS
+          WHERE LONGITUDE <> '' AND LATITUDE <> ''
+        `,
+      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+      onDataLoad: onTreesLoaded,
+      radiusUnits: 'pixels',
+      getRadius: 1,
+      radiusScale: interpolateZoom(zoom, [
+        [16, 2],
+        [20, 6]
+      ]),
+      getFillColor: TREE_COLOR,
+      opacity,
+      visible: opacity > 0,
+      pickable: opacity >= 0.5,
+      parameters: {depthCompare: 'always'}
+    })
+  );
 
   const getTooltip = useCallback(
     (info: PickingInfo) => {
@@ -272,6 +293,7 @@ export default function App({
 
   return (
     <DeckGL
+      sqlParser={sqlParser}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
