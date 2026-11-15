@@ -39,6 +39,9 @@ const defaultPosition = (row: any) => row.position;
 
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
+/** Byte RGB(A) constant or row callback, or a numeric RGB(A) Arrow or SQL source. */
+type ScatterplotColorAccessor<DataT> = ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
+
 /** All props supported by the ScatterplotLayer */
 export type ScatterplotLayerProps<DataT = unknown> = _ScatterplotLayerProps<DataT> & LayerProps;
 
@@ -119,15 +122,17 @@ type _ScatterplotLayerProps<DataT> = ScatterplotColumnProps & {
    */
   getRadius?: ArrowAccessor<DataT, number, Int | Float>;
   /**
-   * Fill color constant, row accessor, or numeric RGB/RGBA Arrow column converted to RGBA8.
+   * Fill color as byte RGB(A), a row callback, a numeric RGB(A) Arrow column, or a SQL expression.
+   * Omitted alpha is opaque.
    * @default [0, 0, 0, 255]
    */
-  getFillColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
+  getFillColor?: ScatterplotColorAccessor<DataT>;
   /**
-   * Stroke color constant, row accessor, or numeric RGB/RGBA Arrow column converted to RGBA8.
+   * Stroke color as byte RGB(A), a row callback, a numeric RGB(A) Arrow column, or a SQL expression.
+   * Omitted alpha is opaque.
    * @default [0, 0, 0, 255]
    */
-  getLineColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
+  getLineColor?: ScatterplotColorAccessor<DataT>;
   /**
    * Stroke width constant, row accessor, or numeric Arrow vector converted to Float32.
    * @default 1
@@ -284,7 +289,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         transition: true,
         type: 'unorm8',
         accessor: 'getFillColor',
-        defaultValue: [0, 0, 0, 255],
+        semanticType: 'color',
         bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineColors: {
@@ -292,7 +297,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         transition: true,
         type: 'unorm8',
         accessor: 'getLineColor',
-        defaultValue: [0, 0, 0, 255],
+        semanticType: 'color',
         bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineWidths: {
