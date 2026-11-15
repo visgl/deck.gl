@@ -101,16 +101,20 @@ class OSMNode {
 
     const boundingVolume = this.getBoundingVolume(elevationBounds, offset, project);
     if (!boundingVolume) {
-      // The custom projection cannot draw this tile.
-      // The tile can contain the complete area of use, so examine its children.
-      this.selected = false;
+      // No reference point of the tile is in the area of use of the custom projection.
       if (this.z < maxZ) {
+        // Examine the children
+        this.selected = false;
         this.childVisible = true;
         for (const child of this.children) {
           child.update(params);
         }
+        return false;
       }
-      return false;
+      // The tile passed the bounds test, so the area of use is between the reference points.
+      // Keep the tile.
+      this.selected = !this.childVisible;
+      return this.selected;
     }
     // A tile that is partially in the area of use of a custom projection passed the bounds test.
     // Keep it.
@@ -287,21 +291,50 @@ function projectInAreaOfUse(viewport: _CustomProjectionViewport, position: numbe
     : [NaN, NaN, NaN];
 }
 
+type ScreenRect = {x: number; y: number; width: number; height: number};
+
 /**
- * Returns the WGS84 bounds of the ground that a custom projection shows in a screen rectangle.
- * The default rectangle is the complete viewport.
+ * Returns WGS84 positions of the ground that a custom projection shows in a screen rectangle.
+ * The default rectangle is the complete viewport. The positions are samples on a grid.
+ * A screen position that the CRS cannot convert in the two directions shows no ground.
+ */
+export function getGroundPositions(
+  viewport: _CustomProjectionViewport,
+  zRange: ZRange | null,
+  rect: ScreenRect = {x: 0, y: 0, width: viewport.width, height: viewport.height}
+): number[][] {
+  const positions: number[][] = [];
+  for (const targetZ of zRange || [0]) {
+    for (let i = 0; i <= VIEW_SAMPLES; i++) {
+      for (let j = 0; j <= VIEW_SAMPLES; j++) {
+        const pixel = [
+          rect.x + (i / VIEW_SAMPLES) * rect.width,
+          rect.y + (j / VIEW_SAMPLES) * rect.height
+        ];
+        const [lng, lat] = tryConvert(() => viewport.unproject(pixel, {targetZ}));
+        if (
+          Number.isFinite(lng) &&
+          Number.isFinite(lat) &&
+          isFinitePosition(projectInAreaOfUse(viewport, [lng, lat, 0]))
+        ) {
+          // Longitude in the range [-180, 180)
+          positions.push([lng - 360 * Math.floor((lng + 180) / 360), lat]);
+        }
+      }
+    }
+  }
+  return positions;
+}
+
+/**
+ * Returns the WGS84 bounds of ground positions that a custom projection shows in a screen rectangle.
  * The result is empty if no ground is visible. It has two boxes if the view crosses the antimeridian.
  */
 // eslint-disable-next-line complexity, max-statements
 export function getGeographicBounds(
   viewport: _CustomProjectionViewport,
-  zRange: ZRange | null,
-  rect: {x: number; y: number; width: number; height: number} = {
-    x: 0,
-    y: 0,
-    width: viewport.width,
-    height: viewport.height
-  }
+  groundPositions: number[][],
+  rect: ScreenRect = {x: 0, y: 0, width: viewport.width, height: viewport.height}
 ): Bounds[] {
   const {x: left, y: top, width, height} = rect;
   const centerLng = viewport.position[0];
@@ -310,22 +343,14 @@ export function getGeographicBounds(
   let maxLng = -Infinity;
   let maxLat = -Infinity;
 
-  for (const targetZ of zRange || [0]) {
-    for (let i = 0; i <= VIEW_SAMPLES; i++) {
-      for (let j = 0; j <= VIEW_SAMPLES; j++) {
-        const pixel = [left + (i / VIEW_SAMPLES) * width, top + (j / VIEW_SAMPLES) * height];
-        const [lng, lat] = tryConvert(() => viewport.unproject(pixel, {targetZ}));
-        if (Number.isFinite(lng) && Number.isFinite(lat)) {
-          // Keep the longitude continuous across the antimeridian
-          const dLng = lng - centerLng;
-          const continuousLng = centerLng + dLng - 360 * Math.round(dLng / 360);
-          minLng = Math.min(minLng, continuousLng);
-          maxLng = Math.max(maxLng, continuousLng);
-          minLat = Math.min(minLat, lat);
-          maxLat = Math.max(maxLat, lat);
-        }
-      }
-    }
+  for (const [lng, lat] of groundPositions) {
+    // Keep the longitude continuous across the antimeridian
+    const dLng = lng - centerLng;
+    const continuousLng = centerLng + dLng - 360 * Math.round(dLng / 360);
+    minLng = Math.min(minLng, continuousLng);
+    maxLng = Math.max(maxLng, continuousLng);
+    minLat = Math.min(minLat, lat);
+    maxLat = Math.max(maxLat, lat);
   }
   if (minLng > maxLng) {
     return [];
@@ -406,8 +431,9 @@ export function getOSMTileIndices(
   );
   const cullingVolume = new CullingVolume(planes);
 
-  // Project zRange from meters to common space
-  const unitsPerMeter = viewport.distanceScales.unitsPerMeter[2];
+  // Project zRange from meters to common space.
+  // The projection of a custom projection takes the altitude in meters.
+  const unitsPerMeter = isCustomProjection ? 1 : viewport.distanceScales.unitsPerMeter[2];
   const elevationMin = (zRange && zRange[0] * unitsPerMeter) || 0;
   const elevationMax = (zRange && zRange[1] * unitsPerMeter) || 0;
 
@@ -421,7 +447,7 @@ export function getOSMTileIndices(
   if (isCustomProjection) {
     // The frustum test is not sufficient: a tile at the edge of the area of use of the CRS has
     // no bounding volume. Select tiles only in the WGS84 bounds of the visible ground.
-    geographicBounds = getGeographicBounds(viewport, zRange)
+    geographicBounds = getGeographicBounds(viewport, getGroundPositions(viewport, zRange))
       .map(viewBounds => (extent ? intersectBounds(viewBounds, extent) : viewBounds))
       .filter(Boolean) as Bounds[];
     if (!geographicBounds.length) {

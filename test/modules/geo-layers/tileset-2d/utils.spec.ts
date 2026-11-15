@@ -508,13 +508,19 @@ test('getTileIndices#CustomProjectionView selects the tiles on screen', async ()
 
 test('getTileIndices#CustomProjectionView omits tiles outside the area of use', async () => {
   // The east half of the screen is outside UTM zone 15, which ends at longitude -90
-  const viewport = await makeCustomProjectionViewport(UTM_15N, {center: [-90, 45, 0], zoom: 10.3});
-  const result = getTileIndices({viewport, zRange: null});
-  expect(result.length).toBeGreaterThan(0);
-  for (const {x, y, z} of result) {
-    const {west} = tileToBoundingBox(viewport, x, y, z) as {west: number};
-    // A tile that touches the edge of the zone has reference points in the area of use
-    expect(west, `tile ${x},${y},${z}`).toBeLessThanOrEqual(-90);
+  for (const bearing of [0, 40]) {
+    const viewport = await makeCustomProjectionViewport(UTM_15N, {
+      center: [-90, 45, 0],
+      zoom: 10.3,
+      bearing
+    });
+    const result = getTileIndices({viewport, zRange: null});
+    expect(result.length, `bearing ${bearing}`).toBeGreaterThan(0);
+    for (const {x, y, z} of result) {
+      const {west} = tileToBoundingBox(viewport, x, y, z) as {west: number};
+      // A tile that touches the edge of the zone has reference points in the area of use
+      expect(west, `bearing ${bearing}: tile ${x},${y},${z}`).toBeLessThanOrEqual(-90);
+    }
   }
 });
 
@@ -584,7 +590,7 @@ test('getTileIndices#CustomProjectionView accepts a CRS that cannot convert a po
   for (const [title, viewport] of Object.entries(viewports)) {
     let result: {x: number; y: number; z: number}[] = [];
     expect(() => {
-      result = getTileIndices({viewport, zRange: null});
+      result = getTileIndices({viewport, zRange: null, zoomOffset: 2});
     }, title).not.toThrow();
     expect(result.length, `${title}: selects tiles`).toBeGreaterThan(0);
     for (const {x, y, z} of result) {
@@ -594,6 +600,48 @@ test('getTileIndices#CustomProjectionView accepts a CRS that cannot convert a po
       );
     }
   }
+});
+
+test('getTileIndices#CustomProjectionView keeps a tile that is larger than the area of use', async () => {
+  // UTM zone 14 is between the longitudes -102 and -96.
+  // No corner and no center of these tiles is in the zone.
+  const viewport = await makeCustomProjectionViewport('EPSG:32614', {
+    center: [-99, 40, 0],
+    zoom: 10.3
+  });
+  for (const [maxZoom, expected] of [
+    [0, ['0,0,0']],
+    [1, ['0,0,1']],
+    [2, ['0,1,2']]
+  ] as const) {
+    expect(
+      getTileIds(getTileIndices({viewport, zRange: null, maxZoom})),
+      `maxZoom ${maxZoom}`
+    ).toEqual(expected);
+  }
+});
+
+test('getTileIndices#CustomProjectionView uses the elevation range in meters', async () => {
+  const viewState = {center: [12, -33, 0], zoom: 10, pitch: 45} as const;
+  const zRange: [number, number] = [0, 30000];
+  const viewport = await makeCustomProjectionViewport('EPSG:3857', viewState);
+  const mapViewport = new WebMercatorViewport({
+    width: 800,
+    height: 400,
+    longitude: 12,
+    latitude: -33,
+    zoom: 10,
+    pitch: 45
+  });
+  const groundIds = getTileIds(getTileIndices({viewport, zRange: null}));
+  const ids = getTileIds(getTileIndices({viewport, zRange}));
+  const mapViewIds = getTileIds(getTileIndices({viewport: mapViewport, zRange}));
+  // A high tile that is in front of the bottom of the screen comes into view
+  expect(ids.length, 'the elevation adds tiles').toBeGreaterThan(groundIds.length);
+  expect(
+    ids.filter(id => !mapViewIds.includes(id)),
+    'selects no other tiles than MapView'
+  ).toEqual([]);
 });
 
 test('getTileIndices#CustomProjectionView respects extent and maxZoom', async () => {
