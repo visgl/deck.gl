@@ -10,6 +10,7 @@ import {DeckGL} from '@deck.gl/react';
 import type {Device} from '@luma.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {log} from '@deck.gl/core';
+import {tableFromArrays} from 'apache-arrow';
 import sampleData from './all.json';
 
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
@@ -58,27 +59,27 @@ type Aircraft = [
   category: number
 ];
 
-const DATA_INDEX = {
-  UNIQUE_ID: 0,
-  CALL_SIGN: 1,
-  ORIGIN_COUNTRY: 2,
-  LAST_CONTACT: 4,
-  LONGITUDE: 5,
-  LATITUDE: 6,
-  BARO_ALTITUDE: 7,
-  VELOCITY: 9,
-  TRUE_TRACK: 10,
-  VERTICAL_RATE: 11,
-  GEO_ALTITUDE: 13,
-  CATEGORY: 17
-} as const;
+type AircraftRow = {
+  callSign: string;
+  originCountry: string;
+  lastContact: number;
+  velocity: number | null;
+  trueTrack: number | null;
+  verticalRate: number | null;
+};
 
-function normalizeData({time, states}: {time: number; states: Aircraft[]}): Aircraft[] {
-  // make lastContact timestamp relative to response time
-  return states.map(state => {
-    const aircraft = [...state] as Aircraft;
-    aircraft[DATA_INDEX.LAST_CONTACT] -= time;
-    return aircraft;
+/** Converts the OpenSky response to named columns and makes contact times relative. */
+function normalizeData({time, states}: {time: number; states: Aircraft[]}) {
+  return tableFromArrays({
+    callSign: states.map(aircraft => aircraft[1]),
+    originCountry: states.map(aircraft => aircraft[2]),
+    lastContact: Float64Array.from(states, aircraft => aircraft[4] - time),
+    longitude: Float64Array.from(states, aircraft => aircraft[5] ?? 0),
+    latitude: Float64Array.from(states, aircraft => aircraft[6] ?? 0),
+    velocity: states.map(aircraft => aircraft[9]),
+    trueTrack: states.map(aircraft => aircraft[10]),
+    verticalRate: states.map(aircraft => aircraft[11]),
+    altitude: Float64Array.from(states, aircraft => aircraft[13] ?? 0)
   });
 }
 
@@ -87,7 +88,7 @@ function normalizeData({time, states}: {time: number; states: Aircraft[]}): Airc
 // bundled snapshot so the demo can render immediately and keep it as fallback.
 const DATA = normalizeData(sampleData as {time: number; states: Aircraft[]});
 
-async function fetchData(signal: AbortSignal): Promise<Aircraft[]> {
+async function fetchData(signal: AbortSignal) {
   const response = await fetch(DATA_URL, {signal});
   if (!response.ok) {
     throw new Error(`OpenSky request failed with status ${response.status}`);
@@ -95,15 +96,15 @@ async function fetchData(signal: AbortSignal): Promise<Aircraft[]> {
   return normalizeData((await response.json()) as {time: number; states: Aircraft[]});
 }
 
-function getTooltip({object}: PickingInfo<Aircraft>) {
+function getTooltip({object}: PickingInfo<AircraftRow>) {
   return (
     object &&
     `\
-    Call Sign: ${object[DATA_INDEX.CALL_SIGN] || ''}
-    Country: ${object[DATA_INDEX.ORIGIN_COUNTRY] || ''}
-    Vertical Rate: ${object[DATA_INDEX.VERTICAL_RATE] || 0} m/s
-    Velocity: ${object[DATA_INDEX.VELOCITY] || 0} m/s
-    Direction: ${object[DATA_INDEX.TRUE_TRACK] || 0}`
+    Call Sign: ${object.callSign || ''}
+    Country: ${object.originCountry || ''}
+    Vertical Rate: ${object.verticalRate || 0} m/s
+    Velocity: ${object.velocity || 0} m/s
+    Direction: ${object.trueTrack || 0}`
   );
 }
 
@@ -126,7 +127,7 @@ export default function App({
   }, [onDataLoad]);
 
   useEffect(() => {
-    onDataLoadRef.current?.(data.length);
+    onDataLoadRef.current?.(data.numRows);
   }, [data]);
 
   useEffect(() => {
@@ -141,7 +142,7 @@ export default function App({
     return () => abortController.abort();
   }, []);
 
-  const layer = new ScenegraphLayer<Aircraft>({
+  const layer = new ScenegraphLayer<AircraftRow>({
     id: 'scenegraph-layer',
     data,
     pickable: true,
@@ -150,21 +151,13 @@ export default function App({
     _animations: ANIMATIONS,
     sizeMinPixels: 0.1,
     sizeMaxPixels: 1.5,
-    getPosition: d => [
-      d[DATA_INDEX.LONGITUDE] ?? 0,
-      d[DATA_INDEX.LATITUDE] ?? 0,
-      d[DATA_INDEX.GEO_ALTITUDE] ?? 0
-    ],
-    getOrientation: d => {
-      const verticalRate = d[DATA_INDEX.VERTICAL_RATE] ?? 0;
-      const velocity = d[DATA_INDEX.VELOCITY] ?? 0;
+    getPosition: {sql: 'FLOAT64x3(longitude, latitude, altitude)'},
+    getOrientation: ({verticalRate, velocity, trueTrack}) => {
       // -90 looking up, +90 looking down
-      const pitch = (-Math.atan2(verticalRate, velocity) * 180) / Math.PI;
-      const yaw = -d[DATA_INDEX.TRUE_TRACK] ?? 0;
-      return [pitch, yaw, 90];
+      const pitch = (-Math.atan2(verticalRate ?? 0, velocity ?? 0) * 180) / Math.PI;
+      return [pitch, -(trueTrack ?? 0), 90];
     },
-    getScale: d => {
-      const lastContact = d[DATA_INDEX.LAST_CONTACT];
+    getScale: ({lastContact}) => {
       return lastContact < -DROP_IF_OLDER_THAN_SECONDS ? [0, 0, 0] : [1, 1, 1];
     }
   });

@@ -14,6 +14,11 @@
  */
 const v10Sections = require('./examples-v10/v10/examples.json');
 
+/** Adds a porting status without changing the example's title or position. */
+function withStatus(id, status) {
+  return {type: 'doc', id, className: `example-sidebar-${status}`};
+}
+
 const sidebars = {
   examplesSidebar: [
     {
@@ -25,20 +30,20 @@ const sidebars = {
       type: 'category',
       label: 'Layers',
       items: [
-        {type: 'doc', id: 'arc-layer', className: 'example-sidebar-arrow'},
+        withStatus('arc-layer', 'started'),
         'bitmap-layer',
         'contour-layer',
         'geojson-layer-polygons',
         'geojson-layer-paths',
-        'global-grids',
-        {type: 'doc', id: 'grid-layer', className: 'example-sidebar-arrow'},
+        withStatus('global-grids', 'started'),
+        withStatus('grid-layer', 'started'),
         'heatmap-layer',
-        {type: 'doc', id: 'hexagon-layer', className: 'example-sidebar-arrow'},
-        'icon-layer',
-        {type: 'doc', id: 'line-layer', className: 'example-sidebar-arrow'},
-        {type: 'doc', id: 'point-cloud-layer', className: 'example-sidebar-arrow'},
-        {type: 'doc', id: 'scatterplot-layer', className: 'example-sidebar-arrow'},
-        'scenegraph-layer',
+        withStatus('hexagon-layer', 'started'),
+        withStatus('icon-layer', 'started'),
+        withStatus('line-layer', 'started'),
+        withStatus('point-cloud-layer', 'ready'),
+        withStatus('scatterplot-layer', 'ready'),
+        withStatus('scenegraph-layer', 'started'),
         'screen-grid-layer',
         // 'simple-mesh-layer',
         'terrain-layer',
@@ -55,11 +60,11 @@ const sidebars = {
       type: 'category',
       label: 'Proposals',
       items: [
-        'shared-tile-2d-layer',
+        withStatus('shared-tile-2d-layer', 'experimental'),
         ...v10Sections.map(({label, examples}) => ({
           type: 'category',
           label,
-          items: examples.map(({id}) => `v10/${id}`)
+          items: examples.map(({id}) => withStatus(`v10/${id}`, 'experimental'))
         }))
       ]
     },

@@ -8,14 +8,15 @@ import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
+import {tableFromArrays} from 'apache-arrow';
 
 import IconClusterLayer from './icon-cluster-layer';
 import type {IconClusterLayerPickingInfo} from './icon-cluster-layer';
-import type {PickingInfo, MapViewState} from '@deck.gl/core';
+import type {LayerData, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {IconLayerProps} from '@deck.gl/layers';
 import {Device} from '@luma.gl/core';
 
-// Source data CSV
+// Source data JSON
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/icon/meteorites.json'; // eslint-disable-line
 
@@ -31,7 +32,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
 
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/dark';
 
-type Meterite = {
+type Meteorite = {
   coordinates: [longitude: number, latitude: number];
   name: string;
   class: string;
@@ -39,7 +40,20 @@ type Meterite = {
   year: number;
 };
 
-function renderTooltip(info: IconClusterLayerPickingInfo<Meterite>) {
+/** Splits source coordinates into columns for the unclustered SQL position accessor. */
+function toMeteoriteTable<LayerDataT = LayerData<unknown>>(data: unknown): LayerDataT {
+  const rows = data as Meteorite[];
+  return tableFromArrays({
+    longitude: Float64Array.from(rows, meteorite => meteorite.coordinates[0]),
+    latitude: Float64Array.from(rows, meteorite => meteorite.coordinates[1]),
+    name: rows.map(meteorite => meteorite.name),
+    class: rows.map(meteorite => meteorite.class),
+    mass: rows.map(meteorite => meteorite.mass),
+    year: rows.map(meteorite => meteorite.year)
+  }) as LayerDataT;
+}
+
+function renderTooltip(info: IconClusterLayerPickingInfo<Meteorite>) {
   const {object, objects, x, y} = info;
 
   if (objects) {
@@ -85,12 +99,12 @@ export default function App({
 }: {
   device?: Device;
   showCluster?: boolean;
-  data?: string | Meterite[];
+  data?: string | Meteorite[];
   iconMapping?: string;
   iconAtlas?: string;
   mapStyle?: string;
 }) {
-  const [hoverInfo, setHoverInfo] = useState<IconClusterLayerPickingInfo<Meterite> | null>(null);
+  const [hoverInfo, setHoverInfo] = useState<IconClusterLayerPickingInfo<Meteorite> | null>(null);
 
   const hideTooltip = useCallback(() => {
     setHoverInfo(null);
@@ -103,8 +117,9 @@ export default function App({
     }
   }, []);
 
-  const layerProps: IconLayerProps<Meterite> = {
+  const layerProps: IconLayerProps<Meteorite> = {
     id: 'icon',
+    // Sample row: {coordinates: [28.96, 13.66033], name: "Al Zarnkh", class: "LL5", mass: "700", year: 2001}
     data,
     pickable: true,
     getPosition: d => d.coordinates,
@@ -121,7 +136,9 @@ export default function App({
     : new IconLayer({
         ...layerProps,
         id: 'icon',
-        getIcon: d => 'marker',
+        dataTransform: toMeteoriteTable,
+        getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+        getIcon: () => 'marker',
         sizeUnits: 'meters',
         sizeScale: 2000,
         sizeMinPixels: 6
