@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Viewport, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
+import {
+  Viewport,
+  WebMercatorViewport,
+  _GlobeViewport,
+  _CustomProjectionViewport
+} from '@deck.gl/core';
 
 import {
   CullingVolume,
@@ -10,13 +15,17 @@ import {
   AxisAlignedBoundingBox,
   makeOrientedBoundingBoxFromPoints
 } from '@math.gl/geometry/culling';
-import {lngLatToWorld} from '@math.gl/web-mercator';
+import {lngLatToWorld, MAX_LATITUDE} from '@math.gl/web-mercator';
 import {Bounds, TileIndex, ZRange} from './types';
 import {osmTile2lngLat} from './utils';
 
 const TILE_SIZE = 512;
 // number of world copies to check
 const MAX_MAPS = 3;
+// number of intervals on each screen axis, to sample the ground that a custom projection shows
+const VIEW_SAMPLES = 8;
+// tolerance in degrees, to detect a position that a CRS moved into its area of use
+const EPSILON = 1e-9;
 // for calculating bounding volume of a tile in a non-web-mercator viewport
 const REF_POINTS_5 = [
   [0.5, 0.5],
@@ -35,6 +44,9 @@ const REF_POINTS_11 = REF_POINTS_9.concat([
   [0.25, 0.5],
   [0.75, 0.5]
 ]); // 2 additional points on equator for top tile
+
+// for a tile that a custom projection can draw only in part: the tile has no reliable bounds
+const PARTIAL_BOUNDING_VOLUME = new AxisAlignedBoundingBox();
 
 class OSMNode {
   x: number;
@@ -71,35 +83,55 @@ class OSMNode {
   update(params: {
     viewport: Viewport;
     project: ((xyz: number[]) => number[]) | null;
+    isGlobe: boolean;
     cullingVolume: CullingVolume;
     elevationBounds: ZRange;
     minZ: number;
     maxZ: number;
-    bounds?: Bounds;
+    bounds?: Bounds[];
     offset: number;
   }) {
-    const {viewport, cullingVolume, elevationBounds, minZ, maxZ, bounds, offset, project} = params;
-    const boundingVolume = this.getBoundingVolume(elevationBounds, offset, project);
+    const {viewport, cullingVolume, elevationBounds, minZ, maxZ, bounds, offset, project, isGlobe} =
+      params;
 
     // First, check if this tile is visible
-    if (bounds && !this.insideBounds(bounds)) {
+    if (bounds && !bounds.some(b => this.insideBounds(b))) {
       return false;
     }
 
-    const visibility = cullingVolume.computeVisibility(boundingVolume);
-    if (visibility === 'outside') {
+    const boundingVolume = this.getBoundingVolume(elevationBounds, offset, project);
+    if (!boundingVolume) {
+      // The custom projection cannot draw this tile.
+      // The tile can contain the complete area of use, so examine its children.
+      this.selected = false;
+      if (this.z < maxZ) {
+        this.childVisible = true;
+        for (const child of this.children) {
+          child.update(params);
+        }
+      }
+      return false;
+    }
+    // A tile that is partially in the area of use of a custom projection passed the bounds test.
+    // Keep it.
+    const isPartial = boundingVolume === PARTIAL_BOUNDING_VOLUME;
+    if (!isPartial && cullingVolume.computeVisibility(boundingVolume) === 'outside') {
       return false;
     }
 
     // Globe: reject tiles occluded by the near hemisphere
-    if (project && this.beyondHorizon(viewport.cameraPosition, project, elevationBounds[1])) {
+    if (
+      project &&
+      isGlobe &&
+      this.beyondHorizon(viewport.cameraPosition, project, elevationBounds[1])
+    ) {
       return false;
     }
 
     // Avoid loading overlapping tiles - if a descendant is requested, do not request the ancester
     if (!this.childVisible) {
       let {z} = this;
-      if (z < maxZ && z >= minZ) {
+      if (!isPartial && z < maxZ && z >= minZ) {
         // Adjust LOD
         // If the tile is far enough from the camera, accept a lower zoom level
         const distance =
@@ -198,6 +230,12 @@ class OSMNode {
         }
       }
 
+      const validCount = refPointPositions.filter(isFinitePosition).length;
+      if (validCount < refPointPositions.length) {
+        // Some reference points are not in the area of use of the custom projection.
+        // They do not show where the tile is.
+        return validCount ? PARTIAL_BOUNDING_VOLUME : null;
+      }
       return makeOrientedBoundingBoxFromPoints(refPointPositions);
     }
 
@@ -215,18 +253,128 @@ class OSMNode {
   }
 }
 
+function isFinitePosition(position: number[]): boolean {
+  return position.every(Number.isFinite);
+}
+
+/** Returns true if the CRS of the viewport projects the WGS84 position without moving it first */
+function isInAreaOfUse(viewport: _CustomProjectionViewport, position: number[]): boolean {
+  const normalized = viewport.crs.converter.WGS84.normalize(position);
+  const dLng = Math.abs(normalized[0] - position[0]) % 360;
+  return Math.min(dLng, 360 - dLng) <= EPSILON && Math.abs(normalized[1] - position[1]) <= EPSILON;
+}
+
+/**
+ * Projects a WGS84 position to the common space of a custom projection.
+ * A CRS can clamp a position to its area of use. The projected position then does not show
+ * where the tile is, so the result is not finite.
+ */
+function projectInAreaOfUse(viewport: _CustomProjectionViewport, position: number[]): number[] {
+  return isInAreaOfUse(viewport, position) ? viewport.projectPosition(position) : [NaN, NaN, NaN];
+}
+
+/**
+ * Returns the WGS84 bounds of the ground that a custom projection shows.
+ * The result is empty if no ground is visible. It has two boxes if the view crosses the antimeridian.
+ */
+// eslint-disable-next-line complexity, max-statements
+function getGeographicBounds(viewport: _CustomProjectionViewport, zRange: ZRange | null): Bounds[] {
+  const {width, height} = viewport;
+  const centerLng = viewport.position[0];
+  let minLng = Infinity;
+  let minLat = Infinity;
+  let maxLng = -Infinity;
+  let maxLat = -Infinity;
+
+  for (const targetZ of zRange || [0]) {
+    for (let i = 0; i <= VIEW_SAMPLES; i++) {
+      for (let j = 0; j <= VIEW_SAMPLES; j++) {
+        const pixel = [(i / VIEW_SAMPLES) * width, (j / VIEW_SAMPLES) * height];
+        const [lng, lat] = viewport.unproject(pixel, {targetZ});
+        if (Number.isFinite(lng) && Number.isFinite(lat)) {
+          // Keep the longitude continuous across the antimeridian
+          const dLng = lng - centerLng;
+          const continuousLng = centerLng + dLng - 360 * Math.round(dLng / 360);
+          minLng = Math.min(minLng, continuousLng);
+          maxLng = Math.max(maxLng, continuousLng);
+          minLat = Math.min(minLat, lat);
+          maxLat = Math.max(maxLat, lat);
+        }
+      }
+    }
+  }
+  if (minLng > maxLng) {
+    return [];
+  }
+
+  // The edges of the screen are curves in WGS84. Add half of the sample interval.
+  const padLng = (maxLng - minLng) / VIEW_SAMPLES / 2;
+  const padLat = (maxLat - minLat) / VIEW_SAMPLES / 2;
+  minLng -= padLng;
+  maxLng += padLng;
+  minLat -= padLat;
+  maxLat += padLat;
+
+  // All meridians meet at a pole
+  for (const poleLat of [-90, 90]) {
+    const pole = [centerLng, poleLat];
+    if (isInAreaOfUse(viewport, pole)) {
+      const [x, y] = viewport.project(pole);
+      if (x >= 0 && x <= width && y >= 0 && y <= height) {
+        minLng = centerLng - 180;
+        maxLng = centerLng + 180;
+        minLat = Math.min(minLat, poleLat);
+        maxLat = Math.max(maxLat, poleLat);
+      }
+    }
+  }
+
+  // Web Mercator tiles end at this latitude
+  minLat = Math.max(minLat, -MAX_LATITUDE);
+  maxLat = Math.min(maxLat, MAX_LATITUDE);
+  if (maxLng - minLng >= 360) {
+    return [[-180, minLat, 180, maxLat]];
+  }
+  const offset = 360 * Math.floor((minLng + 180) / 360);
+  minLng -= offset;
+  maxLng -= offset;
+  return maxLng > 180
+    ? [
+        [minLng, minLat, 180, maxLat],
+        [-180, minLat, maxLng - 360, maxLat]
+      ]
+    : [[minLng, minLat, maxLng, maxLat]];
+}
+
+/** Returns the intersection of two WGS84 bounds, or null if they do not overlap */
+function intersectBounds(a: Bounds, b: Bounds): Bounds | null {
+  const result: Bounds = [
+    Math.max(a[0], b[0]),
+    Math.max(a[1], b[1]),
+    Math.min(a[2], b[2]),
+    Math.min(a[3], b[3])
+  ];
+  return result[0] < result[2] && result[1] < result[3] ? result : null;
+}
+
 // eslint-disable-next-line complexity
 export function getOSMTileIndices(
   viewport: Viewport,
   maxZ: number,
   zRange: ZRange | null,
-  bounds?: Bounds
+  extent?: Bounds
 ): TileIndex[] {
-  const project: ((xyz: number[]) => number[]) | null =
-    viewport instanceof _GlobeViewport
-      ? // eslint-disable-next-line @typescript-eslint/unbound-method
-        viewport.projectPosition
-      : null;
+  const isGlobe = viewport instanceof _GlobeViewport;
+  const isCustomProjection = viewport instanceof _CustomProjectionViewport;
+  // These viewports do not have the common space of Web Mercator.
+  // Project the tile to get its bounding volume.
+  let project: ((xyz: number[]) => number[]) | null = null;
+  if (isGlobe) {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    project = viewport.projectPosition;
+  } else if (isCustomProjection) {
+    project = xyz => projectInAreaOfUse(viewport, xyz);
+  }
 
   // Get the culling volume of the current camera
   const planes: Plane[] = Object.values(viewport.getFrustumPlanes()).map(
@@ -240,20 +388,35 @@ export function getOSMTileIndices(
   const elevationMax = (zRange && zRange[1] * unitsPerMeter) || 0;
 
   // Always load at the current zoom level if pitch is small
-  const minZ = viewport instanceof WebMercatorViewport && viewport.pitch <= 60 ? maxZ : 0;
+  const minZ =
+    (viewport instanceof WebMercatorViewport || isCustomProjection) && viewport.pitch <= 60
+      ? maxZ
+      : 0;
+
+  let geographicBounds: Bounds[] | undefined = extent && [extent];
+  if (isCustomProjection) {
+    // The frustum test is not sufficient: a tile at the edge of the area of use of the CRS has
+    // no bounding volume. Select tiles only in the WGS84 bounds of the visible ground.
+    geographicBounds = getGeographicBounds(viewport, zRange)
+      .map(viewBounds => (extent ? intersectBounds(viewBounds, extent) : viewBounds))
+      .filter(Boolean) as Bounds[];
+    if (!geographicBounds.length) {
+      return [];
+    }
+  }
 
   // Map extent to OSM position
-  if (bounds) {
-    const [minLng, minLat, maxLng, maxLat] = bounds;
+  const bounds = geographicBounds?.map(([minLng, minLat, maxLng, maxLat]): Bounds => {
     const topLeft = lngLatToWorld([minLng, maxLat]);
     const bottomRight = lngLatToWorld([maxLng, minLat]);
-    bounds = [topLeft[0], TILE_SIZE - topLeft[1], bottomRight[0], TILE_SIZE - bottomRight[1]];
-  }
+    return [topLeft[0], TILE_SIZE - topLeft[1], bottomRight[0], TILE_SIZE - bottomRight[1]];
+  });
 
   const root = new OSMNode(0, 0, 0);
   const traversalParams = {
     viewport,
     project,
+    isGlobe,
     cullingVolume,
     elevationBounds: [elevationMin, elevationMax] as ZRange,
     minZ,

@@ -11,7 +11,12 @@ import {
 } from '@deck.gl/geo-layers/tileset-2d';
 import {Matrix4} from '@math.gl/core';
 
-import {WebMercatorViewport, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {
+  WebMercatorViewport,
+  OrthographicView,
+  _GlobeView as GlobeView,
+  _CustomProjectionView as CustomProjectionView
+} from '@deck.gl/core';
 
 const TEST_CASES = [
   {
@@ -341,6 +346,189 @@ test('getTileIndices', () => {
     });
     expect(getTileIds(result), testCase.title).toEqual(testCase.output);
   }
+});
+
+const UTM_15N = 'EPSG:32615';
+const SOUTH_POLAR_STEREOGRAPHIC =
+  '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +datum=WGS84 +units=m';
+
+async function makeCustomProjectionViewport(
+  crs: string,
+  viewState: {center: [number, number, number]; zoom: number; pitch?: number; bearing?: number},
+  width = 800,
+  height = 400
+) {
+  const view = new CustomProjectionView({crs});
+  await view.initialize();
+  return view.makeViewport({width, height, viewState})!;
+}
+
+/** Returns true if a position of the tile is on screen. Samples a grid of positions in the tile. */
+function isTileOnScreen(viewport, {x, y, z}, samples = 16): boolean {
+  for (let i = 0; i <= samples; i++) {
+    for (let j = 0; j <= samples; j++) {
+      const {west, north} = tileToBoundingBox(viewport, x + i / samples, y + j / samples, z);
+      const normalized = viewport.crs.converter.WGS84.normalize([west, north]);
+      if (Math.abs(normalized[0] - west) > 1e-9 || Math.abs(normalized[1] - north) > 1e-9) {
+        // The position is outside the area of use of the CRS
+        continue;
+      }
+      const pixel = viewport.project([west, north]);
+      if (pixel[0] > 0 && pixel[0] < viewport.width && pixel[1] > 0 && pixel[1] < viewport.height) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/** Returns the ids of the tiles of one level that are on screen. Does not use getTileIndices. */
+function getTilesOnScreen(viewport, z: number, margin = 3): string[] {
+  const count = 2 ** z;
+  let range = [0, 0, count - 1, count - 1];
+  if (z > 5) {
+    // Examine only the tiles near the corners of the screen
+    const [west, south, east, north] = viewport.getBounds();
+    const toY = lat => ((1 - Math.asinh(Math.tan((lat * Math.PI) / 180)) / Math.PI) / 2) * count;
+    range = [
+      Math.floor(((west + 180) / 360) * count) - margin,
+      Math.floor(toY(north)) - margin,
+      Math.floor(((east + 180) / 360) * count) + margin,
+      Math.floor(toY(south)) + margin
+    ];
+  }
+  const ids: string[] = [];
+  for (let x = Math.max(0, range[0]); x <= Math.min(count - 1, range[2]); x++) {
+    for (let y = Math.max(0, range[1]); y <= Math.min(count - 1, range[3]); y++) {
+      if (isTileOnScreen(viewport, {x, y, z})) {
+        ids.push(`${x},${y},${z}`);
+      }
+    }
+  }
+  return ids;
+}
+
+test('getTileIndices#CustomProjectionView agrees with MapView in Web Mercator', async () => {
+  for (const viewState of [
+    {center: [-90, 45, 0], zoom: 2.6},
+    {center: [-93.2, 45, 0], zoom: 10.2},
+    {center: [12, -33, 0], zoom: 6, pitch: 30, bearing: -25}
+  ] as const) {
+    const [longitude, latitude] = viewState.center;
+    const mapViewIds = getTileIds(
+      getTileIndices({
+        viewport: new WebMercatorViewport({
+          width: 800,
+          height: 400,
+          ...viewState,
+          longitude,
+          latitude
+        }),
+        zRange: null
+      })
+    );
+    const viewport = await makeCustomProjectionViewport('EPSG:3857', {
+      ...viewState,
+      center: [longitude, latitude, 0]
+    });
+    const ids = getTileIds(getTileIndices({viewport, zRange: null}));
+    const title = `zoom ${viewState.zoom}`;
+    expect(ids.length, `${title}: selects tiles`).toBeGreaterThan(0);
+    // MapView also selects tiles that only touch the frustum planes
+    expect(
+      ids.filter(id => !mapViewIds.includes(id)),
+      `${title}: selects no other tiles than MapView`
+    ).toEqual([]);
+    expect(
+      mapViewIds
+        .filter(id => !ids.includes(id))
+        .filter(id => {
+          const [x, y, z] = id.split(',').map(Number);
+          return isTileOnScreen(viewport, {x, y, z});
+        }),
+      `${title}: selects each MapView tile that is on screen`
+    ).toEqual([]);
+  }
+});
+
+test('getTileIndices#CustomProjectionView selects the tiles on screen', async () => {
+  const testCases = [
+    {
+      title: 'UTM zone',
+      viewport: await makeCustomProjectionViewport(UTM_15N, {center: [-93.2, 45, 0], zoom: 10.3}),
+      // The projected CRS has no Web Mercator scale factor: 10.3 + log2(cos(45 deg)) = 9.8
+      z: 10
+    },
+    {
+      title: 'UTM zone, rotated',
+      viewport: await makeCustomProjectionViewport(UTM_15N, {
+        center: [-93.2, 45, 0],
+        zoom: 12.3,
+        bearing: 40
+      }),
+      z: 12
+    },
+    {
+      title: 'edge of the UTM zone',
+      viewport: await makeCustomProjectionViewport(UTM_15N, {center: [-90, 45, 0], zoom: 10.3}),
+      z: 10
+    },
+    {
+      title: 'polar stereographic',
+      viewport: await makeCustomProjectionViewport(SOUTH_POLAR_STEREOGRAPHIC, {
+        center: [0, -80, 0],
+        zoom: 6.2
+      }),
+      // 6.2 + log2(cos(80 deg)), and the scale factor of the projection at this latitude
+      z: 4
+    }
+  ];
+
+  for (const {title, viewport, z} of testCases) {
+    const result = getTileIndices({viewport, zRange: null});
+    const ids = getTileIds(result);
+    expect(ids.length, `${title}: selects tiles`).toBeGreaterThan(0);
+    expect(
+      result.every(tile => tile.z === z),
+      `${title}: tile level`
+    ).toBe(true);
+
+    const expected = getTilesOnScreen(viewport, z);
+    expect(expected.length, `${title}: tiles are on screen`).toBeGreaterThan(0);
+    expect(
+      expected.filter(id => !ids.includes(id)),
+      `${title}: no tile on screen is missing`
+    ).toEqual([]);
+    // A selected tile can be next to the screen. Permit a border of tiles.
+    expect(ids.length, `${title}: no excess tiles`).toBeLessThanOrEqual(expected.length * 2 + 4);
+  }
+});
+
+test('getTileIndices#CustomProjectionView omits tiles outside the area of use', async () => {
+  // The east half of the screen is outside UTM zone 15, which ends at longitude -90
+  const viewport = await makeCustomProjectionViewport(UTM_15N, {center: [-90, 45, 0], zoom: 10.3});
+  const result = getTileIndices({viewport, zRange: null});
+  expect(result.length).toBeGreaterThan(0);
+  for (const {x, y, z} of result) {
+    const {west} = tileToBoundingBox(viewport, x, y, z) as {west: number};
+    // A tile that touches the edge of the zone has reference points in the area of use
+    expect(west, `tile ${x},${y},${z}`).toBeLessThanOrEqual(-90);
+  }
+});
+
+test('getTileIndices#CustomProjectionView respects extent and maxZoom', async () => {
+  const viewport = await makeCustomProjectionViewport(UTM_15N, {
+    center: [-93.2, 45, 0],
+    zoom: 10.3
+  });
+  expect(getTileIds(getTileIndices({viewport, zRange: null, maxZoom: 5}))).toEqual(['7,11,5']);
+  expect(
+    getTileIds(getTileIndices({viewport, zRange: null, extent: [-93.2, 45, -93, 45.1]}))
+  ).toEqual(['246,367,10', '246,368,10', '247,367,10', '247,368,10']);
+  expect(
+    getTileIndices({viewport, zRange: null, extent: [10, 45, 11, 46]}),
+    'extent outside the view'
+  ).toEqual([]);
 });
 
 test('tileToBoundingBox', () => {

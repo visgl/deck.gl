@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Viewport} from '@deck.gl/core';
+import {Viewport, _CustomProjectionViewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
+import {MAX_LATITUDE} from '@math.gl/web-mercator';
 import {getOSMTileIndices} from './tile-2d-traversal';
 import {Bounds, GeoBoundingBox, TileBoundingBox, TileIndex, ZRange} from './types';
 
 const TILE_SIZE = 512;
+// Common units per meter of Web Mercator at the equator
+const WEB_MERCATOR_UNITS_PER_METER = TILE_SIZE / 40075016.6855;
 const DEFAULT_EXTENT: Bounds = [-Infinity, -Infinity, Infinity, Infinity];
 
 export type URLTemplate = string | string[] | null;
@@ -258,6 +261,20 @@ function getIdentityTileIndices(
 }
 
 /**
+ * Returns the zoom at which Web Mercator tiles match the ground resolution of the viewport.
+ * A projected CRS does not have the latitude-dependent scale of Web Mercator, so the zoom of
+ * a `CustomProjectionViewport` does not select the correct tile level.
+ */
+function getWebMercatorZoom(viewport: Viewport): number {
+  if (!(viewport instanceof _CustomProjectionViewport)) {
+    return viewport.zoom;
+  }
+  const latitude = Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, viewport.position[1]));
+  const unitsPerMeter = WEB_MERCATOR_UNITS_PER_METER / Math.cos((latitude * Math.PI) / 180);
+  return viewport.zoom + Math.log2(viewport.distanceScales.unitsPerMeter[2] / unitsPerMeter);
+}
+
+/**
  * Returns all tile indices in the current viewport. If the current zoom level is smaller
  * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
  * return tiles that are on maxZoom.
@@ -291,7 +308,7 @@ export function getTileIndices({
   // This round/ceil operation ensures that tiles are rendered in the same way as Google Maps, Map Libre, etc.
   // eg. at viewport.zoom = 9.5, you should fetch tiles at z = 10, not z = 9.
   let z = viewport.isGeospatial
-    ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize) + zoomOffset)
+    ? Math.round(getWebMercatorZoom(viewport) + Math.log2(TILE_SIZE / tileSize) + zoomOffset)
     : Math.ceil(viewport.zoom + zoomOffset);
 
   if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
