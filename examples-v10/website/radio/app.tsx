@@ -14,6 +14,7 @@ import type {Device} from '@luma.gl/core';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {scaleSqrt, scaleLinear} from 'd3-scale';
+import {tableFromArrays} from 'apache-arrow';
 import SearchBar from './search-bar';
 
 import type {
@@ -157,6 +158,16 @@ export default function App({
     return result;
   }, [data]);
 
+  const stationPositions = useMemo(
+    () =>
+      data &&
+      tableFromArrays({
+        longitude: Float64Array.from(data, station => station.longitude),
+        latitude: Float64Array.from(data, station => station.latitude)
+      }),
+    [data]
+  );
+
   const onViewStateChange = useCallback(
     ({viewState: newViewState}: ViewStateChangeParameters<MapViewState>) => {
       setViewState(() => ({
@@ -227,14 +238,15 @@ export default function App({
         getFillColor: [255, 255, 255, 0]
       }),
 
-    new ScatterplotLayer<Station>({
-      id: 'stations',
-      data,
-      getPosition: d => [d.longitude, d.latitude],
-      getFillColor: [40, 40, 40, 128],
-      getRadius: 20,
-      radiusMinPixels: 2
-    }),
+    stationPositions &&
+      new ScatterplotLayer({
+        id: 'stations',
+        data: stationPositions,
+        getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+        getFillColor: [40, 40, 40, 128],
+        getRadius: 20,
+        radiusMinPixels: 2
+      }),
 
     new H3HexagonLayer<{hex: string; count: number}>({
       id: 'coverage',

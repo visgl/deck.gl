@@ -13,7 +13,7 @@ import {createRoot} from 'react-dom/client';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 
-import AnimatedArcLayer from './animated-arc-group-layer';
+import AnimatedArcGroupLayer from './animated-arc-group-layer';
 import RangeInput from './range-input';
 
 // Data source
@@ -32,7 +32,7 @@ const ANIMATION_SPEED = 60;
 const TIME_WINDOW = 1800; // 30 minutes
 const SEC_PER_DAY = 60 * 60 * 24;
 
-type Flight = {
+export type Flight = {
   // Departure
   time1: number;
   lon1: number;
@@ -80,13 +80,9 @@ export default function App({
     data &&
     data.map(
       ({date, flights}) =>
-        new AnimatedArcLayer<Flight>({
+        new AnimatedArcGroupLayer({
           id: `flights-${date}`,
           data: flights,
-          getSourcePosition: d => [d.lon1, d.lat1, d.alt1],
-          getTargetPosition: d => [d.lon2, d.lat2, d.alt2],
-          getSourceTimestamp: d => d.time1,
-          getTargetTimestamp: d => d.time2,
           getHeight: 0.3,
           getWidth: 2,
           timeRange,

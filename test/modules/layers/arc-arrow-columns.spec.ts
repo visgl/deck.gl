@@ -194,3 +194,66 @@ test('ArcLayer keeps picking indexes distinct across WebGPU chunks', async ({ski
     container.remove();
   }
 });
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Animated flight arcs bind Arrow timestamps and clip on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) return skip();
+
+    const {Deck, OrthographicView} = await import('@deck.gl/core');
+    const {tableFromArrays} = await import('apache-arrow');
+    const {default: AnimatedArcLayer} =
+      backend === 'webgpu'
+        ? await import('../../../examples-v10/website/globe/animated-arc-layer')
+        : await import('../../../examples-v10/website/maplibre/animated-arc-layer');
+    const parent = document.createElement('div');
+    document.body.appendChild(parent);
+    const data = tableFromArrays({x: [-20], y: [20], start: [0], arrival: [10]});
+    const layer = new AnimatedArcLayer({
+      id: 'flight-time',
+      data,
+      getSourcePosition: {sql: 'FLOAT64x2(x, 0)'},
+      getTargetPosition: {sql: 'FLOAT64x2(y, 0)'},
+      getTimestamps: {sql: 'FLOAT32x2(start, arrival)'},
+      getHeight: 0,
+      getWidth: 14,
+      timeRange: [0, 10],
+      pickable: true
+    });
+    const errors: Error[] = [];
+    const deck = new Deck({
+      device: testDevice,
+      parent,
+      width: 128,
+      height: 128,
+      useDevicePixels: false,
+      views: new OrthographicView(),
+      initialViewState: {target: [0, 0, 0], zoom: 0},
+      layers: [layer],
+      onError: error => errors.push(error)
+    });
+    const waitForRender = (current: typeof layer) =>
+      vi.waitFor(
+        () => {
+          expect(errors).toEqual([]);
+          expect(current.state?.columns?.length).toBe(1);
+          expect(current.isLoaded).toBe(true);
+          deck.redraw('draw flight arcs');
+        },
+        {timeout: 5000}
+      );
+    try {
+      await waitForRender(layer);
+      expect((await deck.pickObjectAsync({x: 64, y: 64}))?.index).toBe(0);
+
+      const hidden = layer.clone({timeRange: [20, 30]});
+      deck.setProps({layers: [hidden]});
+      await waitForRender(hidden);
+      expect(await deck.pickObjectAsync({x: 64, y: 64})).toBeNull();
+      expect(errors).toEqual([]);
+    } finally {
+      deck.finalize();
+      parent.remove();
+    }
+  });
+}

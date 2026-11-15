@@ -18,6 +18,7 @@ import {
   ArrowAccessor,
   Color,
   DefaultProps,
+  type _ColumnDefinition as ColumnDefinition,
   _GPUVectorModel as DeckGPUVectorModel
 } from '@deck.gl/core';
 
@@ -320,6 +321,11 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     }
   }
 
+  /** Adds instance columns for subclass shaders when ArcLayer uses the Arrow path. */
+  protected getExtraColumnDefinitions(): Readonly<Record<string, ColumnDefinition>> {
+    return {};
+  }
+
   /** Updates the model and schedules conversion while Arrow columns are active. */
   private updateColumnState(params: UpdateParameters<this>): void {
     if (this.props.extensions.length)
@@ -328,7 +334,10 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     if (entering) {
       this.internalState!.attributeManager?.finalize();
       this.internalState!.attributeManager = null;
-      this.state.columns = new ArcLayerColumns(this.context.device);
+      this.state.columns = new ArcLayerColumns(
+        this.context.device,
+        this.getExtraColumnDefinitions()
+      );
     }
     if (
       entering ||

@@ -89,7 +89,7 @@ export function hasArcColumns(props: Readonly<Record<string, unknown>>): boolean
 
 /** Prepares ArcLayer columns and accessor fallbacks. */
 export class ArcLayerColumns extends LayerColumns {
-  constructor(device: Device) {
-    super(device, DEFINITIONS, 'Arc');
+  constructor(device: Device, extraColumns: Readonly<Record<string, ColumnDefinition>> = {}) {
+    super(device, {...DEFINITIONS, ...extraColumns}, 'Arc');
   }
 }
