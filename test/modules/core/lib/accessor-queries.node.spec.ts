@@ -169,3 +169,22 @@ test('a failed replacement load leaves the layer free to update its previous Arr
     device.destroy();
   }
 });
+
+test('typed SQL colors clamp channels and propagate nulls', () => {
+  const data = tableFromArrays({red: [-1, null], green: [0.5, 0], blue: [2, 1]});
+  const result = evaluateAccessorQueries(
+    data,
+    {getFillColor: 'RGBA8(red, green, blue, 1)'},
+    sqlParser.parseExpression
+  );
+  const colors = result.getChild('getFillColor')!;
+  expect(Array.from(colors.get(0))).toEqual([0, 128, 255, 255]);
+  expect(colors.get(1)).toBeNull();
+  expect(() =>
+    evaluateAccessorQueries(
+      data,
+      {getFillColor: 'RGBA8(red, green, blue)'},
+      sqlParser.parseExpression
+    )
+  ).toThrow('requires exactly 4 arguments');
+});

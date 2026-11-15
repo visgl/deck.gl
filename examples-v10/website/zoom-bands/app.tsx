@@ -10,6 +10,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {sqlParser} from '@deck.gl/core/sql';
+import {isArrowTable} from '@math.gl/arrow';
 import type {Table} from 'apache-arrow';
 
 import type {Color, Layer, MapViewState, PickingInfo} from '@deck.gl/core';
@@ -128,8 +129,7 @@ const LOADERS = [CSVLoader];
 const LOAD_OPTIONS = {csv: {dynamicTyping: false}};
 
 /** Collects queried tree positions and statistics for the grid and tooltip. */
-function summarizeTrees(source: unknown): Trees {
-  const data = source as Table;
+function summarizeTrees(data: Table): Trees {
   const trees = data.toArray() as unknown as {
     longitude: number;
     latitude: number;
@@ -179,6 +179,9 @@ export default function App({
   /** Shares the queried tree positions with the grid bands and reports their count. */
   const onTreesLoaded = useCallback(
     (source: unknown) => {
+      if (!isArrowTable(source)) {
+        return;
+      }
       const result = summarizeTrees(source);
       setTrees(result);
       onDataLoad?.(result.length);

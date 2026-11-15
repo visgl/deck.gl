@@ -7,6 +7,7 @@ import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
 import {sqlParser} from '@deck.gl/core/sql';
+import {isArrowTable} from '@math.gl/arrow';
 import {JSONTableLoader} from '@loaders.gl/tables/json';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
@@ -60,7 +61,11 @@ export default function App({
       data: DATA_URL,
       // Source row: [-73.986022, 40.730743, 2]
       query: 'SELECT column1 AS longitude, column2 AS latitude, column3 AS gender',
-      onDataLoad: table => onDataLoad?.((table as {numRows: number}).numRows),
+      onDataLoad: table => {
+        if (isArrowTable(table)) {
+          onDataLoad?.(table.numRows);
+        }
+      },
       radiusScale: radius,
       radiusMinPixels: 0.25,
       getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},

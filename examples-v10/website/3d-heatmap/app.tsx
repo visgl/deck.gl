@@ -10,6 +10,7 @@ import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {sqlParser} from '@deck.gl/core/sql';
+import {isArrowTable} from '@math.gl/arrow';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
@@ -105,8 +106,10 @@ export default function App({
       elevationRange: [0, 3000],
       elevationScale: hasData ? 50 : 0,
       onDataLoad: table => {
-        setHasData(true);
-        onDataLoad?.((table as {numRows: number}).numRows);
+        if (isArrowTable(table)) {
+          setHasData(true);
+          onDataLoad?.(table.numRows);
+        }
       },
       extruded: true,
       getPosition: ({lng, lat}) => [lng, lat],

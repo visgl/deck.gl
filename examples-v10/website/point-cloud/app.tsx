@@ -8,9 +8,9 @@ import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
 import {OrbitView, LinearInterpolator} from '@deck.gl/core';
 import {sqlParser} from '@deck.gl/core/sql';
+import {isArrowTable} from '@math.gl/arrow';
 import {PointCloudLayer} from '@deck.gl/layers';
 
-import type {Table} from 'apache-arrow';
 import {LASLoader} from '@loaders.gl/pointclouds/las';
 import type {OrbitViewState, Widget} from '@deck.gl/core';
 import {Device} from '@luma.gl/core';
@@ -63,8 +63,10 @@ export default function App({
 
   /** Frames the camera once and reports the accumulated points after each batch. */
   const onDataProgress = useCallback(
-    (data: unknown) => {
-      const table = data as Table;
+    (table: unknown) => {
+      if (!isArrowTable(table)) {
+        return;
+      }
       const min = table.schema.metadata.get('las_mins');
       const max = table.schema.metadata.get('las_maxs');
       if (!framed.current && min && max) {

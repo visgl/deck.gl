@@ -25,7 +25,7 @@ const sidebars = {
       type: 'category',
       label: 'Layers',
       items: [
-        'arc-layer',
+        {type: 'doc', id: 'arc-layer', className: 'example-sidebar-arrow'},
         'bitmap-layer',
         'contour-layer',
         'geojson-layer-polygons',
