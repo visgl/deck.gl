@@ -53,16 +53,22 @@ const lightingEffect = new LightingEffect({ambientLight, sunLight});
 
 /** One flight with departure and arrival coordinates and timestamps. */
 export type Flight = {
-  // Departure
+  /** Departure time in seconds on the animation timeline. */
   time1: number;
+  /** Departure longitude in degrees. */
   lon1: number;
+  /** Departure latitude in degrees. */
   lat1: number;
+  /** Departure altitude in meters. */
   alt1: number;
 
-  // Arrival
+  /** Arrival time in seconds on the animation timeline. */
   time2: number;
+  /** Arrival longitude in degrees. */
   lon2: number;
+  /** Arrival latitude in degrees. */
   lat2: number;
+  /** Arrival altitude in meters. */
   alt2: number;
 };
 

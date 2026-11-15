@@ -78,6 +78,7 @@ export default function App({data}) {
 
   const hexes = useMemo(() => aggregateHexes(data), [data]);
 
+  /** Draws visitor trips for the selected POI. */
   const arcLayer =
     arcs &&
     new ArcLayer({

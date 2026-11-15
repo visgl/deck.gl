@@ -7,6 +7,7 @@ import {tableFromArrays, type Table} from 'apache-arrow';
 import AnimatedArcLayer, {type AnimatedArcLayerProps} from './animated-arc-layer';
 import type {Flight} from './app';
 
+/** Limits each shader draw group so the time window can cull it efficiently. */
 const MAX_ARCS_PER_LAYER = 2500;
 
 /** Arrow batch and time bounds for culling arcs outside the current time window. */
@@ -27,17 +28,22 @@ type GroupProps = Omit<AnimatedArcLayerProps, 'data'> & {
 
 /** Partitions flights for time-window culling and renders the visible Arrow groups. */
 export default class AnimatedArcGroupLayer extends CompositeLayer<GroupProps> {
+  /** Identifies the composite layer in Deck diagnostics. */
   static layerName = 'AnimatedArcGroupLayer';
 
+  /** Grouped data for the current set of flights. */
   state!: {groups: ArcGroup[]};
 
+  /** Regroups input only when the decoded flight rows change. */
   override updateState({props, changeFlags}: UpdateParameters<this>) {
     if (changeFlags.dataChanged) {
       this.setState({groups: groupFlights(props.data)});
     }
   }
 
+  /** Passes each group its current window and marks overlapping groups visible. */
   override renderLayers() {
+    /** Window shared across all child layers for this day. */
     const timeRange: [number, number] = this.props.timeRange ?? [0, 1];
     return this.state.groups?.map(
       ({data, startTime, endTime}, index) =>
@@ -54,9 +60,12 @@ export default class AnimatedArcGroupLayer extends CompositeLayer<GroupProps> {
 
 /** Groups flights by departure time without mutating the source rows. */
 function groupFlights(data: Flight[]): ArcGroup[] {
+  /** Sorts a copy so the loader rows can be reused by the rest of the demo. */
   const sorted = [...data].sort((left, right) => left.time1 - right.time1);
+  /** Arrow batches paired with their time extents for culling. */
   const groups: ArcGroup[] = [];
   for (let start = 0; start < sorted.length; start += MAX_ARCS_PER_LAYER) {
+    /** Rows for one separately culled draw. */
     const flights = sorted.slice(start, start + MAX_ARCS_PER_LAYER);
     groups.push({
       startTime: flights[0].time1,

@@ -22,6 +22,7 @@ type AnimationProps = {
 /** Styling and animation props for a group of flight arcs. */
 export type AnimatedArcLayerProps = ArcLayerProps & AnimationProps;
 
+/** Configures the timestamp accessor and an initial one-second window. */
 const defaultProps: DefaultProps<AnimationProps> = {
   getTimestamps: {type: 'accessor', arrow: true, constantTypes: ['array'], value: [0, 1]},
   timeRange: {type: 'array', compare: true, value: [0, 1]}
@@ -41,7 +42,9 @@ const flightTimeUniforms = {
 
 /** Draws a time window through flight arcs using a packed Arrow timestamp pair. */
 export default class AnimatedArcLayer extends ArcLayer<unknown, Required<AnimationProps>> {
+  /** Identifies the primitive layer in Deck diagnostics. */
   static layerName = 'AnimatedArcLayer';
+  /** Adds timing defaults to the inherited ArcLayer props. */
   static defaultProps = defaultProps;
 
   /** Binds timestamps when the layer uses the accessor model. */
@@ -65,13 +68,18 @@ export default class AnimatedArcLayer extends ArcLayer<unknown, Required<Animati
     };
   }
 
+  /** Adds interpolated flight times, time-window clipping, and a fade to the arc shaders. */
   override getShaders() {
+    /** Arc shaders that receive the time-window plugin. */
     const shaders = super.getShaders();
+    /** Derives the GLSL timestamp at the vertex position along the arc. */
     const interpolate =
       'flightTimestamp = mix(instanceTimestamps.x, instanceTimestamps.y, segmentRatio);';
+    /** Discards fragments outside the current window, including during picking. */
     const clip = `if (flightTimestamp < flightTime.timeRange.x || flightTimestamp > flightTime.timeRange.y) {
   discard;
 }`;
+    /** Fades the older end of the visible arc. */
     const opacity =
       '(flightTimestamp - flightTime.timeRange.x) / (flightTime.timeRange.y - flightTime.timeRange.x)';
     shaders.plugins = [
@@ -95,6 +103,7 @@ export default class AnimatedArcLayer extends ArcLayer<unknown, Required<Animati
     return shaders;
   }
 
+  /** Updates the time window independently of the uploaded Arrow columns. */
   override draw(params: {uniforms: Record<string, unknown>}) {
     this.state.model!.shaderInputs.setProps({flightTime: {timeRange: this.props.timeRange}});
     super.draw(params);
