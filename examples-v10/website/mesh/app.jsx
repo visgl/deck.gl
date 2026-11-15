@@ -12,10 +12,6 @@ import {SolidPolygonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 import {OBJLoader} from '@loaders.gl/scene/obj';
-import {registerLoaders} from '@loaders.gl/core';
-
-// Add the loaders that handle your mesh format here
-registerLoaders([OBJLoader]);
 
 const MESH_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/mesh/minicooper.obj';
@@ -75,6 +71,8 @@ export default function App({device}) {
       id: 'mini-coopers',
       data: SAMPLE_DATA,
       mesh: MESH_URL,
+      loaders: [OBJLoader],
+      loadOptions: {obj: {shape: 'mesh'}},
       coordinateSystem: 'cartesian',
       getPosition: {sql: 'FLOAT64x2(x, y)'},
       getColor: {sql: 'RGBA8(red, 0.5, blue, 1)'},
