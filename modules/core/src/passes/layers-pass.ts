@@ -14,6 +14,7 @@ import type {Framebuffer, RenderPass} from '@luma.gl/core';
 import type {WebGLDevice} from '@luma.gl/core/webgl';
 import type {NumberArray4} from '@math.gl/core';
 
+import {normalizeByteColor4} from '@luma.gl/shaders';
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
@@ -327,9 +328,13 @@ export default class LayersPass extends Pass {
         // references as colors and is already cleared to transparent black.
         // `clearColor: false` below still means "don't clear color" in both modes.
         if (Array.isArray(clearColor) && !isPicking) {
-          colorToUse = [...clearColor.slice(0, 3), clearColor[3] || 255].map(
-            c => c / 255
-          ) as NumberArray4;
+          // Retain the legacy zero-alpha fallback while decoding public byte colors.
+          colorToUse = normalizeByteColor4([
+            clearColor[0],
+            clearColor[1],
+            clearColor[2],
+            clearColor[3] || 255
+          ]);
         } else if (clearColor === false) {
           colorToUse = false;
         }

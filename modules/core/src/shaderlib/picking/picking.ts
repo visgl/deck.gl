@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {picking, type ShaderModule, type ShaderPlugin} from '@luma.gl/shaders';
+import {picking, normalizeByteColor4, type ShaderModule, type ShaderPlugin} from '@luma.gl/shaders';
 import log from '../../utils/log';
 
 export const PICKING_MAX_DISABLED_INDICES = 10;
@@ -163,7 +163,20 @@ const pickingModule: ShaderModule = {
     disabledPickingIndices2: [0, 0, 0, 0]
   },
   getUniforms(props, prevUniforms) {
-    const uniforms = picking.getUniforms(props, prevUniforms) as any;
+    // Decode semantic highlight colors separately from byte-encoded picking IDs.
+    const {highlightColor, ...pickingProps} = props;
+    const uniforms = picking.getUniforms(pickingProps, prevUniforms) as any;
+    if (highlightColor) {
+      uniforms.highlightColor = normalizeByteColor4(
+        [
+          highlightColor[0],
+          highlightColor[1],
+          highlightColor[2],
+          highlightColor[3] ?? (props.useByteColors === false ? 1 : 255)
+        ],
+        props.useByteColors ?? true
+      );
+    }
     const disabledPickingIndices = props.disabledPickingIndices || [];
     uniforms.disabledPickingIndexCount = disabledPickingIndices.length;
     uniforms.disabledPickingIndices0 = packDisabledPickingIndices(disabledPickingIndices, 0);
