@@ -19,7 +19,7 @@ export default defineConfig(async () => {
 
   return {
     resolve: {
-      dedupe: ['apache-arrow'],
+      dedupe: ['apache-arrow', 'react', 'react-dom'],
 
       alias: [
         ...Object.entries(aliases).map(([find, replacement]) => ({find, replacement})),
