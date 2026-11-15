@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkproject_website=self.webpackChunkproject_website||[]).push([["1568"],{39987(e,a,r){r.d(a,{DracoWASMLoaderWithParser:()=>p});var s=r(76690),c=r(62492),t=r(20721);let{preload:o,...i}=r(13659).V,p={...i,parse:async(e,a,r)=>await (0,t.j)(e,a,async()=>await (0,c._8)((0,s.$j)(a),"wasm",a?.draco?.decoderProfile),r)}}}]);
-//# sourceMappingURL=1568.2b1fbe4c.js.map
