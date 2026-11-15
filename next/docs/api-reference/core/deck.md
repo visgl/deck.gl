@@ -244,7 +244,7 @@ Notes:
 
 #### `sqlParser` (object, optional)[​](#sqlparser "Direct link to sqlparser")
 
-Parses SQL in [layer queries](https://deck.gl/next/docs/api-reference/core/layer.md#query) and Arrow accessor expressions. The parser can implement `parseQuery` for table queries and `parseExpression` for accessor expressions. Import `sqlParser` from `@deck.gl/core/sql` to use the math.gl parser.
+Overrides the parser for [layer queries](https://deck.gl/next/docs/api-reference/core/layer.md#query) and Arrow accessor expressions. Deck loads the math.gl parser on first use. Supply `parseQuery` to override table query parsing and `parseExpression` to override accessor expression parsing.
 
 #### `layers` (LayersList)[​](#layers "Direct link to layers")
 

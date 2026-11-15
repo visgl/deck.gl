@@ -1,1 +1,0 @@
-const o=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype),Symbol.toStringTag).get;function a(r){return ArrayBuffer.isView(r)?o.call(r):void 0}function e(r){return a(r)==="Float16Array"}const t=globalThis.Float16Array;function n(){return t??Uint16Array}function y(r){return!!(t&&r===t)}export{y as a,n as g,e as i};
