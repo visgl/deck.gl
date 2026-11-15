@@ -145,6 +145,34 @@ const layer = new H3ClusterLayer({
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
+
+  <TabItem value="query" label="Query">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {sqlParser} from '@deck.gl/core/sql';
+import {H3ClusterLayer} from '@deck.gl/geo-layers';
+import {Field, List, Table, Utf8, vectorFromArray} from 'apache-arrow';
+
+const cellType = new List(new Field('cell', new Utf8()));
+const data = new Table({cells: vectorFromArray([['8928308280fffff']], cellType)});
+
+new Deck({
+  sqlParser,
+  layers: [
+    new H3ClusterLayer({
+      data,
+      getHexagons: {sql: 'cells'},
+      getFillColor: [255, 140, 0]
+    })
+  ]
+});
+```
+
+See [Querying Arrow data](../../developer-guide/using-with-arrow.md#querying-arrow-data)
+for filtering rows and writing accessor expressions.
+
+  </TabItem>
 </Tabs>
 
 

@@ -156,6 +156,33 @@ const layer = new ScatterplotLayer({
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
+
+  <TabItem value="query" label="Query">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {sqlParser} from '@deck.gl/core/sql';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import {tableFromArrays} from 'apache-arrow';
+
+const data = tableFromArrays({longitude: [-122.4], latitude: [37.74], population: [100]});
+
+new Deck({
+  sqlParser,
+  layers: [
+    new ScatterplotLayer({
+      data,
+      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+      getRadius: {sql: 'FLOAT32(SQRT(population))'}
+    })
+  ]
+});
+```
+
+See [Querying Arrow data](../../developer-guide/using-with-arrow.md#querying-arrow-data)
+for filtering rows and writing accessor expressions.
+
+  </TabItem>
 </Tabs>
 
 

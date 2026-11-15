@@ -10,7 +10,6 @@ import {Field, FixedSizeList, Float32, Float64, Int16, Uint8, vectorFromArray} f
 import {validateProps, diffProps} from '../../../modules/core/src/lifecycle/props';
 import {resolveColumns} from '../../../modules/core/src/lib/resolve-columns';
 import {
-  hasScatterplotColumns,
   SCATTERPLOT_COLUMN_DEFINITIONS,
   ScatterplotLayerColumns
 } from '../../../modules/layers/src/scatterplot-layer/scatterplot-layer-columns';
@@ -47,7 +46,7 @@ void checkAccessorTypes;
 test('Scatterplot validates Arrow accessors and compares column identity', () => {
   const layer = new ScatterplotLayer(arrowProps);
   expect(() => validateProps(layer.props)).not.toThrow();
-  expect(hasScatterplotColumns(layer.props)).toBe(true);
+  expect(resolveColumns(layer.props, SCATTERPLOT_COLUMN_DEFINITIONS).radii).toBe(radii);
   expect(diffProps(layer.clone({getRadius: radii}).props, layer.props).propsChanged).toBe(false);
   expect(
     diffProps(layer.clone({getRadius: radii.slice()}).props, layer.props).propsChanged
@@ -64,7 +63,9 @@ test('Arrow accessors select columns without a competing CPU column prop', () =>
     'requires a GPUVector'
   );
   expect(resolveColumns({getRadius: radii}, {radii: {accessor: 'getRadius'}})).toEqual({});
-  expect(hasScatterplotColumns(new ScatterplotLayer({getRadius: 2}).props)).toBe(false);
+  expect(
+    resolveColumns(new ScatterplotLayer({getRadius: 2}).props, SCATTERPLOT_COLUMN_DEFINITIONS)
+  ).toEqual({});
 });
 
 test('GPU vectors are rejected as accessors and remain borrowed column inputs', () => {

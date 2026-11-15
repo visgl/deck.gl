@@ -4,7 +4,7 @@
 
 import type {Device} from '@luma.gl/core';
 import type {GPUVector} from '@luma.gl/graph/gpu-data';
-import {type RecordBatch, type Vector} from 'apache-arrow';
+import {type Data, type RecordBatch, Vector} from 'apache-arrow';
 import {
   convertArrowColumnToGPUVector,
   type ArrowColumnGPUVectorOptions,
@@ -78,6 +78,19 @@ export class ArrowConverter {
     vector: Vector,
     options: ArrowConverterOptions = {}
   ): Promise<PreparedArrowColumnGPUVector> {
+    return this.convertVector(vector, options);
+  }
+
+  /** Converts one Arrow data chunk without uploading preceding chunks. */
+  convertChunk(data: Data, options: ArrowConverterOptions): PreparedArrowColumnGPUVector {
+    return this.convertVector(new Vector([data]), options);
+  }
+
+  /** Resolves a layer format and delegates the GPU upload to luma.gl. */
+  private convertVector(
+    vector: Vector,
+    options: ArrowConverterOptions
+  ): PreparedArrowColumnGPUVector {
     const {semantic = 'auto', nullPolicy = 'reject', ...conversion} = options;
     const format = getArrowConversionFormat(vector.type, options);
     return convertArrowColumnToGPUVector(this.device, vector, {

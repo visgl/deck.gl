@@ -164,6 +164,36 @@ const layer = new IconLayer({
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
+
+  <TabItem value="query" label="Query">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {sqlParser} from '@deck.gl/core/sql';
+import {IconLayer} from '@deck.gl/layers';
+import {tableFromArrays} from 'apache-arrow';
+
+const data = tableFromArrays({longitude: [-122.4], latitude: [37.74], icon: ['marker']});
+
+new Deck({
+  sqlParser,
+  layers: [
+    new IconLayer({
+      data,
+      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+      getIcon: row => row.icon,
+      iconAtlas: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png',
+      iconMapping: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.json',
+      getSize: 40
+    })
+  ]
+});
+```
+
+See [Querying Arrow data](../../developer-guide/using-with-arrow.md#querying-arrow-data)
+for filtering rows and writing accessor expressions.
+
+  </TabItem>
 </Tabs>
 
 

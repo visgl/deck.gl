@@ -153,6 +153,34 @@ const layer = new SimpleMeshLayer({
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
+
+  <TabItem value="query" label="Query">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {sqlParser} from '@deck.gl/core/sql';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {CubeGeometry} from '@luma.gl/engine';
+import {tableFromArrays} from 'apache-arrow';
+
+const data = tableFromArrays({longitude: [-122.4], latitude: [37.74]});
+
+new Deck({
+  sqlParser,
+  layers: [
+    new SimpleMeshLayer({
+      data,
+      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+      mesh: new CubeGeometry()
+    })
+  ]
+});
+```
+
+See [Querying Arrow data](../../developer-guide/using-with-arrow.md#querying-arrow-data)
+for filtering rows and writing accessor expressions.
+
+  </TabItem>
 </Tabs>
 
 

@@ -128,6 +128,53 @@ See each layer's prop descriptions for supported inputs and the [loading data gu
 for other ways to provide data.
 
 
+## Querying Arrow data
+
+[Deck's `sqlParser`](../api-reference/core/deck.md#sqlparser) enables two ways to
+use SQL with an Arrow table. The layer's [`query`](../api-reference/core/layer.md#query)
+runs on the input data and can filter, rename, or select fields. An Arrow-enabled
+accessor with `{sql: string}` evaluates an expression over the loaded rows.
+
+```ts
+import {Deck} from '@deck.gl/core';
+import {sqlParser} from '@deck.gl/core/sql';
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+new Deck({
+  sqlParser,
+  layers: [
+    new ScatterplotLayer({
+      id: 'points',
+      data: tablePromise,
+      query: 'SELECT * WHERE longitude IS NOT NULL AND latitude IS NOT NULL',
+      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+      getRadius: {sql: 'FLOAT32(SQRT(population))'},
+      getFillColor: {sql: 'RGBA8(red, green, blue, 1.0)'}
+    })
+  ]
+});
+```
+
+The layer's data is the implicit source. `FROM data` is optional.
+For a URL, a source-capable loaders.gl loader can push down parts of the query.
+Each accessor expression returns one value per loaded row in order. Picking
+returns the row from the loaded table. Direct GPUVector props take precedence
+over SQL or Arrow accessors for the same input.
+
+Use `FLOAT32(expression)` to cast a numeric value to a 32-bit float. The typed
+constructors `FLOAT32x2/x3/x4`, `FLOAT64x2/x3/x4`, `RGBA8`, `RGBA16`,
+`RGBA16F`, and `RGBA32F` build fixed-size lists. `RGBA8` and `RGBA16` clamp
+channels to [0, 1] and scale them to their integer ranges. A null component
+makes the output value null. Use typed vector constructors at the top level
+of an accessor expression.
+
+## Matching table fields to accessors
+
+ScatterplotLayer uses matching, compatible Arrow table fields when an explicit
+Arrow accessor or GPUVector is absent. Use the exact accessor name, such as
+`getPosition` or `getRadius`. The table can be passed directly or resolved
+asynchronously. Accessors and picking can still read other fields on the row.
+
 ## Direct GPUVector inputs
 
 Some layers expose optional props for caller-owned luma.gl `GPUVector` buffers.

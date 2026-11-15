@@ -156,6 +156,33 @@ const layer = new ScenegraphLayer({
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
+
+  <TabItem value="query" label="Query">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {sqlParser} from '@deck.gl/core/sql';
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {tableFromArrays} from 'apache-arrow';
+
+const data = tableFromArrays({longitude: [-122.4], latitude: [37.74]});
+
+new Deck({
+  sqlParser,
+  layers: [
+    new ScenegraphLayer({
+      data,
+      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+      scenegraph: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb'
+    })
+  ]
+});
+```
+
+See [Querying Arrow data](../../developer-guide/using-with-arrow.md#querying-arrow-data)
+for filtering rows and writing accessor expressions.
+
+  </TabItem>
 </Tabs>
 
 

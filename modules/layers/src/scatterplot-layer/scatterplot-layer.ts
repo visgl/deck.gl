@@ -19,7 +19,7 @@ import fs from './scatterplot-layer-fragment.glsl';
 import {getShaderWGSL} from './scatterplot-layer.wgsl';
 import {
   ScatterplotLayerColumns,
-  hasScatterplotColumns,
+  SCATTERPLOT_COLUMN_DEFINITIONS,
   type ScatterplotColumnProps
 } from './scatterplot-layer-columns';
 
@@ -199,6 +199,11 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     columns?: ScatterplotLayerColumns;
   };
 
+  /** Uses the same selected inputs as column preparation to choose the model. */
+  private hasColumns(): boolean {
+    return Object.keys(this.resolveColumns(SCATTERPLOT_COLUMN_DEFINITIONS, true)).length > 0;
+  }
+
   /** Uses converted position bounds when Arrow columns bypass the attribute manager. */
   getBounds(): [number[], number[]] | null {
     return this.state?.columns ? this.state.columns.getBounds() : super.getBounds();
@@ -206,7 +211,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
 
   /** Bypasses accessor attribute generation when explicit columns drive the model. */
   protected _getAttributeManager() {
-    return hasScatterplotColumns(this.props) ? null : super._getAttributeManager();
+    return this.hasColumns() ? null : super._getAttributeManager();
   }
 
   /** Uses the prepared column length as the instance count in column mode. */
@@ -235,7 +240,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       fs,
       source: getShaderWGSL(
         useRowIndexes,
-        this.context.device.type === 'webgpu' && hasScatterplotColumns(this.props)
+        this.context.device.type === 'webgpu' && this.hasColumns()
       ),
       defines: useRowIndexes ? {USE_ROW_INDEXES: true} : {},
       modules: [project32, color, picking, scatterplotUniforms]
@@ -243,7 +248,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   }
 
   initializeState() {
-    if (hasScatterplotColumns(this.props)) {
+    if (this.hasColumns()) {
       if (this.props.extensions.length)
         throw new Error('Scatterplot Arrow columns do not support extensions');
       return;
@@ -313,7 +318,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   }
 
   updateState(params: UpdateParameters<this>) {
-    if (hasScatterplotColumns(this.props)) {
+    if (this.hasColumns()) {
       this.updateColumnState(params);
       return;
     }
@@ -358,7 +363,15 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       this.state.model?.destroy();
       this.state.model = this._getModel();
     }
-    void this.state.columns!.updateIfNeeded(params, {
+    const data = this.getColumnData();
+    const columnParams =
+      data === params.props.data
+        ? params
+        : {
+            ...params,
+            props: Object.create(params.props, {data: {value: data}})
+          };
+    void this.state.columns!.updateIfNeeded(columnParams, {
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});
@@ -368,7 +381,9 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       positionOptions: {
         transform: this.usePositionTransforms().transform?.bind(this),
         fp64: this.use64bitPositions(),
-        requireRows: !this.props.positions && this.props.getPosition === defaultPosition
+        requireRows:
+          !this.resolveColumns(SCATTERPLOT_COLUMN_DEFINITIONS, true).positions &&
+          this.props.getPosition === defaultPosition
       }
     });
   }

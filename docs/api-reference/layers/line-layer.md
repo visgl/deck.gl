@@ -160,6 +160,38 @@ const layer = new LineLayer({
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
+
+  <TabItem value="query" label="Query">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {sqlParser} from '@deck.gl/core/sql';
+import {LineLayer} from '@deck.gl/layers';
+import {tableFromArrays} from 'apache-arrow';
+
+const data = tableFromArrays({
+  sourceLongitude: [-122.4],
+  sourceLatitude: [37.74],
+  targetLongitude: [-122.41],
+  targetLatitude: [37.75]
+});
+
+new Deck({
+  sqlParser,
+  layers: [
+    new LineLayer({
+      data,
+      getSourcePosition: {sql: 'FLOAT64x2(sourceLongitude, sourceLatitude)'},
+      getTargetPosition: {sql: 'FLOAT64x2(targetLongitude, targetLatitude)'}
+    })
+  ]
+});
+```
+
+See [Querying Arrow data](../../developer-guide/using-with-arrow.md#querying-arrow-data)
+for filtering rows and writing accessor expressions.
+
+  </TabItem>
 </Tabs>
 
 
