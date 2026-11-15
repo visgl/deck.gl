@@ -120,7 +120,7 @@ export default function App({
         getColor: {
           sql: `RGBA8(
             1 - start_altitude / 5000,
-            (128 / 255) * start_altitude / 10000,
+            128 * start_altitude / (255 * 10000),
             start_altitude / 10000,
             1 - start_altitude / 10000
           )`

@@ -201,3 +201,19 @@ test('typed SQL colors clamp channels and propagate nulls', () => {
     )
   ).toThrow('requires exactly 4 arguments');
 });
+
+test('SQL colors normalize byte channels with arithmetic and CASE', () => {
+  const data = tableFromArrays({gender: [1, 2], altitude: new Float64Array([5000, 2500])});
+  const result = evaluateAccessorQueries(
+    data,
+    {
+      categorical: 'RGBA8(0, (CASE WHEN gender = 1 THEN 128 ELSE 0 END) / 255, 0, 1)',
+      continuous: 'RGBA8(0, 128 * altitude / (255 * 10000), 0, 1)'
+    },
+    undefined
+  );
+  expect(Array.from(result.getChild('categorical')!.get(0))).toEqual([0, 128, 0, 255]);
+  expect(Array.from(result.getChild('categorical')!.get(1))).toEqual([0, 0, 0, 255]);
+  expect(Array.from(result.getChild('continuous')!.get(0))).toEqual([0, 64, 0, 255]);
+  expect(Array.from(result.getChild('continuous')!.get(1))).toEqual([0, 32, 0, 255]);
+});

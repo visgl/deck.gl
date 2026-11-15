@@ -31,6 +31,7 @@ const deckOverlay = new DeckOverlay({
       // Sample row: Sahnewal (LUH), scalerank 9, longitude 75.95707224036518, latitude 30.850359856170176
       data: AIRPORTS,
       loaders: [JSONTableLoader],
+      loadOptions: {json: {shape: 'arrow-table'}},
       getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
       getRadius: {sql: 'FLOAT32(11 - scalerank)'},
       radiusMinPixels: 2,
