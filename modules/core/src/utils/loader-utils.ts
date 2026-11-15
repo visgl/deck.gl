@@ -19,6 +19,7 @@ export function equalLoaderOptions(a: unknown, b: unknown): boolean {
   return compareOptions(a, b, new WeakMap());
 }
 
+/** Compares nested options while tracking circular references. */
 function compareOptions(a: unknown, b: unknown, seen: WeakMap<object, object>): boolean {
   if (Object.is(a, b)) {
     return true;
@@ -43,6 +44,7 @@ function compareOptions(a: unknown, b: unknown, seen: WeakMap<object, object>): 
   return equal;
 }
 
+/** Identifies options that can be compared by their own properties. */
 function isOptionContainer(value: unknown): value is Record<string, unknown> {
   if (!value || typeof value !== 'object') {
     return false;

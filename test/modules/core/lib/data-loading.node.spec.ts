@@ -213,7 +213,7 @@ test('URL loading consumes real CSV loader batches without metadata or wrappers'
       csv: {shape: 'object-row-table'}
     }
   });
-  layer.context = {resourceManager: {contains: () => false}} as never;
+  layer.context = {resourceManager: {contains: () => false, unsubscribe: vi.fn()}} as never;
   state.setAsyncProps(layer.props);
   await vi.waitFor(() => {
     expect(error.mock.calls).toEqual([]);

@@ -135,6 +135,7 @@ const defaultProps: DefaultProps<LayerProps> = {
       }
 
       if (propName === 'data' && layer.props._dataLoadOptions !== 'auto') {
+        resourceManager.unsubscribe({consumerId: layer.id, requestId: propName});
         return loadInBatches(url, loaders, loadOptions);
       }
 

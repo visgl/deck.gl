@@ -29,6 +29,7 @@ export type ChangeFlags = {
 };
 
 export default class LayerState<LayerT extends Layer> extends ComponentState<LayerT> {
+  /** Options used by the current URL stream. */
   private dataRequest?: {
     mode: LayerT['props']['_dataLoadOptions'];
     loaders: LayerT['props']['loaders'];
