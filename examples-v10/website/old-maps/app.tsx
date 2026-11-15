@@ -120,17 +120,26 @@ const MIN_MAP_SIZE = 16;
 // The maps on screen and large enough to see, as a comma-separated list of ids
 function getVisibleMapIds(map: MapLibreMap): string {
   const bounds = map.getBounds();
+  const viewWest = bounds.getWest();
+  const viewEast = bounds.getEast();
+  const viewLongitude = (viewWest + viewEast) / 2;
+  const repeat = map.getRenderWorldCopies();
   return OLD_MAPS.filter(({bounds: [west, south, east, north]}) => {
+    // Use the copy of the scan closest to the center of the visible longitude range.
+    const scanLongitude = (west + east) / 2;
+    const offset = repeat ? 360 * Math.round((viewLongitude - scanLongitude) / 360) : 0;
+    const scanWest = west + offset;
+    const scanEast = east + offset;
     if (
-      east < bounds.getWest() ||
-      west > bounds.getEast() ||
+      scanEast < viewWest ||
+      scanWest > viewEast ||
       north < bounds.getSouth() ||
       south > bounds.getNorth()
     ) {
       return false;
     }
-    const {x: x0, y: y0} = map.project([west, south]);
-    const {x: x1, y: y1} = map.project([east, north]);
+    const {x: x0, y: y0} = map.project([scanWest, south]);
+    const {x: x1, y: y1} = map.project([scanEast, north]);
     return Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) >= MIN_MAP_SIZE;
   })
     .map(m => m.id)
@@ -165,6 +174,7 @@ export default function App({
   autoplay?: boolean;
   opacity?: number;
   mapStyle?: string;
+  /** Projection used by the MapLibre basemap and deck.gl overlay. */
   projection?: 'mercator' | 'globe';
   onMapChange?: (map: OldMap) => void;
 }) {

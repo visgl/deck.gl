@@ -97,12 +97,15 @@ const PIN_MESH = createPinMesh();
 
 /** Inputs for the example's geographic map pins. */
 type PinLayerProps<DataT> = CompositeLayerProps & {
+  /** One row per pin. */
   data: DataT[];
+  /** Returns the longitude and latitude of the point of the pin. */
   getPosition: (object: DataT) => Position;
 };
 
 /** Draws shaded 3D pins with a nominal screen width of 24 pixels. */
 export default class PinLayer<DataT> extends CompositeLayer<PinLayerProps<DataT>> {
+  /** Name used by deck.gl to identify this layer type. */
   static layerName = 'PinLayer';
 
   /** Resizes the mesh when the camera scale changes. */
