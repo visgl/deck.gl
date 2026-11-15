@@ -145,6 +145,8 @@ export function renderCellColumns(
       )
     }),
     data,
+    // The source query has already run before cell expansion.
+    query: undefined,
     dataTransform: undefined,
     // Compare semantic rows: fresh expansion alone must not invalidate geometry.
     dataComparator: (next, previous) =>

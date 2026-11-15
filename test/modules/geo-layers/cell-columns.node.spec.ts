@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
+import {LayerManager, WebMercatorViewport} from '@deck.gl/core';
+import {CSVLoader} from '@loaders.gl/tables/csv';
+import {NullDevice} from '@luma.gl/core/test-utils';
 import {h3IndexToSplitLong} from 'h3-js';
 import LayerState from '../../../modules/core/src/lib/layer-state';
 import {
@@ -139,15 +142,54 @@ test('H3 column wrapper leaves viewport updates to its child', () => {
 test('generated rows clear source data hooks', () => {
   const layer = new S2Layer({
     getS2Token: vectorFromArray(['89c25']),
+    query: "SELECT id, value WHERE value IN ('15')",
     dataTransform: rows => rows,
     dataComparator: () => true,
     _dataDiff: () => []
   });
   const child = layer.renderLayers() as any;
+  expect(child.props.query).toBeFalsy();
   expect(child.props.dataTransform).toBeFalsy();
   expect(child.props.dataComparator).not.toBe(layer.props.dataComparator);
   expect(child.props.dataComparator(child.props.data, [])).toBe(false);
   expect(child.props._dataDiff).toBeFalsy();
+});
+
+test('SQL-filtered grid cells preserve leading zeros and generate child geometry', async () => {
+  const device = new NullDevice({});
+  const manager = new LayerManager(device, {viewport: new WebMercatorViewport()});
+  const onError = vi.fn();
+  const layer = new QuadkeyLayer({
+    data: 'https://example.test/grid.csv',
+    loaders: [CSVLoader],
+    loadOptions: {
+      core: {
+        fetch: async () =>
+          new Response('id,value\n011021211,15\n001122301,9\n', {
+            headers: {'content-type': 'text/csv'}
+          })
+      },
+      csv: {shape: 'arrow-table', dynamicTyping: false}
+    },
+    query: "SELECT id, value WHERE value IN ('15')",
+    getQuadkey: {sql: 'id'},
+    onError
+  });
+  try {
+    manager.setLayers([layer]);
+    await vi.waitFor(() => {
+      manager.updateLayers();
+      const child = layer.getSubLayers()[0] as QuadkeyLayer;
+      const rows = child?.props.data as unknown[];
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({cell: '011021211'});
+      expect(layer.isLoaded).toBe(true);
+    });
+    expect(onError).not.toHaveBeenCalled();
+  } finally {
+    manager.finalize();
+    device.destroy();
+  }
 });
 
 test('signed S2 identifiers preserve their unsigned token', () => {
