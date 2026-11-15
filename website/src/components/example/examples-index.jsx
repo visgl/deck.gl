@@ -24,10 +24,16 @@ function renderItem(item, getThumbnail) {
   );
 }
 
+/** Renders category headings and cards, including nested proposal groups. */
 function renderCategory({label, items}, getThumbnail) {
   return [
     <ExampleHeader key={`${label}-header`}>{label}</ExampleHeader>,
-    <ExamplesGroup key={label}>{items.map(item => renderItem(item, getThumbnail))}</ExamplesGroup>
+    <ExamplesGroup key={label}>
+      {items.filter(item => item.type !== 'category').map(item => renderItem(item, getThumbnail))}
+    </ExamplesGroup>,
+    ...items
+      .filter(item => item.type === 'category')
+      .flatMap(item => renderCategory(item, getThumbnail))
   ];
 }
 
