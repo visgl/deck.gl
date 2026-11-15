@@ -35,6 +35,16 @@ main .container {
 .menu__link {
   line-height: 1.5;
 }
+/* Apache Arrow format logo from the loaders.gl website. */
+.example-sidebar-arrow > .menu__link::after {
+  content: url('../static/images/apache-arrow-logo.png') / 'Uses Apache Arrow data';
+  object-fit: contain;
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 1rem;
+  margin-inline-start: auto;
+}
+
 .menu__list {
   padding-bottom: 0.5rem;
 }
