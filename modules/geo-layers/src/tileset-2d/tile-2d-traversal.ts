@@ -90,18 +90,29 @@ class OSMNode {
     elevationBounds: ZRange;
     minZ: number;
     maxZ: number;
-    bounds?: Bounds[];
+    bounds?: Bounds;
+    /** Bounds of the ground that a custom projection shows, for a tile without a bounding volume */
+    viewBounds?: Bounds[];
     offset: number;
   }) {
     const {viewport, cullingVolume, elevationBounds, minZ, maxZ, bounds, offset, project, isGlobe} =
       params;
+    const {viewBounds} = params;
 
     // First, check if this tile is visible
-    if (bounds && !bounds.some(b => this.insideBounds(b))) {
+    if (bounds && !this.insideBounds(bounds)) {
       return false;
     }
 
     const boundingVolume = this.getBoundingVolume(elevationBounds, offset, project);
+    const isPartial = boundingVolume === PARTIAL_BOUNDING_VOLUME;
+    if (!boundingVolume || isPartial) {
+      // Some reference points of the tile are not in the area of use of the custom projection.
+      // The frustum test is not possible. Use the bounds of the visible ground.
+      if (viewBounds && !viewBounds.some(b => this.insideBounds(b))) {
+        return false;
+      }
+    }
     if (!boundingVolume) {
       // No reference point of the tile is in the area of use of the custom projection.
       if (this.z < maxZ) {
@@ -120,7 +131,6 @@ class OSMNode {
     }
     // A tile that is partially in the area of use of a custom projection passed the bounds test.
     // Keep it.
-    const isPartial = boundingVolume === PARTIAL_BOUNDING_VOLUME;
     if (!isPartial && cullingVolume.computeVisibility(boundingVolume) === 'outside') {
       return false;
     }
@@ -453,17 +463,6 @@ export function getGeographicBounds(
     : [[minLng, minLat, maxLng, maxLat]];
 }
 
-/** Returns the intersection of two WGS84 bounds, or null if they do not overlap */
-function intersectBounds(a: Bounds, b: Bounds): Bounds | null {
-  const result: Bounds = [
-    Math.max(a[0], b[0]),
-    Math.max(a[1], b[1]),
-    Math.min(a[2], b[2]),
-    Math.min(a[3], b[3])
-  ];
-  return result[0] < result[2] && result[1] < result[3] ? result : null;
-}
-
 // eslint-disable-next-line complexity
 export function getOSMTileIndices(
   viewport: Viewport,
@@ -501,24 +500,18 @@ export function getOSMTileIndices(
       ? maxZ
       : 0;
 
-  let geographicBounds: Bounds[] | undefined = extent && [extent];
-  if (isCustomProjection) {
-    // The frustum test is not sufficient: a tile at the edge of the area of use of the CRS has
-    // no bounding volume. Select tiles only in the WGS84 bounds of the visible ground.
-    geographicBounds = getGeographicBounds(viewport, getGroundPositions(viewport, zRange))
-      .map(viewBounds => (extent ? intersectBounds(viewBounds, extent) : viewBounds))
-      .filter(Boolean) as Bounds[];
-    if (!geographicBounds.length) {
-      return [];
-    }
-  }
-
-  // Map extent to OSM position
-  const bounds = geographicBounds?.map(([minLng, minLat, maxLng, maxLat]): Bounds => {
+  // Map bounds to OSM position
+  const toWorldBounds = ([minLng, minLat, maxLng, maxLat]: Bounds): Bounds => {
     const topLeft = lngLatToWorld([minLng, maxLat]);
     const bottomRight = lngLatToWorld([maxLng, minLat]);
     return [topLeft[0], TILE_SIZE - topLeft[1], bottomRight[0], TILE_SIZE - bottomRight[1]];
-  });
+  };
+  const bounds = extent && toWorldBounds(extent);
+  // A tile at the edge of the area of use of a custom projection has no bounding volume.
+  // Select such a tile only in the WGS84 bounds of the visible ground.
+  const viewBounds = isCustomProjection
+    ? getGeographicBounds(viewport, getGroundPositions(viewport, zRange)).map(toWorldBounds)
+    : undefined;
 
   const root = new OSMNode(0, 0, 0);
   const traversalParams = {
@@ -530,6 +523,7 @@ export function getOSMTileIndices(
     minZ,
     maxZ,
     bounds,
+    viewBounds,
     // num. of worlds from the center. For repeated maps
     offset: 0
   };

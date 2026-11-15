@@ -658,6 +658,44 @@ test('getTileIndices#CustomProjectionView finds an area of use that is small on 
   ]);
 });
 
+test('getTileIndices#CustomProjectionView covers the ground of a view with a high pitch', async () => {
+  const viewport = await makeCustomProjectionViewport(SOUTH_POLAR_STEREOGRAPHIC, {
+    center: [120, -65, 0],
+    zoom: 7,
+    pitch: 75
+  });
+  const boxes = getTileIndices({viewport, zRange: null, maxZoom: 5}).map(({x, y, z}) =>
+    tileToBoundingBox(viewport, x, y, z)
+  ) as {west: number; north: number; east: number; south: number}[];
+  expect(boxes.length).toBeGreaterThan(0);
+
+  // Each ground position on screen is in a selected tile
+  const missing: string[] = [];
+  let groundCount = 0;
+  for (let x = 10; x < 800; x += 20) {
+    for (let y = 10; y < 400; y += 20) {
+      const [lng, lat] = viewport.unproject([x, y]);
+      const pixel = viewport.project([lng, lat, 0]);
+      // Ignore a pixel that shows no ground: above the horizon, or behind the far plane
+      const isGround =
+        Math.abs(pixel[0] - x) < 1e-3 &&
+        Math.abs(pixel[1] - y) < 1e-3 &&
+        pixel[2] >= 0 &&
+        pixel[2] <= 1 &&
+        Math.abs(lat) < 85;
+      groundCount += isGround ? 1 : 0;
+      if (
+        isGround &&
+        !boxes.some(b => lng >= b.west && lng <= b.east && lat >= b.south && lat <= b.north)
+      ) {
+        missing.push(`${x},${y}`);
+      }
+    }
+  }
+  expect(groundCount, 'pixels that show the ground').toBeGreaterThan(400);
+  expect(missing).toEqual([]);
+});
+
 test('getTileIndices#CustomProjectionView respects extent and maxZoom', async () => {
   const viewport = await makeCustomProjectionViewport(UTM_15N, {
     center: [-93.2, 45, 0],
