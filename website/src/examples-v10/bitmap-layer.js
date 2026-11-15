@@ -32,6 +32,12 @@ class BitmapLayerDemo extends Component {
       options: Object.keys(MAPS_BY_LABEL),
       value: getLabel(OLD_MAPS[0])
     },
+    projection: {
+      displayName: 'Projection',
+      type: 'select',
+      options: ['Mercator', 'Globe'],
+      value: 'Mercator'
+    },
     opacity: {displayName: 'Opacity', type: 'range', value: 1, step: 0.05, min: 0, max: 1}
   };
 
@@ -45,7 +51,10 @@ class BitmapLayerDemo extends Component {
           Scanned historical maps, each drawn as a single image stretched over its geographic bounds
           with a BitmapLayer. Fade the opacity to compare the old city with the new.
         </p>
-        <p>Moving the map pauses the tour. Use the buttons at the bottom to resume it or skip ahead.</p>
+        <p>
+          Zoom out to find other maps and select a pin to fly there. Moving the map pauses the tour.
+          Use the buttons at the bottom to resume it or skip ahead.
+        </p>
         {map && (
           <p>
             <i>{map.title}</i>
@@ -98,6 +107,7 @@ class BitmapLayerDemo extends Component {
         device={device}
         mapId={MAPS_BY_LABEL[params.map.value].id}
         opacity={params.opacity.value}
+        projection={params.projection.value === 'Globe' ? 'globe' : 'mercator'}
         onMapChange={this._onMapChange}
       />
     );
