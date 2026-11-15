@@ -24,6 +24,9 @@ use cases.
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -134,6 +137,31 @@ function App() {
   />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+import {IconLayer} from '@deck.gl/layers';
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+
+const layer = new IconLayer({
+  data: [{icon: 'marker'}],
+  getPosition: positions,
+  getIcon: row => row.icon,
+  iconAtlas: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png',
+  iconMapping: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.json',
+  getSize: 40
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
 </Tabs>
@@ -532,6 +560,26 @@ If `data.attributes.getIcon` is supplied, since its value can only be a typed ar
 - Provide one `data` row per icon so `getIcon` can select it in either atlas mode.
 - If varying attributes exceed the WebGPU device's vertex buffer limit, use constant
   accessors for styling values shared by all icons.
+
+## GPUVector inputs (unstable)
+
+These props use layer-specific GPU layouts. Their names, layouts, and behavior can change
+at any time.
+
+Each optional prop accepts a caller-owned luma.gl `GPUVector`. Use the following GPU formats.
+
+| Prop | GPU format |
+| --- | --- |
+| `positions` | `float32x3` |
+| `sizes` | `float32` |
+| `colors` | `unorm8x4` |
+| `angles` | `float32` |
+| `pixelOffsets` | `float32x2` |
+
+
+The vectors contain one value per rendered instance in instance order. See
+[Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs)
+for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source
 

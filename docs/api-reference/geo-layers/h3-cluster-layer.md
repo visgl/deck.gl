@@ -12,6 +12,9 @@ The `H3ClusterLayer` renders regions represented by hexagon sets from the [H3](h
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -120,6 +123,26 @@ function App() {
   />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Field, List, Utf8, vectorFromArray} from 'apache-arrow';
+import {H3ClusterLayer} from '@deck.gl/geo-layers';
+
+const cells = vectorFromArray([['8928308280fffff']], new List(new Field('cell', new Utf8())));
+
+const layer = new H3ClusterLayer({
+  getHexagons: cells,
+  getFillColor: [255, 140, 0]
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
 </Tabs>

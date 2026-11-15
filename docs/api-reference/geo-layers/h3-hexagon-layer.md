@@ -12,6 +12,9 @@ The `H3HexagonLayer` renders hexagons from the [H3](https://h3geo.org/) geospati
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -118,6 +121,26 @@ function App() {
   />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Utf8, vectorFromArray} from 'apache-arrow';
+import {H3HexagonLayer} from '@deck.gl/geo-layers';
+
+const cells = vectorFromArray(['8928308280fffff'], new Utf8());
+
+const layer = new H3HexagonLayer({
+  getHexagon: cells,
+  getFillColor: [255, 140, 0]
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
 </Tabs>

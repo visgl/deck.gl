@@ -15,6 +15,9 @@ The `ScenegraphLayer` renders a number of instances of a complete glTF scenegrap
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -130,6 +133,27 @@ function App() {
   />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+
+const layer = new ScenegraphLayer({
+  getPosition: positions,
+  scenegraph: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxAnimated/glTF-Binary/BoxAnimated.glb'
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
 </Tabs>
@@ -319,6 +343,23 @@ The minimum size in pixels for one unit of the scene.
 * Default: `Number.MAX_SAFE_INTEGER`
 
 The maximum size in pixels for one unit of the scene.
+
+## GPUVector inputs (unstable)
+
+These props use layer-specific GPU layouts. Their names, layouts, and behavior can change
+at any time.
+
+Each optional prop accepts a caller-owned luma.gl `GPUVector`. Use the following GPU formats.
+
+| Prop | GPU format |
+| --- | --- |
+| `positions` | `float32x3` |
+| `colors` | `unorm8x4` |
+
+
+The vectors contain one value per rendered instance in instance order. See
+[Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs)
+for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source
 

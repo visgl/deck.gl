@@ -18,6 +18,9 @@ This is the primitive layer rendered by [GridLayer](../aggregation-layers/grid-l
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -132,6 +135,27 @@ function App() {
   </TabItem>
 </Tabs>
 
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+import {GridCellLayer} from '@deck.gl/layers';
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+
+const layer = new GridCellLayer({
+  getPosition: positions,
+  getElevation: vectorFromArray([100], new Float32())
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
+  </TabItem>
+</Tabs>
+
 
 ## Installation
 
@@ -235,6 +259,13 @@ The elevation of each cell in meters.
 
 An Arrow vector supplies one value per object. See [scalar columns](../../developer-guide/using-with-arrow.md#scalars) for requirements.
 
+
+## GPUVector inputs (unstable)
+
+These props use layer-specific GPU layouts. Their names, layouts, and behavior can change
+at any time.
+
+GridCellLayer accepts the [ColumnLayer GPUVector props](./column-layer.md#gpuvector-inputs-unstable).
 
 ## Source
 

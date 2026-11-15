@@ -12,6 +12,9 @@ The `S2Layer` renders filled and/or stroked polygons based on the [S2](http://s2
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -118,6 +121,26 @@ function App() {
   />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Utf8, vectorFromArray} from 'apache-arrow';
+import {S2Layer} from '@deck.gl/geo-layers';
+
+const cells = vectorFromArray(['89c25'], new Utf8());
+
+const layer = new S2Layer({
+  getS2Token: cells,
+  getFillColor: [255, 140, 0]
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
 </Tabs>

@@ -15,6 +15,9 @@ The `ArcLayer` renders raised arcs joining pairs of source and target coordinate
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -134,6 +137,28 @@ function App() {
   />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+import {ArcLayer} from '@deck.gl/layers';
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+const targets = vectorFromArray([[-122.41, 37.75]], positionType);
+
+const layer = new ArcLayer({
+  getSourcePosition: positions,
+  getTargetPosition: targets
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
 </Tabs>
@@ -302,6 +327,28 @@ An Arrow vector supplies one value per object. See [scalar columns](../../develo
 
 - If varying attributes exceed the WebGPU device's vertex buffer limit, use constant
   accessors for styling values shared by all arcs.
+
+## GPUVector inputs (unstable)
+
+These props use layer-specific GPU layouts. Their names, layouts, and behavior can change
+at any time.
+
+Each optional prop accepts a caller-owned luma.gl `GPUVector`. Use the following GPU formats.
+
+| Prop | GPU format |
+| --- | --- |
+| `sourcePositions` | `float32x3` |
+| `targetPositions` | `float32x3` |
+| `sourceColors` | `unorm8x4` |
+| `targetColors` | `unorm8x4` |
+| `widths` | `float32` |
+| `heights` | `float32` |
+| `tilts` | `float32` |
+
+
+The vectors contain one value per rendered instance in instance order. See
+[Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs)
+for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source
 

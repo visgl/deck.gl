@@ -543,6 +543,16 @@ The HexagonLayer renders the following sublayers:
 * `cells` - a [ColumnLayer](../layers/column-layer.md) rendering the aggregated columns.
 
 
+## GPUVector inputs (unstable)
+
+These props supply caller-owned GPU buffers to the aggregation path. Their names,
+layouts, and behavior can change at any time. Values are in input point order.
+
+Supply `positions`, `weights` in color and elevation order, and `dataBounds`
+as `[min, max]` in input coordinates. GPU inputs require a compatible WebGPU
+compute configuration with explicit color and elevation domains. Positions
+requiring CPU preprojection use the accessor path.
+
 ## Source
 
 [modules/aggregation-layers/src/hexagon-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/hexagon-layer)

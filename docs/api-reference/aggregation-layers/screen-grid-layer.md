@@ -310,6 +310,17 @@ The [PickingInfo.object](../../developer-guide/interactivity.md#the-pickinginfo-
 - `points` (object[]) - The data objects in the picked cell. Only available if using CPU aggregation and layer data is an array.
 
 
+## GPUVector inputs (unstable)
+
+These props supply caller-owned GPU buffers to the aggregation path. Their names,
+layouts, and behavior can change at any time. Values are in input point order.
+
+Supply single-chunk `float32x2` or `float32x3` `positions` and one
+matching single-chunk `float32` vector in `weights`. The built-in WebGPU
+compute path accepts buffers with `STORAGE` or `COPY_SRC` usage. Use positions
+in the view's coordinate system for custom views. The path requires a compute
+configuration without extensions or CPU position preprojection.
+
 ## Source
 
 [modules/aggregation-layers/src/screen-grid-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/screen-grid-layer)

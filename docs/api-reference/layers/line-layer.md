@@ -14,6 +14,9 @@ The `LineLayer` renders straight lines joining pairs of source and target coordi
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -137,6 +140,28 @@ function App() {
   </TabItem>
 </Tabs>
 
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+import {LineLayer} from '@deck.gl/layers';
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+const targets = vectorFromArray([[-122.41, 37.75]], positionType);
+
+const layer = new LineLayer({
+  getSourcePosition: positions,
+  getTargetPosition: targets
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
+  </TabItem>
+</Tabs>
+
 
 ## Installation
 
@@ -255,6 +280,25 @@ The line width of each object, in units specified by `widthUnits` (default pixel
 
 An Arrow vector supplies one value per object. See [scalar columns](../../developer-guide/using-with-arrow.md#scalars) for requirements.
 
+
+## GPUVector inputs (unstable)
+
+These props use layer-specific GPU layouts. Their names, layouts, and behavior can change
+at any time.
+
+Each optional prop accepts a caller-owned luma.gl `GPUVector`. Use the following GPU formats.
+
+| Prop | GPU format |
+| --- | --- |
+| `sourcePositions` | `float32x3` |
+| `targetPositions` | `float32x3` |
+| `colors` | `unorm8x4` |
+| `widths` | `float32` |
+
+
+The vectors contain one value per rendered instance in instance order. See
+[Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs)
+for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source
 

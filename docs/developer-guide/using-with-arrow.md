@@ -126,3 +126,25 @@ Arrow rendering accessors do not support attribute transitions or layer extensio
 
 See each layer's prop descriptions for supported inputs and the [loading data guide](./loading-data.md)
 for other ways to provide data.
+
+
+## Direct GPUVector inputs
+
+Some layers expose optional props for caller-owned luma.gl `GPUVector` buffers.
+These unstable props follow the layer's GPU layout and can change at any time.
+Check the layer reference for supported formats and the meaning and order of rows.
+
+Instanced rendering layers take values in rendered instance order. Supplied
+vectors must agree on row count and chunk boundaries. For GPU positions, choose a coordinate system that the rendering path can
+use directly. Layers that require CPU preprojection for the supplied
+coordinate system reject GPU position vectors. Provide row data for attributes
+that use callback accessors and for picking metadata.
+
+Layers that process features, tessellate geometry, or aggregate inputs can
+require different buffers from the values their public accessors return. An
+accessor can describe a source feature. A direct GPU input can represent
+prepared vertices, instances, or aggregator inputs. Follow the specific prop's
+contract when building those buffers.
+
+Keep the vectors and their buffers alive while the layer uses them. The layer
+borrows those buffers and releases its own conversion allocations.

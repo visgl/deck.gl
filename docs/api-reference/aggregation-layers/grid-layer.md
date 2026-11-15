@@ -547,6 +547,21 @@ The GridLayer renders the following sublayers:
 
 * `cells` - a custom layer that extends the [ColumnLayer](../layers/column-layer.md).
 
+## GPUVector inputs (unstable)
+
+These props supply caller-owned GPU buffers to the aggregation path. Their names,
+layouts, and behavior can change at any time. Values are in input point order.
+
+| Prop | Input |
+| --- | --- |
+| `positions` | Single-chunk `float32x2` or `float32x3` positions |
+| `weights` | Two matching single-chunk `float32` vectors, in color and elevation order |
+| `dataBounds` | Position bounds as `[min, max]` in input coordinates |
+
+The built-in WebGPU compute path requires buffers with `STORAGE` or `COPY_SRC`
+usage. Use positions in the view's coordinate system for custom views. The path
+requires a compute configuration without extensions or CPU position preprojection.
+
 ## Source
 
 [modules/aggregation-layers/src/grid-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/grid-layer)

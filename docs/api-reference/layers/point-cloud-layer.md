@@ -14,6 +14,9 @@ The `PointCloudLayer` renders a point cloud with 3D positions, normals and color
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -125,6 +128,26 @@ function App() {
   />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+import {PointCloudLayer} from '@deck.gl/layers';
+
+const positionType = new FixedSizeList(3, new Field('value', new Float32()));
+const positions = vectorFromArray([[0, 0, 0]], positionType);
+
+const layer = new PointCloudLayer({
+  getPosition: positions
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
 </Tabs>
@@ -242,6 +265,24 @@ For arrays and callback results, the rgba color is in the format of `[r, g, b, [
 
 An Arrow vector supplies one value per object. See [color columns](../../developer-guide/using-with-arrow.md#colors) for requirements.
 
+
+## GPUVector inputs (unstable)
+
+These props use layer-specific GPU layouts. Their names, layouts, and behavior can change
+at any time.
+
+Each optional prop accepts a caller-owned luma.gl `GPUVector`. Use the following GPU formats.
+
+| Prop | GPU format |
+| --- | --- |
+| `positions` | `float32x3` |
+| `normals` | `float32x3` |
+| `colors` | `unorm8x4` |
+
+
+The vectors contain one value per rendered instance in instance order. See
+[Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs)
+for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source
 
