@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@luma.gl/core": "10.0.0-alpha.15",
-    "@math.gl/core": "5.0.0-beta.8",
+    "@math.gl/core": "5.0.0-beta.10",
     "@types/google.maps": "^3.48.6"
   },
   "peerDependencies": {

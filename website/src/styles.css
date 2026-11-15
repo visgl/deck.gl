@@ -35,18 +35,26 @@ main .container {
 .menu__link {
   line-height: 1.5;
 }
-/* Apache Arrow format logo from the loaders.gl website. */
-.example-sidebar-arrow > .menu__link {
+.example-sidebar-ready > .menu__link,
+.example-sidebar-started > .menu__link,
+.example-sidebar-experimental > .menu__link {
   justify-content: flex-start;
   gap: 0.25rem;
 }
 
-.example-sidebar-arrow > .menu__link::after {
-  content: '';
-  content: '' / 'Uses Apache Arrow data';
-  background: url('../static/images/apache-arrow-logo.png') center / contain no-repeat;
-  flex: 0 0 1.65rem;
-  height: 0.625rem;
+.example-sidebar-ready > .menu__link::after {
+  content: '✅';
+  content: '✅' / 'Arrow and SQL port ready';
+}
+
+.example-sidebar-started > .menu__link::after {
+  content: '🚧';
+  content: '🚧' / 'Arrow and SQL port started';
+}
+
+.example-sidebar-experimental > .menu__link::after {
+  content: '🧪';
+  content: '🧪' / 'Experimental example';
 }
 
 .menu__list {

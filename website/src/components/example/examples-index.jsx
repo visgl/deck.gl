@@ -14,11 +14,12 @@ function renderItem(item, getThumbnail) {
   const imageUrl = useBaseUrl(getThumbnail(item));
   const arrowLogoUrl = useBaseUrl('/images/apache-arrow-logo.png');
   const {label, href, className} = item;
+  const usesArrow = ['example-sidebar-ready', 'example-sidebar-started'].includes(className);
 
   return (
     <ExampleCard key={label} href={href}>
       <img width="100%" src={imageUrl} alt={label} />
-      {className === 'example-sidebar-arrow' && (
+      {usesArrow && (
         <img className="example-thumbnail-arrow" src={arrowLogoUrl} alt="Uses Apache Arrow data" />
       )}
       <ExampleTitle>

@@ -57,7 +57,7 @@
     "@deck.gl/mesh-layers": "10.0.0-alpha.1",
     "@deck.gl/react": "10.0.0-alpha.1",
     "@deck.gl/widgets": "10.0.0-alpha.1",
-    "@loaders.gl/core": "5.0.0-beta.8",
+    "@loaders.gl/core": "5.0.0-beta.10",
     "@luma.gl/core": "10.0.0-alpha.15",
     "@luma.gl/engine": "10.0.0-alpha.15"
   },
