@@ -114,17 +114,17 @@ export default class PinLayer<DataT> extends CompositeLayer<PinLayerProps<DataT>
   renderLayers() {
     const {data, getPosition} = this.props;
     const {viewport} = this.context;
+    const isGlobe = viewport instanceof GlobeViewport;
     // The overlaid canvas has no depth buffer shared with the basemap.
-    const visibleData =
-      viewport instanceof GlobeViewport
-        ? data.filter(object => {
-            const [longitude, latitude] = getPosition(object);
-            const [x, y, z] = viewport.projectPosition([longitude, latitude, 0]);
-            const [cameraX, cameraY, cameraZ] = viewport.cameraPosition;
-            // A point faces the camera when its outward normal points toward the camera.
-            return x * (cameraX - x) + y * (cameraY - y) + z * (cameraZ - z) > 0;
-          })
-        : data;
+    const visibleData = isGlobe
+      ? data.filter(object => {
+          const [longitude, latitude] = getPosition(object);
+          const [x, y, z] = viewport.projectPosition([longitude, latitude, 0]);
+          const [cameraX, cameraY, cameraZ] = viewport.cameraPosition;
+          // A point faces the camera when its outward normal points toward the camera.
+          return x * (cameraX - x) + y * (cameraY - y) + z * (cameraZ - z) > 0;
+        })
+      : data;
 
     return new SimpleMeshLayer<DataT>(this.getSubLayerProps({id: 'mesh'}), {
       data: visibleData,
@@ -134,8 +134,8 @@ export default class PinLayer<DataT> extends CompositeLayer<PinLayerProps<DataT>
       mesh: PIN_MESH,
       // The mesh is one unit wide and SimpleMeshLayer sizes it in meters.
       sizeScale: 24 * viewport.metersPerPixel,
-      // Lean the pin so its tip is visible when looking straight down at the map.
-      getOrientation: [0, 0, -45],
+      // Local up is radial on the globe. The Mercator tilt exposes the pin tip.
+      getOrientation: isGlobe ? [0, 0, 0] : [0, 0, -45],
       getColor: [255, 255, 255],
       material: {ambient: 0.45, diffuse: 0.65, specularColor: [0, 0, 0]}
     });
