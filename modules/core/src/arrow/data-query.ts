@@ -26,13 +26,11 @@ export async function queryLayerData(
     if (!loaders?.length) {
       throw new Error('query requires a source-capable loader');
     }
-    return (await query(sql, {...(options as QueryOptions), source: input, loaders, sqlParser}))
-      .data;
+    return query(sql, {...(options as QueryOptions), source: input, loaders, sqlParser});
   }
   const data = unwrapLoaderArrowResult(input);
   if (!isArrowTable(data)) {
     throw new Error('query requires a URL or Arrow table data');
   }
-  const source = {shape: 'arrow-table' as const, data};
-  return (await query(sql, {source, sqlParser})).data;
+  return query(sql, {source: data, sqlParser});
 }
