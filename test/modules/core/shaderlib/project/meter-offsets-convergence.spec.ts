@@ -12,6 +12,7 @@ import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions
 import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
 import {projectionEngine} from '@math.gl/geospatial/projection';
+import {OSM_TILE_CRS} from '@deck.gl/core/viewports/web-mercator-util';
 import {createTestViewport} from '../../viewports/test-crs';
 import {runOnGPU, testUniforms} from './project-glsl-test-utils';
 
@@ -207,6 +208,71 @@ test('project#meter-offsets use the per-axis scale where the projection wraps', 
     new Matrix4().toArray()
   );
 });
+
+// The north and south samples of this anchor clamp to the same latitude as the anchor
+const clampOrigin: [number, number, number] = [0, 86, 0];
+const clampViewport = new CustomProjectionViewport({
+  crs: OSM_TILE_CRS,
+  center: [0, 80, 0],
+  zoom: 12,
+  width: 800,
+  height: 600
+});
+
+test('project#meter-offsets use the per-axis scale where the projection clamps (CPU)', () => {
+  const coordinateOrigin = clampOrigin;
+  const targetOrigin = clampViewport.crs.converter.WGS84.from(coordinateOrigin);
+  const {unitsPerMeter} = clampViewport.getDistanceScales(targetOrigin);
+  const props = {
+    viewport: clampViewport,
+    coordinateSystem: 'meter-offsets' as const,
+    coordinateOrigin
+  };
+  const anchor = clampViewport.projectPosition(coordinateOrigin);
+  const actual = projectPosition([1000, 2000, 0], {
+    ...props,
+    sourceCrs: null,
+    modelMatrix: null,
+    autoOffset: false
+  });
+  expect(actual[0]).toBeCloseTo(anchor[0] + 1000 * unitsPerMeter[0], 9);
+  expect(actual[1]).toBeCloseTo(anchor[1] + 2000 * unitsPerMeter[1], 9);
+  expect(actual[1], 'north offsets do not collapse onto the anchor').not.toBeCloseTo(anchor[1], 9);
+  expect(project.getUniforms(props).modelMatrix, 'modelMatrix is unchanged').toEqual(
+    new Matrix4().toArray()
+  );
+});
+
+gpuTest(
+  'project#meter-offsets use the per-axis scale where the projection clamps (GPU)',
+  async () => {
+    const targetOrigin = clampViewport.crs.converter.WGS84.from(clampOrigin);
+    const {unitsPerMeter} = clampViewport.getDistanceScales(targetOrigin);
+    const anchor = clampViewport.projectPosition(clampOrigin);
+    const expected = [anchor[0] + 1000 * unitsPerMeter[0], anchor[1] + 2000 * unitsPerMeter[1]];
+    const actual = await runOnGPU({
+      vs: `#version 300 es
+    out vec3 result;
+    void main() { result = project_position(test.uPos, test.uPos64Low) + project.commonOrigin; }`,
+      modules: [project, testUniforms],
+      vertexCount: 1,
+      varying: 'result',
+      shaderInputProps: {
+        project: {
+          viewport: clampViewport,
+          coordinateSystem: 'meter-offsets',
+          coordinateOrigin: clampOrigin
+        },
+        test: {uPos: [1000, 2000, 0], uPos64Low: [0, 0, 0]}
+      }
+    });
+    // Within 1/1000 of the offset length
+    const offset = Math.hypot(expected[0] - anchor[0], expected[1] - anchor[1]);
+    expect(Math.hypot(actual[0] - expected[0], actual[1] - expected[1]) / offset).toBeLessThan(
+      0.001
+    );
+  }
+);
 
 test('project#meter-offsets leave the model matrix of a WebMercatorViewport unchanged', () => {
   const uniforms = project.getUniforms({

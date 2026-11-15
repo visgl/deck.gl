@@ -146,7 +146,13 @@ function calculateMeterOffsetsJacobian({
   ].every(([after, before]) =>
     [0, 1].every(i => Math.abs(after[i] + before[i] - 2 * center[i]) <= tolerance)
   );
-  return isSmooth ? jacobian : null;
+  // A sample that clamps, for example at the latitude limit of Web Mercator, can give a
+  // zero or a parallel column, which collapses offsets onto a line.
+  const [eastX, eastY, northX, northY] = jacobian;
+  const isRegular =
+    Math.abs(eastX * northY - eastY * northX) >
+    1e-3 * Math.hypot(eastX, eastY) * Math.hypot(northX, northY);
+  return isSmooth && isRegular ? jacobian : null;
 }
 
 /**
