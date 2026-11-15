@@ -132,6 +132,8 @@ test('layer updates wait for SQL accessor values on replacement data', async () 
     await vi.waitFor(() => expect(first.isLoaded).toBe(true));
     manager.updateLayers();
     expect(initialUpdate).toHaveBeenCalledOnce();
+    first._drawLayer({renderPass, shaderModuleProps: null, uniforms: {}, parameters: {}});
+    expect(draw).toHaveBeenCalledOnce();
 
     const next = first.clone({data: tableFromArrays({x: [3], y: [4]})});
     const replacementUpdate = vi.spyOn(next, 'updateState');
