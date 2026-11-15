@@ -260,10 +260,11 @@ The elevation of each cell in meters.
 An Arrow vector supplies one value per object. See [scalar columns](../../developer-guide/using-with-arrow.md#scalars) for requirements.
 
 
-## GPUVector inputs (unstable)
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
 
-These props use layer-specific GPU layouts. Their names, layouts, and behavior can change
-at any time.
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
 
 GridCellLayer accepts the [ColumnLayer GPUVector props](./column-layer.md#gpuvector-inputs-unstable).
 

@@ -328,27 +328,24 @@ An Arrow vector supplies one value per object. See [scalar columns](../../develo
 - If varying attributes exceed the WebGPU device's vertex buffer limit, use constant
   accessors for styling values shared by all arcs.
 
-## GPUVector inputs (unstable)
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
 
-These props use layer-specific GPU layouts. Their names, layouts, and behavior can change
-at any time.
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
 
-Each optional prop accepts a caller-owned luma.gl `GPUVector`. Use the following GPU formats.
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
 
-| Prop | GPU format |
-| --- | --- |
-| `sourcePositions` | `float32x3` |
-| `targetPositions` | `float32x3` |
-| `sourceColors` | `unorm8x4` |
-| `targetColors` | `unorm8x4` |
-| `widths` | `float32` |
-| `heights` | `float32` |
-| `tilts` | `float32` |
+- `sourcePositions` – `float32x3` – Source positions in XYZ order.
+- `targetPositions` – `float32x3` – Target positions in XYZ order.
+- `sourceColors` – `unorm8x4` – Packed RGBA colors at source positions.
+- `targetColors` – `unorm8x4` – Packed RGBA colors at target positions.
+- `widths` – `float32`
+- `heights` – `float32`
+- `tilts` – `float32`
 
+Notes:
 
-The vectors contain one value per rendered instance in instance order. See
-[Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs)
-for ownership, chunk alignment, and preprocessing requirements.
+- Supply one value per rendered instance, in instance order.
+- See [Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs) for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source
 

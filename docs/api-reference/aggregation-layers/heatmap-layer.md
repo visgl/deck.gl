@@ -240,16 +240,21 @@ The `HeatmapLayer` performs aggregation on the GPU. On WebGPU, it uses instanced
 
 - iOS Safari: WebGL context does not support rendering to a float texture. The layer therefore falls back to an 8-bit low-precision mode, where weights must be integers and the accumulated weights in any pixel cannot exceed 255.
 
-## GPUVector inputs (unstable)
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
 
-These props supply caller-owned GPU buffers to the aggregation path. Their names,
-layouts, and behavior can change at any time. Values are in input point order.
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
 
-Supply a single-chunk `float32x3` vector in `positions` and one matching
-single-chunk `float32` vector in `weights`. Buffers must support vertex
-binding. Offsets and strides are preserved. The position vector supplies the
-input count, and `numInstances` can select a prefix. This path requires WebGPU
-and a configuration without extensions or CPU position preprojection.
+GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
+
+- `positions` – `float32x3` – A single-chunk position vector.
+- `weights` – `float32` – An array containing one matching single-chunk weight vector.
+
+Notes:
+
+- Buffers must support vertex binding.
+- Offsets and strides are preserved.
+- The position vector supplies the input count. `numInstances` can select a prefix.
+- This path requires WebGPU and a configuration without extensions or CPU position preprojection.
 
 ## Source
 

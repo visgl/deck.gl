@@ -547,20 +547,21 @@ The GridLayer renders the following sublayers:
 
 * `cells` - a custom layer that extends the [ColumnLayer](../layers/column-layer.md).
 
-## GPUVector inputs (unstable)
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
 
-These props supply caller-owned GPU buffers to the aggregation path. Their names,
-layouts, and behavior can change at any time. Values are in input point order.
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
 
-| Prop | Input |
-| --- | --- |
-| `positions` | Single-chunk `float32x2` or `float32x3` positions |
-| `weights` | Two matching single-chunk `float32` vectors, in color and elevation order |
-| `dataBounds` | Position bounds as `[min, max]` in input coordinates |
+GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
 
-The built-in WebGPU compute path requires buffers with `STORAGE` or `COPY_SRC`
-usage. Use positions in the view's coordinate system for custom views. The path
-requires a compute configuration without extensions or CPU position preprojection.
+- `positions` – `float32x2` or `float32x3` – A single-chunk position vector.
+- `weights` – `float32` – Two matching single-chunk vectors, in color and elevation order.
+- `dataBounds` – `[min, max]` – Bounds in input coordinates.
+
+Notes:
+
+- The built-in WebGPU compute path requires buffers with `STORAGE` or `COPY_SRC` usage.
+- Use positions in the view's coordinate system for custom views.
+- The compute path requires a configuration without extensions or CPU position preprojection.
 
 ## Source
 

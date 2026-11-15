@@ -266,23 +266,20 @@ For arrays and callback results, the rgba color is in the format of `[r, g, b, [
 An Arrow vector supplies one value per object. See [color columns](../../developer-guide/using-with-arrow.md#colors) for requirements.
 
 
-## GPUVector inputs (unstable)
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
 
-These props use layer-specific GPU layouts. Their names, layouts, and behavior can change
-at any time.
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
 
-Each optional prop accepts a caller-owned luma.gl `GPUVector`. Use the following GPU formats.
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
 
-| Prop | GPU format |
-| --- | --- |
-| `positions` | `float32x3` |
-| `normals` | `float32x3` |
-| `colors` | `unorm8x4` |
+- `positions` – `float32x3` – Positions in XYZ order.
+- `normals` – `float32x3` – Normal vectors in XYZ order.
+- `colors` – `unorm8x4` – Packed RGBA colors.
 
+Notes:
 
-The vectors contain one value per rendered instance in instance order. See
-[Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs)
-for ownership, chunk alignment, and preprocessing requirements.
+- Supply one value per rendered instance, in instance order.
+- See [Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs) for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source
 

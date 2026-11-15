@@ -543,15 +543,20 @@ The HexagonLayer renders the following sublayers:
 * `cells` - a [ColumnLayer](../layers/column-layer.md) rendering the aggregated columns.
 
 
-## GPUVector inputs (unstable)
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
 
-These props supply caller-owned GPU buffers to the aggregation path. Their names,
-layouts, and behavior can change at any time. Values are in input point order.
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
 
-Supply `positions`, `weights` in color and elevation order, and `dataBounds`
-as `[min, max]` in input coordinates. GPU inputs require a compatible WebGPU
-compute configuration with explicit color and elevation domains. Positions
-requiring CPU preprojection use the accessor path.
+GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
+
+- `positions` – A GPUVector of input positions.
+- `weights` – Matching weight vectors in color and elevation order.
+- `dataBounds` – `[min, max]` – Bounds in input coordinates.
+
+Notes:
+
+- GPU inputs require a compatible WebGPU compute configuration with explicit color and elevation domains.
+- The GPU position path requires a coordinate system that the layer can use without CPU preprojection.
 
 ## Source
 

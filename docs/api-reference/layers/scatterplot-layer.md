@@ -355,25 +355,22 @@ Screen space offset relative to the `coordinates` in pixel unit.
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.
 
-## GPUVector inputs (unstable)
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
 
-These props use layer-specific GPU layouts. Their names, layouts, and behavior can change
-at any time.
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
 
-Each optional prop accepts a caller-owned luma.gl `GPUVector`. Use the following GPU formats.
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
 
-| Prop | GPU format |
-| --- | --- |
-| `positions` | `float32x3` |
-| `radii` | `float32` |
-| `fillColors` | `unorm8x4` |
-| `lineColors` | `unorm8x4` |
-| `lineWidths` | `float32` |
+- `positions` – `float32x3` – Positions in XYZ order.
+- `radii` – `float32`
+- `fillColors` – `unorm8x4` – Packed RGBA fill colors.
+- `lineColors` – `unorm8x4` – Packed RGBA outline colors.
+- `lineWidths` – `float32`
 
+Notes:
 
-The vectors contain one value per rendered instance in instance order. See
-[Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs)
-for ownership, chunk alignment, and preprocessing requirements.
+- Supply one value per rendered instance, in instance order.
+- See [Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs) for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source
 

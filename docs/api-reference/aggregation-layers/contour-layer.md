@@ -270,15 +270,19 @@ The `ContourLayer` renders the following sublayers:
 * `bands` - For Isobands, rendered by [SolidPolygonLayer](../layers/solid-polygon-layer.md)
 
 
-## GPUVector inputs (unstable)
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
 
-These props supply caller-owned GPU buffers to the aggregation path. Their names,
-layouts, and behavior can change at any time. Values are in input point order.
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
 
-Supply `positions`, one matching weight column in `weights`, and
-`dataBounds` as `[min, max]` in input coordinates when using a custom
-aggregator that accepts GPU inputs. The aggregator defines the supported
-formats and chunking.
+GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
+
+- `positions` – A GPUVector of input positions.
+- `weights` – An array containing one matching weight vector.
+- `dataBounds` – `[min, max]` – Bounds in input coordinates.
+
+Notes:
+
+- Use a custom aggregator that accepts GPU inputs. It defines the supported formats and chunking.
 
 ## Source
 

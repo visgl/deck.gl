@@ -310,16 +310,20 @@ The [PickingInfo.object](../../developer-guide/interactivity.md#the-pickinginfo-
 - `points` (object[]) - The data objects in the picked cell. Only available if using CPU aggregation and layer data is an array.
 
 
-## GPUVector inputs (unstable)
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
 
-These props supply caller-owned GPU buffers to the aggregation path. Their names,
-layouts, and behavior can change at any time. Values are in input point order.
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
 
-Supply single-chunk `float32x2` or `float32x3` `positions` and one
-matching single-chunk `float32` vector in `weights`. The built-in WebGPU
-compute path accepts buffers with `STORAGE` or `COPY_SRC` usage. Use positions
-in the view's coordinate system for custom views. The path requires a compute
-configuration without extensions or CPU position preprojection.
+GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
+
+- `positions` – `float32x2` or `float32x3` – A single-chunk position vector.
+- `weights` – `float32` – An array containing one matching single-chunk weight vector.
+
+Notes:
+
+- The built-in WebGPU compute path accepts buffers with `STORAGE` or `COPY_SRC` usage.
+- Use positions in the view's coordinate system for custom views.
+- The compute path requires a configuration without extensions or CPU position preprojection.
 
 ## Source
 
