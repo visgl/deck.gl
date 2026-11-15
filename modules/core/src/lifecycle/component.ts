@@ -10,6 +10,7 @@ import {
   ASYNC_DEFAULTS_SYMBOL
 } from './constants';
 import {PropType} from './prop-types';
+import type ComponentState from './component-state';
 import {createProps} from './create-props';
 
 let counter = 0;
@@ -30,6 +31,7 @@ export default class Component<PropsT extends {} = {}> {
   id: string;
   props: StatefulComponentProps<PropsT>;
   count: number;
+  internalState: ComponentState<this> | null = null;
 
   constructor(...propObjects: Partial<PropsT>[]) {
     // Merge supplied props with default props and freeze them.
@@ -40,6 +42,21 @@ export default class Component<PropsT extends {} = {}> {
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
     this.count = counter++; // Keep track of how many layer instances you are generating
   }
+
+  /** Replace synchronous effective prop overrides without changing declarative props. */
+  protected setDerivedProps(overrides: Partial<this['props']> | null): void {
+    const state = this.internalState;
+    if (!state) return;
+    const previous = state.getEffectiveProps(this.props);
+    state.setDerivedProps(overrides);
+    this.onDerivedPropsUpdated(state.getEffectiveProps(this.props), previous);
+  }
+
+  /** Called after the component's synchronous overrides change. */
+  protected onDerivedPropsUpdated(
+    _props: StatefulComponentProps<PropsT>,
+    _oldProps: StatefulComponentProps<PropsT>
+  ): void {}
 
   // clone this layer with modified props
   clone(newProps: Partial<PropsT>) {

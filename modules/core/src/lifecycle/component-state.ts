@@ -36,6 +36,8 @@ export default class ComponentState<ComponentT extends Component> {
 
   private asyncProps: Partial<Record<string, AsyncPropState>>;
   private oldProps: ComponentT['props'] | null;
+  private derivedProps: Partial<ComponentT['props']> | null = null;
+  private oldDerivedProps: Partial<ComponentT['props']> | null = null;
   private oldAsyncProps: ComponentT['props'] | null;
 
   constructor(component: ComponentT) {
@@ -59,11 +61,45 @@ export default class ComponentState<ComponentT extends Component> {
       }
     }
     this.asyncProps = {};
+    this.derivedProps = null;
     this.component = null;
     this.resetOldProps();
   }
 
-  /* Layer-facing props API */
+  /** Apply the current synchronous overrides to the component's resolved props. */
+  getEffectiveProps(props: ComponentT['props']): ComponentT['props'] {
+    return this._applyDerivedProps(props, this.derivedProps);
+  }
+
+  /** Replace the entire set of synchronous overrides, or clear them with null. */
+  setDerivedProps(overrides: Partial<ComponentT['props']> | null): void {
+    this.derivedProps = overrides ? {...overrides} : null;
+  }
+
+  /** Read the resolved props and overrides from the last completed update. */
+  getOldEffectiveProps(): ComponentT['props'] {
+    return this._applyDerivedProps(this.getOldProps() as ComponentT['props'], this.oldDerivedProps);
+  }
+
+  private _applyDerivedProps(
+    props: ComponentT['props'],
+    overrides: Partial<ComponentT['props']> | null
+  ): ComponentT['props'] {
+    if (!overrides || !Object.keys(overrides).length) return props;
+
+    // Shadow immutable declarative props, including async getters, with owned values.
+    const descriptors = Object.getOwnPropertyDescriptors(props);
+    for (const key of Object.keys(overrides)) {
+      Object.defineProperty(descriptors, key, {
+        value: {value: overrides[key], enumerable: true},
+        enumerable: true,
+        configurable: true
+      });
+    }
+    return Object.create(Object.getPrototypeOf(props), descriptors);
+  }
+
+  /* Component-facing props API */
 
   getOldProps(): ComponentT['props'] | typeof EMPTY_PROPS {
     return this.oldAsyncProps || this.oldProps || EMPTY_PROPS;
@@ -71,6 +107,7 @@ export default class ComponentState<ComponentT extends Component> {
 
   resetOldProps() {
     this.oldAsyncProps = null;
+    this.oldDerivedProps = this.derivedProps;
     this.oldProps = this.component ? this.component.props : null;
   }
 

@@ -230,7 +230,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return Object.prototype.hasOwnProperty.call(this, 'layerName') ? this.layerName : '';
   }
 
-  internalState: LayerState<this> | null = null;
+  declare internalState: LayerState<this> | null;
   lifecycle: Lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
 
   // context and state can technically be null before a layer is initialized/matched.
@@ -865,29 +865,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
   }
 
-  /** Resolve internal overrides without changing the caller's declarative props. */
-  private _getDerivedProps(
+  /** Schedule a layer update when effective props change. */
+  protected override onDerivedPropsUpdated(
     props: Layer<PropsT>['props'],
-    overrides = this.internalState?.derivedProps
-  ): Layer<PropsT>['props'] {
-    if (!overrides || !Object.keys(overrides).length) return props;
-    return Object.assign(Object.create(props), overrides);
-  }
-
-  /**
-   * Set internal, synchronous effective prop values (e.g. query-derived statistics).
-   * Unlike async props, this works for normal numeric/color/array props.
-   * Changes participate in standard prop diffing and uniform transitions.
-   */
-  protected setDerivedProps(overrides: Partial<Layer<PropsT>['props']> | null): void {
-    const state = this.internalState;
-    if (!state) return;
-    const previous = this._getDerivedProps(this.props);
-    const next = overrides ? {...overrides} : undefined;
-    const current = this._getDerivedProps(this.props, next);
-    if (!state.derivedOldProps) state.derivedOldProps = previous;
-    state.derivedProps = next;
-    this._diffProps(current, previous);
+    oldProps: Layer<PropsT>['props']
+  ): void {
+    this._diffProps(props, oldProps);
     this.setNeedsUpdate();
   }
 
@@ -1282,7 +1265,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // Ensure any async props are updated
     this.internalState.setAsyncProps(this.props);
 
-    this._diffProps(this.props, this.internalState.getOldProps() as Layer<PropsT>['props']);
+    this._diffEffectiveProps();
   }
 
   /** (Internal) Called by layer manager when a new layer is added or an existing layer is matched with a new instance */
@@ -1309,7 +1292,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const internalState = this.internalState as LayerState<this>;
 
     const currentViewport = context.viewport;
-    const propsInTransition = this._updateUniformTransition(this._getDerivedProps(currentProps));
+    const propsInTransition = this._updateUniformTransition(
+      internalState.getEffectiveProps(currentProps)
+    );
     internalState.propsInTransition = propsInTransition;
     // Use the first eligible viewport retained by this layer for lifecycle updates
     // In multi-view applications, a layer may only be drawn in one of the views
@@ -1319,7 +1304,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     this.props = propsInTransition;
 
     try {
-      const updateParams = this._getUpdateParams();
+      const updateParams = this._getUpdateParams(propsInTransition);
       const oldModels = this.getModels();
       const coordinateSystemChanged = !areCRSEqual(
         updateParams.props.coordinateSystem,
@@ -1381,7 +1366,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       this._clearChangeFlags();
       internalState.needsUpdate = false;
       internalState.preprojectionChanged = false;
-      internalState.derivedOldProps = undefined;
       internalState.resetOldProps();
     }
   }
@@ -1684,15 +1668,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
   }
 
-  private _getUpdateParams(): UpdateParameters<Layer<PropsT>> {
+  private _getUpdateParams(props?: Layer<PropsT>['props']): UpdateParameters<Layer<PropsT>> {
+    // Update parameters are only requested after initialization.
+    const internalState = this.internalState!;
     return {
-      props: this.props,
-      // @ts-ignore TS2531 this method can only be called internally with internalState assigned
-      oldProps: (this.internalState.derivedOldProps ||
-        this._getDerivedProps(this.internalState.getOldProps() as Layer<PropsT>['props'])) as PropsT,
+      props: props ?? internalState.getEffectiveProps(this.props),
+      oldProps: internalState.getOldEffectiveProps(),
       context: this.context,
-      // @ts-ignore TS2531 this method can only be called internally with internalState assigned
-      changeFlags: this.internalState.changeFlags
+      changeFlags: internalState.changeFlags
     };
   }
 
@@ -1724,10 +1707,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return redraw;
   }
 
-  /** Callback when asyn prop is loaded */
+  private _diffEffectiveProps(): void {
+    const state = this.internalState!;
+    this._diffProps(state.getEffectiveProps(this.props), state.getOldEffectiveProps());
+  }
+
+  /** Callback when an async prop is loaded. */
   private _onAsyncPropUpdated(): void {
-    // @ts-ignore TS2531 this method can only be called internally with internalState assigned
-    this._diffProps(this.props, this.internalState.getOldProps());
+    this._diffEffectiveProps();
     this.setNeedsUpdate();
   }
 }

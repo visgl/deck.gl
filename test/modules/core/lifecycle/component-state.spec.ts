@@ -60,12 +60,36 @@ test('ComponentState#imports', () => {
   expect(ComponentState, 'ComponentState import ok').toBeTruthy();
 });
 
+test('Component derived props preserve declarative and resolved async values', () => {
+  class DerivedComponent extends Component<{opacity: number; data: number[]}> {
+    static defaultProps = {...defaultProps, opacity: 0.25};
+
+    setComputedOpacity(opacity: number | null) {
+      this.setDerivedProps(opacity === null ? null : {opacity});
+    }
+  }
+  const component = new DerivedComponent({data: [1]});
+  const state = new ComponentState(component);
+  component.internalState = state;
+  state.setAsyncProps(component.props);
+  state.resetOldProps();
+
+  component.setComputedOpacity(0.75);
+  expect(component.props.opacity).toBe(0.25);
+  expect(state.getEffectiveProps(component.props).opacity).toBe(0.75);
+  expect(state.getEffectiveProps(component.props).data).toEqual([1]);
+  expect(state.getOldEffectiveProps().opacity).toBe(0.25);
+
+  state.resetOldProps();
+  component.setComputedOpacity(null);
+  expect(state.getEffectiveProps(component.props)).toBe(component.props);
+  expect(state.getOldEffectiveProps().opacity).toBe(0.75);
+});
+
 test('ComponentState#finalize', async () => {
   const component = new TestComponent({});
-  // @ts-expect-error
-  component.internalState = new ComponentState(component);
-  // @ts-expect-error
-  const state = component.internalState;
+  const state = new ComponentState(component);
+  component.internalState = state;
   expect(state.component, 'state.component is present').toBe(component);
 
   const updateCallbackCalled = {};
@@ -100,10 +124,8 @@ test('ComponentState#finalize', async () => {
 
 test('ComponentState#synchronous async props', () => {
   const component = new Component();
-  // @ts-expect-error
-  component.internalState = new ComponentState(component);
-  // @ts-expect-error
-  const state = component.internalState;
+  const state = new ComponentState(component);
+  component.internalState = state;
   expect(state, 'ComponentState construction ok').toBeTruthy();
 
   expect(state.hasAsyncProp('data'), 'ComponentState.hasAsyncProp returned correct value').toBe(
@@ -121,10 +143,8 @@ test('ComponentState#synchronous async props', () => {
 
 test('ComponentState#asynchronous async props', async () => {
   const component = new Component();
-  // @ts-expect-error
-  component.internalState = new ComponentState(component);
-  // @ts-expect-error
-  const state = component.internalState;
+  const state = new ComponentState(component);
+  component.internalState = state;
   expect(state, 'ComponentState construction ok').toBeTruthy();
 
   const loadPromise1 = makePromise();
@@ -216,10 +236,8 @@ test('ComponentState#stale async prop load does not release the current value', 
   }
 
   const component = new ReleaseTestComponent({});
-  // @ts-expect-error
-  component.internalState = new ComponentState(component);
-  // @ts-expect-error
-  const state = component.internalState;
+  const state = new ComponentState(component);
+  component.internalState = state;
 
   const olderLoad = makePromise();
   const newerLoad = makePromise();
@@ -258,7 +276,6 @@ webglTest('ComponentState#async props with transform', async () => {
   // Simulate Layer class
   const makeComponent = (props: Record<string, unknown>) => {
     const comp = new TestComponent(props);
-    // @ts-expect-error
     comp.internalState = state;
     // @ts-expect-error
     comp.context = testContext;

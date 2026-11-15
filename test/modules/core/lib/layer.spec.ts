@@ -850,7 +850,9 @@ test('Layer#derivedProps overrides effective props without mutating user props',
         }
       }
     ],
-    onError: error => { throw error; }
+    onError: error => {
+      throw error;
+    }
   });
 });
 
@@ -897,6 +899,8 @@ test('Layer#derivedProps numeric values participate in uniform transitions', () 
         onAfterUpdate: () => expect(draws.at(-1)).toBe(1)
       }
     ],
-    onError: error => { throw error; }
+    onError: error => {
+      throw error;
+    }
   });
 });
