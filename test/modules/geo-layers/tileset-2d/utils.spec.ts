@@ -696,6 +696,65 @@ test('getTileIndices#CustomProjectionView covers the ground of a view with a hig
   expect(missing).toEqual([]);
 });
 
+const OBLIQUE_STEREOGRAPHIC = '+proj=stere +lat_0=-60 +lon_0=-30 +k=1 +datum=WGS84 +units=m';
+
+test('getTileIndices#CustomProjectionView keeps a tile whose curved edge is on screen', async () => {
+  // A rotated view lets each frustum plane reject a box that does not enclose the tile
+  const testCases = [
+    {
+      // The tile 1,3,2 is between the longitudes -90 and 0. Its north edge is an arc that bows out
+      // beyond the box of its corners and center.
+      title: 'polar stereographic',
+      crs: SOUTH_POLAR_STEREOGRAPHIC,
+      viewState: {center: [-45, -70, 0], zoom: 12, bearing: 45}
+    },
+    {
+      title: 'polar stereographic, other rotation',
+      crs: SOUTH_POLAR_STEREOGRAPHIC,
+      viewState: {center: [-45, -68, 0], zoom: 11, bearing: -45}
+    },
+    {
+      // Near this view, points at each quarter of the edges of a tile do not enclose the edges
+      title: 'margin between the points of an edge',
+      crs: OBLIQUE_STEREOGRAPHIC,
+      viewState: {center: [-118.125, -0.01, 0], zoom: 13, bearing: 120}
+    },
+    {
+      // Far from the center of the projection, the edges of a tile bend too much
+      title: 'edge that bends too much',
+      crs: CONUS_ALBERS,
+      viewState: {center: [81.5625, -79.1613, 0], zoom: 13, bearing: 30}
+    }
+  ] as {
+    title: string;
+    crs: string;
+    viewState: {center: [number, number, number]; zoom: number; bearing: number};
+  }[];
+
+  for (const {title, crs, viewState} of testCases) {
+    const viewport = await makeCustomProjectionViewport(crs, viewState);
+    const result = getTileIndices({viewport, zRange: null});
+    expect(result.length, `${title}: selects tiles`).toBeGreaterThan(0);
+    const ids = getTileIds(result);
+    const expected = getTilesOnScreen(viewport, result[0].z);
+    expect(expected.length, `${title}: tiles are on screen`).toBeGreaterThan(0);
+    expect(
+      expected.filter(id => !ids.includes(id)),
+      `${title}: no tile on screen is missing`
+    ).toEqual([]);
+  }
+});
+
+test('getTileIndices#CustomProjectionView selects no tile next to the screen', async () => {
+  // The tiles are almost square in this view. Their boxes follow the edges of the tiles.
+  const viewport = await makeCustomProjectionViewport(UTM_15N, {
+    center: [-93.2, 45, 0],
+    zoom: 10.3
+  });
+  const ids = getTileIds(getTileIndices({viewport, zRange: null}));
+  expect(ids.sort()).toEqual(getTilesOnScreen(viewport, 10).sort());
+});
+
 test('getTileIndices#CustomProjectionView respects extent and maxZoom', async () => {
   const viewport = await makeCustomProjectionViewport(UTM_15N, {
     center: [-93.2, 45, 0],

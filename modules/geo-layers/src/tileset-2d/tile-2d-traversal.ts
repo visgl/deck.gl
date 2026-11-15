@@ -13,6 +13,7 @@ import {
   CullingVolume,
   Plane,
   AxisAlignedBoundingBox,
+  OrientedBoundingBox,
   makeOrientedBoundingBoxFromPoints
 } from '@math.gl/geometry/culling';
 import {lngLatToWorld, MAX_LATITUDE} from '@math.gl/web-mercator';
@@ -47,6 +48,35 @@ const REF_POINTS_11 = REF_POINTS_9.concat([
   [0.75, 0.5]
 ]); // 2 additional points on equator for top tile
 
+// for calculating bounding volume of a tile in a custom projection, where tile edges are curves:
+// the corners and the points at each quarter of the edges, in order around the tile
+const EDGE_POINTS = [
+  [0, 0],
+  [0.25, 0],
+  [0.5, 0],
+  [0.75, 0],
+  [1, 0],
+  [1, 0.25],
+  [1, 0.5],
+  [1, 0.75],
+  [1, 1],
+  [0.75, 1],
+  [0.5, 1],
+  [0.25, 1],
+  [0, 1],
+  [0, 0.75],
+  [0, 0.5],
+  [0, 0.25]
+];
+const CURVED_REF_POINTS = EDGE_POINTS.concat([[0.5, 0.5]]);
+const CURVED_REF_POINTS_TOP = CURVED_REF_POINTS.concat([
+  [0.25, 0.5],
+  [0.75, 0.5]
+]);
+
+// largest deviation of an edge from a chord, relative to the chord, that the margin of
+// the bounding volume of a tile in a custom projection can enclose
+const MAX_EDGE_DEVIATION = 0.25;
 // for a tile that a custom projection can draw only in part: the tile has no reliable bounds
 const PARTIAL_BOUNDING_VOLUME = new AxisAlignedBoundingBox();
 
@@ -104,7 +134,7 @@ class OSMNode {
       return false;
     }
 
-    const boundingVolume = this.getBoundingVolume(elevationBounds, offset, project);
+    const boundingVolume = this.getBoundingVolume(elevationBounds, offset, project, !isGlobe);
     const isPartial = boundingVolume === PARTIAL_BOUNDING_VOLUME;
     if (!boundingVolume || isPartial) {
       // Some reference points of the tile are not in the area of use of the custom projection.
@@ -224,13 +254,19 @@ class OSMNode {
   getBoundingVolume(
     zRange: ZRange,
     worldOffset: number,
-    project: ((xyz: number[]) => number[]) | null
+    project: ((xyz: number[]) => number[]) | null,
+    curvedEdges = false
   ) {
     if (project) {
       // Custom projection
       // Estimate bounding box from sample points
       // At low zoom level we need more samples to calculate the bounding volume correctly
-      const refPoints = this.z < 1 ? REF_POINTS_11 : this.z < 2 ? REF_POINTS_9 : REF_POINTS_5;
+      let refPoints: number[][];
+      if (curvedEdges) {
+        refPoints = this.z < 1 ? CURVED_REF_POINTS_TOP : CURVED_REF_POINTS;
+      } else {
+        refPoints = this.z < 1 ? REF_POINTS_11 : this.z < 2 ? REF_POINTS_9 : REF_POINTS_5;
+      }
 
       // Convert from tile-relative coordinates to common space
       const refPointPositions: number[][] = [];
@@ -252,6 +288,14 @@ class OSMNode {
         // They do not show where the tile is.
         return validCount ? PARTIAL_BOUNDING_VOLUME : null;
       }
+      if (curvedEdges) {
+        const stride = zRange[0] !== zRange[1] ? 2 : 1;
+        if (!addEdgeMargin(refPointPositions, stride)) {
+          // The reference points do not show where the tile is
+          return PARTIAL_BOUNDING_VOLUME;
+        }
+        return makeTileBoundingBox(refPointPositions, stride);
+      }
       return makeOrientedBoundingBoxFromPoints(refPointPositions);
     }
 
@@ -267,6 +311,62 @@ class OSMNode {
       [originX + extent, originY + extent, zRange[1]]
     );
   }
+}
+
+/**
+ * Adds points so that the bounding box of the positions encloses the curved edges of a tile.
+ * The positions start with the projected EDGE_POINTS, `stride` positions for each point.
+ * Between the two neighbors of an odd point, the edge bows out from their chord by
+ * approximately the deviation of the odd point. Add a point at twice that deviation.
+ * Returns false if an edge bends too much for the points to enclose it.
+ */
+function addEdgeMargin(positions: number[][], stride: number): boolean {
+  const count = EDGE_POINTS.length;
+  for (let k = 1; k < count; k += 2) {
+    for (let e = 0; e < stride; e++) {
+      const before = positions[(k - 1) * stride + e];
+      const point = positions[k * stride + e];
+      const after = positions[((k + 1) % count) * stride + e];
+      const deviation = point.map((v, i) => v - (before[i] + after[i]) / 2);
+      const chord = before.map((v, i) => after[i] - v);
+      if (Math.hypot(...deviation) > MAX_EDGE_DEVIATION * Math.hypot(...chord)) {
+        return false;
+      }
+      positions.push(point.map((v, i) => v + deviation[i]));
+    }
+  }
+  return true;
+}
+
+/**
+ * Returns a box that encloses the positions, with axes along the edges of the tile.
+ * The positions start with the projected EDGE_POINTS, `stride` positions for each point.
+ * The principal axes of the positions are not stable for a square tile.
+ */
+function makeTileBoundingBox(positions: number[][], stride: number): OrientedBoundingBox {
+  // From the corner 0,0 to the corner 1,0, and from the corner 0,1 to the corner 1,1
+  const [x0, y0] = positions[0];
+  const [x1, y1] = positions[4 * stride];
+  const [x2, y2] = positions[8 * stride];
+  const [x3, y3] = positions[12 * stride];
+  const length = Math.hypot(x1 - x0 + x2 - x3, y1 - y0 + y2 - y3);
+  const ux = (x1 - x0 + x2 - x3) / length;
+  const uy = (y1 - y0 + y2 - y3) / length;
+  const min = [Infinity, Infinity, Infinity];
+  const max = [-Infinity, -Infinity, -Infinity];
+  for (const [x, y, z = 0] of positions) {
+    const coordinates = [x * ux + y * uy, y * ux - x * uy, z];
+    for (let i = 0; i < 3; i++) {
+      min[i] = Math.min(min[i], coordinates[i]);
+      max[i] = Math.max(max[i], coordinates[i]);
+    }
+  }
+  const [u, v, z] = min.map((value, i) => (value + max[i]) / 2);
+  const [halfU, halfV, halfZ] = min.map((value, i) => (max[i] - value) / 2);
+  return new OrientedBoundingBox(
+    [u * ux - v * uy, u * uy + v * ux, z],
+    [ux * halfU, uy * halfU, 0, -uy * halfV, ux * halfV, 0, 0, 0, halfZ]
+  );
 }
 
 function isFinitePosition(position: number[]): boolean {
