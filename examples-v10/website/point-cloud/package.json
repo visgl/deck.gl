@@ -9,8 +9,8 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@math.gl/arrow": "5.0.0-beta.8",
-    "@loaders.gl/pointclouds": "5.0.0-beta.8",
+    "@math.gl/arrow": "5.0.0-beta.10",
+    "@loaders.gl/pointclouds": "5.0.0-beta.10",
     "apache-arrow": "^21.2.0",
 
     "@types/react": "^18.0.0",
