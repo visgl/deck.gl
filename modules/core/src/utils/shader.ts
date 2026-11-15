@@ -45,12 +45,24 @@ export function mergeShaders(target, source) {
   if ('inject' in source) {
     // Convert the named targets of each descriptor to a plugin before the merge. A merge of two
     // `inject` maps cannot keep an `{injection, order}` entry and the order of the descriptors.
-    const {plugin, rest} = splitLegacyInjections(source.inject, 'getShaders()', 'layer');
-    if (plugin) {
-      result.plugins = [...(result.plugins || []), plugin];
+    // An array holds luma.gl `ShaderInjection` entries. A plugin accepts them as they are.
+    const {plugin, rest} = Array.isArray(source.inject)
+      ? {
+          plugin: source.inject.length ? {name: 'layer-inject', injections: source.inject} : null,
+          rest: {}
+        }
+      : splitLegacyInjections(source.inject, 'getShaders()', 'layer');
+    // The `inject` option cannot hold an array and a map. Move an array of the target also.
+    const targetPlugin =
+      Array.isArray(target.inject) && target.inject.length
+        ? {name: 'layer-inject', injections: target.inject}
+        : null;
+    const plugins = [targetPlugin, plugin].filter(Boolean);
+    if (plugins.length) {
+      result.plugins = [...(result.plugins || []), ...plugins];
     }
     // luma.gl assembles the other keys (regular expressions) from the `inject` option
-    const inject = {...target.inject};
+    const inject = Array.isArray(target.inject) ? {} : {...target.inject};
     for (const key in rest) {
       const previous = inject[key];
       const next = rest[key];

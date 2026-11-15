@@ -129,6 +129,27 @@ test('mergeShaders keeps inject keys that are not named targets', () => {
   ]);
 });
 
+test('mergeShaders moves an array of shader injections to a plugin', () => {
+  const fade = {stage: 'fragment', target: '#main-end', glsl: 'fragColor.a *= 0.5;'};
+  const tint = {stage: 'fragment', target: '#main-end', wgsl: 'color.r = 1.0;', order: -1};
+  const warn = vi.spyOn(log, 'warn');
+  const merged = mergeShaders(mergeShaders({}, {inject: [fade]}), {inject: [tint]});
+  const warnings = warn.mock.calls.length;
+  warn.mockRestore();
+  expect('inject' in merged, 'inject key is removed').toBe(false);
+  expect(merged.plugins).toEqual([
+    {name: 'layer-inject', injections: [fade]},
+    {name: 'layer-inject', injections: [tint]}
+  ]);
+  expect(merged.plugins[0].injections[0], 'entries are not copied').toBe(fade);
+  expect(warnings, 'the array form is not deprecated').toBe(0);
+
+  // An array that is already on the target stays in effect
+  const fromTarget = mergeShaders({inject: [fade]}, {inject: {'gl_Position = (.*);': 'a'}});
+  expect(fromTarget.plugins).toEqual([{name: 'layer-inject', injections: [fade]}]);
+  expect(fromTarget.inject).toEqual({'gl_Position = (.*);': 'a'});
+});
+
 test('convertLegacyInjections converts inject fields to GLSL plugins', () => {
   const dependency = {name: 'dependency', inject: {'vs:#decl': 'float dependency;'}};
   const module = {
