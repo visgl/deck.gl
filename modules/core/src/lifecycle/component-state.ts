@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {normalizeArrowBatch} from '../arrow/normalize-arrow-batch';
 import {isArrowTable} from '../arrow/upstream-math/is-arrow-table';
 import {unwrapLoaderArrowResult} from '../utils/loader-utils';
 import {isAsyncIterable} from '../utils/iterable-utils';
@@ -326,21 +327,27 @@ export default class ComponentState<ComponentT extends Component> {
             throw new Error('Cannot mix Arrow and row chunks');
           }
           chunkKind = 'arrow';
-          const {Table, RecordBatch} = await import('apache-arrow');
+          const arrowRuntime = await import('apache-arrow');
+          const {Table, RecordBatch, Schema} = arrowRuntime;
           if (!this.component || loadCount !== asyncProp.pendingLoadCount) {
             return;
           }
-          const batches = 'batches' in arrow ? arrow.batches : [arrow];
-          if (batches.some(batch => !(batch instanceof RecordBatch))) {
-            throw new Error('Expected Arrow Tables or RecordBatches');
-          }
+          const batches = ('batches' in arrow ? arrow.batches : [arrow]).map(batch => {
+            if (batch instanceof RecordBatch) {
+              return batch;
+            }
+            return normalizeArrowBatch(batch as import('apache-arrow').RecordBatch, arrowRuntime);
+          });
           if (_dataLoadOptions === 'snapshots') {
             arrowBatches = [...batches];
           } else {
             // Preserve Arrow columnar storage without converting to row objects.
             arrowBatches.push(...batches);
           }
-          const table = new Table(arrow.schema, arrowBatches);
+          const table = new Table(
+            batches[0]?.schema ?? new Schema(arrow.schema.fields, arrow.schema.metadata),
+            arrowBatches
+          );
           lastResult = table;
           this._setAsyncPropValue(propName, table, loadCount);
           if (this.component && loadCount === asyncProp.pendingLoadCount) {

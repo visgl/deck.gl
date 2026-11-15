@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
+import {createRequire} from 'node:module';
 import {Table, tableFromArrays} from 'apache-arrow';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import ComponentState from '../../../../modules/core/src/lifecycle/component-state';
@@ -300,4 +301,20 @@ test('complete loading exposes a bare Arrow table to layer props and callbacks',
   await vi.waitFor(() => expect(complete).toHaveBeenCalledExactlyOnceWith('data', first));
   expect(state.getAsyncProp('data')).toBe(first);
   expect(dataTransform).toHaveBeenLastCalledWith(first);
+});
+
+test('appends batches from a separate Arrow runtime without copying column buffers', async () => {
+  const foreignArrow = createRequire(import.meta.url)(
+    'apache-arrow'
+  ) as typeof import('apache-arrow');
+  const foreign = foreignArrow.tableFromArrays({x: [7, 8]});
+  expect(foreign).not.toBeInstanceOf(Table);
+  const {state, run, error} = makeState({_dataLoadOptions: 'batched'});
+  await run(chunks(first.batches[0], foreign.batches[0], {shape: 'arrow-table', data: foreign}));
+  expect(error).not.toHaveBeenCalled();
+  const table = state.getAsyncProp('data') as Table;
+  expect(Array.from(table.getChild('x')!)).toEqual([1, 2, 7, 8, 7, 8]);
+  expect(table.batches[1].data.children[0].values.buffer).toBe(
+    foreign.batches[0].data.children[0].values.buffer
+  );
 });
