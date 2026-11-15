@@ -159,12 +159,17 @@ export default function App({
   );
 }
 
-export async function renderToDOM(container: HTMLDivElement) {
-  const root = createRoot(container);
-  root.render(<App />);
+/** Loads the standalone demo's source files in parallel. */
+async function loadFlightData(): Promise<{airports: Airport[]; flightPaths: FlightPath[]}> {
   const [airports, flightPaths] = await Promise.all([
     fetch(DATA_URL.AIRPORTS).then(response => response.json()),
     fetch(DATA_URL.FLIGHT_PATHS).then(response => response.json())
   ]);
-  root.render(<App airports={airports} flightPaths={flightPaths} />);
+  return {airports, flightPaths};
+}
+
+/** Mounts the standalone demo with its loaded flight data. */
+export async function renderToDOM(container: HTMLDivElement) {
+  const data = await loadFlightData();
+  createRoot(container).render(<App {...data} />);
 }
