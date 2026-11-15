@@ -45,18 +45,8 @@ export default class Component<PropsT extends {} = {}> {
 
   /** Replace synchronous effective prop overrides without changing declarative props. */
   protected setDerivedProps(overrides: Partial<this['props']> | null): void {
-    const state = this.internalState;
-    if (!state) return;
-    const previous = state.getEffectiveProps(this.props);
-    state.setDerivedProps(overrides);
-    this.onDerivedPropsUpdated(state.getEffectiveProps(this.props), previous);
+    this.internalState?.setDerivedProps(overrides);
   }
-
-  /** Called after the component's synchronous overrides change. */
-  protected onDerivedPropsUpdated(
-    _props: StatefulComponentProps<PropsT>,
-    _oldProps: StatefulComponentProps<PropsT>
-  ): void {}
 
   // clone this layer with modified props
   clone(newProps: Partial<PropsT>) {

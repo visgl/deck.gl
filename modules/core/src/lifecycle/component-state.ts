@@ -32,6 +32,8 @@ type AsyncPropState = {
 export default class ComponentState<ComponentT extends Component> {
   /** The component that this state instance belongs to. `null` if this state has been finalized. */
   component: ComponentT | null;
+  /** Called when async resolution or a derived override changes effective props. */
+  onEffectivePropsUpdated?(props?: ComponentT['props'], oldProps?: ComponentT['props']): void;
   onAsyncPropUpdated: (propName: string, value: any) => void;
 
   private asyncProps: Partial<Record<string, AsyncPropState>>;
@@ -73,7 +75,11 @@ export default class ComponentState<ComponentT extends Component> {
 
   /** Replace the entire set of synchronous overrides, or clear them with null. */
   setDerivedProps(overrides: Partial<ComponentT['props']> | null): void {
+    const props = this.component?.props;
+    if (!props) return;
+    const previous = this.getEffectiveProps(props);
     this.derivedProps = overrides ? {...overrides} : null;
+    this.onEffectivePropsUpdated?.(this.getEffectiveProps(props), previous);
   }
 
   /** Read the resolved props and overrides from the last completed update. */
@@ -263,6 +269,7 @@ export default class ComponentState<ComponentT extends Component> {
 
       // Call callback to inform listener
       this.onAsyncPropUpdated(propName, value);
+      this.onEffectivePropsUpdated?.();
     }
   }
 

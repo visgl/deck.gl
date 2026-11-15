@@ -865,19 +865,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
   }
 
-  /** Schedule a layer update when effective props change. */
-  protected override onDerivedPropsUpdated(
-    props: Layer<PropsT>['props'],
-    oldProps: Layer<PropsT>['props']
-  ): void {
-    this._diffProps(props, oldProps);
-    this.setNeedsUpdate();
-  }
-
   /** Update uniform (prop) transitions. This is called in updateState, may result in model updates. */
-  private _updateUniformTransition(baseProps = this.props): Layer<PropsT>['props'] {
-    // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
-    const {uniformTransitions} = this.internalState;
+  private _updateUniformTransition(): Layer<PropsT>['props'] {
+    const state = this.internalState!;
+    const {uniformTransitions} = state;
+    const baseProps = state.getEffectiveProps(this.props);
     if (uniformTransitions.active) {
       // clone props
       const propsInTransition = uniformTransitions.update();
@@ -1216,7 +1208,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       /* eslint-enable accessor-pairs */
 
       this.internalState.uniformTransitions = new UniformTransitionManager(this.context.timeline);
-      this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
+      this.internalState.onEffectivePropsUpdated = (props, oldProps) =>
+        this.getCurrentLayer()?._onPropUpdated(props, oldProps);
 
       // Ensure any async props are updated
       this.internalState.setAsyncProps(this.props);
@@ -1265,7 +1258,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // Ensure any async props are updated
     this.internalState.setAsyncProps(this.props);
 
-    this._diffEffectiveProps();
+    this._diffProps();
   }
 
   /** (Internal) Called by layer manager when a new layer is added or an existing layer is matched with a new instance */
@@ -1292,9 +1285,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const internalState = this.internalState as LayerState<this>;
 
     const currentViewport = context.viewport;
-    const propsInTransition = this._updateUniformTransition(
-      internalState.getEffectiveProps(currentProps)
-    );
+    const propsInTransition = this._updateUniformTransition();
     internalState.propsInTransition = propsInTransition;
     // Use the first eligible viewport retained by this layer for lifecycle updates
     // In multi-view applications, a layer may only be drawn in one of the views
@@ -1551,7 +1542,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Compares the layers props with old props from a matched older layer
       and extracts change flags that describe what has change so that state
       can be update correctly with minimal effort */
-  private _diffProps(newProps: Layer<PropsT>['props'], oldProps: Layer<PropsT>['props']) {
+  private _diffProps(
+    newProps = this.internalState!.getEffectiveProps(this.props),
+    oldProps = this.internalState!.getOldEffectiveProps()
+  ) {
     const changeFlags = {
       ...diffProps(newProps, oldProps),
       projectionChanged: !areCRSEqual(newProps.coordinateSystem, oldProps.coordinateSystem)
@@ -1707,14 +1701,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return redraw;
   }
 
-  private _diffEffectiveProps(): void {
-    const state = this.internalState!;
-    this._diffProps(state.getEffectiveProps(this.props), state.getOldEffectiveProps());
-  }
-
-  /** Callback when an async prop is loaded. */
-  private _onAsyncPropUpdated(): void {
-    this._diffEffectiveProps();
+  /** Schedule an update when a resolved or derived prop changes. */
+  private _onPropUpdated(props?: Layer<PropsT>['props'], oldProps?: Layer<PropsT>['props']): void {
+    this._diffProps(props, oldProps);
     this.setNeedsUpdate();
   }
 }
