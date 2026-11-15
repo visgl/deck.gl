@@ -45,27 +45,16 @@ export function mergeShaders(target, source) {
   if ('inject' in source) {
     // Convert the named targets of each descriptor to a plugin before the merge. A merge of two
     // `inject` maps cannot keep an `{injection, order}` entry and the order of the descriptors.
-    // An array holds luma.gl `ShaderInjection` entries. A plugin accepts them as they are.
-    const {plugin, rest} = Array.isArray(source.inject)
-      ? {
-          plugin: source.inject.length ? {name: 'layer-inject', injections: source.inject} : null,
-          rest: {}
-        }
-      : splitLegacyInjections(source.inject, 'getShaders()', 'layer');
-    // The `inject` option cannot hold an array and a map. Move an array of the target also.
-    const targetPlugin =
-      Array.isArray(target.inject) && target.inject.length
-        ? {name: 'layer-inject', injections: target.inject}
-        : null;
-    const plugins = [targetPlugin, plugin].filter(Boolean);
+    const parts = [target.inject, source.inject].map(splitDescriptorInjections);
+    const plugins = parts.map(part => part.plugin).filter(Boolean);
     if (plugins.length) {
       result.plugins = [...(result.plugins || []), ...plugins];
     }
     // luma.gl assembles the other keys (regular expressions) from the `inject` option
-    const inject = Array.isArray(target.inject) ? {} : {...target.inject};
-    for (const key in rest) {
+    const inject = {...parts[0].rest};
+    for (const key in parts[1].rest) {
       const previous = inject[key];
-      const next = rest[key];
+      const next = parts[1].rest[key];
       inject[key] =
         typeof previous === 'string' && typeof next === 'string' ? previous + next : next;
     }
@@ -109,6 +98,23 @@ export function convertLegacyInjections(shaders) {
   // mergeShaders converts the `inject` field of the descriptor
   const {inject, ...result} = shaders;
   return mergeShaders(result, {plugins, ...(inject && {inject})});
+}
+
+/**
+ * Split the `inject` option of a shader descriptor into a plugin and the entries that stay.
+ * An array holds luma.gl `ShaderInjection` entries. A plugin accepts them as they are.
+ */
+function splitDescriptorInjections(inject?: LegacyInjections | object[]): {
+  plugin: object | null;
+  rest: LegacyInjections;
+} {
+  if (Array.isArray(inject)) {
+    return {
+      plugin: inject.length ? {name: 'layer-inject', injections: inject} : null,
+      rest: {}
+    };
+  }
+  return splitLegacyInjections(inject as LegacyInjections, 'getShaders()', 'layer');
 }
 
 /**

@@ -129,6 +129,20 @@ test('mergeShaders keeps inject keys that are not named targets', () => {
   ]);
 });
 
+test('mergeShaders keeps the target injections before the source injections', () => {
+  // The two descriptors still have an `inject` map, as in a direct call of the merge
+  const merged = mergeShaders(
+    {inject: {'fs:#main-end': 'fragColor.r = 1.0;'}},
+    {inject: {'fs:#main-end': 'fragColor.r *= 0.5;'}}
+  );
+  expect('inject' in merged, 'inject key is removed').toBe(false);
+  expect(merged.plugins.map(plugin => plugin.injections[0].glsl)).toEqual([
+    'fragColor.r = 1.0;',
+    'fragColor.r *= 0.5;'
+  ]);
+  expect(convertLegacyInjections(merged), 'no later conversion').toBe(merged);
+});
+
 test('mergeShaders moves an array of shader injections to a plugin', () => {
   const fade = {stage: 'fragment', target: '#main-end', glsl: 'fragColor.a *= 0.5;'};
   const tint = {stage: 'fragment', target: '#main-end', wgsl: 'color.r = 1.0;', order: -1};
