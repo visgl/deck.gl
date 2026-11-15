@@ -2,7 +2,7 @@
 
 See [setup and commands](../README.md) before running this example.
 
-Run `yarn --cwd examples/proposals/flow-particles start` from the repository root. The renderer selector switches between
+Run `yarn --cwd examples-v10/proposals/flow-particles start` from the repository root. The renderer selector switches between
 WebGPU and WebGL2 with float render-target support.
 
 The riverfront is a generated local scene. Its velocity grid supplies eastward and
@@ -22,7 +22,7 @@ at 32,768 particles the square-packed textures occupy approximately 1 MiB. The v
 grid occupies another 256 KiB. Shader work grows with active texture area and substeps;
 transparent overdraw also grows with density, width, and trail length.
 
-Run `yarn --cwd examples/proposals/flow-particles test:visual` for rendering,
+Run `yarn --cwd examples-v10/proposals/flow-particles test:visual` for rendering,
 animation, pause, picking, bridge occlusion, buffer ownership, and cleanup checks on both
 backends. It also reports frame timing for the three density settings. Those wall-clock
 measurements include browser, rendering, and test overhead, and are not isolated GPU timings.

@@ -7,7 +7,7 @@ district uses deterministic local geometry, so it requires no basemap service or
 
 ```sh
 yarn install
-cd examples/proposals/city-scene
+cd examples-v10/proposals/city-scene
 yarn start
 ```
 

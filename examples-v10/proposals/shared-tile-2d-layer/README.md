@@ -20,7 +20,7 @@ Run the example from a deck.gl source checkout. From the repository root:
 yarn
 yarn build
 yarn build-private
-yarn --cwd examples/proposals/shared-tile-2d-layer start-local
+yarn --cwd examples-v10/proposals/shared-tile-2d-layer start-local
 ```
 
 To build the example, run `yarn build-private-examples shared-tile-2d-layer`.
@@ -28,7 +28,7 @@ To build the example, run `yarn build-private-examples shared-tile-2d-layer`.
 
 ## Website and Documentation
 
-The standalone website route is `/examples/shared-tile-2d-layer`. The `Tile2DLayer` API page
+The standalone website route is `/examples-v10/shared-tile-2d-layer`. The `Tile2DLayer` API page
 embeds the same `App` in a bounded container. The website route disables the app's local
 counters so its existing infobox shows the subscription-driven counters once.
 

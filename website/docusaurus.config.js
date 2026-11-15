@@ -163,10 +163,9 @@ const config = {
             '@deck.gl/mesh-layers': resolve('../modules/mesh-layers/dist'),
             '@deck.gl/react': resolve('../modules/react/dist'),
             '@deck.gl/widgets': resolve('../modules/widgets/dist'),
-            'proposal-examples': resolve('../examples/proposals'),
+            'proposal-examples': resolve('../examples-v10/proposals'),
             'examples-root': resolve('../examples'),
             'website-examples': resolve('../examples/website'),
-            'v10-proposal-examples': resolve('../examples-v10/proposals'),
             'v10-website-examples': resolve('../examples-v10/website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom')

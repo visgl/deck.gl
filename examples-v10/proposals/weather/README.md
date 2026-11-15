@@ -10,7 +10,7 @@ and diffuse light color and intensity, including cloud-cover attenuation. Sun
 and Moon aim the camera above the horizon; if the body has set, the control
 selects a time when it is visible. Center returns to the district view. Dense fog can
 obscure celestial bodies; disable Fog to inspect the sky.
-Run `yarn --cwd examples/proposals/weather start`;
+Run `yarn --cwd examples-v10/proposals/weather start`;
 
 Choose Rain, Snow, Clouds, or Sunny, then toggle Fog independently. Clouds has no precipitation; Sunny disables clouds. The Clouds checkbox can override the selected preset. The fog controls retain their values while disabled. Intensity controls the particle count, wind uses metres
 per second with direction clockwise from north, and visibility sets the fog extinction.
@@ -66,7 +66,7 @@ module in this example. The same analytic integral also powers the height mode o
 That pass can fog opaque geometry from depth; transparent precipitation applies fog in its material
 afterward to avoid using the background depth. Neither path models a planet-scale atmosphere.
 
-Run `yarn --cwd examples/proposals/weather test:visual` for both-backend movement,
+Run `yarn --cwd examples-v10/proposals/weather test:visual` for both-backend movement,
 pause, fog, map/globe projection, depth-occlusion, surface-mask, and ownership checks. GPU module tests separately
 check analytic fog and seeded, world-anchored motion. Projection tests round-trip local positions
 through the actual Deck shaders, including high latitudes and globe poles. The pinned Deck patch

@@ -7,7 +7,7 @@ Connected routes through the shared fictional river district, composing luma.gl'
 
 ```sh
 yarn install
-yarn --cwd examples/proposals/styled-paths start
+yarn --cwd examples-v10/proposals/styled-paths start
 ```
 
 Choose WebGPU or WebGL2, adjust width in metres, compare butt/square/round path ends and
@@ -21,7 +21,7 @@ the envelope geometry and blend configuration. Deck supplies the
 device, frame loop, projection, picking uniforms, and render pass. The adapter is local to this
 example; the reusable CPU geometry and shader module live in engine and shadertools respectively.
 
-`yarn --cwd examples/proposals/styled-paths build` checks types and builds standalone assets.
+`yarn --cwd examples-v10/proposals/styled-paths build` checks types and builds standalone assets.
 `test:visual` runs both renderers and checks stable redraw, dash phase and toggles, geometry changes,
 feature picking through gaps, zero-width paths, resizing, buffer reuse, and resource cleanup. Set
 `STROKE_EXAMPLE_URL` to test a served production bundle. Software-GPU checks do not establish hardware

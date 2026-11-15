@@ -8,4 +8,4 @@ The initial automatic tour chooses a different visible building every five secon
 
 This capture path requires WebGPU. The example borrows scene-depth textures and lets the shared effects own and clean up GPU resources.
 
-Run `yarn --cwd examples/proposals/depth-of-field start`, build with `yarn --cwd examples/proposals/depth-of-field build`, and verify interaction/rendering with `yarn --cwd examples/proposals/depth-of-field test:visual`.
+Run `yarn --cwd examples-v10/proposals/depth-of-field start`, build with `yarn --cwd examples-v10/proposals/depth-of-field build`, and verify interaction/rendering with `yarn --cwd examples-v10/proposals/depth-of-field test:visual`.

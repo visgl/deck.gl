@@ -8,7 +8,7 @@ A deck.gl GlobeView scene with an animated, ray-marched spherical cloud shell on
 
 The example-owned Earth surface reuses the texture from the existing globe showcase. Cloud coverage is continuous across the longitude seam and poles. The shell is depth tested, does not write depth or participate in picking, and is clipped at the planet surface. Sun direction uses globe-centered XYZ coordinates.
 
-Run `yarn --cwd examples/proposals/globe-clouds start`. Select WebGPU or WebGL2 using Device. Drag to rotate and scroll to zoom; Center restores the initial view.
+Run `yarn --cwd examples-v10/proposals/globe-clouds start`. Select WebGPU or WebGL2 using Device. Drag to rotate and scroll to zoom; Center restores the initial view.
 
 The example now uses the reusable `SkyLayer` composite with one math.gl observer and
 UTC clock for the sun, moon, catalog stars and cloud illumination. Toggle each sky

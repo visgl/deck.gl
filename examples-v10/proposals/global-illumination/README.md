@@ -4,7 +4,7 @@ See [setup and commands](../README.md) before running this example.
 
 Colored diffuse bounce from visible buildings using the existing screen-space GI graph.
 
-Run `yarn --cwd examples/proposals/global-illumination start`.
+Run `yarn --cwd examples-v10/proposals/global-illumination start`.
 
 Uses the shared `riverfront-lighting-scene.ts` fixture and one `SceneBufferEffect` for scene-linear `rgba16float` color, opaque depth, view normals/roughness and `rg16float` current-minus-previous UV motion. `SceneShaderPassEffect` binds these borrowed textures to existing luma.gl graphs and coordinates history invalidation. Camera motion is reconstructed from depth; firefly cores additionally write object motion. Resize and Center invalidate history, and pause settles a bounded number of frames before becoming idle.
 

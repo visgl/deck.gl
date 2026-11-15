@@ -20,7 +20,7 @@ yarn build-private-examples
 # Or build selected examples:
 yarn build-private-examples arrow-path-layer gpu-graph-explorer
 # Start an example:
-yarn --cwd examples/proposals/arrow-path-layer start
+yarn --cwd examples-v10/proposals/arrow-path-layer start
 # Run the private module tests (including example integration tests):
 yarn test-private
 ```

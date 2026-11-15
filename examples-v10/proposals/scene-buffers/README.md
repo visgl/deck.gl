@@ -5,7 +5,7 @@ See [setup and commands](../README.md) before running this example.
 A WebGPU deck.gl scene with HDR bloom, surface edges, a visible-surface selection outline,
 and normal, depth, selection, and previous-frame views. Click a building to move the outline.
 
-Run `yarn --cwd examples/proposals/scene-buffers start` from the repository root.
+Run `yarn --cwd examples-v10/proposals/scene-buffers start` from the repository root.
 
 
 `SceneBufferEffect` captures the explicitly participating layers into a shared `GBuffer` per
@@ -27,7 +27,7 @@ physical canvas pixel per view, doubled with history, before bloom and presentat
 The adapter uses Deck's experimental layer-pass interface and the repository's pinned patch;
 it is experimental and currently requires WebGPU.
 
-Run `yarn --cwd examples/proposals/scene-buffers test:visual` for the browser checks.
+Run `yarn --cwd examples-v10/proposals/scene-buffers test:visual` for the browser checks.
 
 The district geometry is rendered by `../river-district-layer.ts`, shared with the other riverfront
 examples. It uses luma.gl's Lambert material for lighting, optional `heightFog`, and `surfaceBuffer`

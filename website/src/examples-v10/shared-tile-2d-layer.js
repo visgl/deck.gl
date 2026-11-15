@@ -4,7 +4,7 @@
 
 import React, {Component} from 'react';
 import {GITHUB_TREE} from '../constants/defaults';
-import App from 'v10-proposal-examples/shared-tile-2d-layer/app';
+import App from 'proposal-examples/shared-tile-2d-layer/app';
 
 import {makeExample} from '../components';
 
