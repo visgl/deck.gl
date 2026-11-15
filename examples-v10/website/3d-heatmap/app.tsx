@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React from 'react';
+import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
@@ -72,7 +72,8 @@ function getTooltip({object}: PickingInfo) {
     ${count} Accidents`;
 }
 
-type DataPoint = {lng: number; lat: number};
+/** Position from a queried table or a preloaded coordinate pair. */
+type DataPoint = {lng: number; lat: number} | [number, number];
 
 export default function App({
   data = DATA_URL,
@@ -80,7 +81,8 @@ export default function App({
   radius = 1000,
   upperPercentile = 100,
   coverage = 1,
-  device
+  device,
+  onDataLoad
 }: {
   data?: DataPoint[] | string | null;
   mapStyle?: string;
@@ -88,7 +90,10 @@ export default function App({
   upperPercentile?: number;
   coverage?: number;
   device?: Device;
+  onDataLoad?: (count: number) => void;
 }) {
+  const [loadedSource, setLoadedSource] = useState<string | null>(null);
+  const hasData = typeof data === 'string' ? loadedSource === data : Boolean(data?.length);
   const layers = [
     new HexagonLayer<DataPoint>({
       id: 'heatmap',
@@ -104,9 +109,15 @@ export default function App({
           ? 'SELECT lng, lat WHERE lng IS NOT NULL AND lat IS NOT NULL'
           : null,
       elevationRange: [0, 3000],
-      elevationScale: 50,
+      elevationScale: hasData ? 50 : 0,
+      onDataLoad: table => {
+        if (typeof data === 'string') {
+          setLoadedSource(data);
+          onDataLoad?.((table as {numRows: number}).numRows);
+        }
+      },
       extruded: true,
-      getPosition: ({lng, lat}) => [lng, lat],
+      getPosition: point => (Array.isArray(point) ? point : [point.lng, point.lat]),
       pickable: true,
       radius,
       upperPercentile,

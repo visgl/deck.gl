@@ -125,6 +125,7 @@ function getBandOpacityStops(
 const LOADERS = [CSVLoader];
 const LOAD_OPTIONS = {csv: {dynamicTyping: false}};
 
+/** Collects queried tree positions and statistics for the grid and tooltip. */
 function summarizeTrees(source: unknown): Trees {
   const data = source as Table;
   const trees = data.toArray() as unknown as {

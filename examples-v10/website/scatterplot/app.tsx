@@ -13,6 +13,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import type {Color, MapViewState, Widget} from '@deck.gl/core';
 import type {Device, DeviceProps} from '@luma.gl/core';
 
+/** Converts a color channel to the normalized range expected by RGBA8. */
 function normalizedChannel(color: Color, index: number): number {
   return (color[index] ?? 255) / 255;
 }
