@@ -47,7 +47,8 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.5",
-    "preact": "^10.17.0"
+    "preact": "^10.17.0",
+    "probe.gl": "^5.0.0"
   },
   "peerDependencies": {
     "@deck.gl/core": "~10.0.0-alpha",

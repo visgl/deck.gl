@@ -57,7 +57,7 @@
     "@math.gl/core": "5.0.0-beta.8",
     "@math.gl/geometry": "5.0.0-beta.8",
     "@math.gl/web-mercator": "5.0.0-beta.8",
-    "@probe.gl/stats": "^4.1.1",
+    "probe.gl": "^5.0.0",
     "@types/geojson": "^7946.0.8",
     "a5-js": "^1.0.0",
     "geotiff": "^2.1.0",

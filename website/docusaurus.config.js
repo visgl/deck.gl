@@ -11,6 +11,7 @@ const darkCodeTheme = prismThemes.nightOwl;
 
 const {getSwcLoaderOptions, rspack} = require('@docusaurus/faster');
 const {resolve} = require('path');
+const examplesDirectory = require('./scripts/examples-directory.cjs');
 const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/';
 const websiteBasePathSegments = websiteBaseUrl.split('/').filter(Boolean);
 const websiteBasePath =
@@ -27,6 +28,7 @@ const config = {
   tagline: 'GPU-powered, highly performant large-scale data visualization',
   url: 'https://deck.gl',
   baseUrl: websiteBaseUrl,
+  customFields: {examplesDirectory},
   onBrokenLinks: 'throw',
   markdown: {
     hooks: {
@@ -160,8 +162,9 @@ const config = {
             '@deck.gl/mesh-layers': resolve('../modules/mesh-layers/dist'),
             '@deck.gl/react': resolve('../modules/react/dist'),
             '@deck.gl/widgets': resolve('../modules/widgets/dist'),
-            'proposal-examples': resolve('../examples/proposals'),
-            'website-examples': resolve('../examples/website'),
+            'proposal-examples': resolve('..', examplesDirectory, 'proposals'),
+            'examples-root': resolve('..', examplesDirectory),
+            'website-examples': resolve('..', examplesDirectory, 'website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom')
           }
@@ -258,7 +261,7 @@ const config = {
               },
               {
                 label: 'Starter templates',
-                href: 'https://github.com/visgl/deck.gl/tree/master/examples/get-started'
+                href: `https://github.com/visgl/deck.gl/tree/master/${examplesDirectory}/get-started`
               },
               {
                 label: 'Playground',

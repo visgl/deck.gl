@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+EXAMPLES_ROOT="../$(node -p "require('./scripts/examples-directory.cjs')")"
+
 node scripts/validate-token.js
 npm run write-heading-ids
 npm pkg set version=$(node -p "require('../modules/core/package.json').version")
@@ -22,11 +24,11 @@ OUTPUT_DIR=build
 
 # generate playground schema and publish it as a static website asset
 (
-  cd ../examples/playground
+  cd "$EXAMPLES_ROOT/playground"
   yarn
   yarn generate-schema
 )
-cp ../examples/playground/schema.generated.json ./static/schema.generated.json
+cp "$EXAMPLES_ROOT/playground/schema.generated.json" ./static/schema.generated.json
 
 # Build the embedded v10 examples and their unpublished luma.gl peers.
 yarn build-v10-examples
@@ -49,13 +51,13 @@ node ./scripts/check-llm-output.mjs
 
 # transpile workers
 BABEL_ENV=es5 npx babel ./static/workers --out-dir ./$OUTPUT_DIR/workers
-BABEL_ENV=esm npx babel ../examples/pydeck/src/pyodide-worker.ts --out-file ./$OUTPUT_DIR/workers/pyodide-worker.mjs
+BABEL_ENV=esm npx babel "$EXAMPLES_ROOT/pydeck/src/pyodide-worker.ts" --out-file ./$OUTPUT_DIR/workers/pyodide-worker.mjs
 
 # build gallery (scripting) examples
 (
-  cd ../examples/gallery
+  cd "$EXAMPLES_ROOT/gallery"
   yarn
   yarn build
 )
 mkdir $OUTPUT_DIR/gallery
-cp -r ../examples/gallery/dist/* $OUTPUT_DIR/gallery/
+cp -r "$EXAMPLES_ROOT/gallery/dist/"* $OUTPUT_DIR/gallery/

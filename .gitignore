@@ -18,6 +18,7 @@ dist.webgl-only/
 dist-bundle.js
 
 examples/winds/data/*.html
+examples-arrow/winds/data/*.html
 mapbox-token.js
 TODO
 
@@ -25,6 +26,7 @@ mapbox-gl.js
 mapbox-gl-dev.js
 
 examples/**/yarn.lock
+examples-arrow/**/yarn.lock
 showcases/**/yarn.lock
 test/**/yarn.lock
 yarn-error.log
