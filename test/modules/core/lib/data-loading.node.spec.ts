@@ -308,7 +308,7 @@ test('appends batches from a separate Arrow runtime without copying column buffe
     'apache-arrow'
   ) as typeof import('apache-arrow');
   const foreign = foreignArrow.tableFromArrays({x: [7, 8]});
-  expect(foreign).not.toBeInstanceOf(Table);
+  expect(Object.getPrototypeOf(foreign)).not.toBe(Table.prototype);
   const {state, run, error} = makeState({_dataLoadOptions: 'batched'});
   await run(chunks(first.batches[0], foreign.batches[0], {shape: 'arrow-table', data: foreign}));
   expect(error).not.toHaveBeenCalled();

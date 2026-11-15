@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {DataType, Vector} from 'apache-arrow';
+import type {DataType, RecordBatch, Table, Vector} from 'apache-arrow';
 import type {CoordinateSystem} from '../lib/constants';
 import type Layer from '../lib/layer';
 import type LayerExtension from '../lib/layer-extension';
@@ -17,7 +17,16 @@ import type {Buffer, Parameters} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
 import type {Matrix4Like} from '@math.gl/core';
-import type {RecordBatch, Table} from 'apache-arrow';
+import type {Expression} from '@math.gl/expressions';
+import type {SQLQuery} from '@math.gl/expressions/sql';
+
+/** Optional SQL parser methods supplied by the application to Deck. */
+export type SQLParser = {
+  /** Parses a SELECT query against the loaded layer table. */
+  parseQuery?: (sql: string) => SQLQuery;
+  /** Parses an SQL expression used by an Arrow accessor. */
+  parseExpression?: (sql: string) => Expression;
+};
 
 /** Arrow table interface accepted by layers without requiring the optional Arrow peer. */
 type ArrowTableData = {
@@ -64,12 +73,13 @@ export type AccessorFunction<In, Out> = (
 /** Either a uniform value for all objects, or a function that returns a value for each object. */
 export type Accessor<In, Out> = Out | AccessorFunction<In, Out>;
 
-/** A constant, row callback, or Arrow column on accessors that explicitly support columns.
+/** A constant, row callback, Arrow column, or SQL expression on opted-in accessors.
  * GPUVector inputs are only supported by separate column props.
  */
 export type ArrowAccessor<In, Out, ArrowType extends DataType = DataType> =
   | Accessor<In, Out>
-  | Vector<ArrowType>;
+  | Vector<ArrowType>
+  | {readonly sql: string};
 
 /** A position in the format of `[lng, lat, alt?]` or `[x, y, z?]` depending on the coordinate system.
  * See https://deck.gl/docs/developer-guide/coordinate-systems#positions
@@ -106,6 +116,9 @@ export type TextureSource =
   | HTMLVideoElement
   | ImageBitmap;
 
+/** Arrow result returned by loaders.gl. */
+type ArrowTableResult = {readonly shape: 'arrow-table'; readonly data: ArrowTableData};
+
 /** Stream chunks accepted by the layer's asynchronous data loading path. */
 type LayerDataStream<T> = AsyncIterable<T[] | RecordBatch | Table>;
 
@@ -122,7 +135,8 @@ export type LayerDataSource<DataType> =
   | LayerData<DataType>
   | string
   | LayerDataStream<DataType>
-  | Promise<LayerData<DataType> | LayerDataStream<DataType>>
+  | ArrowTableResult
+  | Promise<LayerData<DataType> | ArrowTableResult | LayerDataStream<DataType>>
   | null;
 
 /**
@@ -137,6 +151,8 @@ export type LayerProps = {
    * The data to visualize.
    */
   data?: unknown;
+  /** SQL executed on an Arrow table or URL supplied to `data`. Requires a SQL parser. */
+  query?: string | null;
   /**
    * Experimental loading mode. Defaults to `auto`: load URLs completely and append supplied streams.
    * `batched` streams and appends data; `snapshots` streams and replaces data with each Arrow result.

@@ -5,6 +5,7 @@
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/core/webgl';
+import {unwrapLoaderArrowResult} from '../utils/loader-utils';
 import {isArrowTable} from '../arrow/upstream-math/is-arrow-table';
 import {resolveColumns} from './resolve-columns';
 import type {ColumnDefinitions} from './layer-columns';
@@ -12,7 +13,7 @@ import AttributeManager from './attribute/attribute-manager';
 import GPUVectorModel from './luma-upstream/gpu-vector-model';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
-import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
+import {ACCESSOR_QUERIES_SYMBOL, LIFECYCLE, Lifecycle} from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import debug from '../debug/index';
@@ -95,6 +96,7 @@ const defaultProps: DefaultProps<LayerProps> = {
     value: data => data && data.__diff,
     optional: true
   },
+  query: null,
   dataTransform: {type: 'function', value: null, optional: true},
   _dataLoadOptions: 'auto',
   onDataProgress: {type: 'function', value: null, optional: true},
@@ -359,7 +361,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Returns true if all async resources are loaded */
   get isLoaded(): boolean {
     return this.internalState
-      ? !this._coordinateSystemLoading && !this.internalState.isAsyncPropLoading()
+      ? !this._coordinateSystemLoading &&
+          !this.internalState.isAsyncPropLoading() &&
+          !this.internalState.accessorQueries?.pending
       : false;
   }
 
@@ -562,7 +566,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
 
     // Use container library to get a count for any ES6 container or object
-    return count(this.props.data);
+    return count(this.getColumnData());
   }
 
   /** Buffer layout describes how many attribute values are packed for each data object
@@ -599,7 +603,100 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     definitions: ColumnDefinitions,
     useTable = false
   ): Record<string, unknown> {
-    return resolveColumns(this.props, definitions, useTable);
+    const data = useTable ? this.getColumnData() : this.props.data;
+    const props =
+      data === this.props.data ? this.props : Object.create(this.props, {data: {value: data}});
+    return resolveColumns(props, definitions, useTable);
+  }
+
+  /** Returns the table used by column-aware layers while leaving the loaded prop intact. */
+  protected getColumnData(): LayerData<unknown> {
+    return unwrapLoaderArrowResult(this.props.data) as LayerData<unknown>;
+  }
+
+  /** Evaluates opted-in SQL accessors against the loaded data, preserving source row order. */
+  private updateAccessorQueries(): void {
+    const state = this.internalState!;
+    const queries = this.props[ACCESSOR_QUERIES_SYMBOL];
+    if (!queries) {
+      state.accessorQueries = undefined;
+      return;
+    }
+    const source = this.props.data;
+    if (state.isAsyncPropLoading('data') && !isArrowTable(unwrapLoaderArrowResult(source))) {
+      state.accessorQueries = undefined;
+      return;
+    }
+    const parseExpression = this.context.sqlParser?.parseExpression;
+    const expressions = Object.fromEntries(
+      Object.entries(queries).map(([name, query]) => [name, query.sql])
+    );
+    const previous = state.accessorQueries;
+    const matches = (layer: Layer) => {
+      const inputs = layer.props[ACCESSOR_QUERIES_SYMBOL];
+      return (
+        inputs &&
+        layer.props.data === source &&
+        layer.context.sqlParser?.parseExpression === parseExpression &&
+        Object.keys(inputs).length === Object.keys(expressions).length &&
+        Object.entries(expressions).every(([name, sql]) => inputs[name]?.sql === sql)
+      );
+    };
+    const apply = (layer: Layer, columns: NonNullable<typeof previous>['columns']) => {
+      for (const [name, input] of Object.entries(layer.props[ACCESSOR_QUERIES_SYMBOL]!)) {
+        input.column = columns?.[name];
+      }
+    };
+    if (
+      previous &&
+      previous.source === source &&
+      previous.parseExpression === parseExpression &&
+      deepEqual(previous.expressions, expressions, 1)
+    ) {
+      apply(this, previous.columns);
+      return;
+    }
+
+    const request: NonNullable<typeof state.accessorQueries> = {
+      source,
+      expressions,
+      parseExpression,
+      pending: true
+    };
+    state.accessorQueries = request;
+    apply(this, undefined);
+
+    const currentLayer = () => {
+      const layer = state.layer;
+      return state.accessorQueries === request && layer && matches(layer) ? layer : null;
+    };
+    void import('../arrow/accessor-queries')
+      .then(({evaluateAccessorQueries}) =>
+        evaluateAccessorQueries(source, expressions, parseExpression, previous)
+      )
+      .then(
+        table => {
+          const layer = currentLayer();
+          if (layer) {
+            request.table = table;
+            request.pending = false;
+            request.columns = Object.fromEntries(
+              Object.keys(expressions).map(name => [name, table.getChild(name)!])
+            );
+            apply(layer, request.columns);
+            layer.setChangeFlags({dataChanged: 'SQL accessors resolved'});
+            layer.setNeedsUpdate();
+          }
+        },
+        error => {
+          const layer = currentLayer();
+          if (layer) {
+            request.pending = false;
+            layer.setNeedsUpdate();
+            layer.raiseError(error, 'evaluating SQL accessors');
+          }
+        }
+      );
   }
 
   /** Called once to set up the initial state. Layers can create WebGL resources here. */
@@ -713,11 +810,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const {index} = info;
 
     if (index >= 0) {
-      // If props.data is an indexable array, get the object
-      if (Array.isArray(this.props.data)) {
-        info.object = this.props.data[index];
-      } else if (isArrowTable(this.props.data)) {
-        info.object = this.props.data.get(index);
+      const data = this.getColumnData();
+      if (Array.isArray(data)) {
+        info.object = data[index];
+      } else if (isArrowTable(data)) {
+        info.object = data.get(index);
       }
     }
 
@@ -849,14 +946,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const numInstances = this.getNumInstances();
     const startIndices = this.getStartIndices();
 
+    const data = this.getColumnData();
     attributeManager.update({
-      data: props.data,
+      data,
       numInstances,
       startIndices,
       props,
       transitions: props.transitions,
       // @ts-ignore (TS2339) property attribute is not present on some acceptable data types
-      buffers: props.data.attributes,
+      buffers: data.attributes,
       context: this
     });
 
@@ -1249,6 +1347,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const {state, internalState} = oldLayer;
 
     if (this === oldLayer) {
+      this.internalState?.refreshQueryParser();
       return;
     }
 
@@ -1263,6 +1362,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // Ensure any async props are updated
     this.internalState.setAsyncProps(this.props);
 
+    this.updateAccessorQueries();
     this._diffProps(this.props, this.internalState.getOldProps() as Layer<PropsT>['props']);
   }
 
@@ -1275,6 +1375,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     )
       return;
     this._updatePreprojection(this.internalState?.viewport || this.context.viewport);
+    this.updateAccessorQueries();
+    // Keep the current attributes until the new rows and SQL columns can be applied together.
+    if (this.internalState.accessorQueries?.pending) {
+      return;
+    }
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.needsUpdate();
     // End lifecycle method

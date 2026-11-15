@@ -23,6 +23,8 @@ import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
 import type Deck from './deck';
 
+import type {SQLParser} from '../types/layer-props';
+
 const TRACE_SET_LAYERS = 'layerManager.setLayers';
 const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
 
@@ -30,6 +32,7 @@ export type LayerContext = {
   layerManager: LayerManager;
   resourceManager: ResourceManager;
   deck?: Deck<any>;
+  sqlParser?: SQLParser;
   device: Device;
   shaderAssembler: ShaderAssembler;
   defaultShaderModules: ShaderModule[];
@@ -194,6 +197,10 @@ export default class LayerManager {
     if ('layerFilter' in props && props.layerFilter !== this._layerFilter) {
       this._layerFilter = props.layerFilter;
       this.setNeedsUpdate('layerFilter changed');
+    }
+    if ('sqlParser' in props && props.sqlParser !== this.context.sqlParser) {
+      this.context.sqlParser = props.sqlParser;
+      this.setNeedsUpdate('SQL parser changed');
     }
     if ('debug' in props) {
       this._debug = props.debug;
