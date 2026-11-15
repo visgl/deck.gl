@@ -100,7 +100,7 @@ export default abstract class View<
 
     // A falsy id means the class default. Read only an own `id`: props from another view keep
     // their default on the prototype, and copying it would make it look app-supplied.
-    const ownId = Object.hasOwn(props, 'id') ? props.id : undefined;
+    const ownId = Object.prototype.hasOwnProperty.call(props, 'id') ? props.id : undefined;
     this.props = createPropsWithDefaultId<ViewProps>(this.id, props, {id: ownId || undefined});
 
     // Extents
