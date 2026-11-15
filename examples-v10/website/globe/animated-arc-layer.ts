@@ -2,104 +2,110 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {ArcLayer, ArcLayerProps} from '@deck.gl/layers';
-import {Accessor, DefaultProps} from '@deck.gl/core';
-
+import {ArcLayer, type ArcLayerProps} from '@deck.gl/layers';
+import type {
+  ArrowAccessor,
+  DefaultProps,
+  _ColumnDefinition as ColumnDefinition
+} from '@deck.gl/core';
+import type {FixedSizeList, Float32} from 'apache-arrow';
 import type {ShaderModule} from '@luma.gl/shaders';
 
-const uniformBlock = `\
-uniform tripsUniforms {
-  vec2 timeRange;
-} trips;
-`;
-
-export type TripsProps = {
-  timeRange: [number, number];
-};
-
-export const tripsUniforms = {
-  name: 'trips',
-  vs: uniformBlock,
-  fs: uniformBlock,
-  uniformTypes: {
-    timeRange: 'vec2<f32>'
-  }
-} as const satisfies ShaderModule<TripsProps>;
-
-export type AnimatedArcLayerProps<DataT = any> = _AnimatedArcLayerProps<DataT> &
-  ArcLayerProps<DataT>;
-
-type _AnimatedArcLayerProps<DataT = any> = {
-  getSourceTimestamp?: Accessor<DataT, number>;
-  getTargetTimestamp?: Accessor<DataT, number>;
+/** Time range and timestamps used to animate a set of flight arcs. */
+type AnimationProps = {
+  /** Departure and arrival times in seconds on the shared animation timeline. */
+  getTimestamps?: ArrowAccessor<unknown, [number, number], FixedSizeList<Float32>>;
+  /** Time window displayed by the shader, in seconds. */
   timeRange?: [number, number];
 };
 
-const defaultProps: DefaultProps<_AnimatedArcLayerProps> = {
-  getSourceTimestamp: {type: 'accessor', value: 0},
-  getTargetTimestamp: {type: 'accessor', value: 1},
+/** Styling and animation props for a group of flight arcs. */
+export type AnimatedArcLayerProps = ArcLayerProps & AnimationProps;
+
+/** Configures the timestamp accessor and an initial one-second window. */
+const defaultProps: DefaultProps<AnimationProps> = {
+  getTimestamps: {type: 'accessor', arrow: true, constantTypes: ['array'], value: [0, 1]},
   timeRange: {type: 'array', compare: true, value: [0, 1]}
 };
 
-export default class AnimatedArcLayer<DataT = any, ExtraProps = {}> extends ArcLayer<
-  DataT,
-  ExtraProps & Required<_AnimatedArcLayerProps>
-> {
-  layerName = 'AnimatedArcLayer';
-  defaultProps = defaultProps;
+/** Timestamp window layout for the GLSL shader stages. */
+const uniformBlock = `uniform flightTimeUniforms { vec2 timeRange; } flightTime;`;
+/** Shared time window uniforms for both shader backends. */
+const flightTimeUniforms = {
+  name: 'flightTime',
+  vs: uniformBlock,
+  fs: uniformBlock,
+  source: `struct FlightTimeUniforms { timeRange: vec2<f32> };
+@group(0) @binding(auto) var<uniform> flightTime: FlightTimeUniforms;`,
+  uniformTypes: {timeRange: 'vec2<f32>'}
+} as const satisfies ShaderModule<Pick<AnimationProps, 'timeRange'>>;
 
-  getShaders() {
+/** Draws a time window through flight arcs using a packed Arrow timestamp pair. */
+export default class AnimatedArcLayer extends ArcLayer<unknown, Required<AnimationProps>> {
+  /** Identifies the primitive layer in Deck diagnostics. */
+  static layerName = 'AnimatedArcLayer';
+  /** Adds timing defaults to the inherited ArcLayer props. */
+  static defaultProps = defaultProps;
+
+  /** Binds timestamps when the layer uses the accessor model. */
+  protected override initializeAccessorAttributes() {
+    super.initializeAccessorAttributes();
+    this.getAttributeManager()!.addInstanced({
+      instanceTimestamps: {size: 2, accessor: 'getTimestamps'}
+    });
+  }
+
+  /** Binds packed departure and arrival times to the Arrow model. */
+  protected override getExtraColumnDefinitions(): Readonly<Record<string, ColumnDefinition>> {
+    return {
+      timestamps: {
+        attribute: 'instanceTimestamps',
+        accessor: 'getTimestamps',
+        arrowAccessor: true,
+        semantic: 'vector',
+        size: 2
+      }
+    };
+  }
+
+  /** Adds interpolated flight times, time-window clipping, and a fade to the arc shaders. */
+  override getShaders() {
+    /** Arc shaders that receive the time-window plugin. */
     const shaders = super.getShaders();
+    /** Derives the GLSL timestamp at the vertex position along the arc. */
+    const interpolate =
+      'flightTimestamp = mix(instanceTimestamps.x, instanceTimestamps.y, segmentRatio);';
+    /** Discards fragments outside the current window, including during picking. */
+    const clip = `if (flightTimestamp < flightTime.timeRange.x || flightTimestamp > flightTime.timeRange.y) {
+  discard;
+}`;
+    /** Fades the older end of the visible arc. */
+    const opacity =
+      '(flightTimestamp - flightTime.timeRange.x) / (flightTime.timeRange.y - flightTime.timeRange.x)';
     shaders.plugins = [
       ...(shaders.plugins || []),
       {
         name: 'animatedArc',
-        module: tripsUniforms,
+        module: flightTimeUniforms,
+        vertexInputs: {instanceTimestamps: 'vec2<f32>'},
+        interStageVariables: {flightTimestamp: {type: 'f32'}},
         injections: {
-          'glsl:vs:#decl': `\
-in float instanceSourceTimestamp;
-in float instanceTargetTimestamp;
-out float vTimestamp;
-`,
-          'glsl:vs:#main-end': `\
-vTimestamp = mix(instanceSourceTimestamp, instanceTargetTimestamp, segmentRatio);
-`,
-          'glsl:fs:#decl': `\
-in float vTimestamp;
-`,
-          'glsl:fs:#main-start': `\
-if (vTimestamp < trips.timeRange.x || vTimestamp > trips.timeRange.y) {
-  discard;
-}
-`,
-          'glsl:fs:DECKGL_FILTER_COLOR': `\
-color.a *= (vTimestamp - trips.timeRange.x) / (trips.timeRange.y - trips.timeRange.x);
-`
+          'glsl:vs:#main-end': interpolate,
+          'glsl:fs:#main-start': clip,
+          'glsl:fs:DECKGL_FILTER_COLOR': `color.a *= ${opacity};`,
+          'wgsl:vs:DECKGL_FILTER_GL_POSITION':
+            'flightTimestamp = mix(instanceTimestamps.x, instanceTimestamps.y, geometry.uv.x);',
+          'wgsl:fs:DECKGL_FILTER_COLOR': `${clip}
+(*color).a *= ${opacity};`
         }
       }
     ];
     return shaders;
   }
 
-  initializeState() {
-    super.initializeState();
-    this.getAttributeManager().addInstanced({
-      instanceSourceTimestamp: {
-        size: 1,
-        accessor: 'getSourceTimestamp'
-      },
-      instanceTargetTimestamp: {
-        size: 1,
-        accessor: 'getTargetTimestamp'
-      }
-    });
-  }
-
-  draw(params) {
-    const {timeRange} = this.props;
-    const tripsProps: TripsProps = {timeRange};
-    const model = this.state.model!;
-    model.shaderInputs.setProps({trips: tripsProps});
+  /** Updates the time window independently of the uploaded Arrow columns. */
+  override draw(params: {uniforms: Record<string, unknown>}) {
+    this.state.model!.shaderInputs.setProps({flightTime: {timeRange: this.props.timeRange}});
     super.draw(params);
   }
 }

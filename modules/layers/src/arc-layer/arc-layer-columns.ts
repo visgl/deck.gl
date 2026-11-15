@@ -83,13 +83,19 @@ export type ArcColumnProps = {
 };
 
 /** Returns whether a column prop selects the column path. */
-export function hasArcColumns(props: Readonly<Record<string, unknown>>): boolean {
-  return Object.keys(resolveColumns(props, DEFINITIONS)).length > 0;
+export function hasArcColumns(
+  props: Readonly<Record<string, unknown>>,
+  extraColumns?: Readonly<Record<string, ColumnDefinition>>
+): boolean {
+  /** Combined definitions used to discover a column declared by the base layer or a subclass. */
+  const definitions = extraColumns ? {...DEFINITIONS, ...extraColumns} : DEFINITIONS;
+  return Object.keys(resolveColumns(props, definitions)).length > 0;
 }
 
 /** Prepares ArcLayer columns and accessor fallbacks. */
 export class ArcLayerColumns extends LayerColumns {
-  constructor(device: Device) {
-    super(device, DEFINITIONS, 'Arc');
+  /** Prepares columns for the Arc shaders and any additional inputs from a subclass. */
+  constructor(device: Device, extraColumns: Readonly<Record<string, ColumnDefinition>> = {}) {
+    super(device, {...DEFINITIONS, ...extraColumns}, 'Arc');
   }
 }

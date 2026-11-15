@@ -22,7 +22,7 @@ import {SphereGeometry} from '@luma.gl/engine';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 
-import AnimatedArcLayer from './animated-arc-group-layer';
+import AnimatedArcGroupLayer from './animated-arc-group-layer';
 import RangeInput from './range-input';
 import type {GlobeViewState} from '@deck.gl/core';
 
@@ -51,17 +51,24 @@ const sunLight = new SunLight({
 // create lighting effect with light sources
 const lightingEffect = new LightingEffect({ambientLight, sunLight});
 
-type Flight = {
-  // Departure
+/** One flight with departure and arrival coordinates and timestamps. */
+export type Flight = {
+  /** Departure time in seconds on the animation timeline. */
   time1: number;
+  /** Departure longitude in degrees. */
   lon1: number;
+  /** Departure latitude in degrees. */
   lat1: number;
+  /** Departure altitude in meters. */
   alt1: number;
 
-  // Arrival
+  /** Arrival time in seconds on the animation timeline. */
   time2: number;
+  /** Arrival longitude in degrees. */
   lon2: number;
+  /** Arrival latitude in degrees. */
   lat2: number;
+  /** Arrival altitude in meters. */
   alt2: number;
 };
 
@@ -108,13 +115,9 @@ export default function App({device, data}: {device?: Device; data?: DailyFlight
     data &&
     data.map(
       ({date, flights}) =>
-        new AnimatedArcLayer<Flight>({
+        new AnimatedArcGroupLayer({
           id: `flights-${date}`,
           data: flights,
-          getSourcePosition: d => [d.lon1, d.lat1, d.alt1],
-          getTargetPosition: d => [d.lon2, d.lat2, d.alt2],
-          getSourceTimestamp: d => d.time1,
-          getTargetTimestamp: d => d.time2,
           getHeight: 0.5,
           getWidth: 1,
           timeRange,
