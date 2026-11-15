@@ -9,6 +9,7 @@ import App from 'arrow-website-examples/terrain-extension/app';
 
 import {makeExample} from '../components';
 
+/** Provides locations for the example. */
 const LOCATIONS = {
   'Day 5. Pau to Laruns': {
     latitude: 43.09822,
@@ -52,11 +53,15 @@ const LOCATIONS = {
   }
 };
 
+/** Connects the Arrow terrain extension example to the website controls. */
 class TerrainExtensionDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Tour de France routes';
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/terrain-extension`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     location: {
       displayName: 'Route',
@@ -72,8 +77,10 @@ class TerrainExtensionDemo extends Component {
     }
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.BLANK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -95,9 +102,12 @@ class TerrainExtensionDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides location, view for the example. */
     const {location, view} = this.props.params;
 
+    /** Provides initial view state for the example. */
     const initialViewState = {
       ...LOCATIONS[location.value],
       pitch: 45,

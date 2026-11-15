@@ -9,9 +9,12 @@ import App, {COLOR_SCALE} from 'arrow-website-examples/highway/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow highway example to the website controls. */
 class HighwayDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Highway Safety in the US';
 
+  /** Data sources loaded before rendering the demo. */
   static data = [
     {
       url: `${DATA_URI}/highway-accidents.txt`,
@@ -23,18 +26,25 @@ class HighwayDemo extends Component {
     }
   ];
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/highway`;
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     year: {displayName: 'Year', type: 'range', value: 1990, step: 5, min: 1990, max: 2015}
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.DARK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
+    /** Provides legends for the example. */
     const legends = COLOR_SCALE.domain();
+    /** Provides width for the example. */
     const width = `${100 / legends.length}%`;
 
     return (
@@ -80,7 +90,9 @@ class HighwayDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides data, params, ...other props for the example. */
     const {data, params, ...otherProps} = this.props;
 
     return (

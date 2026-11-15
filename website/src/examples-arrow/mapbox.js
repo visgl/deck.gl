@@ -8,16 +8,21 @@ import App from 'arrow-website-examples/mapbox/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow mapbox example to the website controls. */
 class MapboxDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Who Is Visiting San Francisco?';
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/mapbox`;
 
+  /** Data sources loaded before rendering the demo. */
   static data = {
     url: `${DATA_URI}/safegraph.txt`,
     worker: '/workers/poi-data-decoder.js'
   };
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -33,9 +38,12 @@ class MapboxDemo extends Component {
     );
   }
 
+  /** Manages container ref for the example. */
   _containerRef = createRef();
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides data, ...other props for the example. */
     const {data, ...otherProps} = this.props;
     return <App {...otherProps} data={data}/>;
   }

@@ -9,25 +9,33 @@ import App from 'arrow-website-examples/screen-grid/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow screen grid example to the website controls. */
 class ScreenGridDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Uber Pickup Locations In NewYork City';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/screen-grid`;
 
+  /** Data sources loaded before rendering the demo. */
   static data = {
     url: `${DATA_URI}/screen-grid-data-uber-pickups-nyc.txt`,
     worker: '/workers/screen-grid-data-decoder.js'
   };
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     gpuAggregation: {displayName: 'GPU Acceleration', type: 'checkbox', value: true},
     cellSize: {displayName: 'Cell Size', type: 'range', value: 5, step: 1, min: 1, max: 20}
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.DARK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -59,12 +67,16 @@ class ScreenGridDemo extends Component {
   }
 
   // get a subset of the data if GPU aggregation is not supported
+  /** Manages sample data for the example. */
   _sampleData(data) {
     if (!data) {
       return null;
     }
+    /** Provides data sample size for the example. */
     const DATA_SAMPLE_SIZE = 1e5;
+    /** Provides result for the example. */
     const result = new Array(DATA_SAMPLE_SIZE);
+    /** Provides stride for the example. */
     const stride = Math.floor(data.length / DATA_SAMPLE_SIZE);
     for (let i = 0; i < DATA_SAMPLE_SIZE; i++) {
       result[i] = data[i * stride];
@@ -73,6 +85,7 @@ class ScreenGridDemo extends Component {
     return result;
   }
 
+  /** Manages disable gpuaggregation for the example. */
   _disableGPUAggregation = () => {
     this.props.useParam({
       gpuAggregation: {
@@ -89,9 +102,13 @@ class ScreenGridDemo extends Component {
     });
   };
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params, data for the example. */
     const {params, data} = this.props;
+    /** Provides cell size for the example. */
     const cellSize = params.cellSize.value;
+    /** Provides gpu aggregation for the example. */
     const gpuAggregation = params.gpuAggregation.value;
 
     return (

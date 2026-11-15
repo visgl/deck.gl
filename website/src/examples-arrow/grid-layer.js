@@ -9,11 +9,15 @@ import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import {makeExample} from '../components';
 import {readableInteger} from '../utils/format-utils';
 
+/** Connects the Arrow grid example to the website controls. */
 class GridDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Paris Street Trees';
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/zoom-bands`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     cellPixels: {
       displayName: 'Cell Size (px)',
@@ -33,8 +37,10 @@ class GridDemo extends Component {
     }
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.DARK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -73,7 +79,9 @@ class GridDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params, map style, on state change for the example. */
     const {params, mapStyle, onStateChange} = this.props;
 
     return (

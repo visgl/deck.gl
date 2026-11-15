@@ -9,6 +9,7 @@ import styled from 'styled-components';
 
 import {makeExample} from '../components';
 
+/** Provides demo container for the example. */
 const DemoContainer = styled.div`
   .selected-feature-info {
     position: absolute;
@@ -23,6 +24,7 @@ const DemoContainer = styled.div`
   }
 `;
 
+/** Provides services for the example. */
 const SERVICES = {
   'Terrestris (OpenStreetMap)': {
     serviceUrl: `https://ows.terrestris.de/osm/service`,
@@ -45,13 +47,18 @@ const SERVICES = {
   }
 };
 
+/** Connects the Arrow wmsdemo example to the website controls. */
 class WMSDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Web Map Service (WMS)';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/wms`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     service: {
       displayName: 'Service',
@@ -62,6 +69,7 @@ class WMSDemo extends Component {
     layer: {displayName: 'Layer', type: 'select', options: [], value: ''}
   };
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     if (!meta.title) {
       return (
@@ -70,6 +78,7 @@ class WMSDemo extends Component {
         </div>
       );
     }
+    /** Provides title, abstract, access constraints for the example. */
     const {title, abstract, accessConstraints} = meta;
     return (
       <div>
@@ -82,13 +91,17 @@ class WMSDemo extends Component {
     );
   }
 
+  /** Initializes the demo after its container mounts. */
   componentDidMount() {
+    /** Provides service for the example. */
     const service = SERVICES[this.props.params.service.value];
     this.setState({service, layers: {}});
   }
 
+  /** Updates the demo when its inputs change. */
   componentDidUpdate(prevProps) {
     if (prevProps.params.service.value !== this.props.params.service.value) {
+      /** Provides service for the example. */
       const service = SERVICES[this.props.params.service.value];
       // Clear metadata and layers dropdown
       this.props.onStateChange({title: ''});
@@ -100,9 +113,11 @@ class WMSDemo extends Component {
     }
   }
 
+  /** Manages on metadata load for the example. */
   _onMetadataLoad = meta => {
     this.props.onStateChange(meta);
 
+    /** Provides layers for the example. */
     const layers = getLayerNames(meta.layers);
     this.setState({layers});
 
@@ -115,9 +130,12 @@ class WMSDemo extends Component {
     });
   };
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
     // eslint-disable-next-line no-unused-vars
+    /** Provides params, ...other props for the example. */
     const {params, ...otherProps} = this.props;
+    /** Provides service, layers for the example. */
     const {service, layers} = this.state || {};
 
     if (!service) {

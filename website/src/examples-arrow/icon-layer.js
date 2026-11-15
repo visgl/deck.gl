@@ -10,6 +10,7 @@ import App from 'arrow-website-examples/icon/app';
 
 import {makeExample} from '../components';
 
+/** Provides icon demo container for the example. */
 const IconDemoContainer = styled.div`
   .tooltip {
     h5 {
@@ -37,24 +38,32 @@ const IconDemoContainer = styled.div`
   }
 `;
 
+/** Connects the Arrow icon example to the website controls. */
 class IconDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Meteorites Landings';
 
+  /** Data sources loaded before rendering the demo. */
   static data = {
     url: `${DATA_URI}/meteorites.txt`,
     worker: '/workers/meteorites-decoder.js'
   };
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/icon`;
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     cluster: {displayName: 'Cluster', type: 'checkbox', value: true}
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.DARK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -78,7 +87,9 @@ class IconDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params, data, ...other props for the example. */
     const {params, data, ...otherProps} = this.props;
 
     return (

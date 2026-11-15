@@ -9,16 +9,21 @@ import {readableInteger} from '../utils/format-utils';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow orthographic view example to the website controls. */
 class OrthographicViewDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'World Weather Station Temperatures, 1880-2020';
 
+  /** Data sources loaded before rendering the demo. */
   static data = {
     url: `${DATA_URI}/ghcn-annual.txt`,
     worker: '/workers/ghcn-data-decoder.js'
   };
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/orthographic`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     groupBy: {
       displayName: 'Group By',
@@ -28,7 +33,9 @@ class OrthographicViewDemo extends Component {
     }
   };
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
+    /** Provides buckets for the example. */
     const buckets = [-60, -45, -30, -15, 0, 15, 30];
 
     return (
@@ -76,8 +83,11 @@ class OrthographicViewDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params, data, ...other props for the example. */
     const {params, data, ...otherProps} = this.props;
+    /** Provides group by for the example. */
     const groupBy = params.groupBy.value;
 
     return (

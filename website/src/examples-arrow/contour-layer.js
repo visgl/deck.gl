@@ -8,20 +8,27 @@ import App, {BANDS, LINES} from 'arrow-website-examples/contour/app';
 
 import {makeExample} from '../components';
 
+/** Provides ms per week for the example. */
 const MS_PER_WEEK = 1000 * 60 * 60 * 24 * 7;
 
+/** Connects the Arrow contour example to the website controls. */
 class ContourDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'COVID-19 Cases in the United States';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Data sources loaded before rendering the demo. */
   static data = {
     url: `${DATA_URI}/covid-by-county.txt`,
     worker: '/workers/contour-data-decoder.js'
   };
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/contour`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     style: {
       displayName: 'Style',
@@ -40,8 +47,10 @@ class ContourDemo extends Component {
     week: {displayName: 'Week', type: 'range', value: 30, step: 1, min: 0, max: 30}
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.DARK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -75,11 +84,13 @@ class ContourDemo extends Component {
     );
   }
 
+  /** Initializes the demo after its container mounts. */
   componentDidMount() {
     this.updateSummary();
     this.updateOptions();
   }
 
+  /** Updates the demo when its inputs change. */
   componentDidUpdate(oldProps) {
     if (this.props.params.week !== oldProps.params.week) {
       this.updateSummary();
@@ -89,8 +100,11 @@ class ContourDemo extends Component {
     }
   }
 
+  /** Updates the summary for the selected time period. */
   updateSummary() {
+    /** Provides week for the example. */
     const week = this.props.params.week.value;
+    /** Provides date for the example. */
     const date = new Date(Date.UTC(2020, 0, 20) + week * MS_PER_WEEK);
 
     this.props.onStateChange({
@@ -102,11 +116,15 @@ class ContourDemo extends Component {
     });
   }
 
+  /** Updates the available controls from the loaded data. */
   updateOptions() {
+    /** Provides data for the example. */
     const {data} = this.props;
     if (data) {
+      /** Provides max week for the example. */
       let maxWeek = 0;
       for (const d of data) {
+        /** Provides weeks for the example. */
         const weeks = Object.keys(d.casesByWeek)
           .map(Number)
           .sort((a, b) => a - b);
@@ -119,10 +137,15 @@ class ContourDemo extends Component {
     }
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params, data for the example. */
     const {params, data} = this.props;
+    /** Provides cell size for the example. */
     const cellSize = params.cellSize.value;
+    /** Provides week for the example. */
     const week = params.week.value;
+    /** Provides style for the example. */
     const style = params.style.value;
 
     return (

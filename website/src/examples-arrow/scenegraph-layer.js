@@ -9,19 +9,26 @@ import App from 'arrow-website-examples/scenegraph/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow scenegraph example to the website controls. */
 class ScenegraphDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Flight Tracker';
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/scenegraph`;
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     sizeScale: {displayName: 'Size', type: 'range', value: 25, step: 5, min: 5, max: 500}
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.DARK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -39,7 +46,9 @@ class ScenegraphDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params, ...other props for the example. */
     const {params, ...otherProps} = this.props;
     return (
       <App

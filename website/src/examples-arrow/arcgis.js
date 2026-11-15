@@ -8,11 +8,15 @@ import App from 'arrow-website-examples/i3s/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow arc gisdemo example to the website controls. */
 class ArcGISDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'San Francisco 3D Buildings';
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/i3s`;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -34,6 +38,7 @@ class ArcGISDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
     return <App />;
   }

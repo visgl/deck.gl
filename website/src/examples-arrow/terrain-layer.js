@@ -8,6 +8,7 @@ import {GITHUB_TREE, MAPBOX_STYLES} from '../constants/defaults';
 
 import {makeExample} from '../components';
 
+/** Provides locations for the example. */
 const LOCATIONS = {
   'Mt. St Helens': {
     latitude: 46.2,
@@ -47,19 +48,25 @@ const LOCATIONS = {
   }
 };
 
+/** Provides surface images for the example. */
 const SURFACE_IMAGES = {
   Satellite: 'https://tiles.versatiles.org/tiles/satellite/{z}/{x}/{y}.webp',
   Street: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
   None: null
 };
 
+/** Connects the Arrow terrain example to the website controls. */
 class TerrainDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Terrains';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/terrain`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     globeView: {displayName: 'Globe View', type: 'checkbox', value: false},
     location: {
@@ -121,8 +128,10 @@ class TerrainDemo extends Component {
     }
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.BLANK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -148,12 +157,24 @@ class TerrainDemo extends Component {
     );
   }
 
+  /** Manages on zoom change for the example. */
   _onZoomChange = zoom => {
     this.props.onStateChange({zoom});
   };
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params, data, ...other props for the example. */
     const {params, data, ...otherProps} = this.props;
+    /** Provides location,
+      surface,
+      wireframe,
+      globe view,
+      min zoom,
+      max zoom,
+      visible min zoom,
+      visible max zoom,
+      zoom offset for the example. */
     const {
       location,
       surface,
@@ -166,6 +187,7 @@ class TerrainDemo extends Component {
       zoomOffset
     } = params;
 
+    /** Provides initial view state for the example. */
     const initialViewState = LOCATIONS[location.value];
     initialViewState.pitch = 45;
 

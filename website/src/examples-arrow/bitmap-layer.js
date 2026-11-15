@@ -8,16 +8,23 @@ import App, {OLD_MAPS} from 'arrow-website-examples/old-maps/app';
 
 import {makeExample} from '../components';
 
+/** Provides get label for the example. */
 const getLabel = map => `${map.place}, ${map.date}`;
+/** Provides maps by label for the example. */
 const MAPS_BY_LABEL = Object.fromEntries(OLD_MAPS.map(map => [getLabel(map), map]));
 
+/** Connects the Arrow bitmap layer example to the website controls. */
 class BitmapLayerDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'A Tour of Old Maps';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/old-maps`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     map: {
       displayName: 'Map',
@@ -28,7 +35,9 @@ class BitmapLayerDemo extends Component {
     opacity: {displayName: 'Opacity', type: 'range', value: 1, step: 0.05, min: 0, max: 1}
   };
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
+    /** Provides map for the example. */
     const {map} = meta;
     return (
       <div>
@@ -56,25 +65,31 @@ class BitmapLayerDemo extends Component {
     );
   }
 
+  /** Initializes the demo after its container mounts. */
   componentDidMount() {
     this._updateInfo();
   }
 
+  /** Updates the demo when its inputs change. */
   componentDidUpdate(prevProps) {
     if (prevProps.params.map.value !== this.props.params.map.value) {
       this._updateInfo();
     }
   }
 
+  /** Manages update info for the example. */
   _updateInfo() {
     this.props.onStateChange({map: MAPS_BY_LABEL[this.props.params.map.value]});
   }
 
+  /** Manages on map change for the example. */
   _onMapChange = map => {
     this.props.useParam({map: {...this.props.params.map, value: getLabel(map)}});
   };
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params, device for the example. */
     const {params, device} = this.props;
 
     return (

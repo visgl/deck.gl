@@ -10,18 +10,24 @@ import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow hexagon example to the website controls. */
 class HexagonDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'United Kingdom Road Safety';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Data sources loaded before rendering the demo. */
   static data = {
     url: `${DATA_URI}/heatmap-data.txt`,
     worker: '/workers/heatmap-data-decoder.js'
   };
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/3d-heatmap`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     radius: {displayName: 'Radius', type: 'range', value: 2000, step: 100, min: 500, max: 20000},
     coverage: {displayName: 'Coverage', type: 'range', value: 0.7, step: 0.1, min: 0, max: 1},
@@ -35,9 +41,12 @@ class HexagonDemo extends Component {
     }
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.DARK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
+    /** Provides color ramp for the example. */
     const colorRamp = colorRange.slice().map(color => `rgb(${color.join(',')})`);
 
     return (
@@ -73,7 +82,9 @@ class HexagonDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides data, params for the example. */
     const {data, params} = this.props;
 
     return (

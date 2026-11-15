@@ -8,11 +8,15 @@ import App from 'arrow-website-examples/360-video/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow first person view example to the website controls. */
 class FirstPersonViewDemo extends Component {
+  /** Title shown above the example controls. */
   static title = '360 Video: NASA Astronaut Training';
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/360-video`;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo() {
     return (
       <div>
@@ -27,6 +31,7 @@ class FirstPersonViewDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
     return <App {...this.props} />;
   }

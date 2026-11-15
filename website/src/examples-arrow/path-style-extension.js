@@ -8,6 +8,7 @@ import App, {ROAD_STYLE} from 'arrow-website-examples/path-style-extension/app';
 
 import {makeExample} from '../components';
 
+/** Provides legend for the example. */
 const LEGEND = [
   {label: 'White marking', color: ROAD_STYLE.whiteMarking},
   {label: 'Yellow marking', color: ROAD_STYLE.yellowMarking},
@@ -17,18 +18,24 @@ const LEGEND = [
 
 // Blends a color over asphalt so that the swatch matches the map
 function getSwatchColor([r, g, b, a = 255]) {
+  /** Provides alpha for the example. */
   const alpha = a / 255;
+  /** Provides channels for the example. */
   const channels = [r, g, b].map((value, i) =>
     Math.round(value * alpha + ROAD_STYLE.asphalt[i] * (1 - alpha))
   );
   return `rgb(${channels.join(',')})`;
 }
 
+/** Connects the Arrow path style extension example to the website controls. */
 class PathStyleExtensionDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Street Design Anatomy';
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/path-style-extension`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     units: {
       displayName: 'Units',
@@ -47,8 +54,10 @@ class PathStyleExtensionDemo extends Component {
     extensionLayersOnly: {displayName: 'Extension layers only', type: 'checkbox', value: false}
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.DARK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo() {
     return (
       <div>
@@ -86,7 +95,9 @@ class PathStyleExtensionDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params, ...other props for the example. */
     const {params, ...otherProps} = this.props;
     return (
       <App

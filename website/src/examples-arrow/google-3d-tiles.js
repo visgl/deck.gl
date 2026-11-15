@@ -8,19 +8,25 @@ import App, {COLORS} from 'arrow-website-examples/google-3d-tiles/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow google3d tiles example to the website controls. */
 class Google3dTilesDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Photorealistic 3D Tiles';
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/google-3d-tiles`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     globeView: {displayName: 'Globe View', type: 'checkbox', value: false},
     distance: {displayName: 'Distance to tree', type: 'range', value: 0, step: 1, min: 0, max: 400},
     opacity: {displayName: 'Opacity', type: 'range', value: 0.2, step: 0.01, min: 0, max: 0.5}
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.DARK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -67,10 +73,15 @@ class Google3dTilesDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params for the example. */
     const {params} = this.props;
+    /** Provides distance for the example. */
     const distance = params.distance.value;
+    /** Provides opacity for the example. */
     const opacity = params.opacity.value;
+    /** Provides globe view for the example. */
     const globeView = params.globeView.value;
 
     return <App {...this.props} distance={distance} opacity={opacity} globeView={globeView} />;

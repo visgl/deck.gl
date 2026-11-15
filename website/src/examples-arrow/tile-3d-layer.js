@@ -8,21 +8,29 @@ import App from 'arrow-website-examples/3d-tiles/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow tiles3 ddemo example to the website controls. */
 class Tiles3DDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'City of Melbourne 3D Point Cloud';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/3d-tiles`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {};
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.DARK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     if (!meta.attributions) {
       return null;
     }
+    /** Provides attributions for the example. */
     const {attributions} = meta;
     return (
       <div style={{marginTop: '0.5cm'}}>
@@ -37,10 +45,12 @@ class Tiles3DDemo extends Component {
     );
   }
 
+  /** Manages update attributions for the example. */
   _updateAttributions = attributions => {
     this.props.onStateChange({attributions});
   };
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
     return <App {...this.props} updateAttributions={this._updateAttributions} />;
   }

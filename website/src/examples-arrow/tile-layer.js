@@ -9,13 +9,18 @@ import App from 'arrow-website-examples/map-tile/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow map tile example to the website controls. */
 class MapTileDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Raster Map Tiles';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/map-tile`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     minZoom: {displayName: 'Min Zoom', type: 'range', value: 3, step: 1, min: 0, max: 19, accentColor: '#0275ff'},
     maxZoom: {displayName: 'Max Zoom', type: 'range', value: 8, step: 1, min: 0, max: 19, accentColor: '#0275ff'},
@@ -26,6 +31,7 @@ class MapTileDemo extends Component {
     useExtent: {displayName: 'Extent (France)', type: 'checkbox', value: false}
   };
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -46,6 +52,7 @@ class MapTileDemo extends Component {
     );
   }
 
+  /** Manages on tiles load for the example. */
   _onTilesLoad = tiles => {
     // onViewportLoad is called during tileLayer.updateState
     // Updating React state here may trigger another round of layer updates and create a racing condition
@@ -53,12 +60,15 @@ class MapTileDemo extends Component {
     requestAnimationFrame(() => this.props.onStateChange({tileCount: tiles.length}));
   };
 
+  /** Manages on zoom change for the example. */
   _onZoomChange = zoom => {
     this.props.onStateChange({zoom});
   };
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
     // eslint-disable-next-line no-unused-vars
+    /** Provides params, ...other props for the example. */
     const {params, ...otherProps} = this.props;
     return (
       <App

@@ -9,15 +9,21 @@ import {LANDCOVER_LEGEND} from 'arrow-website-examples/global-grids/landcover-pa
 
 import {makeExample} from '../components';
 
+/** Provides grid systems for the example. */
 const GRID_SYSTEMS = ['a5', 'geohash', 'h3', 's2', 'quadkey'];
 
+/** Connects the Arrow global grids example to the website controls. */
 class GlobalGridsDemo extends React.Component {
+  /** Title shown above the example controls. */
   static title = 'Global Grid Layers';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/global-grids`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     gridSystem: {
       displayName: 'Grid System',
@@ -33,6 +39,7 @@ class GlobalGridsDemo extends React.Component {
     }
   };
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo() {
     return (
       <div>
@@ -45,7 +52,9 @@ class GlobalGridsDemo extends React.Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params for the example. */
     const {params} = this.props;
     return (
       <App

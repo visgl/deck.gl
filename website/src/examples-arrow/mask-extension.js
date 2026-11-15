@@ -8,16 +8,21 @@ import App from 'arrow-website-examples/mask-extension/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow mask extension example to the website controls. */
 class MaskExtensionDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Flights over cities';
 
+  /** Data sources loaded before rendering the demo. */
   static data = {
     url: `${DATA_URI}/air-traffic-sm.txt`,
     worker: '/workers/air-traffic-sm-decoder.js'
   };
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/mask-extension`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     showFlights: {displayName: 'Show flights', type: 'checkbox', value: true},
     timeWindow: {
@@ -38,8 +43,10 @@ class MaskExtensionDemo extends Component {
     }
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.DARK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -52,7 +59,9 @@ class MaskExtensionDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides data, params, ...other props for the example. */
     const {data, params, ...otherProps} = this.props;
 
     // renders the mask extension demo app wrapped in necessary BaseUI and Styletron providers

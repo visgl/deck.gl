@@ -8,6 +8,7 @@ import App from 'arrow-website-examples/carto-sql/app';
 
 import {makeExample} from '../components';
 
+/** Provides urbanity for the example. */
 const URBANITY = {
   All: 'any',
   Remote: 'remote',
@@ -18,11 +19,15 @@ const URBANITY = {
   'VeryHigh-density urban': 'Very_High_density_urban'
 };
 
+/** Connects the Arrow carto sqldemo example to the website controls. */
 class CartoSQLDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'CARTO Spatial Features — USA';
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/carto-sql`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     urbanity: {
       displayName: 'Urbanity',
@@ -40,8 +45,10 @@ class CartoSQLDemo extends Component {
     }
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo() {
     return (
       <div>
@@ -83,9 +90,13 @@ class CartoSQLDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params for the example. */
     const {params} = this.props;
+    /** Provides urbanity for the example. */
     const urbanity = URBANITY[params.urbanity.value];
+    /** Provides tourism for the example. */
     const tourism = params.tourism.value;
 
     return <App {...this.props} urbanity={urbanity} tourism={tourism} />;

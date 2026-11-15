@@ -9,30 +9,39 @@ import App, {inFlowColors, outFlowColors} from 'arrow-website-examples/arc/app';
 
 import {makeExample} from '../components';
 
+/** Provides color ramp for the example. */
 const colorRamp = inFlowColors
   .slice()
   .reverse()
   .concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);
 
+/** Connects the Arrow arc example to the website controls. */
 class ArcDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'United States County-to-county Migration';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Data sources loaded before rendering the demo. */
   static data = {
     url: `${DATA_URI}/arc-data.txt`,
     worker: '/workers/arc-data-decoder.js'
   };
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/arc`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     lineWidth: {displayName: 'Width', type: 'range', value: 1, step: 0.1, min: 0, max: 10}
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.LIGHT;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <>
@@ -70,11 +79,14 @@ class ArcDemo extends Component {
     );
   }
 
+  /** Updates the selected county shown in the information panel. */
   _onSelectCounty = f => {
     this.props.onStateChange({sourceName: f.properties.name});
   };
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params, ...other props for the example. */
     const {params, ...otherProps} = this.props;
 
     return (

@@ -9,21 +9,28 @@ import App, {inFlowColor, outFlowColor} from 'arrow-website-examples/brushing/ap
 
 import {makeExample} from '../components';
 
+/** Provides color ramp for the example. */
 const colorRamp = [inFlowColor, outFlowColor]
   .map(color => `rgb(${color.join(',')})`);
 
+/** Connects the Arrow brushing example to the website controls. */
 class BrushingDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'United States County-to-county Migration';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Data sources loaded before rendering the demo. */
   static data = {
     url: `${DATA_URI}/arc-data.txt`,
     worker: '/workers/arc-data-decoder.js'
   };
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/brushing`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     enableBrushing: {displayName: 'Enable Brushing', type: 'checkbox', value: true},
     lineWidth: {displayName: 'Width', type: 'range', value: 1, step: 1, min: 1, max: 10},
@@ -38,8 +45,10 @@ class BrushingDemo extends Component {
     }
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.LIGHT;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -77,7 +86,9 @@ class BrushingDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params for the example. */
     const {params} = this.props;
 
     return (

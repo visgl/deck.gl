@@ -10,11 +10,15 @@ import App from 'arrow-website-examples/trips/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow trips example to the website controls. */
 class TripsDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Yellow Cab Vs. Green Cab Trips in Manhattan';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Data sources loaded before rendering the demo. */
   static data = [
     {
       url: `${DATA_URI}/trips-data.txt`,
@@ -26,14 +30,18 @@ class TripsDemo extends Component {
     }
   ];
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/trips`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     trail: {displayName: 'Trail', type: 'range', value: 180, step: 1, min: 10, max: 200}
   };
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.DARK;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -69,7 +77,9 @@ class TripsDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides data, params, ...other props for the example. */
     const {data, params, ...otherProps} = this.props;
 
     return (

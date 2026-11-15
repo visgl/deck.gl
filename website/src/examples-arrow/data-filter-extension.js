@@ -9,22 +9,30 @@ import App from 'arrow-website-examples/data-filter/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow data filter example to the website controls. */
 class DataFilterDemo extends Component {
+  /** Title shown above the example controls. */
   static title = '40 Years of Earthquakes';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Data sources loaded before rendering the demo. */
   static data = {
     url: `${DATA_URI}/earthquakes.txt`,
     worker: '/workers/earthquakes-decoder.js'
   };
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/data-filter`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {};
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.LIGHT;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -59,7 +67,9 @@ class DataFilterDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides data, ...other props for the example. */
     const {data, ...otherProps} = this.props;
     // renders the data filter demo app wrapped in necessary BaseUI and Styletron providers
     return <App data={data} {...otherProps} />;

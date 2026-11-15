@@ -8,20 +8,26 @@ import App from 'arrow-website-examples/maplibre/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow map libre example to the website controls. */
 class MapLibreDemo extends React.Component {
+  /** Title shown above the example controls. */
   static title = 'MapLibre Integration';
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/maplibre`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     interleaveLabels: {displayName: 'Interleaved Labels', type: 'checkbox', value: true}
   };
 
+  /** Data sources loaded before rendering the demo. */
   static data = {
     url: `${DATA_URI}/air-traffic.txt`,
     worker: '/workers/air-traffic-decoder.js'
   };
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo() {
     return (
       <div>
@@ -37,7 +43,9 @@ class MapLibreDemo extends React.Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params for the example. */
     const {params} = this.props;
     return <App {...this.props} interleaveLabels={params.interleaveLabels.value} />;
   }

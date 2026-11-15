@@ -8,16 +8,21 @@ import {renderToDOM} from 'arrow-website-examples/google-3d/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow google maps example to the website controls. */
 class GoogleMapsDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Animated Truck Routes';
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/google-3d`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     tracking: {displayName: 'Camera tracking', type: 'checkbox', value: true},
     paths: {displayName: 'Show paths', type: 'checkbox', value: false}
   };
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -34,9 +39,12 @@ class GoogleMapsDemo extends Component {
     );
   }
 
+  /** Manages container ref for the example. */
   _containerRef = createRef();
 
+  /** Initializes the demo after its container mounts. */
   componentDidMount() {
+    /** Provides params for the example. */
     const {params} = this.props;
     renderToDOM(this._containerRef.current, {
       tracking: params.tracking.value,
@@ -44,13 +52,16 @@ class GoogleMapsDemo extends Component {
     }).then(instance => (this._view = instance));
   }
 
+  /** Releases demo resources when leaving the page. */
   componentWillUnmount() {
     if (this._view) {
       this._view.remove();
     }
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params for the example. */
     const {params} = this.props;
 
     if (this._view) {

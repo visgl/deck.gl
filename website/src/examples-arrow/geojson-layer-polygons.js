@@ -9,24 +9,34 @@ import App, {COLOR_SCALE} from 'arrow-website-examples/geojson/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow geo json example to the website controls. */
 class GeoJsonDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Vancouver Property Value';
 
+  /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
+  /** Data sources loaded before rendering the demo. */
   static data = {
     url: `${DATA_URI}/vancouver-blocks.txt`,
     worker: '/workers/geojson-data-decoder.js'
   };
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/geojson`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {};
 
+  /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.LIGHT;
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
+    /** Provides legends for the example. */
     const legends = COLOR_SCALE.domain();
+    /** Provides width for the example. */
     const width = `${100 / legends.length}%`;
 
     return (
@@ -72,6 +82,7 @@ class GeoJsonDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
     return <App {...this.props} />;
   }

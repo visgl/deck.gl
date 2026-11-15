@@ -9,18 +9,24 @@ import App from 'arrow-website-examples/globe/app';
 
 import {makeExample} from '../components';
 
+/** Connects the Arrow multi view example to the website controls. */
 class MultiViewDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'Air Traffic During the Global Pandemic';
 
+  /** Data sources loaded before rendering the demo. */
   static data = {
     url: `${DATA_URI}/air-traffic.txt`,
     worker: '/workers/air-traffic-decoder.js'
   };
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/globe`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {};
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -39,6 +45,7 @@ class MultiViewDemo extends Component {
     );
   }
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
     return (
       <div style={{width: '100%', height: '100%', position: 'absolute', background: '#111'}}>

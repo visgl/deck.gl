@@ -11,6 +11,7 @@ import App from 'arrow-website-examples/image-tile/app';
 
 import {makeExample} from '../components';
 
+/** Provides image tile demo container for the example. */
 const ImageTileDemoContainer = styled.div`
   position: absolute;
   width: 100%;
@@ -18,15 +19,20 @@ const ImageTileDemoContainer = styled.div`
   background: #000;
 `;
 
+/** Connects the Arrow image tile example to the website controls. */
 class ImageTileDemo extends Component {
+  /** Title shown above the example controls. */
   static title = 'LROC WAC Mosaic of the Lunar Nearside';
 
+  /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-arrow/website/image-tile`;
 
+  /** Interactive controls and their initial values. */
   static parameters = {
     autoHighlight: {displayName: 'Highlight tile on hover', type: 'checkbox', value: false}
   };
 
+  /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
     return (
       <div>
@@ -44,6 +50,7 @@ class ImageTileDemo extends Component {
     );
   }
 
+  /** Manages on tiles load for the example. */
   _onTilesLoad = tiles => {
     // onViewportLoad is called during tileLayer.updateState
     // Updating React state here may trigger another round of layer updates and create a racing condition
@@ -51,7 +58,9 @@ class ImageTileDemo extends Component {
     requestAnimationFrame(() => this.props.onStateChange({tileCount: tiles.length}));
   };
 
+  /** Renders the Arrow demo with the current controls and data. */
   render() {
+    /** Provides params, ...other props for the example. */
     const {params, ...otherProps} = this.props;
 
     return (
