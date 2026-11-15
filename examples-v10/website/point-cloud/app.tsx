@@ -42,6 +42,7 @@ export default function App({
   const [viewState, updateViewState] = useState<OrbitViewState>(INITIAL_VIEW_STATE);
   const [boundingBox, setBoundingBox] = useState<[number[], number[]] | null>(null);
 
+  /** Tracks whether the first available bounds have framed the camera. */
   const framed = useRef(false);
 
   useEffect(() => {
@@ -60,6 +61,7 @@ export default function App({
     rotateCamera();
   }, [boundingBox]);
 
+  /** Frames the camera once and reports the accumulated points after each batch. */
   const onDataProgress = useCallback(
     (data: unknown) => {
       const table = data as Table;

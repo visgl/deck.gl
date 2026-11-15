@@ -176,6 +176,7 @@ export default function App({
   const [trees, setTrees] = useState<Trees | null>(null);
   const onViewStateChange = useCallback(({viewState}) => setZoom(viewState.zoom), []);
 
+  /** Shares the queried tree positions with the grid bands and reports their count. */
   const onTreesLoaded = useCallback(
     (source: unknown) => {
       const result = summarizeTrees(source);
