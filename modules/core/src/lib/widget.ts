@@ -11,6 +11,7 @@ import type {WidgetManager, WidgetPlacement} from './widget-manager';
 import type {ViewOrViews} from './view-manager';
 import {deepEqual} from '../utils/deep-equal';
 import {applyStyles, removeStyles} from '../utils/apply-styles';
+import {createPropsWithDefaultId} from '../utils/props-with-default-id';
 
 export type WidgetProps = {
   id?: string;
@@ -65,13 +66,7 @@ export abstract class Widget<
   constructor(props: PropsT) {
     // @ts-expect-error `defaultProps` may not exist on constructor
     const {id, ...defaultProps} = this.constructor.defaultProps as Required<PropsT>;
-    // Like layer props, the default `id` lives on the prototype, so `Object.hasOwn(props, 'id')`
-    // tells an id the app passed from the default. `props.id` reads the resolved id either way.
-    const widgetProps: Required<PropsT> = Object.assign(Object.create({id}), defaultProps, props);
-    if (props?.id === undefined) {
-      delete (widgetProps as WidgetProps).id;
-    }
-    this.props = widgetProps;
+    this.props = createPropsWithDefaultId<Required<PropsT>>(id, defaultProps, props);
     // @ts-expect-error TODO(ib) - why is id considered optional even though we use Required<>
     this.id = this.props.id;
   }

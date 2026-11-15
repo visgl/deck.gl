@@ -5,6 +5,7 @@
 import Viewport from '../viewports/viewport';
 import {parsePosition, getPosition, LayoutExpression} from '../utils/positions';
 import {deepEqualExcept} from '../utils/deep-equal';
+import {createPropsWithDefaultId} from '../utils/props-with-default-id';
 import {deepMergeViewState} from '../utils/deep-merge';
 import type Controller from '../controllers/controller';
 import type {ControllerOptions} from '../controllers/controller';
@@ -97,13 +98,8 @@ export default abstract class View<
     // @ts-ignore
     this.id = id || this.constructor.displayName || 'view';
 
-    // Like layer props, the default `id` lives on the prototype, so `Object.hasOwn(props, 'id')`
-    // tells an id the app passed from the default. `props.id` reads the resolved id either way.
-    const viewProps: ViewProps = Object.assign(Object.create({id: this.id}), props);
-    if (!id) {
-      delete viewProps.id;
-    }
-    this.props = viewProps;
+    // A falsy id means the class default
+    this.props = createPropsWithDefaultId<ViewProps>(this.id, props, {id: id || undefined});
 
     // Extents
     this._x = parsePosition(x);
