@@ -168,6 +168,8 @@ const config = {
             'examples-root': resolve('../examples'),
             'website-examples': resolve('../examples/website'),
             'v10-website-examples': resolve('../examples-v10/website'),
+            // Use the same Arrow runtime for website loaders and workspace layer queries.
+            'apache-arrow$': resolve('../node_modules/apache-arrow/Arrow.dom.mjs'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom')
           }

@@ -78,13 +78,13 @@ class HexagonDemo extends Component {
 
   /** Renders the Arrow demo with the current controls and data. */
   render() {
-    const {params, onStateChange} = this.props;
+    const {params, onStateChange, mapStyle, device} = this.props;
 
     return (
       <App
-        {...this.props}
-        key={this.props.device?.type}
-        device={this.props.device}
+        key={device?.type}
+        device={device}
+        mapStyle={mapStyle}
         onDataLoad={count => onStateChange({count})}
         radius={params.radius.value}
         upperPercentile={params.upperPercentile.value}

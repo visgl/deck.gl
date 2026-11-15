@@ -21,7 +21,7 @@ function normalizedChannel(color: Color, index: number): number {
 const MALE_COLOR: Color = [0, 128, 255, 255];
 const FEMALE_COLOR: Color = [255, 0, 128, 255];
 
-// Source data CSV
+// Source data JSON
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
 
@@ -44,7 +44,8 @@ export default function App({
   maleColor = MALE_COLOR,
   femaleColor = FEMALE_COLOR,
   mapStyle = 'https://tiles.openfreemap.org/styles/positron',
-  widgets
+  widgets,
+  onDataLoad
 }: {
   device?: Device;
   deviceProps?: DeviceProps;
@@ -54,6 +55,7 @@ export default function App({
   femaleColor?: Color;
   mapStyle?: string;
   widgets?: Widget[];
+  onDataLoad?: (count: number) => void;
 }) {
   const layers = [
     new ScatterplotLayer<DataPoint>({
@@ -65,6 +67,11 @@ export default function App({
         typeof data === 'string'
           ? 'SELECT column1 AS longitude, column2 AS latitude, column3 AS gender'
           : null,
+      onDataLoad: table => {
+        if (typeof data === 'string') {
+          onDataLoad?.((table as {numRows: number}).numRows);
+        }
+      },
       radiusScale: radius,
       radiusMinPixels: 0.25,
       getPosition:

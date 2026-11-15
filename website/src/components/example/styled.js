@@ -41,8 +41,15 @@ export const ExampleCard = styled.a`
   &:hover {
     box-shadow: var(--ifm-global-shadow-md);
   }
-  &:hover img {
+  &:hover img:not(.example-thumbnail-arrow) {
     filter: contrast(0.2);
+  }
+  .example-thumbnail-arrow {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: 0.5rem;
+    inset-inline-end: 0.5rem;
+    width: 3rem;
   }
   ${isMobile} {
     width: 33%;

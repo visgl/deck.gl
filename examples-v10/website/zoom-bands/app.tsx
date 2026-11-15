@@ -122,7 +122,9 @@ function getBandOpacityStops(
   });
 }
 
+/** Loads the Paris tree inventory from CSV. */
 const LOADERS = [CSVLoader];
+/** Leaves numeric conversion to the table query. */
 const LOAD_OPTIONS = {csv: {dynamicTyping: false}};
 
 /** Collects queried tree positions and statistics for the grid and tooltip. */
