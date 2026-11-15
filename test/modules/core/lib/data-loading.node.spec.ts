@@ -4,7 +4,7 @@
 
 import {expect, test, vi} from 'vitest';
 import {createRequire} from 'node:module';
-import {Table, tableFromArrays} from 'apache-arrow';
+import {Field, Float64, Table, tableFromArrays} from 'apache-arrow';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import ComponentState from '../../../../modules/core/src/lifecycle/component-state';
 import Layer from '../../../../modules/core/src/lib/layer';
@@ -317,4 +317,18 @@ test('appends batches from a separate Arrow runtime without copying column buffe
   expect(table.batches[1].data.children[0].values.buffer).toBe(
     foreign.batches[0].data.children[0].values.buffer
   );
+});
+
+test('empty snapshots from another Arrow runtime retain local field and type identities', async () => {
+  const foreignArrow = createRequire(import.meta.url)(
+    'apache-arrow'
+  ) as typeof import('apache-arrow');
+  const foreign = new foreignArrow.Table(foreignArrow.tableFromArrays({x: [1]}).schema);
+  const {state, run, error} = makeState({_dataLoadOptions: 'snapshots'});
+  await run(chunks(first, foreign));
+  expect(error).not.toHaveBeenCalled();
+  const table = state.getAsyncProp('data') as Table;
+  expect(table.numRows).toBe(0);
+  expect(table.schema.fields[0]).toBeInstanceOf(Field);
+  expect(table.schema.fields[0].type).toBeInstanceOf(Float64);
 });

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {normalizeArrowBatch} from '../arrow/normalize-arrow-batch';
+import {normalizeArrowBatch, normalizeArrowSchema} from '../arrow/normalize-arrow-batch';
 import {isArrowTable} from '../arrow/upstream-math/is-arrow-table';
 import {unwrapLoaderArrowResult} from '../utils/loader-utils';
 import {isAsyncIterable} from '../utils/iterable-utils';
@@ -328,7 +328,7 @@ export default class ComponentState<ComponentT extends Component> {
           }
           chunkKind = 'arrow';
           const arrowRuntime = await import('apache-arrow');
-          const {Table, RecordBatch, Schema} = arrowRuntime;
+          const {Table, RecordBatch} = arrowRuntime;
           if (!this.component || loadCount !== asyncProp.pendingLoadCount) {
             return;
           }
@@ -345,7 +345,7 @@ export default class ComponentState<ComponentT extends Component> {
             arrowBatches.push(...batches);
           }
           const table = new Table(
-            batches[0]?.schema ?? new Schema(arrow.schema.fields, arrow.schema.metadata),
+            batches[0]?.schema ?? normalizeArrowSchema(arrow.schema, arrowRuntime),
             arrowBatches
           );
           lastResult = table;
