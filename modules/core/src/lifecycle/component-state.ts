@@ -318,7 +318,7 @@ export default class ComponentState<ComponentT extends Component> {
           continue;
         }
         // @ts-expect-error (2339) layer-only props are not declared on Component
-        const {dataTransform, _dataLoadingMode = 'auto'} = this.component.props;
+        const {dataTransform, _dataLoadOptions = 'auto'} = this.component.props;
         // Arrow is an optional peer dependency. Import it only for Arrow inputs.
         const arrow = unwrapLoaderArrowResult(chunk);
         if (isArrowTable(arrow)) {
@@ -334,7 +334,7 @@ export default class ComponentState<ComponentT extends Component> {
           if (batches.some(batch => !(batch instanceof RecordBatch))) {
             throw new Error('Expected Arrow Tables or RecordBatches');
           }
-          if (_dataLoadingMode === 'snapshots') {
+          if (_dataLoadOptions === 'snapshots') {
             arrowBatches = [...batches];
           } else {
             // Preserve Arrow columnar storage without converting to row objects.
@@ -348,7 +348,7 @@ export default class ComponentState<ComponentT extends Component> {
           }
           continue;
         }
-        if (_dataLoadingMode === 'snapshots') {
+        if (_dataLoadOptions === 'snapshots') {
           throw new Error('snapshots requires Arrow chunks');
         }
         if (chunkKind === 'arrow') {

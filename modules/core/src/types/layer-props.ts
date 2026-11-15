@@ -141,9 +141,9 @@ export type LayerProps = {
    * Experimental loading mode. Defaults to `auto`: load URLs completely and append supplied streams.
    * `batched` streams and appends data; `snapshots` streams and replaces data with each Arrow result.
    */
-  _dataLoadingMode?: 'auto' | 'batched' | 'snapshots';
+  _dataLoadOptions?: 'auto' | 'batched' | 'snapshots';
   /** Experimental callback invoked with current data after each streamed batch is applied. */
-  _onDataProgress?: ((data: unknown, context: {propName: string; layer: Layer}) => void) | null;
+  onDataProgress?: ((data: unknown, context: {propName: string; layer: Layer}) => void) | null;
   /**
    * Callback to determine if two data values are equal.
    */

@@ -96,8 +96,8 @@ const defaultProps: DefaultProps<LayerProps> = {
     optional: true
   },
   dataTransform: {type: 'function', value: null, optional: true},
-  _dataLoadingMode: 'auto',
-  _onDataProgress: {type: 'function', value: null, optional: true},
+  _dataLoadOptions: 'auto',
+  onDataProgress: {type: 'function', value: null, optional: true},
   onDataLoad: {type: 'function', value: null, optional: true},
   onError: {type: 'function', value: null, optional: true},
   fetch: {
@@ -134,7 +134,7 @@ const defaultProps: DefaultProps<LayerProps> = {
         };
       }
 
-      if (propName === 'data' && layer.props._dataLoadingMode !== 'auto') {
+      if (propName === 'data' && layer.props._dataLoadOptions !== 'auto') {
         return loadInBatches(url, loaders, loadOptions);
       }
 

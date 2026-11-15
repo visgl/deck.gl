@@ -159,14 +159,14 @@ supported. Arrow remains an optional dependency and is loaded only when an Arrow
 new ScatterplotLayer({
   id: 'streamed-points',
   data: recordBatchStream,
-  _dataLoadingMode: 'batched',
+  _dataLoadOptions: 'batched',
   getPosition: row => [row.longitude, row.latitude],
   getRadius: row => row.radius,
-  _onDataProgress: table => console.log(table.numRows)
+  onDataProgress: table => console.log(table.numRows)
 });
 ```
 
-The experimental `_dataLoadingMode` prop controls loading and accumulation:
+The experimental `_dataLoadOptions` prop controls loading and accumulation:
 
 - `'auto'` (default) loads URLs completely and appends chunks from application-supplied streams.
 - `'batched'` loads URLs with loaders.gl `loadInBatches` and appends each batch to the current table.
@@ -179,7 +179,7 @@ supported batches. Deck discards loader metadata and exposes Arrow tables to app
 retain their columnar storage; they are not converted to row objects. Do not mix Arrow and row
 chunks in one stream. An empty Arrow snapshot clears the table while retaining its schema.
 
-`_onDataProgress` receives the current accumulated or replacement table after each accepted batch.
+`onDataProgress` receives the current accumulated or replacement table after each accepted batch.
 `onDataLoad` runs once when the stream finishes. An empty stream completes with an empty array
 and no progress callback. Replaced or finalized streams cannot publish further callbacks.
 

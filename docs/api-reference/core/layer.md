@@ -311,7 +311,7 @@ The function receives two arguments:
 And should return `true` if the two values are considered equal (no update needed), or `false` if the data has changed.
 
 
-#### `_dataLoadingMode` (string, optional) **Experimental** {#_dataloadingmode}
+#### `_dataLoadOptions` (string, optional) **Experimental** {#_dataloadoptions}
 
 * Default: `'auto'`
 
@@ -589,7 +589,7 @@ The function is expected to return a Promise that resolves to loaded data.
 * Default: `load(url, loaders, loadOptions)`
 
 
-#### `_onDataProgress` (Function, optional) **Experimental** {#_ondataprogress}
+#### `onDataProgress` (Function, optional) **Experimental** {#ondataprogress}
 
 Called after each accepted streamed data batch is applied. Receives `(value, context)`, where
 `value` is the accumulated row array or Arrow table (the replacement table in snapshot mode),

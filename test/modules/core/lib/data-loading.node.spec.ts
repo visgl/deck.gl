@@ -33,8 +33,8 @@ for (const mode of ['auto', 'batched', 'snapshots'] as const) {
   test(`${mode}: Arrow chunks preserve column storage and report current data`, async () => {
     const callback = vi.fn();
     const {state, layer, run, complete, error} = makeState({
-      _dataLoadingMode: mode,
-      _onDataProgress: callback
+      _dataLoadOptions: mode,
+      onDataProgress: callback
     });
     await run(chunks(first.batches[0], second.batches[0]));
     const table = state.getAsyncProp('data') as Table;
@@ -51,7 +51,7 @@ for (const mode of ['auto', 'batched', 'snapshots'] as const) {
 }
 
 test('promised loaders.gl stream discards metadata and unwraps multiple Arrow batches', async () => {
-  const {state, progress, complete} = makeState({_dataLoadingMode: 'batched'});
+  const {state, progress, complete} = makeState({_dataLoadOptions: 'batched'});
   const table = new Table([...first.batches, ...second.batches]);
   state.setAsyncProps({
     data: Promise.resolve(
@@ -65,7 +65,7 @@ test('promised loaders.gl stream discards metadata and unwraps multiple Arrow ba
 });
 
 test('empty Arrow snapshot clears rows while preserving its schema', async () => {
-  const {state, run} = makeState({_dataLoadingMode: 'snapshots'});
+  const {state, run} = makeState({_dataLoadOptions: 'snapshots'});
   await run(chunks(first.batches[0], {shape: 'arrow-table', data: new Table(first.schema)}));
   expect(state.getAsyncProp('data').numRows).toBe(0);
   expect(state.getAsyncProp('data').schema.fields[0].name).toBe('x');
@@ -95,7 +95,7 @@ test('empty and metadata-only streams complete without progress', async () => {
 });
 
 test('snapshot mode rejects row chunks through the layer error path', async () => {
-  const {run, error, complete, progress} = makeState({_dataLoadingMode: 'snapshots'});
+  const {run, error, complete, progress} = makeState({_dataLoadOptions: 'snapshots'});
   await run(chunks([1]));
   expect(error).toHaveBeenCalledOnce();
   expect(complete).not.toHaveBeenCalled();
@@ -176,11 +176,11 @@ test('same URL reloads on mode and active batch options changes, retaining custo
   await vi.waitFor(() => expect(complete).toHaveBeenCalledTimes(1));
   let current = layer;
   for (const [props, calls] of [
-    [{_dataLoadingMode: 'batched'}, 2],
+    [{_dataLoadOptions: 'batched'}, 2],
     [{opacity: 0.5}, 2],
     [{loadOptions: {csv: {delimiter: ';'}}}, 3],
-    [{_dataLoadingMode: 'snapshots'}, 4],
-    [{_dataLoadingMode: 'auto'}, 5]
+    [{_dataLoadOptions: 'snapshots'}, 4],
+    [{_dataLoadOptions: 'auto'}, 5]
   ] as const) {
     current = current.clone(props);
     state.setAsyncProps(current.props);
@@ -203,7 +203,7 @@ test('non-data async iterables remain untouched', async () => {
 test('URL loading consumes real CSV loader batches without metadata or wrappers', async () => {
   const {state, layer, complete, error, progress} = makeState({
     data: 'points.csv',
-    _dataLoadingMode: 'batched',
+    _dataLoadOptions: 'batched',
     loaders: [CSVLoader],
     loadOptions: {
       core: {
@@ -253,7 +253,7 @@ test('equivalent nested URL options do not restart an active batch load', async 
   const options = () => ({core: {fetch: {headers: {Authorization: 'token'}}}});
   const {layer, state, progress, complete} = makeState({
     data: 'points.csv',
-    _dataLoadingMode: 'batched',
+    _dataLoadOptions: 'batched',
     loadOptions: options(),
     fetch
   });
@@ -274,7 +274,7 @@ test('replacing fetch Headers reloads an active batch URL', () => {
   });
   const {layer, state} = makeState({
     data: 'points.csv',
-    _dataLoadingMode: 'batched',
+    _dataLoadOptions: 'batched',
     loadOptions: options('first'),
     fetch
   });
@@ -284,7 +284,7 @@ test('replacing fetch Headers reloads an active batch URL', () => {
 });
 
 test('a bare Arrow table replaces the previous snapshot with all its batches', async () => {
-  const {state, run, progress} = makeState({_dataLoadingMode: 'snapshots'});
+  const {state, run, progress} = makeState({_dataLoadOptions: 'snapshots'});
   const replacement = new Table([...second.batches, ...first.batches]);
   await run(chunks(first.batches[0], replacement));
   expect(Array.from(state.getAsyncProp('data').getChild('x'))).toEqual([3, 1, 2]);

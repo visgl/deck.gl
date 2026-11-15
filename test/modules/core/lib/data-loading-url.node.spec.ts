@@ -17,7 +17,7 @@ for (const mode of ['auto', 'batched', 'snapshots'] as const) {
   test(`${mode} chooses URL loader and forwards options`, () => {
     const loaders = [];
     const loadOptions = {csv: {delimiter: ';'}};
-    const layer = new Layer({id: 'load', _dataLoadingMode: mode, loaders, loadOptions});
+    const layer = new Layer({id: 'load', _dataLoadOptions: mode, loaders, loadOptions});
     const resourceManager = {contains: vi.fn(() => false), add: vi.fn()};
     layer.context = {resourceManager} as never;
     const controller = new AbortController();
@@ -34,7 +34,7 @@ for (const mode of ['auto', 'batched', 'snapshots'] as const) {
 }
 
 test('batch loading is limited to the data prop', () => {
-  const layer = new Layer({id: 'load', _dataLoadingMode: 'batched', loadOptions: {}});
+  const layer = new Layer({id: 'load', _dataLoadOptions: 'batched', loadOptions: {}});
   layer.context = {resourceManager: {contains: () => false}} as never;
   layer.props.fetch!('image.png', {propName: 'image', layer});
   expect(load).toHaveBeenCalledOnce();

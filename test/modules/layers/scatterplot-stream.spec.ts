@@ -43,7 +43,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           {
             props: {
               data: Promise.resolve(stream()),
-              _dataLoadingMode: mode,
+              _dataLoadOptions: mode,
               getPosition: row => [row.longitude, row.latitude],
               getRadius: 100,
               pickable: true,

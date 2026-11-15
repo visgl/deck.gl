@@ -30,7 +30,7 @@ export type ChangeFlags = {
 
 export default class LayerState<LayerT extends Layer> extends ComponentState<LayerT> {
   private dataRequest?: {
-    mode: LayerT['props']['_dataLoadingMode'];
+    mode: LayerT['props']['_dataLoadOptions'];
     loaders: LayerT['props']['loaders'];
     options: unknown;
   };
@@ -110,7 +110,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
       return false;
     }
     const layer = this.layer;
-    const mode = layer?.props._dataLoadingMode ?? 'auto';
+    const mode = layer?.props._dataLoadOptions ?? 'auto';
     const request =
       layer && typeof value === 'string' && mode !== 'auto'
         ? {mode, loaders: layer.props.loaders, options: layer.getLoadOptions()}
@@ -123,7 +123,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
   protected _onProgress(propName: string, value: unknown) {
     const layer = this.layer;
     if (propName === 'data' && layer) {
-      layer.props._onDataProgress?.(value, {propName, layer});
+      layer.props.onDataProgress?.(value, {propName, layer});
     }
   }
 
