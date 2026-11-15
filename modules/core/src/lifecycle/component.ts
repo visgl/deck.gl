@@ -11,6 +11,7 @@ import {
 } from './constants';
 import {PropType} from './prop-types';
 import {createProps} from './create-props';
+import {compareProps} from './props';
 
 let counter = 0;
 
@@ -37,12 +38,38 @@ export default class Component<PropsT extends {} = {}> {
     this.props = createProps<PropsT>(this, propObjects);
     /* eslint-enable prefer-spread */
 
-    this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
+    this.id = this.props.id; // Stable identity used by component managers for matching
     this.count = counter++; // Keep track of how many layer instances you are generating
   }
 
-  // clone this layer with modified props
-  clone(newProps: Partial<PropsT>) {
+  /**
+   * Replace props with a frozen, default-resolved snapshot and return the change reason.
+   * Pass previous props first for a partial update, or omit them for replacement.
+   * The owning manager controls identity; this does not change the component id.
+   */
+  protected _setProps(...propObjects: Partial<PropsT>[]): string | false {
+    const oldProps = this.props;
+    this.props = createProps(this, propObjects);
+    return this._compareProps(oldProps);
+  }
+
+  /** Compare effective props using declared equality rules, without layer-specific flags. */
+  protected _compareProps(oldProps: Partial<PropsT>): string | false {
+    const sameDefaults = Object.getPrototypeOf(this.props) === Object.getPrototypeOf(oldProps);
+    const copyProps = (props: Partial<PropsT>) => {
+      const result: Partial<PropsT> = {};
+      for (const key in props) result[key] = props[key];
+      return result;
+    };
+    return compareProps({
+      newProps: sameDefaults ? this.props : copyProps(this.props),
+      oldProps: sameDefaults ? oldProps : copyProps(oldProps),
+      propTypes: this.props[PROP_TYPES_SYMBOL]
+    });
+  }
+
+  /** Create an uninitialized instance of the same component with modified props. */
+  clone(newProps: Partial<PropsT>): this {
     const {props} = this;
 
     // Async props cannot be copied with Object.assign, copy them separately

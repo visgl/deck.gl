@@ -67,3 +67,20 @@ test('ToggleWidget - checked tooltip falls back to onLabel', async () => {
   const tooltip = testInstance.findElements('.deck-widget-tooltip')[0];
   expect(tooltip.textContent).toBe('Toggle on');
 });
+
+test('ToggleWidget - declarative replacement preserves selection and updates callbacks', async () => {
+  const firstCallback = vi.fn();
+  const nextCallback = vi.fn();
+  const first = new ToggleWidget({id: 'selection', icon: '', onChange: firstCallback});
+  testInstance = new WidgetTester({widgets: [first]});
+  await testInstance.idle();
+  testInstance.click('.deck-widget-icon-button');
+  const root = first.rootElement;
+  const next = new ToggleWidget({id: 'selection', icon: '', onChange: nextCallback});
+  testInstance.setProps({widgets: [next]});
+  expect(next.checked).toBe(true);
+  expect(next.rootElement).toBe(root);
+  testInstance.click('.deck-widget-icon-button');
+  expect(nextCallback).toHaveBeenCalledWith(false);
+  expect(firstCallback).toHaveBeenCalledTimes(1);
+});

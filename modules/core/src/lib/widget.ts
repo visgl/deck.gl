@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import Component from '../lifecycle/component';
+import type {StatefulComponentProps} from '../lifecycle/component';
 import type Deck from './deck';
 import type Viewport from '../viewports/viewport';
 import type {PickingInfo} from './picking/pick-info';
@@ -32,7 +34,9 @@ export type WidgetProps = {
 export abstract class Widget<
   PropsT extends WidgetProps = WidgetProps,
   ViewsT extends ViewOrViews = null
-> {
+> extends Component<Required<PropsT>> {
+  static componentName = 'Widget';
+
   static defaultProps: Required<WidgetProps> = {
     id: 'widget',
     style: {},
@@ -40,10 +44,17 @@ export abstract class Widget<
     className: ''
   };
 
-  /** Unique identifier of the widget. */
-  id: string;
-  /** Widget props, with defaults applied */
-  props: Required<PropsT>;
+  /** Persistent application state transferred to the next widget with the same id. */
+  state: Record<string, any> = {};
+
+  private internalState: {
+    component: Widget<PropsT, ViewsT> | null;
+    widgetManager?: WidgetManager;
+    deck?: Deck<ViewsT>;
+    rootElement?: HTMLDivElement | null;
+  } = {component: this};
+
+  private replacingProps = false;
   /**
    * The view id that this widget controls and is positioned relative to. Default `null`.
    * If assigned, this widget only responds to events inside the matching view. In multi-canvas
@@ -57,48 +68,107 @@ export abstract class Widget<
   /** Class name for this widget */
   abstract className: string;
 
-  // Populated by core when mounted
-  widgetManager?: WidgetManager;
-  deck?: Deck<ViewsT>;
-  rootElement?: HTMLDivElement | null;
-
-  constructor(props: PropsT) {
-    this.props = {
-      // @ts-expect-error `defaultProps` may not exist on constructor
-      ...(this.constructor.defaultProps as Required<PropsT>),
-      ...props
-    };
-    // @ts-expect-error TODO(ib) - why is id considered optional even though we use Required<>
-    this.id = this.props.id;
+  /** Manager that owns this widget's mounted lifecycle. */
+  get widgetManager(): WidgetManager | undefined {
+    return this.internalState.widgetManager;
+  }
+  set widgetManager(value: WidgetManager | undefined) {
+    this.internalState.widgetManager = value;
   }
 
-  /** Called to update widget options */
+  /** Deck instance associated with the mounted widget. */
+  get deck(): Deck<ViewsT> | undefined {
+    return this.internalState.deck;
+  }
+  set deck(value: Deck<ViewsT> | undefined) {
+    this.internalState.deck = value;
+  }
+
+  /** DOM root retained when a matching widget replaces this instance. */
+  get rootElement(): HTMLDivElement | null | undefined {
+    return this.internalState.rootElement;
+  }
+  set rootElement(value: HTMLDivElement | null | undefined) {
+    this.internalState.rootElement = value;
+  }
+
+  constructor(props: PropsT) {
+    super(props as Required<PropsT>);
+  }
+
+  /** Resolve the active instance from a long-lived callback; null after removal. */
+  getCurrentWidget(): this | null {
+    return this.internalState.component as this | null;
+  }
+
+  /** Merge persistent state and render the active widget. */
+  setState(state: Partial<this['state']>): void {
+    Object.assign(this.state, state);
+    this.getCurrentWidget()?.updateHTML();
+  }
+
+  /** Apply a partial options update, replacing rather than mutating the props snapshot. */
   setProps(props: Partial<PropsT>): void {
+    const current = this.getCurrentWidget();
+    if (current && current !== this) {
+      current.setProps(props);
+      return;
+    }
+    if (props.id !== undefined && props.id !== this.id) {
+      throw new Error('Widget id cannot be changed with setProps; create a new widget instead');
+    }
     const oldProps = this.props;
+    const changed = this.replacingProps
+      ? this._setProps(props as Required<PropsT>)
+      : this._setProps(oldProps, props as Partial<Required<PropsT>>);
     const el = this.rootElement;
-
-    // Update className and style
-    if (el && oldProps.className !== props.className) {
+    if (el && oldProps.className !== this.props.className) {
       if (oldProps.className) el.classList.remove(oldProps.className);
-      if (props.className) el.classList.add(props.className);
+      if (this.props.className) el.classList.add(this.props.className);
     }
-
-    // Update style
-    if (el && !deepEqual(oldProps.style, props.style, 1)) {
+    if (el && !deepEqual(oldProps.style, this.props.style, 1)) {
       removeStyles(el, oldProps.style);
-      applyStyles(el, props.style);
+      applyStyles(el, this.props.style);
     }
+    if (changed || this.replacingProps) this.updateHTML();
+  }
 
-    Object.assign(this.props, props);
+  /** @internal Transfer lifecycle ownership without mounting or removing the DOM. */
+  _transferState(oldWidget: Widget): void {
+    if (oldWidget === this) return;
+    const nextProps = this.props;
+    this.state = oldWidget.state;
+    this.internalState = oldWidget.internalState as typeof this.internalState;
+    this.internalState.component = this;
+    this.props = oldWidget.props as StatefulComponentProps<Required<PropsT>>;
+    this.replacingProps = true;
+    try {
+      this.setProps(nextProps);
+    } finally {
+      this.replacingProps = false;
+    }
+  }
 
-    // Update the HTML to match the new props
-    this.updateHTML();
+  /** @internal Release resources once, including for superseded references. */
+  _finalize(): void {
+    const current = this.getCurrentWidget();
+    if (!current) return;
+    try {
+      current.onRemove();
+    } finally {
+      this.rootElement?.remove();
+      this.rootElement = undefined;
+      this.deck = undefined;
+      this.widgetManager = undefined;
+      this.internalState.component = null;
+    }
   }
 
   /** Update the HTML to reflect latest props and state */
   updateHTML(): void {
-    if (this.rootElement) {
-      this.onRenderHTML(this.rootElement);
+    const current = this.getCurrentWidget();
+    if (current?.rootElement) {
+      current.onRenderHTML(current.rootElement);
     }
   }
 
@@ -150,6 +220,7 @@ export abstract class Widget<
 
   /** Internal API called by Deck when the widget is first added to a Deck instance */
   _onAdd(params: {deck: Deck<any>; viewId: string | null}): HTMLDivElement {
+    this.internalState.component = this;
     return this.onAdd(params) ?? this.onCreateRootElement();
   }
 

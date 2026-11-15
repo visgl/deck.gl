@@ -8,6 +8,7 @@ import type {PickingInfo} from './picking/pick-info';
 import type {MjolnirPointerEvent, MjolnirGestureEvent} from 'mjolnir.js';
 import type Layer from './layer';
 import {Widget} from './widget';
+import log from '../utils/log';
 
 import {EVENT_HANDLERS} from './constants';
 import {deepEqual} from '../utils/deep-equal';
@@ -82,15 +83,16 @@ export class WidgetManager {
     }
     this.defaultWidgets.length = 0;
     this.resolvedWidgets.length = 0;
+    this.widgets = [];
     for (const id in this.containers) {
       this.containers[id].remove();
+      delete this.containers[id];
     }
   }
 
   /** Imperative API. Widgets added this way are not affected by the declarative prop. */
   addDefault(widget: Widget) {
     if (!this.defaultWidgets.find(w => w.id === widget.id)) {
-      this._addWidget(widget);
       this.defaultWidgets.push(widget);
       // Update widget list
       this._setWidgets(this.widgets);
@@ -178,49 +180,50 @@ export class WidgetManager {
    * Update props of existing widgets
    */
   private _setWidgets(nextWidgets: Widget[]) {
-    const oldWidgetMap: Record<string, Widget | null> = {};
+    const oldWidgetMap = new Map<string, Widget | null>();
 
     for (const widget of this.resolvedWidgets) {
-      oldWidgetMap[widget.id] = widget;
+      oldWidgetMap.set(widget.id, widget);
     }
     // Clear and rebuild the list
     this.resolvedWidgets.length = 0;
 
     // Add all default widgets
     for (const widget of this.defaultWidgets) {
-      oldWidgetMap[widget.id] = null;
-      this.resolvedWidgets.push(widget);
-    }
-
-    for (let widget of nextWidgets) {
-      const oldWidget = oldWidgetMap[widget.id];
-      if (!oldWidget) {
-        // Widget is new
-        this._addWidget(widget);
-      } else if (
-        // Widget placement changed
-        oldWidget.viewId !== widget.viewId ||
-        oldWidget.placement !== widget.placement
-      ) {
-        this._removeWidget(oldWidget);
-        this._addWidget(widget);
-      } else if (widget !== oldWidget) {
-        // Widget props changed
-        oldWidget.setProps(widget.props);
-        widget = oldWidget;
-      }
-
-      // mark as matched
-      oldWidgetMap[widget.id] = null;
-      this.resolvedWidgets.push(widget);
-    }
-
-    for (const id in oldWidgetMap) {
-      const oldWidget = oldWidgetMap[id];
+      const oldWidget = oldWidgetMap.get(widget.id);
       if (oldWidget) {
-        // No longer exists
-        this._removeWidget(oldWidget);
+        widget._transferState(oldWidget);
+      } else {
+        this._addWidget(widget);
       }
+      oldWidgetMap.set(widget.id, null);
+      this.resolvedWidgets.push(widget);
+    }
+
+    for (const widget of nextWidgets) {
+      const oldWidget = oldWidgetMap.get(widget.id);
+      if (oldWidget === null) {
+        log.warn(`Multiple widgets with same id ${widget.id}`)();
+        continue;
+      }
+      if (!oldWidget) {
+        this._addWidget(widget);
+      } else {
+        widget._transferState(oldWidget);
+      }
+      // Restore declarative order and move an existing root when its placement changes.
+      if (widget.rootElement) {
+        this._getContainer(
+          widget.props._container ?? widget.viewId ?? null,
+          widget.placement
+        ).append(widget.rootElement);
+      }
+      oldWidgetMap.set(widget.id, null);
+      this.resolvedWidgets.push(widget);
+    }
+
+    for (const oldWidget of oldWidgetMap.values()) {
+      if (oldWidget) this._removeWidget(oldWidget);
     }
     this.widgets = nextWidgets;
   }
@@ -244,14 +247,7 @@ export class WidgetManager {
 
   /** Destroy an old widget */
   private _removeWidget(widget: Widget) {
-    widget.onRemove?.();
-
-    if (widget.rootElement) {
-      widget.rootElement.remove();
-    }
-    widget.rootElement = undefined;
-    widget.deck = undefined;
-    widget.widgetManager = undefined;
+    widget._finalize();
   }
 
   /** Get a container element based on view and placement */

@@ -164,7 +164,7 @@ function createPropsPrototypeAndTypes(
 // Builds a pre-merged default props object that component props can inherit from
 function createPropsPrototype(defaultProps, componentClass) {
   // Avoid freezing `id` prop
-  const id = getComponentName(componentClass);
+  const id = defaultProps.id ?? getComponentName(componentClass);
 
   Object.defineProperties(defaultProps, {
     // `id` is treated specially because layer might need to override it

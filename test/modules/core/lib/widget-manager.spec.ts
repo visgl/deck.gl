@@ -24,10 +24,16 @@ class TestWidget extends Widget<TestWidgetProps> {
 
   placement: WidgetPlacement = 'top-left';
   className = 'deck-test-widget';
-  isVisible = false;
+  state = {isVisible: false};
+  get isVisible() {
+    return this.state.isVisible;
+  }
+  set isVisible(value: boolean) {
+    this.state.isVisible = value;
+  }
 
   constructor(props: TestWidgetProps = {}) {
-    super(props, TestWidget.defaultProps);
+    super(props);
     this.viewId = props.viewId ?? this.viewId;
     this.placement = props.placement ?? 'top-left';
   }
@@ -101,15 +107,18 @@ test('WidgetManager#setProps', () => {
   // Only B2
   widgetManager.setProps({widgets: [widgetB2]});
   expect(widgetManager.getWidgets().length, 'widget count').toBe(1);
-  expect(widgetManager.getWidgets()[0], 'old widget is reused').toBe(widgetB);
-  expect(widgetB.props.version, 'old widget is updated').toBe(2);
+  expect(widgetManager.getWidgets()[0], 'new widget is active').toBe(widgetB2);
+  expect(widgetB2.state).toBe(widgetB.state);
+  expect(widgetB2.rootElement).toBe(widgetB.rootElement);
+  expect(widgetB2.props.version, 'new widget receives props').toBe(2);
+  expect(widgetB.props.version, 'old snapshot is unchanged').toBe(1);
 
   widgetB2 = new TestWidget({id: 'B', version: 2, viewId: 'map', placement: 'fill'});
   // Only B2 with new placement
   widgetManager.setProps({widgets: [widgetB2]});
   expect(widgetManager.getWidgets().length, 'widget count').toBe(1);
   expect(widgetManager.getWidgets()[0], 'new widget is used').toBe(widgetB2);
-  expect(widgetB.isVisible, 'widget.onRemove is called').toBeFalsy();
+  expect(widgetB.isVisible, 'placement change preserves mounted state').toBeTruthy();
   expect(widgetB2.isVisible, 'widget.onAdd is called').toBeTruthy();
 
   widgetManager.setProps({widgets: []});
@@ -512,4 +521,96 @@ test('WidgetManager#onHover, onEvent#viewId', () => {
   expect(onClickCalledCount, 'widget.onClick is not called').toBe(2);
 
   widgetManager.finalize();
+});
+
+test('WidgetManager#state transfer, prop snapshots and cleanup', () => {
+  class StatefulWidget extends TestWidget {
+    state = {isVisible: false, clicks: 0, mounts: 0, removals: 0, renders: 0};
+    onAdd() {
+      this.state.mounts++;
+    }
+    onRemove() {
+      this.state.removals++;
+    }
+    onRenderHTML(root: HTMLElement) {
+      this.state.renders++;
+      root.textContent = `${this.props.version}:${this.state.clicks}`;
+    }
+  }
+  const parent = document.createElement('div');
+  const manager = new WidgetManager({deck: mockDeckInstance, parentElement: parent});
+  const first = new StatefulWidget({
+    id: '__proto__',
+    version: 2,
+    className: 'custom',
+    style: {color: 'red'}
+  });
+  manager.setProps({widgets: [first]});
+  first.setState({clicks: 3});
+  const root = first.rootElement!;
+  const snapshot = first.props;
+  const renders = first.state.renders;
+  first.setProps({version: 2});
+  expect(first.state.renders).toBe(renders);
+  expect(root.classList.contains('custom')).toBe(true);
+  expect(root.style.color).toBe('red');
+  const second = new StatefulWidget({id: '__proto__', placement: 'bottom-right'});
+  manager.setProps({widgets: [second]});
+  expect(manager.getWidgets()).toEqual([second]);
+  expect(second.rootElement).toBe(root);
+  expect(second.state).toBe(first.state);
+  expect(second.state.clicks).toBe(3);
+  expect(second.state.mounts).toBe(1);
+  expect(second.state.removals).toBe(0);
+  expect(second.props.version).toBe(1);
+  expect(snapshot.version).toBe(2);
+  expect(root.classList.contains('custom')).toBe(false);
+  expect(root.style.color).toBe('');
+  expect(root.parentElement?.className).toBe('bottom-right');
+  expect(first.getCurrentWidget()).toBe(second);
+  first.setState({clicks: 4});
+  expect(root.textContent).toBe('1:4');
+  manager.setProps({widgets: [second]});
+  expect(second.state.mounts).toBe(1);
+  manager.finalize();
+  manager.finalize();
+  expect(second.state.removals).toBe(1);
+  expect(first.getCurrentWidget()).toBe(null);
+  expect(first.rootElement).toBeUndefined();
+});
+
+test('WidgetManager#reordering and external containers preserve roots', () => {
+  const manager = new WidgetManager({
+    deck: mockDeckInstance,
+    parentElement: document.createElement('div')
+  });
+  const external = document.createElement('div');
+  const first = new TestWidget({id: 'first', _container: external});
+  const second = new TestWidget({id: 'second', _container: external});
+  manager.setProps({widgets: [first, second]});
+  manager.setProps({widgets: [second, first]});
+  expect(Array.from(external.children)).toEqual([second.rootElement, first.rootElement]);
+  const moved = first.clone({_container: document.createElement('div')});
+  manager.setProps({widgets: [moved, second]});
+  expect(moved.rootElement).toBe(first.rootElement);
+  expect(moved.props._container?.contains(moved.rootElement)).toBe(true);
+  manager.finalize();
+});
+
+test('WidgetManager#imperative defaults take over matching declarative widgets', () => {
+  const manager = new WidgetManager({
+    deck: mockDeckInstance,
+    parentElement: document.createElement('div')
+  });
+  const declarative = new TestWidget({id: 'shared'});
+  manager.setProps({widgets: [declarative]});
+  const root = declarative.rootElement;
+  const imperative = new TestWidget({id: 'shared'});
+  manager.addDefault(imperative);
+  expect(manager.getWidgets()).toEqual([imperative]);
+  expect(imperative.rootElement).toBe(root);
+  manager.setProps({widgets: []});
+  expect(manager.getWidgets()).toEqual([imperative]);
+  manager.finalize();
+  expect(declarative.getCurrentWidget()).toBe(null);
 });

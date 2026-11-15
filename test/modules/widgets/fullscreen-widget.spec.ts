@@ -4,6 +4,7 @@
 
 import {test, expect, vi} from 'vitest';
 import {FullscreenWidget} from '@deck.gl/widgets';
+import {WidgetManager} from '@deck.gl/core/lib/widget-manager';
 
 test('FullscreenWidget - uncontrolled: defaults to not fullscreen', () => {
   const widget = new FullscreenWidget();
@@ -56,4 +57,22 @@ test('FullscreenWidget - onFullscreenChange does not fire callback when state un
 
   widget.onFullscreenChange();
   expect(onFullscreenChange).not.toHaveBeenCalled();
+});
+
+test('FullscreenWidget - replacement retains and cleans up its listener', () => {
+  const callback = vi.fn();
+  const first = new FullscreenWidget({id: 'fullscreen-transfer'});
+  const manager = new WidgetManager({
+    deck: {props: {parent: document.createElement('div')}} as any
+  });
+  manager.setProps({widgets: [first]});
+  const next = new FullscreenWidget({id: 'fullscreen-transfer', onFullscreenChange: callback});
+  manager.setProps({widgets: [next]});
+  next.fullscreen = true;
+  document.dispatchEvent(new Event('fullscreenchange'));
+  expect(callback).toHaveBeenCalledWith(false);
+  manager.finalize();
+  callback.mockClear();
+  document.dispatchEvent(new Event('fullscreenchange'));
+  expect(callback).not.toHaveBeenCalled();
 });

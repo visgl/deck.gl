@@ -50,7 +50,18 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
 
   className = 'deck-widget-fullscreen';
   placement: WidgetPlacement = 'top-left';
-  fullscreen: boolean = false;
+  state = {
+    fullscreen: false,
+    onFullscreenChange: null as (() => void) | null
+  };
+
+  /** Current fullscreen state, preserved across matching widget instances. */
+  get fullscreen(): boolean {
+    return this.state.fullscreen;
+  }
+  set fullscreen(value: boolean) {
+    this.state.fullscreen = value;
+  }
 
   constructor(props: FullscreenWidgetProps = {}) {
     super(props);
@@ -58,11 +69,15 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   }
 
   onAdd(): void {
-    document.addEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
+    this.state.onFullscreenChange = () => this.getCurrentWidget()?.onFullscreenChange();
+    document.addEventListener('fullscreenchange', this.state.onFullscreenChange);
   }
 
   onRemove() {
-    document.removeEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
+    if (this.state.onFullscreenChange) {
+      document.removeEventListener('fullscreenchange', this.state.onFullscreenChange);
+      this.state.onFullscreenChange = null;
+    }
   }
 
   onRenderHTML(rootElement: HTMLElement): void {

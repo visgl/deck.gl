@@ -5,6 +5,7 @@
 import {afterEach, test, expect, vi} from 'vitest';
 import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
+import {WidgetManager} from '@deck.gl/core/lib/widget-manager';
 
 let testInstance: WidgetTester<any> | undefined;
 
@@ -28,10 +29,14 @@ test('TimelineWidget - controlled: getTime returns time prop', () => {
   expect(widget.getTime()).toBe(42);
 });
 
-test('TimelineWidget - controlled: constructor syncs Timeline to controlled time prop', () => {
+test('TimelineWidget - controlled: mounting syncs Timeline without constructor side effects', () => {
   const timeline = {setTime: vi.fn()};
-  new TimelineWidget({timeRange: [0, 100], time: 50, timeline: timeline as any});
+  const widget = new TimelineWidget({timeRange: [0, 100], time: 50, timeline: timeline as any});
+  expect(timeline.setTime).not.toHaveBeenCalled();
+  const manager = new WidgetManager({deck: {} as any});
+  manager.setProps({widgets: [widget]});
   expect(timeline.setTime).toHaveBeenCalledWith(50);
+  manager.finalize();
 });
 
 test('TimelineWidget - controlled: setProps updates time and syncs Timeline', () => {
@@ -280,4 +285,35 @@ test('TimelineWidget', async () => {
 
   testInstance.click('.deck-widget-timeline-pause');
   expect(onPlayingChange).toHaveBeenCalledWith(false);
+});
+
+test('TimelineWidget - matching preserves timer and uses the current callback', () => {
+  vi.useFakeTimers();
+  const manager = new WidgetManager({deck: {} as any});
+  try {
+    const oldCallback = vi.fn();
+    const newCallback = vi.fn();
+    const first = new TimelineWidget({
+      id: 'playback',
+      autoPlay: true,
+      playInterval: 100,
+      onTimeChange: oldCallback
+    });
+    manager.setProps({widgets: [first]});
+    const time = first.getTime();
+    const next = new TimelineWidget({id: 'playback', playInterval: 100, onTimeChange: newCallback});
+    manager.setProps({widgets: [next]});
+    expect(next.getTime()).toBe(time);
+    expect(next.getPlaying()).toBe(true);
+    oldCallback.mockClear();
+    vi.advanceTimersByTime(100);
+    expect(newCallback).toHaveBeenCalledTimes(1);
+    expect(oldCallback).not.toHaveBeenCalled();
+    manager.finalize();
+    vi.advanceTimersByTime(500);
+    expect(newCallback).toHaveBeenCalledTimes(1);
+  } finally {
+    manager.finalize();
+    vi.useRealTimers();
+  }
 });

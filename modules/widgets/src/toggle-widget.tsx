@@ -57,7 +57,15 @@ export class ToggleWidget extends Widget<ToggleWidgetProps> {
 
   className = 'deck-widget-toggle';
   placement: WidgetPlacement = 'top-left';
-  checked: boolean;
+  state = {checked: false};
+
+  /** Current uncontrolled selection, preserved across matching widget instances. */
+  get checked(): boolean {
+    return this.state.checked;
+  }
+  set checked(value: boolean) {
+    this.state.checked = value;
+  }
 
   constructor(props: ToggleWidgetProps) {
     super(props);

@@ -63,13 +63,31 @@ export type TimelineWidgetProps = WidgetProps & {
 };
 
 export class TimelineWidget extends Widget<TimelineWidgetProps> {
-  id = 'timeline';
   className = 'deck-widget-timeline';
   placement: WidgetPlacement = 'fill';
 
-  private _playing = false;
-  private timerId: number | null = null;
-  currentTime: number;
+  state = {playing: false, timerId: null as number | null, currentTime: 0};
+
+  private get _playing(): boolean {
+    return this.state.playing;
+  }
+  private set _playing(value: boolean) {
+    this.state.playing = value;
+  }
+  private get timerId(): number | null {
+    return this.state.timerId;
+  }
+  private set timerId(value: number | null) {
+    this.state.timerId = value;
+  }
+
+  /** Current uncontrolled time, preserved across matching widget instances. */
+  get currentTime(): number {
+    return this.state.currentTime;
+  }
+  set currentTime(value: number) {
+    this.state.currentTime = value;
+  }
 
   /**
    * Returns the current time value.
@@ -113,9 +131,6 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   constructor(props: TimelineWidgetProps = {}) {
     super(props);
     this.currentTime = this.props.initialTime ?? this.props.timeRange[0];
-    // In controlled mode, sync Timeline to the controlled time prop
-    const syncTime = this.props.time ?? this.currentTime;
-    this.props.timeline?.setTime(syncTime);
     this.setProps(this.props);
   }
 
@@ -140,6 +155,7 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   }
 
   onAdd(): void {
+    this.props.timeline?.setTime(this.getTime());
     this._playing = false;
     this.timerId = null;
     if (this.props.autoPlay) {
@@ -301,7 +317,10 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
       this.updateHTML();
     }
     if (this._playing) {
-      this.timerId = window.setTimeout(this.tick, this.props.playInterval);
+      this.timerId = window.setTimeout(
+        () => this.getCurrentWidget()?.tick(),
+        this.props.playInterval
+      );
     } else {
       this.timerId = null;
     }
