@@ -1,0 +1,105 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {ArcLayer, ArcLayerProps} from '@deck.gl/layers';
+import {Accessor, DefaultProps} from '@deck.gl/core';
+
+import type {ShaderModule} from '@luma.gl/shaders';
+
+const uniformBlock = `\
+uniform tripsUniforms {
+  vec2 timeRange;
+} trips;
+`;
+
+export type TripsProps = {
+  timeRange: [number, number];
+};
+
+export const tripsUniforms = {
+  name: 'trips',
+  vs: uniformBlock,
+  fs: uniformBlock,
+  uniformTypes: {
+    timeRange: 'vec2<f32>'
+  }
+} as const satisfies ShaderModule<TripsProps>;
+
+export type AnimatedArcLayerProps<DataT = any> = _AnimatedArcLayerProps<DataT> &
+  ArcLayerProps<DataT>;
+
+type _AnimatedArcLayerProps<DataT = any> = {
+  getSourceTimestamp?: Accessor<DataT, number>;
+  getTargetTimestamp?: Accessor<DataT, number>;
+  timeRange?: [number, number];
+};
+
+const defaultProps: DefaultProps<_AnimatedArcLayerProps> = {
+  getSourceTimestamp: {type: 'accessor', value: 0},
+  getTargetTimestamp: {type: 'accessor', value: 1},
+  timeRange: {type: 'array', compare: true, value: [0, 1]}
+};
+
+export default class AnimatedArcLayer<DataT = any, ExtraProps = {}> extends ArcLayer<
+  DataT,
+  ExtraProps & Required<_AnimatedArcLayerProps>
+> {
+  layerName = 'AnimatedArcLayer';
+  defaultProps = defaultProps;
+
+  getShaders() {
+    const shaders = super.getShaders();
+    shaders.plugins = [
+      ...(shaders.plugins || []),
+      {
+        name: 'animatedArc',
+        module: tripsUniforms,
+        injections: {
+          'glsl:vs:#decl': `\
+in float instanceSourceTimestamp;
+in float instanceTargetTimestamp;
+out float vTimestamp;
+`,
+          'glsl:vs:#main-end': `\
+vTimestamp = mix(instanceSourceTimestamp, instanceTargetTimestamp, segmentRatio);
+`,
+          'glsl:fs:#decl': `\
+in float vTimestamp;
+`,
+          'glsl:fs:#main-start': `\
+if (vTimestamp < trips.timeRange.x || vTimestamp > trips.timeRange.y) {
+  discard;
+}
+`,
+          'glsl:fs:DECKGL_FILTER_COLOR': `\
+color.a *= (vTimestamp - trips.timeRange.x) / (trips.timeRange.y - trips.timeRange.x);
+`
+        }
+      }
+    ];
+    return shaders;
+  }
+
+  initializeState() {
+    super.initializeState();
+    this.getAttributeManager().addInstanced({
+      instanceSourceTimestamp: {
+        size: 1,
+        accessor: 'getSourceTimestamp'
+      },
+      instanceTargetTimestamp: {
+        size: 1,
+        accessor: 'getTargetTimestamp'
+      }
+    });
+  }
+
+  draw(params) {
+    const {timeRange} = this.props;
+    const tripsProps: TripsProps = {timeRange};
+    const model = this.state.model!;
+    model.shaderInputs.setProps({trips: tripsProps});
+    super.draw(params);
+  }
+}

@@ -1,0 +1,195 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import React, {useState, useEffect, useMemo} from 'react';
+import {createRoot} from 'react-dom/client';
+import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
+import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
+import {TerrainLayer} from '@deck.gl/geo-layers';
+import {GeoJsonLayer, IconLayer, TextLayer} from '@deck.gl/layers';
+import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
+
+import type {Color, MapViewState, PickingInfo} from '@deck.gl/core';
+import type {FeatureCollection, Feature, LineString} from 'geojson';
+import type {TerrainLayerProps} from '@deck.gl/geo-layers';
+
+const DATA_URL_BASE =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/terrain';
+const DATA_URL = `${DATA_URL_BASE}/tour_de_france_2023.json`;
+
+const INITIAL_VIEW_STATE: MapViewState = {
+  latitude: 43.09822,
+  longitude: -0.6194,
+  zoom: 10,
+  pitch: 55,
+  maxZoom: 23.5,
+  bearing: 0,
+  maxPitch: 89
+};
+
+const TERRAIN_IMAGE = 'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp';
+const SURFACE_IMAGE = 'https://tiles.versatiles.org/tiles/satellite/{z}/{x}/{y}.webp';
+
+// Mapterhorn serves Terrarium-encoded elevation tiles.
+const ELEVATION_DECODER: TerrainLayerProps['elevationDecoder'] = {
+  rScaler: 256,
+  gScaler: 1,
+  bScaler: 1 / 256,
+  offset: -32768
+};
+
+const COLOR_SCHEME: Color[] = [
+  [166, 206, 227],
+  [31, 120, 180],
+  [178, 223, 138],
+  [51, 160, 44],
+  [251, 154, 153],
+  [227, 26, 28],
+  [253, 191, 111]
+];
+
+type RouteProperties = {
+  day: number;
+  start: string;
+  finish: string;
+  km: number;
+  type: string;
+};
+type Route = Feature<LineString, RouteProperties>;
+
+type Stage = {
+  day: number;
+  name: string;
+  coordinates: [number, number];
+  type: 'start' | 'finish';
+};
+type ViewType = 'MapView' | 'GlobeView';
+
+function getTooltip({object}: PickingInfo<Route>) {
+  if (!object) return null;
+
+  const {day, start, finish, km, type} = object.properties;
+  return `\
+    Day ${day}: ${start} - ${finish}
+    ${km} km (${type})
+    `;
+}
+
+export default function App({
+  device,
+  initialViewState = INITIAL_VIEW_STATE,
+  view = 'GlobeView'
+}: {
+  device?: Device;
+  initialViewState?: MapViewState;
+  view?: ViewType;
+}) {
+  const [routes, setRoutes] = useState<FeatureCollection<LineString, RouteProperties>>();
+  const [viewState, setViewState] = useState<MapViewState>(initialViewState);
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    fetch(DATA_URL)
+      .then(resp => resp.json())
+      .then(setRoutes);
+  }, []);
+
+  const stages = useMemo(() => {
+    return routes?.features.flatMap(f => {
+      const {coordinates} = f.geometry;
+      const {day, start, finish} = f.properties;
+      return [
+        {type: 'start', name: start, day, coordinates: coordinates[0]},
+        {type: 'finish', name: finish, day, coordinates: coordinates[coordinates.length - 1]}
+      ] as Stage[];
+    });
+  }, [routes]);
+
+  const layers = [
+    new TerrainLayer({
+      id: 'terrain',
+      minZoom: 0,
+      maxZoom: 12,
+      tileSize: 512,
+      strategy: 'no-overlap',
+      elevationDecoder: ELEVATION_DECODER,
+      elevationData: TERRAIN_IMAGE,
+      texture: SURFACE_IMAGE,
+      material: false,
+      maxRequests: 12,
+      operation: 'terrain+draw'
+    }),
+    new GeoJsonLayer<RouteProperties>({
+      id: 'gpx-routes',
+      data: routes,
+      getLineColor: f => COLOR_SCHEME[f.properties.day % COLOR_SCHEME.length],
+      getLineWidth: 30,
+      lineWidthMinPixels: 6,
+      pickable: true,
+      extensions: [new TerrainExtension()]
+    }),
+    new IconLayer<Stage>({
+      id: 'stage-icon',
+      data: stages,
+      iconAtlas: `${DATA_URL_BASE}/flag-icons.png`,
+      iconMapping: `${DATA_URL_BASE}/flag-icons.json`,
+      parameters: {
+        cullMode: 'none',
+        depthCompare: 'always'
+      },
+      getPosition: d => d.coordinates,
+      getIcon: d => (d.type === 'start' ? 'green' : 'checker'),
+      getSize: 32,
+      extensions: [new TerrainExtension()]
+    }),
+    new TextLayer<Stage>({
+      id: 'stage-label',
+      data: stages,
+      characterSet: 'auto',
+      parameters: {
+        // should not be occluded by terrain
+        cullMode: 'none',
+        depthCompare: 'always'
+      },
+      getPosition: d => d.coordinates,
+      getText: d => d.name,
+      getColor: [255, 255, 255],
+      getSize: 18,
+      getAlignmentBaseline: 'top',
+      extensions: [new TerrainExtension()]
+    })
+  ];
+
+  const deckView = useMemo(() => (view === 'GlobeView' ? new GlobeView() : new MapView()), [view]);
+
+  return (
+    <DeckGL
+      device={device}
+      views={deckView}
+      viewState={viewState}
+      onViewStateChange={e => setViewState(e.viewState as MapViewState)}
+      controller={true}
+      layers={layers}
+      pickingRadius={5}
+      getTooltip={getTooltip}
+    >
+      <div
+        style={{position: 'absolute', bottom: 0, right: 0, background: 'white', padding: '2px 6px'}}
+      >
+        <a href="https://mapterhorn.com/attribution" target="_blank" rel="noreferrer">
+          © Mapterhorn
+        </a>
+        {' | '}
+        <a href="https://versatiles.org/sources/" target="_blank" rel="noreferrer">
+          VersaTiles sources
+        </a>
+      </div>
+    </DeckGL>
+  );
+}
+
+export function renderToDOM(container: HTMLDivElement) {
+  createRoot(container).render(<App />);
+}
