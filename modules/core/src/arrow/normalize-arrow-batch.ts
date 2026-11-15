@@ -13,7 +13,7 @@ import type {
 
 /** Recreates schema metadata from another Arrow runtime, including schemas with no batches. */
 export function normalizeArrowSchema(schema: Schema, arrow: typeof import('apache-arrow')): Schema {
-  if (schema instanceof arrow.Schema) {
+  if (Object.getPrototypeOf(schema) === arrow.Schema.prototype) {
     return schema;
   }
 
