@@ -18,6 +18,7 @@ export default class GPUVectorModel extends Model {
     enforceMatchingVectorLengths: false
   };
 
+  /** Converts integer-backed constants to floats for WebGL float shader inputs. */
   override setConstantAttributes(
     attributes: Record<string, TypedArray>,
     options?: {disableWarnings?: boolean}
