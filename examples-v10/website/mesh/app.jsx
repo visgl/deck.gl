@@ -70,8 +70,8 @@ export default function App({device}) {
     new SimpleMeshLayer({
       id: 'mini-coopers',
       data: SAMPLE_DATA,
-      mesh: MESH_URL,
       loaders: [OBJLoader],
+      mesh: MESH_URL,
       loadOptions: {obj: {shape: 'mesh'}},
       coordinateSystem: 'cartesian',
       getPosition: {sql: 'FLOAT64x2(x, y)'},

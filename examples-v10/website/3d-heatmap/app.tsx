@@ -98,10 +98,9 @@ export default function App({
       gpuAggregation: true,
       colorRange,
       coverage,
-      loaders: [CSVLoader],
+      // Sample row (lng,lat): -0.198465,51.505538
       data: DATA_URL,
-      // lng,lat
-      // -0.198465,51.505538
+      loaders: [CSVLoader],
       query: 'SELECT lng, lat WHERE lng IS NOT NULL AND lat IS NOT NULL',
       elevationRange: [0, 3000],
       elevationScale: hasData ? 50 : 0,

@@ -246,11 +246,11 @@ export default function App({
   layers.push(
     new ScatterplotLayer({
       id: 'trees',
-      loaders: LOADERS,
+      // Source fields: LIBELLEFRANCAIS;CIRCONFERENCE(CM);LATITUDE;LONGITUDE
+      // Sample row: Platane;0.0;48.9029892;2.4097097
       data: DATA_URL,
+      loaders: LOADERS,
       loadOptions: LOAD_OPTIONS,
-      // LIBELLEFRANCAIS;CIRCONFERENCE(CM);LATITUDE;LONGITUDE
-      // Platane;0.0;48.9029892;2.4097097
       query: `\
           SELECT
             LONGITUDE::DOUBLE PRECISION AS longitude,

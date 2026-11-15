@@ -30,8 +30,9 @@ const deckOverlay = new DeckOverlay({
   layers: [
     new ScatterplotLayer({
       id: 'airports',
-      loaders: [JSONTableLoader],
+      // Sample row: Sahnewal (LUH), scalerank 9, longitude 75.95707224036518, latitude 30.850359856170176
       data: AIRPORTS,
+      loaders: [JSONTableLoader],
       getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
       getRadius: {sql: 'FLOAT32(11 - scalerank)'},
       radiusMinPixels: 2,
@@ -45,9 +46,9 @@ const deckOverlay = new DeckOverlay({
     }),
     new ArcLayer({
       id: 'arcs',
-      loaders: [JSONTableLoader],
+      // Sample row: Sahnewal (LUH), scalerank 9, longitude 75.95707224036518, latitude 30.850359856170176
       data: AIRPORTS,
-      // Sahnewal (LUH), rank 9, longitude 75.95707224036518, latitude 30.850359856170176
+      loaders: [JSONTableLoader],
       query: 'SELECT * WHERE scalerank < 4',
       getTargetPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
       getSourcePosition: [-0.4531566, 51.4709959],

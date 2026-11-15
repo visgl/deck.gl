@@ -57,9 +57,9 @@ export default function App({
   const layers = [
     new ScatterplotLayer({
       id: 'scatter-plot',
-      loaders: [JSONTableLoader],
+      // Sample row: [-73.986022, 40.730743, 2]
       data: DATA_URL,
-      // Source row: [-73.986022, 40.730743, 2]
+      loaders: [JSONTableLoader],
       query: 'SELECT column1 AS longitude, column2 AS latitude, column3 AS gender',
       onDataLoad: table => {
         if (isArrowTable(table)) {
