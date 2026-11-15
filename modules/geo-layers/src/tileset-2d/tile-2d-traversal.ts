@@ -257,9 +257,21 @@ function isFinitePosition(position: number[]): boolean {
   return position.every(Number.isFinite);
 }
 
+/**
+ * Returns the result of a conversion, or a position that is not finite if the conversion fails.
+ * A CRS, and the viewport that uses it, can throw for a position that the CRS cannot convert.
+ */
+function tryConvert(convert: () => number[]): number[] {
+  try {
+    return convert();
+  } catch {
+    return [NaN, NaN, NaN];
+  }
+}
+
 /** Returns true if the CRS of the viewport projects the WGS84 position without moving it first */
 function isInAreaOfUse(viewport: _CustomProjectionViewport, position: number[]): boolean {
-  const normalized = viewport.crs.converter.WGS84.normalize(position);
+  const normalized = tryConvert(() => viewport.crs.converter.WGS84.normalize(position));
   const dLng = Math.abs(normalized[0] - position[0]) % 360;
   return Math.min(dLng, 360 - dLng) <= EPSILON && Math.abs(normalized[1] - position[1]) <= EPSILON;
 }
@@ -270,16 +282,28 @@ function isInAreaOfUse(viewport: _CustomProjectionViewport, position: number[]):
  * where the tile is, so the result is not finite.
  */
 function projectInAreaOfUse(viewport: _CustomProjectionViewport, position: number[]): number[] {
-  return isInAreaOfUse(viewport, position) ? viewport.projectPosition(position) : [NaN, NaN, NaN];
+  return isInAreaOfUse(viewport, position)
+    ? tryConvert(() => viewport.projectPosition(position))
+    : [NaN, NaN, NaN];
 }
 
 /**
- * Returns the WGS84 bounds of the ground that a custom projection shows.
+ * Returns the WGS84 bounds of the ground that a custom projection shows in a screen rectangle.
+ * The default rectangle is the complete viewport.
  * The result is empty if no ground is visible. It has two boxes if the view crosses the antimeridian.
  */
 // eslint-disable-next-line complexity, max-statements
-function getGeographicBounds(viewport: _CustomProjectionViewport, zRange: ZRange | null): Bounds[] {
-  const {width, height} = viewport;
+export function getGeographicBounds(
+  viewport: _CustomProjectionViewport,
+  zRange: ZRange | null,
+  rect: {x: number; y: number; width: number; height: number} = {
+    x: 0,
+    y: 0,
+    width: viewport.width,
+    height: viewport.height
+  }
+): Bounds[] {
+  const {x: left, y: top, width, height} = rect;
   const centerLng = viewport.position[0];
   let minLng = Infinity;
   let minLat = Infinity;
@@ -289,8 +313,8 @@ function getGeographicBounds(viewport: _CustomProjectionViewport, zRange: ZRange
   for (const targetZ of zRange || [0]) {
     for (let i = 0; i <= VIEW_SAMPLES; i++) {
       for (let j = 0; j <= VIEW_SAMPLES; j++) {
-        const pixel = [(i / VIEW_SAMPLES) * width, (j / VIEW_SAMPLES) * height];
-        const [lng, lat] = viewport.unproject(pixel, {targetZ});
+        const pixel = [left + (i / VIEW_SAMPLES) * width, top + (j / VIEW_SAMPLES) * height];
+        const [lng, lat] = tryConvert(() => viewport.unproject(pixel, {targetZ}));
         if (Number.isFinite(lng) && Number.isFinite(lat)) {
           // Keep the longitude continuous across the antimeridian
           const dLng = lng - centerLng;
@@ -319,8 +343,8 @@ function getGeographicBounds(viewport: _CustomProjectionViewport, zRange: ZRange
   for (const poleLat of [-90, 90]) {
     const pole = [centerLng, poleLat];
     if (isInAreaOfUse(viewport, pole)) {
-      const [x, y] = viewport.project(pole);
-      if (x >= 0 && x <= width && y >= 0 && y <= height) {
+      const [x, y] = tryConvert(() => viewport.project(pole));
+      if (x >= left && x <= left + width && y >= top && y <= top + height) {
         minLng = centerLng - 180;
         maxLng = centerLng + 180;
         minLat = Math.min(minLat, poleLat);

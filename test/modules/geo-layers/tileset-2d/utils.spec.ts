@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {
   getTileIndices,
   tileToBoundingBox,
@@ -10,6 +10,8 @@ import {
   getURLFromTemplate
 } from '@deck.gl/geo-layers/tileset-2d';
 import {Matrix4} from '@math.gl/core';
+import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
+import {createTestViewport} from '../../core/viewports/test-crs';
 
 import {
   WebMercatorViewport,
@@ -513,6 +515,84 @@ test('getTileIndices#CustomProjectionView omits tiles outside the area of use', 
     const {west} = tileToBoundingBox(viewport, x, y, z) as {west: number};
     // A tile that touches the edge of the zone has reference points in the area of use
     expect(west, `tile ${x},${y},${z}`).toBeLessThanOrEqual(-90);
+  }
+});
+
+const CONUS_ALBERS =
+  '+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs';
+
+test('Tileset2D#CustomProjectionView does not cull tiles when a screen corner has no position', async () => {
+  // The screen shows the complete conic projection. Its corners are outside the projection.
+  const viewport = await makeCustomProjectionViewport(
+    CONUS_ALBERS,
+    {center: [-96, 40, 0], zoom: -1},
+    800,
+    600
+  );
+  expect(viewport.unproject([0, 0]).slice(0, 2).every(Number.isFinite), 'corner').toBe(false);
+
+  const tileset = new Tileset2D({getTileData: () => null, onTileLoad: () => {}, zoomOffset: 2});
+  // A tile is visible only after its data loads
+  tileset.update(viewport);
+  await vi.waitFor(() => {
+    expect(tileset.selectedTiles!.every(tile => tile.isLoaded)).toBe(true);
+  });
+  tileset.update(viewport);
+  const tiles = tileset.selectedTiles!;
+  expect(tiles.length, 'selects tiles').toBeGreaterThan(0);
+  expect(
+    tiles.every(tile => tileset.isTileVisible(tile)),
+    'tiles are visible without culling'
+  ).toBe(true);
+  const cullRect = {x: 0, y: 0, width: 800, height: 600};
+  expect(
+    tiles.filter(tile => !tileset.isTileVisible(tile, cullRect)).map(tile => tile.id),
+    'no selected tile is culled'
+  ).toEqual([]);
+
+  // A culling rectangle that shows only a part of the screen still culls
+  const smallRect = {x: 390, y: 290, width: 20, height: 20};
+  expect(
+    tiles.filter(tile => tileset.isTileVisible(tile, smallRect)).length,
+    'a small rectangle culls tiles'
+  ).toBeLessThan(tiles.length);
+  tileset.finalize();
+});
+
+test('getTileIndices#CustomProjectionView accepts a CRS that cannot convert a position', () => {
+  // This CRS has degrees as its units, and converts only the positions near its central meridian.
+  // The view of deck.gl throws when it projects a position that is not a number.
+  const makeViewport = (forward: (p: number[]) => number[]) =>
+    createTestViewport({
+      width: 800,
+      height: 400,
+      center: [40, 40, 0],
+      zoom: 3,
+      converter: {forward, inverse: p => p.slice()},
+      bounds: [-180, -90, 180, 90],
+      metersPerUnit: [111319.49, 111319.49, 1]
+    });
+  const viewports = {
+    'the conversion throws': makeViewport(p => {
+      if (Math.abs(p[0]) > 60 || Math.abs(p[1]) > 80) throw new Error('outside the projection');
+      return p.slice();
+    }),
+    'the conversion returns NaN': makeViewport(p =>
+      Math.abs(p[0]) > 60 || Math.abs(p[1]) > 80 ? [NaN, NaN, NaN] : p.slice()
+    )
+  };
+  for (const [title, viewport] of Object.entries(viewports)) {
+    let result: {x: number; y: number; z: number}[] = [];
+    expect(() => {
+      result = getTileIndices({viewport, zRange: null});
+    }, title).not.toThrow();
+    expect(result.length, `${title}: selects tiles`).toBeGreaterThan(0);
+    for (const {x, y, z} of result) {
+      const {west, east} = tileToBoundingBox(viewport, x, y, z) as {west: number; east: number};
+      expect(west < 60 && east > -60, `${title}: tile ${x},${y},${z} is in the projection`).toBe(
+        true
+      );
+    }
   }
 });
 

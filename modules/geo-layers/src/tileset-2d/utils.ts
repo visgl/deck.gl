@@ -5,7 +5,7 @@
 import {Viewport, _CustomProjectionViewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
 import {MAX_LATITUDE} from '@math.gl/web-mercator';
-import {getOSMTileIndices} from './tile-2d-traversal';
+import {getGeographicBounds, getOSMTileIndices} from './tile-2d-traversal';
 import {Bounds, GeoBoundingBox, TileBoundingBox, TileIndex, ZRange} from './types';
 
 const TILE_SIZE = 512;
@@ -150,7 +150,15 @@ export function getCullBounds({
   cullRect: {x: number; y: number; width: number; height: number};
 }): [number, number, number, number][] {
   const subViewports = viewport.subViewports || [viewport];
-  return subViewports.map(v => getCullBoundsInViewport(v, z || 0, cullRect));
+  return subViewports.flatMap(v => {
+    if (v instanceof _CustomProjectionViewport) {
+      // A corner of the rectangle can be outside the projection, without a WGS84 position.
+      // Sample the rectangle, as the tile selection does.
+      const rect = {...cullRect, x: cullRect.x - v.x, y: cullRect.y - v.y};
+      return getGeographicBounds(v, Array.isArray(z) ? z : z ? [z, z] : null, rect);
+    }
+    return [getCullBoundsInViewport(v, z || 0, cullRect)];
+  });
 }
 
 function getCullBoundsInViewport(
