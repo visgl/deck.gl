@@ -92,7 +92,10 @@ export function renderCellColumns(
     const value = cells.get(index);
     if (value === null || value === undefined) throw new Error('cells cannot contain nulls');
     const ids = isArrowVector(cellInput) ? decodeArrowCellIds(value, accessor) : null;
-    const cellRows = ids ? (cluster ? [ids] : ids) : [value];
+    // Cluster callbacks can reuse both their result array and split-long pairs.
+    const cellRows = cluster
+      ? [ids ?? Array.from(value as Iterable<unknown>, id => (Array.isArray(id) ? [...id] : id))]
+      : (ids ?? [value]);
     for (const cell of cellRows) {
       data.push(
         callbacks.row(

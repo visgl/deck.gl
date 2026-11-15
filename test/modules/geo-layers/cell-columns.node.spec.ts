@@ -66,17 +66,27 @@ for (const [Layer, accessor, cell] of cases) {
   }
 }
 
-test('H3ClusterLayer preserves split-long callback IDs with Arrow styling', () => {
-  const cell = h3IndexToSplitLong('8928308280fffff');
+test('H3ClusterLayer copies reused split-long callback IDs with Arrow styling', () => {
+  const first = h3IndexToSplitLong('8928308280fffff');
+  const second = h3IndexToSplitLong('8928308280bffff');
+  const pair: [number, number] = [...first];
   const layer = new H3ClusterLayer({
-    data: [{cells: [cell]}],
-    getHexagons: row => row.cells,
-    getElevation: vectorFromArray([10])
+    data: [{cell: first}, {cell: second}],
+    getHexagons: ({cell}, {target}) => {
+      pair[0] = cell[0];
+      pair[1] = cell[1];
+      const cells = target as unknown as [number, number][];
+      cells[0] = pair;
+      return cells;
+    },
+    getElevation: vectorFromArray([10, 20])
   });
   const child = layer.renderLayers() as any;
-  const row = child.props.data[0];
-  expect(child.props.getHexagons(row)).toEqual([cell]);
-  expect(child.props.getElevation(row, {index: 0})).toBe(10);
+  const [firstRow, secondRow] = child.props.data;
+  expect(child.props.getHexagons(firstRow)).toEqual([first]);
+  expect(child.props.getHexagons(secondRow)).toEqual([second]);
+  expect(child.props.getElevation(firstRow, {index: 0})).toBe(10);
+  expect(child.props.getElevation(secondRow, {index: 1})).toBe(20);
 });
 
 test('Arrow cell colors use normalized floats and byte-range integers', () => {
