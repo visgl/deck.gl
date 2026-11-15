@@ -152,9 +152,10 @@ See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column lay
 import {Deck} from '@deck.gl/core';
 import {sqlParser} from '@deck.gl/core/sql';
 import {H3ClusterLayer} from '@deck.gl/geo-layers';
-import {tableFromArrays} from 'apache-arrow';
+import {Field, List, Table, Utf8, vectorFromArray} from 'apache-arrow';
 
-const data = tableFromArrays({cells: [['8928308280fffff']]});
+const cellType = new List(new Field('cell', new Utf8()));
+const data = new Table({cells: vectorFromArray([['8928308280fffff']], cellType)});
 
 new Deck({
   sqlParser,
