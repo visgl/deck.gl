@@ -59,12 +59,19 @@ type Aircraft = [
   category: number
 ];
 
+/** Named flight fields used for styling and tooltips after Arrow conversion. */
 type AircraftRow = {
+  /** Aircraft call sign reported by OpenSky. */
   callSign: string;
+  /** Country associated with the aircraft's transponder address. */
   originCountry: string;
+  /** Seconds from the response timestamp to the last contact. */
   lastContact: number;
+  /** Ground speed in meters per second, when reported. */
   velocity: number | null;
+  /** Track angle in degrees clockwise from true north, when reported. */
   trueTrack: number | null;
+  /** Vertical speed in meters per second, when reported. */
   verticalRate: number | null;
 };
 

@@ -25,7 +25,13 @@ const INITIAL_VIEW_STATE: GlobeViewState = {longitude: 0, latitude: 0, zoom: 2};
 type GridSystem = 'a5' | 'geohash' | 'h3' | 's2' | 'quadkey';
 
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/';
-type GridCell = {id: string; value: string};
+/** Cell and land-cover class read from a grid CSV row. */
+type GridCell = {
+  /** Grid cell identifier, including any leading zeros. */
+  id: string;
+  /** Index into the land-cover palette, read as text. */
+  value: string;
+};
 
 const GRID_DATA_FILES: Record<GridSystem, string> = {
   a5: 'landcover-a5v1.csv',
