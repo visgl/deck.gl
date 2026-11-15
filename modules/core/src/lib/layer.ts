@@ -230,6 +230,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return Object.prototype.hasOwnProperty.call(this, 'layerName') ? this.layerName : '';
   }
 
+  /** Lifecycle state shared between matched layer instances. */
   declare internalState: LayerState<this> | null;
   lifecycle: Lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
 

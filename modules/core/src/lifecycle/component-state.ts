@@ -32,7 +32,10 @@ type AsyncPropState = {
 export default class ComponentState<ComponentT extends Component> {
   /** The component that this state instance belongs to. `null` if this state has been finalized. */
   component: ComponentT | null;
-  /** Called when async resolution or a derived override changes effective props. */
+  /**
+   * Called after async resolution or a derived override updates effective props.
+   * Derived updates supply current and previous effective props. Async updates use the saved prop snapshot.
+   */
   onEffectivePropsUpdated?(props?: ComponentT['props'], oldProps?: ComponentT['props']): void;
 
   private asyncProps: Partial<Record<string, AsyncPropState>>;

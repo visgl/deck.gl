@@ -31,6 +31,7 @@ export default class Component<PropsT extends {} = {}> {
   id: string;
   props: StatefulComponentProps<PropsT>;
   count: number;
+  /** State attached by the lifecycle owner during initialization. */
   internalState: ComponentState<this> | null = null;
 
   constructor(...propObjects: Partial<PropsT>[]) {
@@ -43,7 +44,10 @@ export default class Component<PropsT extends {} = {}> {
     this.count = counter++; // Keep track of how many layer instances you are generating
   }
 
-  /** Replace synchronous effective prop overrides without changing declarative props. */
+  /**
+   * Replace synchronous effective prop overrides without changing declarative props.
+   * Pass null to clear overrides. Requires initialized lifecycle state.
+   */
   protected setDerivedProps(overrides: Partial<this['props']> | null): void {
     this.internalState?.setDerivedProps(overrides);
   }
