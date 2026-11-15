@@ -211,7 +211,8 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
 
     const subdivisionStep = this.getSubdivisionStep();
     if (
-      props.bounds !== oldProps.bounds ||
+      // Bounds compare by value: projected meshes are costly, and callers often pass new arrays.
+      !deepEqual(props.bounds, oldProps.bounds, 2) ||
       changeFlags.projectionChanged ||
       this.state.subdivisionStep !== subdivisionStep ||
       props._projectionTolerance !== oldProps._projectionTolerance ||

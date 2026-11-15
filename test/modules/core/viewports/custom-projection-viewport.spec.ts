@@ -256,3 +256,36 @@ test('viewport signatures consume CRS identity independently of converters and r
   expect(bounded.projectionSignature).toBe(viewport.projectionSignature);
   expect(bounded.sizeScaleSignature).not.toBe(viewport.sizeScaleSignature);
 });
+
+test('CustomProjectionViewport scales positions packed in its CRS without conversion', () => {
+  const from = vi.fn(([x, y, z = 0]) => [x * 2, y * 3, z]);
+  const to = vi.fn(([x, y, z = 0]) => [x / 2, y / 3, z]);
+  const viewport = new CustomProjectionViewport({
+    ...options,
+    crs: createTestCRS({converter: {forward: from, inverse: to}})
+  });
+  const other = createTestCRS({
+    signature: 'other',
+    converter: {
+      forward: ([x, y, z = 0]) => [x - 1, y, z],
+      inverse: ([x, y, z = 0]) => [x + 1, y, z]
+    }
+  });
+  const scale = viewport.distanceScales.unitsPerWorldUnit;
+  from.mockClear();
+  to.mockClear();
+  expect(viewport.projectPosition([4, 6, 2], {sourceCrs: viewport.crs})).toEqual([
+    4 * scale[0],
+    6 * scale[1],
+    2 * scale[2]
+  ]);
+  expect(from).not.toHaveBeenCalled();
+  expect(to).not.toHaveBeenCalled();
+  // Another source CRS still converts through WGS84: [4, 6] is [5, 6] there, then [10, 18].
+  expect(viewport.projectPosition([4, 6, 2], {sourceCrs: other})).toEqual([
+    10 * scale[0],
+    18 * scale[1],
+    2 * scale[2]
+  ]);
+  expect(from).toHaveBeenCalledOnce();
+});

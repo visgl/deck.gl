@@ -240,9 +240,16 @@ export default class CustomProjectionViewport extends Viewport {
     position: number[],
     options: ProjectPositionOptions = {}
   ): [number, number, number] {
-    if (options.sourceCrs) return this._projectPositionFromCRS(position, options.sourceCrs);
-    const converter = this.crs.converter.WGS84;
-    const projected = converter.from(converter.normalize(position));
+    const {sourceCrs} = options;
+    if (sourceCrs && sourceCrs !== this.crs) {
+      return this._projectPositionFromCRS(position, sourceCrs);
+    }
+    // Positions already packed in the target CRS need only scaling, not a WGS84 round trip.
+    let projected = position;
+    if (!sourceCrs) {
+      const converter = this.crs.converter.WGS84;
+      projected = converter.from(converter.normalize(position));
+    }
     const scale = this.distanceScales.unitsPerWorldUnit;
     return [projected[0] * scale[0], projected[1] * scale[1], (projected[2] ?? 0) * scale[2]];
   }
