@@ -73,6 +73,62 @@ test('mergeShaders preserves layer and extension plugins in order', () => {
   expect(shaders.plugins).toEqual([basePlugin]);
 });
 
+test('mergeShaders converts the inject field of each descriptor before the merge', () => {
+  const layerShaders = {vs: 'vs', inject: {'fs:DECKGL_FILTER_COLOR': 'color.a *= 0.5;'}};
+  const extensionShaders = {
+    inject: {
+      'fs:DECKGL_FILTER_COLOR': {injection: 'color.rgb = vec3(1.0, 0.0, 0.0);', order: -1},
+      'vs:#main-end': {injection: 'gl_Position.z = 0.0;', order: 2}
+    }
+  };
+  const merged = mergeShaders(
+    mergeShaders({plugins: [discardPlugin]}, layerShaders),
+    extensionShaders
+  );
+  expect(merged.inject, 'inject is removed').toBeUndefined();
+  expect('inject' in merged, 'inject key is removed').toBe(false);
+  expect(merged.plugins).toEqual([
+    discardPlugin,
+    {
+      name: 'layer-inject',
+      injections: [
+        {stage: 'fragment', target: 'DECKGL_FILTER_COLOR', glsl: 'color.a *= 0.5;', order: 0}
+      ]
+    },
+    {
+      name: 'layer-inject',
+      injections: [
+        {
+          stage: 'fragment',
+          target: 'DECKGL_FILTER_COLOR',
+          glsl: 'color.rgb = vec3(1.0, 0.0, 0.0);',
+          order: -1
+        },
+        {stage: 'vertex', target: '#main-end', glsl: 'gl_Position.z = 0.0;', order: 2}
+      ]
+    }
+  ]);
+  expect(layerShaders.inject, 'input is not mutated').toBeDefined();
+});
+
+test('mergeShaders keeps inject keys that are not named targets', () => {
+  // luma.gl assembles a regular expression key from the `inject` option
+  const merged = mergeShaders(
+    mergeShaders({}, {inject: {'fragColor = (.*);': 'a', 'fs:#main-end': 'b'}}),
+    {inject: {'fragColor = (.*);': 'c', 'gl_Position = (.*);': {injection: 'd', order: 1}}}
+  );
+  expect(merged.inject).toEqual({
+    'fragColor = (.*);': 'ac',
+    'gl_Position = (.*);': {injection: 'd', order: 1}
+  });
+  expect(merged.plugins).toEqual([
+    {
+      name: 'layer-inject',
+      injections: [{stage: 'fragment', target: '#main-end', glsl: 'b', order: 0}]
+    }
+  ]);
+});
+
 test('convertLegacyInjections converts inject fields to GLSL plugins', () => {
   const dependency = {name: 'dependency', inject: {'vs:#decl': 'float dependency;'}};
   const module = {
