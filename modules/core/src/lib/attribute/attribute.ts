@@ -65,6 +65,8 @@ export type AttributeOptions = DataColumnOptions<{
   bufferGroup?: string;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
+  /** @internal Identifies RGB(A) byte color accessors independently of their vertex format. */
+  semanticType?: 'color';
   /** Callback to map `accessor`'s return value to the attribute value. */
   transform?: ((value: any) => any) | null;
   /** Identifies the transform dependency; `projection` enables automatic position invalidation. */
@@ -94,7 +96,12 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   constant: boolean = false;
 
   constructor(device: Device, opts: AttributeOptions) {
-    super(device, opts, {
+    // Constant and row accessors both use DataColumn's component writer and defaults.
+    const options =
+      opts.semanticType === 'color' && opts.defaultValue === undefined
+        ? {...opts, defaultValue: [0, 0, 0, 255]}
+        : opts;
+    super(device, options, {
       startIndices: null,
       constantValue: null,
       lastExternalBuffer: null,
