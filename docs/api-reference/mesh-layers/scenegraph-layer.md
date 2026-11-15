@@ -235,15 +235,28 @@ Only triggers when scenegraph property changes.
 Only read when scenegraph property changes.
 Uses [global light configuration](../../developer-guide/using-effects.md#lighting) from deck.
 
-#### `_imageBasedLightingEnvironment` (Function | GLTFEnvironment, optional) {#_imagebasedlightingenvironment}
+#### `_imageBasedLightingEnvironment` (Function | PBRLightingEnvironment | PBREnvironment, optional) {#_imagebasedlightingenvironment}
 
 - Default: `null`
 
 **Experimental** Can be:
-- A `GLTFEnvironment` object.
-- A function that takes `{gl, layer}` as first argument and returns a `GLTFEnvironment`.
+- A luma.gl `PBRLightingEnvironment` object. It holds the linear-light textures `diffuseTexture`, `specularTexture` and `brdfLUTTexture`, for example the `textures` of a `createPrefilteredEnvironment()` result. The optional `intensity` (default `1`) scales the environment light. The optional `rotation` (default `0`) turns the environment around the vertical axis, in radians.
+- A luma.gl `PBREnvironment` object, the result of `loadPBREnvironment()`.
+- A function that takes `{device, layer}` as first argument and returns one of the two objects.
 
-Only read when scenegraph property changes.
+```js
+import {createPrefilteredEnvironment} from '@luma.gl/engine/lighting';
+
+const environment = createPrefilteredEnvironment(device, {source: equirectangularTexture});
+
+new ScenegraphLayer({
+  // ...
+  _lighting: 'pbr',
+  _imageBasedLightingEnvironment: {...environment.textures, intensity: 1.5, rotation: Math.PI / 2}
+});
+```
+
+The textures are only read when the scenegraph property changes. The `intensity` and `rotation` of a `PBRLightingEnvironment` object also update when this property changes. The layer does not destroy the textures.
 
 ### Data Accessors
 
