@@ -34,12 +34,9 @@ const INITIAL_VIEW_STATE: MapViewState = {
   bearing: 0
 };
 
-type DataPoint = [longitude: number, latitude: number, gender: number];
-
 export default function App({
   device,
   deviceProps,
-  data = DATA_URL,
   radius = 30,
   maleColor = MALE_COLOR,
   femaleColor = FEMALE_COLOR,
@@ -49,7 +46,6 @@ export default function App({
 }: {
   device?: Device;
   deviceProps?: DeviceProps;
-  data?: string | DataPoint[];
   radius?: number;
   maleColor?: Color;
   femaleColor?: Color;
@@ -58,39 +54,25 @@ export default function App({
   onDataLoad?: (count: number) => void;
 }) {
   const layers = [
-    new ScatterplotLayer<DataPoint>({
+    new ScatterplotLayer({
       id: 'scatter-plot',
-      data,
       loaders: [JSONTableLoader],
+      data: DATA_URL,
       // Source row: [-73.986022, 40.730743, 2]
-      query:
-        typeof data === 'string'
-          ? 'SELECT column1 AS longitude, column2 AS latitude, column3 AS gender'
-          : null,
-      onDataLoad: table => {
-        if (typeof data === 'string') {
-          onDataLoad?.((table as {numRows: number}).numRows);
-        }
-      },
+      query: 'SELECT column1 AS longitude, column2 AS latitude, column3 AS gender',
+      onDataLoad: table => onDataLoad?.((table as {numRows: number}).numRows),
       radiusScale: radius,
       radiusMinPixels: 0.25,
-      getPosition:
-        typeof data === 'string' ? {sql: 'FLOAT64x2(longitude, latitude)'} : d => [d[0], d[1], 0],
-      getFillColor:
-        typeof data === 'string'
-          ? {
-              sql: `RGBA8(${[0, 1, 2, 3]
-                .map(
-                  index =>
-                    `CASE WHEN gender = 1 THEN ${normalizedChannel(maleColor, index)} ELSE ${normalizedChannel(femaleColor, index)} END`
-                )
-                .join(', ')})`
-            }
-          : d => (d[2] === 1 ? maleColor : femaleColor),
-      getRadius: 1,
-      updateTriggers: {
-        getFillColor: [maleColor, femaleColor]
+      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+      getFillColor: {
+        sql: `RGBA8(${[0, 1, 2, 3]
+          .map(
+            index =>
+              `CASE WHEN gender = 1 THEN ${normalizedChannel(maleColor, index)} ELSE ${normalizedChannel(femaleColor, index)} END`
+          )
+          .join(', ')})`
       },
+      getRadius: 1,
       pickable: true
     })
   ];

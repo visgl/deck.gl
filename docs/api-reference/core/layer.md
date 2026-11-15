@@ -342,7 +342,7 @@ applies to row chunks; transform Arrow chunks in the producer instead. See
 SQL to execute through loaders.gl when `data` is an Arrow table, a promise resolving
 to an Arrow table, or a URL. The result becomes the layer's loaded data and is
 available to accessor queries, accessors, and picking. The layer's data is the
-implicit source. `FROM data` is optional.
+implicit source. `FROM data` is optional. Omit `query` to use the loaded data as-is.
 
 For URL inputs, provide a source-capable loader. Loaders that support query pushdown
 can optimize loading based on the supplied query. When the layer has a custom
