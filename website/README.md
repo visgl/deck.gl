@@ -1,14 +1,15 @@
-# Website example sources
+# Website example catalogs
 
-The website uses the repository's `examples-arrow/` directory by default.
-Set `WEBSITE_EXAMPLES_DIR=examples` to use the original `examples/`
-directory.
+The website publishes Examples at `/examples` and v10 Examples at
+`/examples-v10` in the same build.
 
-Run the website check with the original examples from the repository root.
+Edit their pages independently in `src/examples/` and `src/examples-v10/`.
+Their sidebars are `src/examples-sidebar.js` and `src/examples-v10-sidebar.js`.
+Demo implementations live in the repository's corresponding `examples/` and
+`examples-v10/` directories. Shared website components provide layout and controls.
 
-```sh
-WEBSITE_EXAMPLES_DIR=examples yarn test-website
-```
+The catalog configuration is in `scripts/example-catalogs.cjs`. The v10 catalog's manifest
+selects embedded demos from `examples-v10/proposals/`.
 
-The same setting works with `yarn start`, `yarn build`, and
-`yarn build-staging` from the `website/` directory.
+The homepage, Playground, Pydeck, and scripting gallery use `examples/`.
+Run `yarn test-website` from the repository root to validate both catalogs.

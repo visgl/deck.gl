@@ -6,12 +6,11 @@ import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {build, loadConfigFromFile, mergeConfig} from 'vite';
-import examplesDirectory from './examples-directory.cjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const examplesRoot = resolve(root, examplesDirectory, 'proposals');
-const sections = JSON.parse(readFileSync(resolve(root, 'website/src/examples/v10/examples.json')));
 const websiteBasePath = `/${(process.env.WEBSITE_BASE_URL || '').split('/').filter(Boolean).join('/')}`;
+const examplesRoot = resolve(root, 'examples-v10/proposals');
+const sections = JSON.parse(readFileSync(resolve(root, 'website/src/examples-v10/v10/examples.json')));
 const loadedConfig = await loadConfigFromFile(
   {command: 'build', mode: 'production'},
   resolve(examplesRoot, 'vite.config.ts'),

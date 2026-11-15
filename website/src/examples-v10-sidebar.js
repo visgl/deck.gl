@@ -1,0 +1,107 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+/**
+ * Creating a sidebar enables you to:
+ - create an ordered group of docs
+ - render a sidebar for each doc of that group
+ - provide next/previous navigation
+
+ The sidebars can be generated from the filesystem, or explicitly defined here.
+
+ Create as many sidebars as you want.
+ */
+const v10Sections = require('./examples-v10/v10/examples.json');
+
+const sidebars = {
+  examplesSidebar: [
+    {
+      type: 'doc',
+      label: 'Overview',
+      id: 'index'
+    },
+    {
+      type: 'category',
+      label: 'Layers',
+      items: [
+        'arc-layer',
+        'bitmap-layer',
+        'contour-layer',
+        'geojson-layer-polygons',
+        'geojson-layer-paths',
+        'global-grids',
+        'grid-layer',
+        'heatmap-layer',
+        'hexagon-layer',
+        'icon-layer',
+        'line-layer',
+        'point-cloud-layer',
+        'scatterplot-layer',
+        'scenegraph-layer',
+        'screen-grid-layer',
+        // 'simple-mesh-layer',
+        'terrain-layer',
+        'text-layer',
+        'text-layer-clipping',
+        'tile-layer',
+        'tile-layer-non-geospatial',
+        'tile-3d-layer',
+        'trips-layer',
+        'wms-layer'
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Proposals',
+      items: [
+        'shared-tile-2d-layer',
+        ...v10Sections.map(({label, examples}) => ({
+          type: 'category',
+          label,
+          items: examples.map(({id}) => `v10/${id}`)
+        }))
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Integrations',
+      items: ['arcgis', 'carto', 'google-3d-tiles', 'google-maps', 'mapbox', 'maplibre']
+    },
+    {
+      type: 'category',
+      label: 'Views',
+      items: ['multi-view', 'globe-view', 'plot', 'orthographic-view']
+    },
+    {
+      type: 'category',
+      label: 'Extensions',
+      items: [
+        'brushing-extension',
+        'collision-filter-extension',
+        'data-filter-extension',
+        'mask-extension',
+        'path-style-extension',
+        'terrain-extension'
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Declarative',
+      items: [
+        {
+          type: 'link',
+          label: 'Playground',
+          href: `/playground`
+        },
+        {
+          type: 'link',
+          label: 'pydeck',
+          href: `/pydeck`
+        }
+      ]
+    }
+  ]
+};
+
+module.exports = sidebars;
