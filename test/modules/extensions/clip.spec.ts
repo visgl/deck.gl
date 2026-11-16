@@ -4,8 +4,10 @@
 
 import {test, expect} from 'vitest';
 import {
+  Deck,
   LayerManager,
   MapView,
+  _CustomProjectionView as CustomProjectionView,
   WebMercatorViewport,
   _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
@@ -306,4 +308,128 @@ test('ClipExtension#WebGPU PathLayer dash arclength with billboard', async ({ski
   expect(await webgpuDevice.handle.popErrorScope()).toBeNull();
 
   layerManager.finalize();
+});
+
+// A polar view rotates the clip bounds, and bends the edges on parallels into arcs
+const NORTH_POLAR_STEREOGRAPHIC =
+  '+proj=stere +lat_0=90 +lat_ts=70 +lon_0=-45 +datum=WGS84 +units=m';
+
+const POLAR_CLIP_TEST_CASES = [
+  {
+    title: 'rotated bounds',
+    // Longitude 15 is 60 degrees from lon_0
+    clipBounds: [10, 60, 20, 65] as [number, number, number, number],
+    viewState: {center: [15, 62.5, 0] as [number, number, number], zoom: 5}
+  },
+  {
+    title: 'bounds with curved edges',
+    // The edges at latitudes 70 and 80 are arcs of 90 degrees around the pole
+    clipBounds: [-90, 70, 0, 80] as [number, number, number, number],
+    viewState: {center: [-45, 75, 0] as [number, number, number], zoom: 3}
+  }
+];
+
+/** Positions inside and outside the clip bounds, near the corners and the middles of the edges */
+function getClipTestPositions([west, south, east, north]: number[]): {
+  inside: number[][];
+  outside: number[][];
+} {
+  const inside: number[][] = [];
+  const outside: number[][] = [];
+  for (const lng of [west, east]) {
+    for (const lat of [south, north]) {
+      const dLng = lng === west ? 0.4 : -0.4;
+      const dLat = lat === south ? 0.3 : -0.3;
+      inside.push([lng + dLng, lat + dLat]);
+      outside.push([lng - dLng, lat + dLat], [lng + dLng, lat - dLat]);
+    }
+  }
+  const middle = (west + east) / 2;
+  inside.push([middle, south + 0.3], [middle, north - 0.3]);
+  outside.push([middle, south - 0.3], [middle, north + 0.3]);
+  return {inside, outside};
+}
+
+/** A ring with a vertex at each degree, so that its edges follow the curves of the projection */
+function getPolygonRing([west, south, east, north]: number[]): number[][] {
+  const ring: number[][] = [];
+  for (let lng = west; lng < east; lng++) ring.push([lng, south]);
+  for (let lat = south; lat < north; lat++) ring.push([east, lat]);
+  for (let lng = east; lng > west; lng--) ring.push([lng, north]);
+  for (let lat = north; lat > south; lat--) ring.push([west, lat]);
+  return ring;
+}
+
+webglTest('ClipExtension#CustomProjectionView clips to the projected bounds', async () => {
+  const deck = new Deck({
+    width: 400,
+    height: 400,
+    useDevicePixels: false,
+    views: new CustomProjectionView({crs: NORTH_POLAR_STEREOGRAPHIC}),
+    viewState: POLAR_CLIP_TEST_CASES[0].viewState
+  });
+
+  for (const {title, clipBounds, viewState} of POLAR_CLIP_TEST_CASES) {
+    const {inside, outside} = getClipTestPositions(clipBounds);
+    const layers = {
+      // Clip by geometry
+      polygon: new SolidPolygonLayer({
+        id: `clip-polygon-${title}`,
+        data: [
+          getPolygonRing([
+            clipBounds[0] - 10,
+            clipBounds[1] - 5,
+            clipBounds[2] + 10,
+            clipBounds[3] + 5
+          ])
+        ],
+        getPolygon: d => d,
+        pickable: true,
+        clipBounds,
+        extensions: [new ClipExtension()]
+      }),
+      // Clip by instance
+      points: new ScatterplotLayer({
+        id: `clip-points-${title}`,
+        data: [...inside, ...outside],
+        getPosition: d => d,
+        getRadius: 2,
+        radiusUnits: 'pixels',
+        pickable: true,
+        clipBounds,
+        extensions: [new ClipExtension()]
+      })
+    };
+
+    for (const [mode, layer] of Object.entries(layers)) {
+      await new Promise<void>(resolve => {
+        deck.setProps({
+          viewState,
+          layers: [layer],
+          onAfterRender: () => {
+            // @ts-expect-error private member
+            if (deck.layerManager && !deck.layerManager.needsUpdate() && layer.isLoaded) {
+              resolve();
+            }
+          }
+        });
+      });
+      const viewport = deck.getViewports()[0];
+      for (const [positions, expected] of [
+        [inside, true],
+        [outside, false]
+      ] as const) {
+        for (const position of positions) {
+          const [x, y] = viewport.project(position);
+          const object = deck.pickObject({x, y, radius: 0})?.object;
+          // A point can cover the pixel of a point near it
+          const isDrawn = mode === 'points' ? object === position : Boolean(object);
+          expect(isDrawn, `${title}, ${mode}: ${position} is ${expected ? 'in' : 'out'}`).toBe(
+            expected
+          );
+        }
+      }
+    }
+  }
+  deck.finalize();
 });
