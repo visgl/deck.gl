@@ -343,3 +343,40 @@ test('fovy matches WebMercatorViewport and the top-down copy keeps it', () => {
   expect(viewport.fovy).toBe(map.fovy);
   expect(viewport.getTopDownViewport().fovy).toBe(map.fovy);
 });
+
+test('getTopDownViewport keeps an orthographic camera', () => {
+  const pitched = new CustomProjectionViewport({
+    ...options,
+    center: [-75.612, 40.042, 0],
+    zoom: 12,
+    pitch: 45,
+    bearing: 30,
+    orthographic: true
+  });
+  const level = new CustomProjectionViewport({
+    ...options,
+    center: [-75.612, 40.042, 0],
+    zoom: 12,
+    bearing: 30,
+    orthographic: true
+  });
+  const perspective = new CustomProjectionViewport({
+    ...options,
+    center: [-75.612, 40.042, 0],
+    zoom: 12,
+    bearing: 30
+  });
+  const topDown = pitched.getTopDownViewport();
+  expect(Array.from(topDown.projectionMatrix)).toEqual(Array.from(level.projectionMatrix));
+  // An elevated point off center shows the camera model: perspective moves it away from center.
+  const raised = [-75.6, 40.05, 2000];
+  for (const position of [[-75.612, 40.042, 0], raised]) {
+    topDown
+      .project(position)
+      .forEach((value, axis) => expect(value).toBeCloseTo(level.project(position)[axis], 6));
+  }
+  expect(Math.abs(perspective.project(raised)[0] - level.project(raised)[0])).toBeGreaterThan(1);
+  expect(pitched.orthographic).toBe(true);
+  expect(perspective.orthographic).toBe(false);
+  expect(topDown.orthographic).toBe(true);
+});
