@@ -57,6 +57,8 @@ export type LayersPassRenderOptions = {
   clearStack?: boolean;
   clearCanvas?: boolean;
   clearColor?: number[];
+  /** Interpret View clear colors as 0–1. */
+  normalizedColors?: boolean;
   /** Color write channels for layer pipelines and WebGL attachment clears. */
   colorMask?: number;
   scissorRect?: number[];
@@ -182,7 +184,8 @@ export default class LayersPass extends Pass {
                   view,
                   pass,
                   layers: options.layers,
-                  isPicking: options.isPicking
+                  isPicking: options.isPicking,
+                  normalizedColors: options.normalizedColors
                 },
                 drawLayerParams
               );
@@ -296,7 +299,8 @@ export default class LayersPass extends Pass {
       canvasContext,
       viewport,
       view,
-      isPicking
+      isPicking,
+      normalizedColors = false
     }: {
       layers: Layer[];
       shaderModuleProps: Record<string, any>;
@@ -306,6 +310,7 @@ export default class LayersPass extends Pass {
       viewport: Viewport;
       view?: View;
       isPicking?: boolean;
+      normalizedColors?: boolean;
     },
     drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
@@ -329,12 +334,15 @@ export default class LayersPass extends Pass {
         // `clearColor: false` below still means "don't clear color" in both modes.
         if (Array.isArray(clearColor) && !isPicking) {
           // Retain the legacy zero-alpha fallback while decoding public byte colors.
-          colorToUse = normalizeByteColor4([
-            clearColor[0],
-            clearColor[1],
-            clearColor[2],
-            clearColor[3] || 255
-          ]);
+          colorToUse = normalizeByteColor4(
+            [
+              clearColor[0],
+              clearColor[1],
+              clearColor[2],
+              normalizedColors ? (clearColor[3] ?? 1) : clearColor[3] || 255
+            ],
+            !normalizedColors
+          );
         } else if (clearColor === false) {
           colorToUse = false;
         }

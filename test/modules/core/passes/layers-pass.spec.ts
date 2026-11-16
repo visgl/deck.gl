@@ -615,6 +615,28 @@ test('LayersPass#uses the supplied canvas context for viewport and clear passes'
   expect(beginRenderPass.mock.calls[1][0].clearColor).toEqual([1, 128 / 255, 0, 1]);
   expect(beginRenderPass.mock.calls[1][0].framebuffer).toBe(framebuffer);
 
+  for (const [clearColor, expected] of [
+    [
+      [1, 0.5, 0, 0],
+      [1, 0.5, 0, 0]
+    ],
+    [
+      [1, 0.5, 0],
+      [1, 0.5, 0, 1]
+    ]
+  ]) {
+    beginRenderPass.mockClear();
+    layersPass.render({
+      canvasContext,
+      normalizedColors: true,
+      views: {[viewport.id]: new MapView({id: viewport.id, clear: true, clearColor})},
+      viewports: [viewport],
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport
+    });
+    expect(beginRenderPass.mock.calls[1][0].clearColor).toEqual(expected);
+  }
+
   beginRenderPass.mockRestore();
   layerManager.finalize();
   framebuffer.destroy();
