@@ -158,6 +158,8 @@ The experimental `_dataLoadOptions` prop controls loading and accumulation:
 
 Set `loaders` and `loadOptions` as usual when streaming a URL. The selected loader must produce supported batches. Deck discards loader metadata and exposes Arrow tables to apps. Arrow batches retain their columnar storage; they are not converted to row objects. Do not mix Arrow and row chunks in one stream. An empty Arrow snapshot clears the table while retaining its schema.
 
+Arrow columns retain their GPU buffers when new batches extend the existing chunk sequence. Only new chunks are converted and uploaded, including float64 position residuals. Picking rows are read lazily. Replaced chunks, changed conversion settings, and snapshot loading rebuild the GPU columns. CPU-preprojected positions and ordinary accessor fallbacks use full conversion.
+
 `onDataProgress` receives the current accumulated or replacement table after each accepted batch. `onDataLoad` runs once when the stream finishes. An empty stream completes with an empty array and no progress callback. Replaced or finalized streams cannot publish further callbacks.
 
 `dataTransform` retains its existing behavior for row-array streams; it is not applied to Arrow chunks. Transform Arrow data in the producer before yielding it. This loading feature does not select fields or execute SQL; use accessors or explicit column props as with other Arrow inputs.
