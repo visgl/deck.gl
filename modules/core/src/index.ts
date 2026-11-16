@@ -115,6 +115,7 @@ export type {DeckProps} from './lib/deck';
 export type {
   LayerProps,
   SQLParser,
+  SQLFunctions,
   CompositeLayerProps,
   Accessor,
   ArrowAccessor,

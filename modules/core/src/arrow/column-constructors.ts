@@ -2,8 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {compileArrowExpression, type ArrowExpression} from '@math.gl/expressions/arrow';
+import {
+  compileArrowExpression,
+  type ArrowExpression,
+  type ArrowTableFunction
+} from '@math.gl/expressions/arrow';
 import {SQRT} from '@math.gl/expressions/math';
+import {bindNestedExtraction} from './nested-extraction';
 import type {Expression} from '@math.gl/expressions';
 import {
   Field,
@@ -56,7 +61,11 @@ function constructorFor(expression: Expression) {
 }
 
 /** Evaluate one row-preserving SQL expression, including local typed constructors. */
-export function evaluateColumnExpression(expression: Expression, input: Table): Vector {
+export function evaluateColumnExpression(
+  expression: Expression,
+  input: Table,
+  sqlFunctions: readonly ArrowTableFunction[] = []
+): Vector {
   if (expression.type === 'Identifier') {
     const column = input.getChild(expression.name);
     if (!column) {
@@ -64,6 +73,14 @@ export function evaluateColumnExpression(expression: Expression, input: Table): 
     }
     return column;
   }
+  const functions = sqlFunctions.some(fn => fn.name.toUpperCase() === 'SQRT')
+    ? [...sqlFunctions]
+    : [SQRT, ...sqlFunctions];
+  const inputSchema = input.schema;
+  const compile = (expression: ArrowExpression) => {
+    const bound = bindNestedExtraction(expression as Expression, inputSchema, functions);
+    return compileArrowExpression(bound, {inputSchema, functions}).evaluateTable(input);
+  };
   const call = expression as FunctionCall;
   if (
     call.type === 'CallExpression' &&
@@ -78,26 +95,15 @@ export function evaluateColumnExpression(expression: Expression, input: Table): 
       callee: {type: 'Identifier', name: 'cast'},
       arguments: [call.arguments[0]!, {type: 'Literal', value: 'float32', raw: '"float32"'}]
     };
-    return compileArrowExpression(cast, {
-      inputSchema: input.schema,
-      functions: [SQRT]
-    }).evaluateTable(input);
+    return compile(cast);
   }
 
   const constructor = constructorFor(expression);
   if (!constructor) {
-    return compileArrowExpression(expression, {
-      inputSchema: input.schema,
-      functions: [SQRT]
-    }).evaluateTable(input);
+    return compile(expression);
   }
 
-  const components = call.arguments.map(argument =>
-    compileArrowExpression(argument as ArrowExpression, {
-      inputSchema: input.schema,
-      functions: [SQRT]
-    }).evaluateTable(input)
-  );
+  const components = call.arguments.map(compile);
   const rows: (number[] | null)[] = new Array(input.numRows);
   for (let row = 0; row < input.numRows; row++) {
     const values: number[] = [];

@@ -23,7 +23,7 @@ import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
 import type Deck from './deck';
 
-import type {SQLParser} from '../types/layer-props';
+import type {SQLFunctions, SQLParser} from '../types/layer-props';
 
 const TRACE_SET_LAYERS = 'layerManager.setLayers';
 const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
@@ -33,6 +33,8 @@ export type LayerContext = {
   resourceManager: ResourceManager;
   deck?: Deck<any>;
   sqlParser?: SQLParser;
+  /** Additional Arrow functions shared by all layer SQL accessors. */
+  sqlFunctions?: SQLFunctions;
   device: Device;
   shaderAssembler: ShaderAssembler;
   defaultShaderModules: ShaderModule[];
@@ -201,6 +203,10 @@ export default class LayerManager {
     if ('sqlParser' in props && props.sqlParser !== this.context.sqlParser) {
       this.context.sqlParser = props.sqlParser;
       this.setNeedsUpdate('SQL parser changed');
+    }
+    if ('sqlFunctions' in props && props.sqlFunctions !== this.context.sqlFunctions) {
+      this.context.sqlFunctions = props.sqlFunctions;
+      this.setNeedsUpdate('SQL functions changed');
     }
     if ('debug' in props) {
       this._debug = props.debug;

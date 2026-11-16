@@ -5,7 +5,9 @@
 import {expect, test, vi} from 'vitest';
 import {
   Field,
+  Float64,
   List,
+  Struct,
   Table,
   Utf8,
   tableFromArrays,
@@ -216,4 +218,66 @@ test('SQL colors normalize byte channels with arithmetic and CASE', () => {
   expect(Array.from(result.getChild('categorical')!.get(1))).toEqual([0, 0, 0, 255]);
   expect(Array.from(result.getChild('continuous')!.get(0))).toEqual([0, 64, 0, 255]);
   expect(Array.from(result.getChild('continuous')!.get(1))).toEqual([0, 32, 0, 255]);
+});
+
+test('default SQL functions extract nested Arrow values without a parser override', () => {
+  const data = tableFromArrays({
+    start: [[-122, 40, 500], null, [12, 45]],
+    endpoint: vectorFromArray(
+      [{longitude: -121}, null, {longitude: 13}],
+      new Struct([new Field('longitude', new Float64())])
+    )
+  });
+  const columns = evaluateAccessorQueries(
+    data,
+    {
+      longitude: "STRUCT_EXTRACT(endpoint, 'longitude')",
+      altitude: 'LIST_EXTRACT(start, 3)',
+      position: 'FLOAT64x2(LIST_EXTRACT(start, 1), LIST_EXTRACT(start, 2))'
+    },
+    undefined
+  );
+  expect(Array.from(columns.getChild('longitude')!)).toEqual([-121, null, 13]);
+  expect(Array.from(columns.getChild('altitude')!)).toEqual([500, null, null]);
+  expect(Array.from(columns.getChild('position')!.get(0))).toEqual([-122, 40]);
+});
+
+test('layer SQL functions override Deck declarations and changing them reevaluates accessors', async () => {
+  const device = new NullDevice({});
+  const manager = new LayerManager(device, {viewport: new Viewport()});
+  const declaration = (offset: number) => ({
+    name: 'ADJUST',
+    prototypes: [
+      {
+        arguments: [new Field('value', new Float64())],
+        result: new Field('adjusted', new Float64()),
+        evaluate: ([values]) =>
+          vectorFromArray(
+            Array.from(values, value => value + offset),
+            new Float64()
+          )
+      }
+    ]
+  });
+  const deckFunction = declaration(1);
+  const layerFunction = declaration(4);
+  const layer = new QueryLayer({
+    data: tableFromArrays({x: [2], y: [3]}),
+    getPosition: {sql: 'FLOAT64x2(ADJUST(x), y)'}
+  });
+  try {
+    manager.setProps({sqlFunctions: [deckFunction]});
+    manager.setLayers([layer]);
+    await vi.waitFor(() => expect(layer.isLoaded).toBe(true));
+    manager.updateLayers();
+    expect(Array.from((layer.props.getPosition as Vector).get(0))).toEqual([3, 3]);
+    const next = layer.clone({sqlFunctions: [layerFunction]});
+    manager.setLayers([next]);
+    await vi.waitFor(() => expect(next.isLoaded).toBe(true));
+    manager.updateLayers();
+    expect(Array.from((next.props.getPosition as Vector).get(0))).toEqual([6, 3]);
+  } finally {
+    manager.finalize();
+    device.destroy();
+  }
 });

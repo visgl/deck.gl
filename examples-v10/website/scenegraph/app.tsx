@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* global fetch */
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
@@ -127,16 +127,6 @@ export default function App({
   mapStyle?: string;
 }) {
   const [data, setData] = useState(DATA);
-  const onDataLoadRef = useRef(onDataLoad);
-
-  useEffect(() => {
-    onDataLoadRef.current = onDataLoad;
-  }, [onDataLoad]);
-
-  useEffect(() => {
-    onDataLoadRef.current?.(data.numRows);
-  }, [data]);
-
   useEffect(() => {
     const abortController = new AbortController();
     fetchData(abortController.signal)
@@ -152,6 +142,7 @@ export default function App({
   const layer = new ScenegraphLayer<AircraftRow>({
     id: 'scenegraph-layer',
     data,
+    onDataLoad: () => onDataLoad?.(data.numRows),
     pickable: true,
     sizeScale,
     scenegraph: MODEL_URL,

@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useMemo} from 'react';
+import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
-import {tableFromArrays} from 'apache-arrow';
+import {Field, FixedSizeList, Float64, tableFromArrays, vectorFromArray} from 'apache-arrow';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 
-import type {PickingInfo, MapViewState, Widget} from '@deck.gl/core';
+import type {LayerData, PickingInfo, MapViewState, Widget} from '@deck.gl/core';
 import {Device} from '@luma.gl/core';
 
 // Source JSON data
@@ -54,6 +54,38 @@ function getTooltip({object}: PickingInfo) {
   );
 }
 
+/** Projects decoded airports into the columns used by SQL accessors and tooltips. */
+function toAirportTable<LayerDataT = LayerData<unknown>>(data: unknown): LayerDataT {
+  const airports = data as Airport[];
+  return tableFromArrays({
+    coordinates: vectorFromArray(
+      airports.map(airport => airport.coordinates),
+      new FixedSizeList(2, new Field('coordinate', new Float64()))
+    ),
+    name: airports.map(airport => airport.name),
+    abbrev: airports.map(airport => airport.abbrev),
+    type: airports.map(airport => airport.type)
+  }) as LayerDataT;
+}
+
+/** Projects decoded flight endpoints and picking fields into Arrow columns. */
+function toFlightTable<LayerDataT = LayerData<unknown>>(data: unknown): LayerDataT {
+  const flights = data as FlightPath[];
+  const positionType = new FixedSizeList(3, new Field('coordinate', new Float64()));
+  return tableFromArrays({
+    start: vectorFromArray(
+      flights.map(flight => flight.start),
+      positionType
+    ),
+    end: vectorFromArray(
+      flights.map(flight => flight.end),
+      positionType
+    ),
+    name: flights.map(flight => flight.name),
+    country: flights.map(flight => flight.country)
+  }) as LayerDataT;
+}
+
 export default function App({
   airports,
   flightPaths,
@@ -69,60 +101,34 @@ export default function App({
   device?: Device;
   widgets?: Widget[];
 }) {
-  const airportTable = useMemo(
-    () =>
-      airports &&
-      tableFromArrays({
-        longitude: Float64Array.from(airports, airport => airport.coordinates[0]),
-        latitude: Float64Array.from(airports, airport => airport.coordinates[1]),
-        name: airports.map(airport => airport.name),
-        abbrev: airports.map(airport => airport.abbrev),
-        type: airports.map(airport => airport.type)
-      }),
-    [airports]
-  );
-  const flightTable = useMemo(
-    () =>
-      flightPaths &&
-      tableFromArrays({
-        start_longitude: Float64Array.from(flightPaths, flight => flight.start[0]),
-        start_latitude: Float64Array.from(flightPaths, flight => flight.start[1]),
-        start_altitude: Float64Array.from(flightPaths, flight => flight.start[2]),
-        end_longitude: Float64Array.from(flightPaths, flight => flight.end[0]),
-        end_latitude: Float64Array.from(flightPaths, flight => flight.end[1]),
-        end_altitude: Float64Array.from(flightPaths, flight => flight.end[2]),
-        name: flightPaths.map(flight => flight.name),
-        country: flightPaths.map(flight => flight.country)
-      }),
-    [flightPaths]
-  );
-
   const layers = [
-    airportTable &&
+    airports &&
       new ScatterplotLayer({
         id: 'airports',
-        data: airportTable,
+        data: airports,
+        dataTransform: toAirportTable,
         radiusScale: 20,
-        getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+        getPosition: {sql: 'coordinates'},
         getFillColor: [255, 140, 0],
         getRadius: {
           sql: "CASE WHEN type = 'major' THEN 100 WHEN type = 'small' THEN 30 ELSE 60 END"
         },
         pickable: true
       }),
-    flightTable &&
+    flightPaths &&
       new LineLayer({
         id: 'flight-paths',
-        data: flightTable,
+        data: flightPaths,
+        dataTransform: toFlightTable,
         opacity: 0.8,
-        getSourcePosition: {sql: 'FLOAT64x3(start_longitude, start_latitude, start_altitude)'},
-        getTargetPosition: {sql: 'FLOAT64x3(end_longitude, end_latitude, end_altitude)'},
+        getSourcePosition: {sql: 'start'},
+        getTargetPosition: {sql: '"end"'},
         getColor: {
           sql: `RGBA8(
-            1 - start_altitude / 5000,
-            128 * start_altitude / (255 * 10000),
-            start_altitude / 10000,
-            1 - start_altitude / 10000
+            1 - LIST_EXTRACT(start, 3) / 5000,
+            128 * LIST_EXTRACT(start, 3) / (255 * 10000),
+            LIST_EXTRACT(start, 3) / 10000,
+            1 - LIST_EXTRACT(start, 3) / 10000
           )`
         },
         getWidth: lineWidth,
