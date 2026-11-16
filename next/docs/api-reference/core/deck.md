@@ -246,6 +246,12 @@ Notes:
 
 Overrides the parser for [layer queries](https://deck.gl/next/docs/api-reference/core/layer.md#query) and Arrow accessor expressions. Deck loads the math.gl parser on first use. Supply `parseQuery` to override table query parsing and `parseExpression` to override accessor expression parsing.
 
+#### `sqlFunctions` (SQLFunctions, optional)[​](#sqlfunctions "Direct link to sqlfunctions")
+
+Additional math.gl Arrow functions available to SQL accessors in every layer. A layer can override a function by name through its own [`sqlFunctions`](https://deck.gl/next/docs/api-reference/core/layer.md#sqlfunctions) prop. Function names are case-insensitive.
+
+SQL accessors can use `LIST_EXTRACT(column, index)` and `STRUCT_EXTRACT(column, 'field')` by default. List indices start at 1, negative indices count from the end, and an out-of-range index returns null.
+
 #### `layers` (LayersList)[​](#layers "Direct link to layers")
 
 * Default: `[]`
@@ -890,7 +896,7 @@ Notes:
 
 #### `pickObject`[​](#pickobject "Direct link to pickobject")
 
-![](https://img.shields.io/badge/WebGPU-❌-brightgreen.svg?style=flat-square)
+![](https://img.shields.io/badge/WebGPU-�❌-brightgreen.svg?style=flat-square)
 
 Get the closest pickable and visible object at the given screen coordinate.
 

@@ -326,6 +326,10 @@ Streams can yield row arrays, Arrow `RecordBatch` objects, or Arrow tables. Each
 
 Arrow is an optional dependency, imported only when an Arrow chunk arrives. `dataTransform` applies to row chunks; transform Arrow chunks in the producer instead. See [Streaming Arrow data](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#streaming-arrow-data).
 
+#### `sqlFunctions` (SQLFunctions, optional)[​](#sqlfunctions "Direct link to sqlfunctions")
+
+Additional math.gl Arrow functions for this layer's SQL accessors. Functions override matching [Deck functions](https://deck.gl/next/docs/api-reference/core/deck.md#sqlfunctions) by name.
+
 #### `query` (string, optional)[​](#query "Direct link to query")
 
 SQL to execute through loaders.gl when `data` is an Arrow table, a promise resolving to an Arrow table, or a URL. The result becomes the layer's loaded data and is available to accessor queries, accessors, and picking. The layer's data is the implicit source. `FROM data` is optional. Omit `query` to use the loaded data as-is.
@@ -700,7 +704,7 @@ Called after each accepted streamed data batch is applied. Receives `(value, con
 
 #### `onDataLoad` (Function, optional)[​](#ondataload "Direct link to ondataload")
 
-Called when remote data is fully loaded. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.
+Called when a new `data` input resolves. Direct inputs are reported after any `dataTransform` is applied. URL and promise inputs are reported after loading, query evaluation, and transformation. Async iterables report completion after the stream ends. The callback receives the same resolved value as `layer.props.data` and can pass it to the application UI.
 
 The function receives two arguments:
 
