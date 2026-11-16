@@ -942,6 +942,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
     const props = this.props;
 
+    const normalizedColorInput = Boolean(this.context.normalizedColors);
+    for (const attribute of Object.values(attributeManager.attributes)) {
+      const {settings} = attribute;
+      if (
+        settings.semanticType === 'color' &&
+        settings.normalizedColorInput !== normalizedColorInput
+      ) {
+        settings.normalizedColorInput = normalizedColorInput;
+        attribute.setNeedsUpdate();
+      }
+    }
+
     // Figure out data length
     const numInstances = this.getNumInstances();
     const startIndices = this.getStartIndices();

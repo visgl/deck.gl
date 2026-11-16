@@ -10,6 +10,8 @@ import {
   type _ColumnDefinition as ColumnDefinition
 } from '@deck.gl/core';
 
+export const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+
 const DEFINITIONS: Record<string, ColumnDefinition> = {
   sourcePositions: {
     attribute: 'instanceSourcePositions',
@@ -30,6 +32,7 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     accessor: 'getSourceColor',
     arrowAccessor: true,
     semantic: 'color',
+    defaultColor: DEFAULT_COLOR,
     size: 4
   },
   targetColors: {
@@ -37,6 +40,7 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     accessor: 'getTargetColor',
     arrowAccessor: true,
     semantic: 'color',
+    defaultColor: DEFAULT_COLOR,
     size: 4
   },
   widths: {

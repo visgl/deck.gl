@@ -133,12 +133,6 @@ type _ScatterplotLayerProps<DataT> = ScatterplotColumnProps & {
    */
   getLineColor?: ScatterplotColorAccessor<DataT>;
   /**
-   * Interpret plain-array fill and line colors from constants or row callbacks in the 0–1 range.
-   * Typed arrays, Arrow columns, and binary attributes keep their existing interpretation.
-   * @default false
-   */
-  normalizedColors?: boolean;
-  /**
    * Stroke width constant, row accessor, or numeric Arrow vector converted to Float32.
    * @default 1
    */
@@ -180,7 +174,6 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
 
   getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
   getRadius: {type: 'accessor', arrow: true, value: 1},
-  normalizedColors: false,
   getFillColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', arrow: true, value: 1},
@@ -296,7 +289,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         type: 'unorm8',
         accessor: 'getFillColor',
         semanticType: 'color',
-        normalizedColorInput: this.props.normalizedColors,
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'scatterplot-instance-data'
       },
@@ -306,7 +298,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         type: 'unorm8',
         accessor: 'getLineColor',
         semanticType: 'color',
-        normalizedColorInput: this.props.normalizedColors,
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'scatterplot-instance-data'
       },
@@ -334,14 +325,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     }
     this.restoreAccessorState();
     super.updateState(params);
-    if (params.props.normalizedColors !== params.oldProps.normalizedColors) {
-      const attributeManager = this.getAttributeManager()!;
-      const {attributes} = attributeManager;
-      for (const name of ['instanceFillColors', 'instanceLineColors']) {
-        attributes[name].settings.normalizedColorInput = params.props.normalizedColors;
-        attributeManager.invalidate(name);
-      }
-    }
 
     if (params.changeFlags.extensionsChanged) {
       this.state.model?.destroy();
@@ -382,6 +365,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       this.state.model = this._getModel();
     }
     void this.state.columns!.updateIfNeeded(params, {
+      normalizedColors: this.context.normalizedColors,
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

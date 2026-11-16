@@ -304,19 +304,11 @@ The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number be
 
 This prop supplies the fallback for `getLineColor` and `getFillColor`.
 
-#### `normalizedColors` (boolean, optional) {#normalizedcolors}
-
-* Default: `false`
-
-When enabled, plain JavaScript arrays passed to `getFillColor` and `getLineColor`, or returned by these callbacks, use 0–1 channels. Omitted alpha is opaque. For example, `[1, 0.5, 0, 0.25]` is orange with 25% opacity. Components are clamped and rounded to the nearest byte for storage.
-
-Built-in defaults, typed arrays, Arrow columns, and binary attributes keep their existing interpretation.
-
 #### `getFillColor` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`
 
-For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Channels use the 0–255 range by default. See [`normalizedColors`](#normalizedcolors) to use 0–1 plain arrays.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Channels use the 0–255 range by default. See [Deck’s `normalizedColors`](../core/deck.md#normalizedcolors) to use 0–1 plain arrays.
 
 * If an array is provided, it is used as the filled color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
@@ -330,7 +322,7 @@ The default value comes from `getColor` when supplied.
 
 * Default: `[0, 0, 0, 255]`
 
-For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Channels use the 0–255 range by default. See [`normalizedColors`](#normalizedcolors) to use 0–1 plain arrays.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Channels use the 0–255 range by default. See [Deck’s `normalizedColors`](../core/deck.md#normalizedcolors) to use 0–1 plain arrays.
 
 * If an array is provided, it is used as the outline color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.

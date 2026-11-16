@@ -51,7 +51,7 @@ type PrepareFallbacks = (
   own: (resource: {destroy(): void}) => void
 ) => Record<string, unknown>;
 
-type Request = {source: unknown; rows?: Rows};
+type Request = {source: unknown; rows?: Rows; normalizedColors: boolean};
 
 type Columns = Record<string, GPUVector | GPUConstant>;
 type Prepared = {
@@ -121,7 +121,6 @@ export class LayerColumns {
       props.data !== this.request.source ||
       !deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
       props.colorFormat !== oldProps.colorFormat ||
-      props.normalizedColors !== oldProps.normalizedColors ||
       !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1) ||
       props.coordinateSystem !== oldProps.coordinateSystem ||
       Object.entries(this.definitions).some(
@@ -151,13 +150,15 @@ export class LayerColumns {
       changed,
       failed,
       positionOptions,
-      prepareFallbacks
+      prepareFallbacks,
+      normalizedColors = false
     }: {
       dataLoading: boolean;
       changed: () => void;
       failed: (error: Error) => void;
       positionOptions?: PositionOptions;
       prepareFallbacks?: PrepareFallbacks;
+      normalizedColors?: boolean;
     }
   ): Promise<void> | undefined {
     if (
@@ -165,9 +166,17 @@ export class LayerColumns {
       (changeFlags.dataChanged ||
         changeFlags.updateTriggersChanged ||
         changeFlags.projectionChanged ||
+        this.request?.normalizedColors !== normalizedColors ||
         this.needsUpdate(props, oldProps))
     ) {
-      return this.update(props, changed, failed, positionOptions, prepareFallbacks);
+      return this.update(
+        props,
+        changed,
+        failed,
+        positionOptions,
+        prepareFallbacks,
+        normalizedColors
+      );
     }
     return undefined;
   }
@@ -182,12 +191,13 @@ export class LayerColumns {
     changed: () => void,
     failed: (error: Error) => void,
     positionOptions: PositionOptions = {},
-    prepareFallbacks?: PrepareFallbacks
+    prepareFallbacks?: PrepareFallbacks,
+    normalizedColors = false
   ): Promise<void> {
     const version = ++this.version;
     this.loading = true;
     const previousRequest = this.request;
-    const request: Request = {source: props.data};
+    const request: Request = {source: props.data, normalizedColors};
     this.request = request;
     const results: Array<{destroy(): void}> = [];
     try {
@@ -302,7 +312,7 @@ export class LayerColumns {
             definition.defaultValue,
             fallbacks?.[definition.accessor],
             definition.attribute,
-            definition.defaultColor
+            normalizedColors ? definition.defaultColor : undefined
           );
         }
       }
@@ -607,7 +617,6 @@ export class LayerColumns {
       }
       if (
         defaultColor &&
-        props.normalizedColors &&
         !binaryColor &&
         Array.isArray(value) &&
         (typeof source === 'function' || value !== defaultColor)

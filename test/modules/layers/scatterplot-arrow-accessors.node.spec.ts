@@ -147,12 +147,12 @@ test('Scatterplot normalizes plain color fallbacks alongside Arrow columns', asy
     getRadius: radii,
     getFillColor: [0, 1, 0, 0]
   });
-  const props = layer.clone({normalizedColors: true}).props;
+  const {props} = layer;
   try {
     await columns.update(layer.props, () => {}, failed);
     await columns.updateIfNeeded(
       {props, oldProps: layer.props, changeFlags: {}},
-      {dataLoading: false, changed: () => {}, failed}
+      {dataLoading: false, changed: () => {}, failed, normalizedColors: true}
     );
     expect(failed).not.toHaveBeenCalled();
     const prepared = (columns as any).prepared.columns;

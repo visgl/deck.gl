@@ -101,8 +101,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   constructor(device: Device, opts: AttributeOptions) {
     // Constant and row accessors both use DataColumn's component writer and defaults.
     const options =
-      opts.semanticType === 'color' && opts.defaultValue === undefined
-        ? {...opts, defaultValue: [0, 0, 0, 255]}
+      opts.semanticType === 'color'
+        ? {...opts, normalizedColorInput: false, defaultValue: opts.defaultValue ?? [0, 0, 0, 255]}
         : opts;
     super(device, options, {
       startIndices: null,

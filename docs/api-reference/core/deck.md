@@ -230,6 +230,16 @@ new Deck({
 // layers is in the shape of [[<layer>, <layer>], null, [<layer>, <layer>], ...]
 ```
 
+#### `normalizedColors` (boolean, optional) {#normalizedcolors}
+
+Default: `false`.
+
+When enabled, ScatterplotLayer, LineLayer, and ArcLayer interpret plain JavaScript arrays
+passed to their color accessors, including arrays returned by callbacks, as 0–1 channels.
+Channels are clamped and rounded to bytes for GPU storage. Omitted alpha is opaque.
+Built-in defaults, typed arrays, Arrow columns, and binary inputs keep their existing encoding.
+Other layers and color properties continue to use their documented conventions.
+
 #### `layerFilter` (Function) {#layerfilter}
 
 * Default: `null`

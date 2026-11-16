@@ -21,7 +21,12 @@ import {
   _GPUVectorModel as DeckGPUVectorModel
 } from '@deck.gl/core';
 import {GPUVectorModel, GPUVectorGeometry, Geometry, makeGPUVectorGeometry} from '@luma.gl/engine';
-import {LineLayerColumns, hasLineColumns, type LineColumnProps} from './line-layer-columns';
+import {
+  DEFAULT_COLOR,
+  LineLayerColumns,
+  hasLineColumns,
+  type LineColumnProps
+} from './line-layer-columns';
 
 import {lineUniforms, LineProps} from './line-layer-uniforms';
 import {shaderWGSL} from './line-layer.wgsl';
@@ -30,8 +35,6 @@ import fs from './line-layer-fragment.glsl';
 
 const defaultSourcePosition = (x: any) => x.sourcePosition;
 const defaultTargetPosition = (x: any) => x.targetPosition;
-
-const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<LineLayerProps> = {
   getSourcePosition: {
@@ -230,7 +233,8 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
         type: 'unorm8',
         transition: true,
         accessor: 'getColor',
-        defaultValue: [0, 0, 0, 255]
+        semanticType: 'color',
+        defaultValue: DEFAULT_COLOR
       },
       instanceWidths: {
         size: 1,
@@ -290,6 +294,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
     }
     const binary = (this.props.data as any)?.attributes;
     void this.state.columns!.updateIfNeeded(params, {
+      normalizedColors: this.context.normalizedColors,
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

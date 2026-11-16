@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {UNIT, Layer} from '@deck.gl/core';
-import {GeoJsonLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {ArcLayer, GeoJsonLayer, LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 import * as FIXTURES from 'deck.gl-test/data';
 
 const SIZE = 1;
@@ -77,7 +77,9 @@ test('ScatterplotLayer opts plain color arrays into normalized input', () => {
         }
       },
       {
-        updateProps: {normalizedColors: true},
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
         onAfterUpdate: ({layer}) => {
           const {instanceFillColors, instanceLineColors} = layer.getAttributeManager()!.attributes;
           expect(Array.from(instanceFillColors.value!)).toEqual(
@@ -97,4 +99,43 @@ test('ScatterplotLayer opts plain color arrays into normalized input', () => {
       }
     ]
   });
+});
+
+test('Deck color convention updates LineLayer and ArcLayer accessors', () => {
+  const getSourcePosition = () => [0, 0] as const;
+  const getTargetPosition = () => [1, 1] as const;
+  const getColor = () => [1, 0.5, 0, 0] as const;
+  const data = [{}];
+
+  for (const [layer, attributeName] of [
+    [new LineLayer({data, getSourcePosition, getTargetPosition, getColor}), 'instanceColors'],
+    [
+      new ArcLayer({data, getSourcePosition, getTargetPosition, getSourceColor: getColor}),
+      'instanceSourceColors'
+    ]
+  ] as const) {
+    testLayer({
+      Layer: layer.constructor as typeof Layer,
+      onError: error => {
+        throw error;
+      },
+      testCases: [
+        {props: layer.props},
+        {
+          onBeforeUpdate: ({layer: current}) => {
+            current.context.layerManager.setProps({normalizedColors: true});
+          },
+          onAfterUpdate: ({layer: current}) => {
+            const attributes = current.getAttributeManager()!.attributes;
+            expect(Array.from(attributes[attributeName].value!.slice(0, 4))).toEqual([
+              255, 128, 0, 0
+            ]);
+            if (attributes.instanceTargetColors) {
+              expect(Array.from(attributes.instanceTargetColors.value!)).toEqual([0, 0, 0, 1]);
+            }
+          }
+        }
+      ]
+    });
+  }
 });
