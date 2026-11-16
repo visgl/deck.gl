@@ -139,3 +139,32 @@ test('Deck color convention updates LineLayer and ArcLayer accessors', () => {
     });
   }
 });
+
+test('GeoJsonLayer preserves byte point colors when Deck enables normalized colors', () => {
+  testLayer({
+    Layer: GeoJsonLayer,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          data: [{type: 'Feature', properties: {}, geometry: {type: 'Point', coordinates: [0, 0]}}],
+          getFillColor: [128, 64, 32, 128]
+        }
+      },
+      {
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({subLayers}) => {
+          const points = subLayers.find(layer => layer instanceof ScatterplotLayer)!;
+          const color = points.getAttributeManager()!.attributes.instanceFillColors.value!;
+          expect(Array.from(color)).toEqual(
+            Array.from(new Float32Array([128 / 255, 64 / 255, 32 / 255, 128 / 255]))
+          );
+        }
+      }
+    ]
+  });
+});

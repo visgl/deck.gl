@@ -22,6 +22,7 @@ function makeState(props: Partial<LayerProps> = {}) {
   const complete = vi.spyOn(state as any, '_onResolve');
   const error = vi.spyOn(state as any, '_onError').mockImplementation(() => {});
   state.setAsyncProps({data: []} as never);
+  complete.mockClear();
   const run = (stream: AsyncIterable<unknown>) =>
     (state as any)._resolveAsyncIterable('data', stream) as Promise<void>;
   return {state, layer, progress, complete, error, run};
@@ -87,6 +88,7 @@ test('empty and metadata-only streams complete without progress', async () => {
   for (const stream of [chunks(), chunks({batchType: 'metadata'})]) {
     const {state, run, progress, complete} = makeState();
     state.setAsyncProps({data: [9]} as never);
+    complete.mockClear();
     await run(stream);
     expect(state.getAsyncProp('data')).toEqual([]);
     expect(state.isAsyncPropLoading('data')).toBe(false);
@@ -135,9 +137,13 @@ for (const finalized of [false, true]) {
     resume();
     await done;
     expect(progress).toHaveBeenCalledOnce();
-    expect(complete).not.toHaveBeenCalled();
+    if (finalized) {
+      expect(complete).not.toHaveBeenCalled();
+    } else {
+      expect(complete).toHaveBeenCalledExactlyOnceWith('data', [9]);
+      expect(state.getAsyncProp('data')).toEqual([9]);
+    }
     expect(error).not.toHaveBeenCalled();
-    if (!finalized) expect(state.getAsyncProp('data')).toEqual([9]);
   });
 }
 
@@ -150,7 +156,7 @@ test('replacement during lazy Arrow import cannot publish data', async () => {
   await done;
   expect(state.getAsyncProp('data')).toEqual([9]);
   expect(progress).not.toHaveBeenCalled();
-  expect(complete).not.toHaveBeenCalled();
+  expect(complete).toHaveBeenCalledExactlyOnceWith('data', [9]);
 });
 
 test('superseded promised streams and failures cannot notify the layer', async () => {
@@ -166,7 +172,7 @@ test('superseded promised streams and failures cannot notify the layer', async (
   await new Promise(resolve => setTimeout(resolve, 0));
   expect(state.getAsyncProp('data')).toEqual([9]);
   expect(progress).not.toHaveBeenCalled();
-  expect(complete).not.toHaveBeenCalled();
+  expect(complete).toHaveBeenCalledExactlyOnceWith('data', [9]);
   expect(error).not.toHaveBeenCalled();
 });
 
@@ -331,4 +337,30 @@ test('empty snapshots from another Arrow runtime retain local field and type ide
   expect(table.numRows).toBe(0);
   expect(table.schema.fields[0]).toBeInstanceOf(Field);
   expect(table.schema.fields[0].type).toBeInstanceOf(Float64);
+});
+
+test('new direct data reports its transformed value once', () => {
+  const rows = [{x: 1}, {x: 2}];
+  const onDataLoad = vi.fn((value, {layer}) => {
+    expect(layer.props.data).toBe(value);
+  });
+  const dataTransform = vi.fn(<T>(value: unknown) => {
+    const input = value as {x: number}[];
+    return tableFromArrays({x: input.map(row => row.x * 2)}) as T;
+  });
+  const layer = new Layer({data: rows, dataTransform, onDataLoad});
+  const state = new LayerState({layer, attributeManager: null});
+  state.setAsyncProps(layer.props);
+  expect(onDataLoad).toHaveBeenCalledExactlyOnceWith(layer.props.data, {propName: 'data', layer});
+  expect(Array.from((layer.props.data as Table).getChild('x')!)).toEqual([2, 4]);
+
+  const unchanged = new Layer({data: rows, dataTransform, onDataLoad});
+  state.setAsyncProps(unchanged.props);
+  expect(dataTransform).toHaveBeenCalledOnce();
+  expect(onDataLoad).toHaveBeenCalledOnce();
+
+  const next = new Layer({data: [{x: 3}], dataTransform, onDataLoad});
+  state.setAsyncProps(next.props);
+  expect(onDataLoad).toHaveBeenCalledTimes(2);
+  expect(onDataLoad).toHaveBeenLastCalledWith(next.props.data, {propName: 'data', layer: next});
 });

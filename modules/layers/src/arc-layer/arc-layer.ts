@@ -18,6 +18,7 @@ import {
   ArrowAccessor,
   Color,
   DefaultProps,
+  type _ColumnDefinition as ColumnDefinition,
   _GPUVectorModel as DeckGPUVectorModel
 } from '@deck.gl/core';
 
@@ -188,7 +189,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
 
   /** Bypasses attribute generation while Arrow columns drive the model. */
   protected _getAttributeManager() {
-    return hasArcColumns(this.props) ? null : super._getAttributeManager();
+    return this.hasColumns() ? null : super._getAttributeManager();
   }
 
   getNumInstances(): number {
@@ -231,7 +232,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   initializeState() {
-    if (hasArcColumns(this.props)) {
+    if (this.hasColumns()) {
       if (this.props.extensions.length)
         throw new Error('Arc Arrow columns do not support extensions');
       return;
@@ -239,7 +240,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     this.initializeAccessorAttributes();
   }
 
-  private initializeAccessorAttributes() {
+  /** Registers instance attributes for the accessor model, including after a mode switch. */
+  protected initializeAccessorAttributes() {
     const attributeManager = this.getAttributeManager()!;
 
     /* eslint-disable max-len */
@@ -299,7 +301,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   updateState(params: UpdateParameters<this>): void {
-    if (hasArcColumns(this.props)) {
+    if (this.hasColumns()) {
       this.updateColumnState(params);
       return;
     }
@@ -325,6 +327,16 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     }
   }
 
+  /** Adds instance columns for subclass shaders when ArcLayer uses the Arrow path. */
+  protected getExtraColumnDefinitions(): Readonly<Record<string, ColumnDefinition>> | undefined {
+    return undefined;
+  }
+
+  /** Selects the same column definitions for initialization and updates. */
+  private hasColumns(): boolean {
+    return hasArcColumns(this.props, this.getExtraColumnDefinitions());
+  }
+
   /** Updates the model and schedules conversion while Arrow columns are active. */
   private updateColumnState(params: UpdateParameters<this>): void {
     if (this.props.extensions.length)
@@ -333,7 +345,10 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     if (entering) {
       this.internalState!.attributeManager?.finalize();
       this.internalState!.attributeManager = null;
-      this.state.columns = new ArcLayerColumns(this.context.device);
+      this.state.columns = new ArcLayerColumns(
+        this.context.device,
+        this.getExtraColumnDefinitions()
+      );
     }
     if (
       entering ||
@@ -344,7 +359,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       this.state.model = this._getModel();
     }
     void this.state.columns!.updateIfNeeded(params, {
-      normalizedColors: this.context.normalizedColors,
+      normalizedColors: this.usesNormalizedColors(),
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

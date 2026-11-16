@@ -53,7 +53,7 @@ export default function App({
 
   const data = h3QuerySource({
     ...globalOptions,
-    sqlQuery: `
+    sqlQuery: `\
       SELECT h3, population, urbanity 
       FROM carto-demo-data.demo_tables.derived_spatialfeatures_usa_h3res8_v1_yearly_v2 
       WHERE 
@@ -78,15 +78,11 @@ export default function App({
       filled: true,
       extruded: true,
       elevationScale: 0.5,
-      getElevation: d => d.properties.pop,
+      getElevation: d => d.properties.pop
       // transitions: {
       //   getElevation: {duration: 1000, enter: () => [0]},
       //   getFillColor: {duration: 1000}
       // },
-      loadOptions: {
-        // TODO use workers once v9.alpha packages available
-        worker: true
-      }
     })
   ];
 

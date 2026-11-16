@@ -13,7 +13,7 @@ import {createRoot} from 'react-dom/client';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 
-import AnimatedArcLayer from './animated-arc-group-layer';
+import AnimatedArcGroupLayer from './animated-arc-group-layer';
 import RangeInput from './range-input';
 
 // Data source
@@ -32,17 +32,24 @@ const ANIMATION_SPEED = 60;
 const TIME_WINDOW = 1800; // 30 minutes
 const SEC_PER_DAY = 60 * 60 * 24;
 
-type Flight = {
-  // Departure
+/** One flight with departure and arrival coordinates and timestamps. */
+export type Flight = {
+  /** Departure time in seconds on the animation timeline. */
   time1: number;
+  /** Departure longitude in degrees. */
   lon1: number;
+  /** Departure latitude in degrees. */
   lat1: number;
+  /** Departure altitude in meters. */
   alt1: number;
 
-  // Arrival
+  /** Arrival time in seconds on the animation timeline. */
   time2: number;
+  /** Arrival longitude in degrees. */
   lon2: number;
+  /** Arrival latitude in degrees. */
   lat2: number;
+  /** Arrival altitude in meters. */
   alt2: number;
 };
 
@@ -80,13 +87,9 @@ export default function App({
     data &&
     data.map(
       ({date, flights}) =>
-        new AnimatedArcLayer<Flight>({
+        new AnimatedArcGroupLayer({
           id: `flights-${date}`,
           data: flights,
-          getSourcePosition: d => [d.lon1, d.lat1, d.alt1],
-          getTargetPosition: d => [d.lon2, d.lat2, d.alt2],
-          getSourceTimestamp: d => d.time1,
-          getTargetTimestamp: d => d.time2,
           getHeight: 0.3,
           getWidth: 2,
           timeRange,
@@ -162,9 +165,8 @@ export async function renderToDOM(container: HTMLDivElement) {
   const data: DailyFlights[] = [];
   for (const date of dates) {
     const url = `${DATA_URL}/${date}.csv`;
-    const flights: Flight[] = (
-      await load(url, CSVLoader, {csv: {shape: 'object-row-table', skipEmptyLines: true}})
-    ).data as Flight[];
+    const flights: Flight[] = (await load(url, CSVLoader, {csv: {shape: 'object-row-table'}}))
+      .data as Flight[];
 
     // Join flight data from multiple dates into one continuous animation
     const offset = SEC_PER_DAY * data.length;

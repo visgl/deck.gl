@@ -9,7 +9,7 @@ import ComponentState from '../lifecycle/component-state';
 
 import Layer from './layer';
 import type {Table, Vector} from 'apache-arrow';
-import type {SQLParser} from '../types/layer-props';
+import type {SQLFunctions, SQLParser} from '../types/layer-props';
 import type AttributeManager from './attribute/attribute-manager';
 import type Viewport from '../viewports/viewport';
 import type UniformTransitionManager from './uniform-transition-manager';
@@ -36,6 +36,8 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     source: unknown;
     expressions: Record<string, string>;
     parseExpression: SQLParser['parseExpression'];
+    /** Effective function declarations used by this evaluation. */
+    functions?: SQLFunctions;
     pending: boolean;
     table?: Table;
     columns?: Record<string, Vector>;

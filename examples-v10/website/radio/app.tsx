@@ -14,10 +14,12 @@ import type {Device} from '@luma.gl/core';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {scaleSqrt, scaleLinear} from 'd3-scale';
+import {tableFromArrays} from 'apache-arrow';
 import SearchBar from './search-bar';
 
 import type {
   Color,
+  LayerData,
   ViewStateChangeParameters,
   MapViewState,
   PickingInfo,
@@ -227,14 +229,22 @@ export default function App({
         getFillColor: [255, 255, 255, 0]
       }),
 
-    new ScatterplotLayer<Station>({
-      id: 'stations',
-      data,
-      getPosition: d => [d.longitude, d.latitude],
-      getFillColor: [40, 40, 40, 128],
-      getRadius: 20,
-      radiusMinPixels: 2
-    }),
+    data &&
+      new ScatterplotLayer({
+        id: 'stations',
+        data,
+        dataTransform: <LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT => {
+          const stations = source as Station[];
+          return tableFromArrays({
+            longitude: Float64Array.from(stations, station => station.longitude),
+            latitude: Float64Array.from(stations, station => station.latitude)
+          }) as LayerDataT;
+        },
+        getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+        getFillColor: [40, 40, 40, 128],
+        getRadius: 20,
+        radiusMinPixels: 2
+      }),
 
     new H3HexagonLayer<{hex: string; count: number}>({
       id: 'coverage',
@@ -288,7 +298,7 @@ export async function renderToDOM(container: HTMLDivElement) {
 
   const stations = (
     await load(DATA_URL.STATIONS, CSVLoader, {
-      csv: {shape: 'object-row-table', delimitersToGuess: '\t', skipEmptyLines: true}
+      csv: {shape: 'object-row-table'}
     })
   ).data;
 

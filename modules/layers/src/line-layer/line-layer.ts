@@ -294,7 +294,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
     }
     const binary = (this.props.data as any)?.attributes;
     void this.state.columns!.updateIfNeeded(params, {
-      normalizedColors: this.context.normalizedColors,
+      normalizedColors: this.usesNormalizedColors(),
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

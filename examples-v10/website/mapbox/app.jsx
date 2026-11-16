@@ -11,6 +11,7 @@ import {scaleLog} from 'd3-scale';
 import {cellToLatLng} from 'h3-js';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
+import {tableFromArrays} from 'apache-arrow';
 import {Map, NavigationControl, useControl, Layer} from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -62,19 +63,34 @@ export default function App({data}) {
     return [lng, lat];
   }, [selectedPOI]);
 
-  const arcs = useMemo(() => filterArcs(data, selectedPOI), [data, selectedPOI]);
+  /** Visitor rows used by the arc query regardless of the selected POI. */
+  const arcs = useMemo(
+    () =>
+      data &&
+      tableFromArrays({
+        hex: data.map(row => row.hex),
+        home_lng: Float64Array.from(data, row => row.home_lng),
+        home_lat: Float64Array.from(data, row => row.home_lat),
+        count: Float64Array.from(data, row => row.count)
+      }),
+    [data]
+  );
 
   const hexes = useMemo(() => aggregateHexes(data), [data]);
 
-  const arcLayer = new ArcLayer({
-    id: 'deckgl-connections',
-    data: arcs,
-    getSourcePosition: d => selectedPOICentroid,
-    getTargetPosition: d => [d.home_lng, d.home_lat],
-    getSourceColor: [255, 0, 128],
-    getTargetColor: [0, 200, 255],
-    getWidth: d => Math.max(2, d.count / 15)
-  });
+  /** Draws visitor trips for the selected POI. */
+  const arcLayer =
+    arcs &&
+    new ArcLayer({
+      id: 'deckgl-connections',
+      data: arcs,
+      query: `SELECT home_lng, home_lat, count WHERE hex = '${selectedPOI}'`,
+      getSourcePosition: selectedPOICentroid,
+      getTargetPosition: {sql: 'FLOAT64x2(home_lng, home_lat)'},
+      getSourceColor: [255, 0, 128],
+      getTargetColor: [0, 200, 255],
+      getWidth: {sql: 'CASE WHEN count > 30 THEN count / 15 ELSE 2 END'}
+    });
 
   const poiLayer = new H3HexagonLayer({
     id: 'deckgl-pois',
@@ -110,13 +126,6 @@ export default function App({data}) {
       <Layer {...buildings3DLayer} />
     </Map>
   );
-}
-
-function filterArcs(data, selectedPOI) {
-  if (!data) {
-    return null;
-  }
-  return data.filter(d => d.hex === selectedPOI);
 }
 
 function aggregateHexes(data) {

@@ -40,7 +40,7 @@ const sidebars = {
         'heatmap-layer',
         withStatus('hexagon-layer', 'started'),
         withStatus('icon-layer', 'started'),
-        withStatus('line-layer', 'started'),
+        withStatus('line-layer', 'ready'),
         withStatus('point-cloud-layer', 'ready'),
         withStatus('scatterplot-layer', 'ready'),
         withStatus('scenegraph-layer', 'started'),
@@ -71,12 +71,12 @@ const sidebars = {
     {
       type: 'category',
       label: 'Integrations',
-      items: ['arcgis', 'carto', 'google-3d-tiles', 'google-maps', 'mapbox', 'maplibre']
+      items: ['arcgis', 'carto', 'google-3d-tiles', 'google-maps', withStatus('mapbox', 'started'), withStatus('maplibre', 'started')]
     },
     {
       type: 'category',
       label: 'Views',
-      items: ['multi-view', 'globe-view', 'plot', 'orthographic-view']
+      items: [withStatus('multi-view', 'started'), withStatus('globe-view', 'started'), 'plot', 'orthographic-view']
     },
     {
       type: 'category',

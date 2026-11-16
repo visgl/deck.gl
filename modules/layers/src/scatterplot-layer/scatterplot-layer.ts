@@ -365,7 +365,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       this.state.model = this._getModel();
     }
     void this.state.columns!.updateIfNeeded(params, {
-      normalizedColors: this.context.normalizedColors,
+      normalizedColors: this.usesNormalizedColors(),
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

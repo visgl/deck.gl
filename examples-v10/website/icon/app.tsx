@@ -9,6 +9,7 @@ import {DeckGL} from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
 import {tableFromArrays} from 'apache-arrow';
+import {JSONTableLoader} from '@loaders.gl/tables/json';
 
 import IconClusterLayer from './icon-cluster-layer';
 import type {IconClusterLayerPickingInfo} from './icon-cluster-layer';
@@ -39,19 +40,6 @@ type Meteorite = {
   mass: number;
   year: number;
 };
-
-/** Splits source coordinates into columns for the unclustered SQL position accessor. */
-function toMeteoriteTable<LayerDataT = LayerData<unknown>>(data: unknown): LayerDataT {
-  const rows = data as Meteorite[];
-  return tableFromArrays({
-    longitude: Float64Array.from(rows, meteorite => meteorite.coordinates[0]),
-    latitude: Float64Array.from(rows, meteorite => meteorite.coordinates[1]),
-    name: rows.map(meteorite => meteorite.name),
-    class: rows.map(meteorite => meteorite.class),
-    mass: rows.map(meteorite => meteorite.mass),
-    year: rows.map(meteorite => meteorite.year)
-  }) as LayerDataT;
-}
 
 function renderTooltip(info: IconClusterLayerPickingInfo<Meteorite>) {
   const {object, objects, x, y} = info;
@@ -136,8 +124,20 @@ export default function App({
     : new IconLayer({
         ...layerProps,
         id: 'icon',
-        dataTransform: toMeteoriteTable,
-        getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+        loaders: [JSONTableLoader],
+        dataTransform: <LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT => {
+          if (!Array.isArray(source)) {
+            return source as LayerDataT;
+          }
+          return tableFromArrays({
+            coordinates: source.map(meteorite => meteorite.coordinates),
+            name: source.map(meteorite => meteorite.name),
+            class: source.map(meteorite => meteorite.class),
+            mass: source.map(meteorite => meteorite.mass),
+            year: source.map(meteorite => meteorite.year)
+          }) as LayerDataT;
+        },
+        getPosition: {sql: 'FLOAT64x2(LIST_EXTRACT(coordinates, 1), LIST_EXTRACT(coordinates, 2))'},
         getIcon: () => 'marker',
         sizeUnits: 'meters',
         sizeScale: 2000,

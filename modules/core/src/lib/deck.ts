@@ -42,7 +42,7 @@ import {EVENT_HANDLERS, RECOGNIZERS, RecognizerOptions} from './constants';
 import type {Effect} from './effect';
 import type {FilterContext} from '../passes/layers-pass';
 import type Layer from './layer';
-import type {SQLParser} from '../types/layer-props';
+import type {SQLFunctions, SQLParser} from '../types/layer-props';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
 import type {EventManagerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
@@ -105,6 +105,8 @@ type PointPickResult = {
 export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** Overrides the default parser for layer queries and SQL accessors. */
   sqlParser?: SQLParser;
+  /** Additional Arrow functions shared by all layer SQL accessors. */
+  sqlFunctions?: SQLFunctions;
   /** Id of this Deck instance */
   id?: string;
   /** Width of the canvas, a number in pixels or a valid CSS string.
@@ -134,7 +136,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** WebGL parameters to be set before each frame is rendered. */
   parameters?: Parameters;
   /**
-   * Interpret plain-array color constants and callbacks as 0–1 in ScatterplotLayer,
+   * Interpret plain-array color constants and callbacks as 0–1 in top-level ScatterplotLayer,
    * LineLayer, and ArcLayer. Built-in defaults and typed or binary inputs retain their encoding.
    * @default false
    */
@@ -270,6 +272,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
 };
 
 const defaultProps: DeckProps = {
+  sqlFunctions: [],
   id: '',
   width: '100%',
   height: '100%',

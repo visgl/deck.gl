@@ -83,7 +83,7 @@ export default function App({
       id: 'google-3d-tiles',
       data: TILESET_URL,
       loadOptions: {
-        fetch: {headers: {'X-GOOG-API-KEY': GOOGLE_MAPS_API_KEY}},
+        core: {fetch: {headers: {'X-GOOG-API-KEY': GOOGLE_MAPS_API_KEY}}},
         tileset: {
           maximumScreenSpaceError: 20,
           maximumMemoryUsage: 512,
