@@ -97,8 +97,8 @@ export default function App({
       loaders: [LASLoader],
       _dataLoadOptions: 'batched',
       loadOptions: {
-        core: {worker: false, batchSize: 25000, batchDebounceMs: 180},
-        las: {shape: 'arrow-table', fp64: true, columns: ['POSITION']}
+        core: {batchSize: 25000, batchMaxRowsPerSecond: 50000},
+        las: {fp64: true, columns: ['POSITION']}
       },
       getPosition: {sql: 'POSITION'},
       onDataProgress,

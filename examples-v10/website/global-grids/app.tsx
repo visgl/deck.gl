@@ -73,7 +73,7 @@ export default function App({
     getElevation: 50000,
     beforeId: 'waterway_line_label',
     loaders: [CSVLoader],
-    loadOptions: {csv: {shape: 'arrow-table', header: true, dynamicTyping: false}},
+    loadOptions: {csv: {dynamicTyping: false}},
     query
   } as Omit<H3HexagonLayerProps<GridCell>, 'data' | 'id'> & {beforeId: string};
 

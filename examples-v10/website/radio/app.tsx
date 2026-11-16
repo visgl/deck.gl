@@ -298,7 +298,7 @@ export async function renderToDOM(container: HTMLDivElement) {
 
   const stations = (
     await load(DATA_URL.STATIONS, CSVLoader, {
-      csv: {shape: 'object-row-table', delimitersToGuess: '\t', skipEmptyLines: true}
+      csv: {shape: 'object-row-table'}
     })
   ).data;
 

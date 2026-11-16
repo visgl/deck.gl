@@ -78,15 +78,11 @@ export default function App({
       filled: true,
       extruded: true,
       elevationScale: 0.5,
-      getElevation: d => d.properties.pop,
+      getElevation: d => d.properties.pop
       // transitions: {
       //   getElevation: {duration: 1000, enter: () => [0]},
       //   getFillColor: {duration: 1000}
       // },
-      loadOptions: {
-        // TODO use workers once v9.alpha packages available
-        worker: true
-      }
     })
   ];
 
