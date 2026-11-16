@@ -7,6 +7,7 @@ import {
   CompositeLayer,
   CompositeLayerProps,
   DefaultProps,
+  _CustomProjectionViewport as CustomProjectionViewport,
   _GlobeViewport as GlobeViewport,
   Layer,
   LayersList,
@@ -16,6 +17,7 @@ import {
   UpdateParameters
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {lngLatToWorld, worldToLngLat} from '@math.gl/web-mercator';
 import type {MeshAttributes} from '@loaders.gl/core/schema';
 import {TerrainWorkerLoader} from '@loaders.gl/raster/terrain/index';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
@@ -95,6 +97,42 @@ function getOverlappedBounds(bounds: Bounds, tileSize: number, clampLngLat: bool
   ];
 }
 
+/**
+ * Converts the positions of a mesh to the CRS of a custom projection. `toLngLat` converts the
+ * horizontal mesh coordinates to WGS84. The sublayer draws the result with
+ * `coordinateSystem: 'cartesian'`, because the view does not convert the vertices of a mesh.
+ */
+function convertMeshToCRS(
+  mesh: MeshAttributes,
+  viewport: CustomProjectionViewport,
+  toLngLat: (xy: number[]) => number[]
+): MeshAttributes {
+  // The loader returns a mesh with a header and attributes, not the attributes alone
+  const {header, attributes} = mesh as unknown as TerrainMesh;
+  const converter = viewport.crs.converter.WGS84;
+  const name = attributes.POSITION ? 'POSITION' : 'positions';
+  const source = attributes[name].value;
+  const positions = new Float32Array(source.length);
+  const min = [Infinity, Infinity, Infinity];
+  const max = [-Infinity, -Infinity, -Infinity];
+  for (let i = 0; i < source.length; i += 3) {
+    const [lng, lat] = toLngLat([source[i], source[i + 1]]);
+    const position = converter.from(converter.normalize([lng, lat, source[i + 2]]));
+    for (let axis = 0; axis < 3; axis++) {
+      const value = position[axis] ?? 0;
+      positions[i + axis] = value;
+      min[axis] = Math.min(min[axis], value);
+      max[axis] = Math.max(max[axis], value);
+    }
+  }
+  const result: TerrainMesh = {
+    ...mesh,
+    header: {...header, boundingBox: [min, max]},
+    attributes: {...attributes, [name]: {...attributes[name], value: positions}}
+  };
+  return result as unknown as MeshAttributes;
+}
+
 function getEffectiveMeshMaxError(meshMaxError: number): number {
   if (!Number.isFinite(meshMaxError) || meshMaxError <= 0) {
     return MIN_TERRAIN_MESH_MAX_ERROR;
@@ -117,6 +155,12 @@ type MeshWithBoundingBox = MeshAttributes & {
   header?: {
     boundingBox?: MeshBoundingBox;
   };
+};
+type TerrainMesh = {
+  header?: {
+    boundingBox?: MeshBoundingBox;
+  };
+  attributes: MeshAttributes;
 };
 
 /** All properties supported by TerrainLayer */
@@ -166,6 +210,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
   state!: {
     isTiled?: boolean;
     terrain?: MeshAttributes;
+    /** The CRS of the custom projection that the mesh is in */
+    crs?: string | null;
     zRange?: ZRange | null;
   };
 
@@ -185,10 +231,17 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       props.elevationDecoder !== oldProps.elevationDecoder ||
       props.bounds !== oldProps.bounds;
 
-    if (!this.state.isTiled && shouldReload) {
+    // In a custom projection, the mesh is in the CRS of the view: see convertMeshToCRS
+    const {viewport} = this.context;
+    const crs = viewport instanceof CustomProjectionViewport ? viewport.crs.signature : null;
+    if (!this.state.isTiled && (shouldReload || crs !== (this.state.crs ?? null))) {
       // When state.isTiled, elevationData cannot be an array
-      const terrain = this.loadTerrain(props as TerrainLoadProps);
-      this.setState({terrain});
+      let terrain = this.loadTerrain(props as TerrainLoadProps);
+      if (viewport instanceof CustomProjectionViewport && terrain) {
+        // The mesh positions are WGS84 longitudes and latitudes
+        terrain = terrain.then(mesh => mesh && convertMeshToCRS(mesh, viewport, lngLat => lngLat));
+      }
+      this.setState({terrain, crs});
     }
 
     // TODO - remove in v9
@@ -234,7 +287,13 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     const {signal} = tile;
     let bottomLeft = [0, 0] as [number, number];
     let topRight = [0, 0] as [number, number];
-    if (viewport.isGeospatial) {
+    const isCustomProjection = viewport instanceof CustomProjectionViewport;
+    if (isCustomProjection) {
+      // Build the mesh on the Web Mercator grid of the tile images, then convert its vertices
+      const bbox = tile.bbox as GeoBoundingBox;
+      bottomLeft = lngLatToWorld([bbox.west, bbox.south]) as [number, number];
+      topRight = lngLatToWorld([bbox.east, bbox.north]) as [number, number];
+    } else if (viewport.isGeospatial) {
       const bbox = tile.bbox as GeoBoundingBox;
       bottomLeft = viewport.projectFlat([bbox.west, bbox.south]);
       topRight = viewport.projectFlat([bbox.east, bbox.north]);
@@ -250,13 +309,16 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       viewport instanceof GlobeViewport
     );
 
-    const terrain = this.loadTerrain({
+    let terrain = this.loadTerrain({
       elevationData: dataUrl,
       bounds: overlappedBounds,
       elevationDecoder,
       meshMaxError,
       signal
     });
+    if (isCustomProjection && terrain) {
+      terrain = terrain.then(mesh => mesh && convertMeshToCRS(mesh, viewport, worldToLngLat));
+    }
     const surface = textureUrl
       ? // If surface image fails to load, the tile should still be displayed
         fetch(textureUrl, {propName: 'texture', layer: this, loaders: [], signal}).catch(_ => null)
@@ -287,6 +349,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     // Bounds are baked with projectFlat. In GlobeView projectFlat is identity,
     // so tiled terrain meshes are in lng/lat degrees instead of common-space
     // web-mercator units.
+    // In a custom projection, the meshes are in the CRS of the view: see convertMeshToCRS
     const isGlobe = viewport instanceof GlobeViewport;
     const boundingBox = (mesh as MeshWithBoundingBox | null)?.header?.boundingBox;
     const hasLngLatBounds =
@@ -374,6 +437,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
               meshMaxError,
               elevationDecoder,
               projectionMode: this.context.viewport.projectionMode,
+              // The meshes of a custom projection are in its CRS
+              crs: this.context.viewport.crs?.signature,
               zoomOffset
             }
           },
@@ -409,6 +474,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
         mesh: this.state.terrain,
         texture,
         _instanced: false,
+        // The mesh of a custom projection is in its CRS
+        ...(this.state.crs && {coordinateSystem: 'cartesian'}),
         getPosition: d => [0, 0, 0],
         getColor: color,
         material,
