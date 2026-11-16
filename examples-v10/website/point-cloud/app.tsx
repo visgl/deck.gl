@@ -98,12 +98,12 @@ export default function App({
       _dataLoadOptions: 'batched',
       loadOptions: {
         core: {batchSize: 25000, batchMaxRowsPerSecond: 50000},
-        las: {fp64: true, columns: ['POSITION']}
+        las: {columns: ['POSITION', 'COLOR_0']}
       },
       getPosition: {sql: 'POSITION'},
       onDataProgress,
       getNormal: [0, 1, 0],
-      getColor: [255, 255, 255],
+      getColor: {sql: 'COLOR_0'},
       opacity: 0.5,
       pointSize: 0.5,
       // TODO (kaapp) currently webgpu requirement to ensure instanceColors are supplied
