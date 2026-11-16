@@ -98,7 +98,7 @@ export default function App({
       _dataLoadOptions: 'batched',
       loadOptions: {
         core: {batchSize: 25000, batchMaxRowsPerSecond: 50000},
-        las: {fp64: true, columns: ['POSITION', 'COLOR_0']}
+        las: {columns: ['POSITION', 'COLOR_0']}
       },
       getPosition: {sql: 'POSITION'},
       onDataProgress,
