@@ -94,14 +94,18 @@ function normalizeData<LayerDataT = LayerData<unknown>>(source: unknown): LayerD
 // https://github.com/visgl/deck.gl/pull/10465 updated the live OpenSky URL,
 // but the endpoint still rejects cross-origin browser requests. Start with this
 // bundled snapshot so the demo can render immediately and keep it as fallback.
-const DATA = sampleData as {time: number; states: Aircraft[]};
+const DATA = {
+  ...(sampleData as {time: number; states: Aircraft[]}),
+  length: sampleData.states.length
+};
 
 async function fetchData(signal: AbortSignal) {
   const response = await fetch(DATA_URL, {signal});
   if (!response.ok) {
     throw new Error(`OpenSky request failed with status ${response.status}`);
   }
-  return (await response.json()) as {time: number; states: Aircraft[]};
+  const responseData = (await response.json()) as {time: number; states: Aircraft[]};
+  return {...responseData, length: responseData.states.length};
 }
 
 function getTooltip({object}: PickingInfo<AircraftRow>) {

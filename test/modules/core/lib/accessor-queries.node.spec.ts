@@ -281,3 +281,32 @@ test('layer SQL functions override Deck declarations and changing them reevaluat
     device.destroy();
   }
 });
+
+test('custom declarations override default nested extraction functions', () => {
+  const data = tableFromArrays({value: [2]});
+  for (const name of ['LIST_EXTRACT', 'STRUCT_EXTRACT']) {
+    const result = evaluateAccessorQueries(
+      data,
+      {adjusted: `${name}(value)`},
+      undefined,
+      undefined,
+      [
+        {
+          name,
+          prototypes: [
+            {
+              arguments: [new Field('value', new Float64())],
+              result: new Field('value', new Float64()),
+              evaluate: ([values]) =>
+                vectorFromArray(
+                  Array.from(values, value => value + 1),
+                  new Float64()
+                )
+            }
+          ]
+        }
+      ]
+    );
+    expect(Array.from(result.getChild('adjusted')!)).toEqual([3]);
+  }
+});

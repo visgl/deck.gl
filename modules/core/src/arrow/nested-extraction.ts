@@ -38,7 +38,10 @@ export function bindNestedExtraction(
     return {...expression, arguments: args};
   }
   const name = expression.callee.name.toUpperCase();
-  if (name !== 'LIST_EXTRACT' && name !== 'STRUCT_EXTRACT') {
+  if (
+    (name !== 'LIST_EXTRACT' && name !== 'STRUCT_EXTRACT') ||
+    functions.some(fn => fn.name.toUpperCase() === name)
+  ) {
     return {...expression, arguments: args};
   }
   if (args.length !== 2 || args[0].type !== 'Identifier') {
