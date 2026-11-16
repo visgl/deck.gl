@@ -9,10 +9,15 @@ import type {ArrowConverter, ArrowConverterOptions} from './upstream-luma/arrow-
 
 /** A column's source chunks and the conversion handles that own its GPU allocations. */
 export type PreparedArrowColumn = {
+  /** Immutable Arrow chunks used to identify an unchanged prefix. */
   source: Vector;
+  /** Converted values; combined vectors borrow chunks owned by resources. */
   vector: GPUVector;
+  /** Low float32 position components sharing the same chunk boundaries. */
   residualVector?: GPUVector;
+  /** Conversion handles that own allocations and transfer only on commit. */
   resources: PreparedArrowColumnGPUVector[];
+  /** Source-coordinate bounds, extended from appended positions only. */
   bounds?: [number[], number[]];
 };
 

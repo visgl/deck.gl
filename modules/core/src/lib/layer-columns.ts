@@ -54,11 +54,18 @@ type Request = {source: unknown; rows?: Rows};
 type Columns = Record<string, GPUVector | GPUConstant>;
 type Prepared = {
   columns: Columns;
+  /** Arrow source chunks and their conversion handles. */
   arrow?: Record<string, PreparedArrowColumn>;
+  /** Allocations owned by this committed state; reused handles transfer on commit. */
   resources?: Set<{destroy(): void}>;
+  /** Inputs used by the last successful conversion, including update triggers. */
   props?: Record<string, any>;
+  /** Precision used for the committed position conversion. */
   fp64?: boolean;
+  /** Whether committed positions required CPU preprojection. */
   transformed?: boolean;
+  /** Invalidation generation satisfied by this conversion. */
+  revision?: number;
   destroy(): void;
   length: number;
   source: unknown;
@@ -71,6 +78,8 @@ type Prepared = {
 export class LayerColumns {
   private prepared?: Prepared;
   private version = 0;
+  /** Retains projection/trigger invalidation across superseded or failed requests. */
+  private conversionRevision = 0;
   private request?: Request;
   loading = false;
   /** Number of rows in the last successfully prepared columns, used as the instance count. */
@@ -197,6 +206,8 @@ export class LayerColumns {
     reuseChunks = true
   ): Promise<void> {
     const version = ++this.version;
+    if (!reuseChunks) this.conversionRevision++;
+    const revision = this.conversionRevision;
     this.loading = true;
     const previousRequest = this.request;
     const request: Request = {source: props.data};
@@ -218,6 +229,8 @@ export class LayerColumns {
       const converter = new ArrowConverter(this.device);
       const previous = this.prepared;
       const reuse =
+        previous?.revision === revision &&
+        deepEqual(props.updateTriggers, previous.props?.updateTriggers, 2) &&
         reuseChunks &&
         props._dataLoadOptions !== 'snapshots' &&
         !positionOptions.transform &&
@@ -389,6 +402,7 @@ export class LayerColumns {
         props,
         fp64: positionOptions.fp64,
         transformed: Boolean(positionOptions.transform),
+        revision,
         length,
         chunkLengths,
         bounds: length && boundsAvailable ? bounds : undefined,

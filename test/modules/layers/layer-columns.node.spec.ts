@@ -340,3 +340,74 @@ test('LayerColumns appends float64 residuals and colors with only new upload byt
     device.destroy();
   }
 });
+
+test('LayerColumns honors trigger changes when dataChanged suppresses the trigger flag', async () => {
+  const device = new NullDevice({});
+  const columns = makeColumns(device);
+  const failed = vi.fn();
+  const input = {...props(), updateTriggers: {getPosition: [1]}};
+  try {
+    await columns.update(input, () => {}, failed);
+    const buffer = (columns as any).prepared.columns.positions.data[0].buffer;
+    input.getPosition.data[0].children[0].values[0] = 9;
+    await columns.updateIfNeeded(
+      {
+        props: {...input, data: [], updateTriggers: {getPosition: [2]}},
+        oldProps: input,
+        changeFlags: {dataChanged: true}
+      },
+      {dataLoading: false, changed() {}, failed}
+    );
+    expect(failed).not.toHaveBeenCalled();
+    expect(buffer.destroyed).toBe(true);
+    expect(columns.getBounds()).toEqual([
+      [3, 2, 0],
+      [9, 4, 0]
+    ]);
+  } finally {
+    columns.destroy();
+    device.destroy();
+  }
+});
+
+test('LayerColumns keeps invalidation until a superseding append commits', async () => {
+  const device = new NullDevice({});
+  const columns = makeColumns(device);
+  const failed = vi.fn();
+  const input = props();
+  let resume!: () => void;
+  const gate = new Promise<void>(resolve => {
+    resume = resolve;
+  });
+  try {
+    await columns.update(input, () => {}, failed);
+    const buffer = (columns as any).prepared.columns.positions.data[0].buffer;
+    const convert = ArrowConverter.prototype.convert;
+    let calls = 0;
+    const spy = vi.spyOn(ArrowConverter.prototype, 'convert').mockImplementation(async function (
+      this: ArrowConverter,
+      ...args
+    ) {
+      if (++calls === 1) await gate;
+      return convert.apply(this, args);
+    });
+    const refresh = columns.update(input, () => {}, failed, {}, undefined, false);
+    await vi.waitFor(() => expect(calls).toBe(1));
+    await columns.update(
+      {...input, getPosition: input.getPosition.concat(positions())},
+      () => {},
+      failed
+    );
+    expect(spy.mock.calls[1][0].length).toBe(4);
+    expect(buffer.destroyed).toBe(true);
+    resume();
+    await refresh;
+    expect(columns.length).toBe(4);
+    expect(failed).not.toHaveBeenCalled();
+  } finally {
+    resume();
+    columns.destroy();
+    vi.restoreAllMocks();
+    device.destroy();
+  }
+});
