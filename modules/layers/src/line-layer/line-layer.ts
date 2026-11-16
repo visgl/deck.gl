@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {FixedSizeList, Float, Int} from 'apache-arrow';
+
 import {
   Layer,
   project32,
@@ -12,14 +14,19 @@ import {
   LayerDataSource,
   Unit,
   Position,
-  Accessor,
+  ArrowAccessor,
   Color,
   UpdateParameters,
   DefaultProps,
   _GPUVectorModel as DeckGPUVectorModel
 } from '@deck.gl/core';
 import {GPUVectorModel, GPUVectorGeometry, Geometry, makeGPUVectorGeometry} from '@luma.gl/engine';
-import {LineLayerColumns, hasLineColumns, type LineColumnProps} from './line-layer-columns';
+import {
+  DEFAULT_COLOR,
+  LineLayerColumns,
+  hasLineColumns,
+  type LineColumnProps
+} from './line-layer-columns';
 
 import {lineUniforms, LineProps} from './line-layer-uniforms';
 import {shaderWGSL} from './line-layer.wgsl';
@@ -29,13 +36,21 @@ import fs from './line-layer-fragment.glsl';
 const defaultSourcePosition = (x: any) => x.sourcePosition;
 const defaultTargetPosition = (x: any) => x.targetPosition;
 
-const DEFAULT_COLOR = [0, 0, 0, 255] as const;
-
 const defaultProps: DefaultProps<LineLayerProps> = {
-  getSourcePosition: {type: 'accessor', value: defaultSourcePosition},
-  getTargetPosition: {type: 'accessor', value: defaultTargetPosition},
-  getColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getWidth: {type: 'accessor', value: 1},
+  getSourcePosition: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['array'],
+    value: defaultSourcePosition
+  },
+  getTargetPosition: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['array'],
+    value: defaultTargetPosition
+  },
+  getColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getWidth: {type: 'accessor', arrow: true, value: 1},
   sourcePositions: {type: 'object', value: null, optional: true},
   targetPositions: {type: 'object', value: null, optional: true},
   colors: {type: 'object', value: null, optional: true},
@@ -89,27 +104,31 @@ type _LineLayerProps<DataT> = LineColumnProps & {
 
   /**
    * Source position of each object.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default object => object.sourcePosition
    */
-  getSourcePosition?: Accessor<DataT, Position>;
+  getSourcePosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
 
   /**
    * Target position of each object.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default object => object.targetPosition
    */
-  getTargetPosition?: Accessor<DataT, Position>;
+  getTargetPosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
 
   /**
    * The rgba color is in the format of `[r, g, b, [a]]`.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 0, 255]
    */
-  getColor?: Accessor<DataT, Color>;
+  getColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
 
   /**
    * Width of each object
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default 1
    */
-  getWidth?: Accessor<DataT, number>;
+  getWidth?: ArrowAccessor<DataT, number, Int | Float>;
 };
 
 /**
@@ -214,7 +233,8 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
         type: 'unorm8',
         transition: true,
         accessor: 'getColor',
-        defaultValue: [0, 0, 0, 255]
+        semanticType: 'color',
+        defaultValue: DEFAULT_COLOR
       },
       instanceWidths: {
         size: 1,
@@ -274,6 +294,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
     }
     const binary = (this.props.data as any)?.attributes;
     void this.state.columns!.updateIfNeeded(params, {
+      normalizedColors: this.usesNormalizedColors(),
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

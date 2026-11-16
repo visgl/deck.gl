@@ -7,12 +7,12 @@ import type {GPUVector} from '@luma.gl/graph/gpu-data';
 import {type RecordBatch, type Vector} from 'apache-arrow';
 import {
   convertArrowColumnToGPUVector,
+  getArrowConversionFormat,
   type ArrowColumnGPUVectorOptions,
   type PreparedArrowColumnGPUVector
 } from '@luma.gl/graph/arrow';
-import {getArrowConversionFormat} from './arrow-schema';
 
-/** Arrow columns or borrowed GPU vectors accepted by layer column props. */
+/** Resolved Arrow accessor columns or borrowed GPU vectors used during preparation. */
 export type ColumnSource = Pick<Vector, 'length' | 'type' | 'data'> | GPUVector;
 
 /** Layer-oriented semantics, for numeric, position, scalar, and color conversion. */

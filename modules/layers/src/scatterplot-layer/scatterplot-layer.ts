@@ -10,6 +10,7 @@ import {
   UNIT,
   _GPUVectorModel as DeckGPUVectorModel
 } from '@deck.gl/core';
+import type {FixedSizeList, Float, Int} from 'apache-arrow';
 import {GPUVectorModel, GPUVectorGeometry, Geometry, makeGPUVectorGeometry} from '@luma.gl/engine';
 
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
@@ -17,6 +18,7 @@ import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 import {getShaderWGSL} from './scatterplot-layer.wgsl';
 import {
+  DEFAULT_COLOR,
   ScatterplotLayerColumns,
   hasScatterplotColumns,
   type ScatterplotColumnProps
@@ -27,6 +29,7 @@ import type {
   LayerDataSource,
   UpdateParameters,
   Accessor,
+  ArrowAccessor,
   Unit,
   Position,
   Color,
@@ -35,7 +38,8 @@ import type {
 
 const defaultPosition = (row: any) => row.position;
 
-const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+/** Byte RGB(A) constant or row callback, or a numeric RGB(A) Arrow or SQL source. */
+type ScatterplotColorAccessor<DataT> = ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
 
 /** All props supported by the ScatterplotLayer */
 export type ScatterplotLayerProps<DataT = unknown> = _ScatterplotLayerProps<DataT> & LayerProps;
@@ -108,28 +112,31 @@ type _ScatterplotLayerProps<DataT> = ScatterplotColumnProps & {
 
   /**
    * Center position accessor.
+   * Accepts a constant, row callback, or numeric Arrow column.
    */
-  getPosition?: Accessor<DataT, Position>;
+  getPosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
   /**
-   * Radius accessor.
+   * Radius constant, row accessor, or numeric Arrow vector converted to Float32.
    * @default 1
    */
-  getRadius?: Accessor<DataT, number>;
+  getRadius?: ArrowAccessor<DataT, number, Int | Float>;
   /**
-   * Fill color accessor.
+   * Fill color as byte RGB(A), a row callback, a numeric RGB(A) Arrow column, or a SQL expression.
+   * Omitted alpha is opaque.
    * @default [0, 0, 0, 255]
    */
-  getFillColor?: Accessor<DataT, Color>;
+  getFillColor?: ScatterplotColorAccessor<DataT>;
   /**
-   * Stroke color accessor.
+   * Stroke color as byte RGB(A), a row callback, a numeric RGB(A) Arrow column, or a SQL expression.
+   * Omitted alpha is opaque.
    * @default [0, 0, 0, 255]
    */
-  getLineColor?: Accessor<DataT, Color>;
+  getLineColor?: ScatterplotColorAccessor<DataT>;
   /**
-   * Stroke width accessor.
+   * Stroke width constant, row accessor, or numeric Arrow vector converted to Float32.
    * @default 1
    */
-  getLineWidth?: Accessor<DataT, number>;
+  getLineWidth?: ArrowAccessor<DataT, number, Int | Float>;
   /**
    * Pixel offset accessor, [x, y] in pixels.
    * @default [0, 0]
@@ -165,11 +172,11 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   billboard: false,
   antialiasing: true,
 
-  getPosition: {type: 'accessor', value: defaultPosition},
-  getRadius: {type: 'accessor', value: 1},
-  getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getLineWidth: {type: 'accessor', value: 1},
+  getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
+  getRadius: {type: 'accessor', arrow: true, value: 1},
+  getFillColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getLineColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getLineWidth: {type: 'accessor', arrow: true, value: 1},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
   positions: {type: 'object', value: null, optional: true},
   radii: {type: 'object', value: null, optional: true},
@@ -281,7 +288,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         transition: true,
         type: 'unorm8',
         accessor: 'getFillColor',
-        defaultValue: [0, 0, 0, 255],
+        semanticType: 'color',
+        defaultValue: DEFAULT_COLOR,
         bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineColors: {
@@ -289,7 +297,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         transition: true,
         type: 'unorm8',
         accessor: 'getLineColor',
-        defaultValue: [0, 0, 0, 255],
+        semanticType: 'color',
+        defaultValue: DEFAULT_COLOR,
         bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineWidths: {
@@ -356,6 +365,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       this.state.model = this._getModel();
     }
     void this.state.columns!.updateIfNeeded(params, {
+      normalizedColors: this.usesNormalizedColors(),
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

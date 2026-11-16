@@ -203,6 +203,23 @@ Notes:
 - GPU `parameters` supplied to a view override the global `parameters` for layers rendered in that view.
 - GPU `parameters` supplied to individual layers override both view and global `parameters` when that layer is rendered.
 
+#### `sqlParser` (object, optional) {#sqlparser}
+
+Overrides the parser for [layer queries](./layer.md#query) and Arrow accessor
+expressions. Deck loads the math.gl parser on first use. Supply `parseQuery` to
+override table query parsing and `parseExpression` to override accessor expression
+parsing.
+
+#### `sqlFunctions` (SQLFunctions, optional) {#sqlfunctions}
+
+Additional math.gl Arrow functions available to SQL accessors in every layer. A
+layer can override a function by name through its own
+[`sqlFunctions`](./layer.md#sqlfunctions) prop. Function names are case-insensitive.
+
+SQL accessors can use `LIST_EXTRACT(column, index)` and
+`STRUCT_EXTRACT(column, 'field')` by default. List indices start at 1, negative
+indices count from the end, and an out-of-range index returns null.
+
 #### `layers` (LayersList) {#layers}
 
 * Default: `[]`
@@ -221,6 +238,17 @@ new Deck({
 });
 // layers is in the shape of [[<layer>, <layer>], null, [<layer>, <layer>], ...]
 ```
+
+#### `normalizedColors` (boolean, optional) {#normalizedcolors}
+
+Default: `false`.
+
+When enabled, top-level ScatterplotLayer, LineLayer, and ArcLayer interpret plain JavaScript arrays
+passed to their color accessors, including arrays returned by callbacks, as 0–1 channels.
+Channels are clamped and rounded to bytes for GPU storage. Omitted alpha is opaque.
+Built-in defaults, typed arrays, Arrow columns, and binary inputs keep their existing encoding.
+[View clear colors](./view.md#clearcolor) also use 0–1 channels when enabled.
+Composite sublayers, other layers, and other color properties continue to use their documented conventions.
 
 #### `layerFilter` (Function) {#layerfilter}
 

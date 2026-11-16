@@ -6,6 +6,7 @@
       "modules/**/*.{js,mjs,jsx,ts,tsx}",
       "test/**/*.{js,mjs,jsx,ts,tsx}",
       "examples/**/*.{js,mjs,jsx,ts,tsx}",
+      "examples-v10/**/*.{js,mjs,jsx,ts,tsx}",
       "!**/dist*/**",
       "!**/node-modules/**",
       "!**/dist.js",
@@ -33,6 +34,7 @@
     "includes": [
       "modules/**/*.{js,mjs,jsx,ts,tsx}",
       "examples/**/*.{js,mjs,jsx,ts,tsx}",
+      "examples-v10/**/*.{js,mjs,jsx,ts,tsx}",
       "!**/dist*/**",
       "!**/dist.js",
       "!**/*.min.js",
@@ -41,7 +43,9 @@
       "!**/.docusaurus/**",
       "!**/workers/**",
       "!examples/layer-browser/**",
-      "!examples/vite.config.local.mjs"
+      "!examples-v10/layer-browser/**",
+      "!examples/vite.config.local.mjs",
+      "!examples-v10/vite.config.local.mjs"
     ],
     "rules": {
       "recommended": false,
