@@ -28,8 +28,8 @@ import {
 
 import type {NumericArray, TypedArray} from '../../types/types';
 
-/** Scratch color components consumed synchronously by setData. */
-const CONSTANT_COLOR_SCRATCH: number[] = [];
+/** Scratch color components consumed synchronously by attribute writes. */
+const COLOR_SCRATCH: number[] = [];
 
 export type Accessor<DataType, ReturnType> = (
   object: DataType,
@@ -316,8 +316,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
           Array.isArray(constant) &&
           constant !== this.settings.defaultValue
         ) {
-          packNormalizedColor(constant, CONSTANT_COLOR_SCRATCH, 0, this.size);
-          constant = CONSTANT_COLOR_SCRATCH;
+          packNormalizedColor(constant, COLOR_SCRATCH, 0, this.size);
+          constant = COLOR_SCRATCH;
         }
         break;
       default:
@@ -644,20 +644,18 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         objectValue = transform.call(this, objectValue);
       }
 
+      if (normalizeColor && Array.isArray(objectValue)) {
+        COLOR_SCRATCH.length = size;
+        packNormalizedColor(objectValue, COLOR_SCRATCH, 0, size);
+        objectValue = COLOR_SCRATCH;
+      }
+
       if (startIndices) {
         const numVertices =
           (objectInfo.index < startIndices.length - 1
             ? startIndices[objectInfo.index + 1]
             : numInstances) - startIndices[objectInfo.index];
-        if (normalizeColor && Array.isArray(objectValue)) {
-          packNormalizedColor(objectValue, objectInfo.target, 0, size);
-          fillArray({
-            target: value,
-            source: objectInfo.target,
-            start: i,
-            count: numVertices
-          });
-        } else if (objectValue && Array.isArray(objectValue[0])) {
+        if (objectValue && Array.isArray(objectValue[0])) {
           let startIndex = i;
           for (const item of objectValue) {
             attribute._normalizeValue(item, value as TypedArray, startIndex);
@@ -676,11 +674,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         }
         i += numVertices * size;
       } else {
-        if (normalizeColor && Array.isArray(objectValue)) {
-          packNormalizedColor(objectValue, value as TypedArray, i, size);
-        } else {
-          attribute._normalizeValue(objectValue, value as TypedArray, i);
-        }
+        attribute._normalizeValue(objectValue, value as TypedArray, i);
         i += size;
       }
     }
