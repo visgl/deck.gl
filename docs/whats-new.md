@@ -4,6 +4,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Tile3DLayer tile creation pacing
+
+[`Tile3DLayer`](./api-reference/geo-layers/tile-3d-layer.md#_maxnewtilesperframe) accepts an experimental `_maxNewTilesPerFrame` prop that spreads the GPU upload of arriving glTF tiles over several frames, while their parent tiles stay visible.
+
 ### Normalized color inputs
 
 Deck's [`normalizedColors`](./api-reference/core/deck.md#normalizedcolors) option enables
