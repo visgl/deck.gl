@@ -6,9 +6,13 @@ import {log, Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core
 import {render} from 'preact';
 import {IconButton} from './lib/components/icon-button';
 
+/** Class that expands a container to the viewport. */
 const FALLBACK_CLASS = 'deck-pseudo-fullscreen';
+/** Class that prevents the background page from scrolling. */
 const SCROLL_LOCK = 'deck-fullscreen-scroll-lock';
+/** Active fallback per document, so only one widget owns its scroll lock. */
 const fallbackOwners = new WeakMap<Document, FullscreenWidget>();
+/** Candidates for keyboard focus inside the expanded container. */
 const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex]';
 
 export type FullscreenWidgetProps = WidgetProps & {
@@ -53,11 +57,17 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   className = 'deck-widget-fullscreen';
   placement: WidgetPlacement = 'top-left';
   fullscreen: boolean = false;
+  /** Mounted widget root used to render and focus the fullscreen button. */
   private root: HTMLElement | null = null;
+  /** Document on which the widget listens for native fullscreen changes. */
   private ownerDocument: Document | null = null;
+  /** Invalidates earlier native requests when the widget exits or is removed. */
   private generation = 0;
+  /** Whether a native fullscreen request is still settling. */
   private pending = false;
+  /** Container this widget successfully put into native fullscreen. */
   private nativeTarget: HTMLElement | null = null;
+  /** Cleanup for the active fallback, or null outside fallback. */
   private restoreFallback: (() => void) | null = null;
 
   constructor(props: FullscreenWidgetProps = {}) {
@@ -65,6 +75,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     this.setProps(this.props);
   }
 
+  /** Release fullscreen and detach listeners when the widget is removed. */
   onRemove() {
     ++this.generation;
     this.ownerDocument?.removeEventListener('fullscreenchange', this.handleNativeChange);
@@ -81,6 +92,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     this.root = null;
   }
 
+  /** Render the toggle button and listen for native fullscreen changes. */
   onRenderHTML(rootElement: HTMLElement): void {
     this.root = rootElement;
     if (this.ownerDocument !== rootElement.ownerDocument) {
@@ -102,6 +114,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     );
   }
 
+  /** Apply new widget props and exit fullscreen if the target changes. */
   setProps(props: Partial<FullscreenWidgetProps>) {
     if ('container' in props && props.container !== this.props.container) {
       void this.exitFullscreen().catch(err => log.error(err)());
@@ -119,8 +132,10 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     return this.fullscreen;
   }
 
+  /** Keep a stable listener reference for cleanup. */
   private handleNativeChange = () => this.onFullscreenChange();
 
+  /** Synchronize the widget with browser fullscreen changes. */
   onFullscreenChange() {
     const container = this.getContainer();
     const native = Boolean(container && container.ownerDocument.fullscreenElement === container);
@@ -132,6 +147,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     this.setFullscreen(native);
   }
 
+  /** Notify subscribers and update the button after a state transition. */
   private setFullscreen(fullscreen: boolean) {
     if (fullscreen !== this.fullscreen) {
       this.fullscreen = fullscreen;
@@ -140,11 +156,13 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     }
   }
 
+  /** Toggle fullscreen or cancel a request that is still settling. */
   async handleClick() {
     if (this.fullscreen || this.pending) await this.exitFullscreen();
     else await this.requestFullscreen();
   }
 
+  /** Request native fullscreen and use the viewport fallback if unavailable. */
   async requestFullscreen() {
     const container = this.getContainer();
     if (!container?.isConnected || this.fullscreen || this.pending) return;
@@ -176,6 +194,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     }
   }
 
+  /** Exit the active fullscreen mode and cancel pending entry. */
   async exitFullscreen() {
     ++this.generation;
     if (this.restoreFallback) {
@@ -191,6 +210,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     this.setFullscreen(false);
   }
 
+  /** Toggle the viewport fallback directly. */
   togglePseudoFullscreen() {
     if (this.restoreFallback) {
       this.closeFallback();
@@ -200,6 +220,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     }
   }
 
+  /** Restore the page and notify subscribers that fallback has ended. */
   private closeFallback() {
     const restore = this.restoreFallback;
     this.restoreFallback = null;
@@ -207,6 +228,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     this.setFullscreen(false);
   }
 
+  /** Expand the container in place and register its keyboard and cleanup handlers. */
   private openFallback(container: HTMLElement) {
     const doc = container.ownerDocument;
     const view = doc.defaultView;

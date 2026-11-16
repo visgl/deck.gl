@@ -71,6 +71,7 @@ test('FullscreenWidget - onFullscreenChange does not fire callback when state un
 test('FullscreenWidget - rejected native request uses viewport fallback and exits by mode', async () => {
   const target = document.createElement('div');
   const root = document.createElement('div');
+  root.className = 'deck-widget deck-widget-fullscreen';
   const canvas = document.createElement('canvas');
   const opener = document.createElement('button');
   const ancestor = document.createElement('div');
@@ -101,7 +102,15 @@ test('FullscreenWidget - rejected native request uses viewport fallback and exit
     expect(getComputedStyle(document.documentElement).overflow).toBe('hidden');
     expect(target.querySelector('canvas')).toBe(canvas);
     expect(target.getAttribute('aria-modal')).toBe('true');
-    expect(document.activeElement).toBe(root.querySelector('button'));
+    const button = root.querySelector('button')!;
+    const frame = root.querySelector('.deck-widget-button')!;
+    const buttonBounds = button.getBoundingClientRect();
+    const frameBounds = frame.getBoundingClientRect();
+    expect(buttonBounds.width).toBeGreaterThanOrEqual(44);
+    expect(buttonBounds.height).toBeGreaterThanOrEqual(44);
+    expect(frameBounds.width).toBeGreaterThan(buttonBounds.width);
+    expect(frameBounds.height).toBeGreaterThan(buttonBounds.height);
+    expect(document.activeElement).toBe(button);
     expect(document.documentElement.classList.contains('deck-fullscreen-scroll-lock')).toBe(true);
     document.dispatchEvent(new Event('fullscreenchange'));
     expect(widget.getFullscreen()).toBe(true);
