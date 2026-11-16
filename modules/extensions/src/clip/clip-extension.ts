@@ -7,7 +7,7 @@ import {LayerExtension, project} from '@deck.gl/core';
 
 import type {Layer} from '@deck.gl/core';
 import {
-  getBoundsOutline,
+  getBoundsCorners,
   projectBoundsToFlatCommon,
   projectToFlatCommon,
   TILE_SIZE
@@ -71,14 +71,16 @@ export default class ClipExtension extends LayerExtension {
     } as ClipModuleProps;
     if (project.isCustomProjection(viewport)) {
       // A custom projection can rotate the bounds and bend their edges. Clip to a polygon on the
-      // projected outline. Adjacent bounds, such as tiles, share the vertices of their edges.
-      const transform = this.state.clipByInstance
-        ? this.usePositionTransforms().transform
-        : (position: number[]) => projectToFlatCommon(this, position);
-      const outline = getBoundsOutline(this, clipBounds, CLIP_POLYGON_SIZE / 4).map(position =>
-        transform ? transform.call(this, position) : position
+      // projected outline.
+      const outline = getProjectedOutline(this, clipBounds, OUTLINE_TOLERANCE / viewport.scale);
+      const transform = this.usePositionTransforms().transform;
+      setPolygon(
+        clipProps,
+        outline.map(({position, common}) => {
+          if (!this.state.clipByInstance) return common;
+          return transform ? transform.call(this, position) : position;
+        })
       );
-      setPolygon(clipProps, outline);
     } else if (this.state.clipByInstance) {
       // Instance shaders see packed attributes. Match their CPU conversion when
       // the layer source CRS needs preprojection (e.g. tile-local MVT positions).
@@ -112,6 +114,71 @@ const EMPTY_POLYGON: ClipModuleProps['polygon'] = Array.from(
   () => [0, 0, 0, 0]
 );
 
+/** Largest distance, in pixels at the view center, from the clip polygon to the projected bounds */
+const OUTLINE_TOLERANCE = 0.5;
+
+type OutlineVertex = {
+  /** In the source coordinates of the layer */
+  position: number[];
+  /** In flat common space */
+  common: number[];
+};
+
+/**
+ * Returns at most CLIP_POLYGON_SIZE vertices on the projected outline of the bounds. The segment
+ * with the largest error is halved until all errors are less than `tolerance`. Whether a segment
+ * is halved depends only on the segment, and the halves of a tile edge are the edges of the child
+ * tiles. So, tiles of different levels have the same vertices on a shared edge, while the
+ * polygon has space for them.
+ */
+function getProjectedOutline(
+  layer: Layer,
+  bounds: Readonly<[number, number, number, number]>,
+  tolerance: number
+): OutlineVertex[] {
+  const getVertex = (position: number[]): OutlineVertex => ({
+    position,
+    common: projectToFlatCommon(layer, position)
+  });
+  const getMidpoint = (a: OutlineVertex, b: OutlineVertex): OutlineVertex =>
+    getVertex(a.position.map((value, i) => (value + b.position[i]) / 2));
+
+  const outline = getBoundsCorners(layer, bounds).map(getVertex);
+  // midpoints[i] is the midpoint of the segment from outline[i] to the next vertex
+  const midpoints = outline.map((vertex, i) => getMidpoint(vertex, outline[(i + 1) % 4]));
+  while (outline.length < CLIP_POLYGON_SIZE) {
+    let index = -1;
+    let maxError = tolerance;
+    for (let i = 0; i < outline.length; i++) {
+      const next = outline[(i + 1) % outline.length];
+      const error = getDistanceToLine(midpoints[i].common, outline[i].common, next.common);
+      if (error > maxError) {
+        index = i;
+        maxError = error;
+      }
+    }
+    if (index < 0) {
+      break;
+    }
+    const midpoint = midpoints[index];
+    const next = outline[(index + 1) % outline.length];
+    outline.splice(index + 1, 0, midpoint);
+    midpoints.splice(index, 1, getMidpoint(outline[index], midpoint), getMidpoint(midpoint, next));
+  }
+  return outline;
+}
+
+/** Distance from `point` to the line through `a` and `b` */
+function getDistanceToLine(point: number[], a: number[], b: number[]): number {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const length = Math.hypot(dx, dy);
+  if (length === 0) {
+    return Math.hypot(point[0] - a[0], point[1] - a[1]);
+  }
+  return Math.abs((point[0] - a[0]) * dy - (point[1] - a[1]) * dx) / length;
+}
+
 /** Sets the polygon, or only its bounding box if a vertex is not finite */
 function setPolygon(clipProps: ClipModuleProps, outline: number[][]): void {
   const xs = outline.map(position => position[0]);
@@ -119,11 +186,11 @@ function setPolygon(clipProps: ClipModuleProps, outline: number[][]): void {
   clipProps.bounds = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
   if (clipProps.bounds.every(Number.isFinite)) {
     clipProps.polygon = EMPTY_POLYGON.map((_, i) => [
-      xs[2 * i],
-      ys[2 * i],
-      xs[2 * i + 1],
-      ys[2 * i + 1]
+      xs[2 * i] ?? 0,
+      ys[2 * i] ?? 0,
+      xs[2 * i + 1] ?? 0,
+      ys[2 * i + 1] ?? 0
     ]);
-    clipProps.polygonSize = CLIP_POLYGON_SIZE;
+    clipProps.polygonSize = outline.length;
   }
 }

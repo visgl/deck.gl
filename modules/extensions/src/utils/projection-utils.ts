@@ -135,15 +135,13 @@ export function projectBoundsToFlatCommon(
 }
 
 /**
- * Returns positions on the outline of `[minX, minY, maxX, maxY]`, `count` per edge. The outline
- * starts at `[minX, minY]` and goes to `[maxX, minY]`, `[maxX, maxY]` and `[minX, maxY]`. Edges are
- * re-ordered as in `projectBoundsToFlatCommon()`. Lng/lat bounds with `minX - maxX > 180` cross
- * the antimeridian.
+ * Returns the corners of `[minX, minY, maxX, maxY]`, from `[minX, minY]` to `[maxX, minY]`,
+ * `[maxX, maxY]` and `[minX, maxY]`. Edges are re-ordered as in `projectBoundsToFlatCommon()`.
+ * Lng/lat bounds with `minX - maxX > 180` cross the antimeridian.
  */
-export function getBoundsOutline(
+export function getBoundsCorners(
   layer: Layer,
   bounds: Readonly<[number, number, number, number]>,
-  count: number,
   opts?: FlatProjectOptions
 ): number[][] {
   let [minX, minY, maxX, maxY] = bounds;
@@ -155,22 +153,12 @@ export function getBoundsOutline(
   if (minY > maxY) {
     [minY, maxY] = [maxY, minY];
   }
-  const corners = [
-    [minX, minY],
-    [maxX, minY],
-    [maxX, maxY],
-    [minX, maxY]
+  return [
+    [minX, minY, 0],
+    [maxX, minY, 0],
+    [maxX, maxY, 0],
+    [minX, maxY, 0]
   ];
-  const outline: number[][] = [];
-  for (let edge = 0; edge < 4; edge++) {
-    const [x0, y0] = corners[edge];
-    const [x1, y1] = corners[(edge + 1) % 4];
-    for (let i = 0; i < count; i++) {
-      const t = i / count;
-      outline.push([x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, 0]);
-    }
-  }
-  return outline;
 }
 
 function getLayerViewport(layer: Layer): Viewport {

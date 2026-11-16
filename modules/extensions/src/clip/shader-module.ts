@@ -7,7 +7,7 @@ import {project} from '@deck.gl/core';
 import type {ClipModuleProps} from './clip-extension';
 
 /** Number of vertices of the polygon that clips in a custom projection */
-export const CLIP_POLYGON_SIZE = 32;
+export const CLIP_POLYGON_SIZE = 64;
 
 const shaderFunction = /* glsl */ `
 layout(std140) uniform clipUniforms {
@@ -26,8 +26,12 @@ vec2 clip_getPolygonVertex(int index) {
 // and the edges at the maximum are outside.
 bool clip_isInPolygon(vec2 position) {
   bool inside = false;
-  vec2 previous = clip_getPolygonVertex(${CLIP_POLYGON_SIZE - 1});
+  int count = int(clip.polygonSize);
+  vec2 previous = clip_getPolygonVertex(count - 1);
   for (int i = 0; i < ${CLIP_POLYGON_SIZE}; i++) {
+    if (i >= count) {
+      break;
+    }
     vec2 current = clip_getPolygonVertex(i);
     if ((current.y > position.y) != (previous.y > position.y)) {
       float x = current.x + (position.y - current.y) * (previous.x - current.x) / (previous.y - current.y);
@@ -77,8 +81,12 @@ fn clip_getPolygonVertex(index: i32) -> vec2<f32> {
 // and the edges at the maximum are outside.
 fn clip_isInPolygon(position: vec2<f32>) -> bool {
   var inside = false;
-  var previous = clip_getPolygonVertex(${CLIP_POLYGON_SIZE - 1});
+  let count = i32(clip.polygonSize);
+  var previous = clip_getPolygonVertex(count - 1);
   for (var i = 0; i < ${CLIP_POLYGON_SIZE}; i++) {
+    if (i >= count) {
+      break;
+    }
     let current = clip_getPolygonVertex(i);
     if ((current.y > position.y) != (previous.y > position.y)) {
       let x = current.x + (position.y - current.y) * (previous.x - current.x) / (previous.y - current.y);

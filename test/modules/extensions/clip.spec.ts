@@ -12,6 +12,7 @@ import {
   _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
+import {CLIP_POLYGON_SIZE} from '@deck.gl/extensions/clip/shader-module';
 import {lngLatToMercatorCommon} from '@deck.gl/extensions/utils/projection-utils';
 import {GeoJsonLayer, PathLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getLayerUniforms, testLayer, device} from '@deck.gl/test-utils/vitest';
@@ -439,3 +440,95 @@ webglTest('ClipExtension#CustomProjectionView clips to the projected bounds', as
   deck.finalize();
   gl.getExtension('WEBGL_lose_context')?.loseContext();
 });
+
+/** Distance from a point to the segment between a and b */
+function getDistanceToSegment(point: number[], a: number[], b: number[]): number {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const t = Math.max(
+    0,
+    Math.min(1, ((point[0] - a[0]) * dx + (point[1] - a[1]) * dy) / (dx * dx + dy * dy || 1))
+  );
+  return Math.hypot(point[0] - a[0] - t * dx, point[1] - a[1] - t * dy);
+}
+
+/** Vertices of the clip polygon of a layer, in flat common space */
+function getClipPolygon(layer): number[][] {
+  const uniforms = getLayerUniforms(layer, 'clip');
+  const vertices: number[][] = [];
+  for (let i = 0; i < CLIP_POLYGON_SIZE / 2; i++) {
+    const [x0, y0, x1, y1] = uniforms[`polygon[${i}]`] as number[];
+    vertices.push([x0, y0], [x1, y1]);
+  }
+  return vertices.slice(0, uniforms.polygonSize as number);
+}
+
+/** Largest distance from a vertex of `polygon` near `other` to the outline of `other` */
+function getEdgeMismatch(polygon: number[][], other: number[][], near: number): number {
+  let mismatch = 0;
+  for (const vertex of polygon) {
+    let distance = Infinity;
+    for (let i = 0; i < other.length; i++) {
+      distance = Math.min(
+        distance,
+        getDistanceToSegment(vertex, other[i], other[(i + 1) % other.length])
+      );
+    }
+    if (distance < near) mismatch = Math.max(mismatch, distance);
+  }
+  return mismatch;
+}
+
+webglTest(
+  'ClipExtension#CustomProjectionView bounds of different sizes share an edge',
+  async () => {
+    // A coarse tile, and a tile of the next level on half of its north edge, an arc around the pole
+    const coarseBounds: [number, number, number, number] = [-90, 70, 0, 80];
+    const fineBounds: [number, number, number, number] = [-90, 80, -45, 85];
+    const viewState = {center: [-45, 80, 0] as [number, number, number], zoom: 4};
+    const deck = new Deck({
+      width: 400,
+      height: 400,
+      useDevicePixels: false,
+      views: new CustomProjectionView({crs: NORTH_POLAR_STEREOGRAPHIC}),
+      viewState
+    });
+    const layers = [coarseBounds, fineBounds].map(
+      (clipBounds, i) =>
+        new SolidPolygonLayer({
+          id: `clip-edge-${i}`,
+          data: [getPolygonRing([-100, 60, 10, 89])],
+          getPolygon: d => d,
+          clipBounds,
+          extensions: [new ClipExtension()]
+        })
+    );
+    await new Promise<void>(resolve => {
+      deck.setProps({
+        layers,
+        onAfterRender: () => {
+          // @ts-expect-error private member
+          if (deck.layerManager && !deck.layerManager.needsUpdate()) resolve();
+        }
+      });
+    });
+    const [coarse, fine] = layers.map(layer => getClipPolygon(layer.getCurrentLayer()));
+    const pixelsPerUnit = deck.getViewports()[0].scale;
+    // The vertices on the shared edge; the other vertices are more than 100 pixels away
+    const near = 10 / pixelsPerUnit;
+    const mismatch = Math.max(
+      getEdgeMismatch(fine, coarse, near),
+      getEdgeMismatch(coarse, fine, near)
+    );
+    expect(mismatch * pixelsPerUnit, 'distance between the outlines, in pixels').toBeLessThan(0.5);
+    // The Deck made a WebGL context. Release it: when there are too many, the browser loses the
+    // oldest one, which the other tests use.
+    const canvas = deck.getCanvas()!;
+    expect(canvas, 'the Deck made its own canvas').not.toBe(
+      device.getDefaultCanvasContext().canvas
+    );
+    const gl = canvas.getContext('webgl2')!;
+    deck.finalize();
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+  }
+);
