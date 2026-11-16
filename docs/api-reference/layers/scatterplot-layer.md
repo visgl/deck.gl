@@ -308,7 +308,7 @@ This prop supplies the fallback for `getLineColor` and `getFillColor`.
 
 * Default: `[0, 0, 0, 255]`
 
-For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Channels use the 0–255 range by default. See [Deck’s `normalizedColors`](../core/deck.md#normalizedcolors) to use 0–1 plain arrays.
 
 * If an array is provided, it is used as the filled color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
@@ -322,7 +322,7 @@ The default value comes from `getColor` when supplied.
 
 * Default: `[0, 0, 0, 255]`
 
-For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Channels use the 0–255 range by default. See [Deck’s `normalizedColors`](../core/deck.md#normalizedcolors) to use 0–1 plain arrays.
 
 * If an array is provided, it is used as the outline color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.

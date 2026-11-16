@@ -18,6 +18,7 @@ import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 import {getShaderWGSL} from './scatterplot-layer.wgsl';
 import {
+  DEFAULT_COLOR,
   ScatterplotLayerColumns,
   hasScatterplotColumns,
   type ScatterplotColumnProps
@@ -36,8 +37,6 @@ import type {
 } from '@deck.gl/core';
 
 const defaultPosition = (row: any) => row.position;
-
-const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 /** Byte RGB(A) constant or row callback, or a numeric RGB(A) Arrow or SQL source. */
 type ScatterplotColorAccessor<DataT> = ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
@@ -290,6 +289,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         type: 'unorm8',
         accessor: 'getFillColor',
         semanticType: 'color',
+        defaultValue: DEFAULT_COLOR,
         bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineColors: {
@@ -298,6 +298,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         type: 'unorm8',
         accessor: 'getLineColor',
         semanticType: 'color',
+        defaultValue: DEFAULT_COLOR,
         bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineWidths: {
@@ -364,6 +365,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       this.state.model = this._getModel();
     }
     void this.state.columns!.updateIfNeeded(params, {
+      normalizedColors: this.usesNormalizedColors(),
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

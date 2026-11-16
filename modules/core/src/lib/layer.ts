@@ -951,6 +951,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
   }
 
+  /** Returns the Deck input convention for a top-level layer. Composite children keep byte colors. */
+  protected usesNormalizedColors(): boolean {
+    return !this.parent && Boolean(this.context.normalizedColors);
+  }
+
   /** Recalculate any attributes if needed */
   protected _updateAttributes(): void {
     const attributeManager = this.getAttributeManager();
@@ -958,6 +963,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       return;
     }
     const props = this.props;
+
+    const normalizedColorInput = this.usesNormalizedColors();
+    for (const attribute of Object.values(attributeManager.attributes)) {
+      const {settings} = attribute;
+      if (
+        settings.semanticType === 'color' &&
+        settings.normalizedColorInput !== normalizedColorInput
+      ) {
+        settings.normalizedColorInput = normalizedColorInput;
+        attribute.setNeedsUpdate();
+      }
+    }
 
     // Figure out data length
     const numInstances = this.getNumInstances();

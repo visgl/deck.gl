@@ -59,3 +59,20 @@ function applyOpacity(color: NumericArray, opacity: number = 127): NumericArray 
 // but for utils that will be called in tight inner loops, export as object
 // TODO - this perf hit is mainly an issue for dev builds?
 export default {parseColor, applyOpacity};
+
+/** Packs normalized plain-array color components into byte values. */
+export function packNormalizedColor(
+  color: readonly number[],
+  target: NumericArray,
+  offset: number,
+  size: number
+): void {
+  for (let channel = 0; channel < size; channel++) {
+    const value = color[channel];
+    target[offset + channel] = Number.isFinite(value)
+      ? Math.round(Math.min(1, Math.max(0, value)) * 255)
+      : channel === 3
+        ? 255
+        : 0;
+  }
+}

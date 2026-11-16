@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {packNormalizedColor} from '../utils/color';
 import {createIterable} from '../utils/iterable-utils';
 import {deepEqual} from '../utils/deep-equal';
 import type {UpdateParameters} from './layer';
@@ -29,6 +30,8 @@ export type ColumnDefinition = {
   /** Select an Arrow vector supplied through the matching accessor, after an explicit column. */
   arrowAccessor?: boolean;
   defaultValue?: number;
+  /** Built-in byte color to preserve when normalizing plain-array input. */
+  defaultColor?: readonly number[];
 };
 
 /** Definitions keyed by public column name, including internal inputs. */
@@ -49,7 +52,7 @@ type PrepareFallbacks = (
   own: (resource: {destroy(): void}) => void
 ) => Record<string, unknown>;
 
-type Request = {source: unknown; rows?: Rows};
+type Request = {source: unknown; rows?: Rows; normalizedColors: boolean};
 
 type Columns = Record<string, GPUVector | GPUConstant>;
 type Prepared = {
@@ -163,13 +166,15 @@ export class LayerColumns {
       changed,
       failed,
       positionOptions,
-      prepareFallbacks
+      prepareFallbacks,
+      normalizedColors = false
     }: {
       dataLoading: boolean;
       changed: () => void;
       failed: (error: Error) => void;
       positionOptions?: PositionOptions;
       prepareFallbacks?: PrepareFallbacks;
+      normalizedColors?: boolean;
     }
   ): Promise<void> | undefined {
     if (
@@ -177,6 +182,7 @@ export class LayerColumns {
       (changeFlags.dataChanged ||
         changeFlags.updateTriggersChanged ||
         changeFlags.projectionChanged ||
+        this.request?.normalizedColors !== normalizedColors ||
         this.needsUpdate(props, oldProps))
     ) {
       return this.update(
@@ -185,7 +191,8 @@ export class LayerColumns {
         failed,
         positionOptions,
         prepareFallbacks,
-        !changeFlags.projectionChanged && !changeFlags.updateTriggersChanged
+        !changeFlags.projectionChanged && !changeFlags.updateTriggersChanged,
+        normalizedColors
       );
     }
     return undefined;
@@ -203,14 +210,15 @@ export class LayerColumns {
     failed: (error: Error) => void,
     positionOptions: PositionOptions = {},
     prepareFallbacks?: PrepareFallbacks,
-    reuseChunks = true
+    reuseChunks = true,
+    normalizedColors = false
   ): Promise<void> {
     const version = ++this.version;
     if (!reuseChunks) this.conversionRevision++;
     const revision = this.conversionRevision;
     this.loading = true;
     const previousRequest = this.request;
-    const request: Request = {source: props.data};
+    const request: Request = {source: props.data, normalizedColors};
     this.request = request;
     const results: Array<{destroy(): void}> = [];
     try {
@@ -353,7 +361,8 @@ export class LayerColumns {
             definition.semantic === 'position' ? `${definition.attribute}64Low` : undefined,
             definition.defaultValue,
             fallbacks?.[definition.accessor],
-            definition.attribute
+            definition.attribute,
+            normalizedColors ? definition.defaultColor : undefined
           );
         }
       }
@@ -537,7 +546,8 @@ export class LayerColumns {
     lowAttribute?: string,
     defaultValue = 0,
     binaryOverride?: unknown,
-    attribute?: string
+    attribute?: string,
+    defaultColor?: readonly number[]
   ): Promise<GPUVector | GPUConstant> {
     let binaryColor = false;
     const binary =
@@ -662,6 +672,16 @@ export class LayerColumns {
       if (size === 1) {
         const scalar = Number.isFinite(value) ? value : value?.[0];
         target[offset] = Number.isFinite(scalar) ? scalar : defaultValue;
+        return;
+      }
+      if (
+        defaultColor &&
+        !binaryColor &&
+        Array.isArray(value) &&
+        (typeof source === 'function' || value !== defaultColor)
+      ) {
+        packNormalizedColor(value, target, offset, props.colorFormat === 'RGB' ? 3 : size);
+        if (props.colorFormat === 'RGB') target[offset + 3] = 255;
         return;
       }
       for (let component = 0; component < size; component++) {

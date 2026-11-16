@@ -23,7 +23,12 @@ import {
 } from '@deck.gl/core';
 
 import {GPUVectorModel} from '@luma.gl/engine';
-import {ArcLayerColumns, hasArcColumns, type ArcColumnProps} from './arc-layer-columns';
+import {
+  DEFAULT_COLOR,
+  ArcLayerColumns,
+  hasArcColumns,
+  type ArcColumnProps
+} from './arc-layer-columns';
 
 import {arcUniforms, ArcProps} from './arc-layer-uniforms';
 import {shaderWGSL} from './arc-layer.wgsl';
@@ -32,8 +37,6 @@ import fs from './arc-layer-fragment.glsl';
 
 const defaultSourcePosition = (row: any) => row.sourcePosition;
 const defaultTargetPosition = (row: any) => row.targetPosition;
-
-const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<ArcLayerProps> = {
   sourcePositions: {type: 'object', value: null, optional: true},
@@ -264,6 +267,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
         type: 'unorm8',
         transition: true,
         accessor: 'getSourceColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR
       },
       instanceTargetColors: {
@@ -271,6 +275,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
         type: 'unorm8',
         transition: true,
         accessor: 'getTargetColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR
       },
       instanceWidths: {
@@ -354,6 +359,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       this.state.model = this._getModel();
     }
     void this.state.columns!.updateIfNeeded(params, {
+      normalizedColors: this.usesNormalizedColors(),
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

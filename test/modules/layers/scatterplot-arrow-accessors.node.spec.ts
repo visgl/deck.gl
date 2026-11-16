@@ -137,3 +137,30 @@ test('Arrow accessors share conversion, validation and replacement with column p
     device.destroy();
   }
 });
+
+test('Scatterplot normalizes plain color fallbacks alongside Arrow columns', async () => {
+  const device = new NullDevice({});
+  const columns = new ScatterplotLayerColumns(device);
+  const failed = vi.fn();
+  const layer = new ScatterplotLayer({
+    getPosition: [0, 0, 0],
+    getRadius: radii,
+    getFillColor: [0, 1, 0, 0]
+  });
+  const {props} = layer;
+  try {
+    await columns.update(layer.props, () => {}, failed);
+    await columns.updateIfNeeded(
+      {props, oldProps: layer.props, changeFlags: {}},
+      {dataLoading: false, changed: () => {}, failed, normalizedColors: true}
+    );
+    expect(failed).not.toHaveBeenCalled();
+    const prepared = (columns as any).prepared.columns;
+    expect(prepared.instanceFillColors.format).toBe('unorm8x4');
+    expect(Array.from(prepared.instanceFillColors.value)).toEqual([0, 255, 0, 0]);
+    expect(Array.from(prepared.instanceLineColors.value)).toEqual([0, 0, 0, 255]);
+  } finally {
+    columns.destroy();
+    device.destroy();
+  }
+});

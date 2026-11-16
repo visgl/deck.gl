@@ -9,6 +9,7 @@ import DataColumn, {
   BufferAccessor,
   DataColumnSettings
 } from './data-column';
+import {packNormalizedColor} from '../../utils/color';
 import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
@@ -26,6 +27,9 @@ import {
 } from '@luma.gl/graph/gpu-data';
 
 import type {NumericArray, TypedArray} from '../../types/types';
+
+/** Scratch color components consumed synchronously by attribute writes. */
+const COLOR_SCRATCH: number[] = [];
 
 export type Accessor<DataType, ReturnType> = (
   object: DataType,
@@ -67,6 +71,8 @@ export type AttributeOptions = DataColumnOptions<{
   accessor?: Accessor<any, any> | string | string[];
   /** @internal Identifies RGB(A) byte color accessors independently of their vertex format. */
   semanticType?: 'color';
+  /** @internal Interpret plain-array color accessor inputs as normalized values. */
+  normalizedColorInput?: boolean;
   /** Callback to map `accessor`'s return value to the attribute value. */
   transform?: ((value: any) => any) | null;
   /** Identifies the transform dependency; `projection` enables automatic position invalidation. */
@@ -98,8 +104,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   constructor(device: Device, opts: AttributeOptions) {
     // Constant and row accessors both use DataColumn's component writer and defaults.
     const options =
-      opts.semanticType === 'color' && opts.defaultValue === undefined
-        ? {...opts, defaultValue: [0, 0, 0, 255]}
+      opts.semanticType === 'color'
+        ? {...opts, normalizedColorInput: false, defaultValue: opts.defaultValue ?? [0, 0, 0, 255]}
         : opts;
     super(device, options, {
       startIndices: null,
@@ -302,7 +308,22 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
     const transformedValue =
       this.settings.transform && context ? this.settings.transform.call(context, value) : value;
-    this.setData({constant: true, value: transformedValue});
+    let constant = transformedValue;
+    switch (this.settings.semanticType) {
+      case 'color':
+        if (
+          this.settings.normalizedColorInput &&
+          Array.isArray(constant) &&
+          constant !== this.settings.defaultValue
+        ) {
+          packNormalizedColor(constant, COLOR_SCRATCH, 0, this.size);
+          constant = COLOR_SCRATCH;
+        }
+        break;
+      default:
+        break;
+    }
+    this.setData({constant: true, value: constant});
     return true;
   }
 
@@ -603,6 +624,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
+    const normalizeColor =
+      settings.semanticType === 'color' && settings.normalizedColorInput && !state.binaryAccessor;
     const accessorFunc: Accessor<any, any> =
       state.binaryAccessor ||
       // @ts-ignore
@@ -619,6 +642,12 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         // transform callbacks could be bound to a particular layer instance.
         // always point `this` to the current layer.
         objectValue = transform.call(this, objectValue);
+      }
+
+      if (normalizeColor && Array.isArray(objectValue)) {
+        COLOR_SCRATCH.length = size;
+        packNormalizedColor(objectValue, COLOR_SCRATCH, 0, size);
+        objectValue = COLOR_SCRATCH;
       }
 
       if (startIndices) {

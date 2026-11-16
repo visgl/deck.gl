@@ -33,6 +33,8 @@ export type LayerContext = {
   resourceManager: ResourceManager;
   deck?: Deck<any>;
   sqlParser?: SQLParser;
+  /** Effective Deck color convention for participating layers. */
+  normalizedColors?: boolean;
   /** Additional Arrow functions shared by all layer SQL accessors. */
   sqlFunctions?: SQLFunctions;
   device: Device;
@@ -199,6 +201,13 @@ export default class LayerManager {
     if ('layerFilter' in props && props.layerFilter !== this._layerFilter) {
       this._layerFilter = props.layerFilter;
       this.setNeedsUpdate('layerFilter changed');
+    }
+    if ('normalizedColors' in props && props.normalizedColors !== this.context.normalizedColors) {
+      this.context.normalizedColors = props.normalizedColors;
+      for (const layer of this.layers) {
+        layer.setNeedsUpdate();
+      }
+      this.setNeedsUpdate('normalizedColors changed');
     }
     if ('sqlParser' in props && props.sqlParser !== this.context.sqlParser) {
       this.context.sqlParser = props.sqlParser;

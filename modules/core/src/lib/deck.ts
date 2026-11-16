@@ -135,6 +135,12 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
 
   /** WebGL parameters to be set before each frame is rendered. */
   parameters?: Parameters;
+  /**
+   * Interpret plain-array color constants and callbacks as 0–1 in top-level ScatterplotLayer,
+   * LineLayer, and ArcLayer. Built-in defaults and typed or binary inputs retain their encoding.
+   * @default false
+   */
+  normalizedColors?: boolean;
   /** If supplied, will be called before a layer is drawn to determine whether it should be rendered. */
   layerFilter?: ((context: FilterContext) => boolean) | null;
 
@@ -276,6 +282,7 @@ const defaultProps: DeckProps = {
   pickingRadius: 0,
   pickAsync: 'auto',
   layerFilter: null,
+  normalizedColors: false,
   parameters: {},
   parent: null,
   device: null,
