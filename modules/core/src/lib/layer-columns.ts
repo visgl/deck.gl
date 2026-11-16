@@ -17,6 +17,7 @@ import {DynamicBuffer} from '@luma.gl/core/dynamic';
 import type {GPUVectorModel, GPUVectorModelInputs} from '@luma.gl/engine';
 import {GPUConstant, GPUVector, getGPUVectorFormatInfo} from '@luma.gl/graph/gpu-data';
 
+import type {PreparedArrowColumn} from '../arrow/append-arrow-column';
 import {resolveColumns} from './resolve-columns';
 
 export type ColumnDefinition = {
@@ -53,6 +54,11 @@ type Request = {source: unknown; rows?: Rows};
 type Columns = Record<string, GPUVector | GPUConstant>;
 type Prepared = {
   columns: Columns;
+  arrow?: Record<string, PreparedArrowColumn>;
+  resources?: Set<{destroy(): void}>;
+  props?: Record<string, any>;
+  fp64?: boolean;
+  transformed?: boolean;
   destroy(): void;
   length: number;
   source: unknown;
@@ -116,6 +122,7 @@ export class LayerColumns {
     return (
       !this.request ||
       props.data !== this.request.source ||
+      props._dataLoadOptions !== oldProps._dataLoadOptions ||
       !deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
       props.colorFormat !== oldProps.colorFormat ||
       !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1) ||
@@ -163,7 +170,14 @@ export class LayerColumns {
         changeFlags.projectionChanged ||
         this.needsUpdate(props, oldProps))
     ) {
-      return this.update(props, changed, failed, positionOptions, prepareFallbacks);
+      return this.update(
+        props,
+        changed,
+        failed,
+        positionOptions,
+        prepareFallbacks,
+        !changeFlags.projectionChanged && !changeFlags.updateTriggersChanged
+      );
     }
     return undefined;
   }
@@ -171,14 +185,16 @@ export class LayerColumns {
   /**
    * Converts explicit columns and fills missing inputs from accessors or binary attributes.
    * Replaces the previous result only after all inputs succeed; superseded requests release
-   * their allocations so asynchronous completions cannot overwrite newer state.
+   * their allocations so asynchronous completions cannot overwrite newer state. Unchanged Arrow
+   * chunks retain their allocations unless snapshot mode or conversion invalidation disables reuse.
    */
   async update(
     props: Record<string, any>,
     changed: () => void,
     failed: (error: Error) => void,
     positionOptions: PositionOptions = {},
-    prepareFallbacks?: PrepareFallbacks
+    prepareFallbacks?: PrepareFallbacks,
+    reuseChunks = true
   ): Promise<void> {
     const version = ++this.version;
     this.loading = true;
@@ -198,7 +214,21 @@ export class LayerColumns {
         return;
       }
       const {ArrowConverter} = await import('../arrow/upstream-luma/arrow-converter');
+      const {appendArrowColumn} = await import('../arrow/append-arrow-column');
       const converter = new ArrowConverter(this.device);
+      const previous = this.prepared;
+      const reuse =
+        reuseChunks &&
+        props._dataLoadOptions !== 'snapshots' &&
+        !positionOptions.transform &&
+        !previous?.transformed &&
+        previous?.fp64 === positionOptions.fp64 &&
+        previous?.props &&
+        ['modelMatrix', 'coordinateOrigin', 'coordinateSystem', 'colorFormat'].every(key =>
+          deepEqual(props[key], previous.props![key], 1)
+        );
+      const arrow: Record<string, PreparedArrowColumn> = {};
+      const retained = new Set<{destroy(): void}>();
       const columns: Columns = {};
       let bounds: [number[], number[]] | undefined;
       let boundsAvailable = true;
@@ -244,21 +274,34 @@ export class LayerColumns {
         const result =
           source instanceof GPUVector
             ? {vector: source, residualVector: undefined, destroy() {}}
-            : await converter.convert(source as Parameters<typeof converter.convert>[0], {
-                name,
-                semantic: definition.semantic === 'vector' ? 'numeric' : definition.semantic,
-                ...(definition.semantic === 'position'
-                  ? {
-                      format: 'float32x3',
-                      transform: value => {
-                        positionOptions.onPosition!(value);
-                        return positionOptions.transform ? positionOptions.transform(value) : value;
-                      },
-                      fp64: positionOptions.fp64
-                    }
-                  : {})
-              });
-        results.push(result);
+            : await appendArrowColumn(
+                converter,
+                source as Parameters<typeof converter.convert>[0],
+                {
+                  name,
+                  semantic: definition.semantic === 'vector' ? 'numeric' : definition.semantic,
+                  ...(definition.semantic === 'position'
+                    ? {
+                        format: 'float32x3',
+                        transform: positionOptions.transform ?? undefined,
+                        fp64: positionOptions.fp64
+                      }
+                    : {})
+                },
+                resource => results.push(resource),
+                reuse ? previous?.arrow?.[name] : undefined
+              );
+        if (!(source instanceof GPUVector)) {
+          const prepared = result as PreparedArrowColumn;
+          arrow[name] = prepared;
+          for (const resource of prepared.resources) {
+            if (previous?.resources?.has(resource)) retained.add(resource);
+          }
+          if (prepared.bounds) {
+            positionOptions.onPosition!(prepared.bounds[0]);
+            positionOptions.onPosition!(prepared.bounds[1]);
+          }
+        }
         if (version !== this.version) {
           for (const result of results) result.destroy();
           return;
@@ -336,16 +379,24 @@ export class LayerColumns {
         for (const result of results) result.destroy();
         return;
       }
+      for (const resource of retained) previous?.resources?.delete(resource);
       this.prepared?.destroy();
+      const resources = new Set([...results, ...retained]);
       this.prepared = {
         columns,
+        arrow,
+        resources,
+        props,
+        fp64: positionOptions.fp64,
+        transformed: Boolean(positionOptions.transform),
         length,
         chunkLengths,
         bounds: length && boundsAvailable ? bounds : undefined,
         source: props.data,
         rows,
         destroy: () => {
-          for (const result of results) result.destroy();
+          for (const resource of resources) resource.destroy();
+          resources.clear();
         }
       };
       this.loading = false;

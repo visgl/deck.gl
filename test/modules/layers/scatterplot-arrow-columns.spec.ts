@@ -545,7 +545,14 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         testCases: [
           {props: {getPosition: source, data: {length: 2}}},
           {
-            updateProps: {data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}}},
+            updateProps: {
+              // Replace the Arrow input to exercise conversion rather than chunk reuse.
+              getPosition: positions([
+                [0, 0],
+                [1, 1]
+              ]),
+              data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}}
+            },
             onBeforeUpdate: () => {
               delay = true;
             },
@@ -600,7 +607,14 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         testCases: [
           {props: {getPosition: source, data: {length: 2}}},
           {
-            updateProps: {data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}}},
+            updateProps: {
+              // Replace the Arrow input to exercise conversion rather than chunk reuse.
+              getPosition: positions([
+                [0, 0],
+                [1, 1]
+              ]),
+              data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}}
+            },
             onBeforeUpdate: () => {
               fail = true;
             },
