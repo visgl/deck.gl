@@ -431,5 +431,11 @@ webglTest('ClipExtension#CustomProjectionView clips to the projected bounds', as
       }
     }
   }
+  // The Deck made a WebGL context. Release it: when there are too many, the browser loses the
+  // oldest one, which the other tests use.
+  const canvas = deck.getCanvas()!;
+  expect(canvas, 'the Deck made its own canvas').not.toBe(device.getDefaultCanvasContext().canvas);
+  const gl = canvas.getContext('webgl2')!;
   deck.finalize();
+  gl.getExtension('WEBGL_lose_context')?.loseContext();
 });

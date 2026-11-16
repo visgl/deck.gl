@@ -276,6 +276,14 @@ for (const {title, crs, viewState, span} of [
       const [x, y] = viewport.project([lng, lat, ELEVATION]);
       expect(deck.pickObject({x, y, radius: 0})?.layer?.id, `${lng}, ${lat}`).toBe(layer.id);
     }
+    // The Deck made a WebGL context. Release it: when there are too many, the browser loses the
+    // oldest one, which the other tests use.
+    const canvas = deck.getCanvas()!;
+    expect(canvas, 'the Deck made its own canvas').not.toBe(
+      device.getDefaultCanvasContext().canvas
+    );
+    const gl = canvas.getContext('webgl2')!;
     deck.finalize();
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
   });
 }
