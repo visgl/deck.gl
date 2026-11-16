@@ -137,7 +137,8 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   parameters?: Parameters;
   /**
    * Interpret plain-array color constants and callbacks as 0–1 in top-level ScatterplotLayer,
-   * LineLayer, and ArcLayer. Built-in defaults and typed or binary inputs retain their encoding.
+   * LineLayer, and ArcLayer, and interpret View clear colors as 0–1. Built-in layer defaults
+   * and typed or binary inputs retain their encoding.
    * @default false
    */
   normalizedColors?: boolean;

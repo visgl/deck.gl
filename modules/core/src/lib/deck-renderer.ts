@@ -27,6 +27,8 @@ export default class DeckRenderer {
   pickLayersPass: PickLayersPass;
   stats?: Stats;
 
+  /** Whether view clear colors use 0–1 channels. */
+  private normalizedColors = false;
   private renderCount: number;
   private _needsRedraw: string | false;
   private renderBuffers: Framebuffer[];
@@ -45,7 +47,17 @@ export default class DeckRenderer {
     this.lastPostProcessEffect = null;
   }
 
-  setProps(props: {layerFilter: LayerFilter; drawPickingColors: boolean}) {
+  setProps(props: {
+    layerFilter: LayerFilter;
+    drawPickingColors: boolean;
+    normalizedColors?: boolean;
+  }) {
+    const normalizedColors = props.normalizedColors ?? false;
+    if (this.normalizedColors !== normalizedColors) {
+      this.normalizedColors = normalizedColors;
+      this._needsRedraw = 'normalizedColors changed';
+    }
+
     if (this.layerFilter !== props.layerFilter) {
       this.layerFilter = props.layerFilter;
       this._needsRedraw = 'layerFilter changed';
@@ -75,6 +87,7 @@ export default class DeckRenderer {
     const renderOpts: LayersPassRenderOptions = {
       layerFilter: this.layerFilter,
       isPicking: this.drawPickingColors,
+      normalizedColors: this.normalizedColors,
       ...opts
     };
 
