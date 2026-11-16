@@ -115,6 +115,27 @@ export default class CustomProjectionViewport extends Viewport {
     return PROJECTION_MODE.CUSTOM_GEOSPATIAL;
   }
 
+  /**
+   * Returns a copy of this camera with zero pitch, in the same CRS and over the same target.
+   * loaders.gl 3D tileset traversal (`Tile3DLayer`) uses it to measure projected tile size,
+   * because it cannot rebuild this viewport from longitude, latitude and zoom.
+   */
+  getTopDownViewport(): CustomProjectionViewport {
+    const {id, crs, resolution, width, height, padding, position, zoom, bearing} = this;
+    return new CustomProjectionViewport({
+      id,
+      crs,
+      resolution,
+      width,
+      height,
+      padding,
+      center: [position[0], position[1], 0],
+      zoom,
+      bearing,
+      pitch: 0
+    });
+  }
+
   /** Sample the Jacobian scalar, XY slopes, and Z-unit encoding over the CRS bounds. */
   getSizeScaleData(size = 64): Float32Array {
     const [[minX, minY], [maxX, maxY]] = this.crs.renderingBounds;
