@@ -233,7 +233,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 
     // In a custom projection, the mesh is in the CRS of the view: see convertMeshToCRS
     const {viewport} = this.context;
-    const crs = viewport instanceof CustomProjectionViewport ? viewport.crs.signature : null;
+    const crs = viewport instanceof CustomProjectionViewport ? viewport.projectionSignature : null;
     if (!this.state.isTiled && (shouldReload || crs !== (this.state.crs ?? null))) {
       // When state.isTiled, elevationData cannot be an array
       let terrain = this.loadTerrain(props as TerrainLoadProps);
@@ -443,7 +443,9 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
               elevationDecoder,
               projectionMode: this.context.viewport.projectionMode,
               // The meshes of a custom projection are in its CRS
-              crs: this.context.viewport.crs?.signature,
+              crs: this.context.viewport.crs
+                ? this.context.viewport.projectionSignature
+                : undefined,
               zoomOffset
             }
           },

@@ -324,3 +324,44 @@ test('TerrainLayer#CustomProjectionView keeps the height range in meters', async
   expect(zRange![0]).toBeCloseTo(ELEVATION, 3);
   expect(zRange![1]).toBeCloseTo(ELEVATION, 3);
 });
+
+test('TerrainLayer#CustomProjectionView keys its meshes on the projection signature', async () => {
+  const view = new CustomProjectionView({crs: 'EPSG:32615'});
+  await view.initialize();
+  const viewport = view.makeViewport({
+    width: 400,
+    height: 300,
+    viewState: {center: [-93.2, 45, 0], zoom: 10}
+  })!;
+  // Two converters can share a CRS signature. The viewport's projection signature tells them apart.
+  Object.defineProperty(viewport, 'projectionSignature', {value: 'another converter'});
+  expect(viewport.projectionSignature).not.toBe(viewport.crs.signature);
+  let tiledKey: unknown;
+  let meshKey: unknown;
+
+  await testLayerAsync({
+    Layer: TerrainLayer,
+    viewport,
+    testCases: [
+      {
+        props: {elevationData: 'terrain/{z}/{x}/{y}.png', fetch: fetchTerrainFixture},
+        onAfterUpdate: ({subLayer}) => {
+          tiledKey = (subLayer?.props as any)?.updateTriggers?.getTileData?.crs;
+        }
+      },
+      {
+        props: {
+          elevationData: 'terrain.png',
+          bounds: [-93.3, 44.9, -93.1, 45.1],
+          fetch: fetchTerrainFixture
+        },
+        onAfterUpdate: ({layer}) => {
+          meshKey = layer.state.crs;
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+  expect(tiledKey, 'tiled meshes').toBe('another converter');
+  expect(meshKey, 'single mesh').toBe('another converter');
+});
