@@ -21,6 +21,7 @@ import {
 } from '@deck.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {SamplerProps, Texture} from '@luma.gl/core';
+import {normalizeByteColor3, normalizeByteColor4} from '@luma.gl/shaders';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
 import createMesh from './create-mesh';
@@ -357,8 +358,14 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         bounds,
         coordinateConversion,
         desaturate,
-        tintColor: tintColor.slice(0, 3).map(x => x / 255) as [number, number, number],
-        transparentColor: transparentColor.map(x => x / 255) as [number, number, number, number]
+        // Decode public byte colors at the boundary; shader inputs are normalized.
+        tintColor: normalizeByteColor3([tintColor[0], tintColor[1], tintColor[2]]),
+        transparentColor: normalizeByteColor4([
+          transparentColor[0],
+          transparentColor[1],
+          transparentColor[2],
+          transparentColor[3] ?? 255
+        ])
       };
       model.shaderInputs.setProps({bitmap: bitmapProps});
       model.draw(this.context.renderPass);

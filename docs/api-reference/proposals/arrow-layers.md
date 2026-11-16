@@ -124,6 +124,6 @@ workspace already receives Arrow through its loaders.gl dependencies.
 ## Examples and integration tests
 
 The original standalone examples and their shared fixtures are available in
-[`examples/proposals`](https://github.com/visgl/deck.gl/tree/master/examples/proposals). Run `yarn build-private-examples`
+[`examples-v10/proposals`](https://github.com/visgl/deck.gl/tree/master/examples-v10/proposals). Run `yarn build-private-examples`
 after installing workspace dependencies. `yarn test-private` includes the copied
 example integration tests alongside the module tests.

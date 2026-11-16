@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {createTestViewport} from '../core/viewports/test-crs';
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {_GlobeViewport as GlobeViewport, LayerExtension} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
@@ -455,4 +455,23 @@ test('BitmapLayer keeps its draw count when extensions change and bounds are equ
       }
     ]
   });
+});
+
+test('BitmapLayer#typed byte colors retain fractional shader components', () => {
+  const setProps = vi.fn();
+  const tintColor = new Uint8Array([128, 64, 32]);
+  const transparentColor = new Uint8Array([32, 64, 128, 192]);
+  BitmapLayer.prototype.draw.call(
+    {
+      props: {image: {}, desaturate: 0, tintColor, transparentColor},
+      state: {model: {shaderInputs: {setProps}, draw: vi.fn()}},
+      context: {renderPass: {}}
+    } as unknown as BitmapLayer,
+    {shaderModuleProps: {picking: {isActive: false}}}
+  );
+  const {bitmap} = setProps.mock.calls[0][0];
+  expect(bitmap.tintColor).toEqual([128 / 255, 64 / 255, 32 / 255]);
+  expect(bitmap.transparentColor).toEqual([32 / 255, 64 / 255, 128 / 255, 192 / 255]);
+  expect(Array.from(tintColor)).toEqual([128, 64, 32]);
+  expect(Array.from(transparentColor)).toEqual([32, 64, 128, 192]);
 });

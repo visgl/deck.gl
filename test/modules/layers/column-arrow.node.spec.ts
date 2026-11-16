@@ -17,7 +17,7 @@ const positions = () =>
   );
 const props = () => ({
   data: [],
-  positions: positions(),
+  getPosition: positions(),
   getElevation: 1000,
   getFillColor: [0, 0, 0, 255],
   getLineColor: [0, 0, 0, 255],
@@ -35,7 +35,7 @@ test('Column conversion preserves accessor fallbacks and cleans up failed replac
   expect(Array.from(previous.columns.instanceElevations.value)).toEqual([1000]);
   expect(previous.columns.instancePositions64Low).toBeTruthy();
   await columns.update(
-    {...props(), elevations: vectorFromArray([1], new Float32())},
+    {...props(), getElevation: vectorFromArray([1], new Float32())},
     () => {},
     failed
   );
@@ -55,8 +55,8 @@ test('Column rejects mismatched chunk structures even when lengths match', async
   await columns.update(
     {
       ...props(),
-      positions: positions().concat(positions()),
-      elevations: vectorFromArray([1, 2, 3, 4], new Float32())
+      getPosition: positions().concat(positions()),
+      getElevation: vectorFromArray([1, 2, 3, 4], new Float32())
     },
     () => {},
     failed

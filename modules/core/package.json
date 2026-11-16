@@ -34,6 +34,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./sql": {
+      "types": "./dist/arrow/upstream-math/sql-parser.d.ts",
+      "import": "./dist/arrow/upstream-math/sql-parser.js",
+      "require": "./dist/arrow/upstream-math/sql-parser.cjs"
+    },
     "./arrow": {
       "types": "./dist/arrow/upstream-luma/arrow-converter.d.ts",
       "visgl:webgl-only": {
@@ -58,16 +63,18 @@
     "prepublishOnly": "npm run build-debugger && npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "5.0.0-beta.8",
-    "@loaders.gl/images": "5.0.0-beta.8",
-    "@luma.gl/core": "10.0.0-alpha.14",
-    "@luma.gl/engine": "10.0.0-alpha.14",
-    "@luma.gl/graph": "10.0.0-alpha.14",
-    "@luma.gl/shaders": "10.0.0-alpha.14",
-    "@math.gl/core": "5.0.0-beta.8",
-    "@math.gl/earth": "5.0.0-beta.8",
-    "@math.gl/geospatial": "5.0.0-beta.8",
-    "@math.gl/web-mercator": "5.0.0-beta.8",
+    "@loaders.gl/core": "5.0.0-beta.10",
+    "@loaders.gl/images": "5.0.0-beta.10",
+    "@luma.gl/core": "10.0.0-alpha.15",
+    "@luma.gl/engine": "10.0.0-alpha.15",
+    "@luma.gl/graph": "10.0.0-alpha.15",
+    "@luma.gl/shaders": "10.0.0-alpha.15",
+
+    "@math.gl/core": "5.0.0-beta.10",
+    "@math.gl/expressions": "5.0.0-beta.10",
+    "@math.gl/earth": "5.0.0-beta.10",
+    "@math.gl/geospatial": "5.0.0-beta.10",
+    "@math.gl/web-mercator": "5.0.0-beta.10",
     "probe.gl": "^5.0.0",
     "@types/offscreencanvas": "^2019.6.4",
     "gl-matrix": "^3.0.0",

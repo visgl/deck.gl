@@ -11,6 +11,7 @@ import {Matrix4, Vector3} from '@math.gl/core';
 import ShadowPass from '../../passes/shadow-pass';
 import {shadowPlugin} from '../../shaderlib/shadow/shadow';
 
+import {normalizeByteColor3} from '@luma.gl/shaders';
 import type {Light, LightingProps} from '@luma.gl/shaders';
 import type {ShadowModuleProps} from '../../shaderlib/shadow/shadow';
 import type Layer from '../../lib/layer';
@@ -147,6 +148,7 @@ export default class LightingEffect implements Effect {
 
     const lightingProps: LightingProps = {
       enabled: true,
+      useByteColors: false,
       lights: this._getLights(layer)
     };
     // @ts-expect-error material is not a Layer prop
@@ -218,6 +220,10 @@ export default class LightingEffect implements Effect {
       lights.push(directionalLight.getProjectedLight({layer}));
     }
 
-    return lights;
+    // Public light objects remain byte-valued, including mutable projected lights.
+    return lights.map(light => ({
+      ...light,
+      color: normalizeByteColor3(light.color)
+    }));
   }
 }

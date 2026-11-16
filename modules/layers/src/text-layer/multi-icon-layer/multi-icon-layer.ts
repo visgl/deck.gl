@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {log, createIterable} from '@deck.gl/core';
+import {normalizeByteColor4} from '@luma.gl/shaders';
 import IconLayer from '../../icon-layer/icon-layer';
 
 import {SdfProps, sdfUniforms} from './sdf-uniforms';
@@ -132,15 +133,14 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       this.getAttributeManager()!.invalidate('instanceIconDefs');
     }
     if (outlineColor !== oldProps.outlineColor) {
-      const normalizedOutlineColor = [
-        outlineColor[0] / 255,
-        outlineColor[1] / 255,
-        outlineColor[2] / 255,
-        (outlineColor[3] ?? 255) / 255
-      ];
-
+      // Decode the public byte color before storing normalized rendering state.
       this.setState({
-        outlineColor: normalizedOutlineColor
+        outlineColor: normalizeByteColor4([
+          outlineColor[0],
+          outlineColor[1],
+          outlineColor[2],
+          outlineColor[3] ?? 255
+        ])
       });
     }
     if (!props.sdf && props.outlineWidth) {
