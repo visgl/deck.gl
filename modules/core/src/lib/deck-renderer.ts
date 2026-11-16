@@ -27,6 +27,7 @@ export default class DeckRenderer {
   pickLayersPass: PickLayersPass;
   stats?: Stats;
 
+  /** Whether view clear colors use 0–1 channels. */
   private normalizedColors = false;
   private renderCount: number;
   private _needsRedraw: string | false;
