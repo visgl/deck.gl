@@ -126,10 +126,12 @@ type OutlineVertex = {
 
 /**
  * Returns at most CLIP_POLYGON_SIZE vertices on the projected outline of the bounds. The segment
- * with the largest error is halved until all errors are less than `tolerance`. Whether a segment
- * is halved depends only on the segment, and the halves of a tile edge are the edges of the child
- * tiles. So, tiles of different levels have the same vertices on a shared edge, while the
- * polygon has space for them.
+ * with the largest error is halved until all errors are less than `tolerance`. The error of a
+ * segment is the largest distance from its quarter points and its midpoint to its chord, so an
+ * S-shaped segment, whose midpoint is on the chord, is halved too. Whether a segment is halved
+ * depends only on the segment, and the halves of a tile edge are the edges of the child tiles.
+ * So, tiles of different levels have the same vertices on a shared edge, while the polygon has
+ * space for them.
  */
 function getProjectedOutline(
   layer: Layer,
@@ -142,28 +144,48 @@ function getProjectedOutline(
   });
   const getMidpoint = (a: OutlineVertex, b: OutlineVertex): OutlineVertex =>
     getVertex(a.position.map((value, i) => (value + b.position[i]) / 2));
+  type Segment = {quarter: OutlineVertex; midpoint: OutlineVertex; threeQuarter: OutlineVertex};
+  // A quarter point is the midpoint of a half. A half uses it again as its midpoint.
+  const getSegment = (
+    a: OutlineVertex,
+    b: OutlineVertex,
+    midpoint = getMidpoint(a, b)
+  ): Segment => ({
+    quarter: getMidpoint(a, midpoint),
+    midpoint,
+    threeQuarter: getMidpoint(midpoint, b)
+  });
+  const getError = (a: OutlineVertex, b: OutlineVertex, segment: Segment): number =>
+    Math.max(
+      getDistanceToLine(segment.quarter.common, a.common, b.common),
+      getDistanceToLine(segment.midpoint.common, a.common, b.common),
+      getDistanceToLine(segment.threeQuarter.common, a.common, b.common)
+    );
 
   const outline = getBoundsCorners(layer, bounds).map(getVertex);
-  // midpoints[i] is the midpoint of the segment from outline[i] to the next vertex
-  const midpoints = outline.map((vertex, i) => getMidpoint(vertex, outline[(i + 1) % 4]));
+  // segments[i] goes from outline[i] to the next vertex
+  const segments = outline.map((vertex, i) => getSegment(vertex, outline[(i + 1) % 4]));
+  const errors = segments.map((segment, i) => getError(outline[i], outline[(i + 1) % 4], segment));
   while (outline.length < CLIP_POLYGON_SIZE) {
     let index = -1;
     let maxError = tolerance;
     for (let i = 0; i < outline.length; i++) {
-      const next = outline[(i + 1) % outline.length];
-      const error = getDistanceToLine(midpoints[i].common, outline[i].common, next.common);
-      if (error > maxError) {
+      if (errors[i] > maxError) {
         index = i;
-        maxError = error;
+        maxError = errors[i];
       }
     }
     if (index < 0) {
       break;
     }
-    const midpoint = midpoints[index];
-    const next = outline[(index + 1) % outline.length];
+    const start = outline[index];
+    const end = outline[(index + 1) % outline.length];
+    const {quarter, midpoint, threeQuarter} = segments[index];
+    const first = getSegment(start, midpoint, quarter);
+    const second = getSegment(midpoint, end, threeQuarter);
     outline.splice(index + 1, 0, midpoint);
-    midpoints.splice(index, 1, getMidpoint(outline[index], midpoint), getMidpoint(midpoint, next));
+    segments.splice(index, 1, first, second);
+    errors.splice(index, 1, getError(start, midpoint, first), getError(midpoint, end, second));
   }
   return outline;
 }

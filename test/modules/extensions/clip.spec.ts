@@ -13,10 +13,14 @@ import {
 } from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {CLIP_POLYGON_SIZE} from '@deck.gl/extensions/clip/shader-module';
-import {lngLatToMercatorCommon} from '@deck.gl/extensions/utils/projection-utils';
+import {
+  lngLatToMercatorCommon,
+  projectToFlatCommon
+} from '@deck.gl/extensions/utils/projection-utils';
 import {GeoJsonLayer, PathLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getLayerUniforms, testLayer, device} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
+import {Matrix4} from '@math.gl/core';
 import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
 
 import {geojson, polygons, points} from 'deck.gl-test/data';
@@ -532,3 +536,68 @@ webglTest(
     gl.getExtension('WEBGL_lose_context')?.loseContext();
   }
 );
+
+webglTest('ClipExtension#CustomProjectionView follows an S-shaped projected edge', async () => {
+  // The model matrix turns the south edge into a diagonal through [0, 0]. In Web Mercator, the
+  // diagonal is an S-shaped curve. Its midpoint is on the chord, but its quarter points are not.
+  const clipBounds: [number, number, number, number] = [-60, 0, 60, 10];
+  const deck = new Deck({
+    width: 400,
+    height: 400,
+    useDevicePixels: false,
+    views: new CustomProjectionView({crs: 'EPSG:3857'}),
+    viewState: {center: [0, 0, 0] as [number, number, number], zoom: 2}
+  });
+  const layer = new SolidPolygonLayer({
+    id: 'clip-s-shaped-edge',
+    data: [getPolygonRing([-80, -20, 80, 30])],
+    getPolygon: d => d,
+    modelMatrix: new Matrix4().rotateZ(Math.PI / 4),
+    clipBounds,
+    extensions: [new ClipExtension()]
+  });
+  await new Promise<void>(resolve => {
+    deck.setProps({
+      layers: [layer],
+      onAfterRender: () => {
+        // @ts-expect-error private member
+        if (deck.layerManager && !deck.layerManager.needsUpdate()) resolve();
+      }
+    });
+  });
+  const currentLayer = layer.getCurrentLayer()!;
+  const polygon = getClipPolygon(currentLayer);
+  const [west, south, east, north] = clipBounds;
+  const corners = [
+    [west, south],
+    [east, south],
+    [east, north],
+    [west, north]
+  ];
+  // Largest distance from the true projected edges to the clip polygon
+  let error = 0;
+  for (let i = 0; i < 4; i++) {
+    const [a, b] = [corners[i], corners[(i + 1) % 4]];
+    for (let t = 0; t <= 1; t += 1 / 256) {
+      const position = [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1]), 0];
+      const point = projectToFlatCommon(currentLayer, position);
+      let distance = Infinity;
+      for (let j = 0; j < polygon.length; j++) {
+        distance = Math.min(
+          distance,
+          getDistanceToSegment(point, polygon[j], polygon[(j + 1) % polygon.length])
+        );
+      }
+      error = Math.max(error, distance);
+    }
+  }
+  const pixelsPerUnit = deck.getViewports()[0].scale;
+  expect(error * pixelsPerUnit, 'distance from the projected edges, in pixels').toBeLessThan(1);
+  // The Deck made a WebGL context. Release it: when there are too many, the browser loses the
+  // oldest one, which the other tests use.
+  const canvas = deck.getCanvas()!;
+  expect(canvas, 'the Deck made its own canvas').not.toBe(device.getDefaultCanvasContext().canvas);
+  const gl = canvas.getContext('webgl2')!;
+  deck.finalize();
+  gl.getExtension('WEBGL_lose_context')?.loseContext();
+});
