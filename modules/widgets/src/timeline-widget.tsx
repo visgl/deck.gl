@@ -63,7 +63,6 @@ export type TimelineWidgetProps = WidgetProps & {
 };
 
 export class TimelineWidget extends Widget<TimelineWidgetProps> {
-  id = 'timeline';
   className = 'deck-widget-timeline';
   placement: WidgetPlacement = 'fill';
 
