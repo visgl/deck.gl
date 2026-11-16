@@ -6,10 +6,11 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
-import {Field, FixedSizeList, Float64, tableFromArrays, vectorFromArray} from 'apache-arrow';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {isArrowTable} from '@math.gl/arrow';
+import {JSONTableLoader} from '@loaders.gl/tables/json';
 
-import type {LayerData, PickingInfo, MapViewState, Widget} from '@deck.gl/core';
+import type {PickingInfo, MapViewState, Widget} from '@deck.gl/core';
 import {Device} from '@luma.gl/core';
 
 // Source JSON data
@@ -54,61 +55,32 @@ function getTooltip({object}: PickingInfo) {
   );
 }
 
-/** Projects decoded airports into the columns used by SQL accessors and tooltips. */
-function toAirportTable<LayerDataT = LayerData<unknown>>(data: unknown): LayerDataT {
-  const airports = data as Airport[];
-  return tableFromArrays({
-    coordinates: vectorFromArray(
-      airports.map(airport => airport.coordinates),
-      new FixedSizeList(2, new Field('coordinate', new Float64()))
-    ),
-    name: airports.map(airport => airport.name),
-    abbrev: airports.map(airport => airport.abbrev),
-    type: airports.map(airport => airport.type)
-  }) as LayerDataT;
-}
-
-/** Projects decoded flight endpoints and picking fields into Arrow columns. */
-function toFlightTable<LayerDataT = LayerData<unknown>>(data: unknown): LayerDataT {
-  const flights = data as FlightPath[];
-  const positionType = new FixedSizeList(3, new Field('coordinate', new Float64()));
-  return tableFromArrays({
-    start: vectorFromArray(
-      flights.map(flight => flight.start),
-      positionType
-    ),
-    end: vectorFromArray(
-      flights.map(flight => flight.end),
-      positionType
-    ),
-    name: flights.map(flight => flight.name),
-    country: flights.map(flight => flight.country)
-  }) as LayerDataT;
-}
-
 export default function App({
-  airports,
-  flightPaths,
+  airports = DATA_URL.AIRPORTS,
+  flightPaths = DATA_URL.FLIGHT_PATHS,
   lineWidth = 3,
   mapStyle = MAP_STYLE,
   device,
-  widgets
+  widgets,
+  onDataLoad
 }: {
-  airports?: Airport[];
-  flightPaths?: FlightPath[];
+  airports?: string;
+  flightPaths?: string;
   lineWidth?: number;
   mapStyle?: string;
   device?: Device;
   widgets?: Widget[];
+  onDataLoad?: (count: number) => void;
 }) {
   const layers = [
     airports &&
       new ScatterplotLayer({
         id: 'airports',
+        // Sample row: {coordinates: [-0.4531566, 51.4709959], type: 'major', name: 'London Heathrow', abbrev: 'LHR'}
         data: airports,
-        dataTransform: toAirportTable,
+        loaders: [JSONTableLoader],
         radiusScale: 20,
-        getPosition: {sql: 'coordinates'},
+        getPosition: {sql: 'FLOAT64x2(LIST_EXTRACT(coordinates, 1), LIST_EXTRACT(coordinates, 2))'},
         getFillColor: [255, 140, 0],
         getRadius: {
           sql: "CASE WHEN type = 'major' THEN 100 WHEN type = 'small' THEN 30 ELSE 60 END"
@@ -118,18 +90,39 @@ export default function App({
     flightPaths &&
       new LineLayer({
         id: 'flight-paths',
+        // Sample row: {name: '0x342090', country: 'Spain', start: [-0.4855, 51.4727, 0], end: [-0.4592, 51.4776, 15.2]}
         data: flightPaths,
-        dataTransform: toFlightTable,
+        loaders: [JSONTableLoader],
+        onDataLoad: table => {
+          if (isArrowTable(table)) {
+            onDataLoad?.(table.numRows);
+          }
+        },
         opacity: 0.8,
-        getSourcePosition: {sql: 'start'},
-        getTargetPosition: {sql: '"end"'},
+        getSourcePosition: {
+          sql: `\
+            FLOAT64x3(
+              LIST_EXTRACT(start, 1),
+              LIST_EXTRACT(start, 2),
+              LIST_EXTRACT(start, 3)
+            )`
+        },
+        getTargetPosition: {
+          sql: `\
+            FLOAT64x3(
+              LIST_EXTRACT("end", 1),
+              LIST_EXTRACT("end", 2),
+              LIST_EXTRACT("end", 3)
+            )`
+        },
         getColor: {
-          sql: `RGBA8(
-            1 - LIST_EXTRACT(start, 3) / 5000,
-            128 * LIST_EXTRACT(start, 3) / (255 * 10000),
-            LIST_EXTRACT(start, 3) / 10000,
-            1 - LIST_EXTRACT(start, 3) / 10000
-          )`
+          sql: `\
+            RGBA8(
+              1 - LIST_EXTRACT(start, 3) / 5000,
+              128 * LIST_EXTRACT(start, 3) / (255 * 10000),
+              LIST_EXTRACT(start, 3) / 10000,
+              1 - LIST_EXTRACT(start, 3) / 10000
+            )`
         },
         getWidth: lineWidth,
         pickable: true
@@ -163,17 +156,7 @@ export default function App({
   );
 }
 
-/** Loads the standalone demo's source files in parallel. */
-async function loadFlightData(): Promise<{airports: Airport[]; flightPaths: FlightPath[]}> {
-  const [airports, flightPaths] = await Promise.all([
-    fetch(DATA_URL.AIRPORTS).then(response => response.json()),
-    fetch(DATA_URL.FLIGHT_PATHS).then(response => response.json())
-  ]);
-  return {airports, flightPaths};
-}
-
-/** Mounts the standalone demo with its loaded flight data. */
-export async function renderToDOM(container: HTMLDivElement) {
-  const data = await loadFlightData();
-  createRoot(container).render(<App {...data} />);
+/** Mounts the standalone demo. */
+export function renderToDOM(container: HTMLDivElement) {
+  createRoot(container).render(<App />);
 }

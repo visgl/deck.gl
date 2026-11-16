@@ -40,7 +40,7 @@ const sidebars = {
         'heatmap-layer',
         withStatus('hexagon-layer', 'started'),
         withStatus('icon-layer', 'started'),
-        withStatus('line-layer', 'started'),
+        withStatus('line-layer', 'ready'),
         withStatus('point-cloud-layer', 'ready'),
         withStatus('scatterplot-layer', 'ready'),
         withStatus('scenegraph-layer', 'started'),

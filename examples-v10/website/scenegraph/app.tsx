@@ -14,7 +14,7 @@ import {tableFromArrays} from 'apache-arrow';
 import sampleData from './all.json';
 
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
-import type {PickingInfo, MapViewState} from '@deck.gl/core';
+import type {PickingInfo, MapViewState, LayerData} from '@deck.gl/core';
 
 // Live data provided by the OpenSky Network, https://opensky-network.org.
 // The API may reject browser requests from other origins, so the bundled
@@ -76,7 +76,8 @@ type AircraftRow = {
 };
 
 /** Converts the OpenSky response to named columns and makes contact times relative. */
-function normalizeData({time, states}: {time: number; states: Aircraft[]}) {
+function normalizeData<LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT {
+  const {time, states} = source as {time: number; states: Aircraft[]};
   return tableFromArrays({
     callSign: states.map(aircraft => aircraft[1]),
     originCountry: states.map(aircraft => aircraft[2]),
@@ -87,20 +88,20 @@ function normalizeData({time, states}: {time: number; states: Aircraft[]}) {
     trueTrack: states.map(aircraft => aircraft[10]),
     verticalRate: states.map(aircraft => aircraft[11]),
     altitude: Float64Array.from(states, aircraft => aircraft[13] ?? 0)
-  });
+  }) as LayerDataT;
 }
 
 // https://github.com/visgl/deck.gl/pull/10465 updated the live OpenSky URL,
 // but the endpoint still rejects cross-origin browser requests. Start with this
 // bundled snapshot so the demo can render immediately and keep it as fallback.
-const DATA = normalizeData(sampleData as {time: number; states: Aircraft[]});
+const DATA = sampleData as {time: number; states: Aircraft[]};
 
 async function fetchData(signal: AbortSignal) {
   const response = await fetch(DATA_URL, {signal});
   if (!response.ok) {
     throw new Error(`OpenSky request failed with status ${response.status}`);
   }
-  return normalizeData((await response.json()) as {time: number; states: Aircraft[]});
+  return (await response.json()) as {time: number; states: Aircraft[]};
 }
 
 function getTooltip({object}: PickingInfo<AircraftRow>) {
@@ -142,7 +143,8 @@ export default function App({
   const layer = new ScenegraphLayer<AircraftRow>({
     id: 'scenegraph-layer',
     data,
-    onDataLoad: () => onDataLoad?.(data.numRows),
+    dataTransform: normalizeData,
+    onDataLoad: () => onDataLoad?.(data.states.length),
     pickable: true,
     sizeScale,
     scenegraph: MODEL_URL,

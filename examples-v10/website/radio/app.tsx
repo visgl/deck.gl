@@ -19,6 +19,7 @@ import SearchBar from './search-bar';
 
 import type {
   Color,
+  LayerData,
   ViewStateChangeParameters,
   MapViewState,
   PickingInfo,
@@ -158,17 +159,6 @@ export default function App({
     return result;
   }, [data]);
 
-  /** Station coordinates used by the SQL position accessor. */
-  const stationPositions = useMemo(
-    () =>
-      data &&
-      tableFromArrays({
-        longitude: Float64Array.from(data, station => station.longitude),
-        latitude: Float64Array.from(data, station => station.latitude)
-      }),
-    [data]
-  );
-
   const onViewStateChange = useCallback(
     ({viewState: newViewState}: ViewStateChangeParameters<MapViewState>) => {
       setViewState(() => ({
@@ -239,10 +229,17 @@ export default function App({
         getFillColor: [255, 255, 255, 0]
       }),
 
-    stationPositions &&
+    data &&
       new ScatterplotLayer({
         id: 'stations',
-        data: stationPositions,
+        data,
+        dataTransform: <LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT => {
+          const stations = source as Station[];
+          return tableFromArrays({
+            longitude: Float64Array.from(stations, station => station.longitude),
+            latitude: Float64Array.from(stations, station => station.latitude)
+          }) as LayerDataT;
+        },
         getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
         getFillColor: [40, 40, 40, 128],
         getRadius: 20,
