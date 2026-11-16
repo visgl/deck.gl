@@ -380,13 +380,18 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     }
 
     const {zRange} = this.state;
+    // TileLayer takes zRange in meters. The meshes of a custom projection are in its CRS, whose
+    // height unit can differ: see convertMeshToCRS
+    const {viewport} = this.context;
+    const metersPerUnit =
+      viewport instanceof CustomProjectionViewport ? (viewport.crs.zUnit.metersPerUnit ?? 1) : 1;
     const ranges = tiles
       .map(tile => tile.content)
       .filter(Boolean)
       .map(arr => {
         // @ts-ignore
         const bounds = arr[0].header.boundingBox;
-        return bounds.map(bound => bound[2]);
+        return bounds.map(bound => bound[2] * metersPerUnit);
       });
     if (ranges.length === 0) {
       return;

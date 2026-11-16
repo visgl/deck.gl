@@ -287,3 +287,40 @@ for (const {title, crs, viewState, span} of [
     gl.getExtension('WEBGL_lose_context')?.loseContext();
   });
 }
+
+test('TerrainLayer#CustomProjectionView keeps the height range in meters', async () => {
+  // Heights in feet
+  const view = new CustomProjectionView({
+    crs: '+proj=utm +zone=15 +datum=WGS84 +units=m +vunits=ft'
+  });
+  await view.initialize();
+  const viewport = view.makeViewport({
+    width: 400,
+    height: 300,
+    viewState: {center: [-93.2, 45, 0], zoom: 10, pitch: 30}
+  })!;
+  let zRange: number[] | null = null;
+
+  await testLayerAsync({
+    Layer: BoundsTerrainLayer,
+    viewport,
+    testCases: [
+      {
+        props: {
+          elevationData: 'terrain/{z}/{x}/{y}.png',
+          fetch: fetchTerrainFixture
+        },
+        onAfterUpdate: ({layer}) => {
+          if (layer.isLoaded && layer.state.zRange) {
+            zRange = layer.state.zRange;
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+  expect(zRange, 'zRange is set').toBeTruthy();
+  // TileLayer takes zRange in meters
+  expect(zRange![0]).toBeCloseTo(ELEVATION, 3);
+  expect(zRange![1]).toBeCloseTo(ELEVATION, 3);
+});
