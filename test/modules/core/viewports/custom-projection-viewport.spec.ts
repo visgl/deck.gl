@@ -336,3 +336,10 @@ test('getTopDownViewport does not change the original viewport', async () => {
     projectionMatrix: Array.from(viewport.projectionMatrix)
   }).toEqual(before);
 });
+
+test('fovy matches WebMercatorViewport and the top-down copy keeps it', () => {
+  const viewport = new CustomProjectionViewport({...options, zoom: 12, pitch: 45, bearing: 30});
+  const map = new WebMercatorViewport({width: 800, height: 600, zoom: 12, pitch: 45, bearing: 30});
+  expect(viewport.fovy).toBe(map.fovy);
+  expect(viewport.getTopDownViewport().fovy).toBe(map.fovy);
+});

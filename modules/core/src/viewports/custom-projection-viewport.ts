@@ -33,6 +33,8 @@ export default class CustomProjectionViewport extends Viewport {
   static displayName = 'CustomProjectionViewport';
   pitch: number;
   bearing: number;
+  /** Camera vertical field of view in degrees, as in `WebMercatorViewport`. */
+  fovy: number;
   private signature: string;
   declare crs: CRSDescriptor;
   readonly sizeScaleSignature: string;
@@ -95,6 +97,7 @@ export default class CustomProjectionViewport extends Viewport {
     this.crs = crs;
     this.pitch = pitch;
     this.bearing = bearing;
+    this.fovy = fovy;
     this.isGeospatial = true;
     this.signature = JSON.stringify([crs.signature, this.resolution]);
     this.sizeScaleSignature = JSON.stringify([crs.signature, crs.renderingBounds]);
