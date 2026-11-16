@@ -306,7 +306,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
       }
     };
     this.setFullscreen(true);
-    if (this.restoreFallback) {
+    if (fallbackOwners.get(doc) === this) {
       const button = this.root?.querySelector('button');
       if (button && container.contains(button)) button.focus({preventScroll: true});
       else focusInside();
