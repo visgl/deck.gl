@@ -28,6 +28,9 @@ import {
 
 import type {NumericArray, TypedArray} from '../../types/types';
 
+/** Scratch color components consumed synchronously by setData. */
+const CONSTANT_COLOR_SCRATCH: number[] = [];
+
 export type Accessor<DataType, ReturnType> = (
   object: DataType,
   context: {
@@ -306,14 +309,19 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const transformedValue =
       this.settings.transform && context ? this.settings.transform.call(context, value) : value;
     let constant = transformedValue;
-    if (
-      this.settings.semanticType === 'color' &&
-      this.settings.normalizedColorInput &&
-      Array.isArray(constant) &&
-      constant !== this.settings.defaultValue
-    ) {
-      constant = [];
-      packNormalizedColor(transformedValue, constant, 0, this.size);
+    switch (this.settings.semanticType) {
+      case 'color':
+        if (
+          this.settings.normalizedColorInput &&
+          Array.isArray(constant) &&
+          constant !== this.settings.defaultValue
+        ) {
+          packNormalizedColor(constant, CONSTANT_COLOR_SCRATCH, 0, this.size);
+          constant = CONSTANT_COLOR_SCRATCH;
+        }
+        break;
+      default:
+        break;
     }
     this.setData({constant: true, value: constant});
     return true;
