@@ -337,6 +337,11 @@ applies to row chunks; transform Arrow chunks in the producer instead. See
 [Streaming Arrow data](../../developer-guide/using-with-arrow.md#streaming-arrow-data).
 
 
+#### `sqlFunctions` (SQLFunctions, optional) {#sqlfunctions}
+
+Additional math.gl Arrow functions for this layer's SQL accessors. Functions
+override matching [Deck functions](./deck.md#sqlfunctions) by name.
+
 #### `query` (string, optional) {#query}
 
 SQL to execute through loaders.gl when `data` is an Arrow table, a promise resolving
@@ -637,7 +642,11 @@ streams do not publish subsequent progress, completion, or error callbacks.
 
 #### `onDataLoad` (Function, optional) {#ondataload}
 
-Called when remote data is fully loaded. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.
+Called when a new `data` input resolves. Direct inputs are reported after any
+`dataTransform` is applied. URL and promise inputs are reported after loading,
+query evaluation, and transformation. Async iterables report completion after
+the stream ends. The callback receives the same resolved value as `layer.props.data`
+and can pass it to the application UI.
 
 The function receives two arguments:
 

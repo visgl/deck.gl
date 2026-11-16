@@ -67,12 +67,13 @@ export default function App({
       radiusMinPixels: 0.25,
       getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
       getFillColor: {
-        sql: `RGBA8(
-          (CASE WHEN gender = 1 THEN ${maleRed} ELSE ${femaleRed} END) / 255,
-          (CASE WHEN gender = 1 THEN ${maleGreen} ELSE ${femaleGreen} END) / 255,
-          (CASE WHEN gender = 1 THEN ${maleBlue} ELSE ${femaleBlue} END) / 255,
-          (CASE WHEN gender = 1 THEN ${maleAlpha} ELSE ${femaleAlpha} END) / 255
-        )`
+        sql: `\
+          RGBA8(
+            (CASE WHEN gender = 1 THEN ${maleRed} ELSE ${femaleRed} END) / 255,
+            (CASE WHEN gender = 1 THEN ${maleGreen} ELSE ${femaleGreen} END) / 255,
+            (CASE WHEN gender = 1 THEN ${maleBlue} ELSE ${femaleBlue} END) / 255,
+            (CASE WHEN gender = 1 THEN ${maleAlpha} ELSE ${femaleAlpha} END) / 255
+          )`
       },
       getRadius: 1,
       pickable: true

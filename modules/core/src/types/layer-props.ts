@@ -19,6 +19,10 @@ import type {LightingModuleSettings} from '../shaderlib/index';
 import type {Matrix4Like} from '@math.gl/core';
 import type {Expression} from '@math.gl/expressions';
 import type {SQLQuery} from '@math.gl/expressions/sql';
+import type {ArrowTableFunction} from '@math.gl/expressions/arrow';
+
+/** Additional Arrow functions available to SQL accessors. */
+export type SQLFunctions = readonly ArrowTableFunction[];
 
 /** Optional SQL parser methods supplied by the application to Deck. */
 export type SQLParser = {
@@ -153,6 +157,8 @@ export type LayerProps = {
   data?: unknown;
   /** SQL executed on an Arrow table or URL supplied to `data`. Requires a SQL parser. */
   query?: string | null;
+  /** Adds or overrides named Arrow functions for this layer’s SQL accessors. */
+  sqlFunctions?: SQLFunctions | null;
   /**
    * Experimental loading mode. Defaults to `auto`: load URLs completely and append supplied streams.
    * `batched` streams and appends data; `snapshots` streams and replaces data with each Arrow result.
@@ -283,7 +289,7 @@ export type LayerProps = {
   highlightColor?: number[] | ((pickingInfo: PickingInfo) => number[]);
 
   /**
-   * Called when remote data is fetched and parsed.
+   * Called when a new data input resolves, after query evaluation and data transformation.
    */
   onDataLoad?:
     | (<LayerDataT = LayerData<unknown>>(

@@ -97,6 +97,7 @@ const defaultProps: DefaultProps<LayerProps> = {
     optional: true
   },
   query: null,
+  sqlFunctions: {type: 'array', value: [], compare: true},
   dataTransform: {type: 'function', value: null, optional: true},
   _dataLoadOptions: 'auto',
   onDataProgress: {type: 'function', value: null, optional: true},
@@ -614,6 +615,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return unwrapLoaderArrowResult(this.props.data) as LayerData<unknown>;
   }
 
+  /** Merges Deck and layer declarations by SQL name, with the layer taking precedence. */
+  private getSQLFunctions() {
+    return Array.from(
+      new Map(
+        [...(this.context.sqlFunctions ?? []), ...(this.props.sqlFunctions ?? [])].map(fn => [
+          fn.name.toUpperCase(),
+          fn
+        ])
+      ).values()
+    );
+  }
+
   /** Evaluates opted-in SQL accessors against the loaded data, preserving source row order. */
   private updateAccessorQueries(): void {
     const state = this.internalState!;
@@ -628,6 +641,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       return;
     }
     const parseExpression = this.context.sqlParser?.parseExpression;
+    const functions = this.getSQLFunctions();
     const expressions = Object.fromEntries(
       Object.entries(queries).map(([name, query]) => [name, query.sql])
     );
@@ -638,6 +652,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         inputs &&
         layer.props.data === source &&
         layer.context.sqlParser?.parseExpression === parseExpression &&
+        deepEqual(layer.getSQLFunctions(), functions, 1) &&
         Object.keys(inputs).length === Object.keys(expressions).length &&
         Object.entries(expressions).every(([name, sql]) => inputs[name]?.sql === sql)
       );
@@ -651,6 +666,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       previous &&
       previous.source === source &&
       previous.parseExpression === parseExpression &&
+      deepEqual(previous.functions, functions, 1) &&
       deepEqual(previous.expressions, expressions, 1)
     ) {
       apply(this, previous.columns);
@@ -661,6 +677,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       source,
       expressions,
       parseExpression,
+      functions,
       pending: true
     };
     state.accessorQueries = request;
@@ -672,7 +689,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     };
     void import('../arrow/accessor-queries')
       .then(({evaluateAccessorQueries}) =>
-        evaluateAccessorQueries(source, expressions, parseExpression, previous)
+        evaluateAccessorQueries(source, expressions, parseExpression, previous, functions)
       )
       .then(
         table => {

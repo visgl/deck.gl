@@ -3,12 +3,13 @@
 // Copyright (c) vis.gl contributors
 
 import {Table, type Vector} from 'apache-arrow';
-import type {SQLParser} from '../types/layer-props';
+import type {SQLFunctions, SQLParser} from '../types/layer-props';
 import {evaluateColumnExpression} from './column-constructors';
 import {isArrowTableAppend} from './column-query-append';
 import {unwrapLoaderArrowResult} from '../utils/loader-utils';
 import {isArrowTable} from './upstream-math/is-arrow-table';
 import {sqlParser} from './upstream-math/sql-parser';
+import {deepEqual} from '../utils/deep-equal';
 
 /** Evaluates row-preserving expressions, reusing prior batches for append-only data. */
 export function evaluateAccessorQueries(
@@ -19,8 +20,10 @@ export function evaluateAccessorQueries(
     source: unknown;
     expressions: Record<string, string>;
     parseExpression: SQLParser['parseExpression'];
+    functions?: SQLFunctions;
     table?: Table;
-  }
+  },
+  functions?: SQLFunctions
 ): Table {
   const data = unwrapLoaderArrowResult(source);
   if (!isArrowTable(data)) {
@@ -34,6 +37,7 @@ export function evaluateAccessorQueries(
     isArrowTable(priorSource) &&
     priorTable &&
     previous.parseExpression === parseExpression &&
+    deepEqual(previous.functions, functions, 1) &&
     Object.keys(previous.expressions).length === entries.length &&
     entries.every(([name, expression]) => previous.expressions[name] === expression) &&
     isArrowTableAppend(priorSource, data);
@@ -45,7 +49,7 @@ export function evaluateAccessorQueries(
   const evaluate = (table: Table) => {
     const columns: Record<string, Vector> = Object.create(null);
     for (const {name, expression} of parsed) {
-      columns[name] = evaluateColumnExpression(expression, table);
+      columns[name] = evaluateColumnExpression(expression, table, functions);
     }
     return new Table(columns);
   };
