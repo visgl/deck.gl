@@ -282,6 +282,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       colors?: AttributeWithScale;
       elevations?: AttributeWithScale;
 
+      /** Whether domains, scales, callbacks or picking require a CPU result snapshot. */
       metadataRequired?: boolean;
       binIdRange: [number, number][];
       aggregatorViewport: Viewport;

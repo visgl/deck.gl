@@ -96,13 +96,16 @@ export default abstract class AggregationLayer<
   state!: {
     aggregatorType: string;
     aggregator: Aggregator;
+    /** CPU-backed previous cells, prepared only while replacement metadata is pending. */
     retainedAggregationLayer?: Layer;
+    /** Completed geometry and immutable result arrays retained until the next completed frame. */
     retainedAggregationFrame?: {
       layer: Layer;
       range: [number, number][];
       values: (Float32Array | null | undefined)[];
       binCount: number;
     };
+    /** Projection frame used by world-space compute aggregation and extension uniforms. */
     aggregatorViewport?: Viewport;
   } & CompositeLayer['state'];
 

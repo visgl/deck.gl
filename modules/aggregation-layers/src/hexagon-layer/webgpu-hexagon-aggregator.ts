@@ -11,6 +11,7 @@ import {binOptionsUniforms} from './bin-options-uniforms';
 
 /** Hexagonal bin assignment for the shared two-channel reducer. @internal */
 export class WebGPUHexagonAggregator extends WebGPUAggregator {
+  /** Configure hexagonal assignment and the owning layer's optional input shader hooks. */
   constructor(
     device: Device,
     extensions: Pick<WebGPUAggregatorOptions, 'shaders' | 'bindAttributes' | 'requestRedraw'> = {}
