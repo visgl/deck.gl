@@ -11,6 +11,7 @@ import Layer from './layer';
 import type {Table, Vector} from 'apache-arrow';
 import type {SQLFunctions, SQLParser} from '../types/layer-props';
 import type AttributeManager from './attribute/attribute-manager';
+import type {BinaryAttribute} from './attribute/attribute';
 import type Viewport from '../viewports/viewport';
 import type {PickingInfo} from './picking/pick-info';
 import type UniformTransitionManager from './uniform-transition-manager';
@@ -98,6 +99,11 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
   preprojectionChanged = false;
   /** Target geometry configuration, independent of the packed attribute CRS. */
   tessellationSignature: string | null = null;
+  /**
+   * Versioned entries of `data.attributes` as of the last update, by key. In-place version bumps
+   * do not change the `data` object, so they are detected against these.
+   */
+  binaryAttributeSnapshots: Record<string, BinaryAttribute> = {};
 
   /** First eligible viewport, retained for attribute and sublayer updates. */
   viewport?: Viewport;
