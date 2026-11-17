@@ -68,7 +68,8 @@ const defaultProps: DefaultProps<Tile3DLayerProps> = {
   onTileLoad: {type: 'function', value: tileHeader => {}},
   onTileUnload: {type: 'function', value: tileHeader => {}},
   onTileError: {type: 'function', value: (tile, message, url) => {}},
-  _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255]}
+  _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255]},
+  _maxNewTilesPerFrame: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 1}
 };
 
 /** All properties supported by Tile3DLayer */
@@ -102,6 +103,14 @@ type _Tile3DLayerProps<DataT> = {
 
   /** (Experimental) Accessor to change color of mesh based on properties. **/
   _getMeshColor?: (tile: Tile3D) => Color;
+
+  /**
+   * (Experimental) Maximum number of loaded glTF tiles that get a sublayer per frame.
+   * Creating a sublayer uploads its tile to the GPU, so bursts of arriving tiles can stall
+   * frames. Tiles over the limit wait for later frames while their parent stays visible.
+   * @default no limit
+   */
+  _maxNewTilesPerFrame?: number;
 };
 
 /** Render 3d tiles data formatted according to the [3D Tiles Specification](https://www.opengeospatial.org/standards/3DTiles) and [`ESRI I3S`](https://github.com/Esri/i3s-spec) */
@@ -117,6 +126,8 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     lastUpdatedViewports: {[viewportId: string]: Viewport} | null;
     layerMap: {[layerId: string]: any};
     tileset3d: Tileset3D | null;
+    /** Frame request that creates the sublayers deferred by `_maxNewTilesPerFrame` */
+    nextTilesFrame?: number;
   };
 
   initializeState() {
@@ -164,6 +175,9 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   finalizeState(context: LayerContext): void {
+    if (this.state.nextTilesFrame !== undefined) {
+      cancelAnimationFrame(this.state.nextTilesFrame);
+    }
     this.state.tileset3d?.destroy();
     this.state.tileset3d = null;
     this.state.layerMap = {};
@@ -438,12 +452,45 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     );
   }
 
+  /** Returns the new tiles that wait for a later frame to stay within `_maxNewTilesPerFrame` */
+  private _getDeferredTiles(): Set<Tile3D> {
+    const {tileset3d, layerMap} = this.state;
+    const maxNewTiles = this.props._maxNewTilesPerFrame;
+    // Only glTF tiles report their first draw, which keeps their parent visible while they wait
+    const newTiles = (tileset3d!.selectedTiles as Tile3D[]).filter(
+      tile => tile.content && tile.type === TILE_TYPE.SCENEGRAPH && !layerMap[tile.id]?.layer
+    );
+    if (newTiles.length <= maxNewTiles) {
+      return new Set();
+    }
+
+    // Create siblings together, so that loaders.gl can release their parent as early as possible
+    const siblingsOrder = new Map<Tile3D | null, number>();
+    newTiles.forEach((tile, index) => {
+      if (!siblingsOrder.has(tile.parent)) {
+        siblingsOrder.set(tile.parent, index);
+      }
+    });
+    newTiles.sort((a, b) => siblingsOrder.get(a.parent)! - siblingsOrder.get(b.parent)!);
+
+    // `setNeedsUpdate` has no effect during an update, so request it from the next frame
+    this.state.nextTilesFrame ??= requestAnimationFrame(() => {
+      const layer = this.getCurrentLayer() as this | null;
+      if (layer) {
+        layer.state.nextTilesFrame = undefined;
+        layer.setNeedsUpdate();
+      }
+    });
+    return new Set(newTiles.slice(maxNewTiles));
+  }
+
   renderLayers(): Layer | null | LayersList {
     const {tileset3d, layerMap} = this.state;
     if (!tileset3d) {
       return null;
     }
 
+    const deferredTiles = this._getDeferredTiles();
     // loaders.gl doesn't provide a type for tileset3d.tiles
     return (tileset3d.tiles as Tile3D[])
       .map(tile => {
@@ -451,7 +498,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         let {layer} = layerCache;
         if (tile.selected) {
           // render selected tiles
-          if (!layer) {
+          if (!layer && !deferredTiles.has(tile)) {
             // create layer
             layer = this._getSubLayer(tile);
           } else if (layerCache.needsUpdate) {

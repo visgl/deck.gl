@@ -235,6 +235,12 @@ The opacity of the layer. The same as defined in [layer](../core/layer.md).
 Global radius of all points in pixels.
 This value is only applied when [tile format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction) is `pnts`.
 
+#### `_maxNewTilesPerFrame` (number, Optional) {#_maxnewtilesperframe}
+
+- Default: no limit
+
+Maximum number of loaded glTF tiles (`b3dm`, `i3dm` and `glb`) that get a sublayer per frame. Creating a sublayer uploads the tile to the GPU, so many tiles arriving at once can stall a frame. Tiles over the limit are created on later frames, siblings together, while their parent tile stays visible. Point cloud and mesh tiles are not limited.
+
 ### Data Properties
 
 #### `data` (string) {#data}
