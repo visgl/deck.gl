@@ -62,7 +62,7 @@ export class TerrainPickingPass extends PickLayersPass {
     // At pixels where no layer renders in the cover (e.g. mesh gaps at tile edges),
     // this ensures the pixel still maps to the terrain layer instead of MISS.
     const terrainParams = this.drawParameters[terrainLayer.id];
-    const terrainAlpha = terrainParams?.blendColor?.[3] ?? 0;
+    const terrainAlpha = terrainParams?.blendConstant?.[3] ?? terrainParams?.blendColor?.[3] ?? 0;
 
     this.render({
       ...opts,
@@ -99,7 +99,7 @@ export class TerrainPickingPass extends PickLayersPass {
       ...base,
       terrain: {
         project: otherShaderModuleProps.project,
-        isPickingCover: true
+        isPickingCover: layer.state.terrainDrawMode === 'drape'
       }
     };
   }
