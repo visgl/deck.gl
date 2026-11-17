@@ -178,7 +178,7 @@ export default abstract class AggregationLayer<
 
   /** Materialize CPU geometry only when a pending frame needs the previous cells. */
   protected getRetainedAggregationLayer(): Layer | null {
-    if (this.state.retainedAggregationLayer) return this.state.retainedAggregationLayer;
+    if (this.state.retainedAggregationLayer) return this.state.retainedAggregationLayer ?? null;
     const frame = this.state.retainedAggregationFrame;
     if (!frame) return null;
     const {layer, range, values, binCount} = frame;
@@ -204,7 +204,7 @@ export default abstract class AggregationLayer<
         getElevationValue: [attributes.getElevationValue]
       }
     });
-    return this.state.retainedAggregationLayer;
+    return this.state.retainedAggregationLayer ?? null;
   }
 
   /** Forwards extension uniforms to the GPU aggregation model as well as rendering models. */

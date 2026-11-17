@@ -12,6 +12,8 @@ ArcLayer, PathLayer, PolygonLayer, SolidPolygonLayer, and GeoJsonLayer, as well 
 [top-level layer highlights](./api-reference/core/layer.md#highlightcolor). Top-level bitmap tints,
 bitmap transparency, and text outlines also use the setting. Other composite layers
 retain their existing color conventions.
+IconLayer, PointCloudLayer, and ColumnLayer also honor this setting for color accessors.
+
 
 ### Experimental batch loading
 
@@ -35,8 +37,8 @@ layer's prop descriptions for supported inputs.
 ### Hexagon compute aggregation
 
 On WebGPU devices, [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md#compute-aggregation)
-aggregates in compute shaders, including automatic domains, picking, quantile and ordinal
-scales, percentiles, and extensions.
+aggregates in compute shaders, including with automatic domains, picking, quantile and ordinal
+scales, percentiles and extensions.
 
 ### ScreenGrid and Grid compute rendering features
 
