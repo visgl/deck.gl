@@ -1774,7 +1774,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Called after updateState to perform common tasks */
   // eslint-disable-next-line complexity
   protected _postUpdate(updateParams: UpdateParameters<Layer<PropsT>>, forceUpdate: boolean) {
-    const {props, oldProps} = updateParams;
+    const {props, oldProps, changeFlags} = updateParams;
 
     // Note: Automatic instance count update only works for single layers
     const model = this.state.model as LumaGPUVectorModel | undefined;
@@ -1788,7 +1788,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const normalizedHighlightColor = this.usesNormalizedColors();
     const colorConventionChanged = state.normalizedHighlightColor !== normalizedHighlightColor;
     state.normalizedHighlightColor = normalizedHighlightColor;
-    if (forceUpdate || !autoHighlight || Number.isInteger(highlightedObjectIndex)) {
+    const hoverDataChanged = Boolean(changeFlags.dataChanged && state.hoverHighlightInfo);
+    const resetHover = hoverDataChanged && typeof highlightColor === 'function';
+    if (
+      forceUpdate ||
+      !autoHighlight ||
+      Number.isInteger(highlightedObjectIndex) ||
+      hoverDataChanged
+    ) {
       state.hoverHighlightInfo = null;
     }
     if (
@@ -1796,13 +1803,20 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       oldProps.autoHighlight !== autoHighlight ||
       oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
       oldProps.highlightColor !== highlightColor ||
-      colorConventionChanged
+      colorConventionChanged ||
+      resetHover
     ) {
       const picking: PickingProps = {};
 
+      const hoverInfo = state.hoverHighlightInfo;
       const color =
         typeof highlightColor === 'function'
-          ? state.hoverHighlightInfo && highlightColor(state.hoverHighlightInfo)
+          ? hoverInfo &&
+            highlightColor({
+              ...hoverInfo,
+              layer: hoverInfo.layer?.id === this.id ? this : hoverInfo.layer,
+              sourceLayer: hoverInfo.sourceLayer?.id === this.id ? this : hoverInfo.sourceLayer
+            })
           : Array.isArray(highlightColor) && highlightColor;
       if (color) {
         picking.highlightColor = color as PickingProps['highlightColor'];
@@ -1817,7 +1831,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       if (
         forceUpdate ||
         oldProps.autoHighlight !== autoHighlight ||
-        highlightedObjectIndex !== oldProps.highlightedObjectIndex
+        highlightedObjectIndex !== oldProps.highlightedObjectIndex ||
+        resetHover
       ) {
         picking.highlightedObjectColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0

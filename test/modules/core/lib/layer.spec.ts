@@ -613,6 +613,7 @@ test('Layer#updateModules', async () => {
   }
 
   const HALF_BYTE = 128 / 255;
+  let callbackLayer: Layer | null = null;
 
   await testLayerAsync({
     Layer: LayerWithModel,
@@ -680,7 +681,7 @@ test('Layer#updateModules', async () => {
           highlightColor: () => [1, 0.5, 0]
         },
         onAfterUpdate: ({layer}) => {
-          layer.updateAutoHighlight({picked: true, color: [3, 0, 0]});
+          layer.updateAutoHighlight({picked: true, color: [3, 0, 0], layer});
           const {picking} = layer.state.model.shaderInputs.getUniformValues();
           expect(picking.highlightColor).toEqual([1, 0.5, 0, 1]);
           expect(picking.highlightedObjectColor).toEqual([3, 0, 0]);
@@ -701,14 +702,34 @@ test('Layer#updateModules', async () => {
       {
         title: 'Deck convention changes update a replacement hover callback',
 
-        updateProps: {highlightColor: () => [0, 0.5, 1, 0]},
+        updateProps: {
+          highlightColor: ({layer}) => {
+            callbackLayer = layer;
+            return [0, 0.5, 1, 0];
+          }
+        },
         onBeforeUpdate: ({layer}) => {
           layer.context.layerManager.setProps({normalizedColors: true});
         },
         onAfterUpdate: ({layer}) => {
           const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(callbackLayer).toBe(layer);
           expect(picking.highlightColor).toEqual([0, 0.5, 1, 0]);
           expect(picking.highlightedObjectColor).toEqual([3, 0, 0]);
+        }
+      },
+      {
+        title: 'Data replacement discards the stale hover',
+
+        updateProps: {
+          data: [{}],
+          highlightColor: () => {
+            throw new Error('stale highlight callback');
+          }
+        },
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.isHighlightActive).toBe(false);
         }
       },
       {
