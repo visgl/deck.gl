@@ -243,7 +243,7 @@ new Deck({
 
 Default: `false`.
 
-When enabled, top-level ScatterplotLayer, LineLayer, and ArcLayer interpret plain JavaScript arrays
+When enabled, top-level ScatterplotLayer, LineLayer, ArcLayer, IconLayer, PointCloudLayer, and ColumnLayer interpret plain JavaScript arrays
 passed to their color accessors, including arrays returned by callbacks, as 0–1 channels.
 Channels are clamped and rounded to bytes for GPU storage. Omitted alpha is opaque.
 Built-in defaults, typed arrays, Arrow columns, and binary inputs keep their existing encoding.
