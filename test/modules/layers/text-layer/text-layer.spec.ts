@@ -48,6 +48,24 @@ test('TextLayer - sdf', () => {
       },
       onAfterUpdate: ({subLayer}) => {
         expect(subLayer.props.sdf, 'sublayer props.sdf').toBeTruthy();
+        expect(subLayer.state.outlineColor).toEqual([0, 0, 0, 1]);
+      }
+    },
+    {
+      updateProps: {outlineColor: [1, 0.5, 0, 0]},
+      onBeforeUpdate: ({layer}) => {
+        layer.context.layerManager.setProps({normalizedColors: true});
+      },
+      onAfterUpdate: ({subLayer}) => {
+        expect(subLayer.state.outlineColor).toEqual([1, 0.5, 0, 0]);
+      }
+    },
+    {
+      onBeforeUpdate: ({layer}) => {
+        layer.context.layerManager.setProps({normalizedColors: false});
+      },
+      onAfterUpdate: ({subLayer}) => {
+        expect(subLayer.state.outlineColor).toEqual([1 / 255, 0.5 / 255, 0, 0]);
       }
     }
   ];

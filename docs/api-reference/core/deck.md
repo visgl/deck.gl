@@ -248,6 +248,7 @@ passed to their color accessors, including arrays returned by callbacks, as 0–
 Channels are clamped and rounded to bytes for GPU storage. Omitted alpha is opaque.
 Built-in defaults, typed arrays, Arrow columns, and binary inputs keep their existing encoding.
 [View clear colors](./view.md#clearcolor) also use 0–1 channels when enabled.
+Top-level BitmapLayer tint and transparency and TextLayer outline colors also follow this setting.
 Composite sublayers, other layers, and other color properties continue to use their documented conventions.
 
 #### `layerFilter` (Function) {#layerfilter}

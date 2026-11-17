@@ -618,6 +618,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             : DEFAULT_FONT_SETTINGS.smoothing,
           outlineWidth: outlineWidth / (fontSettings.radius || DEFAULT_FONT_SETTINGS.radius),
           outlineColor,
+          outlineColorUseByteColors: !this.usesNormalizedColors() || outlineColor === DEFAULT_COLOR,
           iconAtlas: atlas,
           iconMapping: mapping,
 

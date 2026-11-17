@@ -32,6 +32,12 @@ import source from './bitmap-layer.wgsl';
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
+/** White tint in the legacy byte convention. */
+const DEFAULT_TINT_COLOR = [255, 255, 255] as const;
+
+/** Transparent replacement color in the legacy byte convention. */
+const DEFAULT_TRANSPARENT_COLOR = [0, 0, 0, 0] as const;
+
 const defaultProps: DefaultProps<BitmapLayerProps> = {
   image: {type: 'image', value: null, async: true},
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
@@ -42,8 +48,8 @@ const defaultProps: DefaultProps<BitmapLayerProps> = {
   // More context: because of the blending mode we're using for ground imagery,
   // alpha is not effective when blending the bitmap layers with the base map.
   // Instead we need to manually dim/blend rgb values with a background color.
-  transparentColor: {type: 'color', value: [0, 0, 0, 0]},
-  tintColor: {type: 'color', value: [255, 255, 255]},
+  transparentColor: {type: 'color', value: DEFAULT_TRANSPARENT_COLOR},
+  tintColor: {type: 'color', value: DEFAULT_TINT_COLOR},
 
   textureParameters: {type: 'object', ignore: true, value: null}
 };
@@ -348,19 +354,20 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     // // TODO fix zFighting
     // Render the image
     if (image && model) {
+      const normalizedColors = this.usesNormalizedColors();
       const bitmapProps: BitmapProps = {
         bitmapTexture: image as Texture,
         bounds,
         coordinateConversion,
         desaturate,
-        // Decode public byte colors at the boundary; shader inputs are normalized.
-        tintColor: normalizeByteColor3([tintColor[0], tintColor[1], tintColor[2]]),
-        transparentColor: normalizeByteColor4([
-          transparentColor[0],
-          transparentColor[1],
-          transparentColor[2],
-          transparentColor[3] ?? 255
-        ])
+        tintColor: normalizeByteColor3(
+          tintColor,
+          !normalizedColors || tintColor === DEFAULT_TINT_COLOR
+        ) as BitmapProps['tintColor'],
+        transparentColor: normalizeByteColor4(
+          transparentColor,
+          !normalizedColors || transparentColor === DEFAULT_TRANSPARENT_COLOR
+        )
       };
       model.shaderInputs.setProps({bitmap: bitmapProps});
       model.draw(this.context.renderPass);

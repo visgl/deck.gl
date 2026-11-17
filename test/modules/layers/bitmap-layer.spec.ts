@@ -369,11 +369,11 @@ test('BitmapLayer#typed byte colors retain fractional shader components', () => 
   const tintColor = new Uint8Array([128, 64, 32]);
   const transparentColor = new Uint8Array([32, 64, 128, 192]);
   BitmapLayer.prototype.draw.call(
-    {
+    Object.assign(Object.create(BitmapLayer.prototype), {
       props: {image: {}, desaturate: 0, tintColor, transparentColor},
       state: {model: {shaderInputs: {setProps}, draw: vi.fn()}},
-      context: {renderPass: {}}
-    } as unknown as BitmapLayer,
+      context: {renderPass: {}, normalizedColors: true}
+    }),
     {shaderModuleProps: {picking: {isActive: false}}}
   );
   const {bitmap} = setProps.mock.calls[0][0];
@@ -381,4 +381,21 @@ test('BitmapLayer#typed byte colors retain fractional shader components', () => 
   expect(bitmap.transparentColor).toEqual([32 / 255, 64 / 255, 128 / 255, 192 / 255]);
   expect(Array.from(tintColor)).toEqual([128, 64, 32]);
   expect(Array.from(transparentColor)).toEqual([32, 64, 128, 192]);
+});
+
+test('BitmapLayer#normalizes plain colors and preserves the default tint', () => {
+  const setProps = vi.fn();
+  const {tintColor} = new BitmapLayer().props;
+  const layer = Object.assign(Object.create(BitmapLayer.prototype), {
+    props: {image: {}, desaturate: 0, tintColor, transparentColor: [0.5, 0.25, 0, 0]},
+    state: {model: {shaderInputs: {setProps}, draw: vi.fn()}},
+    context: {renderPass: {}, normalizedColors: true}
+  });
+  layer.draw({shaderModuleProps: {picking: {isActive: false}}});
+  expect(setProps.mock.calls[0][0].bitmap.tintColor).toEqual([1, 1, 1]);
+  expect(setProps.mock.calls[0][0].bitmap.transparentColor).toEqual([0.5, 0.25, 0, 0]);
+
+  layer.props.tintColor = [1, 0.5, 0];
+  layer.draw({shaderModuleProps: {picking: {isActive: false}}});
+  expect(setProps.mock.calls[1][0].bitmap.tintColor).toEqual([1, 0.5, 0]);
 });
