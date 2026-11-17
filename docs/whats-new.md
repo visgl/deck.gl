@@ -105,7 +105,7 @@ Looking ahead, deck.gl v10 is expected to introduce larger architectural changes
 
 ### Terrain fitting
 
-Use [`TerrainExtension`](./api-reference/extensions/terrain-extension.md) with `terrainDrawMode: 'offset'` to fit objects to the uppermost terrain surface. Texture draping remains WebGL-only.
+Use [`TerrainExtension`](./api-reference/extensions/terrain-extension.md) with `terrainDrawMode: 'offset'` to fit objects to the uppermost terrain surface. Texture draping overlays layer colors and picking data on the terrain surface.
 
 ### WebGPU
 

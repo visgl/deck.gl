@@ -98,7 +98,8 @@ export class TerrainPickingPass extends PickLayersPass {
     return {
       ...base,
       terrain: {
-        project: otherShaderModuleProps.project
+        project: otherShaderModuleProps.project,
+        isPickingCover: true
       }
     };
   }

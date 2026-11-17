@@ -308,6 +308,28 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
     }
   );
 
+  if (backend === 'webgpu')
+    it('drapes a path and picks it at the terrain surface', async () => {
+      const terrain = createTerrain(() => 40, true);
+      const elevated = [{...DATA[0], path: DATA[0].path.map(([x, y]) => [x, y, 40])}];
+      const reference = await renderFrame(
+        {data: elevated, getWidth: backend === 'webgpu' ? 4 : 8},
+        false
+      );
+      const fitted = await renderFrame(
+        {extensions: [new TerrainExtension()], terrainDrawMode: 'drape'},
+        false,
+        0,
+        terrain
+      );
+      expect(totalBrightness(reference)).toBeGreaterThan(1000);
+      expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
+      const [x, y] = deck!.getViewports()[0].project([-50, 0, 40]);
+      const picked = await deck!.pickObjectAsync({x, y, radius: 3});
+      expect(picked?.layer?.id).toBe('path-drape');
+      expect(picked?.index).toBe(0);
+    });
+
   it('encodes terrain picking only when the terrain is pickable', async () => {
     const terrain = createTerrain(() => 25, true);
     const props = {extensions: [new TerrainExtension()], terrainDrawMode: 'offset' as const};
