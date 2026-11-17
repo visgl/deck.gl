@@ -207,6 +207,9 @@ new GridLayer({
 
 Custom JavaScript callbacks and grids exceeding device limits use CPU aggregation.
 
+Previous cells remain visible and cannot be picked while new domains or scales are pending,
+as described for [HexagonLayer](./hexagon-layer.md#compute-aggregation).
+
 #### `cellSize` (number, optional) {#cellsize}
 
 * Default: `1000`
