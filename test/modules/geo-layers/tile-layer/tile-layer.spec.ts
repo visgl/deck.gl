@@ -11,6 +11,64 @@ import {TileLayer} from '@deck.gl/geo-layers';
 const DUMMY_DATA =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/test-data/geojson-point.json';
 
+test('TileLayer updates default GeoJSON tile colors without refetching', async () => {
+  let requests = 0;
+  let initialRequests = 0;
+  const viewport = new WebMercatorViewport({width: 100, height: 100, zoom: 0});
+  const checkColor = ({layer, subLayers}, color) => {
+    if (layer.isLoaded) {
+      expect(subLayers.length).toBeGreaterThan(0);
+      const pointLayer = subLayers[0].getSubLayers()[0];
+      expect(pointLayer.props.getFillColor).toEqual(color);
+    }
+  };
+
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          data: [],
+          getFillColor: [1, 0.5, 0, 0],
+          getTileData: () => {
+            requests++;
+            return [
+              {
+                type: 'Feature',
+                properties: {},
+                geometry: {type: 'Point', coordinates: [0, 0]}
+              }
+            ];
+          }
+        },
+        onAfterUpdate: update => {
+          checkColor(update, [1, 0.5, 0, 0]);
+          if (update.layer.isLoaded) initialRequests = requests;
+        }
+      },
+      {
+        onBeforeUpdate: ({layer}) => layer.context.layerManager.setProps({normalizedColors: true}),
+        onAfterUpdate: update => {
+          checkColor(update, [255, 128, 0, 0]);
+          expect(initialRequests).toBeGreaterThan(0);
+          expect(requests).toBe(initialRequests);
+        }
+      },
+      {
+        onBeforeUpdate: ({layer}) => layer.context.layerManager.setProps({normalizedColors: false}),
+        onAfterUpdate: update => {
+          checkColor(update, [1, 0.5, 0, 0]);
+          expect(requests).toBe(initialRequests);
+        }
+      }
+    ]
+  });
+});
+
 test('TileLayer', async () => {
   const testCases = generateLayerTests({
     Layer: TileLayer,

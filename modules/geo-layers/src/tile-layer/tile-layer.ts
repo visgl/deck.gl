@@ -28,11 +28,25 @@ import {
 import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d/index';
 import {Matrix4} from '@math.gl/core';
 
+/** GeoJSON tile renderer that forwards the top-level application's color convention. */
+class TileGeoJsonLayer extends GeoJsonLayer<any, {_normalizedTileColors?: boolean}> {
+  static layerName = 'TileGeoJsonLayer';
+
+  /** The tile parent forwards user styling props, including the selected input convention. */
+  protected usesNormalizedColors(): boolean {
+    return Boolean(this.props._normalizedTileColors);
+  }
+}
+
+/** Default render function used for vector tiles. */
+const renderGeoJsonTile = (props: ConstructorParameters<typeof TileGeoJsonLayer>[0]) =>
+  new TileGeoJsonLayer(props);
+
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
   data: {type: 'data', value: []},
   dataComparator: urlType.equal,
-  renderSubLayers: {type: 'function', value: (props: any) => new GeoJsonLayer(props)},
+  renderSubLayers: {type: 'function', value: renderGeoJsonTile},
   getTileData: {type: 'function', optional: true, value: null},
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null},
@@ -66,7 +80,8 @@ type _TileLayerProps<DataT> = {
    */
   TilesetClass?: typeof Tileset2D;
   /**
-   * Renders one or an array of Layer instances.
+   * Renders one or an array of Layer instances. The default GeoJsonLayer renderer forwards
+   * color accessors using the Deck color convention.
    */
   renderSubLayers?: (
     props: TileLayerProps<DataT> & {
@@ -199,6 +214,8 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     tileset: Tileset2D | null;
     isLoaded: boolean;
     frameNumber?: number;
+    /** Color convention applied to the cached default renderers. */
+    normalizedTileColors?: boolean;
   };
 
   initializeState() {
@@ -237,11 +254,18 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
+    const normalizedTileColors =
+      this.props.renderSubLayers === renderGeoJsonTile && this.usesNormalizedColors();
+    const colorsChanged = normalizedTileColors !== this.state.normalizedTileColors;
+    this.state.normalizedTileColors = normalizedTileColors;
+
     if (!tileset) {
       tileset = new this.props.TilesetClass(this._getTilesetOptions());
       this.setState({tileset});
-    } else if (propsChanged) {
-      tileset.setOptions(this._getTilesetOptions());
+    } else if (propsChanged || colorsChanged) {
+      if (propsChanged) {
+        tileset.setOptions(this._getTilesetOptions());
+      }
 
       if (dataChanged) {
         // reload all tiles
@@ -370,7 +394,14 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       tile: Tile2DHeader<DataT>;
     }
   ): Layer | null | LayersList {
-    return this.props.renderSubLayers(props);
+    const {renderSubLayers} = this.props;
+    if (renderSubLayers === renderGeoJsonTile) {
+      return renderGeoJsonTile({
+        ...props,
+        _normalizedTileColors: this.state.normalizedTileColors
+      } as ConstructorParameters<typeof TileGeoJsonLayer>[0]);
+    }
+    return renderSubLayers(props);
   }
 
   getSubLayerPropsByTile(tile: Tile2DHeader): Partial<LayerProps> | null {
