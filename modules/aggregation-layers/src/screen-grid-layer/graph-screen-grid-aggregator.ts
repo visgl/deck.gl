@@ -42,27 +42,45 @@ export class GraphScreenGridAggregator implements Aggregator {
   get isLoaded(): boolean {
     return !this.dirty && (!this.props.readback || this.snapshot !== null);
   }
+  /** Current aggregation inputs and callbacks. */
   private props: AggregationProps = {pointCount: 0, attributes: {}, operations: [], binOptions: {}};
+  /** Borrowed extension shader configuration from the layer. */
   private shaderContext?: AggregationShaderContext;
+  /** Latest extension uniform values. */
   private extensionUniformProps: Record<string, unknown> = {};
+  /** Whether inputs require a new aggregation. */
   private dirty = true;
+  /** Input revision used to reject stale asynchronous copies. */
   private revision = 0;
+  /** Revision for which a metadata retry has already been requested. */
   private metadataRetryRevision = -1;
+  /** Whether owned resources have been released. */
   private destroyed = false;
+  /** Completed CPU metadata for the current input revision. */
   private snapshot: {
     values: Float32Array;
     counts: Uint32Array;
     range: [number, number][];
   } | null = null;
+  /** Number of columns in the dense screen grid. */
   private columns = 0;
+  /** Packed count and value buffer for metadata and rendering. */
   private bins: Buffer | null = null;
+  /** Owned screen-bin identifier storage. */
   private idBuffer: Buffer | null = null;
+  /** Owned aggregated value storage. */
   private valueBuffer: Buffer | null = null;
+  /** Borrowed view of the owned bin identifier buffer. */
   private ids: GPUVector | null = null;
+  /** Borrowed view of the owned result buffer. */
   private result: GPUVector | null = null;
+  /** Device supplied when the layer adopts the aggregator. */
   private device!: Device;
+  /** Graph executor owned by this aggregator. */
   private graph!: ScreenGridGraph;
+  /** Computation converting packed results to rendering inputs. */
   private finalizeBins!: Computation;
+  /** Owned zero-valued fallback input buffer. */
   private zero!: Buffer;
 
   /** Allocate resources when ScreenGridLayer adopts this instance. Requires a WebGPU device. */
@@ -306,6 +324,7 @@ export class GraphScreenGridAggregator implements Aggregator {
     };
   }
 
+  /** Copy current results to CPU metadata, retrying one transient failure. */
   private async readMetadata(revision: number): Promise<void> {
     const length = this.binCount;
     const range = this.props.binIdRange!.map(pair => [...pair] as [number, number]);
@@ -345,6 +364,7 @@ export class GraphScreenGridAggregator implements Aggregator {
     }
   }
 
+  /** Release output views and their separately owned buffers. */
   private destroyOutputs(): void {
     this.idBuffer?.destroy();
     this.valueBuffer?.destroy();

@@ -63,17 +63,28 @@ struct Bin { count: u32, value: u32 };
 
 /** ScreenGrid's projection/packing adapter around generic graph reductions. @internal */
 export class ScreenGridGraph {
+  /** Projection and bin-assignment computation. */
   private assign: Computation;
+  /** Packs counts and values for the rendering adapter. */
   private readonly pack: Computation;
+  /** Executable graph for the current shape and input bindings. */
   private compiled?: CompiledGPUCommandGraph;
+  /** Borrowed layer shader configuration. */
   private shaderContext?: AggregationShaderContext;
+  /** Latest uniforms forwarded by the owning layer. */
   private shaderModuleProps: Record<string, any> = {};
+  /** Extension input bindings for the current executable. */
   private extensionInputs?: DeckAggregationInputs;
+  /** Borrowed attribute buffers used by the current executable. */
   private attributeBuffers: Buffer[] = [];
+  /** Input layout identity used to detect graph rebuilds. */
   private layoutSignature = '';
+  /** Point count, bin count and operation of the current executable. */
   private shape = '';
+  /** Scratch buffers owned by the current executable. */
   private buffers: Record<string, Buffer> = {};
 
+  /** Create the projection and output packing computations. */
   constructor(
     private readonly device: Device,
     private readonly binning: string,
@@ -87,6 +98,7 @@ export class ScreenGridGraph {
     });
   }
 
+  /** Replace extension shaders and invalidate the executable graph. */
   setShaderContext(context: AggregationShaderContext): void {
     const wasFiltering = Boolean(this.shaderContext?.shaders.plugins?.length);
     const filtering = Boolean(context.shaders.plugins?.length);
@@ -99,6 +111,7 @@ export class ScreenGridGraph {
     }
   }
 
+  /** Create the bin-assignment computation with optional extension selection. */
   private createAssignment(filtering: boolean): Computation {
     return new Computation(this.device, {
       id: 'aggregation-assign',
@@ -107,12 +120,14 @@ export class ScreenGridGraph {
     });
   }
 
+  /** Forward current projection and binning uniforms. */
   setShaderModuleProps(props: Record<string, any>): void {
     Object.assign(this.shaderModuleProps, props);
     if (props.project) this.assign.shaderInputs.setProps({project: props.project});
     if (props.binOptions) this.assign.shaderInputs.setProps({binOptions: props.binOptions});
   }
 
+  /** Encode assignment, extension input evaluation, reduction and output packing. */
   encode(
     encoder: CommandEncoder,
     settings: Record<string, any>,
@@ -229,6 +244,7 @@ export class ScreenGridGraph {
     this.dispatch(this.pack, encoder, settings, binCount);
   }
 
+  /** Dispatch a bounded two-dimensional compute grid for the requested rows. */
   private dispatch(
     computation: Computation,
     encoder: CommandEncoder,
@@ -245,6 +261,7 @@ export class ScreenGridGraph {
     pass.end();
   }
 
+  /** Release graph-owned scratch storage and reset borrowed binding identities. */
   private destroyGraph(): void {
     this.compiled?.destroy();
     this.compiled = undefined;
@@ -256,6 +273,7 @@ export class ScreenGridGraph {
     this.layoutSignature = '';
   }
 
+  /** Release all computations and graph-owned storage. */
   destroy(): void {
     this.destroyGraph();
     this.assign.destroy();

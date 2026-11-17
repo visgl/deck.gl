@@ -64,9 +64,13 @@ struct Varyings {
 
 /** Deck input hooks producing the mask and weights consumed by generic grouped reductions. */
 export class DeckAggregationInputsOperation implements GPUOperation {
+  /** Semantic operation discriminator. */
   readonly type = 'deck-aggregation-inputs';
+  /** Stable identifier for the input shader operation. */
   readonly id = 'deck-aggregation-inputs';
+  /** Capture borrowed layer shaders and input bindings. */
   constructor(readonly inputs: DeckAggregationInputs) {}
+  /** Describe group-key reads and filtered contribution writes. */
   get contract(): GPUOperationContract {
     return {
       values: [
