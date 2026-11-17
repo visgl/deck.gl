@@ -4,10 +4,15 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Contour compute aggregation
+
+On WebGPU devices, [ContourLayer](./api-reference/aggregation-layers/contour-layer.md#compute-aggregation) aggregates points in a compute shader before generating contours.
+
 ### Optional graph aggregation
 
 The experimental [`_GraphScreenGridAggregator`](./api-reference/aggregation-layers/aggregator.md#graphscreengridaggregator)
 lets applications customize ScreenGrid aggregation using GPU graphs.
+
 
 ### Normalized color inputs
 
