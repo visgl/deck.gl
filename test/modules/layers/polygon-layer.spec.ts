@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
@@ -125,14 +125,21 @@ test('PolygonLayer forwards normalized strokes and wireframes as bytes', () => {
       ]
     }
   ];
-  const getLineColor = () => [1, 0.5, 0, 0];
+  const getLineColor = vi.fn(() => [1, 0.5, 0, 0]);
   testLayer({
     Layer: PolygonLayer,
     onError: error => {
       throw error;
     },
     testCases: [
-      {props: {data, getPolygon: row => row.polygon, getLineColor}},
+      {
+        props: {
+          data,
+          getPolygon: row => row.polygon,
+          getLineColor,
+          updateTriggers: {getLineColor: [1]}
+        }
+      },
       {
         onBeforeUpdate: ({layer}) => {
           layer.context.layerManager.setProps({normalizedColors: true});
@@ -143,6 +150,15 @@ test('PolygonLayer forwards normalized strokes and wireframes as bytes', () => {
           expect(fill.props.getFillColor).toEqual([0, 0, 0, 255]);
           const {instanceColors} = stroke.getAttributeManager()!.attributes;
           expect(Array.from(instanceColors.value!.slice(0, 4))).toEqual([255, 128, 0, 0]);
+        }
+      },
+      {
+        updateProps: {updateTriggers: {getLineColor: [1]}},
+        onBeforeUpdate: () => {
+          getLineColor.mockClear();
+        },
+        onAfterUpdate: () => {
+          expect(getLineColor).not.toHaveBeenCalled();
         }
       },
       {

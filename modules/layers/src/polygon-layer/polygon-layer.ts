@@ -23,6 +23,14 @@ import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
 import {replaceInRange} from '../utils';
 
+/** Marks converted color callbacks without nesting shallow-compared trigger values. */
+function getColorUpdateTrigger(trigger: unknown, converted: boolean): unknown {
+  if (!converted) return trigger;
+  if (Array.isArray(trigger)) return [true, ...trigger];
+  if (trigger && typeof trigger === 'object') return {...trigger, _normalizedColors: true};
+  return [true, trigger];
+}
+
 /**
  * All properties supported by `PolygonLayer`.
  */
@@ -377,14 +385,14 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
 
     const fillColor = this.getSubLayerColorAccessor(getFillColor, defaultFillColor);
     const lineColor = this.getSubLayerColorAccessor(getLineColor, defaultLineColor);
-    const fillColorTrigger =
-      fillColor === getFillColor
-        ? updateTriggers?.getFillColor
-        : [true, updateTriggers?.getFillColor];
-    const lineColorTrigger =
-      lineColor === getLineColor
-        ? updateTriggers?.getLineColor
-        : [true, updateTriggers?.getLineColor];
+    const fillColorTrigger = getColorUpdateTrigger(
+      updateTriggers?.getFillColor,
+      fillColor !== getFillColor
+    );
+    const lineColorTrigger = getColorUpdateTrigger(
+      updateTriggers?.getLineColor,
+      lineColor !== getLineColor
+    );
 
     const FillLayer = this.getSubLayerClass('fill', SolidPolygonLayer);
     const StrokeLayer = this.getSubLayerClass('stroke', PathLayer);
