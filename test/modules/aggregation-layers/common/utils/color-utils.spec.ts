@@ -45,3 +45,21 @@ test('color-utils#colorRangeToFlatArray', () => {
     );
   }
 });
+
+test('color-utils#preserves palette storage and alpha', () => {
+  const palette = [
+    [128, 64, 255, 0],
+    [255, 128, 64]
+  ];
+  expect(Array.from(colorRangeToFlatArray(palette, false, Uint8Array))).toEqual([
+    128, 64, 255, 0, 255, 128, 64, 255
+  ]);
+  const normalized = colorRangeToFlatArray(palette, true);
+  expect(normalized[0]).toBeCloseTo(128 / 255);
+  expect(normalized[3]).toBe(0);
+  expect(normalized[7]).toBe(1);
+  expect(palette).toEqual([
+    [128, 64, 255, 0],
+    [255, 128, 64]
+  ]);
+});

@@ -5,12 +5,13 @@
 import Layer, {UpdateParameters} from './layer';
 import debug from '../debug/index';
 import {flatten} from '../utils/flatten';
+import {packNormalizedColor} from '../utils/color';
 
 import type AttributeManager from './attribute/attribute-manager';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type {FilterContext} from '../passes/layers-pass';
 import type {LayersList, LayerContext} from './layer-manager';
-import type {CompositeLayerProps, Accessor, AccessorContext} from '../types/layer-props';
+import type {CompositeLayerProps, Accessor, AccessorContext, Color} from '../types/layer-props';
 import {ConstructorOf} from '../types/types';
 import {PROP_TYPES_SYMBOL} from '../lifecycle/constants';
 
@@ -140,6 +141,28 @@ export default abstract class CompositeLayer<PropsT extends {} = {}> extends Lay
       };
     }
     return accessor;
+  }
+
+  /** Converts a parent color to bytes before passing it to a byte-oriented child. */
+  protected getSubLayerColorAccessor<In>(
+    accessor: Accessor<In, Color>,
+    defaultColor: Color,
+    size: 3 | 4 = 4
+  ): Accessor<In, Color> {
+    if (!this.usesNormalizedColors() || accessor === defaultColor) return accessor;
+
+    /** Packs plain arrays to the child attribute width. */
+    const encode = (color: Color): Color => {
+      if (!Array.isArray(color)) return color;
+      /** A new tuple so callers can retain colors without aliasing later accessor calls. */
+      const packed: [number, number, number] | [number, number, number, number] =
+        size === 3 ? [0, 0, 0] : [0, 0, 0, 0];
+      packNormalizedColor(color, packed, 0, size);
+      return packed;
+    };
+    return typeof accessor === 'function'
+      ? (object, info) => encode(accessor(object, info))
+      : encode(accessor);
   }
 
   /** Returns sub layer props for a specific sublayer */

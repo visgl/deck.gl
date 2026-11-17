@@ -4,6 +4,34 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Normalized color inputs
+
+Deck's [`normalizedColors`](./api-reference/core/deck.md#normalizedcolors) option enables
+0–1 plain-array color constants and callbacks for top-level ScatterplotLayer, LineLayer, and
+ArcLayer, PathLayer, PolygonLayer, SolidPolygonLayer, and GeoJsonLayer, as well as [View clear colors](./api-reference/core/view.md#clearcolor) and
+[top-level layer highlights](./api-reference/core/layer.md#highlightcolor). Top-level bitmap tints,
+bitmap transparency, and text outlines also use the setting. Other composite layers
+retain their existing color conventions.
+
+### Experimental batch loading
+
+Layers support `_dataLoadOptions: 'auto' | 'batched' | 'snapshots'` for complete URL loading,
+appended batches, or replacement Arrow snapshots. `onDataProgress` reports each accepted batch.
+Streams support Arrow record batches and tables without converting Arrow
+columns to rows. See [Layer](./api-reference/core/layer.md#_dataloadoptions).
+
+### Arrow accessor inputs
+
+Layers with column support accept Arrow vectors directly through their existing accessors,
+including positions, colors, and scalar values. Numeric rendering inputs use shared luma.gl
+conversion; cell layers preserve source-feature identity while expanding identifiers.
+See [Using with Arrow](./developer-guide/using-with-arrow.md) for shared rules and each
+layer's prop descriptions for supported inputs.
+
+### Async CPU aggregation of GPU inputs
+
+[`ReadbackAggregator`](./api-reference/aggregation-layers/cpu-aggregator.md#readbackaggregator) runs CPU aggregation on GPUVector inputs, so you can compare CPU and GPU timings on the same buffers.
+
 ### Hexagon compute aggregation
 
 On WebGPU devices, [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md#compute-aggregation)
@@ -15,10 +43,6 @@ scales, percentiles, and extensions.
 Compute aggregation now supports automatic domains, picking metadata, accessor-based
 extensions, and Grid distribution scales and percentile filtering. Explicit-domain rendering
 continues to consume GPU vectors directly; CPU-facing metadata uses asynchronous snapshots.
-
-### Heatmap GPU column inputs
-
-HeatmapLayer accepts borrowed position and weight GPUVectors on WebGPU, including strided columns and shorter row prefixes.
 
 ### Grid compute aggregation
 
@@ -33,28 +57,23 @@ implementation shares column preparation and reduction kernels with ScreenGrid. 
 picking and extensions disabled. SUM, MEAN, MIN, MAX, and COUNT produce GPUVector
 outputs consumed directly by the cell layer. See [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#compute-aggregation).
 
-### Custom aggregators and GPUVector inputs
+### Custom aggregators
 
 GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer now accept custom aggregator
-instances. Custom aggregators can consume GPUVector position/weight columns and publish
-GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and
+instances. Custom aggregators can publish GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and
 channel values. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
 result layouts, and supported scales and contours.
 
-### luma.gl v10 alpha.11
+### luma.gl v10 alpha.13
 
-The v10 packages use luma.gl alpha.11. Layer models delegate typed vector and
+The v10 packages use luma.gl alpha.13. Layer models delegate typed vector and
 constant-buffer binding and render-target format tracking to luma.gl. WebGPU
 layer draws restore dynamic render-pass parameters after drawing. Custom shader
 plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-guide.md).
 
-### ScatterplotLayer Arrow columns
-
-ScatterplotLayer accepts Arrow vectors for positions and styling, with accessor and binary fallbacks. See [Using with Arrow](./developer-guide/using-with-arrow.md) for modes and [tabbed examples](./api-reference/layers/scatterplot-layer.md#arrow-columns).
-
 ### deck.gl v10 examples (Experimental)
 
-The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples/v10/arrow-path-layer), [riverfront weather](/examples/v10/weather), and [GPU graph exploration](/examples/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
+The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples-v10/v10/arrow-path-layer), [riverfront weather](/examples-v10/v10/weather), and [GPU graph exploration](/examples-v10/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
 
 ### Extension updates
 

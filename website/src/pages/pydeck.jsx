@@ -14,7 +14,7 @@ const Container = styled.div`
   overflow: hidden;
 `;
 
-const App = React.lazy(() => import('@site/../examples/pydeck/src/app'));
+const App = React.lazy(() => import('examples-root/pydeck/src/app'));
 
 export default function PydeckPlayground() {
   const workerUrl = useBaseUrl('/workers/pyodide-worker.mjs');
