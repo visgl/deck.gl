@@ -30,6 +30,7 @@ import {Matrix4} from '@math.gl/core';
 
 /** GeoJSON tile renderer that forwards the top-level application's color convention. */
 class TileGeoJsonLayer extends GeoJsonLayer<any, {_normalizedTileColors?: boolean}> {
+  /** Layer name used by the framework for default GeoJSON tile instances. */
   static layerName = 'TileGeoJsonLayer';
 
   /** The tile parent forwards user styling props, including the selected input convention. */
@@ -257,8 +258,10 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData));
 
+    /** Whether the default tile renderer should interpret plain user colors as normalized. */
     const normalizedTileColors =
       this.props.renderSubLayers === renderGeoJsonTile && this.usesNormalizedColors();
+    /** Whether existing tile sublayers need to be rebuilt for a new color convention. */
     const colorsChanged = normalizedTileColors !== this.state.normalizedTileColors;
     this.state.normalizedTileColors = normalizedTileColors;
 
