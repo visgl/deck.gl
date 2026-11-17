@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {CompositeLayer, Layer} from '@deck.gl/core';
+import {CompositeLayer, Layer, _packNormalizedColor as packNormalizedColor} from '@deck.gl/core';
 
 import IconLayer from '../icon-layer/icon-layer';
 import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
@@ -137,12 +137,24 @@ export function getDefaultProps({
   return result;
 }
 
+/** Decode a user-supplied plain array for a child that uses byte colors. */
+function encodeColor(value: unknown): unknown {
+  if (!Array.isArray(value)) return value;
+
+  const color: number[] = [];
+  packNormalizedColor(value, color, 0, 4);
+  return color;
+}
+
+/** Forwards GeoJSON style props and keeps child color inputs in their byte convention. */
 export function forwardProps(
   layer: CompositeLayer,
   mapping: Record<string, string>,
-  geometryAccessor: 'getPosition' | 'getPath' | 'getPolygon' = 'getPosition'
+  geometryAccessor: 'getPosition' | 'getPath' | 'getPolygon',
+  normalizedColors: boolean
 ): Record<string, any> {
   const {transitions, updateTriggers} = layer.props;
+  const defaultProps = Object.getPrototypeOf(layer.props);
   const result: Record<string, any> = {
     updateTriggers: {},
     transitions: transitions && {
@@ -155,9 +167,22 @@ export function forwardProps(
     const targetKey = mapping[sourceKey];
     let value = layer.props[sourceKey];
     if (sourceKey.startsWith('get')) {
-      // isAccessor
+      const isColor = sourceKey.endsWith('Color');
+      const normalize = isColor && normalizedColors && value !== defaultProps[sourceKey];
       value = (layer as any).getSubLayerAccessor(value);
-      result.updateTriggers[targetKey] = updateTriggers[sourceKey];
+      if (normalize) {
+        if (typeof value === 'function') {
+          const accessor = value;
+          value = (object, info) => encodeColor(accessor(object, info));
+        } else {
+          value = encodeColor(value);
+        }
+      }
+      const trigger = updateTriggers[sourceKey];
+      result.updateTriggers[targetKey] =
+        normalize && typeof value === 'function'
+          ? [normalize, ...(Array.isArray(trigger) ? trigger : [trigger])]
+          : trigger;
       if (transitions) {
         result.transitions[targetKey] = transitions[sourceKey];
       }

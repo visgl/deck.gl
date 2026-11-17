@@ -362,3 +362,83 @@ webglTest('GeoJsonLayer forwards geometry transitions to each sublayer accessor'
     updateTransitions.mockRestore();
   }
 });
+
+test('GeoJsonLayer forwards normalized color inputs as bytes through its sublayers', () => {
+  const data = [
+    {type: 'Feature', geometry: {type: 'Point', coordinates: [0, 0]}, properties: {}},
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [0, 0],
+          [1, 1]
+        ]
+      },
+      properties: {}
+    },
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 0]
+          ]
+        ]
+      },
+      properties: {}
+    }
+  ];
+  const getLineColor = () => [1, 0.5, 0, 0];
+  const color = [0, 0.5, 1];
+  const pointFill = subLayers =>
+    subLayers.find(layer => layer.id.endsWith('points-circle')).props.getFillColor;
+  const lineBytes = subLayers =>
+    Array.from(
+      subLayers
+        .find(layer => layer.id.endsWith('linestrings'))
+        .getAttributeManager()
+        .attributes.instanceColors.value.slice(0, 4)
+    );
+
+  testLayer({
+    Layer: GeoJsonLayer,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {props: {data, getLineColor}},
+      {
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({subLayers}) => {
+          expect(pointFill(subLayers)).toEqual([0, 0, 0, 255]);
+          expect(lineBytes(subLayers)).toEqual([255, 128, 0, 0]);
+        }
+      },
+      {
+        updateProps: {getFillColor: color},
+        onAfterUpdate: ({subLayers}) => {
+          expect(pointFill(subLayers)).toEqual([0, 128, 255, 255]);
+          expect(
+            subLayers.find(layer => layer.id.endsWith('polygons-fill')).props.getFillColor
+          ).toEqual([0, 128, 255, 255]);
+          expect(color).toEqual([0, 0.5, 1]);
+        }
+      },
+      {
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: false});
+        },
+        onAfterUpdate: ({subLayers}) => {
+          expect(lineBytes(subLayers)).toEqual([1, 0, 0, 0]);
+        }
+      }
+    ]
+  });
+});
