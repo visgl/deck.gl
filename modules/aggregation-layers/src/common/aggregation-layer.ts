@@ -181,9 +181,13 @@ export default abstract class AggregationLayer<
   protected retainAggregationLayer(layer: Layer, range: [number, number][]): void {
     const aggregator = this.state.aggregator;
     const values = [aggregator.getResultValues?.(0), aggregator.getResultValues?.(1)];
-    if (this.state.aggregatorType !== 'webgpu') return;
     for (const buffer of this.state.retainedAggregationBuffers || []) buffer.destroy();
     this.state.retainedAggregationBuffers = undefined;
+    if (this.state.aggregatorType !== 'webgpu') {
+      this.state.retainedAggregationFrame = undefined;
+      this.state.retainedAggregationLayer = undefined;
+      return;
+    }
 
     this.state.retainedAggregationFrame = {layer, range, values, binCount: aggregator.binCount};
     this.state.retainedAggregationLayer = undefined;
