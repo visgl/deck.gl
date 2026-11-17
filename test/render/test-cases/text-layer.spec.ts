@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {describe} from 'vitest';
-import {runRenderTestSuite} from '../render-test-suite';
+import {describe, expect, test} from 'vitest';
+import {isRenderTestDeviceEnabled, runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 import {OrthographicView} from '@deck.gl/core';
@@ -12,7 +12,10 @@ import {PointLabelLayer} from '@deck.gl/carto';
 import {CollisionFilterExtension, PathStyleExtension} from '@deck.gl/extensions';
 import {points} from 'deck.gl-test/data';
 import fontMapping from '../../data/font-atlas.json';
+import FontAtlasManager from '../../../modules/layers/src/text-layer/font-atlas-manager';
 
+// Keep fixture glyphs separate from system-font atlases created by other render tests.
+const PREPACKED_FONT_FAMILY = 'Render Test Prepacked';
 const TextAnchors = ['start', 'middle', 'end'];
 const TextBaselines = ['top', 'center', 'bottom'];
 const ContentAlignment = ['start', 'center', 'end'];
@@ -221,7 +224,7 @@ const testCases = [
         id: 'text-layer',
         data: points.slice(0, 50),
         _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
+        fontFamily: PREPACKED_FONT_FAMILY,
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
         getColor: x => [255, 0, 0],
@@ -285,7 +288,7 @@ const testCases = [
         id: 'text-layer',
         data: points.slice(0, 50),
         _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
+        fontFamily: PREPACKED_FONT_FAMILY,
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
         getColor: x => [255, 0, 0],
@@ -317,7 +320,7 @@ const testCases = [
           getColor: {accessor: x => [1, 0, 0], size: 3, normalized: false}
         }),
         _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
+        fontFamily: PREPACKED_FONT_FAMILY,
         getSize: 20,
         getAngle: 0,
         sizeScale: 1,
@@ -345,7 +348,7 @@ const testCases = [
         id: 'labels',
         data: alignmentTestData,
         _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
+        fontFamily: PREPACKED_FONT_FAMILY,
         getPosition: ({anchor: [x, y]}) => (flipY ? [x, y] : [x, -y]),
         getText: d => 'Hello TextLayer',
         billboard,
@@ -389,7 +392,7 @@ const testCases = [
           id: `labels-${i}`,
           data: [0],
           _getFontRenderer: () => fontRenderer,
-          fontFamily: 'Arial',
+          fontFamily: PREPACKED_FONT_FAMILY,
           getPosition: _ => [-x * 2, -y * 2],
           getText: _ => 'Hello',
           getSize: 16,
@@ -418,7 +421,7 @@ const testCases = [
         id: 'labels',
         data: points.slice(2, 5),
         _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
+        fontFamily: PREPACKED_FONT_FAMILY,
         getPosition: (_, {index}) => [0, (index - 1) * 160],
         getText: d => `${d.ADDRESS}\n${d.LOCATION_NAME}\n${d.RACKS} racks - ${d.SPACES} spaces`,
         getSize: 20,
@@ -442,7 +445,7 @@ const testCases = [
         id: 'labels',
         data: points.slice(0, 10),
         _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
+        fontFamily: PREPACKED_FONT_FAMILY,
         getPosition: (_, {index}) => [0, index * 60],
         getText: d => d.ADDRESS,
         getAngle: 30,
@@ -485,6 +488,7 @@ const testCases = [
         getBorderColor: [0, 100, 180],
         backgroundPadding: [12, 8],
         backgroundBorderRadius: 8,
+        fontFamily: PREPACKED_FONT_FAMILY,
         updateTriggers: {getText: 'point-label'},
         _subLayerProps: {
           'point-label-primary': {_getFontRenderer: () => fontRenderer}
@@ -526,6 +530,7 @@ const testCases = [
         backgroundPadding: [16, 10],
         backgroundBorderRadius: 8,
         extensions: [new CollisionFilterExtension()],
+        fontFamily: PREPACKED_FONT_FAMILY,
         updateTriggers: {getText: 'point-label-collision'},
         _subLayerProps: {
           'point-label-collision-primary': {_getFontRenderer: () => fontRenderer}
@@ -546,7 +551,7 @@ const testCases = [
         id: 'labels',
         data: [0],
         _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
+        fontFamily: PREPACKED_FONT_FAMILY,
         getPosition: d => [40, 40],
         getText: d => `The TextLayer renders text labels at given coordinates.
 TextLayer is a CompositeLayer that wraps around the IconLayer. It automatically creates an atlas texture from the specified font settings and characterSet.`,
@@ -584,7 +589,7 @@ TextLayer is a CompositeLayer that wraps around the IconLayer. It automatically 
           {text: 'Dense dots', anchor: 'end', baseline: 'bottom', dash: [1, 1]}
         ],
         _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
+        fontFamily: PREPACKED_FONT_FAMILY,
         getPosition: (_, {index}) => [-120, (index - 0.5) * 120],
         getText: d => d.text,
         getSize: 18,
@@ -613,7 +618,7 @@ TextLayer is a CompositeLayer that wraps around the IconLayer. It automatically 
           }
         ],
         _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
+        fontFamily: PREPACKED_FONT_FAMILY,
         getPosition: (_, {index}) => [120, (index - 0.5) * 120],
         getText: d => d.text,
         getSize: 18,
@@ -638,4 +643,18 @@ describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType, {
     beforeAll: loadPrepackedFontAtlas
   });
+
+  test.skipIf(!isRenderTestDeviceEnabled(deviceType))(
+    'prepacked font atlas is independent of system Arial',
+    () => {
+      const systemAtlas = new FontAtlasManager();
+      systemAtlas.setProps({fontFamily: 'Arial'});
+      const prepackedAtlas = new FontAtlasManager();
+      prepackedAtlas.setProps({
+        fontFamily: PREPACKED_FONT_FAMILY,
+        _getFontRenderer: () => fontRenderer
+      });
+      expect(prepackedAtlas.atlas).not.toBe(systemAtlas.atlas);
+    }
+  );
 });

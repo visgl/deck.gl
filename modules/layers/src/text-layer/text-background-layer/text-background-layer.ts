@@ -38,6 +38,8 @@ type _TextBackgroundLayerProps<DataT> = {
   sizeMinPixels?: number;
   sizeMaxPixels?: number;
   fontSize?: number;
+  /** Hides labels whose content box is cut off, like the characters layer. */
+  contentCutoffPixels?: [width: number, height: number];
 
   borderRadius?: number | Readonly<[number, number, number, number]>;
   padding?: Readonly<[number, number]> | Readonly<[number, number, number, number]>;
@@ -63,6 +65,7 @@ const defaultProps: DefaultProps<TextBackgroundLayerProps> = {
   sizeMinPixels: 0,
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
   fontSize: 1,
+  contentCutoffPixels: {type: 'array', value: [0, 0]},
 
   borderRadius: {type: 'object', value: 0},
   padding: {type: 'array', value: [0, 0, 0, 0]},
@@ -107,7 +110,14 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         transition: true,
         accessor: 'getPosition'
       },
-      // Interleave six inputs to stay below WebGPU's portable vertex-buffer and storage-buffer limits.
+      /** Source row for picking colors, which binary data can set like the character layer. */
+      rowIndexes: {
+        type: 'uint32',
+        size: 1,
+        bufferGroup: 'text-background-instance-data',
+        accessor: (object, {index}) => index
+      },
+      // Interleave seven inputs to stay below WebGPU's portable vertex-buffer and storage-buffer limits.
       instanceSizes: {
         size: 1,
         transition: true,
@@ -173,8 +183,16 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   }
 
   draw({uniforms}) {
-    const {billboard, sizeScale, sizeUnits, sizeMinPixels, sizeMaxPixels, getLineWidth, fontSize} =
-      this.props;
+    const {
+      billboard,
+      sizeScale,
+      sizeUnits,
+      sizeMinPixels,
+      sizeMaxPixels,
+      getLineWidth,
+      fontSize,
+      contentCutoffPixels
+    } = this.props;
     let {padding, borderRadius} = this.props;
 
     if (padding.length < 4) {
@@ -202,6 +220,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       sizeMaxPixels
     };
     const textProps: TextModuleProps = {
+      contentCutoffPixels,
       fontSize,
       viewport: this.context.viewport
     };

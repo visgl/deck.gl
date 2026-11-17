@@ -8,6 +8,9 @@ import {Layer, _LayersPass as LayersPass, LayersPassRenderOptions, Viewport} fro
 type CollisionFilterPassRenderOptions = LayersPassRenderOptions & {};
 
 export default class CollisionFilterPass extends LayersPass {
+  private drawToCollisionVisibility = false;
+  private drawToCollisionPlacement = false;
+
   renderCollisionMap(target: Framebuffer, options: CollisionFilterPassRenderOptions) {
     const padding = 1;
     const clearColor = [0, 0, 0, 0];
@@ -16,12 +19,52 @@ export default class CollisionFilterPass extends LayersPass {
     this.render({...options, clearColor, scissorRect, target, pass: 'collision'});
   }
 
+  renderCollisionVisibility(target: Framebuffer, options: CollisionFilterPassRenderOptions) {
+    this.drawToCollisionVisibility = true;
+    try {
+      // Cells start unoccluded and undrawn. Each world copy of a label that is not culled writes
+      // its cell: red keeps the minimum, so any occluded copy hides the label, and alpha keeps
+      // the maximum, so a label that no copy drew stays hidden.
+      this.render({...options, clearColor: [1, 1, 1, 0], target, pass: 'collision'});
+    } finally {
+      this.drawToCollisionVisibility = false;
+    }
+  }
+
+  /** Write the placement data of each label to its cell, for greedy placement on the CPU */
+  renderCollisionPlacement(target: Framebuffer, options: CollisionFilterPassRenderOptions) {
+    this.drawToCollisionVisibility = true;
+    this.drawToCollisionPlacement = true;
+    try {
+      // Cells start without data, and the last copy of a label that writes its cell wins
+      this.render({...options, clearColor: [0, 0, 0, 0], target, pass: 'collision'});
+    } finally {
+      this.drawToCollisionVisibility = false;
+      this.drawToCollisionPlacement = false;
+    }
+  }
+
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
     return {
       ...layer.props.parameters,
-      blend: false,
-      depthWriteEnabled: true,
-      depthCompare: 'less-equal'
+      ...(this.drawToCollisionVisibility && !this.drawToCollisionPlacement
+        ? {
+            blend: true,
+            blendColorOperation: 'min',
+            blendColorSrcFactor: 'one',
+            blendColorDstFactor: 'one',
+            blendAlphaOperation: 'max',
+            blendAlphaSrcFactor: 'one',
+            blendAlphaDstFactor: 'one'
+          }
+        : {blend: false}),
+      // Collision depth encodes priority, independent of the layer's display order.
+      depthBias: 0,
+      depthBiasSlopeScale: 0,
+      // Visibility cells are screen-space quads, so the view's back-face culling does not apply
+      ...(this.drawToCollisionVisibility ? {cullMode: 'none'} : null),
+      depthWriteEnabled: !this.drawToCollisionVisibility,
+      depthCompare: this.drawToCollisionVisibility ? 'always' : 'less-equal'
     };
   }
 
@@ -29,7 +72,9 @@ export default class CollisionFilterPass extends LayersPass {
     // Draw picking colors into collision FBO
     return {
       collision: {
-        drawToCollisionMap: true
+        drawToCollisionMap: !this.drawToCollisionVisibility,
+        drawToCollisionVisibility: this.drawToCollisionVisibility,
+        drawToCollisionPlacement: this.drawToCollisionPlacement
       },
       picking: {
         isActive: 1,
