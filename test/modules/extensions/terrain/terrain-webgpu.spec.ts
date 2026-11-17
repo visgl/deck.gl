@@ -293,7 +293,7 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
       const fitted = await renderFrame(
         {
           extensions: [new TerrainExtension()],
-          terrainDrawMode: backend === 'webgl' ? 'offset' : undefined
+          terrainDrawMode: 'offset'
         },
         35,
         0,
@@ -312,10 +312,7 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
     it('drapes a path and picks it at the terrain surface', async () => {
       const terrain = createTerrain(() => 40, true);
       const elevated = [{...DATA[0], path: DATA[0].path.map(([x, y]) => [x, y, 40])}];
-      const reference = await renderFrame(
-        {data: elevated, getWidth: backend === 'webgpu' ? 4 : 8},
-        false
-      );
+      const reference = await renderFrame({data: elevated, getWidth: 4}, false);
       const fitted = await renderFrame(
         {extensions: [new TerrainExtension()], terrainDrawMode: 'drape'},
         false,
