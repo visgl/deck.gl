@@ -565,7 +565,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   }
 
   /** Returns a rebound transition when hard resolution changed the displayed viewport props. */
-  private _getReboundTransition(
+  protected _getReboundTransition(
     constraintContext: ConstraintContext,
     nextControllerState: ControllerState
   ): TransitionProps | null {
