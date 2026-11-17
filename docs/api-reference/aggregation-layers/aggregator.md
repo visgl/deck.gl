@@ -59,8 +59,17 @@ Arguments:
 - `attributes` ([Attribute](../core/attribute.md)[]) - the input data.
 - `operations` (string[]) - How to aggregate the values inside a bin, defined per channel.
 - `binOptions` (object) - arbitrary settings that affect bin sorting.
+- `onNeedsRedraw` (() => void, optional; default: undefined) - requests another draw, for example to retry a metadata copy.
 - `onUpdate` (Function) - callback when a channel has been recalculated. Receives the following arguments:
     + `channel` (number) - the channel that just updated
+
+#### `setShaderContext(context)` (optional) {#setshadercontext}
+
+Default: undefined. Receives the layer's shader configuration after initialization and
+when extensions change. `context.shaders` contains plugins, modules, defines and the
+shader assembler. `context.getAttributeBindings()` returns current GPU attributes and
+buffer layouts. These bindings are borrowed. Release compiled shader resources when
+the context changes and in `destroy()`.
 
 #### `setNeedsUpdate` {#setneedsupdate}
 
@@ -159,6 +168,15 @@ aggregator.destroy();
 
 An implementation of `Aggregator` should expose the following members:
 
+#### `supportsExtensions` (boolean, optional) {#supportsextensions}
+
+Default: undefined. Set to `false` to reject layer shader extensions when adopted.
+
+#### `requiresProjectedPositions` (boolean, optional) {#requiresprojectedpositions}
+
+Default: `false`. Set to `true` to require borrowed position vectors to already use
+the view coordinate system. Accessor inputs can use the layer's CPU preprojection.
+
 #### `binCount` (number) {#bincount}
 
 The number of bins in the aggregated result.
@@ -192,37 +210,6 @@ settings through `setProps`. Accessor inputs remain available as `Attribute` obj
 exposes their typed GPU columns. Allocate outputs in `update()` before sublayers are built,
 and encode GPU work in `preDraw()` before those sublayers draw. Notify `onUpdate` when a
 channel's output changes, following the existing aggregator lifecycle.
-
-### GPU column inputs
-
-The optional `positions` and `weights` props pass borrowed luma `GPUVector` columns directly
-to a custom aggregator, bypassing accessor generation. `positions.length` determines the
-input count unless `numInstances` explicitly selects a shorter prefix. `weights` contains one
-column for ScreenGridLayer/ContourLayer, or two columns
-(color then elevation) for GridLayer/HexagonLayer. Each weight column must have the same
-length as positions. The custom aggregator defines supported input formats and chunking.
-GridLayer, HexagonLayer, and ContourLayer also require `dataBounds: [min, max]` in input
-coordinates because GPU-only positions cannot supply CPU bounds.
-
-Position columns remain in their input coordinate system. The custom aggregator is responsible
-for converting them into the binning coordinate system, including any custom projection.
-Projection settings retain the layer's coordinate system, origin, and model matrix for these
-columns; accessor-generated position attributes have already applied CPU preprojection.
-
-```typescript
-new ScreenGridLayer({
-  positions: positionVector,
-  weights: [weightVector],
-  aggregator: new CustomAggregator(),
-  colorDomain: [0, 100]
-});
-```
-
-Input columns remain caller-owned. Replace column references when their data changes, or
-explicitly invalidate the aggregator when updating storage in place. GPU column inputs require
-a custom aggregator, except for the built-in [ScreenGrid](./screen-grid-layer.md#compute-aggregation) and
-[Grid](./grid-layer.md#compute-aggregation) compute paths,
-and do not support layer extensions or accessor fallbacks.
 
 ### GPU column results
 
@@ -314,45 +301,26 @@ Limitations:
 - CPU timings include readback. Compare end-to-end frame times.
 
 
-### GraphScreenGridAggregator
+### _GraphScreenGridAggregator {#graphscreengridaggregator}
 
-`GraphScreenGridAggregator` is an opt-in implementation for `ScreenGridLayer` that
-composes luma graph operations. It supports COUNT, SUM, MIN, MAX and MEAN with
-accessor-generated attributes or borrowed GPUVector inputs:
+`_GraphScreenGridAggregator` is an experimental alternative for applications that want
+to customize or extend ScreenGrid aggregation using GPU graphs. For ordinary
+`ScreenGridLayer` usage, keep the default `gpuAggregation: true` backend; this
+alternative does not add rendering features.
 
 ```typescript
-import {ScreenGridLayer, GraphScreenGridAggregator} from '@deck.gl/aggregation-layers';
+import {ScreenGridLayer, _GraphScreenGridAggregator} from '@deck.gl/aggregation-layers';
 
 new ScreenGridLayer({
   data,
   getPosition: d => d.position,
-  aggregator: new GraphScreenGridAggregator(),
+  aggregator: new _GraphScreenGridAggregator(),
   colorDomain: [0, 100]
 });
 ```
 
-The layer initializes and destroys the aggregator. Create a new instance when
-switching back to it after replacing or removing the layer. Its output stays in
-GPUVectors; automatic domains and picking request asynchronous metadata snapshots.
-Input shader extensions, including `DataFilterExtension`, `ClipExtension`, and
-`BrushingExtension`, run as deck-specific graph operations before grouped reduction.
-Their selection masks and modified weights stay on the GPU. Extensions currently
-use accessor-generated attributes; borrowed GPUVector inputs require no extensions.
-
-It requires a WebGPU device. Borrowed position vectors must already use the custom view coordinate system; accessor-generated
-positions can use the layer's ordinary CPU preprojection. Weights must be finite. Omitting
-`aggregator` selects the existing default implementation.
-
-Custom aggregators can set `supportsExtensions` to `false` to reject unsupported
-shader extensions when the layer adopts them. Set `requiresProjectedPositions` to
-`true` when borrowed position vectors must already use the view coordinate system.
-
-Aggregators can call the supplied `onNeedsRedraw` callback to request another draw,
-for example when retrying an asynchronous metadata copy.
-
-
-Custom aggregators can implement `setShaderContext(context)` to receive the layer's
-shader plugins and `getAttributeBindings()` callback after initialization and when
-extensions change. The callback resolves current GPU attributes and buffer layouts
-from the owning layer. Aggregators borrow these bindings and must release their own
-compiled shader resources when the context changes or the aggregator is destroyed.
+It requires a WebGPU device and supports COUNT, SUM, MIN, MAX and MEAN.
+Picking and automatic domains update asynchronously. Extensions require accessor
+inputs; borrowed position vectors must already use the view coordinate system.
+The layer initializes and destroys the aggregator. Create a new instance after
+removing or replacing it. Its experimental API may change.

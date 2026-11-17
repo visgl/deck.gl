@@ -6,6 +6,7 @@ import log from '../utils/log';
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {parsePropTypes} from './prop-types';
 import {
+  ACCESSOR_QUERIES_SYMBOL,
   COMPONENT_SYMBOL,
   PROP_TYPES_SYMBOL,
   DEPRECATED_PROPS_SYMBOL,
@@ -52,6 +53,28 @@ export function createProps<PropsT extends {}>(
     // This might happen if one of the arguments is another props instance
     for (const key in props) {
       propsInstance[key] = props[key];
+    }
+  }
+
+  if (propsInstance.query && 'data' in propsInstance[ASYNC_RESOLVED_SYMBOL]) {
+    // A query makes even in-memory data resolve asynchronously. Retain the original table.
+    propsInstance[ASYNC_ORIGINAL_SYMBOL].data = propsInstance[ASYNC_RESOLVED_SYMBOL].data;
+    delete propsInstance[ASYNC_RESOLVED_SYMBOL].data;
+  }
+
+  // Keep the SQL input for cloning while exposing a normal Arrow accessor to the layer.
+  const propTypes = propsPrototype[PROP_TYPES_SYMBOL];
+  for (const name of Object.keys(propsInstance)) {
+    const type = propTypes[name];
+    const value = propsInstance[name];
+    if (type?.type === 'accessor' && type.arrow && typeof value?.sql === 'string') {
+      const queries = (propsInstance[ACCESSOR_QUERIES_SYMBOL] ??= Object.create(null));
+      const query = {sql: value.sql};
+      queries[name] = query;
+      Object.defineProperty(propsInstance, name, {
+        enumerable: true,
+        get: () => queries[name].column ?? type.value
+      });
     }
   }
 

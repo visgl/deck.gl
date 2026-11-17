@@ -336,6 +336,7 @@ export class GraphScreenGridAggregator implements Aggregator {
           this.metadataRetryRevision = revision;
           this.dirty = true;
           this.props.onNeedsRedraw?.();
+          return;
         }
         const failure = error instanceof Error ? error : new Error(String(error));
         if (this.props.onError) this.props.onError(failure);

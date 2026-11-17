@@ -7,7 +7,7 @@ import {Buffer} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
 import {OrthographicView} from '@deck.gl/core';
-import {GraphScreenGridAggregator} from '@deck.gl/aggregation-layers';
+import {_GraphScreenGridAggregator as GraphScreenGridAggregator} from '@deck.gl/aggregation-layers';
 import {createTestViewport} from '../../core/viewports/test-crs';
 import {WebGPUScreenGridAggregator} from '../../../../modules/aggregation-layers/src/screen-grid-layer/webgpu-screen-grid-aggregator';
 
@@ -157,7 +157,7 @@ test('Graph ScreenGrid reductions stay on GPU and recover from empty input', asy
     aggregator.setProps({readback: true, onError, onNeedsRedraw});
     aggregator.preDraw();
     await vi.waitFor(() => expect(onNeedsRedraw).toHaveBeenCalledTimes(1));
-    expect(onError).toHaveBeenCalledTimes(1);
+    expect(onError).not.toHaveBeenCalled();
     expect(aggregator.isLoaded).toBe(false);
     aggregator.preDraw();
     await vi.waitFor(() => expect(aggregator.isLoaded).toBe(true));
