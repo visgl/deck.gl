@@ -249,6 +249,7 @@ Channels are clamped and rounded to bytes for GPU storage. Omitted alpha is opaq
 Built-in defaults, typed arrays, Arrow columns, and binary inputs keep their existing encoding.
 [View clear colors](./view.md#clearcolor) and [top-level layer highlights](./layer.md#highlightcolor)
 also use 0–1 channels when enabled.
+Top-level BitmapLayer tint and transparency and TextLayer outline colors also follow this setting.
 Top-level [GeoJsonLayer color accessors](../layers/geojson-layer.md#getfillcolor) also use this convention.
 Composite-generated colors, other layers, and other color properties continue to use their documented conventions.
 

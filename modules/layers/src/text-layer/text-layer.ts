@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {normalizeByteColor4} from '@luma.gl/shaders';
 import {CompositeLayer, createIterable, log} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
 import FontAtlasManager, {
@@ -502,6 +503,17 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return offsets;
   };
 
+  /** Interpolates outline colors in the same 0–1 representation used by the shader. */
+  protected getUniformTransitionValue(propName: string, value: unknown): unknown {
+    if (propName === 'outlineColor') {
+      return normalizeByteColor4(
+        value as Color,
+        !this.usesNormalizedColors() || value === DEFAULT_COLOR
+      );
+    }
+    return super.getUniformTransitionValue(propName, value);
+  }
+
   renderLayers() {
     const {
       startIndices,
@@ -618,6 +630,9 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             : DEFAULT_FONT_SETTINGS.smoothing,
           outlineWidth: outlineWidth / (fontSettings.radius || DEFAULT_FONT_SETTINGS.radius),
           outlineColor,
+          outlineColorUseByteColors:
+            !this.isUniformTransitionValue('outlineColor') &&
+            (!this.usesNormalizedColors() || outlineColor === DEFAULT_COLOR),
           iconAtlas: atlas,
           iconMapping: mapping,
 
