@@ -15,6 +15,7 @@ test('TileLayer updates default GeoJSON tile colors without refetching', async (
   let requests = 0;
   let initialRequests = 0;
   const viewport = new WebMercatorViewport({width: 100, height: 100, zoom: 0});
+  /** Verify the cached tile renders the expected color after loading. */
   const checkColor = ({layer, subLayers}, color) => {
     if (layer.isLoaded) {
       expect(subLayers.length).toBeGreaterThan(0);
