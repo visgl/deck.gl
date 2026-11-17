@@ -338,6 +338,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     }
   }
 
+  /** Prepare the fallback terrain color for the byte-encoded mesh accessor. */
   private getTerrainColor(): Color {
     const {color} = this.props;
     return this.usesNormalizedColors() && color !== defaultProps.color!.value
@@ -376,6 +377,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
           getTileData: this.getTiledTerrainData.bind(this),
           renderSubLayers: this.renderSubLayers.bind(this),
           updateTriggers: {
+            renderSubLayers: [this.props.color, this.usesNormalizedColors()],
             getTileData: {
               elevationData: urlTemplateToUpdateTrigger(elevationData),
               texture: urlTemplateToUpdateTrigger(texture),

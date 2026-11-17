@@ -118,6 +118,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     frameNumber?: number;
     lastUpdatedViewports: {[viewportId: string]: Viewport} | null;
     layerMap: {[layerId: string]: any};
+    /** Color convention applied to cached tile sublayers. */
     normalizedColors?: boolean;
     tileset3d: Tileset3D | null;
   };
@@ -159,7 +160,11 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       }
     }
     const normalizedColors = this.usesNormalizedColors();
-    if (changeFlags.propsChanged || normalizedColors !== this.state.normalizedColors) {
+    if (
+      changeFlags.propsChanged ||
+      changeFlags.updateTriggersChanged ||
+      normalizedColors !== this.state.normalizedColors
+    ) {
       this.state.normalizedColors = normalizedColors;
       const {layerMap} = this.state;
       for (const key in layerMap) {
@@ -365,7 +370,10 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         pointSize
       },
       this.getSubLayerProps({
-        id: 'pointcloud'
+        id: 'pointcloud',
+        updateTriggers: {
+          getColor: [this.props.updateTriggers.getPointColor, this.state.normalizedColors]
+        }
       }),
       {
         id: `${this.id}-pointcloud-${tileHeader.id}`,
