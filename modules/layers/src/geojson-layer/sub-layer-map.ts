@@ -187,6 +187,10 @@ export function forwardProps(
         result.transitions[targetKey] = transitions[sourceKey];
       }
     }
+    if (sourceKey === 'textOutlineColor' && normalizedColors && value !== defaultProps[sourceKey]) {
+      value = encodeColor(value);
+    }
+
     result[targetKey] = value;
   }
   return result;
