@@ -338,6 +338,11 @@ If the optional third component `z` is supplied for a position, it specifies the
   <p><i>Polygons with 3D positions, courtesy of <a href="https://github.com/SymbolixAU">@SymbolixAU</a> and <a href="https://github.com/mdsumner">@mdsumner</a></i></p>
 </div>
 
+On top-level layers, Deck's [`normalizedColors`](../core/deck.md#normalizedcolors) option
+interprets plain-array `getFillColor` and `getLineColor` values and callback results as 0–1 channels.
+Omitted alpha is opaque. Byte typed arrays, binary attributes, and built-in defaults keep
+their existing encoding.
+
 #### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`

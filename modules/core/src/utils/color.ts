@@ -65,10 +65,11 @@ export function packNormalizedColor(
   color: readonly number[],
   target: NumericArray,
   offset: number,
-  size: number
+  size: number,
+  sourceOffset = 0
 ): void {
   for (let channel = 0; channel < size; channel++) {
-    const value = color[channel];
+    const value = color[sourceOffset + channel];
     target[offset + channel] = Number.isFinite(value)
       ? Math.round(Math.min(1, Math.max(0, value)) * 255)
       : channel === 3
