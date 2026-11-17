@@ -36,8 +36,9 @@ layer's prop descriptions for supported inputs.
 
 ### Hexagon compute aggregation
 
-HexagonLayer supports WebGPU aggregation with explicit color and elevation domains,
-using the shared reducer and GPUVector rendering path.
+On WebGPU devices, [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md#compute-aggregation)
+aggregates in compute shaders, including with automatic domains, picking, quantile and ordinal
+scales, percentiles and extensions.
 
 ### ScreenGrid and Grid compute rendering features
 
