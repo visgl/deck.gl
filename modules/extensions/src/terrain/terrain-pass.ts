@@ -51,7 +51,6 @@ export class TerrainPass extends LayersPass {
       pass: 'terrain-height-map',
       layers: opts.layers!,
       viewports: [viewport],
-      effects: [],
       clearColor: [0, 0, 0, 0]
     });
   }
