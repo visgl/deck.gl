@@ -325,6 +325,35 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
       const picked = await deck!.pickObjectAsync({x, y, radius: 3});
       expect(picked?.layer?.id).toBe('path-drape');
       expect(picked?.index).toBe(0);
+      await renderFrame(
+        {data: [DATA[0], DATA[0]], extensions: [new TerrainExtension()], terrainDrawMode: 'drape'},
+        false,
+        0,
+        terrain
+      );
+      const overlapping = await deck!.pickMultipleObjectsAsync({x, y, radius: 3, depth: 2});
+      expect(overlapping.map(info => info.index).sort()).toEqual([0, 1]);
+    });
+
+  if (backend === 'webgpu')
+    it('composites translucent covers over transparent terrain', async () => {
+      const terrain = createTerrain(() => 40, true).clone({getColor: [255, 0, 0, 0]});
+      const elevated = [{...DATA[0], path: DATA[0].path.map(([x, y]) => [x, y, 40])}];
+      const reference = await renderFrame(
+        {data: elevated, getWidth: 4, getColor: [255, 255, 255, 128]},
+        false
+      );
+      const fitted = await renderFrame(
+        {
+          extensions: [new TerrainExtension()],
+          terrainDrawMode: 'drape',
+          getColor: [255, 255, 255, 128]
+        },
+        false,
+        0,
+        terrain
+      );
+      expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
     });
 
   it('encodes terrain picking only when the terrain is pickable', async () => {

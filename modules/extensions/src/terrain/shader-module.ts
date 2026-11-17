@@ -36,6 +36,7 @@ export type TerrainModuleProps = {
 
 type TerrainModuleUniforms = {
   mode: number;
+  /** Numeric flag enabled only while writing encoded object IDs to a cover. */
   isPickingCover: number;
   bounds: [number, number, number, number];
   heightRange: [number, number];
