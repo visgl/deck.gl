@@ -5,7 +5,7 @@
 import {test, expect, vi} from 'vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {OrthographicView} from '@deck.gl/core';
-import {HexagonLayer} from '@deck.gl/aggregation-layers';
+import {HexagonLayer, GridLayer} from '@deck.gl/aggregation-layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {WebGPUAggregator} from '../../../../modules/aggregation-layers/src/common/aggregator/webgpu-aggregator/webgpu-aggregator';
@@ -173,5 +173,74 @@ for (const explicitDomains of [false, true]) {
     } finally {
       manager.finalize();
     }
+  });
+}
+
+for (const LayerClass of [HexagonLayer, GridLayer]) {
+  test(`${LayerClass.layerName} retains GPU-only cells when switching to automatic domains`, async ({
+    skip
+  }) => {
+    const device = await getWebGPUTestDevice();
+    if (!device) return skip();
+    device.handle.pushErrorScope('validation');
+    const {LayerManager} = await import('@deck.gl/core');
+    const viewport = new OrthographicView().makeViewport({
+      width: 200,
+      height: 200,
+      viewState: {target: [0, 0, 0], zoom: 0}
+    });
+    const manager = new LayerManager(device, {viewport});
+    let layer = new LayerClass({
+      id: 'domain-transition',
+      coordinateSystem: 'cartesian',
+      data: [
+        {position: [2, 2], value: 2},
+        {position: [22, 22], value: 4}
+      ],
+      getPosition: d => d.position,
+      getColorWeight: d => d.value,
+      getElevationWeight: d => d.value,
+      radius: 10,
+      cellSize: 10,
+      colorDomain: [0, 10],
+      elevationDomain: [0, 10]
+    });
+    const draw = () =>
+      layer.draw({
+        shaderModuleProps: {
+          project: {
+            viewport,
+            coordinateSystem: 'cartesian',
+            coordinateOrigin: [0, 0, 0],
+            devicePixelRatio: 1
+          }
+        }
+      } as any);
+    try {
+      manager.setLayers([layer]);
+      draw();
+      expect(layer.state.aggregator.isLoaded).toBe(true);
+      expect(layer.state.aggregator.getResultValues(0)).toBeNull();
+      const previous = layer.renderLayers() as any;
+      expect(previous).not.toBeNull();
+      expect(layer.state.retainedAggregationBuffers).toBeUndefined();
+      layer = layer.clone({colorDomain: null, elevationDomain: null, radius: 20, cellSize: 20});
+      manager.setLayers([layer]);
+      expect(layer.state.aggregator.isLoaded).toBe(false);
+      const pending = layer.renderLayers() as any;
+      expect(pending).not.toBeNull();
+      expect(pending.props.numInstances).toBe(previous.props.numInstances);
+      const copies = layer.state.retainedAggregationBuffers!;
+      expect(copies.length).toBeGreaterThan(0);
+      expect(copies.every(buffer => !buffer.destroyed)).toBe(true);
+      draw();
+      expect(layer.renderLayers()).not.toBeNull();
+      await vi.waitFor(() => expect(layer.state.aggregator.isLoaded).toBe(true), {timeout: 10000});
+      expect(layer.renderLayers()).not.toBeNull();
+      expect(copies.every(buffer => buffer.destroyed)).toBe(true);
+    } finally {
+      manager.finalize();
+    }
+    expect(await device.handle.popErrorScope()).toBeNull();
   });
 }

@@ -25,7 +25,8 @@ import type {Aggregator} from './aggregator/aggregator';
 import type {WebGPUAggregatorOptions} from './aggregator/webgpu-aggregator/webgpu-aggregator';
 import {AttributeWithScale} from './utils/scale-utils';
 import {CPUAggregator} from './aggregator/cpu-aggregator/cpu-aggregator';
-import type {GPUVector} from '@luma.gl/graph/gpu-data';
+import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
+import {Buffer} from '@luma.gl/core';
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
   data: LayerDataSource<DataT>;
@@ -98,6 +99,8 @@ export default abstract class AggregationLayer<
     aggregator: Aggregator;
     /** CPU-backed previous cells, prepared only while replacement metadata is pending. */
     retainedAggregationLayer?: Layer;
+    /** GPU copies owned only while a frame without CPU metadata is retained. */
+    retainedAggregationBuffers?: Buffer[];
     /** Completed geometry and immutable result arrays retained until the next completed frame. */
     retainedAggregationFrame?: {
       layer: Layer;
@@ -174,7 +177,9 @@ export default abstract class AggregationLayer<
   protected retainAggregationLayer(layer: Layer, range: [number, number][]): void {
     const aggregator = this.state.aggregator;
     const values = [aggregator.getResultValues?.(0), aggregator.getResultValues?.(1)];
-    if (!values[0] || !values[1]) return;
+    if (this.state.aggregatorType !== 'webgpu') return;
+    for (const buffer of this.state.retainedAggregationBuffers || []) buffer.destroy();
+    this.state.retainedAggregationBuffers = undefined;
     this.state.retainedAggregationFrame = {layer, range, values, binCount: aggregator.binCount};
     this.state.retainedAggregationLayer = undefined;
   }
@@ -185,6 +190,7 @@ export default abstract class AggregationLayer<
     const frame = this.state.retainedAggregationFrame;
     if (!frame) return null;
     const {layer, range, values, binCount} = frame;
+    if (!values[0] || !values[1]) return null;
     const bins = new Float32Array(binCount * 2);
     const width = range[0][1] - range[0][0];
     for (let i = 0; i < binCount; i++) {
@@ -208,6 +214,56 @@ export default abstract class AggregationLayer<
       }
     });
     return this.state.retainedAggregationLayer ?? null;
+  }
+
+  /** Preserve GPU-only cells before an update can overwrite or resize their output buffers. */
+  protected retainGPUAggregationLayer(): void {
+    const frame = this.state.retainedAggregationFrame;
+    if (!frame || frame.values[0] || this.state.retainedAggregationLayer) return;
+    const attributes = (frame.layer.props.data as {attributes: Record<string, any>}).attributes;
+    const copies = new Map<Buffer, Buffer>();
+    const encoder = this.context.device.createCommandEncoder();
+    const retainedAttributes = {...attributes};
+    for (const [name, attribute] of Object.entries(attributes)) {
+      if (!(attribute instanceof GPUVector)) continue;
+      const data = getGPUVectorData(attribute);
+      if (!(data.buffer instanceof Buffer))
+        throw new Error('Aggregation requires concrete buffers');
+      let buffer = copies.get(data.buffer);
+      if (!buffer) {
+        buffer = this.context.device.createBuffer({
+          byteLength: data.buffer.byteLength,
+          usage: Buffer.COPY_DST | Buffer.VERTEX | Buffer.STORAGE
+        });
+        encoder.copyBufferToBuffer({
+          sourceBuffer: data.buffer,
+          destinationBuffer: buffer,
+          size: data.buffer.byteLength
+        });
+        copies.set(data.buffer, buffer);
+      }
+      retainedAttributes[name] = new GPUVector({
+        type: 'buffer',
+        name: attribute.name,
+        format: attribute.format,
+        length: attribute.length,
+        byteOffset: data.byteOffset,
+        byteStride: data.byteStride,
+        buffer,
+        ownsBuffer: false
+      });
+    }
+    this.context.device.submit(encoder.finish());
+    this.state.retainedAggregationBuffers = [...copies.values()];
+    this.state.retainedAggregationLayer = frame.layer.clone({
+      data: {length: frame.binCount, attributes: retainedAttributes},
+      updateTriggers: {
+        ...frame.layer.props.updateTriggers,
+        getBin: [retainedAttributes.getBin],
+        getColorValue: [retainedAttributes.getColorValue],
+        getElevationValue: [retainedAttributes.getElevationValue]
+      }
+    });
   }
 
   /** Forwards extension uniforms to the GPU aggregation model as well as rendering models. */
@@ -323,6 +379,10 @@ export default abstract class AggregationLayer<
   // Extend Layer.updateState to update the Aggregator instance
   // returns true if aggregator is changed
   updateState(params: UpdateParameters<this>): boolean {
+    const props: Record<string, any> = params.props;
+    if (!props.colorDomain || !props.elevationDomain || this.needsAggregationScaleValues(props)) {
+      this.retainGPUAggregationLayer();
+    }
     super.updateState(params);
     if (this.props.weights && !this.props.positions) {
       throw new Error('GPU aggregation weights require positions');
@@ -398,6 +458,7 @@ export default abstract class AggregationLayer<
   finalizeState(context: LayerContext) {
     super.finalizeState(context);
     this.state.aggregator?.destroy();
+    for (const buffer of this.state.retainedAggregationBuffers || []) buffer.destroy();
   }
 
   // Override Layer.updateAttributes to update the aggregator
