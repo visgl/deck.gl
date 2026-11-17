@@ -564,11 +564,14 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       updateTriggers
     } = this.props;
 
+    /** Byte-encoded glyph color accessor. Preserves the built-in default. */
     const glyphColor = this.getSubLayerColorAccessor(getColor, DEFAULT_COLOR);
+    /** Byte-encoded background fill color accessor. Preserves the built-in default. */
     const backgroundColor = this.getSubLayerColorAccessor(
       getBackgroundColor,
       DEFAULT_BACKGROUND_COLOR
     );
+    /** Byte-encoded background border color accessor. Preserves the built-in default. */
     const borderColor = this.getSubLayerColorAccessor(getBorderColor, DEFAULT_COLOR);
 
     const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
