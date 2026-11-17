@@ -416,6 +416,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return this.state.contourData;
   }
 
+  /** Recheck current attributes and switch to CPU aggregation when compute cannot consume them. */
   protected override updateAttributes(changedAttributes) {
     // AttributeManager has populated current positions at this point. Backend selection
     // during updateState can only see the previous position bounds.
