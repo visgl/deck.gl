@@ -158,6 +158,7 @@ const COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = {
     accessor: 'getColor',
     arrowAccessor: true,
     semantic: 'color',
+    defaultColor: DEFAULT_COLOR,
     size: 4
   },
   angles: {
@@ -314,6 +315,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         transition: true,
         bufferGroup: 'icon-instance-data',
         accessor: 'getColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR
       },
       instanceAngles: {
@@ -462,6 +464,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         }
       },
       {
+        normalizedColors: this.usesNormalizedColors(),
         dataLoading: this.internalState!.isAsyncPropLoading('data'),
         changed: () => {
           this.setState({});
