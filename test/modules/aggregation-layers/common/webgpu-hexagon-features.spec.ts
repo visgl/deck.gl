@@ -134,6 +134,7 @@ for (const explicitDomains of [false, true]) {
       await vi.waitFor(() => expect(layer.state.aggregator.isLoaded).toBe(true), {timeout: 10000});
       let previous = layer.renderLayers() as any;
       expect(previous).not.toBeNull();
+      expect(layer.state.retainedAggregationLayer).toBeUndefined();
       for (const radius of [20, 5]) {
         const oldRadius = previous.props.radius;
         layer = layer.clone({radius});
@@ -144,6 +145,7 @@ for (const explicitDomains of [false, true]) {
         expect(pending.props.pickable).toBe(false);
         if (explicitDomains) expect(pending.props.radius).toBe(layer.state.radiusCommon);
         else {
+          expect(layer.state.retainedAggregationLayer).toBeDefined();
           expect(pending.props.radius).toBe(oldRadius);
           expect(pending.props.numInstances).toBe(previous.props.numInstances);
           expect(pending.props.data.attributes.getBin.value).toBeInstanceOf(Float32Array);
