@@ -4,6 +4,8 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+Top-level TextLayer glyph, background, and border colors honor Deck’s `normalizedColors` option.
+
 ### Normalized color inputs
 
 Deck's [`normalizedColors`](./api-reference/core/deck.md#normalizedcolors) option enables

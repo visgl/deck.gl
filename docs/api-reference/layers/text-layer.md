@@ -358,6 +358,10 @@ Color of outline around the text, in `[r, g, b, [a]]`. Each channel is a number 
 
 With Deck's [`normalizedColors`](../core/deck.md#normalizedcolors), plain arrays for `outlineColor` on a top-level layer use 0–1 channels. Built-in defaults and byte typed arrays retain their byte encoding.
 
+On top-level TextLayer, Deck's [`normalizedColors`](../core/deck.md#normalizedcolors)
+also applies to plain arrays and callback results for glyph, background, and border colors.
+Omitted alpha is opaque.
+
 ### Data Accessors
 
 #### `getText` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettext}

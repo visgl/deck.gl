@@ -42,6 +42,17 @@ const ALIGNMENT_BASELINE = {
   bottom: -1
 } as const;
 
+/** Marks color dependencies without changing their shallow comparisons. */
+function colorUpdateTrigger(trigger: unknown, normalized: boolean): unknown {
+  if (!normalized) return trigger;
+  if (Array.isArray(trigger)) return [true, ...trigger];
+  if (trigger && typeof trigger === 'object') return {...trigger, _normalizedColors: true};
+  return [true, trigger];
+}
+
+/** Opaque white background in the byte convention. */
+const DEFAULT_BACKGROUND_COLOR = [255, 255, 255, 255] as const;
+
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const DEFAULT_LINE_HEIGHT = 1.0;
@@ -231,7 +242,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
   background: false,
-  getBackgroundColor: {type: 'accessor', value: [255, 255, 255, 255]},
+  getBackgroundColor: {type: 'accessor', value: DEFAULT_BACKGROUND_COLOR},
   getBorderColor: {type: 'accessor', value: DEFAULT_COLOR},
   getBorderWidth: {type: 'accessor', value: 0},
   backgroundBorderRadius: {type: 'object', value: 0},
@@ -553,6 +564,13 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       updateTriggers
     } = this.props;
 
+    const glyphColor = this.getSubLayerColorAccessor(getColor, DEFAULT_COLOR);
+    const backgroundColor = this.getSubLayerColorAccessor(
+      getBackgroundColor,
+      DEFAULT_BACKGROUND_COLOR
+    );
+    const borderColor = this.getSubLayerColorAccessor(getBorderColor, DEFAULT_COLOR);
+
     const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
     const BackgroundLayerClass = this.getSubLayerClass('background', TextBackgroundLayer);
     const {fontSize} = this.state.fontAtlasManager.props;
@@ -562,8 +580,8 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         new BackgroundLayerClass(
           {
             // background props
-            getFillColor: getBackgroundColor,
-            getLineColor: getBorderColor,
+            getFillColor: backgroundColor,
+            getLineColor: borderColor,
             getLineWidth: getBorderWidth,
             borderRadius: backgroundBorderRadius,
             padding: backgroundPadding,
@@ -597,8 +615,14 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               getPosition: updateTriggers.getPosition,
               getAngle: updateTriggers.getAngle,
               getSize: updateTriggers.getSize,
-              getFillColor: updateTriggers.getBackgroundColor,
-              getLineColor: updateTriggers.getBorderColor,
+              getFillColor: colorUpdateTrigger(
+                updateTriggers.getBackgroundColor,
+                this.usesNormalizedColors()
+              ),
+              getLineColor: colorUpdateTrigger(
+                updateTriggers.getBorderColor,
+                this.usesNormalizedColors()
+              ),
               getLineWidth: updateTriggers.getBorderWidth,
               getPixelOffset: updateTriggers.getPixelOffset,
               getBoundingRect: {
@@ -637,7 +661,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           iconMapping: mapping,
 
           getPosition,
-          getColor,
+          getColor: glyphColor,
           getSize,
           getAngle,
           getPixelOffset,
@@ -668,7 +692,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             all: updateTriggers.getText,
             getPosition: updateTriggers.getPosition,
             getAngle: updateTriggers.getAngle,
-            getColor: updateTriggers.getColor,
+            getColor: colorUpdateTrigger(updateTriggers.getColor, this.usesNormalizedColors()),
             getSize: updateTriggers.getSize,
             getPixelOffset: updateTriggers.getPixelOffset,
             getContentBox: updateTriggers.getContentBox,
