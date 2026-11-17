@@ -13,7 +13,12 @@ import AttributeManager from './attribute/attribute-manager';
 import GPUVectorModel from './luma-upstream/gpu-vector-model';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
-import {ACCESSOR_QUERIES_SYMBOL, LIFECYCLE, Lifecycle} from '../lifecycle/constants';
+import {
+  ACCESSOR_QUERIES_SYMBOL,
+  COMPONENT_SYMBOL,
+  LIFECYCLE,
+  Lifecycle
+} from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import debug from '../debug/index';
@@ -1004,6 +1009,16 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
   }
 
+  /** Converts a prop to its interpolation representation before a uniform transition starts. */
+  protected getUniformTransitionValue(_propName: string, value: unknown): unknown {
+    return value;
+  }
+
+  /** Returns whether the current prop value is an interpolated uniform transition value. */
+  protected isUniformTransitionValue(propName: string): boolean {
+    return !Object.hasOwn(this.props, COMPONENT_SYMBOL) && Object.hasOwn(this.props, propName);
+  }
+
   /** Update uniform (prop) transitions. This is called in updateState, may result in model updates. */
   private _updateUniformTransition(): Layer<PropsT>['props'] {
     // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
@@ -1712,8 +1727,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         // @ts-ignore (TS2531) internalState is always defined when this method is called
         this.internalState.uniformTransitions.add(
           key,
-          oldProps[key],
-          newProps[key],
+          this.getUniformTransitionValue(key, oldProps[key]),
+          this.getUniformTransitionValue(key, newProps[key]),
           newProps.transitions?.[key]
         );
       }

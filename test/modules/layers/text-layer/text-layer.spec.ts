@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {Timeline} from '@luma.gl/engine';
 import {test, expect} from 'vitest';
 
 import {TextLayer} from '@deck.gl/layers';
@@ -70,6 +71,40 @@ test('TextLayer - sdf', () => {
     }
   ];
   testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('TextLayer interpolates the byte default outline to a normalized color', () => {
+  const timeline = new Timeline();
+  testLayer({
+    Layer: TextLayer,
+    timeline,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          data: FIXTURES.points,
+          getText: d => d.ADDRESS,
+          getPosition: d => d.COORDINATES,
+          fontSettings: {sdf: true}
+        }
+      },
+      {
+        updateProps: {outlineColor: [1, 0, 0, 0], transitions: {outlineColor: 100}},
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+          timeline.setTime(0);
+        }
+      },
+      {
+        onBeforeUpdate: () => timeline.setTime(50),
+        onAfterUpdate: ({subLayer}) => {
+          expect(subLayer.state.outlineColor).toEqual([0.5, 0, 0, 0.5]);
+        }
+      }
+    ]
+  });
 });
 
 test('TextLayer - MultiIconLayer sublayer positions', () => {

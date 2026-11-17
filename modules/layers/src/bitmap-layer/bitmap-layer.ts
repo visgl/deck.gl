@@ -342,6 +342,29 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
+  /** Interpolates bitmap colors in the same 0–1 representation used by the shader. */
+  protected getUniformTransitionValue(propName: string, value: unknown): unknown {
+    if (propName === 'tintColor') return this.decodeTintColor(value as Color);
+    if (propName === 'transparentColor') return this.decodeTransparentColor(value as Color);
+    return super.getUniformTransitionValue(propName, value);
+  }
+
+  /** Converts an authored tint to RGB shader channels. */
+  private decodeTintColor(color: Color): BitmapProps['tintColor'] {
+    return normalizeByteColor3(
+      color,
+      !this.usesNormalizedColors() || color === DEFAULT_TINT_COLOR
+    ) as BitmapProps['tintColor'];
+  }
+
+  /** Converts an authored transparent replacement color to RGBA shader channels. */
+  private decodeTransparentColor(color: Color): BitmapProps['transparentColor'] {
+    return normalizeByteColor4(
+      color,
+      !this.usesNormalizedColors() || color === DEFAULT_TRANSPARENT_COLOR
+    );
+  }
+
   draw(opts) {
     const {shaderModuleProps} = opts;
     const {model, coordinateConversion, bounds, disablePicking} = this.state;
@@ -354,20 +377,17 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     // // TODO fix zFighting
     // Render the image
     if (image && model) {
-      const normalizedColors = this.usesNormalizedColors();
       const bitmapProps: BitmapProps = {
         bitmapTexture: image as Texture,
         bounds,
         coordinateConversion,
         desaturate,
-        tintColor: normalizeByteColor3(
-          tintColor,
-          !normalizedColors || tintColor === DEFAULT_TINT_COLOR
-        ) as BitmapProps['tintColor'],
-        transparentColor: normalizeByteColor4(
-          transparentColor,
-          !normalizedColors || transparentColor === DEFAULT_TRANSPARENT_COLOR
-        )
+        tintColor: this.isUniformTransitionValue('tintColor')
+          ? (tintColor as BitmapProps['tintColor'])
+          : this.decodeTintColor(tintColor),
+        transparentColor: this.isUniformTransitionValue('transparentColor')
+          ? (transparentColor as BitmapProps['transparentColor'])
+          : this.decodeTransparentColor(transparentColor)
       };
       model.shaderInputs.setProps({bitmap: bitmapProps});
       model.draw(this.context.renderPass);
