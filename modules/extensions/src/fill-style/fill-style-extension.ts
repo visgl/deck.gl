@@ -30,6 +30,9 @@ function leastCommonMultiple(a: number, b: number): number {
   return (a / x) * b;
 }
 
+/** Fully transparent default pattern background in byte RGBA. */
+const DEFAULT_BACKGROUND_COLOR: Color = [0, 0, 0, 0];
+
 const defaultProps: DefaultProps<FillStyleExtensionProps> = {
   fillPatternEnabled: true,
   fillPatternAtlas: {
@@ -43,7 +46,7 @@ const defaultProps: DefaultProps<FillStyleExtensionProps> = {
   getFillPattern: {type: 'accessor', value: d => d.pattern},
   getFillPatternScale: {type: 'accessor', value: 1},
   getFillPatternOffset: {type: 'accessor', value: [0, 0]},
-  getFillPatternBackgroundColor: {type: 'accessor', value: [0, 0, 0, 0]}
+  getFillPatternBackgroundColor: {type: 'accessor', value: DEFAULT_BACKGROUND_COLOR}
 };
 
 export type FillStyleExtensionProps<DataT = any> = {
@@ -144,7 +147,7 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
         normalized
       ];
     }
-    if (normalized && color && color !== defaultProps.getFillPatternBackgroundColor!.value) {
+    if (normalized && color && color !== DEFAULT_BACKGROUND_COLOR) {
       const accessor: Accessor<any, Color> =
         typeof color === 'function'
           ? (object, info) => toByteColor(color(object, info))
@@ -327,7 +330,7 @@ function toByteColor(color: Color): Color {
     return color;
   }
   /** Byte RGBA result, with opaque alpha as the fallback. */
-  const packed: Color = [0, 0, 0, 255];
+  const packed: [number, number, number, number] = [0, 0, 0, 255];
   packNormalizedColor(color, packed, 0, 4);
   return packed;
 }
