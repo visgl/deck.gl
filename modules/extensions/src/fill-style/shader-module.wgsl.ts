@@ -128,7 +128,7 @@ export const injections = {
   'wgsl:vs:DECKGL_FILTER_GL_POSITION': /* wgsl */ `
 if (fill.patternEnabled != 0) {
   let cameraFlatX = project_common_position_to_flat(project.cameraPosition).x;
-  let flatPosition = project_common_position_to_flat_continuous(geometry.position, cameraFlatX);
+  let flatPosition = project_common_position_to_flat_continuous(geometry.position.xyz, cameraFlatX);
   fill_patternOffsets = fillPatternOffsets;
   fill_backgroundColor = fillPatternBackgroundColors;
 #ifdef FILL_PROCEDURAL_PATTERN
