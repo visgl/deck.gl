@@ -127,19 +127,14 @@ new Deck({
 | Surface | Supported inputs |
 | --- | --- |
 | Basic layers | ScatterplotLayer fill and stroke, LineLayer and ArcLayer colors, PathLayer strokes, PolygonLayer and SolidPolygonLayer fills, strokes and wireframes, IconLayer and PointCloudLayer colors, ColumnLayer fill and line |
-| Bitmap and text | BitmapLayer tint and transparent colors, TextLayer glyph, background, border, and outline colors |
-| Mesh and tiled layers | SimpleMeshLayer and ScenegraphLayer instance colors, TerrainLayer fallback color, Tile3DLayer point and mesh fallback colors, and GeoJsonLayer styling including the default TileLayer and MVTLayer renderers |
-| Aggregation | GridLayer, HexagonLayer, ScreenGridLayer, HeatmapLayer, and CARTO HeatmapTileLayer palettes, plus ContourLayer line and band colors |
-| Extensions and effects | FillStyleExtension pattern background and ambient, directional, point, and sun light RGB |
+| Bitmap and text | BitmapLayer tint and transparent colors, TextLayer outline colors |
+| GeoJSON | Top-level GeoJsonLayer color accessors |
 | Views and picking | View clear colors and top-level layer highlight colors |
 
 Built-in palettes and omitted color props retain their colors. `Uint8Array` and
 `Uint8ClampedArray` colors retain their byte interpretation. Explicit binary attributes, Arrow
 colors, existing GPU columns, and tile-supplied colors keep the encoding defined by their
-formats. The default vector-tile renderer forwards user styling to GeoJsonLayer. A custom
-`renderSubLayers` callback supplies child colors in the convention expected by the child.
-LightingEffect shadow tints already use normalized RGBA in either mode. Color attribute
-transitions use the WebGL backend.
+formats. Color attribute transitions use the WebGL backend.
 
 Attribute and palette RGB(A) channels are clamped to 0–1 and rounded to a byte when packed.
 The option changes how you supply colors for standard dynamic range rendering.

@@ -3,12 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {LayerManager, OrthographicView} from '@deck.gl/core';
+import {Deck, LayerManager, OrthographicView} from '@deck.gl/core';
 import {sqlParser} from '@deck.gl/core/sql';
 import {tableFromArrays} from 'apache-arrow';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {device as webglDevice} from '@deck.gl/test-utils/vitest';
-import {Buffer} from '@luma.gl/core';
+import {Buffer, Texture} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
@@ -90,6 +90,72 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     } finally {
       manager.finalize();
       buffer.destroy();
+    }
+  });
+
+  test(`Deck draws updated ScatterplotLayer colors on ${backend}`, async ({skip}) => {
+    const device = backend === 'webgpu' ? await getWebGPUTestDevice('core') : webglDevice;
+    if (!device || device.type !== backend) {
+      return skip();
+    }
+
+    const size = 32;
+    const target = device.createTexture({
+      format: 'rgba8unorm',
+      width: size,
+      height: size,
+      usage: Texture.RENDER | Texture.COPY_SRC
+    });
+    const framebuffer = device.createFramebuffer({
+      width: size,
+      height: size,
+      colorAttachments: [target],
+      depthStencilAttachment: 'depth24plus'
+    });
+    const sample = {x: size / 2, y: size / 2, width: 1, height: 1};
+    const {byteLength} = target.computeMemoryLayout(sample);
+    const readback = device.createBuffer({byteLength, usage: Buffer.COPY_DST | Buffer.MAP_READ});
+    const parent = document.createElement('div');
+    document.body.appendChild(parent);
+    const errors: Error[] = [];
+    const layer = new ScatterplotLayer({
+      data: [{position: [0, 0]}],
+      // Omitted alpha stays opaque in both modes.
+      getFillColor: () => [1, 0.5, 0],
+      radiusUnits: 'pixels',
+      getRadius: 6
+    });
+    const deck = new Deck({
+      device,
+      parent,
+      width: size,
+      height: size,
+      useDevicePixels: false,
+      views: new OrthographicView(),
+      initialViewState: {target: [0, 0, 0], zoom: 0},
+      layers: [layer],
+      _framebuffer: framebuffer,
+      onError: error => errors.push(error)
+    });
+    try {
+      await expect.poll(() => deck.isInitialized).toBe(true);
+      for (const normalizedColors of [false, true, false]) {
+        deck.setProps({normalizedColors});
+        await expect
+          .poll(async () => {
+            deck.redraw('normalized color readback');
+            target.readBuffer(sample, readback);
+            return Array.from(await readback.readAsync(0, 4));
+          })
+          .toEqual(normalizedColors ? [255, 128, 0, 255] : [1, 0, 0, 255]);
+      }
+      expect(errors).toEqual([]);
+    } finally {
+      deck.finalize();
+      parent.remove();
+      readback.destroy();
+      framebuffer.destroy();
+      target.destroy();
     }
   });
 
