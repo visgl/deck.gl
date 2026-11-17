@@ -284,7 +284,8 @@ export type LayerProps = {
    */
   highlightedObjectIndex?: number | null;
   /**
-   * The color of the highlight.
+   * The highlight color, in byte channels by default. Deck’s normalizedColors option
+   * selects 0–1 plain-array inputs for top-level layers.
    */
   highlightColor?: number[] | ((pickingInfo: PickingInfo) => number[]);
 

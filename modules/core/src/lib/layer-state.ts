@@ -52,6 +52,11 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     options: unknown;
   };
 
+  /** Last highlight color supplied by an active hover callback, in its input convention. */
+  hoverHighlightColor: number[] | null = null;
+  /** Color convention used for the most recent picking module update. */
+  normalizedHighlightColor = false;
+
   attributeManager: AttributeManager | null;
   needsRedraw: boolean;
   needsUpdate: boolean;

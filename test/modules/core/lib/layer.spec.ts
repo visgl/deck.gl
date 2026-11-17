@@ -650,9 +650,59 @@ test('Layer#updateModules', async () => {
         }
       },
       {
+        title: 'Normalized highlights preserve the default color',
+
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.highlightColor).toEqual([0, 0, HALF_BYTE, HALF_BYTE]);
+        }
+      },
+      {
+        title: 'Normalized highlight constant does not change byte picking IDs',
+
+        updateProps: {highlightColor: [1, 0.5, 0, 0], highlightedObjectIndex: 1},
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.highlightColor).toEqual([1, 0.5, 0, 0]);
+          expect(picking.highlightedObjectColor).toEqual([2, 0, 0]);
+          expect(picking.useByteColors).toBe(true);
+        }
+      },
+      {
+        title: 'Normalized hover callback supplies opaque alpha',
+
+        updateProps: {
+          autoHighlight: true,
+          highlightedObjectIndex: null,
+          highlightColor: () => [1, 0.5, 0]
+        },
+        onAfterUpdate: ({layer}) => {
+          layer.updateAutoHighlight({picked: true, color: [3, 0, 0]});
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.highlightColor).toEqual([1, 0.5, 0, 1]);
+          expect(picking.highlightedObjectColor).toEqual([3, 0, 0]);
+        }
+      },
+      {
+        title: 'Deck convention changes update a stationary hover',
+
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: false});
+        },
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.highlightColor).toEqual([1 / 255, 0.5 / 255, 0, 1]);
+          expect(picking.highlightedObjectColor).toEqual([3, 0, 0]);
+        }
+      },
+      {
         title: 'only highlightedObjectIndex',
 
         updateProps: {
+          autoHighlight: false,
           highlightColor: [255, 0, 0, 128],
           highlightedObjectIndex: 1
         },
