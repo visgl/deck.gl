@@ -8,9 +8,9 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Deck's [`normalizedColors`](./api-reference/core/deck.md#normalizedcolors) option enables
 0–1 plain-array color constants and callbacks for top-level ScatterplotLayer, LineLayer, and
-ArcLayer, PathLayer, PolygonLayer, and SolidPolygonLayer, as well as [View clear colors](./api-reference/core/view.md#clearcolor) and
+ArcLayer, PathLayer, PolygonLayer, SolidPolygonLayer, and GeoJsonLayer, as well as [View clear colors](./api-reference/core/view.md#clearcolor) and
 [top-level layer highlights](./api-reference/core/layer.md#highlightcolor). Top-level bitmap tints,
-bitmap transparency, and text outlines also use the setting. Composite layers
+bitmap transparency, and text outlines also use the setting. Other composite layers
 retain their existing color conventions.
 
 ### Experimental batch loading
