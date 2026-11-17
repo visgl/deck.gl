@@ -9,7 +9,7 @@ import {
   _PickLayersPass as PickLayersPass
 } from '@deck.gl/core';
 import type {TerrainCover} from './terrain-cover';
-import {Parameters} from '@luma.gl/core';
+import {Framebuffer, Parameters} from '@luma.gl/core';
 
 export type TerrainPickingPassRenderOptions = LayersPassRenderOptions & {
   pickZ: boolean;
@@ -76,6 +76,24 @@ export class TerrainPickingPass extends PickLayersPass {
       deviceRect: viewport,
       pickZ: false,
       clearColor: [0, 0, 0, terrainAlpha]
+    });
+  }
+
+  /** Draws the picking colors of layers draped over terrain of another renderer into `target` */
+  renderPickingCover(
+    target: Framebuffer,
+    viewport: Viewport,
+    opts: Partial<TerrainPickingPassRenderOptions>
+  ) {
+    this.render({
+      ...opts,
+      pickingFBO: target,
+      pass: 'terrain-cover-picking-external',
+      layers: opts.layers!,
+      viewports: [viewport],
+      cullRect: undefined,
+      deviceRect: viewport,
+      pickZ: false
     });
   }
 
