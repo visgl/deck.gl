@@ -14,6 +14,8 @@ ArcLayer, PathLayer, PolygonLayer, SolidPolygonLayer, and GeoJsonLayer, as well 
 [top-level layer highlights](./api-reference/core/layer.md#highlightcolor). Top-level bitmap tints,
 bitmap transparency, and text outlines also use the setting. Other composite layers
 retain their existing color conventions.
+IconLayer, PointCloudLayer, and ColumnLayer also honor this setting for color accessors.
+
 
 ### Experimental batch loading
 
