@@ -274,6 +274,11 @@ A polygon can be one of the following formats:
   - `holeIndices` (number[]) - the starting index of each hole in the `positions` array. The first ring is the exterior boundary and the successive rings are the holes.
 
 
+On top-level layers, Deck's [`normalizedColors`](../core/deck.md#normalizedcolors) option
+interprets plain-array `getFillColor` and `getLineColor` values and callback results as 0–1 channels.
+Omitted alpha is opaque. Byte typed arrays, binary attributes, and built-in defaults keep
+their existing encoding.
+
 #### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`

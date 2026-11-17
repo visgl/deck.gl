@@ -352,6 +352,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         size: this.props.colorFormat.length,
         type: 'unorm8',
         accessor: 'getColor',
+        semanticType: 'color',
         transition: isWebGPU ? false : ATTRIBUTE_TRANSITION,
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'path-instance-data'

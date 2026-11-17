@@ -279,6 +279,7 @@ Layers with extensions use CPU aggregation.
 
 ContourLayer also accepts [GPU column inputs](./aggregator.md#gpu-column-inputs), which need `dataBounds`.
 
+
 ## Source
 
 [modules/aggregation-layers/src/contour-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/contour-layer)

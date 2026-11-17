@@ -234,27 +234,27 @@ Method called to retrieve the position of each point.
 
 Method called to retrieve weight of each point. By default each point will use a weight of `1`.
 
-### GPU column inputs
-
-These optional props bypass `getPosition` and `getWeight`. See the [GPU column input guide](./aggregator.md#gpu-column-inputs) for layout and ownership conventions. This path requires a WebGPU device without layer extensions or CPU position preprojection.
-
-#### `positions` (GPUVector, optional) {#positions}
-
-* Default: `null`
-
-A borrowed, single-chunk `float32x3` position vector. Offsets and strides are preserved. The vector length determines the row count; `numInstances` may select a shorter prefix, including zero rows. Replace the vector reference when its storage changes. Buffers must support vertex binding.
-
-#### `weights` (GPUVector[], optional) {#weights}
-
-* Default: `null`
-
-Required when `positions` is supplied. An array containing one borrowed, single-chunk scalar `float32` weight vector with the same length as `positions`. Offsets and strides are preserved. Input buffers remain caller-owned.
-
 ## Limitations
 
 The `HeatmapLayer` performs aggregation on the GPU. On WebGPU, it uses instanced quads and a 16-bit floating-point render target to preserve Gaussian kernel density estimation without requiring WebGL point sprites. On WebGL, this feature is fully supported in evergreen desktop browsers, but limited in the following platforms due to partial WebGL support:
 
 - iOS Safari: WebGL context does not support rendering to a float texture. The layer therefore falls back to an 8-bit low-precision mode, where weights must be integers and the accumulated weights in any pixel cannot exceed 255.
+
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
+
+- `positions` – `float32x3` – A single-chunk position vector.
+- `weights` – `float32` – An array containing one matching single-chunk weight vector.
+
+Notes:
+
+- Buffers must support vertex binding.
+- Offsets and strides are preserved.
+- The position vector supplies the input count. `numInstances` can select a prefix.
+- This path requires WebGPU and a configuration without extensions or CPU position preprojection.
 
 ## Source
 

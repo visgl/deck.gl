@@ -24,6 +24,9 @@ use cases.
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -134,6 +137,31 @@ function App() {
   />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+import {IconLayer} from '@deck.gl/layers';
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+
+const layer = new IconLayer({
+  data: [{icon: 'marker'}],
+  getPosition: positions,
+  getIcon: row => row.icon,
+  iconAtlas: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png',
+  iconMapping: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.json',
+  getSize: 40
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
 </Tabs>
@@ -420,6 +448,8 @@ If not specified, the layer uses the following defaults to create a linearly smo
 
 ### Data Accessors
 
+Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
+
 #### `getIcon` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#geticon}
 
 - Default: `d => d.icon`
@@ -443,14 +473,16 @@ the following properties.
 The image loaded from `url` is always resized to fit the box defined by `[width, height]` while preserving its aspect ratio.
 
 
-#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+#### `getPosition` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 - Default: `d => d.position`
 
 Method called to retrieve the position of each object, returns `[lng, lat, z]`.
 
+An Arrow vector supplies one value per object. See [position columns](../../developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
 
-#### `getSize` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsize}
+
+#### `getSize` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsize}
 
 - Default: `1`
 
@@ -459,18 +491,23 @@ The size of each object, in units specified by `sizeUnits` (default pixels). By 
 - If a number is provided, it is used as the size for all objects.
 - If a function is provided, it is called on each object to retrieve its size.
 
+An Arrow vector supplies one value per object. See [scalar columns](../../developer-guide/using-with-arrow.md#scalars) for requirements.
 
-#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
+
+#### `getColor` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 - Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 - If an array is provided, it is used as the color for all objects.
 - If a function is provided, it is called on each object to retrieve its color.
 - If `mask` = false, only the alpha component will be used to control the opacity of the icon.
 
-#### `getAngle` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getangle}
+An Arrow vector supplies one value per object. See [color columns](../../developer-guide/using-with-arrow.md#colors) for requirements.
+
+
+#### `getAngle` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getangle}
 
 - Default: `0`
 
@@ -479,7 +516,10 @@ The rotating angle  of each object, in degrees.
 - If a number is provided, it is used as the angle for all objects.
 - If a function is provided, it is called on each object to retrieve its angle.
 
-#### `getPixelOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
+An Arrow vector supplies one value per object. See [scalar columns](../../developer-guide/using-with-arrow.md#scalars) for requirements.
+
+
+#### `getPixelOffset` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
 
 - Default: `[0, 0]`
 
@@ -489,6 +529,9 @@ Screen space offset relative to the `coordinates` in pixel unit.
 * If a function is provided, it is called on each object to retrieve its offset.
 
 ### Callbacks
+
+* If an Arrow vector is provided, each row supplies a numeric fixed-size list matching the accessor’s dimensions.
+
 
 #### `onIconError` (Function) {#oniconerror}
 
@@ -511,45 +554,29 @@ This section is about the special requirements when [supplying attributes direct
 If `data.attributes.getIcon` is supplied, since its value can only be a typed array, `iconMapping` can only use integers as keys.
 
 
-### Arrow Columns
-
-See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
-
-#### `positions` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric XY or XYZ fixed-size lists specifying icon anchors. Overrides [`getPosition`](#getposition).
-
-#### `sizes` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric scalar icon sizes in `sizeUnits`. Overrides [`getSize`](#getsize).
-
-#### `colors` (Arrow Vector, optional)
-
-* Default: `null`
-
-RGB or RGBA fixed-size lists specifying icon colors. Overrides [`getColor`](#getcolor).
-
-#### `angles` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric scalar rotations in degrees. Overrides [`getAngle`](#getangle).
-
-#### `pixelOffsets` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric XY fixed-size lists specifying offsets in pixels. Overrides [`getPixelOffset`](#getpixeloffset).
 
 ## Remarks
 
 - Provide one `data` row per icon so `getIcon` can select it in either atlas mode.
 - If varying attributes exceed the WebGPU device's vertex buffer limit, use constant
   accessors for styling values shared by all icons.
+
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
+
+- `positions` – `float32x3` – Positions in XYZ order.
+- `sizes` – `float32`
+- `colors` – `unorm8x4` – Packed RGBA colors.
+- `angles` – `float32`
+- `pixelOffsets` – `float32x2` – Pixel offsets in XY order.
+
+Notes:
+
+- Supply one value per rendered instance, in instance order.
+- See [Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs) for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source
 

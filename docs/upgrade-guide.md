@@ -6,6 +6,12 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
+### View clear color alpha
+
+A View's [`clearColor`](./api-reference/core/view.md#clearcolor) with an explicit zero alpha,
+such as `[0, 0, 0, 0]`, now clears to transparent. Previously a zero alpha cleared to
+opaque. To keep an opaque clear, pass alpha `255` or omit it.
+
 ### WebGLAggregator outputs
 
 `WebGLAggregator.getBins()` and `getResult(channel)` now return borrowed `GPUVector`
@@ -81,7 +87,7 @@ layer and extension draws.
 
 ### loaders.gl and math.gl v5 beta
 
-Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.5`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.10`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
 | Previous import | Replacement import |
 | --- | --- |

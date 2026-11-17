@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {isArrowVector} from '../arrow/upstream-math/is-arrow-vector';
 import {createTexture, destroyTexture} from '../utils/texture';
 import {deepEqual} from '../utils/deep-equal';
 
@@ -72,6 +73,10 @@ type ArrayPropType<T = any[]> = BasePropType<T> & {
 };
 type AccessorPropType<T = any> = BasePropType<T> & {
   type: 'accessor';
+  /** Accept Arrow vectors in addition to constants and callbacks on opted-in accessors. */
+  arrow?: boolean;
+  /** Accepted constant types when the default value is a callback. */
+  constantTypes?: readonly 'array'[];
 };
 type FunctionPropType<T = Function> = BasePropType<T> & {
   type: 'function';
@@ -85,6 +90,8 @@ type FunctionPropType<T = Function> = BasePropType<T> & {
 };
 type DataPropType<T = any> = BasePropType<T> & {
   type: 'data';
+  /** Resolve one-shot synchronous iterators into reusable rows. */
+  materializeIterator?: boolean;
 };
 type ImagePropType = BasePropType<TextureSource | null> & {
   type: 'image';
@@ -156,9 +163,17 @@ const TYPE_DEFINITIONS = {
   accessor: {
     validate(value, propType: AccessorPropType) {
       const valueType = getTypeOf(value);
-      return valueType === 'function' || valueType === getTypeOf(propType.value);
+      return (
+        (Boolean(propType.arrow) && isArrowVector(value)) ||
+        valueType === 'function' ||
+        propType.constantTypes?.some(type => type === valueType) ||
+        valueType === getTypeOf(propType.value)
+      );
     },
     equal(value1, value2, propType: AccessorPropType) {
+      if (propType.arrow && (isArrowVector(value1) || isArrowVector(value2))) {
+        return value1 === value2;
+      }
       if (typeof value2 === 'function') {
         return true;
       }
@@ -202,7 +217,17 @@ const TYPE_DEFINITIONS = {
       }
       const {dataTransform} = component.props;
       if (dataTransform) {
-        return dataTransform(value);
+        value = dataTransform(value);
+      }
+      if (
+        propType.materializeIterator &&
+        typeof value?.next === 'function' &&
+        value[Symbol.iterator]?.() === value
+      ) {
+        return Array.from(value);
+      }
+      if (dataTransform) {
+        return value;
       }
       // Detect loaders.gl v4 table format
       if (

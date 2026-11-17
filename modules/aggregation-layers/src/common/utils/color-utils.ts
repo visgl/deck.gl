@@ -4,6 +4,7 @@
 
 import type {Color} from '@deck.gl/core';
 import type {Device, Texture} from '@luma.gl/core';
+import {normalizeByteColor4} from '@luma.gl/shaders';
 import type {NumericArray, TypedArray, TypedArrayConstructor} from '@math.gl/core';
 import type {ScaleType} from '../types';
 
@@ -42,8 +43,16 @@ export function colorRangeToFlatArray(
   }
 
   if (normalize) {
-    for (let i = 0; i < flatArray.length; i++) {
-      flatArray[i] /= 255;
+    for (let i = 0; i < flatArray.length; i += 4) {
+      const color = normalizeByteColor4([
+        flatArray[i],
+        flatArray[i + 1],
+        flatArray[i + 2],
+        flatArray[i + 3]
+      ]);
+      for (let channel = 0; channel < Math.min(4, flatArray.length - i); channel++) {
+        flatArray[i + channel] = color[channel];
+      }
     }
   }
   return flatArray;
@@ -68,6 +77,7 @@ export function createColorRangeTexture(
   colorRange: Color[] | NumericArray,
   type: ScaleType = 'linear'
 ): Texture {
+  // Byte packing is a storage boundary: rgba8unorm sampling produces normalized colors.
   const colors = colorRangeToFlatArray(colorRange, false, Uint8Array);
 
   return device.createTexture({
