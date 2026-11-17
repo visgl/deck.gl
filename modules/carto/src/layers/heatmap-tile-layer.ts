@@ -389,7 +389,11 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
     );
   }
 
-  _updateColorTexture(opts, normalizedPalette: boolean) {
+  /**
+   * Replace the palette texture. If normalizedPalette is true, pack plain-array
+   * entries from 0–1 into the byte texture. Byte typed entries are copied as bytes.
+   */
+  _updateColorTexture(opts: UpdateParameters<this>, normalizedPalette: boolean) {
     const {colorRange} = opts.props;
     let {colorTexture} = this.state;
     const colors = colorRangeToFlatArray(colorRange, normalizedPalette);
