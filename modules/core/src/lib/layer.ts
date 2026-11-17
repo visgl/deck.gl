@@ -1789,7 +1789,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const colorConventionChanged = state.normalizedHighlightColor !== normalizedHighlightColor;
     state.normalizedHighlightColor = normalizedHighlightColor;
     const hoverDataChanged = Boolean(changeFlags.dataChanged && state.hoverHighlightInfo);
-    const resetHover = hoverDataChanged && typeof highlightColor === 'function';
     if (
       forceUpdate ||
       !autoHighlight ||
@@ -1804,7 +1803,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
       oldProps.highlightColor !== highlightColor ||
       colorConventionChanged ||
-      resetHover
+      hoverDataChanged
     ) {
       const picking: PickingProps = {};
 
@@ -1832,7 +1831,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         forceUpdate ||
         oldProps.autoHighlight !== autoHighlight ||
         highlightedObjectIndex !== oldProps.highlightedObjectIndex ||
-        resetHover
+        hoverDataChanged
       ) {
         picking.highlightedObjectColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0

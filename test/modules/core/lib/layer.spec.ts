@@ -845,7 +845,7 @@ test('Layer#updateModules', async () => {
         }
       },
       {
-        title: 'Other props update',
+        title: 'Data replacement clears constant hover highlights',
 
         updateProps: {
           data: []
@@ -853,14 +853,7 @@ test('Layer#updateModules', async () => {
 
         onAfterUpdate: ({layer}) => {
           const modelUniforms = layer.state.model.shaderInputs.getUniformValues();
-          expect(
-            modelUniforms.picking.isHighlightActive,
-            'model selectedColor uniform is enabled'
-          ).toBe(true);
-          expect(
-            modelUniforms.picking.highlightedObjectColor,
-            'model selectedColor uniform is set from hovered object index'
-          ).toEqual([3, 0, 0]);
+          expect(modelUniforms.picking.isHighlightActive).toBe(false);
         }
       },
       {
