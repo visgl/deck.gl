@@ -10,7 +10,7 @@ export function toByteColor(color: Color): Color {
     return color;
   }
   /** Packed RGBA channels, with opaque alpha as the fallback. */
-  const packed: Color = [0, 0, 0, 255];
+  const packed: [number, number, number, number] = [0, 0, 0, 255];
   packNormalizedColor(color, packed, 0, 4);
   return packed;
 }

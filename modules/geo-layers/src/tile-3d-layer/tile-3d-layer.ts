@@ -58,8 +58,13 @@ export function normalizeCoordinateSystem(
   return coordinateSystem;
 }
 
+/** Byte RGBA for tiles with no point color. */
+const DEFAULT_POINT_COLOR: Color = [0, 0, 0, 255];
+/** Supplies the default byte RGB for mesh tiles. */
+const getDefaultMeshColor = (): Color => [255, 255, 255];
+
 const defaultProps: DefaultProps<Tile3DLayerProps> = {
-  getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
+  getPointColor: {type: 'accessor', value: DEFAULT_POINT_COLOR},
   pointSize: 1.0,
 
   // Disable async data loading (handling it in _loadTileSet)
@@ -70,7 +75,7 @@ const defaultProps: DefaultProps<Tile3DLayerProps> = {
   onTileLoad: {type: 'function', value: tileHeader => {}},
   onTileUnload: {type: 'function', value: tileHeader => {}},
   onTileError: {type: 'function', value: (tile, message, url) => {}},
-  _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255]}
+  _getMeshColor: {type: 'function', value: getDefaultMeshColor}
 };
 
 /** All properties supported by Tile3DLayer */
@@ -354,11 +359,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     const {pointSize, getPointColor} = this.props;
     let color = getPointColor;
-    if (
-      !constantRGBA &&
-      getPointColor !== defaultProps.getPointColor!.value &&
-      this.usesNormalizedColors()
-    ) {
+    if (!constantRGBA && getPointColor !== DEFAULT_POINT_COLOR && this.usesNormalizedColors()) {
       color =
         typeof getPointColor === 'function'
           ? (object, info) => toByteColor(getPointColor(object, info))
@@ -432,8 +433,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     } = content;
     const {_getMeshColor} = this.props;
     const color = _getMeshColor(tileHeader);
-    const normalize =
-      _getMeshColor !== defaultProps._getMeshColor!.value && this.usesNormalizedColors();
+    const normalize = _getMeshColor !== getDefaultMeshColor && this.usesNormalizedColors();
 
     const geometry =
       (oldLayer && oldLayer.props.mesh) ||

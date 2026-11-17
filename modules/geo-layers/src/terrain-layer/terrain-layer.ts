@@ -36,6 +36,9 @@ const MIN_TERRAIN_MESH_MAX_ERROR = 1;
 const MAX_LATITUDE = 90;
 const MAX_LONGITUDE = 180;
 
+/** Byte RGB used for terrain with no texture or application color. */
+const DEFAULT_TERRAIN_COLOR: Color = [255, 255, 255];
+
 const defaultProps: DefaultProps<TerrainLayerProps> = {
   ...TileLayer.defaultProps,
   // Image url that encodes height data
@@ -47,7 +50,7 @@ const defaultProps: DefaultProps<TerrainLayerProps> = {
   // Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates
   bounds: {type: 'array', value: null, optional: true, compare: true},
   // Color to use if texture is unavailable
-  color: {type: 'color', value: [255, 255, 255]},
+  color: {type: 'color', value: DEFAULT_TERRAIN_COLOR},
   // Object to decode height data, from (r, g, b) to height in meters
   elevationDecoder: {
     type: 'object',
@@ -341,7 +344,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
   /** Prepare the fallback terrain color for the byte-encoded mesh accessor. */
   private getTerrainColor(): Color {
     const {color} = this.props;
-    return this.usesNormalizedColors() && color !== defaultProps.color!.value
+    return this.usesNormalizedColors() && color !== DEFAULT_TERRAIN_COLOR
       ? toByteColor(color)
       : color;
   }
