@@ -4,6 +4,11 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Optional graph aggregation
+
+The experimental [`_GraphScreenGridAggregator`](./api-reference/aggregation-layers/aggregator.md#graphscreengridaggregator)
+lets applications customize ScreenGrid aggregation using GPU graphs.
+
 ### Normalized color inputs
 
 Deck's [`normalizedColors`](./api-reference/core/deck.md#normalizedcolors) option enables
