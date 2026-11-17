@@ -331,8 +331,13 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
         0,
         terrain
       );
-      const overlapping = await deck!.pickMultipleObjectsAsync({x, y, radius: 3, depth: 2});
-      expect(overlapping.map(info => info.index).sort()).toEqual([0, 1]);
+      const first = await deck!.pickObjectAsync({x, y, radius: 3});
+      const layer = first!.layer!;
+      // Exercise the same disabled-index transition used by repeated picking.
+      layer.disablePickingIndex(first!.index);
+      const second = await deck!.pickObjectAsync({x, y, radius: 3});
+      expect([first!.index, second!.index].sort()).toEqual([0, 1]);
+      layer.restorePickingColors();
     });
 
   if (backend === 'webgpu')
