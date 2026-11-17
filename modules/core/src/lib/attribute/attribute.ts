@@ -644,8 +644,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         objectValue = transform.call(this, objectValue);
       }
 
+      /** Whether this row contains plain-array colors to pack. */
       const normalizeRow = normalizeColor && Array.isArray(objectValue);
+      /** Whether the row starts with a typed per-vertex color. */
       const nestedColor = normalizeRow && startIndices && ArrayBuffer.isView(objectValue[0]);
+      /** Whether the row contains flat per-vertex color channels. */
       const flatColors = normalizeRow && startIndices && objectValue.length > 4;
       if (
         normalizeRow &&
