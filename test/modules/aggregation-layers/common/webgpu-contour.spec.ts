@@ -9,9 +9,11 @@ import {ContourLayer, CPUAggregator} from '@deck.gl/aggregation-layers';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {WebGPUAggregator} from '../../../../modules/aggregation-layers/src/common/aggregator/webgpu-aggregator/webgpu-aggregator';
 
-// Exercise reduction and marching squares without creating unrelated polygon/path models.
+/** Exercise reduction and marching squares without unrelated polygon/path models. */
 class ContourComputationLayer extends ContourLayer {
+  /** Stable identity for the aggregation-only test layer. */
   static layerName = 'ContourComputationLayer';
+  /** Keep this test focused on aggregation and contour computation. */
   override renderLayers() {
     return null;
   }
