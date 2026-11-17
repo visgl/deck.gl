@@ -45,7 +45,10 @@ function renameCalls(expression: Expression, aliases: ReadonlyMap<string, string
     case 'UnaryExpression':
       return {...expression, argument: rename(expression.argument)};
     case 'ArrayExpression':
-      return {...expression, elements: expression.elements.map(rename)};
+      return {
+        ...expression,
+        elements: expression.elements.map(element => element && rename(element))
+      };
     case 'ConditionalExpression':
       return {
         ...expression,
