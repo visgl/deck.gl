@@ -103,7 +103,8 @@ export function packColorRange(
       packed[offset] = color[0];
       packed[offset + 1] = color[1];
       packed[offset + 2] = color[2];
-      packed[offset + 3] = Number.isFinite(color[3]) ? color[3] : 255;
+      const alpha = color[3];
+      packed[offset + 3] = alpha !== undefined && Number.isFinite(alpha) ? alpha : 255;
     }
   }
   return packed;

@@ -25,7 +25,11 @@ export type _HexagonCellLayerProps = {
 
 export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
   null,
-  ExtraPropsT & Required<_HexagonCellLayerProps>
+  ExtraPropsT &
+    Required<_HexagonCellLayerProps> & {
+      /** Whether plain-array palette entries are normalized. */
+      normalizedColorRange?: boolean;
+    }
 > {
   static layerName = 'HexagonCellLayer';
 
