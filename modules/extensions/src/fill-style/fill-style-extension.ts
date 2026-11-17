@@ -141,11 +141,10 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     const props = super.getSubLayerProps(extension);
     const color: Accessor<any, Color> | undefined = props.getFillPatternBackgroundColor;
     const normalized = !this.parent && Boolean(this.context.normalizedColors);
-    if (typeof color === 'function') {
-      props.updateTriggers.getFillPatternBackgroundColor = [
-        props.updateTriggers.getFillPatternBackgroundColor,
-        normalized
-      ];
+    if (normalized && typeof color === 'function') {
+      props.updateTriggers.getFillPatternBackgroundColor = withNormalizedColorTrigger(
+        props.updateTriggers.getFillPatternBackgroundColor
+      );
     }
     if (normalized && color && color !== DEFAULT_BACKGROUND_COLOR) {
       const accessor: Accessor<any, Color> =
@@ -333,4 +332,11 @@ function toByteColor(color: Color): Color {
   const packed: [number, number, number, number] = [0, 0, 0, 255];
   packNormalizedColor(color, packed, 0, 4);
   return packed;
+}
+
+/** Add a normalization marker while preserving shallow update-trigger comparisons. */
+function withNormalizedColorTrigger(trigger: unknown): unknown {
+  if (Array.isArray(trigger)) return [true, ...trigger];
+  if (trigger && typeof trigger === 'object') return {...trigger, _normalizedColors: true};
+  return [true, trigger];
 }
