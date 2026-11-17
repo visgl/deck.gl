@@ -14,6 +14,7 @@ import {
   CompositeLayer,
   CompositeLayerProps,
   _deepEqual as deepEqual,
+  _packNormalizedColor as packNormalizedColor,
   DefaultProps,
   Layer,
   UpdateParameters
@@ -71,12 +72,17 @@ function unitDensityForH3Cell(cellId: string) {
 /**
  * Converts a colorRange array to a flat array with 4 components per color
  */
-function colorRangeToFlatArray(colorRange: Color[]): Uint8Array {
+function colorRangeToFlatArray(colorRange: Color[], normalized: boolean): Uint8Array {
   const flatArray = new Uint8Array(colorRange.length * 4);
   let index = 0;
 
   for (let i = 0; i < colorRange.length; i++) {
     const color = colorRange[i];
+    if (normalized && Array.isArray(color)) {
+      packNormalizedColor(color, flatArray, index, 4);
+      index += 4;
+      continue;
+    }
     flatArray[index++] = color[0];
     flatArray[index++] = color[1];
     flatArray[index++] = color[2];
@@ -205,6 +211,8 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
 
   state!: {
     colorTexture?: Texture;
+    /** Convention used to encode the current palette texture. */
+    normalizedPalette?: boolean;
     isLoaded: boolean;
     scheme: string | null;
     tiles: Set<Tile2DHeader>;
@@ -228,8 +236,12 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
   updateState(opts: UpdateParameters<this>) {
     const {props, oldProps} = opts;
     super.updateState(opts);
-    if (!deepEqual(props.colorRange, oldProps.colorRange, 2)) {
-      this._updateColorTexture(opts);
+    const normalizedPalette = this.usesNormalizedColors() && props.colorRange !== defaultColorRange;
+    if (
+      normalizedPalette !== this.state.normalizedPalette ||
+      !deepEqual(props.colorRange, oldProps.colorRange, 2)
+    ) {
+      this._updateColorTexture(opts, normalizedPalette);
     }
 
     const scheme = props.data && 'scheme' in props.data ? props.data.scheme : null;
@@ -377,10 +389,10 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
     );
   }
 
-  _updateColorTexture(opts) {
+  _updateColorTexture(opts, normalizedPalette: boolean) {
     const {colorRange} = opts.props;
     let {colorTexture} = this.state;
-    const colors = colorRangeToFlatArray(colorRange);
+    const colors = colorRangeToFlatArray(colorRange, normalizedPalette);
 
     colorTexture?.destroy();
     colorTexture = this.context.device.createTexture({
@@ -390,7 +402,7 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
       height: 1
     });
 
-    this.setState({colorTexture});
+    this.setState({colorTexture, normalizedPalette});
   }
 }
 

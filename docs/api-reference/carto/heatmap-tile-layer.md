@@ -105,6 +105,11 @@ When `colorDomain` is specified:
 
 #### `colorRange` (Color[], optional) {#colorrange}
 
+With Deck's [`normalizedColors`](../core/deck.md#normalizedcolors), plain-array palette entries
+on a top-level HeatmapTileLayer use 0–1 channels. Omitted alpha is opaque. The built-in palette
+and byte typed arrays use byte channels.
+
+
 * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd` <img src="https://deck.gl/images/colorbrewer_YlOrRd_6.png"/>
 
 The color palette used in the heatmap, as an array of colors [color1, color2, ...]. Each color is in the format of `[r, g, b]` or `[r, g, b, a]`. Each channel is a number between 0-255.

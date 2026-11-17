@@ -4,6 +4,8 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+CARTO HeatmapTileLayer accepts normalized plain-array palettes with Deck’s `normalizedColors` option.
+
 ### Normalized color inputs
 
 Deck's [`normalizedColors`](./api-reference/core/deck.md#normalizedcolors) option enables
