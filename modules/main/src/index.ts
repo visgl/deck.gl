@@ -97,7 +97,8 @@ export {
   HeatmapLayer,
   WebGLAggregator,
   CPUAggregator,
-  ReadbackAggregator
+  ReadbackAggregator,
+  _GraphScreenGridAggregator
 } from '@deck.gl/aggregation-layers';
 
 export {

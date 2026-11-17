@@ -8,6 +8,12 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 On WebGPU devices, [ContourLayer](./api-reference/aggregation-layers/contour-layer.md#compute-aggregation) aggregates points in a compute shader before generating contours.
 
+### Optional graph aggregation
+
+The experimental [`_GraphScreenGridAggregator`](./api-reference/aggregation-layers/aggregator.md#graphscreengridaggregator)
+lets applications customize ScreenGrid aggregation using GPU graphs.
+
+
 ### Normalized color inputs
 
 Deck's [`normalizedColors`](./api-reference/core/deck.md#normalizedcolors) option enables
@@ -106,6 +112,10 @@ Release date: September 5, 2026
 deck.gl v9.4 is expected to be the final release in the v9 series. It brings together a collection of completed improvements focused on performance, stability, and usability, and is intended to be a highly compatible, highly recommended upgrade for all v9 applications.
 
 Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
+
+### Terrain fitting
+
+Use [`TerrainExtension`](./api-reference/extensions/terrain-extension.md) with `terrainDrawMode: 'offset'` to fit objects to the uppermost terrain surface. Texture draping remains WebGL-only.
 
 ### WebGPU
 

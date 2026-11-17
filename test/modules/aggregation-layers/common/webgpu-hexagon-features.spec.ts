@@ -6,6 +6,7 @@ import {test, expect, vi} from 'vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {OrthographicView} from '@deck.gl/core';
 import {HexagonLayer, GridLayer} from '@deck.gl/aggregation-layers';
+
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {WebGPUAggregator} from '../../../../modules/aggregation-layers/src/common/aggregator/webgpu-aggregator/webgpu-aggregator';

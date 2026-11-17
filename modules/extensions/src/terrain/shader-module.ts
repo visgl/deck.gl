@@ -8,6 +8,12 @@ import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import {project, ProjectProps, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
+import {
+  terrainWGSLSource,
+  terrainWGSLVertexInjection,
+  terrainWGSLFragmentInjection
+} from './shader-module.wgsl';
+import {isFlatViewport} from '../utils/projection-utils';
 import type {Bounds} from '../utils/projection-utils';
 import type {TerrainCover} from './terrain-cover';
 
@@ -17,6 +23,7 @@ export type TerrainModuleProps = {
   isPicking: boolean;
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
+  heightMapRange?: [number, number];
   dummyHeightMap: Texture;
   terrainCover?: TerrainCover | null;
   drawToTerrainHeightMap?: boolean;
@@ -27,26 +34,15 @@ export type TerrainModuleProps = {
 type TerrainModuleUniforms = {
   mode: number;
   bounds: [number, number, number, number];
+  heightRange: [number, number];
 };
 
 type TerrainModuleBindings = {
   terrain_map: Texture;
 };
 
-/** A model can have one of the following modes */
-export const TERRAIN_MODE = {
-  NONE: 0,
-  /** A terrain layer rendering encoded ground elevation into the height map */
-  WRITE_HEIGHT_MAP: 1,
-  /** An offset layer reading encoded ground elevation from the height map */
-  USE_HEIGHT_MAP: 2,
-  /** A terrain layer rendering to screen, using the cover fbo overlaid with its own texture */
-  USE_COVER: 3,
-  /** A terrain layer rendering to screen, using the cover fbo as texture */
-  USE_COVER_ONLY: 4,
-  /** Draped layer is rendered into a texture, and never to screen */
-  SKIP: 5
-};
+export {TERRAIN_MODE} from './terrain-mode';
+import {TERRAIN_MODE} from './terrain-mode';
 
 const TERRAIN_MODE_CONSTANTS = Object.keys(TERRAIN_MODE)
   .map(key => `const float TERRAIN_MODE_${key} = ${TERRAIN_MODE[key]}.0;`)
@@ -59,6 +55,7 @@ const uniformBlock =
 layout(std140) uniform terrainUniforms {
   float mode;
   vec4 bounds;
+  vec2 heightRange;
 } terrain;
 
 uniform sampler2D terrain_map;
@@ -67,6 +64,7 @@ uniform sampler2D terrain_map;
 export const terrainModule = {
   name: 'terrain',
   dependencies: [project],
+  source: terrainWGSLSource,
   vs: `${uniformBlock}
 out vec3 commonPos;
 // In globe mode, absolute Mercator position for terrain FBO UV lookups
@@ -79,6 +77,10 @@ vec2 terrain_globe_to_mercator(vec3 globePosition) {
   float x = atan(globePosition.x, -globePosition.y);
   float y = atanh(sinLat);
   return (vec2(x, y) + PI) * WORLD_SCALE;
+}
+
+float terrain_globe_latitude_scale(vec3 globePosition) {
+  return length(globePosition.xy) / length(globePosition);
 }
 `,
   fs: `${uniformBlock}in vec2 terrainMercPos;\nin float terrainHeight;`,
@@ -102,7 +104,10 @@ vec2 terrain_globe_to_mercator(vec3 globePosition) {
         terrainSkipRender
       } = opts;
       const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
-      const {commonOrigin} = projectUniforms;
+      // Globe sampling uses absolute Mercator positions, not the sphere's common origin.
+      const commonOrigin = isFlatViewport(opts.project!.viewport)
+        ? projectUniforms.commonOrigin
+        : [0, 0, 0];
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
@@ -138,6 +143,7 @@ vec2 terrain_globe_to_mercator(vec3 globePosition) {
       /* eslint-disable camelcase */
       return {
         mode,
+        heightRange: opts.heightMapRange || [0, 1],
         terrain_map: sampler,
         // Convert bounds to common space, as [minX, minY, width, height]
         bounds: bounds
@@ -155,20 +161,25 @@ vec2 terrain_globe_to_mercator(vec3 globePosition) {
     // Provide the dummy texture to satisfy the terrain_map binding.
     return {
       mode: TERRAIN_MODE.NONE,
+      heightRange: opts.heightMapRange || [0, 1],
       terrain_map: opts.dummyHeightMap,
       bounds: [0, 0, 0, 0]
     };
   },
   uniformTypes: {
     mode: 'f32',
-    bounds: 'vec4<f32>'
+    bounds: 'vec4<f32>',
+    heightRange: 'vec2<f32>'
   }
 } as const satisfies ShaderModule<TerrainModuleProps, TerrainModuleUniforms, TerrainModuleBindings>;
 
 export const terrainPlugin: ShaderPlugin = {
   name: 'terrain',
   module: terrainModule,
+  interStageVariables: {terrainHeightWGSL: {type: 'f32'}},
   injections: {
+    'wgsl:vs:DECKGL_FILTER_GL_POSITION': terrainWGSLVertexInjection,
+    'wgsl:fs:#main-start': terrainWGSLFragmentInjection,
     'glsl:vs:#main-start': /* glsl */ `
 if (terrain.mode == TERRAIN_MODE_SKIP) {
   gl_Position = vec4(0.0);
@@ -201,7 +212,7 @@ if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
     if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
       // Height map is written in Mercator common space (units = TILE_SIZE / EARTH_CIRCUMFERENCE / cos(lat))
       // Convert to globe radial units (units = GLOBE_RADIUS / EARTH_RADIUS)
-      terrainZ *= cos(radians(geometry.worldPosition.y)) * PI;
+      terrainZ *= terrain_globe_latitude_scale(anchorCommon) * PI;
       geometry.position.xyz += normalize(geometry.position.xyz) * terrainZ;
     } else {
       geometry.position.z += terrainZ;

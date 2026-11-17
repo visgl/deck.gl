@@ -70,6 +70,9 @@ export default abstract class AggregationLayer<
       return;
     }
     const {positions, weights, aggregator, extensions} = this.props;
+    if (aggregator?.requiresProjectedPositions && this.state.preproject) {
+      throw new Error('GPU aggregation positions must use the custom view coordinate system');
+    }
     if ((!aggregator && this.state.aggregatorType !== 'webgpu') || extensions.length || !weights) {
       throw new Error('GPU columns require a compatible aggregator, weights, and no extensions');
     }
@@ -101,6 +104,7 @@ export default abstract class AggregationLayer<
     retainedAggregationLayer?: Layer;
     /** GPU copies owned only while a frame without CPU metadata is retained. */
     retainedAggregationBuffers?: Buffer[];
+
     /** Completed geometry and immutable result arrays retained until the next completed frame. */
     retainedAggregationFrame?: {
       layer: Layer;
@@ -180,6 +184,7 @@ export default abstract class AggregationLayer<
     if (this.state.aggregatorType !== 'webgpu') return;
     for (const buffer of this.state.retainedAggregationBuffers || []) buffer.destroy();
     this.state.retainedAggregationBuffers = undefined;
+
     this.state.retainedAggregationFrame = {layer, range, values, binCount: aggregator.binCount};
     this.state.retainedAggregationLayer = undefined;
   }
@@ -191,6 +196,7 @@ export default abstract class AggregationLayer<
     if (!frame) return null;
     const {layer, range, values, binCount} = frame;
     if (!values[0] || !values[1]) return null;
+
     const bins = new Float32Array(binCount * 2);
     const width = range[0][1] - range[0][0];
     for (let i = 0; i < binCount; i++) {
@@ -383,6 +389,9 @@ export default abstract class AggregationLayer<
     if (!props.colorDomain || !props.elevationDomain || this.needsAggregationScaleValues(props)) {
       this.retainGPUAggregationLayer();
     }
+    if (this.props.aggregator?.supportsExtensions === false && this.props.extensions.length) {
+      throw new Error('The supplied aggregator does not support shader extensions');
+    }
     super.updateState(params);
     if (this.props.weights && !this.props.positions) {
       throw new Error('GPU aggregation weights require positions');
@@ -410,8 +419,21 @@ export default abstract class AggregationLayer<
         // Extension changes refresh the supplied instance without destroying it.
         aggregator.setNeedsUpdate();
       }
+      aggregator.setShaderContext?.({
+        shaders: this.getAggregationShaders(),
+        getAttributeBindings: () => {
+          const manager = this.getCurrentLayer()!.getAttributeManager()!;
+          return {
+            attributes: manager.getGPUVectors(),
+            bufferLayouts: manager
+              .getBufferLayouts()
+              .map(layout => ({...layout, stepMode: 'instance' as const}))
+          };
+        }
+      });
       aggregator.setProps({
         onError: error => this.getCurrentLayer()?.raiseError(error, 'aggregation'),
+        onNeedsRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
         attributes: this.getAttributeManager()?.attributes,
         positions: this.props.positions,
         weights: this.props.weights
