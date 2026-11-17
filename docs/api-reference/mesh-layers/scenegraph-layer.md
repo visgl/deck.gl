@@ -283,6 +283,8 @@ Method called to retrieve the center position for each object in the `data` stre
 An Arrow vector supplies one value per object. See [position columns](../../developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
 
 
+Deck’s [`normalizedColors`](../core/deck.md#normalizedcolors) lets top-level layers accept 0–1 plain-array instance colors. Byte defaults, typed arrays, and binary inputs retain their encoding.
+
 #### `getColor` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 - Default: `[0, 0, 0, 255]`
