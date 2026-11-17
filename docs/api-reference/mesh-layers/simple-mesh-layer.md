@@ -296,7 +296,7 @@ Deck’s [`normalizedColors`](../core/deck.md#normalizedcolors) lets top-level l
 
 If `mesh` does not contain vertex colors, use this color to render each object. If `mesh` contains vertex colors, then the two colors are mixed together. Use `[255, 255, 255]` to use the original mesh colors. If `texture` is assigned, then both colors will be ignored.
 
-The color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+The color is in the format of `[r, g, b, [a]]`. Plain arrays use 0–255 channels by default and 0–1 when Deck enables `normalizedColors`. Omitted alpha is opaque (255 or 1, respectively).
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.

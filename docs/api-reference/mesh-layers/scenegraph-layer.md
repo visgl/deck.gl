@@ -289,7 +289,7 @@ Deck’s [`normalizedColors`](../core/deck.md#normalizedcolors) lets top-level l
 
 - Default: `[0, 0, 0, 255]`
 
-For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied. Only used if `texture` is empty.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Plain arrays use 0–255 channels by default and 0–1 when Deck enables `normalizedColors`. Omitted alpha is opaque (255 or 1, respectively). Only used if `texture` is empty.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
