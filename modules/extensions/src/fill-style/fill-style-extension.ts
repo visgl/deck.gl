@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {createFloatParameterTexture} from '../utils/float-parameter-texture';
-import {LayerExtension} from '@deck.gl/core';
+import {LayerExtension, _packNormalizedColor as packNormalizedColor} from '@deck.gl/core';
 
 import {FillStyleModuleProps, patternPlugin, patternPluginWGSL} from './shader-module';
 import {packProceduralPatterns, type ProceduralPatternMapping} from './procedural-pattern';
@@ -12,6 +12,7 @@ import type {
   Layer,
   LayerContext,
   Color,
+  CompositeLayer,
   DefaultProps,
   Accessor,
   AccessorFunction,
@@ -98,7 +99,8 @@ export type FillStyleExtensionProps<DataT = any> = {
   /**
    * Accessor for the color filled behind the pattern. The pattern is composited on top of it, so
    * the background is visible wherever the pattern is transparent. Fully transparent by default,
-   * which leaves the area behind the pattern unfilled.
+   * which leaves the area behind the pattern unfilled. Plain arrays use 0–1 channels
+   * with Deck’s `normalizedColors` option and 0–255 channels otherwise.
    * @default [0, 0, 0, 0]
    */
   getFillPatternBackgroundColor?: Accessor<DataT, Color>;
@@ -129,6 +131,27 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
 
   isEnabled(layer: Layer<FillStyleExtensionProps>): boolean {
     return layer.getAttributeManager() !== null && !('pathTesselator' in layer.state);
+  }
+
+  /** Forward the pattern background accessor to composite children using byte channels. */
+  getSubLayerProps(this: CompositeLayer, extension: this): any {
+    const props = super.getSubLayerProps(extension);
+    const color: Accessor<any, Color> | undefined = props.getFillPatternBackgroundColor;
+    const normalized = !this.parent && Boolean(this.context.normalizedColors);
+    if (typeof color === 'function') {
+      props.updateTriggers.getFillPatternBackgroundColor = [
+        props.updateTriggers.getFillPatternBackgroundColor,
+        normalized
+      ];
+    }
+    if (normalized && color && color !== defaultProps.getFillPatternBackgroundColor!.value) {
+      const accessor: Accessor<any, Color> =
+        typeof color === 'function'
+          ? (object, info) => toByteColor(color(object, info))
+          : toByteColor(color);
+      props.getFillPatternBackgroundColor = accessor;
+    }
+    return props;
   }
 
   getShaders(this: Layer<FillStyleExtensionProps>, extension: this): any {
@@ -175,6 +198,7 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
         fillPatternBackgroundColors: {
           size: 4,
           type: 'unorm8',
+          semanticType: 'color',
           stepMode: 'dynamic',
           accessor: 'getFillPatternBackgroundColor',
           defaultValue: [0, 0, 0, 255]
@@ -295,4 +319,15 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       proceduralPatternTexture: createFloatParameterTexture(this.context.device, packedPatterns)
     };
   }
+}
+
+/** Pack a normalized plain-array color for a byte-encoded sublayer accessor. */
+function toByteColor(color: Color): Color {
+  if (!Array.isArray(color)) {
+    return color;
+  }
+  /** Byte RGBA result, with opaque alpha as the fallback. */
+  const packed: Color = [0, 0, 0, 255];
+  packNormalizedColor(color, packed, 0, 4);
+  return packed;
 }
