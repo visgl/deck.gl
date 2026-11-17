@@ -333,13 +333,13 @@ export default class LayersPass extends Pass {
         // references as colors and is already cleared to transparent black.
         // `clearColor: false` below still means "don't clear color" in both modes.
         if (Array.isArray(clearColor) && !isPicking) {
-          // Retain the legacy zero-alpha fallback while decoding public byte colors.
+          // An omitted alpha is opaque. An explicit zero alpha clears to transparent.
           colorToUse = normalizeByteColor4(
             [
               clearColor[0],
               clearColor[1],
               clearColor[2],
-              normalizedColors ? (clearColor[3] ?? 1) : clearColor[3] || 255
+              clearColor[3] ?? (normalizedColors ? 1 : 255)
             ],
             !normalizedColors
           );

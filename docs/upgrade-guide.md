@@ -6,6 +6,12 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
+### View clear color alpha
+
+A View's [`clearColor`](./api-reference/core/view.md#clearcolor) with an explicit zero alpha,
+such as `[0, 0, 0, 0]`, now clears to transparent. Previously a zero alpha cleared to
+opaque. To keep an opaque clear, pass alpha `255` or omit it.
+
 ### WebGLAggregator outputs
 
 `WebGLAggregator.getBins()` and `getResult(channel)` now return borrowed `GPUVector`

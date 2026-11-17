@@ -612,8 +612,23 @@ test('LayersPass#uses the supplied canvas context for viewport and clear passes'
   ).toEqual([4, 18, 20, 16]);
   expect(beginRenderPass).toHaveBeenCalledTimes(2);
   expect(beginRenderPass.mock.calls[0][0].framebuffer).toBe(framebuffer);
-  expect(beginRenderPass.mock.calls[1][0].clearColor).toEqual([1, 128 / 255, 0, 1]);
+  expect(beginRenderPass.mock.calls[1][0].clearColor).toEqual([1, 128 / 255, 0, 0]);
   expect(beginRenderPass.mock.calls[1][0].framebuffer).toBe(framebuffer);
+
+  beginRenderPass.mockClear();
+  layersPass.render({
+    canvasContext,
+    views: {[viewport.id]: new MapView({id: viewport.id, clear: true, clearColor: [255, 128, 0]})},
+    viewports: [viewport],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport
+  });
+  expect(beginRenderPass.mock.calls[1][0].clearColor, 'omitted byte alpha is opaque').toEqual([
+    1,
+    128 / 255,
+    0,
+    1
+  ]);
 
   for (const [clearColor, expected] of [
     [
