@@ -237,6 +237,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'solid-polygon-instance-data'
       },
@@ -247,6 +248,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'solid-polygon-instance-data'
       },

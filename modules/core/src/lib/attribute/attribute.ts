@@ -314,7 +314,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         if (
           this.settings.normalizedColorInput &&
           Array.isArray(constant) &&
-          constant !== this.settings.defaultValue
+          value !== this.settings.defaultValue
         ) {
           packNormalizedColor(constant, COLOR_SCRATCH, 0, this.size);
           constant = COLOR_SCRATCH;
@@ -644,7 +644,15 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         objectValue = transform.call(this, objectValue);
       }
 
-      if (normalizeColor && Array.isArray(objectValue)) {
+      const normalizeRow = normalizeColor && Array.isArray(objectValue);
+      const nestedColor = normalizeRow && startIndices && ArrayBuffer.isView(objectValue[0]);
+      const flatColors = normalizeRow && startIndices && objectValue.length > 4;
+      if (
+        normalizeRow &&
+        !nestedColor &&
+        !flatColors &&
+        (!startIndices || !Array.isArray(objectValue[0]))
+      ) {
         COLOR_SCRATCH.length = size;
         packNormalizedColor(objectValue, COLOR_SCRATCH, 0, size);
         objectValue = COLOR_SCRATCH;
@@ -655,11 +663,19 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
           (objectInfo.index < startIndices.length - 1
             ? startIndices[objectInfo.index + 1]
             : numInstances) - startIndices[objectInfo.index];
-        if (objectValue && Array.isArray(objectValue[0])) {
+        if (objectValue && (Array.isArray(objectValue[0]) || nestedColor)) {
           let startIndex = i;
           for (const item of objectValue) {
-            attribute._normalizeValue(item, value as TypedArray, startIndex);
+            if (normalizeRow && Array.isArray(item)) {
+              packNormalizedColor(item, value as TypedArray, startIndex, size);
+            } else {
+              attribute._normalizeValue(item, value as TypedArray, startIndex);
+            }
             startIndex += size;
+          }
+        } else if (flatColors) {
+          for (let offset = 0; offset < objectValue.length; offset += size) {
+            packNormalizedColor(objectValue, value as TypedArray, i + offset, size, offset);
           }
         } else if (objectValue && objectValue.length > size) {
           (value as TypedArray).set(objectValue, i);

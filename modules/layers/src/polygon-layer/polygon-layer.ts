@@ -375,6 +375,17 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
 
     const {paths, pathsDiff} = this.state;
 
+    const fillColor = this.getSubLayerColorAccessor(getFillColor, defaultFillColor);
+    const lineColor = this.getSubLayerColorAccessor(getLineColor, defaultLineColor);
+    const fillColorTrigger =
+      fillColor === getFillColor
+        ? updateTriggers?.getFillColor
+        : [true, updateTriggers?.getFillColor];
+    const lineColorTrigger =
+      lineColor === getLineColor
+        ? updateTriggers?.getLineColor
+        : [true, updateTriggers?.getLineColor];
+
     const FillLayer = this.getSubLayerClass('fill', SolidPolygonLayer);
     const StrokeLayer = this.getSubLayerClass('stroke', PathLayer);
 
@@ -395,8 +406,8 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           _windingOrder,
 
           getElevation,
-          getFillColor,
-          getLineColor: extruded && wireframe ? getLineColor : defaultLineColor,
+          getFillColor: fillColor,
+          getLineColor: extruded && wireframe ? lineColor : defaultLineColor,
 
           material,
           transitions
@@ -406,11 +417,11 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           updateTriggers: updateTriggers && {
             getPolygon: updateTriggers.getPolygon,
             getElevation: updateTriggers.getElevation,
-            getFillColor: updateTriggers.getFillColor,
+            getFillColor: fillColorTrigger,
             // using a legacy API to invalid lineColor attributes
             // if (extruded && wireframe) has changed
             lineColors: extruded && wireframe,
-            getLineColor: updateTriggers.getLineColor
+            getLineColor: lineColorTrigger
           }
         }),
         {
@@ -448,7 +459,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
             getPath: transitions.getPolygon
           },
 
-          getColor: this.getSubLayerAccessor(getLineColor),
+          getColor: this.getSubLayerAccessor(lineColor),
           getWidth: this.getSubLayerAccessor(getLineWidth),
           getDashArray: this.getSubLayerAccessor(getLineDashArray)
         },
@@ -456,7 +467,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           id: 'stroke',
           updateTriggers: updateTriggers && {
             getWidth: updateTriggers.getLineWidth,
-            getColor: updateTriggers.getLineColor,
+            getColor: lineColorTrigger,
             getDashArray: updateTriggers.getLineDashArray
           }
         }),
