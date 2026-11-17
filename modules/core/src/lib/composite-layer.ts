@@ -146,14 +146,18 @@ export default abstract class CompositeLayer<PropsT extends {} = {}> extends Lay
   /** Converts a parent color to bytes before passing it to a byte-oriented child. */
   protected getSubLayerColorAccessor<In>(
     accessor: Accessor<In, Color>,
-    defaultColor: Color
+    defaultColor: Color,
+    size: 3 | 4 = 4
   ): Accessor<In, Color> {
     if (!this.usesNormalizedColors() || accessor === defaultColor) return accessor;
 
+    /** Packs plain arrays to the child attribute width. */
     const encode = (color: Color): Color => {
       if (!Array.isArray(color)) return color;
-      const packed: [number, number, number, number] = [0, 0, 0, 0];
-      packNormalizedColor(color, packed, 0, 4);
+      /** A new tuple so callers can retain colors without aliasing later accessor calls. */
+      const packed: [number, number, number] | [number, number, number, number] =
+        size === 3 ? [0, 0, 0] : [0, 0, 0, 0];
+      packNormalizedColor(color, packed, 0, size);
       return packed;
     };
     return typeof accessor === 'function'

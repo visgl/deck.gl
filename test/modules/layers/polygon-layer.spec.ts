@@ -173,3 +173,48 @@ test('PolygonLayer forwards normalized strokes and wireframes as bytes', () => {
     ]
   });
 });
+
+test('PolygonLayer repeats normalized callback colors across RGB child vertices', () => {
+  const data = [
+    {
+      polygon: [
+        [0, 0],
+        [1, 0],
+        [1, 1],
+        [0, 0]
+      ]
+    }
+  ];
+  testLayer({
+    Layer: PolygonLayer,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          data,
+          getPolygon: row => row.polygon,
+          getFillColor: () => [1, 0.5, 0],
+          getLineColor: () => [0, 1, 0.5, 0],
+          _subLayerProps: {fill: {colorFormat: 'RGB'}, stroke: {colorFormat: 'RGB'}}
+        }
+      },
+      {
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({subLayers}) => {
+          const fill = subLayers.find(layer => layer.id.endsWith('-fill'))!;
+          const stroke = subLayers.find(layer => layer.id.endsWith('-stroke'))!;
+          expect(
+            Array.from(fill.getAttributeManager()!.attributes.fillColors.value!.slice(0, 6))
+          ).toEqual([255, 128, 0, 255, 128, 0]);
+          expect(
+            Array.from(stroke.getAttributeManager()!.attributes.instanceColors.value!.slice(0, 6))
+          ).toEqual([0, 255, 128, 0, 255, 128]);
+        }
+      }
+    ]
+  });
+});

@@ -383,15 +383,38 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
 
     const {paths, pathsDiff} = this.state;
 
-    const fillColor = this.getSubLayerColorAccessor(getFillColor, defaultFillColor);
-    const lineColor = this.getSubLayerColorAccessor(getLineColor, defaultLineColor);
+    /** Number of color channels configured for the fill child. */
+    const fillColorSize = this.props._subLayerProps?.fill?.colorFormat === 'RGB' ? 3 : 4;
+    /** Number of color channels configured for the stroke child. */
+    const strokeColorSize = this.props._subLayerProps?.stroke?.colorFormat === 'RGB' ? 3 : 4;
+    /** Fill accessor encoded for the fill child's attribute. */
+    const fillColor = this.getSubLayerColorAccessor(getFillColor, defaultFillColor, fillColorSize);
+    /** Wireframe accessor encoded for the fill child's attribute. */
+    const wireframeColor = this.getSubLayerColorAccessor(
+      getLineColor,
+      defaultLineColor,
+      fillColorSize
+    );
+    /** Stroke accessor encoded for the path child's attribute. */
+    const strokeColor = this.getSubLayerColorAccessor(
+      getLineColor,
+      defaultLineColor,
+      strokeColorSize
+    );
+    /** Child fill-color dependencies. */
     const fillColorTrigger = getColorUpdateTrigger(
       updateTriggers?.getFillColor,
       fillColor !== getFillColor
     );
-    const lineColorTrigger = getColorUpdateTrigger(
+    /** Child wireframe-color dependencies. */
+    const wireframeColorTrigger = getColorUpdateTrigger(
       updateTriggers?.getLineColor,
-      lineColor !== getLineColor
+      wireframeColor !== getLineColor
+    );
+    /** Child stroke-color dependencies. */
+    const strokeColorTrigger = getColorUpdateTrigger(
+      updateTriggers?.getLineColor,
+      strokeColor !== getLineColor
     );
 
     const FillLayer = this.getSubLayerClass('fill', SolidPolygonLayer);
@@ -415,7 +438,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
 
           getElevation,
           getFillColor: fillColor,
-          getLineColor: extruded && wireframe ? lineColor : defaultLineColor,
+          getLineColor: extruded && wireframe ? wireframeColor : defaultLineColor,
 
           material,
           transitions
@@ -429,7 +452,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
             // using a legacy API to invalid lineColor attributes
             // if (extruded && wireframe) has changed
             lineColors: extruded && wireframe,
-            getLineColor: lineColorTrigger
+            getLineColor: wireframeColorTrigger
           }
         }),
         {
@@ -467,7 +490,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
             getPath: transitions.getPolygon
           },
 
-          getColor: this.getSubLayerAccessor(lineColor),
+          getColor: this.getSubLayerAccessor(strokeColor),
           getWidth: this.getSubLayerAccessor(getLineWidth),
           getDashArray: this.getSubLayerAccessor(getLineDashArray)
         },
@@ -475,7 +498,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           id: 'stroke',
           updateTriggers: updateTriggers && {
             getWidth: updateTriggers.getLineWidth,
-            getColor: lineColorTrigger,
+            getColor: strokeColorTrigger,
             getDashArray: updateTriggers.getLineDashArray
           }
         }),
