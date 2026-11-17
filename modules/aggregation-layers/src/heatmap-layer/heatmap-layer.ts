@@ -41,7 +41,7 @@ import {
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
-import {defaultColorRange, colorRangeToFlatArray} from '../common/utils/color-utils';
+import {defaultColorRange, packColorRange} from '../common/utils/color-utils';
 import weightsVs from './weights-vs.glsl';
 import weightsFs from './weights-fs.glsl';
 import maxVs from './max-vs.glsl';
@@ -126,6 +126,7 @@ type _HeatmapLayerProps<DataT> = {
    * Specified as an array of colors [color1, color2, ...].
    *
    * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
+   * Custom plain-array entries are 0–1 when Deck normalizedColors is enabled.
    */
   colorRange?: Color[];
 
@@ -199,6 +200,8 @@ export default class HeatmapLayer<
   static defaultProps = defaultProps;
 
   state!: AggregationLayer<DataT>['state'] & {
+    /** Whether the current texture was packed from normalized plain arrays. */
+    normalizedColorRange?: boolean;
     gpuPositionsLow?: Buffer;
     colorDomain?: Readonly<[number, number]>;
     isWeightMapDirty?: boolean;
@@ -274,8 +277,12 @@ export default class HeatmapLayer<
       this._debouncedUpdateWeightmap();
     }
 
-    if (props.colorRange !== oldProps.colorRange) {
-      this._updateColorTexture(opts);
+    const normalized = this.usesNormalizedColors() && props.colorRange !== defaultColorRange;
+    if (
+      props.colorRange !== oldProps.colorRange ||
+      normalized !== this.state.normalizedColorRange
+    ) {
+      this._updateColorTexture(opts, normalized);
     }
 
     if (this.state.isWeightMapDirty) {
@@ -729,10 +736,11 @@ export default class HeatmapLayer<
     triTexCoordBuffer!.write(packVertices(textureBounds, 2));
   }
 
-  _updateColorTexture(opts) {
+  /** Replace the byte palette texture using the given plain-array color convention. */
+  _updateColorTexture(opts: UpdateParameters<this>, normalized: boolean) {
     const {colorRange} = opts.props;
     let {colorTexture} = this.state;
-    const colors = colorRangeToFlatArray(colorRange, false, Uint8Array as any);
+    const colors = packColorRange(colorRange, normalized);
 
     colorTexture?.destroy();
     colorTexture = this.context.device.createTexture({
@@ -741,7 +749,7 @@ export default class HeatmapLayer<
       width: colorRange.length,
       height: 1
     });
-    this.setState({colorTexture});
+    this.setState({colorTexture, normalizedColorRange: normalized});
   }
 
   _updateWeightmap() {

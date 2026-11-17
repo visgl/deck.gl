@@ -29,7 +29,11 @@ export type _ScreenGridCellLayerProps = {
 };
 
 export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends Layer<
-  ExtraPropsT & Required<_ScreenGridCellLayerProps>
+  ExtraPropsT &
+    Required<_ScreenGridCellLayerProps> & {
+      /** Whether plain-array palette entries are normalized. */
+      normalizedColorRange?: boolean;
+    }
 > {
   static layerName = 'ScreenGridCellLayer';
 
@@ -65,12 +69,16 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
     const {props, oldProps, changeFlags} = params;
     const model = this.state.model!;
 
-    if (oldProps.colorRange !== props.colorRange) {
+    if (
+      oldProps.colorRange !== props.colorRange ||
+      oldProps.normalizedColorRange !== props.normalizedColorRange
+    ) {
       this.state.colorTexture?.destroy();
       this.state.colorTexture = createColorRangeTexture(
         this.context.device,
         props.colorRange,
-        props.colorScaleType
+        props.colorScaleType,
+        props.normalizedColorRange
       );
       const screenGridProps: Partial<ScreenGridProps> = {colorRange: this.state.colorTexture};
       model.shaderInputs.setProps({screenGrid: screenGridProps});
