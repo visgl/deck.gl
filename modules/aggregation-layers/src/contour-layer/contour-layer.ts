@@ -129,7 +129,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
       binIdRange: [number, number][];
       /** Completed contours and their transform retained while replacement metadata is pending. */
-    contourFrame?: {
+      contourFrame?: {
         data: {lines: ContourLine[]; polygons: ContourPolygon[]};
         origin: number[];
         size: number[];
