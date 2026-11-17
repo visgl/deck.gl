@@ -39,8 +39,11 @@ class TileGeoJsonLayer extends GeoJsonLayer<any, {_normalizedTileColors?: boolea
 }
 
 /** Default render function used for vector tiles. */
-const renderGeoJsonTile = (props: ConstructorParameters<typeof TileGeoJsonLayer>[0]) =>
-  new TileGeoJsonLayer(props);
+const renderGeoJsonTile = (
+  props: Parameters<NonNullable<TileLayerProps['renderSubLayers']>>[0] & {
+    _normalizedTileColors?: boolean;
+  }
+) => new TileGeoJsonLayer(props as ConstructorParameters<typeof TileGeoJsonLayer>[0]);
 
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
@@ -399,7 +402,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       return renderGeoJsonTile({
         ...props,
         _normalizedTileColors: this.state.normalizedTileColors
-      } as ConstructorParameters<typeof TileGeoJsonLayer>[0]);
+      });
     }
     return renderSubLayers(props);
   }
