@@ -98,7 +98,7 @@ export {
   WebGLAggregator,
   CPUAggregator,
   ReadbackAggregator,
-  GraphScreenGridAggregator
+  _GraphScreenGridAggregator
 } from '@deck.gl/aggregation-layers';
 
 export {
