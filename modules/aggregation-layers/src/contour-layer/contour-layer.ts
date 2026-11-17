@@ -138,6 +138,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       aggregatorViewport: Viewport;
     } & AggregationLayer<any>['state'];
 
+  /** Select an aggregation backend compatible with current inputs and extensions. */
   getAggregatorType(): string {
     if (this.props.gpuAggregation && this.context.device.type === 'webgpu') {
       if (this.props.extensions.length) return 'cpu';
@@ -184,6 +185,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       : 'cpu';
   }
 
+  /** Construct the selected CPU, WebGL or WebGPU bin reducer. */
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUAggregator {
     if (type === 'webgpu')
       return new WebGPUAggregator(this.context.device, {
@@ -237,6 +239,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
+  /** Initialize contour data and the aggregation input attributes. */
   initializeState() {
     super.initializeState();
 
@@ -253,6 +256,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
+  /** Update binning, contour settings and asynchronous aggregation requirements. */
   updateState(params: UpdateParameters<this>) {
     const aggregatorChanged = super.updateState(params);
 
@@ -295,6 +299,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return aggregatorChanged;
   }
 
+  /** Compute world-space grid bounds and binning uniforms. */
   private _updateBinOptions() {
     const bounds = this.getBounds();
     if (this.props.positions && !this.props.dataBounds) {
@@ -370,6 +375,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     super.draw(opts);
   }
 
+  /** Invalidate contours when a new aggregate snapshot is available. */
   private _onAggregationUpdate() {
     const {aggregator, binIdRange} = this.state;
     this.setState({
@@ -378,6 +384,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
+  /** Generate completed contours or retain the previous frame while metadata is pending. */
   private _getContours(): {
     lines: ContourLine[];
     polygons: ContourPolygon[];
@@ -449,6 +456,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     super.updateAttributes(changedAttributes);
   }
 
+  /** Invalidate binning or weights when aggregation input attributes change. */
   onAttributeChange(id: string) {
     const {aggregator} = this.state;
     switch (id) {
@@ -475,6 +483,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
   }
 
+  /** Render isolines and isobands using the transform of their completed contour frame. */
   renderLayers(): LayersList | null {
     const contourData = this._getContours();
     if (!contourData) {
@@ -534,6 +543,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return [lineLayer, bandsLayer];
   }
 
+  /** Attach the contour definition associated with the picked line or band. */
   getPickingInfo(params: GetPickingInfoParams): ContourLayerPickingInfo {
     const info: ContourLayerPickingInfo = params.info;
     const {object} = info;
