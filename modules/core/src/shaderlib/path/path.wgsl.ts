@@ -396,6 +396,7 @@ ${vertexEntry} {
 #endif
 
     geometry.uv = join.pathPosition;
+    geometry.screenSpaceOffset = join.offset;
     varyings.position = vec4<f32>(
       currPositionScreen.xyz + join.offset * currPositionScreen.w,
       currPositionScreen.w
