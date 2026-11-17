@@ -442,3 +442,55 @@ test('GeoJsonLayer forwards normalized color inputs as bytes through its sublaye
     ]
   });
 });
+
+test('GeoJsonLayer carries normalized icon and text colors through nested sublayers', () => {
+  const data = [{type: 'Feature', geometry: {type: 'Point', coordinates: [0, 0]}, properties: {}}];
+  const getIconColor = () => [1, 0.5, 0, 0];
+
+  testLayer({
+    Layer: GeoJsonLayer,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          data,
+          pointType: 'icon+text',
+          iconAtlas: {data: new Uint8ClampedArray(4), width: 1, height: 1},
+          iconMapping: {marker: {x: 0, y: 0, width: 1, height: 1}},
+          getIcon: () => 'marker',
+          getIconColor,
+          getText: () => 'A',
+          getTextColor: [0, 1, 0],
+          textBackground: true,
+          getTextBackgroundColor: [0.5, 0, 1, 0],
+          getTextBorderColor: [0, 0, 1]
+        }
+      },
+      {
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({subLayers}) => {
+          const icon = subLayers.find(layer => layer.id.endsWith('points-icon'));
+          const text = subLayers.find(layer => layer.id.endsWith('points-text'));
+          const characters = text.getSubLayers().find(layer => layer.id.endsWith('characters'));
+          const background = text.getSubLayers().find(layer => layer.id.endsWith('background'));
+          const color = (layer, name) =>
+            Array.from(layer.getAttributeManager().attributes[name].value.slice(0, 4));
+
+          expect(color(icon, 'instanceColors')).toEqual([255, 128, 0, 0]);
+          expect(color(characters, 'instanceColors')).toEqual([0, 1, 0, 1]);
+          expect(color(background, 'instanceFillColors')).toEqual([
+            Math.fround(128 / 255),
+            0,
+            1,
+            0
+          ]);
+          expect(color(background, 'instanceLineColors')).toEqual([0, 0, 1, 1]);
+        }
+      }
+    ]
+  });
+});
