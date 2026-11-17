@@ -23,6 +23,14 @@ import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
 import {replaceInRange} from '../utils';
 
+/** Marks converted color callbacks without nesting shallow-compared trigger values. */
+function getColorUpdateTrigger(trigger: unknown, converted: boolean): unknown {
+  if (!converted) return trigger;
+  if (Array.isArray(trigger)) return [true, ...trigger];
+  if (trigger && typeof trigger === 'object') return {...trigger, _normalizedColors: true};
+  return [true, trigger];
+}
+
 /**
  * All properties supported by `PolygonLayer`.
  */
@@ -375,6 +383,40 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
 
     const {paths, pathsDiff} = this.state;
 
+    /** Number of color channels configured for the fill child. */
+    const fillColorSize = this.props._subLayerProps?.fill?.colorFormat === 'RGB' ? 3 : 4;
+    /** Number of color channels configured for the stroke child. */
+    const strokeColorSize = this.props._subLayerProps?.stroke?.colorFormat === 'RGB' ? 3 : 4;
+    /** Fill accessor encoded for the fill child's attribute. */
+    const fillColor = this.getSubLayerColorAccessor(getFillColor, defaultFillColor, fillColorSize);
+    /** Wireframe accessor encoded for the fill child's attribute. */
+    const wireframeColor = this.getSubLayerColorAccessor(
+      getLineColor,
+      defaultLineColor,
+      fillColorSize
+    );
+    /** Stroke accessor encoded for the path child's attribute. */
+    const strokeColor = this.getSubLayerColorAccessor(
+      getLineColor,
+      defaultLineColor,
+      strokeColorSize
+    );
+    /** Child fill-color dependencies. */
+    const fillColorTrigger = getColorUpdateTrigger(
+      updateTriggers?.getFillColor,
+      fillColor !== getFillColor
+    );
+    /** Child wireframe-color dependencies. */
+    const wireframeColorTrigger = getColorUpdateTrigger(
+      updateTriggers?.getLineColor,
+      wireframeColor !== getLineColor
+    );
+    /** Child stroke-color dependencies. */
+    const strokeColorTrigger = getColorUpdateTrigger(
+      updateTriggers?.getLineColor,
+      strokeColor !== getLineColor
+    );
+
     const FillLayer = this.getSubLayerClass('fill', SolidPolygonLayer);
     const StrokeLayer = this.getSubLayerClass('stroke', PathLayer);
 
@@ -395,8 +437,8 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           _windingOrder,
 
           getElevation,
-          getFillColor,
-          getLineColor: extruded && wireframe ? getLineColor : defaultLineColor,
+          getFillColor: fillColor,
+          getLineColor: extruded && wireframe ? wireframeColor : defaultLineColor,
 
           material,
           transitions
@@ -406,11 +448,11 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           updateTriggers: updateTriggers && {
             getPolygon: updateTriggers.getPolygon,
             getElevation: updateTriggers.getElevation,
-            getFillColor: updateTriggers.getFillColor,
+            getFillColor: fillColorTrigger,
             // using a legacy API to invalid lineColor attributes
             // if (extruded && wireframe) has changed
             lineColors: extruded && wireframe,
-            getLineColor: updateTriggers.getLineColor
+            getLineColor: wireframeColorTrigger
           }
         }),
         {
@@ -448,7 +490,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
             getPath: transitions.getPolygon
           },
 
-          getColor: this.getSubLayerAccessor(getLineColor),
+          getColor: this.getSubLayerAccessor(strokeColor),
           getWidth: this.getSubLayerAccessor(getLineWidth),
           getDashArray: this.getSubLayerAccessor(getLineDashArray)
         },
@@ -456,7 +498,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           id: 'stroke',
           updateTriggers: updateTriggers && {
             getWidth: updateTriggers.getLineWidth,
-            getColor: updateTriggers.getLineColor,
+            getColor: strokeColorTrigger,
             getDashArray: updateTriggers.getLineDashArray
           }
         }),
