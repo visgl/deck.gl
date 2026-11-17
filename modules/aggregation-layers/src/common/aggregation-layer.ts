@@ -97,6 +97,12 @@ export default abstract class AggregationLayer<
     aggregatorType: string;
     aggregator: Aggregator;
     retainedAggregationLayer?: Layer;
+    retainedAggregationFrame?: {
+      layer: Layer;
+      range: [number, number][];
+      values: (Float32Array | null | undefined)[];
+      binCount: number;
+    };
     aggregatorViewport?: Viewport;
   } & CompositeLayer['state'];
 
@@ -166,9 +172,19 @@ export default abstract class AggregationLayer<
     const aggregator = this.state.aggregator;
     const values = [aggregator.getResultValues?.(0), aggregator.getResultValues?.(1)];
     if (!values[0] || !values[1]) return;
-    const bins = new Float32Array(aggregator.binCount * 2);
+    this.state.retainedAggregationFrame = {layer, range, values, binCount: aggregator.binCount};
+    this.state.retainedAggregationLayer = undefined;
+  }
+
+  /** Materialize CPU geometry only when a pending frame needs the previous cells. */
+  protected getRetainedAggregationLayer(): Layer | null {
+    if (this.state.retainedAggregationLayer) return this.state.retainedAggregationLayer;
+    const frame = this.state.retainedAggregationFrame;
+    if (!frame) return null;
+    const {layer, range, values, binCount} = frame;
+    const bins = new Float32Array(binCount * 2);
     const width = range[0][1] - range[0][0];
-    for (let i = 0; i < aggregator.binCount; i++) {
+    for (let i = 0; i < binCount; i++) {
       bins[i * 2] = range[0][0] + (i % width);
       bins[i * 2 + 1] = range[1][0] + Math.floor(i / width);
     }
@@ -180,7 +196,7 @@ export default abstract class AggregationLayer<
       if (!attributes[name]?.value) attributes[name] = {value: values[channel], size: 1};
     }
     this.state.retainedAggregationLayer = layer.clone({
-      data: {length: aggregator.binCount, attributes},
+      data: {length: binCount, attributes},
       updateTriggers: {
         ...layer.props.updateTriggers,
         getBin: [attributes.getBin],
@@ -188,6 +204,7 @@ export default abstract class AggregationLayer<
         getElevationValue: [attributes.getElevationValue]
       }
     });
+    return this.state.retainedAggregationLayer;
   }
 
   /** Forwards extension uniforms to the GPU aggregation model as well as rendering models. */

@@ -691,7 +691,7 @@ export default class HexagonLayer<
       pendingMetadata &&
       (!colorDomain || !elevationDomain || this.needsAggregationScaleValues())
     ) {
-      return this.state.retainedAggregationLayer?.clone({pickable: false}) || null;
+      return this.getRetainedAggregationLayer()?.clone({pickable: false}) || null;
     }
     if (pendingMetadata && !this.needsAggregationScaleValues()) this.prepareRawAggregationScales();
     const CellLayerClass = this.getSubLayerClass('cells', HexagonCellLayer);
