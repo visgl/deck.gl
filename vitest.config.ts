@@ -149,6 +149,7 @@ const optimizeDepsConfig = {
     '@luma.gl/core/webgl',
     '@luma.gl/shaders',
     '@luma.gl/engine/effects',
+    '@luma.gl/graph/gpu-graph',
     'maplibre-gl-v4',
     'maplibre-gl-v5',
     // loaders.gl dependencies
@@ -236,6 +237,7 @@ const projects = [
       // Used by test-headless and test-ci
       {
         extends: true,
+        define: {...renderTestDefine},
         resolve: {alias: browserAliases, dedupe: includePrivateModules ? linkedPeerDedupe : []},
         optimizeDeps: optimizeDepsConfig,
         assetsInclude: assetsIncludeConfig,

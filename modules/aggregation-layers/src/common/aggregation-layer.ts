@@ -6,6 +6,7 @@ import {project, project32} from '@deck.gl/core';
 
 import {
   CompositeLayer,
+  Layer,
   LayerDataSource,
   LayerContext,
   LayerExtension,
@@ -15,11 +16,14 @@ import {
   Attribute,
   AttributeManager,
   Viewport,
+  _GlobeViewport,
   _deepEqual as deepEqual
 } from '@deck.gl/core';
 import {vec4TransformMat4 as transformMat4} from '@math.gl/core';
 import type {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import type {Aggregator} from './aggregator/aggregator';
+import type {WebGPUAggregatorOptions} from './aggregator/webgpu-aggregator/webgpu-aggregator';
+import {AttributeWithScale} from './utils/scale-utils';
 import {CPUAggregator} from './aggregator/cpu-aggregator/cpu-aggregator';
 import type {GPUVector} from '@luma.gl/graph/gpu-data';
 
@@ -65,6 +69,9 @@ export default abstract class AggregationLayer<
       return;
     }
     const {positions, weights, aggregator, extensions} = this.props;
+    if (aggregator?.requiresProjectedPositions && this.state.preproject) {
+      throw new Error('GPU aggregation positions must use the custom view coordinate system');
+    }
     if ((!aggregator && this.state.aggregatorType !== 'webgpu') || extensions.length || !weights) {
       throw new Error('GPU columns require a compatible aggregator, weights, and no extensions');
     }
@@ -92,6 +99,17 @@ export default abstract class AggregationLayer<
   state!: {
     aggregatorType: string;
     aggregator: Aggregator;
+    /** CPU-backed previous cells, prepared only while replacement metadata is pending. */
+    retainedAggregationLayer?: Layer;
+    /** Completed geometry and immutable result arrays retained until the next completed frame. */
+    retainedAggregationFrame?: {
+      layer: Layer;
+      range: [number, number][];
+      values: (Float32Array | null | undefined)[];
+      binCount: number;
+    };
+    /** Projection frame used by world-space compute aggregation and extension uniforms. */
+    aggregatorViewport?: Viewport;
   } & CompositeLayer['state'];
 
   /** Extension hooks affect input points; rendering effects only affect the cells. */
@@ -105,8 +123,138 @@ export default abstract class AggregationLayer<
     };
   }
 
+  /** Shared compute shader setup for world-space aggregation adapters. */
+  protected getComputeAggregatorOptions(): Pick<
+    WebGPUAggregatorOptions,
+    'shaders' | 'requestRedraw' | 'bindAttributes'
+  > {
+    return {
+      shaders: this.getAggregationShaders(),
+      requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
+      bindAttributes: model => {
+        const manager = this.getCurrentLayer()!.getAttributeManager()!;
+        model.setGPUAttributes(
+          manager.getGPUVectors(),
+          manager.getBufferLayouts().map(layout => ({...layout, stepMode: 'instance' as const}))
+        );
+      }
+    };
+  }
+
+  /** Whether rendering needs CPU distribution values rather than raw GPU results. */
+  protected needsAggregationScaleValues(props: Record<string, any> = this.props): boolean {
+    return (
+      props.colorScaleType === 'quantile' ||
+      props.colorScaleType === 'ordinal' ||
+      props.elevationScaleType === 'quantile' ||
+      props.lowerPercentile > 0 ||
+      props.upperPercentile < 100 ||
+      props.elevationLowerPercentile > 0 ||
+      props.elevationUpperPercentile < 100
+    );
+  }
+
+  /** Request metadata for domains, callbacks, picking, or CPU distribution scales. */
+  protected needsAggregationMetadata(props, noop): boolean {
+    return (
+      !props.colorDomain ||
+      !props.elevationDomain ||
+      Boolean(props._subLayerProps?.cells?.pickable ?? props.pickable) ||
+      props.onSetColorDomain !== noop ||
+      props.onSetElevationDomain !== noop ||
+      this.needsAggregationScaleValues(props)
+    );
+  }
+
+  /** Construct GPU-backed scales without waiting for picking-only metadata. */
+  protected prepareRawAggregationScales(): void {
+    const aggregator = this.state.aggregator;
+    this.state.colors = new AttributeWithScale(aggregator.getResult(0)!, aggregator.binCount);
+    this.state.elevations = new AttributeWithScale(aggregator.getResult(1)!, aggregator.binCount);
+  }
+
+  /** Keep completed cell geometry independent of buffers resized by the next aggregation. */
+  protected retainAggregationLayer(layer: Layer, range: [number, number][]): void {
+    const aggregator = this.state.aggregator;
+    const values = [aggregator.getResultValues?.(0), aggregator.getResultValues?.(1)];
+    if (!values[0] || !values[1]) return;
+    this.state.retainedAggregationFrame = {layer, range, values, binCount: aggregator.binCount};
+    this.state.retainedAggregationLayer = undefined;
+  }
+
+  /** Materialize CPU geometry only when a pending frame needs the previous cells. */
+  protected getRetainedAggregationLayer(): Layer | null {
+    if (this.state.retainedAggregationLayer) return this.state.retainedAggregationLayer ?? null;
+    const frame = this.state.retainedAggregationFrame;
+    if (!frame) return null;
+    const {layer, range, values, binCount} = frame;
+    const bins = new Float32Array(binCount * 2);
+    const width = range[0][1] - range[0][0];
+    for (let i = 0; i < binCount; i++) {
+      bins[i * 2] = range[0][0] + (i % width);
+      bins[i * 2 + 1] = range[1][0] + Math.floor(i / width);
+    }
+    const attributes: Record<string, any> = {
+      ...(layer.props.data as {attributes: Record<string, any>}).attributes,
+      getBin: {value: bins, size: 2}
+    };
+    for (const [channel, name] of ['getColorValue', 'getElevationValue'].entries()) {
+      if (!attributes[name]?.value) attributes[name] = {value: values[channel], size: 1};
+    }
+    this.state.retainedAggregationLayer = layer.clone({
+      data: {length: binCount, attributes},
+      updateTriggers: {
+        ...layer.props.updateTriggers,
+        getBin: [attributes.getBin],
+        getColorValue: [attributes.getColorValue],
+        getElevationValue: [attributes.getElevationValue]
+      }
+    });
+    return this.state.retainedAggregationLayer ?? null;
+  }
+
   /** Forwards extension uniforms to the GPU aggregation model as well as rendering models. */
   setShaderModuleProps(props: Record<string, any>): void {
+    // Geometry clipping uses projected bounds, which must share the reduction viewport.
+    if (
+      props.clip &&
+      this.state?.aggregatorType === 'webgpu' &&
+      this.state.aggregatorViewport &&
+      !this.state.clipByInstance &&
+      // Globe clipping already uses camera-independent Mercator bounds from ClipExtension.
+      !(this.state.aggregatorViewport instanceof _GlobeViewport)
+    ) {
+      const bounds = (this.props as this['props'] & {clipBounds: number[]}).clipBounds;
+      if (bounds) {
+        const viewport = this.state.aggregatorViewport;
+        const a = this.projectPosition([bounds[0], bounds[1], 0], {viewport});
+        const b = this.projectPosition([bounds[2], bounds[3], 0], {viewport});
+        const sourceCrs = this.internalState!.sourceCrs;
+        const longitudeCoordinates =
+          (typeof this.props.coordinateSystem !== 'string' ||
+            !['cartesian', 'meter-offsets', 'lnglat-offsets'].includes(
+              this.props.coordinateSystem
+            )) &&
+          sourceCrs?.coordinateFrame === 'geographic' &&
+          sourceCrs.axis.startsWith('en') &&
+          sourceCrs.xUnit.degreesPerUnit === 1 &&
+          sourceCrs.yUnit.degreesPerUnit === 1;
+        if (bounds[0] - bounds[2] > 180 && viewport.isGeospatial && longitudeCoordinates)
+          b[0] += 512;
+        props = {
+          ...props,
+          clip: {
+            ...props.clip,
+            bounds: [
+              Math.min(a[0], b[0]),
+              Math.min(a[1], b[1]),
+              Math.max(a[0], b[0]),
+              Math.max(a[1], b[1])
+            ]
+          }
+        };
+      }
+    }
     super.setShaderModuleProps(props);
     if (this.state?.aggregator && !(this.state.aggregator instanceof CPUAggregator)) {
       this.state.aggregator.setProps({shaderModuleProps: props});
@@ -178,6 +326,9 @@ export default abstract class AggregationLayer<
   // Extend Layer.updateState to update the Aggregator instance
   // returns true if aggregator is changed
   updateState(params: UpdateParameters<this>): boolean {
+    if (this.props.aggregator?.supportsExtensions === false && this.props.extensions.length) {
+      throw new Error('The supplied aggregator does not support shader extensions');
+    }
     super.updateState(params);
     if (this.props.weights && !this.props.positions) {
       throw new Error('GPU aggregation weights require positions');
@@ -205,8 +356,21 @@ export default abstract class AggregationLayer<
         // Extension changes refresh the supplied instance without destroying it.
         aggregator.setNeedsUpdate();
       }
+      aggregator.setShaderContext?.({
+        shaders: this.getAggregationShaders(),
+        getAttributeBindings: () => {
+          const manager = this.getCurrentLayer()!.getAttributeManager()!;
+          return {
+            attributes: manager.getGPUVectors(),
+            bufferLayouts: manager
+              .getBufferLayouts()
+              .map(layout => ({...layout, stepMode: 'instance' as const}))
+          };
+        }
+      });
       aggregator.setProps({
         onError: error => this.getCurrentLayer()?.raiseError(error, 'aggregation'),
+        onNeedsRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
         attributes: this.getAttributeManager()?.attributes,
         positions: this.props.positions,
         weights: this.props.weights

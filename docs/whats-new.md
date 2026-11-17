@@ -4,7 +4,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
-CARTO HeatmapTileLayer accepts normalized plain-array palettes with Deck’s `normalizedColors` option.
+### Optional graph aggregation
+
+The experimental [`_GraphScreenGridAggregator`](./api-reference/aggregation-layers/aggregator.md#graphscreengridaggregator)
+lets applications customize ScreenGrid aggregation using GPU graphs.
 
 ### Normalized color inputs
 
@@ -16,6 +19,7 @@ bitmap transparency, and text outlines also use the setting. Other composite lay
 retain their existing color conventions.
 IconLayer, PointCloudLayer, and ColumnLayer also honor this setting for color accessors.
 
+CARTO HeatmapTileLayer accepts normalized plain-array palettes with Deck’s `normalizedColors` option.
 
 ### Experimental batch loading
 
@@ -38,8 +42,9 @@ layer's prop descriptions for supported inputs.
 
 ### Hexagon compute aggregation
 
-HexagonLayer supports WebGPU aggregation with explicit color and elevation domains,
-using the shared reducer and GPUVector rendering path.
+On WebGPU devices, [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md#compute-aggregation)
+aggregates in compute shaders, including with automatic domains, picking, quantile and ordinal
+scales, percentiles and extensions.
 
 ### ScreenGrid and Grid compute rendering features
 
@@ -103,6 +108,10 @@ Release date: September 5, 2026
 deck.gl v9.4 is expected to be the final release in the v9 series. It brings together a collection of completed improvements focused on performance, stability, and usability, and is intended to be a highly compatible, highly recommended upgrade for all v9 applications.
 
 Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
+
+### Terrain fitting
+
+Use [`TerrainExtension`](./api-reference/extensions/terrain-extension.md) with `terrainDrawMode: 'offset'` to fit objects to the uppermost terrain surface. Texture draping remains WebGL-only.
 
 ### WebGPU
 
