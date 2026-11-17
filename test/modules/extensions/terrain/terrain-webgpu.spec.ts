@@ -334,10 +334,12 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
       const first = await deck!.pickObjectAsync({x, y, radius: 3});
       const layer = first!.layer!;
       // Exercise the same disabled-index transition used by repeated picking.
-      layer.disablePickingIndex(first!.index);
+      // @ts-expect-error Inspect the disabled-ID state consumed by shader uniforms.
+      layer.internalState.disabledPickingIndices.push(first!.index);
       const second = await deck!.pickObjectAsync({x, y, radius: 3});
       expect([first!.index, second!.index].sort()).toEqual([0, 1]);
-      layer.restorePickingColors();
+      // @ts-expect-error Restore the disabled-ID state after the query.
+      layer.internalState.disabledPickingIndices.length = 0;
     });
 
   if (backend === 'webgpu')
