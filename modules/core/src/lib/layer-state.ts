@@ -12,6 +12,7 @@ import type {Table, Vector} from 'apache-arrow';
 import type {SQLFunctions, SQLParser} from '../types/layer-props';
 import type AttributeManager from './attribute/attribute-manager';
 import type Viewport from '../viewports/viewport';
+import type {PickingInfo} from './picking/pick-info';
 import type UniformTransitionManager from './uniform-transition-manager';
 
 export type ChangeFlags = {
@@ -51,6 +52,11 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     loaders?: Layer['props']['loaders'];
     options: unknown;
   };
+
+  /** Last hovered object, used to refresh highlight callbacks during layer updates. */
+  hoverHighlightInfo: PickingInfo | null = null;
+  /** Color convention used for the most recent picking module update. */
+  normalizedHighlightColor = false;
 
   attributeManager: AttributeManager | null;
   needsRedraw: boolean;
