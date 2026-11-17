@@ -218,7 +218,7 @@ layer can override a function by name through its own
 
 SQL accessors can use `LIST_EXTRACT(column, index)` and
 `STRUCT_EXTRACT(column, 'field')` by default. List indices start at 1, negative
-indices count from the end, and an out-of-range index returns null.
+indices count from the end, and a non-integer or out-of-range index returns null.
 
 #### `layers` (LayersList) {#layers}
 

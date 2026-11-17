@@ -87,7 +87,7 @@ layer and extension draws.
 
 ### loaders.gl and math.gl v5 beta
 
-Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.10`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.11`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
 | Previous import | Replacement import |
 | --- | --- |
@@ -100,6 +100,8 @@ Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.10`. Several pa
 | `@loaders.gl/3d-tiles`, `@loaders.gl/i3s` | Corresponding subpaths of `@loaders.gl/tiles-3d` |
 | `@loaders.gl/terrain`, `@loaders.gl/wms` | `@loaders.gl/raster/terrain/index`, `@loaders.gl/ogc/wms` |
 | `@math.gl/types` | `@math.gl/core` |
+| `@math.gl/expressions`, `@math.gl/expressions/sql` | `@math.gl/sql/expressions`, `@math.gl/sql/parser` |
+| `@math.gl/expressions/arrow`, `@math.gl/expressions/math` | `@math.gl/sql/arrow`, `@math.gl/sql/math-functions` |
 | `@math.gl/polygon`, `@math.gl/culling` | `@math.gl/geometry`, `@math.gl/geometry/culling` |
 | `@math.gl/projection` | `@math.gl/geospatial/projection` |
 | `@math.gl/sun` | `@math.gl/earth/sun` |

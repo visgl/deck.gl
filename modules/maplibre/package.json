@@ -37,11 +37,11 @@
   ],
   "sideEffects": false,
   "dependencies": {
-    "@math.gl/core": "5.0.0-beta.10"
+    "@math.gl/core": "5.0.0-beta.11"
   },
   "peerDependencies": {
     "@deck.gl/core": "~10.0.0-alpha",
-    "@luma.gl/core": "10.0.0-alpha.15",
+    "@luma.gl/core": "10.0.0-alpha.16",
     "maplibre-gl": "^4.5.1 || ^5.0.0 || ^6.0.0"
   },
   "devDependencies": {

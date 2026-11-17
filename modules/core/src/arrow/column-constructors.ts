@@ -2,14 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {
-  compileArrowExpression,
-  type ArrowExpression,
-  type ArrowTableFunction
-} from '@math.gl/expressions/arrow';
-import {SQRT} from '@math.gl/expressions/math';
-import {bindNestedExtraction} from './nested-extraction';
-import type {Expression} from '@math.gl/expressions';
+import {compileArrowExpression, type ArrowTableFunction} from '@math.gl/sql/arrow';
+import {SQRT} from '@math.gl/sql/math-functions';
+import {aliasNestedExtractionOverrides} from './nested-extraction';
+import type {Expression} from '@math.gl/sql/expressions';
 import {
   Field,
   FixedSizeList,
@@ -77,9 +73,12 @@ export function evaluateColumnExpression(
     ? [...sqlFunctions]
     : [SQRT, ...sqlFunctions];
   const inputSchema = input.schema;
-  const compile = (expression: ArrowExpression) => {
-    const bound = bindNestedExtraction(expression as Expression, inputSchema, functions);
-    return compileArrowExpression(bound, {inputSchema, functions}).evaluateTable(input);
+  const compile = (expression: Expression) => {
+    const bound = aliasNestedExtractionOverrides(expression, functions);
+    return compileArrowExpression(bound.expression, {
+      inputSchema,
+      functions: bound.functions
+    }).evaluateTable(input);
   };
   const call = expression as FunctionCall;
   if (
@@ -90,7 +89,7 @@ export function evaluateColumnExpression(
     if (call.arguments.length !== 1) {
       throw new Error('FLOAT32 requires exactly 1 argument');
     }
-    const cast: ArrowExpression = {
+    const cast: Expression = {
       type: 'CallExpression',
       callee: {type: 'Identifier', name: 'cast'},
       arguments: [call.arguments[0]!, {type: 'Literal', value: 'float32', raw: '"float32"'}]

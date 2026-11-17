@@ -9,9 +9,9 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@math.gl/arrow": "5.0.0-beta.10",
+    "@math.gl/arrow": "5.0.0-beta.11",
     "apache-arrow": "^21.2.0",
-    "@loaders.gl/tables": "5.0.0-beta.10",
+    "@loaders.gl/tables": "5.0.0-beta.11",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "deck.gl": "^9.4.0",
