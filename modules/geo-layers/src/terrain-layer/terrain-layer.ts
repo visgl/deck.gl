@@ -28,6 +28,8 @@ import type {
 } from '../tileset-2d/index';
 import {getURLFromTemplate, Tile2DHeader, URLTemplate, urlType} from '../tileset-2d/index';
 
+import {toByteColor} from '../utils/normalized-color';
+
 const DUMMY_DATA = [1];
 const TILE_OVERLAP_PIXELS = 1;
 const MIN_TERRAIN_MESH_MAX_ERROR = 1;
@@ -138,7 +140,7 @@ type _TerrainLayerProps = {
   /** Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates. **/
   bounds?: Bounds | null;
 
-  /** Color to use if texture is unavailable. **/
+  /** Color to use if texture is unavailable. Plain arrays use 0–1 with Deck normalizedColors. */
   color?: Color;
 
   /** Object to decode height data, from (r, g, b) to height in meters. **/
@@ -274,7 +276,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
   ) {
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
 
-    const {color, wireframe, material} = this.props;
+    const {wireframe, material} = this.props;
     const {data} = props;
 
     if (!data) {
@@ -304,7 +306,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       _instanced: false,
       coordinateSystem,
       getPosition: d => [0, 0, 0],
-      getColor: color,
+      getColor: this.getTerrainColor(),
       wireframe,
       material
     });
@@ -336,9 +338,15 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     }
   }
 
+  private getTerrainColor(): Color {
+    const {color} = this.props;
+    return this.usesNormalizedColors() && color !== defaultProps.color!.value
+      ? toByteColor(color)
+      : color;
+  }
+
   renderLayers(): Layer | null | LayersList {
     const {
-      color,
       material,
       elevationData,
       texture,
@@ -410,7 +418,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
         texture,
         _instanced: false,
         getPosition: d => [0, 0, 0],
-        getColor: color,
+        getColor: this.getTerrainColor(),
         material,
         wireframe
       }
