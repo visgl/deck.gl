@@ -1748,11 +1748,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     };
     const {highlightColor} = this.props;
     const state = this.internalState!;
-    state.hoverHighlightColor = null;
+    state.hoverHighlightInfo = info.picked ? {...info} : null;
     if (info.picked && typeof highlightColor === 'function') {
       const color = highlightColor(info);
-      // Keep the input for a Deck convention change while the pointer is stationary.
-      state.hoverHighlightColor = Array.isArray(color) ? color.slice() : null;
       picking.highlightColor = color as PickingProps['highlightColor'];
       picking.normalizedHighlightColor = this.usesNormalizedColors() && Array.isArray(color);
     }
@@ -1790,13 +1788,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const normalizedHighlightColor = this.usesNormalizedColors();
     const colorConventionChanged = state.normalizedHighlightColor !== normalizedHighlightColor;
     state.normalizedHighlightColor = normalizedHighlightColor;
-    if (
-      forceUpdate ||
-      !autoHighlight ||
-      Number.isInteger(highlightedObjectIndex) ||
-      oldProps.highlightColor !== highlightColor
-    ) {
-      state.hoverHighlightColor = null;
+    if (forceUpdate || !autoHighlight || Number.isInteger(highlightedObjectIndex)) {
+      state.hoverHighlightInfo = null;
     }
     if (
       forceUpdate ||
@@ -1807,11 +1800,16 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     ) {
       const picking: PickingProps = {};
 
-      const color = Array.isArray(highlightColor) ? highlightColor : state.hoverHighlightColor;
+      const color =
+        typeof highlightColor === 'function'
+          ? state.hoverHighlightInfo && highlightColor(state.hoverHighlightInfo)
+          : Array.isArray(highlightColor) && highlightColor;
       if (color) {
         picking.highlightColor = color as PickingProps['highlightColor'];
         picking.normalizedHighlightColor =
-          normalizedHighlightColor && color !== DEFAULT_HIGHLIGHT_COLOR;
+          normalizedHighlightColor &&
+          Array.isArray(color) &&
+          (typeof highlightColor === 'function' || color !== DEFAULT_HIGHLIGHT_COLOR);
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.

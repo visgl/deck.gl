@@ -699,8 +699,24 @@ test('Layer#updateModules', async () => {
         }
       },
       {
+        title: 'Deck convention changes update a replacement hover callback',
+
+        updateProps: {highlightColor: () => [0, 0.5, 1, 0]},
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.highlightColor).toEqual([0, 0.5, 1, 0]);
+          expect(picking.highlightedObjectColor).toEqual([3, 0, 0]);
+        }
+      },
+      {
         title: 'only highlightedObjectIndex',
 
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: false});
+        },
         updateProps: {
           autoHighlight: false,
           highlightColor: [255, 0, 0, 128],
