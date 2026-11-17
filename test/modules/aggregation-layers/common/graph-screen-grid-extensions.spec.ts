@@ -11,7 +11,10 @@ import {
   LayerManager,
   OrthographicView
 } from '@deck.gl/core';
-import {_GraphScreenGridAggregator as GraphScreenGridAggregator, ScreenGridLayer} from '@deck.gl/aggregation-layers';
+import {
+  _GraphScreenGridAggregator as GraphScreenGridAggregator,
+  ScreenGridLayer
+} from '@deck.gl/aggregation-layers';
 import {DataFilterExtension, ClipExtension, BrushingExtension} from '@deck.gl/extensions';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 
