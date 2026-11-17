@@ -140,7 +140,8 @@ type _ScenegraphLayerProps<DataT> = {
    */
   getTransformMatrix?: Accessor<DataT, number[]>;
   /**
-   * Called after the layer has rendered for the first time.
+   * Called once every model in the scenegraph has drawn, which can take several frames
+   * while resources such as textures load.
    * Used by Tile3DLayer to signal that a tile's sublayer is visible,
    * allowing parent tiles to be safely deselected during transitions.
    */
@@ -514,6 +515,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     };
 
     const numInstances = this.getNumInstances();
+    let allModelsDrawn = true;
     this.state.scenegraph.traverse((node, {worldMatrix}) => {
       if (node instanceof ModelNode) {
         const {model} = node;
@@ -538,20 +540,24 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           pbrProjection: pbrProjectionProps,
           scenegraph: scenegraphProps
         });
-        if (this.state.columns) {
-          this.state.columns.draw(model, renderPass, (offset, rowCount) => {
-            model.setInstanceCount(Math.min(rowCount, Math.max(0, numInstances - offset)));
-            model.shaderInputs.setProps({scenegraph: {rowIndexOffset: offset}});
-          });
-        } else {
-          model.draw(renderPass);
-        }
+        const drawn = this.state.columns
+          ? this.state.columns.draw(model, renderPass, (offset, rowCount) => {
+              model.setInstanceCount(Math.min(rowCount, Math.max(0, numInstances - offset)));
+              model.shaderInputs.setProps({scenegraph: {rowIndexOffset: offset}});
+            })
+          : model.draw(renderPass);
+        allModelsDrawn = drawn && allModelsDrawn;
       }
     });
 
     if (!this.state.firstDrawSignaled) {
-      this.state.firstDrawSignaled = true;
-      this.props.onFirstDraw?.();
+      if (allModelsDrawn) {
+        this.state.firstDrawSignaled = true;
+        this.props.onFirstDraw?.();
+      } else {
+        // A model skips its draw until its resources are ready; check again next frame
+        this.setNeedsRedraw();
+      }
     }
   }
 }
