@@ -14,7 +14,8 @@ import {
   Viewport,
   _deepEqual,
   UpdateParameters,
-  DefaultProps
+  DefaultProps,
+  type LayerExtension
 } from '@deck.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
@@ -146,7 +147,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         this.props.extensions.some(
           extension =>
             !['DataFilterExtension', 'ClipExtension', 'BrushingExtension'].includes(
-              extension.constructor['extensionName']
+              (extension.constructor as typeof LayerExtension).extensionName
             )
         )
       )
