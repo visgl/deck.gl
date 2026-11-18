@@ -49,9 +49,9 @@ test('resolves a geometry field consistently across record batches', () => {
 });
 
 test('reports missing fields and unsupported encodings', () => {
-  const data = new Table(new Schema([field('geometry', 'geoarrow.wkb'), field('id')]));
+  const data = new Table(new Schema([field('geometry', 'geoarrow.box'), field('id')]));
   expect(() => resolveGeoArrowGeometry(data, 'missing')).toThrow('geometry column "missing"');
-  expect(() => resolveGeoArrowGeometry(data)).toThrow('geoarrow.wkb');
+  expect(() => resolveGeoArrowGeometry(data)).toThrow('geoarrow.box');
   expect(() => resolveGeoArrowGeometry(data, 'id')).toThrow('untyped');
   expect(() => resolveGeoArrowGeometry(new Table())).toThrow('could not find');
 });
