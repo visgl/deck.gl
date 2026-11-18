@@ -94,6 +94,31 @@ test('DeckGL#mount/unmount', async () => {
   container.remove();
 });
 
+/**
+ * Disables stylesheets that style `.deck-widget`. Headless tests share one page, so the widget
+ * stylesheet imported by other test files can still be loaded.
+ */
+function disableWidgetStylesheets(): () => void {
+  const disabled: CSSStyleSheet[] = [];
+  for (const sheet of Array.from(document.styleSheets)) {
+    let rules: CSSRuleList;
+    try {
+      rules = sheet.cssRules;
+    } catch {
+      continue;
+    }
+    if (!sheet.disabled && Array.from(rules).some(rule => rule.cssText.includes('.deck-widget'))) {
+      sheet.disabled = true;
+      disabled.push(sheet);
+    }
+  }
+  return () => {
+    for (const sheet of disabled) {
+      sheet.disabled = false;
+    }
+  };
+}
+
 test.each([
   ['absolute', false],
   ['static', false],
@@ -120,6 +145,7 @@ test.each([
     fillWidget.placement = 'fill';
     document.body.append(container);
     const root = createRoot(container);
+    const restoreWidgetStylesheets = disableWidgetStylesheets();
 
     try {
       // Exercise both initial layout and resizing, with no widget stylesheet loaded.
@@ -200,6 +226,7 @@ test.each([
       ownedDevice?.loseDevice();
       ownedDevice?.destroy();
       container.remove();
+      restoreWidgetStylesheets();
     }
   }
 );
