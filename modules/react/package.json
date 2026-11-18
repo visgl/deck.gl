@@ -36,6 +36,9 @@
     "src"
   ],
   "sideEffects": false,
+  "dependencies": {
+    "react-reconciler": "0.33.0"
+  },
   "peerDependencies": {
     "@deck.gl/core": "~10.0.0-alpha",
     "@deck.gl/widgets": "~10.0.0-alpha",
@@ -45,6 +48,7 @@
   "devDependencies": {
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.3",
+    "@types/react-reconciler": "0.33.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.5"
   },
