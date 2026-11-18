@@ -30,6 +30,14 @@ import {GPUConstant, getGPUVectorData} from '@luma.gl/graph/gpu-data';
 /** Borrowed positions have no low part. */
 const ZERO_POSITION_LOW = new GPUConstant({format: 'float32x3', value: new Float32Array(3)});
 
+/** Source brushing uses the borrowed position, but its shader declares a custom target input. */
+const ZERO_BRUSHING_TARGET = new GPUConstant({format: 'float32x2', value: new Float32Array(2)});
+
+/** Identify the built-in brushing extension without depending on the extensions package. */
+function isBrushingExtension(extension: LayerExtension): boolean {
+  return (extension.constructor as typeof LayerExtension).extensionName === 'BrushingExtension';
+}
+
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   cellSizePixels: {type: 'number', value: 100, min: 1},
   cellMarginPixels: {type: 'number', value: 2, min: 0},
@@ -171,9 +179,10 @@ export default class ScreenGridLayer<
       : 'cpu';
   }
 
-  /** Clip can read borrowed positions without an additional per-point column. */
+  /** Clip and source brushing can read borrowed positions directly. */
   protected override supportsGPUColumnExtensions(): boolean {
     const {positions, weights, aggregator, extensions} = this.props;
+    const {brushingTarget} = this.props as ScreenGridLayerProps & {brushingTarget?: string};
     return (
       !aggregator &&
       this.state.aggregatorType === 'webgpu' &&
@@ -181,7 +190,8 @@ export default class ScreenGridLayer<
       weights?.[0]?.format === 'float32' &&
       extensions.every(
         extension =>
-          (extension.constructor as typeof LayerExtension).extensionName === 'ClipExtension'
+          (extension.constructor as typeof LayerExtension).extensionName === 'ClipExtension' ||
+          (isBrushingExtension(extension) && brushingTarget === 'source')
       ) &&
       [positions, weights[0]].every(vector => getGPUVectorData(vector).buffer.usage & Buffer.VERTEX)
     );
@@ -194,29 +204,54 @@ export default class ScreenGridLayer<
         requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
         bindAttributes: model => {
           const layer = this.getCurrentLayer()! as this;
-          const {positions, weights} = layer.props;
+          const {positions, weights, extensions} = layer.props;
           if (positions) {
             const counts = weights![0];
-            model.setGPUAttributes({positions, positions64Low: ZERO_POSITION_LOW, counts}, [
+            const brushing = extensions.some(isBrushingExtension);
+            model.setGPUAttributes(
               {
-                name: 'positions',
-                stepMode: 'instance',
-                byteStride: getGPUVectorData(positions).byteStride,
-                attributes: [{attribute: 'positions', format: 'float32x3', byteOffset: 0}]
+                positions,
+                positions64Low: ZERO_POSITION_LOW,
+                counts,
+                ...(brushing ? {brushingTargets: ZERO_BRUSHING_TARGET} : {})
               },
-              {
-                name: 'positions64Low',
-                stepMode: 'instance',
-                byteStride: 12,
-                attributes: [{attribute: 'positions64Low', format: 'float32x3', byteOffset: 0}]
-              },
-              {
-                name: 'counts',
-                stepMode: 'instance',
-                byteStride: getGPUVectorData(counts).byteStride,
-                attributes: [{attribute: 'counts', format: 'float32', byteOffset: 0}]
-              }
-            ]);
+              [
+                {
+                  name: 'positions',
+                  stepMode: 'instance',
+                  byteStride: getGPUVectorData(positions).byteStride,
+                  attributes: [{attribute: 'positions', format: 'float32x3', byteOffset: 0}]
+                },
+                {
+                  name: 'positions64Low',
+                  stepMode: 'instance',
+                  byteStride: 12,
+                  attributes: [{attribute: 'positions64Low', format: 'float32x3', byteOffset: 0}]
+                },
+                {
+                  name: 'counts',
+                  stepMode: 'instance',
+                  byteStride: getGPUVectorData(counts).byteStride,
+                  attributes: [{attribute: 'counts', format: 'float32', byteOffset: 0}]
+                },
+                ...(brushing
+                  ? [
+                      {
+                        name: 'brushingTargets',
+                        stepMode: 'instance' as const,
+                        byteStride: 8,
+                        attributes: [
+                          {
+                            attribute: 'brushingTargets',
+                            format: 'float32x2' as const,
+                            byteOffset: 0
+                          }
+                        ]
+                      }
+                    ]
+                  : [])
+              ]
+            );
             return;
           }
           const manager = layer.getAttributeManager()!;

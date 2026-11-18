@@ -584,3 +584,81 @@ test('ScreenGrid clips borrowed positions and weights without calling their acce
     expect(await device.handle.popErrorScope()).toBeNull();
   }
 });
+
+test('ScreenGrid brushes borrowed positions when the pointer moves', async ({skip}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  const {LayerManager} = await import('@deck.gl/core');
+  const {Buffer} = await import('@luma.gl/core');
+  const {GPUVector} = await import('@luma.gl/graph/gpu-data');
+  const {BrushingExtension} = await import('@deck.gl/extensions');
+  const viewport = new OrthographicView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {target: [0, 0, 0], zoom: 0}
+  });
+  const buffer = device.createBuffer({
+    data: new Float32Array([0, 0, 0, 2, 20, 20, 0, 3]),
+    usage: Buffer.VERTEX | Buffer.STORAGE
+  });
+  const positions = new GPUVector({
+    type: 'buffer',
+    name: 'positions',
+    format: 'float32x3',
+    length: 2,
+    byteStride: 16,
+    buffer,
+    ownsBuffer: false
+  });
+  const weights = new GPUVector({
+    type: 'buffer',
+    name: 'weights',
+    format: 'float32',
+    length: 2,
+    byteOffset: 12,
+    byteStride: 16,
+    buffer,
+    ownsBuffer: false
+  });
+  const manager = new LayerManager(device, {viewport});
+  const layer = new ScreenGridLayer({
+    positions,
+    weights: [weights],
+    cellSizePixels: 100,
+    extensions: [new BrushingExtension()],
+    brushingRadius: 2
+  });
+  device.handle.pushErrorScope('validation');
+  try {
+    manager.setLayers([layer]);
+    for (const [position, expected] of [
+      [[0, 0], 2],
+      [[20, 20], 3]
+    ] as const) {
+      const [x, y] = viewport.project(position);
+      layer.setShaderModuleProps({
+        brushing: {viewport, mousePosition: {x, y}, brushingRadius: 2, brushingTarget: 'source'}
+      });
+      layer.draw({
+        shaderModuleProps: {
+          project: {
+            viewport,
+            coordinateSystem: 'cartesian',
+            coordinateOrigin: [0, 0, 0],
+            devicePixelRatio: 1
+          }
+        }
+      } as any);
+      await vi.waitFor(
+        () => expect(layer.state.aggregator.getResultDomain(0)).toEqual([expected, expected]),
+        {timeout: 10000}
+      );
+    }
+  } finally {
+    manager.finalize();
+    positions.destroy();
+    weights.destroy();
+    buffer.destroy();
+    expect(await device.handle.popErrorScope()).toBeNull();
+  }
+});
