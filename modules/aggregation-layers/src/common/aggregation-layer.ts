@@ -63,6 +63,11 @@ export default abstract class AggregationLayer<
       : super.getNumInstances();
   }
 
+  /** Whether this layer can bind extensions alongside borrowed aggregation columns. */
+  protected supportsGPUColumnExtensions(): boolean {
+    return false;
+  }
+
   /** GPU columns are forwarded directly to the aggregator, like ArcLayer's column path. */
   protected override _updateAttributes(): void {
     if (!this.props.positions) {
@@ -73,8 +78,14 @@ export default abstract class AggregationLayer<
     if (aggregator?.requiresProjectedPositions && this.state.preproject) {
       throw new Error('GPU aggregation positions must use the custom view coordinate system');
     }
-    if ((!aggregator && this.state.aggregatorType !== 'webgpu') || extensions.length || !weights) {
-      throw new Error('GPU columns require a compatible aggregator, weights, and no extensions');
+    if (
+      (!aggregator && this.state.aggregatorType !== 'webgpu') ||
+      (extensions.length && !this.supportsGPUColumnExtensions()) ||
+      !weights
+    ) {
+      throw new Error(
+        'GPU columns require a compatible aggregator, weights, and supported extensions'
+      );
     }
     if (
       this.getNumInstances() > positions.length ||

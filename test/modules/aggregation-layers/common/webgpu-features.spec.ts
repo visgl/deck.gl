@@ -500,3 +500,87 @@ for (const coordinateSystem of ['cartesian', 'meter-offsets', 'lnglat-offsets'] 
     }
   });
 }
+
+test('ScreenGrid clips borrowed positions and weights without calling their accessors', async ({
+  skip
+}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  const {Buffer} = await import('@luma.gl/core');
+  const {GPUVector} = await import('@luma.gl/graph/gpu-data');
+  const {ClipExtension} = await import('@deck.gl/extensions');
+  const buffer = device.createBuffer({
+    data: new Float32Array([99, 99, 99, 99, 0, 0, 0, 2, 20, 20, 0, 3]),
+    usage: Buffer.VERTEX | Buffer.STORAGE
+  });
+  const positions = new GPUVector({
+    type: 'buffer',
+    name: 'positions',
+    buffer,
+    format: 'float32x3',
+    length: 2,
+    byteOffset: 16,
+    byteStride: 16,
+    ownsBuffer: false
+  });
+  const weights = new GPUVector({
+    type: 'buffer',
+    name: 'weights',
+    buffer,
+    format: 'float32',
+    length: 2,
+    byteOffset: 28,
+    byteStride: 16,
+    ownsBuffer: false
+  });
+  /** Reject any attempt to regenerate a borrowed column. */
+  const unexpectedAccessor = () => {
+    throw new Error('Borrowed accessor called');
+  };
+  /** Wait until the current clip bounds have affected the bin total. */
+  const expectTotal =
+    (total: number) =>
+    async ({layer}) => {
+      await vi.waitFor(
+        () => expect(layer.state.aggregator.getResultDomain(0)).toEqual([total, total]),
+        {timeout: 10000}
+      );
+    };
+  device.handle.pushErrorScope('validation');
+  try {
+    await testLayerAsync({
+      Layer: ScreenGridLayer,
+      device,
+      viewport: new OrthographicView().makeViewport({
+        width: 100,
+        height: 100,
+        viewState: {target: [0, 0, 0], zoom: 0}
+      }),
+      testCases: [
+        {
+          props: {
+            positions,
+            weights: [weights],
+            getPosition: unexpectedAccessor,
+            getWeight: unexpectedAccessor,
+            cellSizePixels: 100,
+            extensions: [new ClipExtension()],
+            clipByInstance: true,
+            clipBounds: [-10, -10, 10, 10]
+          },
+          onAfterUpdate: expectTotal(2)
+        },
+        {
+          updateProps: {clipBounds: [-30, -30, 30, 30]},
+          onAfterUpdate: expectTotal(5)
+        }
+      ]
+    });
+    expect(buffer.destroyed).toBe(false);
+  } finally {
+    positions.destroy();
+    weights.destroy();
+    buffer.destroy();
+    expect(await device.handle.popErrorScope()).toBeNull();
+  }
+});

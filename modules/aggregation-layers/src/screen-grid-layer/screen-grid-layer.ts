@@ -9,6 +9,7 @@ import {
   Color,
   GetPickingInfoParams,
   Layer,
+  type LayerExtension,
   project32,
   LayersList,
   PickingInfo,
@@ -22,6 +23,12 @@ import ScreenGridCellLayer from './screen-grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 import {defaultColorRange} from '../common/utils/color-utils';
 import {worldToPixels} from '@math.gl/web-mercator';
+
+import {Buffer} from '@luma.gl/core';
+import {GPUConstant, getGPUVectorData} from '@luma.gl/graph/gpu-data';
+
+/** Borrowed positions have no low part. */
+const ZERO_POSITION_LOW = new GPUConstant({format: 'float32x3', value: new Float32Array(3)});
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   cellSizePixels: {type: 'number', value: 100, min: 1},
@@ -164,6 +171,22 @@ export default class ScreenGridLayer<
       : 'cpu';
   }
 
+  /** Clip can read borrowed positions without an additional per-point column. */
+  protected override supportsGPUColumnExtensions(): boolean {
+    const {positions, weights, aggregator, extensions} = this.props;
+    return (
+      !aggregator &&
+      this.state.aggregatorType === 'webgpu' &&
+      positions?.format === 'float32x3' &&
+      weights?.[0]?.format === 'float32' &&
+      extensions.every(
+        extension =>
+          (extension.constructor as typeof LayerExtension).extensionName === 'ClipExtension'
+      ) &&
+      [positions, weights[0]].every(vector => getGPUVectorData(vector).buffer.usage & Buffer.VERTEX)
+    );
+  }
+
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUScreenGridAggregator {
     if (type === 'webgpu')
       return new WebGPUScreenGridAggregator(this.context.device, {
@@ -171,6 +194,31 @@ export default class ScreenGridLayer<
         requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
         bindAttributes: model => {
           const layer = this.getCurrentLayer()! as this;
+          const {positions, weights} = layer.props;
+          if (positions) {
+            const counts = weights![0];
+            model.setGPUAttributes({positions, positions64Low: ZERO_POSITION_LOW, counts}, [
+              {
+                name: 'positions',
+                stepMode: 'instance',
+                byteStride: getGPUVectorData(positions).byteStride,
+                attributes: [{attribute: 'positions', format: 'float32x3', byteOffset: 0}]
+              },
+              {
+                name: 'positions64Low',
+                stepMode: 'instance',
+                byteStride: 12,
+                attributes: [{attribute: 'positions64Low', format: 'float32x3', byteOffset: 0}]
+              },
+              {
+                name: 'counts',
+                stepMode: 'instance',
+                byteStride: getGPUVectorData(counts).byteStride,
+                attributes: [{attribute: 'counts', format: 'float32', byteOffset: 0}]
+              }
+            ]);
+            return;
+          }
           const manager = layer.getAttributeManager()!;
           model.setGPUAttributes(
             manager.getGPUVectors(),
