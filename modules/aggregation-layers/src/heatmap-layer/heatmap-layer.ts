@@ -37,6 +37,7 @@ import {
   ProjectUniforms,
   project,
   project32,
+  type LayerExtension,
   _deepEqual as deepEqual
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
@@ -54,6 +55,11 @@ import {
   WeightProps,
   weightUniforms
 } from './heatmap-layer-uniforms';
+
+/** Recognize ClipExtension without adding an extensions package dependency. */
+function isClipExtension(extension: LayerExtension): boolean {
+  return (extension.constructor as typeof LayerExtension).extensionName === 'ClipExtension';
+}
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const MAX_WEIGHT_REDUCTION_SIZE = 16;
@@ -254,6 +260,12 @@ export default class HeatmapLayer<
   _updateHeatmapState(opts: UpdateParameters<this>) {
     const {props, oldProps} = opts;
     const changeFlags = this._getChangeFlags(opts);
+    const clipModeChanged = props['clipByInstance'] !== oldProps['clipByInstance'];
+    const clipChanged =
+      this.context.device.type === 'webgpu' &&
+      (opts.changeFlags.extensionsChanged ||
+        (props.extensions.some(isClipExtension) &&
+          (clipModeChanged || !deepEqual(props['clipBounds'], oldProps['clipBounds'], 1))));
     const maskPropsChanged =
       props['maskId'] !== oldProps['maskId'] ||
       props['maskInverted'] !== oldProps['maskInverted'] ||
@@ -265,12 +277,15 @@ export default class HeatmapLayer<
       this._updateTextureRenderingBounds();
     }
 
-    if (changeFlags.dataChanged || changeFlags.boundsChanged || maskPropsChanged) {
+    if (changeFlags.dataChanged || changeFlags.boundsChanged || maskPropsChanged || clipChanged) {
       // Update weight map immediately
       clearTimeout(this.state.updateTimer);
       this.setState({isWeightMapDirty: true, updateTimer: null});
 
-      if (changeFlags.dataChanged) {
+      if (
+        changeFlags.dataChanged ||
+        (clipChanged && (clipModeChanged || opts.changeFlags.extensionsChanged))
+      ) {
         // Recreate weights transform if data changed, as buffer layout may have changed,
         // happens when binary attibutes passed.
         const weightsTransformShaders = this.getShaders({vs: weightsVs, fs: weightsFs});
@@ -297,6 +312,7 @@ export default class HeatmapLayer<
       this._updateWeightmap();
     }
     const displayExtensions = this.props.extensions.filter(extension => {
+      if (isClipExtension(extension) && this._clipsSourcePoints()) return false;
       if (extension.constructor['extensionName'] === 'DataFilterExtension') {
         // Update counts from source points after the extension has updated its state.
         extension.draw.call(this, {context: this.context}, extension);
@@ -445,9 +461,13 @@ export default class HeatmapLayer<
       super._updateAttributes();
       return;
     }
-    if (this.context.device.type !== 'webgpu' || extensions.length || this.state.preproject) {
+    if (
+      this.context.device.type !== 'webgpu' ||
+      extensions.some(extension => !isClipExtension(extension)) ||
+      this.state.preproject
+    ) {
       throw new Error(
-        'Heatmap GPU columns require WebGPU, no extensions, and compatible coordinates'
+        'Heatmap GPU columns require WebGPU, compatible extensions, and compatible coordinates'
       );
     }
     const weight = weights?.[0];
@@ -527,7 +547,18 @@ export default class HeatmapLayer<
     }
   }
 
-  _createWeightsTransform(shaders: {vs: string; fs?: string; modules: any[]}) {
+  /** Whether ClipExtension filters source points instead of the display quad. */
+  private _clipsSourcePoints(): boolean {
+    return this.context.device.type === 'webgpu' && this.props['clipByInstance'] !== false;
+  }
+
+  /** Create the source weight transform with its current buffer layout and shader plugins. */
+  _createWeightsTransform(shaders: {
+    vs: string;
+    fs?: string;
+    modules: any[];
+    plugins?: TextureTransformProps['plugins'];
+  }) {
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
     const isWebGPU = this.context.device.type === 'webgpu';
@@ -538,6 +569,9 @@ export default class HeatmapLayer<
       id: `${this.id}-weights-transform`,
       ...shaders,
       source: weightsSource,
+      plugins: isWebGPU
+        ? shaders.plugins?.filter(plugin => plugin.name !== 'clip-geometry')
+        : shaders.plugins,
       bufferLayout: this.props.positions
         ? [
             {
@@ -885,6 +919,7 @@ export default class HeatmapLayer<
     const projectProps = {viewport, coordinateSystem, coordinateOrigin, modelMatrix};
     if (mask) weightsTransform.model.shaderInputs.setProps({mask});
     for (const extension of this.props.extensions) {
+      if (isClipExtension(extension) && !this._clipsSourcePoints()) continue;
       const shaderProps = extension.getAggregationShaderProps.call(this, extension, {
         mask,
         project: projectProps
