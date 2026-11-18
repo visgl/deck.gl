@@ -8,7 +8,6 @@ import {compareLoaderOptions} from '@loaders.gl/core';
 import ComponentState from '../lifecycle/component-state';
 
 import Layer from './layer';
-import {queryArrowSQL} from '@math.gl/sql';
 import {
   prepareSQLParameters,
   areSQLParametersEqual,
@@ -55,6 +54,37 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
   private reactiveSQL?: string | null;
   private sourceTable?: unknown;
   private sourceInput?: unknown;
+  private queryArrowSQL?: typeof import('@math.gl/sql').queryArrowSQL;
+  private loadingExecutor = false;
+  private pendingDataLoad = false;
+
+  isAsyncPropLoading(propName?: string): boolean {
+    return (
+      ((!propName || propName === 'data') && Boolean(this.reactiveSQL) && this.loadingExecutor) ||
+      super.isAsyncPropLoading(propName)
+    );
+  }
+
+  private async loadReactiveExecutor() {
+    this.loadingExecutor = true;
+    try {
+      const {queryArrowSQL} = await import('@math.gl/sql');
+      this.queryArrowSQL = queryArrowSQL;
+      this.loadingExecutor = false;
+      if (this.layer && this.reactiveSQL && this.sourceTable !== undefined) {
+        this._refreshProjection('data', this.sourceTable);
+        this.onAsyncPropUpdated('data', this.getAsyncProp('data'));
+      }
+      if (this.pendingDataLoad) {
+        this._onResolve('data', this.getAsyncProp('data'));
+      }
+    } catch (error) {
+      if (this.reactiveSQL) this._onError('data', error as Error);
+    } finally {
+      this.loadingExecutor = false;
+      this.pendingDataLoad = false;
+    }
+  }
 
   protected _projectValue(propName: string, source: unknown): unknown {
     if (propName !== 'data') return source;
@@ -63,7 +93,11 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
       return source;
     }
     if (!isArrowTable(source)) throw new Error('reactiveQuery requires Arrow table data');
-    return queryArrowSQL(this.reactiveSQL, new Map([['data', source]]), {
+    if (!this.queryArrowSQL) {
+      if (!this.loadingExecutor) void this.loadReactiveExecutor();
+      return this.getAsyncProp(propName) ?? [];
+    }
+    return this.queryArrowSQL(this.reactiveSQL, new Map([['data', source]]), {
       parameters: this.parameters
     });
   }
@@ -203,6 +237,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
       !compareLoaderOptions(this.dataRequest, request) || Boolean(query && bindingsChanged(query));
     if (changed || value !== this.sourceInput) {
       this.sourceTable = undefined;
+      this.pendingDataLoad = false;
     } else if (reactiveChanged && this.sourceTable !== undefined) {
       this._refreshProjection(propName, this.sourceTable);
     }
@@ -255,6 +290,10 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
   }
 
   protected _onResolve(propName: string, value: any) {
+    if (propName === 'data' && this.reactiveSQL && this.loadingExecutor) {
+      this.pendingDataLoad = true;
+      return;
+    }
     const layer = this.layer;
     if (layer) {
       const onDataLoad = layer.props.onDataLoad;

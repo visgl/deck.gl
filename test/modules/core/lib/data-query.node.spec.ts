@@ -202,7 +202,7 @@ test('layer props expose the current reactive result across layer replacements',
   try {
     const first = makeLayer(1, sql);
     manager.setLayers([first]);
-    expect((first.props.data as typeof data).numRows).toBe(2);
+    await vi.waitFor(() => expect((first.props.data as typeof data).numRows).toBe(2));
     const next = makeLayer(2, sql);
     manager.setLayers([next]);
     expect((next.props.data as typeof data).get(0)?.value).toBe(2);
