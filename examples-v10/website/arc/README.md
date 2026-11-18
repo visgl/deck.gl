@@ -3,7 +3,7 @@ on [deck.gl](http://deck.gl) website.
 
 ### Usage
 
-Copy the content of this folder to your project. 
+Run this example from a deck.gl checkout with `yarn start-local`. Its SQL accessors require the current repository source; the published `10.0.0-alpha.1` package predates that API. 
 
 ```bash
 # install dependencies
