@@ -1641,13 +1641,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Copies the modifier key states of a pointer event into the cursor state passed to `getCursor` */
   private _updateModifierKeys(event: MjolnirPointerEvent): void {
-    // Events forwarded by basemap integrations may carry a non-DOM `srcEvent` without key states
-    const srcEvent = event.srcEvent as Partial<MouseEvent> | undefined;
-    const {cursorState} = this;
-    cursorState.shiftKey = Boolean(srcEvent?.shiftKey);
-    cursorState.ctrlKey = Boolean(srcEvent?.ctrlKey);
-    cursorState.altKey = Boolean(srcEvent?.altKey);
-    cursorState.metaKey = Boolean(srcEvent?.metaKey);
+    // Basemap integrations forward their own event objects as `srcEvent`, which wrap the DOM event
+    // in `originalEvent` (Mapbox, MapLibre) or `domEvent` (Google Maps).
+    const srcEvent = event.srcEvent as any;
+    const domEvent = srcEvent?.originalEvent ?? srcEvent?.domEvent ?? srcEvent;
+
+    this.cursorState.shiftKey = Boolean(domEvent?.shiftKey);
+    this.cursorState.ctrlKey = Boolean(domEvent?.ctrlKey);
+    this.cursorState.altKey = Boolean(domEvent?.altKey);
+    this.cursorState.metaKey = Boolean(domEvent?.metaKey);
   }
 
   private _updateCursor(): void {

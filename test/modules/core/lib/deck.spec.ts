@@ -1181,7 +1181,7 @@ test('Deck#getCursor receives modifier keys from pointer events', async () => {
   /** Dispatches a pointer event to Deck and returns the state passed to the next `getCursor` call */
   const getCursorStateAfter = (
     handler: '_onPointerMove' | '_onPointerDown',
-    srcEvent?: Partial<MouseEvent>
+    srcEvent?: Record<string, unknown>
   ) => {
     const type = handler === '_onPointerDown' ? 'pointerdown' : 'pointermove';
     // @ts-expect-error testing with a partial pointer event
@@ -1200,6 +1200,16 @@ test('Deck#getCursor receives modifier keys from pointer events', async () => {
     getCursorStateAfter('_onPointerDown', {ctrlKey: true, altKey: true, metaKey: true}),
     'pointerdown reports pressed modifier keys'
   ).toMatchObject({shiftKey: false, ctrlKey: true, altKey: true, metaKey: true});
+
+  expect(
+    getCursorStateAfter('_onPointerMove', {type: 'mousemove', originalEvent: {shiftKey: true}}),
+    'Mapbox and MapLibre events wrap the DOM event in originalEvent'
+  ).toMatchObject({shiftKey: true, ctrlKey: false, altKey: false, metaKey: false});
+
+  expect(
+    getCursorStateAfter('_onPointerDown', {domEvent: {altKey: true}}),
+    'Google Maps events wrap the DOM event in domEvent'
+  ).toMatchObject({shiftKey: false, ctrlKey: false, altKey: true, metaKey: false});
 
   expect(
     getCursorStateAfter('_onPointerMove'),
