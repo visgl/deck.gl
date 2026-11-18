@@ -48,6 +48,30 @@ test('Tile3DLayer#mesh sub layer normalizes legacy numeric coordinateSystem', ()
   expect(meshLayer.props.coordinateSystem, 'Normalizes to a string constant').toBe('meter-offsets');
 });
 
+test('Tile3DLayer converts normalized mesh colors at the sublayer boundary', () => {
+  const layer = new Tile3DLayer({_getMeshColor: () => [1, 0.5, 0]});
+  layer.context = {normalizedColors: true} as typeof layer.context;
+  const tileHeader = {
+    id: 'normalized-mesh-tile',
+    type: TILE_TYPE.MESH,
+    content: {
+      attributes: {positions: {value: new Float32Array([0, 0, 0]), size: 3}},
+      indices: {value: new Uint16Array([0]), size: 1},
+      cartographicOrigin: [0, 0, 0],
+      coordinateSystem: 'lnglat'
+    }
+  };
+
+  // @ts-expect-error Calling the private sublayer factory for test-only validation.
+  const normalized = layer._makeSimpleMeshLayer(tileHeader);
+  expect(normalized.props.getColor).toEqual([255, 128, 0, 255]);
+
+  layer.context.normalizedColors = false;
+  // @ts-expect-error Calling the private sublayer factory for test-only validation.
+  const legacy = layer._makeSimpleMeshLayer(tileHeader);
+  expect(legacy.props.getColor).toEqual([1, 0.5, 0]);
+});
+
 test('Tile3DLayer', async () => {
   const testCases: LayerTestCase<Tile3DLayer>[] = [
     {
