@@ -160,7 +160,19 @@ const optimizeDepsConfig = {
     '@loaders.gl/core/polyfills',
     '@loaders.gl/core',
     '@loaders.gl/images',
-    'd3-hexbin'
+    'd3-hexbin',
+    // React renderer dependencies, used by the @deck.gl/react browser tests
+    'react',
+    'react-dom/client',
+    'react/jsx-dev-runtime',
+    'react/jsx-runtime',
+    'react-reconciler',
+    'react-reconciler/constants.js',
+    'its-fine',
+    'client-only',
+    'fast-check',
+    'mapbox-gl',
+    'maplibre-gl'
   ],
   // MapLibre v6 is native ESM. Add future ESM-only major aliases here.
   exclude: ['maplibre-gl-v6']
