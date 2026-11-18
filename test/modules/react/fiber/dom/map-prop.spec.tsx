@@ -13,6 +13,9 @@ import {expect, test, vi} from 'vitest';
 
 import {DeckGL as MapboxDeckGL} from '@deck.gl/react/dom/mapbox';
 import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/dom/maplibre';
+import {releaseWebGLContextsAfterEach} from './webgl-contexts';
+
+releaseWebGLContextsAfterEach();
 
 const webglTest = navigator.userAgent.includes('jsdom') ? test.skip : test;
 

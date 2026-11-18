@@ -10,6 +10,9 @@ import {createRoot} from 'react-dom/client';
 import {expect, test} from 'vitest';
 
 import {DeckGL} from '@deck.gl/react/dom/index';
+import {releaseWebGLContextsAfterEach} from './webgl-contexts';
+
+releaseWebGLContextsAfterEach();
 
 const webglTest = navigator.userAgent.includes('jsdom') ? test.skip : test;
 

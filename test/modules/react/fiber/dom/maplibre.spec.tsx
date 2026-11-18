@@ -11,6 +11,9 @@ import {act} from 'react';
 import {expect, test, vi} from 'vitest';
 
 import {DeckGL} from '@deck.gl/react/dom/maplibre';
+import {releaseWebGLContextsAfterEach} from './webgl-contexts';
+
+releaseWebGLContextsAfterEach();
 
 const webglTest = navigator.userAgent.includes('jsdom') ? test.skip : test;
 
