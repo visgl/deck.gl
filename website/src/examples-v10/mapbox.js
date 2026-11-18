@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {Component, createRef} from 'react';
-import {DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import React, {Component} from 'react';
+import {GITHUB_TREE} from '../constants/defaults';
 import App from 'v10-website-examples/mapbox/app';
 
 import {makeExample} from '../components';
@@ -15,12 +15,6 @@ class MapboxDemo extends Component {
 
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/mapbox`;
-
-  /** Data sources loaded before rendering the demo. */
-  static data = {
-    url: `${DATA_URI}/safegraph.txt`,
-    worker: '/workers/poi-data-decoder.js'
-  };
 
   /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
@@ -38,14 +32,9 @@ class MapboxDemo extends Component {
     );
   }
 
-  /** Manages container ref for the example. */
-  _containerRef = createRef();
-
   /** Renders the Arrow demo with the current controls and data. */
   render() {
-    /** Provides data, ...other props for the example. */
-    const {data, ...otherProps} = this.props;
-    return <App {...otherProps} data={data}/>;
+    return <App {...this.props} />;
   }
 }
 
