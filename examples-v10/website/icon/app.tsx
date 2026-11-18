@@ -91,6 +91,7 @@ export default function App({
   device?: Device;
   showCluster?: boolean;
   data?: string | Meteorite[];
+  /** Called after data loads with the total row count, before visibility or filtering. */
   onDataLoad?: (count: number) => void;
   iconMapping?: string;
   iconAtlas?: string;

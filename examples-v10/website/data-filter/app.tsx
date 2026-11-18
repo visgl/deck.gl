@@ -83,6 +83,7 @@ export default function App({
 }: {
   device?: Device;
   data?: string | Earthquake[];
+  /** Called after data loads with the total row count, before visibility or filtering. */
   onDataLoad?: (count: number) => void;
   mapStyle?: string;
 }) {

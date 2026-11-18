@@ -62,6 +62,7 @@ export default function App({
 }: {
   device?: Device;
   data?: string | City[];
+  /** Called after data loads with the total row count, before visibility or filtering. */
   onDataLoad?: (count: number) => void;
   noOverlap?: boolean;
   fontSize?: number;
