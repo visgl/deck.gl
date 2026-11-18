@@ -4,10 +4,19 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Contour compute aggregation
+
+On WebGPU devices, [ContourLayer](./api-reference/aggregation-layers/contour-layer.md#compute-aggregation) aggregates points in a compute shader before generating contours.
+
 ### Optional graph aggregation
 
 The experimental [`_GraphScreenGridAggregator`](./api-reference/aggregation-layers/aggregator.md#graphscreengridaggregator)
 lets applications customize ScreenGrid aggregation using GPU graphs.
+
+
+### CARTO heatmap palettes
+
+CARTO HeatmapTileLayer accepts normalized plain-array palettes with Deck’s `normalizedColors` option.
 
 ### Normalized color inputs
 
@@ -19,7 +28,7 @@ bitmap transparency, and text outlines also use the setting. Other composite lay
 retain their existing color conventions.
 IconLayer, PointCloudLayer, and ColumnLayer also honor this setting for color accessors.
 
-CARTO HeatmapTileLayer accepts normalized plain-array palettes with Deck’s `normalizedColors` option.
+SimpleMeshLayer and ScenegraphLayer instance colors honor Deck’s `normalizedColors` option.
 
 ### Experimental batch loading
 

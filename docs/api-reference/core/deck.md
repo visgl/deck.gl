@@ -251,6 +251,7 @@ Built-in defaults, typed arrays, Arrow columns, and binary inputs keep their exi
 also use 0–1 channels when enabled.
 Top-level BitmapLayer tint and transparency and TextLayer outline colors also follow this setting.
 Top-level [GeoJsonLayer color accessors](../layers/geojson-layer.md#getfillcolor) also use this convention.
+Top-level SimpleMeshLayer and ScenegraphLayer instance color accessors also use this convention.
 Composite-generated colors, other layers, and other color properties continue to use their documented conventions.
 
 #### `layerFilter` (Function) {#layerfilter}
