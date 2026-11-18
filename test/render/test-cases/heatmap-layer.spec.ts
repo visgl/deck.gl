@@ -7,9 +7,26 @@ import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
-import {DataFilterExtension} from '@deck.gl/extensions';
+import {PolygonLayer} from '@deck.gl/layers';
+import {DataFilterExtension, MaskExtension} from '@deck.gl/extensions';
 
 import {points} from 'deck.gl-test/data';
+
+const outlier = [-122.44, 37.75];
+const maskBoundary = [
+  [
+    [-123, 37],
+    [-122, 37],
+    [-122, 38],
+    [-123, 38]
+  ],
+  [
+    [-122.441, 37.749],
+    [-122.441, 37.751],
+    [-122.439, 37.751],
+    [-122.439, 37.749]
+  ]
+];
 
 const testCases = [
   {
@@ -30,6 +47,33 @@ const testCases = [
         getWeight: d => d.SPACES,
         radiusPixels: 35,
         threshold: 0.1
+      })
+    ],
+    goldenImage: './test/render/golden-images/heatmap-lnglat.png'
+  },
+  {
+    // Golden: the original heatmap, without the high-weight point beyond the mask.
+    name: 'heatmap-lnglat-masked',
+    viewState: {latitude: 37.75, longitude: -122.44, zoom: 11.5, pitch: 30, bearing: 0},
+    layers: [
+      new PolygonLayer({
+        id: 'heatmap-mask',
+        data: [maskBoundary],
+        getPolygon: d => d,
+        operation: 'mask',
+        stroked: false
+      }),
+      new HeatmapLayer({
+        id: 'heatmap-lnglat-masked',
+        data: [...points, {COORDINATES: outlier, SPACES: 1000000}],
+        opacity: 0.8,
+        getPosition: d => d.COORDINATES,
+        getWeight: d => d.SPACES,
+        radiusPixels: 35,
+        threshold: 0.1,
+        extensions: [new MaskExtension()],
+        maskId: 'heatmap-mask',
+        maskByInstance: true
       })
     ],
     goldenImage: './test/render/golden-images/heatmap-lnglat.png'

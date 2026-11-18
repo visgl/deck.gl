@@ -289,7 +289,7 @@ export default class HeatmapLayer<
   }
 
   renderLayers(): LayersList | Layer {
-    if (this.state.isWeightMapDirty) {
+    if (this.state.isWeightMapDirty && !this._hasMaskExtension()) {
       this._updateWeightmap();
     }
     const displayExtensions = this.props.extensions.filter(extension => {
@@ -298,7 +298,10 @@ export default class HeatmapLayer<
         extension.draw.call(this, {context: this.context}, extension);
         return false;
       }
-      return true;
+      return (
+        extension.constructor['extensionName'] !== 'MaskExtension' ||
+        this.props['maskByInstance'] === false
+      );
     });
     const {
       weightsTexture,
@@ -767,7 +770,21 @@ export default class HeatmapLayer<
     this.setState({colorTexture, normalizedColorRange: normalized});
   }
 
-  _updateWeightmap() {
+  /** Whether weight rendering needs the mask effect to run first. */
+  private _hasMaskExtension(): boolean {
+    return this.props.extensions.some(
+      extension => extension.constructor['extensionName'] === 'MaskExtension'
+    );
+  }
+
+  /** Runs masked accumulation after the mask pass updates its channels. */
+  _updateAggregationMask(mask: Record<string, unknown>, maskChanged: boolean): void {
+    if (this._hasMaskExtension() && (maskChanged || this.state.isWeightMapDirty)) {
+      this._updateWeightmap(mask);
+    }
+  }
+
+  _updateWeightmap(mask?: Record<string, unknown>) {
     const {radiusPixels, colorDomain, aggregation} = this.props;
     const {worldBounds, textureSize, weightsScale, weightsTexture} = this.state;
     const weightsTransform = this.state.weightsTransform!;
@@ -851,9 +868,21 @@ export default class HeatmapLayer<
       },
       weight: weightProps
     });
+    const projectProps = {viewport, coordinateSystem, coordinateOrigin, modelMatrix};
+    if (mask) weightsTransform.model.shaderInputs.setProps({mask});
     for (const extension of this.props.extensions) {
-      const shaderProps = extension.getAggregationShaderProps.call(this, extension);
+      const shaderProps = extension.getAggregationShaderProps.call(this, extension, {
+        mask,
+        project: projectProps
+      });
       if (shaderProps) {
+        if (shaderProps.mask) {
+          const applyMask = this.props['maskByInstance'] !== false;
+          Object.assign(shaderProps.mask, {
+            maskByInstance: true,
+            ...(applyMask ? {} : {enabled: false})
+          });
+        }
         weightsTransform.model.shaderInputs.setProps(shaderProps);
       }
     }
