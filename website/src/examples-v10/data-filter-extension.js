@@ -4,7 +4,7 @@
 
 import React, {Component} from 'react';
 import {readableInteger} from '../utils/format-utils';
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import App from 'v10-website-examples/data-filter/app';
 
 import {makeExample} from '../components';
@@ -16,12 +16,6 @@ class DataFilterDemo extends Component {
 
   /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
-
-  /** Data sources loaded before rendering the demo. */
-  static data = {
-    url: `${DATA_URI}/earthquakes.txt`,
-    worker: '/workers/earthquakes-decoder.js'
-  };
 
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/data-filter`;
@@ -72,7 +66,7 @@ class DataFilterDemo extends Component {
     /** Provides data, ...other props for the example. */
     const {data, ...otherProps} = this.props;
     // renders the data filter demo app wrapped in necessary BaseUI and Styletron providers
-    return <App data={data} {...otherProps} />;
+    return <App onDataLoad={count => this.props.onStateChange({count})} {...otherProps} />;
   }
 }
 

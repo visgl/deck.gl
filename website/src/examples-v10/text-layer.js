@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, {Component} from 'react';
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App from 'v10-website-examples/text/app';
 
@@ -16,12 +16,6 @@ class TextDemo extends Component {
 
   /** Title shown above the example controls. */
   static title = 'World Cities by Population';
-
-  /** Data sources loaded before rendering the demo. */
-  static data = {
-    url: `${DATA_URI}/geonames.txt`,
-    worker: '/workers/geonames-decoder.js'
-  };
 
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/text`;
@@ -59,13 +53,14 @@ class TextDemo extends Component {
   /** Renders the Arrow demo with the current controls and data. */
   render() {
     /** Provides params, data for the example. */
-    const {params, data} = this.props;
+    const {params} = this.props;
 
     return (
       <App
-        {...this.props}
+        device={this.props.device}
+        mapStyle={this.props.mapStyle}
         key={this.props.device?.type}
-        data={data}
+        onDataLoad={count => this.props.onStateChange({count})}
         noOverlap={params.noOverlap.value}
         fontSize={params.fontSize.value}
       />
