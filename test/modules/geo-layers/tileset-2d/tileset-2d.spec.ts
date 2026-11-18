@@ -286,6 +286,38 @@ test('Tileset2D#lodStrategy evicts stale tiles before coverage', () => {
   tileset.finalize();
 });
 
+for (const consumer of ['default', 'independent']) {
+  test(`Tileset2D#lodStrategy keeps loaded tiles above coverage (${consumer})`, async () => {
+    const pendingZooms = new Set<number>();
+    const tileset = new Tileset2D({
+      getTileData: ({index}) => (pendingZooms.has(index.z) ? new Promise(() => {}) : {}),
+      lodStrategy: 'coverage',
+      maxRequests: 0
+    });
+    const view = consumer === 'independent' ? new Tile2DView(tileset) : null;
+    const update = (zoom: number) =>
+      (view || tileset).update(
+        new WebMercatorViewport({...testViewState, width: 256, height: 256, zoom})
+      );
+    update(13);
+    await vi.waitFor(() => expect(tileset.tiles.every(tile => tile.isLoaded)).toBe(true));
+
+    // Zoom out past the prefetched parents while the new tiles load
+    pendingZooms.add(11);
+    update(11);
+    const visibleIds = tileset.tiles
+      .filter(tile => (view || tileset).isTileVisible(tile))
+      .map(tile => tile.id);
+    expect(visibleIds, 'loaded zoom 12 tile is shown above the zoom 0 coverage').toEqual([
+      '0-0-0',
+      '1171-1566-12'
+    ]);
+
+    view?.finalize();
+    tileset.finalize();
+  });
+}
+
 test('Tileset2D#updateOnModelMatrix', () => {
   const tileset = new Tileset2D({
     getTileData,

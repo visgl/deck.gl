@@ -327,7 +327,7 @@ When called, the function receives an array of [Tile](#tile) instances represent
 Whether the layer prefetches lower resolution tiles that cover the viewport while sharper tiles load, for example during camera transitions.
 
 * `'none'`: Only request the tiles in the current viewport.
-* `'coverage'`: Also request the parent of each tile in the viewport and its ancestor at `minZoom`. In a `GlobeView`, that ancestor is at zoom 6, with a fallback at zoom 4. These tiles are requested after the tiles in view, their requests are not aborted while they are needed, and they are evicted from the cache after other unused tiles. With `refinementStrategy: 'best-available'`, a pending tile shows its nearest loaded ancestor.
+* `'coverage'`: Also request the parent of each tile in the viewport and its ancestor at `minZoom`. In a `GlobeView`, that ancestor is at zoom 6, with a fallback at zoom 4. These tiles are requested after the tiles in view, their requests are not aborted while they are needed, and they are evicted from the cache after other unused tiles. With `refinementStrategy: 'best-available'`, a pending tile shows its nearest loaded ancestor, with loaded descendants drawn on top.
 
 Use `'coverage'` when the camera moves often and visual continuity matters more than the number of requests. It is designed for geospatial views, where tiles follow a power-of-2 hierarchy.
 

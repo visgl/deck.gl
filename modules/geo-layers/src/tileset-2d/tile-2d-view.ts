@@ -229,7 +229,12 @@ export class Tile2DView<DataT = any> {
         getTileState(this._state, tile).isVisible = facade.isVisible;
       }
     } else {
-      refineTileStates(allTiles, refinementStrategy, tile => getTileState(this._state, tile));
+      refineTileStates(
+        allTiles,
+        refinementStrategy,
+        tile => getTileState(this._state, tile),
+        this._tileset.lodStrategy
+      );
     }
 
     let changed = false;

@@ -673,7 +673,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     // Strategy-specific state logic
     const tiles = Array.from(this._cache.values());
     if (typeof refinementStrategy === 'function') refinementStrategy(tiles);
-    else refineTileStates(tiles, refinementStrategy, tile => tile);
+    else refineTileStates(tiles, refinementStrategy, tile => tile, this.opts.lodStrategy);
 
     i = 0;
     // Check if any visibility has changed
@@ -988,6 +988,11 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
   /** Active refinement strategy for placeholder handling. */
   get refinementStrategy(): RefinementStrategy {
     return this.opts.refinementStrategy || STRATEGY_DEFAULT;
+  }
+
+  /** Whether ancestors of selected tiles are prefetched as coverage. */
+  get lodStrategy(): LODStrategy {
+    return this.opts.lodStrategy || 'none';
   }
 
   /** Adapter currently used for traversal and tile metadata. */
