@@ -63,6 +63,7 @@ function makeTable() {
       [1, 1, 1],
       [2, 2, 2]
     ],
+    matrix: [null, [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 20, 30, 1]],
     weight: [3, 7]
   });
   const schema = new Schema(
@@ -94,8 +95,8 @@ const cases = [
   [HexagonLayer, {getPosition: 'position', getColorWeight: 'weight'}],
   [ScreenGridLayer, {getPosition: 'position', getWeight: 'weight'}],
   [IconLayer, {getIcon: 'label'}],
-  [SimpleMeshLayer, {getScale: 'scale'}],
-  [ScenegraphLayer, {getScale: 'scale'}]
+  [SimpleMeshLayer, {getScale: 'scale', getTransformMatrix: 'matrix'}],
+  [ScenegraphLayer, {getScale: 'scale', getTransformMatrix: 'matrix'}]
 ] as const;
 
 /** Materializes nested Arrow list cells for comparisons with row accessor output. */
@@ -116,10 +117,17 @@ for (const [Layer, accessors] of cases) {
     const initial = Object.fromEntries(
       entries.map(([prop]) => [prop, new Layer({} as never).props[prop]])
     );
-    const validate = async ({layer}) => {
-      await expect.poll(() => layer.isLoaded).toBe(true);
+    const validate = ({layer}) => {
+      if (!layer.isLoaded || layer.internalState?.needsUpdate) {
+        return;
+      }
       for (const [prop, column] of entries) {
         expect(layer.props[prop](null, {index: 1})).toEqual(toValue(data.getChild(column)!.get(1)));
+      }
+      if (Layer === SimpleMeshLayer || Layer === ScenegraphLayer) {
+        const matrix = layer.getAttributeManager()?.getAttributes().instanceModelMatrix?.value;
+        expect(Array.from(matrix.slice(9, 12))).toEqual([0, 0, 0]);
+        expect(Array.from(matrix.slice(21, 24))).toEqual([10, 20, 30]);
       }
     };
     const resources =
