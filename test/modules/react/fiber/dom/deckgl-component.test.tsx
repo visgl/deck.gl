@@ -27,7 +27,8 @@ import {DeckGL as MapboxDeckGL} from '@deck.gl/react/dom/mapbox';
 import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/dom/maplibre';
 
 // Mock the reconciler module
-vi.mock(import('@deck.gl/react/reconciler/index'), () => {
+vi.mock(import('@deck.gl/react/reconciler/index'), async importOriginal => {
+  const {_RootErrorBoundary} = await importOriginal();
   const mockRender = vi.fn<() => void>();
   const mockConfigure = vi.fn<() => void>();
   const mockDeckGL = {};
@@ -65,6 +66,7 @@ vi.mock(import('@deck.gl/react/reconciler/index'), () => {
   });
 
   return {
+    _RootErrorBoundary,
     createRoot: mockCreateRoot,
     mockConfigure,
     mockCreateRoot,
