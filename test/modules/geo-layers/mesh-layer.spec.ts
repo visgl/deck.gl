@@ -113,16 +113,34 @@ test('Tile3DLayer mesh sublayer draws with a WebGPU device', async ({skip}) => {
   }
 }, 70000);
 
+/** Runs a test on WebGL only: the pixel tests read back the WebGL drawing buffer. */
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
-// A texture of two pixels, red on the left and blue on the right, sampled without filtering.
-const RED_BLUE_MATERIAL = {
+/** Red, green, blue and white texels, in a row. */
+const TEXELS = {
+  red: [255, 0, 0, 255],
+  green: [0, 255, 0, 255],
+  blue: [0, 0, 255, 255],
+  white: [255, 255, 255, 255]
+};
+
+/** A PBR material whose base colour is the four `TEXELS`, sampled without filtering. */
+const FOUR_TEXEL_MATERIAL = {
   pbrMetallicRoughness: {
     baseColorFactor: [1, 1, 1, 1],
     baseColorTexture: {
       texture: {
         source: {
-          image: new ImageData(new Uint8ClampedArray([255, 0, 0, 255, 0, 0, 255, 255]), 2, 1)
+          image: new ImageData(
+            new Uint8ClampedArray([
+              ...TEXELS.red,
+              ...TEXELS.green,
+              ...TEXELS.blue,
+              ...TEXELS.white
+            ]),
+            4,
+            1
+          )
         },
         sampler: {magFilter: 9728, minFilter: 9728, wrapS: 33071, wrapT: 33071}
       }
@@ -130,7 +148,7 @@ const RED_BLUE_MATERIAL = {
   }
 };
 
-/** A square 80 units wide, two triangles, the texture spread over it from left to right. */
+/** A square 80 units wide, two triangles, with u running from 0.25 on the left to 0.75 on the right. */
 function texturedSquare(uvRegion?: number[]): Geometry {
   return new Geometry({
     topology: 'triangle-list',
@@ -143,7 +161,10 @@ function texturedSquare(uvRegion?: number[]): Geometry {
       },
       normals: {size: 3, value: new Float32Array(Array.from({length: 6}, () => [0, 0, 1]).flat())},
       colors: {size: 4, value: new Uint8Array(6 * 4).fill(255), normalized: true},
-      texCoords: {size: 2, value: new Float32Array([0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1])},
+      texCoords: {
+        size: 2,
+        value: new Float32Array([0.25, 0.5, 0.75, 0.5, 0.75, 0.5, 0.25, 0.5, 0.75, 0.5, 0.25, 0.5])
+      },
       ...(uvRegion
         ? {
             uvRegions: {
@@ -175,14 +196,16 @@ async function drawTexturedMesh(mesh: Geometry): Promise<{left: number[]; right:
         id: 'textured-pbr-mesh',
         data: [0],
         mesh,
-        pbrMaterial: RED_BLUE_MATERIAL,
+        pbrMaterial: FOUR_TEXEL_MATERIAL,
         getPosition: [0, 0, 0],
         getColor: [255, 255, 255, 255]
       })
     ]
   });
+  let timeout: ReturnType<typeof setTimeout> | undefined;
   try {
     await new Promise<void>((resolve, reject) => {
+      timeout = setTimeout(() => reject(new Error('Timed out drawing the textured mesh')), 10000);
       deck.setProps({
         onError: reject,
         onAfterRender: () => {
@@ -199,8 +222,10 @@ async function drawTexturedMesh(mesh: Geometry): Promise<{left: number[]; right:
       gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, out);
       return Array.from(out);
     };
+    // u = 0.375 and 0.625 at these pixels without uvRegions
     return {left: pixel(30, 50), right: pixel(70, 50)};
   } finally {
+    clearTimeout(timeout);
     deck.finalize();
     gl.getExtension('WEBGL_lose_context')?.loseContext();
   }
@@ -208,13 +233,13 @@ async function drawTexturedMesh(mesh: Geometry): Promise<{left: number[]; right:
 
 webglTest('MeshLayer#draws a textured PBR mesh in its texture colours', async () => {
   const {left, right} = await drawTexturedMesh(texturedSquare());
-  expect(left, 'left of the mesh shows the texture left half').toEqual([255, 0, 0, 255]);
-  expect(right, 'right of the mesh shows the texture right half').toEqual([0, 0, 255, 255]);
+  expect(left, 'u = 0.375 samples the second texel').toEqual(TEXELS.green);
+  expect(right, 'u = 0.625 samples the third texel').toEqual(TEXELS.blue);
 });
 
 webglTest('MeshLayer#maps texture coordinates into their uvRegions', async () => {
-  // Every vertex maps into the left half of the texture.
-  const {left, right} = await drawTexturedMesh(texturedSquare([0, 0, 0.5, 1]));
-  expect(left, 'left of the mesh is in the red region').toEqual([255, 0, 0, 255]);
-  expect(right, 'right of the mesh is in the red region too').toEqual([255, 0, 0, 255]);
+  // The right half of the texture: u = 0.25..0.75 becomes 0.625..0.875.
+  const {left, right} = await drawTexturedMesh(texturedSquare([0.5, 0, 1, 1]));
+  expect(left, 'u = 0.6875 samples the third texel').toEqual(TEXELS.blue);
+  expect(right, 'u = 0.8125 samples the fourth texel').toEqual(TEXELS.white);
 });
