@@ -1162,6 +1162,53 @@ test('Deck#async pointerdown delays click callback until picking resolves', asyn
   deck.finalize();
 });
 
+test('Deck#getCursor receives modifier keys from pointer events', async () => {
+  const cursorStates: Record<string, boolean>[] = [];
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 12},
+    layers: [],
+    getCursor: state => {
+      cursorStates.push({...state});
+      return 'grab';
+    }
+  });
+
+  await waitForRender(deck);
+
+  /** Dispatches a pointer event to Deck and returns the state passed to the next `getCursor` call */
+  const getCursorStateAfter = (
+    handler: '_onPointerMove' | '_onPointerDown',
+    srcEvent?: Partial<MouseEvent>
+  ) => {
+    const type = handler === '_onPointerDown' ? 'pointerdown' : 'pointermove';
+    // @ts-expect-error testing with a partial pointer event
+    deck[handler]({type, offsetCenter: {x: 0, y: 0}, srcEvent});
+    // @ts-expect-error testing private method access
+    deck._updateCursor();
+    return cursorStates[cursorStates.length - 1];
+  };
+
+  expect(
+    getCursorStateAfter('_onPointerMove', {shiftKey: true, ctrlKey: false}),
+    'pointermove reports pressed modifier keys'
+  ).toMatchObject({shiftKey: true, ctrlKey: false, altKey: false, metaKey: false});
+
+  expect(
+    getCursorStateAfter('_onPointerDown', {ctrlKey: true, altKey: true, metaKey: true}),
+    'pointerdown reports pressed modifier keys'
+  ).toMatchObject({shiftKey: false, ctrlKey: true, altKey: true, metaKey: true});
+
+  expect(
+    getCursorStateAfter('_onPointerMove'),
+    'events without a DOM source event clear modifier keys'
+  ).toMatchObject({shiftKey: false, ctrlKey: false, altKey: false, metaKey: false});
+
+  deck.finalize();
+});
+
 test('Deck#controller pickPosition returns null in async mode', async () => {
   const deck = new Deck({
     device,

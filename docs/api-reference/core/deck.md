@@ -407,6 +407,10 @@ Receives arguments:
 - `interactiveState` (object)
   + `isDragging` (boolean) - whether the pointer is down and moving
   + `isHovering` (boolean) - whether the pointer is over a pickable object
+  + `shiftKey` (boolean) - whether the Shift key was pressed during the last pointer event
+  + `ctrlKey` (boolean) - whether the Control key was pressed during the last pointer event
+  + `altKey` (boolean) - whether the Alt (Option) key was pressed during the last pointer event
+  + `metaKey` (boolean) - whether the Meta (Command / Windows) key was pressed during the last pointer event
 
 Returns:
 
@@ -414,6 +418,7 @@ A valid [CSS cursor](https://developer.mozilla.org/en-US/docs/Web/CSS/cursor) st
 
 Remarks:
 
+* The modifier key states are read from pointer events (`pointermove` and `pointerdown`), so pressing or releasing a key without moving the pointer does not update them.
 * It is worth noting that when supplying a custom image for the cursor icon, Chrome requires a fallback option to be supplied, otherwise the custom image will not be loaded; e.g. `getCursor={() => 'url(images/custom.png), auto'}`
 
 #### `getTooltip` (Function) {#gettooltip}
