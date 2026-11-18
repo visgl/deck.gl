@@ -6,6 +6,7 @@ import {test, expect} from 'vitest';
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 import MeshLayer from '../../../modules/geo-layers/src/mesh-layer/mesh-layer';
 
@@ -111,3 +112,109 @@ test('Tile3DLayer mesh sublayer draws with a WebGPU device', async ({skip}) => {
     }
   }
 }, 70000);
+
+const webglTest = device.type === 'webgl' ? test : test.skip;
+
+// A texture of two pixels, red on the left and blue on the right, sampled without filtering.
+const RED_BLUE_MATERIAL = {
+  pbrMetallicRoughness: {
+    baseColorFactor: [1, 1, 1, 1],
+    baseColorTexture: {
+      texture: {
+        source: {
+          image: new ImageData(new Uint8ClampedArray([255, 0, 0, 255, 0, 0, 255, 255]), 2, 1)
+        },
+        sampler: {magFilter: 9728, minFilter: 9728, wrapS: 33071, wrapT: 33071}
+      }
+    }
+  }
+};
+
+/** A square 80 units wide, two triangles, the texture spread over it from left to right. */
+function texturedSquare(uvRegion?: number[]): Geometry {
+  return new Geometry({
+    topology: 'triangle-list',
+    attributes: {
+      positions: {
+        size: 3,
+        value: new Float32Array([
+          -40, -40, 0, 40, -40, 0, 40, 40, 0, -40, -40, 0, 40, 40, 0, -40, 40, 0
+        ])
+      },
+      normals: {size: 3, value: new Float32Array(Array.from({length: 6}, () => [0, 0, 1]).flat())},
+      colors: {size: 4, value: new Uint8Array(6 * 4).fill(255), normalized: true},
+      texCoords: {size: 2, value: new Float32Array([0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1])},
+      ...(uvRegion
+        ? {
+            uvRegions: {
+              size: 4,
+              value: new Float32Array(Array.from({length: 6}, () => uvRegion).flat())
+            }
+          }
+        : {})
+    }
+  });
+}
+
+/** The colours of a pixel left of the square's centre and of one right of it, drawn by a MeshLayer. */
+async function drawTexturedMesh(mesh: Geometry): Promise<{left: number[]; right: number[]}> {
+  const canvas = document.createElement('canvas');
+  canvas.width = 100;
+  canvas.height = 100;
+  const gl = canvas.getContext('webgl2', {antialias: false, preserveDrawingBuffer: true})!;
+  const deck = new Deck({
+    gl,
+    width: 100,
+    height: 100,
+    useDevicePixels: false,
+    views: new OrthographicView(),
+    initialViewState: {target: [0, 0, 0], zoom: 0},
+    controller: false,
+    layers: [
+      new MeshLayer({
+        id: 'textured-pbr-mesh',
+        data: [0],
+        mesh,
+        pbrMaterial: RED_BLUE_MATERIAL,
+        getPosition: [0, 0, 0],
+        getColor: [255, 255, 255, 255]
+      })
+    ]
+  });
+  try {
+    await new Promise<void>((resolve, reject) => {
+      deck.setProps({
+        onError: reject,
+        onAfterRender: () => {
+          // @ts-expect-error Accessing the layer manager for test-only validation.
+          const layer = deck.layerManager
+            ?.getLayers()
+            .find(candidate => candidate instanceof MeshLayer);
+          if (layer?.state.model) resolve();
+        }
+      });
+    });
+    const pixel = (x: number, y: number) => {
+      const out = new Uint8Array(4);
+      gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, out);
+      return Array.from(out);
+    };
+    return {left: pixel(30, 50), right: pixel(70, 50)};
+  } finally {
+    deck.finalize();
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+  }
+}
+
+webglTest('MeshLayer#draws a textured PBR mesh in its texture colours', async () => {
+  const {left, right} = await drawTexturedMesh(texturedSquare());
+  expect(left, 'left of the mesh shows the texture left half').toEqual([255, 0, 0, 255]);
+  expect(right, 'right of the mesh shows the texture right half').toEqual([0, 0, 255, 255]);
+});
+
+webglTest('MeshLayer#maps texture coordinates into their uvRegions', async () => {
+  // Every vertex maps into the left half of the texture.
+  const {left, right} = await drawTexturedMesh(texturedSquare([0, 0, 0.5, 1]));
+  expect(left, 'left of the mesh is in the red region').toEqual([255, 0, 0, 255]);
+  expect(right, 'right of the mesh is in the red region too').toEqual([255, 0, 0, 255]);
+});
