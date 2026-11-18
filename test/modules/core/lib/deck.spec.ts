@@ -1591,6 +1591,29 @@ test('Deck#props effects undefined initializes without throwing', async () => {
   }
 });
 
+test('Deck#props undefined inherited keys are not resolved to defaults', async () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [],
+    // `toString` is inherited by `defaultProps`, not one of its own keys
+    // @ts-expect-error not a Deck prop
+    toString: undefined
+  });
+
+  try {
+    expect(deck.props.toString, 'constructor keeps undefined').toBeUndefined();
+
+    // @ts-expect-error not a Deck prop
+    deck.setProps({toString: undefined});
+    expect(deck.props.toString, 'setProps keeps undefined').toBeUndefined();
+  } finally {
+    deck.finalize();
+  }
+});
+
 test('Deck waits for asynchronous viewports before initializing and updating layers', async () => {
   const initialGate = createDeferred<void>();
   const nextGate = createDeferred<void>();
