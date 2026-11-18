@@ -109,6 +109,7 @@ const testCases = [
     goldenImage: './test/render/golden-images/heatmap-lnglat.png'
   },
   {
+    // Golden: the polygon hole clips the entire display quad contribution.
     name: 'heatmap-lnglat-mask-display',
     viewState: {latitude: 37.75, longitude: -122.44, zoom: 11.5, pitch: 0, bearing: 0},
     layers: [
