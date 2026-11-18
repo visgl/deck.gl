@@ -141,7 +141,6 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   /** Select an aggregation backend compatible with current inputs and extensions. */
   getAggregatorType(): string {
     if (this.props.gpuAggregation && this.context.device.type === 'webgpu') {
-      if (this.props.extensions.length) return 'cpu';
       if (
         (!this.props.positions &&
           !WebGPUAggregator.supportsData(this.props.data, ['getPosition', 'getWeight'])) ||
@@ -189,7 +188,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUAggregator {
     if (type === 'webgpu')
       return new WebGPUAggregator(this.context.device, {
-        requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
+        ...this.getComputeAggregatorOptions(),
         channelNames: ['counts'],
         binOptions: binOptionsUniforms,
         binning: `fn getBin(position: vec3f, low: vec3f) -> BinAssignment {
@@ -518,7 +517,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           getPath: d => d.vertices,
           getColor: d => d.contour.color ?? DEFAULT_COLOR,
           getWidth: d => d.contour.strokeWidth ?? DEFAULT_STROKE_WIDTH,
-          widthUnits: 'pixels'
+          widthUnits: 'pixels',
+          ...(this.state.aggregatorType === 'webgpu' ? {extensions: []} : {})
         }
       );
 
@@ -536,7 +536,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           coordinateOrigin: [0, 0, 0],
           modelMatrix,
           getPolygon: d => d.vertices,
-          getFillColor: d => d.contour.color ?? DEFAULT_COLOR
+          getFillColor: d => d.contour.color ?? DEFAULT_COLOR,
+          ...(this.state.aggregatorType === 'webgpu' ? {extensions: []} : {})
         }
       );
 

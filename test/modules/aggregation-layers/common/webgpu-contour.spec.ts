@@ -6,6 +6,7 @@ import {test, expect, vi} from 'vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {OrthographicView, WebMercatorViewport} from '@deck.gl/core';
 import {ContourLayer, CPUAggregator} from '@deck.gl/aggregation-layers';
+import {DataFilterExtension} from '@deck.gl/extensions';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {WebGPUAggregator} from '../../../../modules/aggregation-layers/src/common/aggregator/webgpu-aggregator/webgpu-aggregator';
 
@@ -260,4 +261,41 @@ test('Contour keeps completed geometry and its transform while new bins are pend
   } finally {
     manager.finalize();
   }
+});
+
+test('Contour compute updates bins when the data filter range changes', async ({skip}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  await testLayerAsync({
+    Layer: ContourComputationLayer,
+    device,
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {target: [0, 0, 0], zoom: 0}
+    }),
+    onError: error => {
+      throw error;
+    },
+    testCases: [2, 5].map(expected => ({
+      props: {
+        data: [
+          {position: [1, 1], weight: 2},
+          {position: [2, 2], weight: 3}
+        ],
+        getPosition: d => d.position,
+        getWeight: d => d.weight,
+        getFilterValue: d => d.weight,
+        extensions: [new DataFilterExtension({filterSize: 1})],
+        filterRange: [0, expected],
+        cellSize: 10
+      },
+      async onAfterUpdate({layer}) {
+        expect(layer.state.aggregator).toBeInstanceOf(WebGPUAggregator);
+        await vi.waitFor(() =>
+          expect(layer.state.aggregator.getResultDomain(0)).toEqual([expected, expected])
+        );
+      }
+    }))
+  });
 });
