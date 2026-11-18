@@ -547,7 +547,9 @@ test('Heatmap selects a blendable and filterable WebGPU accumulation format', ()
         }
       },
       props: {weightsTextureSize: 512},
-      setState: state => { format = state.format; }
+      setState: state => {
+        format = state.format;
+      }
     } as any);
     expect(format).toBe(expected);
   }
