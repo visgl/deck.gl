@@ -24,6 +24,7 @@ bitmap transparency, and text outlines also use the setting. Other composite lay
 retain their existing color conventions.
 IconLayer, PointCloudLayer, and ColumnLayer also honor this setting for color accessors.
 
+SimpleMeshLayer and ScenegraphLayer instance colors honor Deck’s `normalizedColors` option.
 
 ### Experimental batch loading
 

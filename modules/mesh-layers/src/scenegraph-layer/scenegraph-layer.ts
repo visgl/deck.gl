@@ -267,6 +267,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         type: 'unorm8',
         size: this.props.colorFormat.length,
         accessor: 'getColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR,
         transition: supportsTransitions
       },
@@ -325,7 +326,14 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (!this.state.columns) {
       this.internalState!.attributeManager?.finalize();
       this.internalState!.attributeManager = null;
-      this.state.columns = new LayerColumns(this.context.device, COLUMN_DEFINITIONS, 'Scenegraph');
+      this.state.columns = new LayerColumns(
+        this.context.device,
+        {
+          ...COLUMN_DEFINITIONS,
+          colors: {...COLUMN_DEFINITIONS.colors, defaultColor: DEFAULT_COLOR}
+        },
+        'Scenegraph'
+      );
     }
     const transformsChanged = TRANSFORM_ACCESSORS.some(
       name =>
@@ -342,6 +350,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         }
       },
       {
+        normalizedColors: this.usesNormalizedColors(),
         dataLoading: this.internalState!.isAsyncPropLoading('data'),
         changed: () => {
           this.setState({});
