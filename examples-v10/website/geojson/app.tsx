@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {GeoParquetLoader} from '@loaders.gl/tables/parquet';
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
@@ -16,7 +17,7 @@ import type {Feature, Geometry} from 'geojson';
 
 // Source data GeoJSON
 const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/geojson/vancouver-blocks.json'; // eslint-disable-line
+  'https://media.githubusercontent.com/media/visgl/deck.gl-data/886cf5ab469bba3816aa5a32d4454835e0ce5951/examples/geojson/vancouver-blocks.parquet'; // eslint-disable-line
 
 export const COLOR_SCALE = scaleThreshold<number, Color>()
   .domain([-0.6, -0.45, -0.3, -0.15, 0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05, 1.2])
@@ -92,11 +93,14 @@ function getTooltip({object}: PickingInfo<Feature<Geometry, BlockProperties>>) {
 export default function App({
   device,
   data = DATA_URL,
-  mapStyle = MAP_STYLE
+  mapStyle = MAP_STYLE,
+  onDataLoad
 }: {
   device?: Device;
   data?: string | Feature<Geometry, BlockProperties>[];
   mapStyle?: string;
+  /** Reports loaded geometry counts to the website controls. */
+  onDataLoad?: (stats: {count: number; vertexCount: number}) => void;
 }) {
   const [effects] = useState(() => {
     const lightingEffect = new LightingEffect({ambientLight, dirLight});
@@ -116,6 +120,18 @@ export default function App({
     new GeoJsonLayer<BlockProperties>({
       id: 'geojson',
       data,
+      loaders: [GeoParquetLoader],
+      loadOptions: {parquet: {shape: 'geojson-table'}},
+      onDataLoad: loaded => {
+        const features = Array.isArray(loaded) ? loaded : loaded.features;
+        onDataLoad?.({
+          count: features.length,
+          vertexCount: features.reduce(
+            (sum, feature) => sum + feature.geometry.coordinates[0].length - 1,
+            0
+          )
+        });
+      },
       opacity: 0.8,
       stroked: false,
       filled: true,
@@ -142,6 +158,7 @@ export default function App({
   );
 }
 
+/** Mounts the standalone example. */
 export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }
