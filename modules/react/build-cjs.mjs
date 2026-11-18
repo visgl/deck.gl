@@ -12,7 +12,9 @@ import {build} from 'esbuild';
 // each with its own React context. This rebuilds the CommonJS entries so that an import of another
 // entry's file becomes a `require` of that entry's bundle, and each module is loaded once.
 
+/** Directory of `@deck.gl/react`, which holds this script and its `package.json`. */
 const PACKAGE_ROOT = dirname(fileURLToPath(import.meta.url));
+/** Suffixes tried, in order, when resolving a relative import to a file. */
 const RESOLVE_EXTENSIONS = ['', '.js', '.ts', '.tsx', '/index.js', '/index.ts', '/index.tsx'];
 
 /**
@@ -30,6 +32,11 @@ export function getCJSEntries(getInput = importFile => importFile) {
     }));
 }
 
+/**
+ * Resolves an import path to an existing file, trying each of `RESOLVE_EXTENSIONS`.
+ * @param {string} path Absolute import path, with or without an extension.
+ * @returns {string | null} The file's absolute path, or `null` if none exists.
+ */
 function resolveFile(path) {
   for (const extension of RESOLVE_EXTENSIONS) {
     if (existsSync(path + extension) && !existsSync(`${path + extension}/`)) {
