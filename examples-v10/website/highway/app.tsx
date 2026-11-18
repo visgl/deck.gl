@@ -101,7 +101,7 @@ function renderTooltip({
   year: number;
   hoverInfo?: PickingInfo<Road>;
 }) {
-  if (!hoverInfo?.object) {
+  if (!hoverInfo?.object || !incidents[year] || !fatalities[year]) {
     return null;
   }
 
