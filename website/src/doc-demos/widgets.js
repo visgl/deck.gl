@@ -25,7 +25,7 @@ import {
   DarkTheme, LightTheme, DarkGlassTheme, LightGlassTheme
 } from '@deck.gl/widgets';
 import { MapView, OrthographicView, OrbitView } from '@deck.gl/core';
-import { DeckGL } from '@deck.gl/react';
+import { DeckGL } from '@deck.gl/react/legacy';
 import { ScatterplotLayer, GeoJsonLayer, IconLayer, TextLayer } from '@deck.gl/layers';
 import { SimpleMeshLayer } from '@deck.gl/mesh-layers';
 import { MVTLayer } from '@deck.gl/geo-layers';

@@ -5,7 +5,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 
 import type {PickingInfo, MapViewState, Widget} from '@deck.gl/core';

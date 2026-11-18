@@ -4,7 +4,7 @@
 
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import {tableFromArrays} from 'apache-arrow';
 import {OrbitView, DirectionalLight, LightingEffect, AmbientLight} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';

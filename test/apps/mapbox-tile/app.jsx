@@ -6,7 +6,7 @@
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import DeckGL from '@deck.gl/react/legacy';
 import {MVTLayer} from '@deck.gl/geo-layers';
 
 // Set your mapbox token here

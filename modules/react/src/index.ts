@@ -2,6 +2,5 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-// The current React API, also published as `@deck.gl/react/legacy`.
-export * from './legacy/index';
-export {default} from './legacy/index';
+// The React renderer for deck.gl. The previous API is published as `@deck.gl/react/legacy`.
+export * from './dom/index';

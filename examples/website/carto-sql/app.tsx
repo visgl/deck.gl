@@ -5,7 +5,7 @@
 import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import {LinearInterpolator, PickingInfo} from '@deck.gl/core';
 import {colorBins, H3TileLayer} from '@deck.gl/carto';

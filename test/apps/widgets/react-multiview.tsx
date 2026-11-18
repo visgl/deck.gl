@@ -6,7 +6,11 @@ import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {View, MapView} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import {DeckGL, _SplitterWidget as SplitterWidget, SplitterWidgetProps} from '@deck.gl/react';
+import {
+  DeckGL,
+  _SplitterWidget as SplitterWidget,
+  SplitterWidgetProps
+} from '@deck.gl/react/legacy';
 
 import '@deck.gl/widgets/stylesheet.css';
 

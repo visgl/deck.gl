@@ -204,6 +204,27 @@ const projects = [
         },
       },
 
+      // React project - the React renderer's unit tests (`*.test.ts(x)`) in jsdom, plus its type
+      // tests (`*.test-d.ts(x)`). Each file is isolated because these tests mock modules. The
+      // renderer's browser tests are `*.spec.tsx` files in the headless project.
+      {
+        extends: true,
+        resolve: {alias: aliases},
+        test: {
+          name: 'react',
+          environment: 'jsdom',
+          include: ['test/modules/react/fiber/**/*.test.{ts,tsx}'],
+          globals: false,
+          testTimeout: 30000,
+          typecheck: {
+            enabled: true,
+            include: ['test/modules/react/fiber/**/*.test-d.{ts,tsx}'],
+            tsconfig: './test/modules/react/fiber/tsconfig.json'
+          },
+          sequence: {groupOrder: 1}
+        }
+      },
+
       // Scripts project - codemod and build tool tests
       // Used by test-scripts
       {
@@ -249,7 +270,7 @@ const projects = [
           // automated runs. These browser-input tests have become flaky across
           // headless and render, so keep them in `browser` only for manual
           // debugging until the shared interaction harness is reworked.
-          include: ['test/modules/**/*.spec.ts', ...privateBrowserTests],
+          include: ['test/modules/**/*.spec.ts', 'test/modules/react/**/*.spec.tsx', ...privateBrowserTests],
           exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/proposals/test/effects/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
@@ -283,7 +304,7 @@ const projects = [
         server: serverConfig,
         test: {
           name: 'browser',
-          include: ['test/modules/**/*.spec.ts', 'test/interaction/**/*.spec.ts', ...privateBrowserTests],
+          include: ['test/modules/**/*.spec.ts', 'test/modules/react/**/*.spec.tsx', 'test/interaction/**/*.spec.ts', ...privateBrowserTests],
           exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/proposals/test/effects/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,

@@ -4,12 +4,13 @@
 // Copyright (c) Deckgl Fiber Renderer contributors
 
 import {Deck, LightingEffect, log, MapView, PostProcessEffect} from '@deck.gl/core';
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import * as fc from 'fast-check';
 import React from 'react';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {createRoot, roots, unmountAtNode} from '@deck.gl/react/reconciler/renderer';
+import {createLayerComponent, createViewComponent} from '@deck.gl/react/wrappers/factories';
 import type {ReconcilerRoot, RootElement} from '@deck.gl/react/reconciler/types';
 import {createTestRoot} from './test-renderer';
 import {TestWidget} from './test-widget';
@@ -434,6 +435,48 @@ describe('renderer', () => {
 
       unmountAtNode(secondNode);
       expect(second.deck.finalize).toHaveBeenCalledOnce();
+    });
+
+    it('renders a createLayerComponent component next to native layers', async () => {
+      const {deck, flush, root} = createTestRoot();
+      const JsxPolygonLayer = createLayerComponent(PolygonLayer);
+      const nativePoints = new ScatterplotLayer({data: [], id: 'native-points'});
+
+      await React.act(async () => {
+        root.render(
+          React.createElement(
+            React.Fragment,
+            null,
+            React.createElement('deckLayer', {layer: nativePoints}),
+            React.createElement(JsxPolygonLayer, {data: [], id: 'jsx-polygons'})
+          )
+        );
+        await flush();
+      });
+
+      expect(deck.getLayerIds()).toStrictEqual(['native-points', 'jsx-polygons']);
+      expect(deck.layers[0]).toBe(nativePoints);
+      expect(deck.layers[1]).toBeInstanceOf(PolygonLayer);
+      expect(deck.layers[1]?.id).toBe('jsx-polygons');
+    });
+
+    it('keeps layers nested in a createViewComponent component', async () => {
+      const {deck, root} = createTestRoot();
+      const JsxMapView = createViewComponent(MapView);
+      const JsxScatterplotLayer = createLayerComponent(ScatterplotLayer);
+
+      await React.act(async () => {
+        root.render(
+          React.createElement(
+            JsxMapView,
+            {id: 'main'},
+            React.createElement(JsxScatterplotLayer, {data: [], id: 'points'})
+          )
+        );
+      });
+
+      expect(deck.views.map(view => view.id)).toStrictEqual(['main']);
+      expect(deck.getLayerIds()).toStrictEqual(['points']);
     });
   });
 
