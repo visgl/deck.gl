@@ -40,7 +40,8 @@ export function makePathShaderWGSL({
   vertexSetup = '',
   vertexOutput = 'varyings.pathPickingColor = geometry.pickingColor;',
   extraVaryings = '@location(10) @interpolate(flat) pathPickingColor: vec3<f32>,',
-  fragmentFilter = /* wgsl */ `
+  fragmentFilter = '',
+  pickingFilter = /* wgsl */ `
     if (picking.isActive > 0.5) {
       if (!picking_isColorValid(varyings.pathPickingColor)) { discard; }
       var extensionColor = vec4<f32>(varyings.pathPickingColor, 1.0);
@@ -65,6 +66,7 @@ export function makePathShaderWGSL({
   vertexOutput?: string;
   extraVaryings?: string;
   fragmentFilter?: string;
+  pickingFilter?: string;
   colorFilter?: string;
 } = {}): string {
   return /* wgsl */ `\
@@ -581,6 +583,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 #endif
   ${colorFilter}
   DECKGL_PATH_STYLE_COLOR(&color, varyings.vPathPosition, pathCoverage);
+  ${pickingFilter}
   DECKGL_FILTER_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
 }

@@ -133,13 +133,15 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
     /** Geometry prepared for the current input. */
     const {geometry, features} = this.state;
     if (features) {
+      /** Inherited extension and accessor refresh triggers for the decoded child. */
+      const subLayerProps = this.getSubLayerProps({id: 'features'});
       return new GeoJsonLayer<GeoArrowFeatureProperties>({
         ...layerProps,
-        ...this.getSubLayerProps({id: 'features'}),
+        ...subLayerProps,
         data: features,
         highlightedObjectIndex:
           layerProps.highlightedObjectIndex == null
-            ? -1
+            ? null
             : features.findIndex(
                 feature => feature.properties.rowIndex === layerProps.highlightedObjectIndex
               ),
@@ -157,10 +159,12 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
         getLineColor: makeGeoArrowFeatureAccessor(data, colors, [0, 0, 0, 255]),
         getLineWidth: makeGeoArrowFeatureAccessor(data, widths, 1),
         updateTriggers: {
-          getPointRadius: getRadius,
-          getFillColor,
-          getLineColor: colors,
-          getLineWidth: widths
+          ...layerProps.updateTriggers,
+          ...subLayerProps.updateTriggers,
+          getPointRadius: [getRadius, layerProps.updateTriggers?.getRadius],
+          getFillColor: [getFillColor, layerProps.updateTriggers?.getFillColor],
+          getLineColor: [colors, layerProps.updateTriggers?.colors],
+          getLineWidth: [widths, layerProps.updateTriggers?.widths]
         }
       });
     }
