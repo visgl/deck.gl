@@ -294,7 +294,15 @@ export default class DataFilterExtension extends LayerExtension<
       filterModel.device.submit(commandEncoder.finish());
 
       if (!didDraw) {
-        if (this.isComposite) this.setNeedsUpdate();
+        if (this.isComposite) {
+          // Composite layer updates clear their dirty flags after rendering sublayers.
+          queueMicrotask(() => {
+            const layer = this.getCurrentLayer();
+            if (layer?.state.filterModel === filterModel && layer.state.filterNeedsUpdate) {
+              layer.setNeedsUpdate();
+            }
+          });
+        }
         this.setNeedsRedraw();
         return;
       }
