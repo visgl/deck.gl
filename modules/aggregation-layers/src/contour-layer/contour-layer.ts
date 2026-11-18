@@ -568,12 +568,17 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   private getContourExtensions(id: 'lines' | 'bands'): LayerExtension[] {
     const {extensions, _subLayerProps} = this.props;
     const {aggregatorType} = this.state;
-    return (
-      _subLayerProps?.[id]?.extensions ??
-      (aggregatorType === 'gpu' || aggregatorType === 'webgpu'
-        ? extensions.filter(extension => !isInputFilter(extension))
-        : extensions)
-    );
+    if (_subLayerProps?.[id]?.extensions) return _subLayerProps[id].extensions;
+    if (aggregatorType === 'webgpu')
+      return extensions.filter(extension => !isInputFilter(extension));
+    // The WebGL sorter runs DataFilter but does not run the vertex position hook.
+    if (aggregatorType === 'gpu') {
+      return extensions.filter(
+        extension =>
+          (extension.constructor as typeof LayerExtension).extensionName !== 'DataFilterExtension'
+      );
+    }
+    return extensions;
   }
 
   /** Attach the contour definition associated with the picked line or band. */
