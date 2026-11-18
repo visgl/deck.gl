@@ -50,6 +50,7 @@ export default class MapLibreOverlay implements IControl {
   private _deck?: Deck<any>;
   private _map?: MapLibreMap;
   private _container?: HTMLDivElement;
+  /** Empty MapLibre control-slot placeholder; the canvas is mounted separately in `_container`. */
   private _controlContainer?: HTMLDivElement;
   /** Layers whose groups were last resolved into the map, while a newer resolve is deferred */
   private _appliedLayers?: LayersList;
