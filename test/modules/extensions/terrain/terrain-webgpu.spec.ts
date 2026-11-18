@@ -240,7 +240,7 @@ function createTerrain(height: (x: number, y: number) => number, draw = false, o
     _instanced: false,
     getPosition: [0, 0, 0],
     getColor: [0, 0, 0],
-    material: {unlit: true},
+    material: {ambient: 1, diffuse: 0, specularColor: [0, 0, 0]},
     operation: operation ?? (draw ? 'terrain+draw' : 'terrain'),
     parameters: {depthWriteEnabled: true, cullMode: 'none'}
   });

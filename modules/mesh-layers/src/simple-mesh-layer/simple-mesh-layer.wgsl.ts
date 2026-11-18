@@ -106,7 +106,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     normal = normalize(cross(dpdy(varyings.positionCommon), dpdx(varyings.positionCommon)));
   }
 
-  DECKGL_FILTER_COLOR(&color, fragmentGeometry);
+  DECKGL_FILTER_COLOR_BEFORE_LIGHTING(&color, fragmentGeometry);
   color = vec4<f32>(
     lighting_getLightColor2(color.rgb, project.cameraPosition, varyings.positionCommon, normal),
     color.a * layer.opacity
@@ -125,6 +125,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     }
   }
 
+  DECKGL_FILTER_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
 }
 `;

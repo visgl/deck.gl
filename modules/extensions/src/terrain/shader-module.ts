@@ -10,6 +10,7 @@ import {project, ProjectProps, ProjectUniforms} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 import {
   terrainWGSLColorInjection,
+  terrainWGSLCoverInjection,
   terrainWGSLSource,
   terrainWGSLVertexInjection,
   terrainWGSLFragmentInjection
@@ -194,6 +195,7 @@ export const terrainPlugin: ShaderPlugin = {
     'wgsl:vs:DECKGL_FILTER_GL_POSITION': terrainWGSLVertexInjection,
     'wgsl:fs:#main-start': terrainWGSLFragmentInjection,
     'wgsl:fs:DECKGL_FILTER_COLOR': terrainWGSLColorInjection,
+    'wgsl:fs:DECKGL_FILTER_COLOR_BEFORE_LIGHTING': terrainWGSLCoverInjection,
     'glsl:vs:#main-start': /* glsl */ `
 if (terrain.mode == TERRAIN_MODE_SKIP) {
   gl_Position = vec4(0.0);
