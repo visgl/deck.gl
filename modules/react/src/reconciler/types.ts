@@ -89,6 +89,12 @@ export interface Instance {
 
   /** Child instances in the reconciler tree */
   children: Instance[];
+
+  /**
+   * True for the hidden copy React makes while a Suspense boundary shows its fallback.
+   * A hidden instance and its children are not sent to deck.gl.
+   */
+  hidden?: boolean;
 }
 
 /**

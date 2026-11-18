@@ -5,13 +5,17 @@
 import {Component} from 'react';
 import type {ReactNode} from 'react';
 
+/** Props for {@link RootErrorBoundary}. */
 interface RootErrorBoundaryProps {
   /** Receives each error caught inside the root, so the host component can rethrow it. */
   onError: (error: unknown) => void;
+  /** The root's rendered tree. */
   children?: ReactNode;
 }
 
+/** State for {@link RootErrorBoundary}. */
 interface RootErrorBoundaryState {
+  /** True after an error was caught, so the boundary renders nothing. */
   failed: boolean;
 }
 

@@ -36,6 +36,7 @@ import {
   organizeList
 } from './utils';
 
+/** A React reconciler event priority lane, such as `DiscreteEventPriority`. */
 type EventPriority = number;
 
 /**
@@ -48,16 +49,6 @@ type EventPriority = number;
  * @see {@link getCurrentUpdatePriority}
  */
 let currentUpdatePriority = DefaultEventPriority;
-
-/**
- * Priority level for the currently executing event.
- *
- * In some Meta host configs this is mutated, but in this implementation
- * it remains constant at DefaultEventPriority.
- *
- * @see {@link getCurrentEventPriority}
- */
-const currentEventPriority = DefaultEventPriority;
 
 /**
  * The reconciler has two modes: mutation mode and persistent mode. You must specify one of them.
@@ -75,6 +66,7 @@ const currentEventPriority = DefaultEventPriority;
  * @see {@link https://github.com/facebook/react/blob/main/packages/react-reconciler/README.md#persistence Persistence Mode Documentation}
  */
 export const supportsMutation = false;
+/** The renderer uses persistence mode; see `supportsMutation`. */
 export const supportsPersistence = true;
 
 /**
@@ -109,6 +101,7 @@ export const isPrimaryRenderer = false;
 
 /** The renderer name and version that React DevTools reads when the renderer registers. */
 export const rendererPackageName = RENDERER_PACKAGE_NAME;
+/** The renderer version that React DevTools reads when the renderer registers. */
 export const rendererVersion = RENDERER_VERSION;
 
 /** No custom inspection config for React DevTools. */
@@ -407,6 +400,7 @@ export function cloneInstance(
 export function cloneHiddenInstance(instance: Instance, type: Type, props: Props): Instance {
   return {
     children: instance.children,
+    hidden: true,
     node: instance.node
   };
 }
@@ -1221,7 +1215,7 @@ export function getCurrentUpdatePriority(): EventPriority {
  *
  * **Priority Resolution:**
  * 1. If `currentUpdatePriority` is set (not DefaultEventPriority), return it
- * 2. Otherwise, return `currentEventPriority` (the priority of the active event)
+ * 2. Otherwise, return the priority of the active event from `getCurrentEventPriority`
  *
  * This ensures work is always scheduled with an appropriate priority even when
  * React hasn't explicitly set one via `setCurrentUpdatePriority`.
@@ -1236,7 +1230,7 @@ export function resolveUpdatePriority(): EventPriority {
     return currentUpdatePriority;
   }
 
-  return currentEventPriority;
+  return getCurrentEventPriority();
 }
 
 /**

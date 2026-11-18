@@ -755,3 +755,38 @@ describe('renderer', () => {
     });
   });
 });
+
+describe('Suspense', () => {
+  it('shows only the fallback when mounted content suspends again', async () => {
+    const {deck, root} = createTestRoot();
+    const content = new ScatterplotLayer({data: [], id: 'content'});
+    const fallback = new ScatterplotLayer({data: [], id: 'fallback'});
+    const pending = new Promise(() => {});
+    let suspended = false;
+
+    function Content() {
+      if (suspended) {
+        throw pending;
+      }
+      return React.createElement('deckLayer', {layer: content});
+    }
+
+    const render = () =>
+      React.act(async () => {
+        root.render(
+          React.createElement(
+            React.Suspense,
+            {fallback: React.createElement('deckLayer', {layer: fallback})},
+            React.createElement(Content)
+          )
+        );
+      });
+
+    await render();
+    expect(deck.getLayerIds(), 'content is shown').toStrictEqual(['content']);
+
+    suspended = true;
+    await render();
+    expect(deck.getLayerIds(), 'only the fallback is shown').toStrictEqual(['fallback']);
+  });
+});

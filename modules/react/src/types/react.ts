@@ -6,6 +6,7 @@
 import type {Deck, DeckProps, View} from '@deck.gl/core';
 import type {ReactNode, Ref} from 'react';
 
+/** The `views` value a `Deck` accepts: one view, an array, or `null`. */
 type ViewOrViews = View | View[] | null;
 
 /**

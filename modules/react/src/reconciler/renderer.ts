@@ -110,12 +110,18 @@ renderer.injectIntoDevTools({
  */
 export const roots = new Map<RootElement, ReconcilerRoot>();
 
+/** Descriptors for a tree with no JSX layers, views, widgets or effects. */
 const EMPTY_JSX_DESCRIPTORS: JsxDescriptors = {effects: [], layers: [], views: [], widgets: []};
 
+/** Logs an error that React reports from the renderer's tree. */
 function reportError(error: unknown): void {
   log.error('DeckGL error', error)();
 }
 
+/**
+ * Logs an error caught by an error boundary, unless the root's own boundary caught it and
+ * rethrows it to the host tree.
+ */
 function reportCaughtError(error: unknown, info: object): void {
   // `DeckGL` rethrows what its own boundary catches, so React reports that error in the host tree.
   // React passes the catching boundary in `info`, although @types/react-reconciler omits it.
@@ -261,6 +267,7 @@ export function createRoot(node: RootElement, options: RootOptions = {}): Reconc
 
   let configured = false;
 
+  /** Creates the deck.gl instance on the first call, then forwards new props to it. */
   function configure(props: DeckGLConfiguration) {
     log.log(4, 'DeckGL configure', props)();
 
@@ -301,6 +308,7 @@ export function createRoot(node: RootElement, options: RootOptions = {}): Reconc
     configured = true;
   }
 
+  /** Renders `children` into the root. */
   function render(children: ReactNode) {
     renderer.updateContainer(children, container, null, noop);
   }

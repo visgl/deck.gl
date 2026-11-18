@@ -89,8 +89,12 @@ export function flattenTree(arr: Instance[]): Instance['node'][] {
   // Gain: 5-20x speedup for trees with 100+ nodes
   const result: Instance['node'][] = [];
 
+  /** Appends each instance's node, then its children's, skipping hidden subtrees. */
   function flatten(instances: Instance[]): void {
     for (const val of instances) {
+      if (val.hidden) {
+        continue;
+      }
       result.push(val.node);
       if (val.children.length > 0) {
         flatten(val.children);
