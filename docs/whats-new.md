@@ -2,7 +2,51 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
-## Unreleased
+## deck.gl v10
+
+Target release date: EOY 2026. Alpha releases available.
+
+*These highlights describe the goals for v10, and some features are still in development.*
+
+### Core Improvements
+
+- **WebGPU** — WebGPU is now the default renderer with full feature support.
+- **GPU vectors** — Layers accept chunked GPU buffers from luma.gl’s GPU Graph.
+
+### Apache Arrow
+
+- **Apache Arrow** — Layers accept Arrow tables and columns (`arrow.Vector`)
+- **Arrow streaming** — Layers incrementally render RecordBatches as they arrive
+- **Arrow** — loads data formats as binary columnar Arrow tables instead of JS arrays.
+- **GeoArrow** — Full support for GeoArrow and GeoParquet source data and `geoarrow.union` and `geoarrow.wkb` rendering.
+
+### SQL
+
+- **SQL table transforms** — Use SQL to transform Arrow tables after loading.
+- **SQL accessors** — Use SQL select expressions to extract layer attributes from your loaded data.
+- **SQL query pushdowns** — data loaders skip work your query doesn’t need (such as loading unused columns, rows, etc from the source data)
+
+### Projections
+
+- **Non Web Mercator projections**  —  `CustomProjectionView` renders longitude/latitude data in a planar projection specified by an EPSG code or PROJ string.
+- **Source data CRS** is preserved during loading and projected automatically
+- **Curved geometry** — Set `resolution` to subdivide paths, polygons, and bitmaps so they follow the projection’s curves.
+
+### High Dynamic Range (HDR)
+
+- **Normalized colors** — Set `normalizedColors` to use RGB values from 0 to 1.
+
+### React
+
+The `@deck.gl/react` module is now a deep React Fiber integration.
+
+- **React components** — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
+- **Map integrations** — Use dedicated React entry points for Mapbox, MapLibre, and Google Maps.
+- **Migration** — The previous React API moves to `@deck.gl/react/legacy`.
+
+### Layers
+
+- `TextLayer` uses `@luma.gl/text/fonts` for bitmap and SDF font atlas generation and glyph packing. Existing font settings and the custom font renderer hook remain supported.
 
 ### Contour compute aggregation
 
