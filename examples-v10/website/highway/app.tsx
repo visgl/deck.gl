@@ -153,8 +153,11 @@ export default function App({
 }) {
   const widgets = useMemo(() => [new LoadingWidget()], []);
   const [hoverInfo, setHoverInfo] = useState<PickingInfo<Road>>();
+  /** Road table supplied by the geometry layer after loading. */
   const [loadedRoads, setLoadedRoads] = useState<Table>();
+  /** Source rows used to build the per-road styles. */
   const roadTable = typeof roads === 'string' ? loadedRoads : roads;
+  /** Accident records loaded as a native Arrow table. */
   const [loadedAccidents, setLoadedAccidents] = useState<Table>();
   useEffect(() => {
     if (accidents) {
@@ -175,17 +178,24 @@ export default function App({
     [accidents, loadedAccidents]
   );
 
+  /** Arrow color and width columns in the source road order. */
   const styles = useMemo(() => {
     if (!roadTable) {
       return null;
     }
+    /** RGBA bytes for each road. */
     const colors: number[][] = [];
+    /** Road widths in meters for the selected year. */
     const widths = new Float32Array(roadTable.numRows);
+    /** Fatality totals keyed by road for the selected year. */
     const roadFatalities = fatalities[year];
+    /** Crash counts keyed by road for the selected year. */
     const roadIncidents = incidents[year];
     let index = 0;
     for (const road of roadTable) {
+      /** Road key shared by the geometry and accident datasets. */
       const key = getKey(road);
+      /** Road color based on fatalities per 1,000 miles. */
       const color = roadFatalities
         ? COLOR_SCALE(((roadFatalities[key] || 0) / road.length) * 1000)
         : [200, 200, 200];

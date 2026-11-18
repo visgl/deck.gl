@@ -127,15 +127,22 @@ export default function App({
   onArcDataLoad?: (count: number) => void;
 }) {
   const widgets = useMemo(() => [new LoadingWidget()], []);
+  /** Index of the county selected by picking. */
   const [selectedCounty, selectCounty] = useState<number>();
 
+  /** County table supplied by the geometry layer after loading. */
   const [loadedCounties, setLoadedCounties] = useState<Table>();
+  /** County table used for the migration destination lookup. */
   const counties = typeof data === 'string' ? loadedCounties : data;
+  /** Index of Los Angeles, or the first row when absent. */
   const defaultCounty = useMemo(() => {
+    /** County names in source row order. */
     const names = counties?.getChild('name');
     return Math.max(0, names ? [...names].indexOf('Los Angeles, CA') : -1);
   }, [counties]);
+  /** One source row whose identity changes with county selection. */
   const arcSource = useMemo(() => {
+    /** Source row for the current selection. */
     const index = selectedCounty ?? defaultCounty;
     return counties && index < counties.numRows ? counties.slice(index, index + 1) : null;
   }, [counties, selectedCounty, defaultCounty]);
@@ -165,6 +172,7 @@ export default function App({
       id: 'arc',
       data: arcSource,
       dataTransform: <LayerDataT,>(source: unknown): LayerDataT => {
+        /** Source county whose flow map supplies the arcs. */
         const county = isArrowTable(source) ? source.get(0) : null;
         return (counties && county ? makeArcTable(counties, county as County) : []) as LayerDataT;
       },
