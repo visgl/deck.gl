@@ -254,6 +254,11 @@ export default class HeatmapLayer<
   _updateHeatmapState(opts: UpdateParameters<this>) {
     const {props, oldProps} = opts;
     const changeFlags = this._getChangeFlags(opts);
+    const maskPropsChanged =
+      props['maskId'] !== oldProps['maskId'] ||
+      props['maskInverted'] !== oldProps['maskInverted'] ||
+      props['maskByInstance'] !== oldProps['maskByInstance'];
+    if (maskPropsChanged) this.setState({isWeightMapDirty: true});
 
     if (changeFlags.dataChanged || changeFlags.viewportChanged) {
       // if data is changed, do not debounce and immediately update the weight map

@@ -81,11 +81,23 @@ const testCases = [
         ...params,
         done: () => {
           const mask = params.layers.find(layer => layer.id === 'heatmap-mask');
+          const heatmap = params.layers.find(layer => layer.id === 'heatmap-lnglat-masked');
+          const topLevel = params.layers.filter(layer => !layer.parent);
           if (mask.props.data[0].length === 1) {
             params.deck.setProps({
-              layers: params.layers
-                .filter(layer => !layer.parent)
-                .map(layer => (layer === mask ? mask.clone({data: [maskBoundary]}) : layer))
+              layers: topLevel.map(layer =>
+                layer === mask
+                  ? mask.clone({data: [maskBoundary]})
+                  : layer === heatmap
+                    ? heatmap.clone({maskInverted: true})
+                    : layer
+              )
+            });
+          } else if (heatmap.props.maskInverted) {
+            params.deck.setProps({
+              layers: topLevel.map(layer =>
+                layer === heatmap ? heatmap.clone({maskInverted: false}) : layer
+              )
             });
           } else {
             params.done();
