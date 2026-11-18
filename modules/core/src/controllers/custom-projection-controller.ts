@@ -6,7 +6,7 @@ import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps} from './controller';
 import ViewState from './view-state';
 import {getMaxBoundsRect} from './utils';
-import {pixelsToWorld, worldToPixels} from '@math.gl/web-mercator';
+import {pixelsToWorld, worldToPixels} from '@math.gl/geospatial/web-mercator';
 import {mod} from '../utils/math-utils';
 
 import type Viewport from '../viewports/viewport';

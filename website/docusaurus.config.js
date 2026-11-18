@@ -187,6 +187,8 @@ const config = {
         ],
         module: {
           rules: [
+            // Match Vite asset imports used by standalone examples.
+            {resourceQuery: /\?url$/, type: 'asset/resource'},
             // https://github.com/Esri/calcite-components/issues/2865
             {
               test: /\.m?js/,

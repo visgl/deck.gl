@@ -33,6 +33,13 @@ type GridCell = {
   value: string;
 };
 
+/** Uses the legend as the single source of colors for the SQL accessor. */
+const LANDCOVER_COLOR = `CASE
+  ${LANDCOVER_LEGEND.map(
+    ({color}, index) => `WHEN value = '${index}' THEN ARRAY_UINT8(${color.join(', ')}, 255)`
+  ).join('\n  ')}
+  ELSE ARRAY_UINT8(0, 0, 0, 255) END`;
+
 const GRID_DATA_FILES: Record<GridSystem, string> = {
   a5: 'landcover-a5v1.csv',
   geohash: 'landcover-geohash.csv',
@@ -68,7 +75,7 @@ export default function App({
   const commonLayerProps = {
     opacity: 0.8,
     filled: true,
-    getFillColor: (d: GridCell) => LANDCOVER_LEGEND[Number(d.value)]?.color ?? [0, 0, 0],
+    getFillColor: {sql: LANDCOVER_COLOR},
     extruded: true,
     getElevation: 50000,
     beforeId: 'waterway_line_label',

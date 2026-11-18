@@ -275,7 +275,9 @@ The `ContourLayer` renders the following sublayers:
 On a WebGPU device, `gpuAggregation: true` aggregates points in a compute shader for all five
 `aggregation` operations. Contours are still generated on the CPU, so they update a frame or
 more after each change. Previous contours remain visible until the new results arrive.
-Layers with extensions use CPU aggregation.
+[DataFilterExtension](../extensions/data-filter-extension.md), [ClipExtension](../extensions/clip-extension.md),
+and [BrushingExtension](../extensions/brushing-extension.md) filter input points before aggregation. They also support [borrowed GPU columns](./aggregator.md#gpu-column-extensions).
+Layers with other extensions use CPU aggregation on WebGPU.
 
 ContourLayer also accepts [GPU column inputs](./aggregator.md#gpu-column-inputs), which need `dataBounds`.
 

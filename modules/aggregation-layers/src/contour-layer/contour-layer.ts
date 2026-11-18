@@ -14,7 +14,8 @@ import {
   Viewport,
   _deepEqual,
   UpdateParameters,
-  DefaultProps
+  DefaultProps,
+  type LayerExtension
 } from '@deck.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
@@ -27,6 +28,16 @@ import {createAggregationViewport} from '../common/utils/projection-utils';
 import {WebGPUAggregator} from '../common/aggregator/webgpu-aggregator/webgpu-aggregator';
 import {Matrix4} from '@math.gl/core';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
+
+/** Extensions whose hooks filter source points during aggregation. */
+const INPUT_FILTER_EXTENSIONS = ['DataFilterExtension', 'ClipExtension', 'BrushingExtension'];
+
+/** Whether a contour extension filters source points. */
+function isInputFilter(extension: LayerExtension): boolean {
+  return INPUT_FILTER_EXTENSIONS.includes(
+    (extension.constructor as typeof LayerExtension).extensionName
+  );
+}
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
@@ -142,7 +153,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   /** Select an aggregation backend compatible with current inputs and extensions. */
   getAggregatorType(): string {
     if (this.props.gpuAggregation && this.context.device.type === 'webgpu') {
-      if (this.props.extensions.length) return 'cpu';
+      // Preserve the existing sublayer behavior for extensions that are not input filters.
+      if (this.props.extensions.some(extension => !isInputFilter(extension))) return 'cpu';
       if (
         (!this.props.positions &&
           !WebGPUAggregator.supportsData(this.props.data, ['getPosition', 'getWeight'])) ||
@@ -190,7 +202,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUAggregator {
     if (type === 'webgpu')
       return new WebGPUAggregator(this.context.device, {
-        requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
+        ...this.getComputeAggregatorOptions(),
         channelNames: ['counts'],
         binOptions: binOptionsUniforms,
         binning: `fn getBin(position: vec3f, low: vec3f) -> BinAssignment {
@@ -524,7 +536,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           getPath: d => d.vertices,
           getColor: getContourColor,
           getWidth: d => d.contour.strokeWidth ?? DEFAULT_STROKE_WIDTH,
-          widthUnits: 'pixels'
+          widthUnits: 'pixels',
+          extensions: this.getContourExtensions('lines')
         }
       );
 
@@ -543,11 +556,29 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           coordinateOrigin: [0, 0, 0],
           modelMatrix,
           getPolygon: d => d.vertices,
-          getFillColor: getContourColor
+          getFillColor: getContourColor,
+          extensions: this.getContourExtensions('bands')
         }
       );
 
     return [lineLayer, bandsLayer];
+  }
+
+  /** Forward explicit overrides and omit input filters already run by the GPU aggregator. */
+  private getContourExtensions(id: 'lines' | 'bands'): LayerExtension[] {
+    const {extensions, _subLayerProps} = this.props;
+    const {aggregatorType} = this.state;
+    if (_subLayerProps?.[id]?.extensions) return _subLayerProps[id].extensions;
+    if (aggregatorType === 'webgpu')
+      return extensions.filter(extension => !isInputFilter(extension));
+    // The WebGL sorter runs DataFilter but does not run the vertex position hook.
+    if (aggregatorType === 'gpu') {
+      return extensions.filter(
+        extension =>
+          (extension.constructor as typeof LayerExtension).extensionName !== 'DataFilterExtension'
+      );
+    }
+    return extensions;
   }
 
   /** Attach the contour definition associated with the picked line or band. */

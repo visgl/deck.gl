@@ -9,6 +9,7 @@ import {project, ProjectProps, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
 import {
+  terrainWGSLColorInjection,
   terrainWGSLSource,
   terrainWGSLVertexInjection,
   terrainWGSLFragmentInjection
@@ -21,6 +22,8 @@ import type {TerrainCover} from './terrain-cover';
 export type TerrainModuleProps = {
   project: ProjectProps;
   isPicking: boolean;
+  /** Whether this pass writes object IDs into the terrain cover. */
+  isPickingCover?: boolean;
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
   heightMapRange?: [number, number];
@@ -33,6 +36,8 @@ export type TerrainModuleProps = {
 
 type TerrainModuleUniforms = {
   mode: number;
+  /** Numeric flag enabled only while writing encoded object IDs to a cover. */
+  isPickingCover: number;
   bounds: [number, number, number, number];
   heightRange: [number, number];
 };
@@ -54,6 +59,7 @@ const uniformBlock =
   /* glsl */ `
 layout(std140) uniform terrainUniforms {
   float mode;
+  float isPickingCover;
   vec4 bounds;
   vec2 heightRange;
 } terrain;
@@ -143,6 +149,7 @@ float terrain_globe_latitude_scale(vec3 globePosition) {
       /* eslint-disable camelcase */
       return {
         mode,
+        isPickingCover: Number(Boolean(opts.isPickingCover)),
         heightRange: opts.heightMapRange || [0, 1],
         terrain_map: sampler,
         // Convert bounds to common space, as [minX, minY, width, height]
@@ -161,6 +168,7 @@ float terrain_globe_latitude_scale(vec3 globePosition) {
     // Provide the dummy texture to satisfy the terrain_map binding.
     return {
       mode: TERRAIN_MODE.NONE,
+      isPickingCover: Number(Boolean(opts.isPickingCover)),
       heightRange: opts.heightMapRange || [0, 1],
       terrain_map: opts.dummyHeightMap,
       bounds: [0, 0, 0, 0]
@@ -168,6 +176,7 @@ float terrain_globe_latitude_scale(vec3 globePosition) {
   },
   uniformTypes: {
     mode: 'f32',
+    isPickingCover: 'f32',
     bounds: 'vec4<f32>',
     heightRange: 'vec2<f32>'
   }
@@ -176,10 +185,15 @@ float terrain_globe_latitude_scale(vec3 globePosition) {
 export const terrainPlugin: ShaderPlugin = {
   name: 'terrain',
   module: terrainModule,
-  interStageVariables: {terrainHeightWGSL: {type: 'f32'}},
+  interStageVariables: {
+    terrainHeightWGSL: {type: 'f32'},
+    terrainMercPosWGSL: {type: 'vec2<f32>'},
+    terrainPickingColorWGSL: {type: 'vec3<f32>'}
+  },
   injections: {
     'wgsl:vs:DECKGL_FILTER_GL_POSITION': terrainWGSLVertexInjection,
     'wgsl:fs:#main-start': terrainWGSLFragmentInjection,
+    'wgsl:fs:DECKGL_FILTER_COLOR': terrainWGSLColorInjection,
     'glsl:vs:#main-start': /* glsl */ `
 if (terrain.mode == TERRAIN_MODE_SKIP) {
   gl_Position = vec4(0.0);

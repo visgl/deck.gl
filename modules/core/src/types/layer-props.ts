@@ -17,9 +17,9 @@ import type {Buffer, Parameters} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
 import type {Matrix4Like} from '@math.gl/core';
-import type {Expression} from '@math.gl/expressions';
-import type {SQLQuery} from '@math.gl/expressions/sql';
-import type {ArrowTableFunction} from '@math.gl/expressions/arrow';
+import type {Expression} from '@math.gl/sql/expressions';
+import type {SQLQuery} from '@math.gl/sql/parser';
+import type {ArrowTableFunction} from '@math.gl/sql/arrow';
 
 /** Additional Arrow functions available to SQL accessors. */
 export type SQLFunctions = readonly ArrowTableFunction[];

@@ -20,7 +20,7 @@ import {
 } from '@luma.gl/core';
 import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
 import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
-import {pixelsToWorld} from '@math.gl/web-mercator';
+import {pixelsToWorld} from '@math.gl/geospatial/web-mercator';
 import {
   Accessor,
   AccessorFunction,
@@ -496,15 +496,19 @@ export default class HeatmapLayer<
     const {weightsTextureSize} = this.props;
 
     const textureSize = Math.min(weightsTextureSize, device.limits.maxTextureDimension2D);
-    const isWebGPU = device.type === 'webgpu';
-    const floatTargetSupport = isWebGPU
-      ? device.getTextureFormatCapabilities('rgba16float').blend
-      : FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
-    const format: TextureFormat = floatTargetSupport
-      ? isWebGPU
-        ? 'rgba16float'
-        : 'rgba32float'
-      : 'rgba8unorm';
+    /** Candidate targets in descending precision. */
+    const floatFormats = ['rgba32float', 'rgba16float'] as const;
+    const format: TextureFormat =
+      floatFormats.find(candidate => {
+        /** Check support for accumulation and linear sampling separately. */
+        const capabilities = device.getTextureFormatCapabilities(candidate);
+        if (!capabilities.render || !capabilities.filter) return false;
+        if (device.type === 'webgl' && candidate === 'rgba32float') {
+          return FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
+        }
+        return capabilities.blend;
+      }) ?? 'rgba8unorm';
+    const floatTargetSupport = format !== 'rgba8unorm';
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
     this.setState({textureSize, format, weightsScale});
     if (!floatTargetSupport) {

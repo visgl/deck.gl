@@ -73,7 +73,7 @@ export default function App({device}) {
       mesh: MESH_URL,
       loadOptions: {obj: {shape: 'mesh'}},
       coordinateSystem: 'cartesian',
-      getPosition: {sql: 'FLOAT64x2(x, y)'},
+      getPosition: {sql: 'ARRAY_FLOAT64(x, y)'},
       getColor: {sql: 'RGBA8(red, 0.5, blue, 1)'},
       getOrientation: d => [d.yaw, 0, -90]
     }),

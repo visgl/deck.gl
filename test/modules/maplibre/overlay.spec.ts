@@ -5,7 +5,7 @@
 import {BitmapLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {device} from '@deck.gl/test-utils';
-import {addMetersToLngLat} from '@math.gl/web-mercator';
+import {addMetersToLngLat} from '@math.gl/geospatial/web-mercator';
 import {
   Map as MapLibreV4Map,
   addProtocol as addProtocolV4,
