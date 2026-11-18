@@ -57,6 +57,7 @@ export default class MaskExtension extends LayerExtension {
     };
   }
 
+  /** Applies mask uniforms for a normal layer draw. */
   draw(this: Layer<Required<MaskExtensionProps>>, {shaderModuleProps}: any, extension: this) {
     this.setShaderModuleProps(
       extension.getAggregationShaderProps.call(this, extension, shaderModuleProps)

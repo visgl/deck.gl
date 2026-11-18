@@ -259,16 +259,16 @@ export default class HeatmapLayer<
       props['maskInverted'] !== oldProps['maskInverted'] ||
       props['maskByInstance'] !== oldProps['maskByInstance'];
 
-    if (changeFlags.dataChanged || changeFlags.viewportChanged) {
+    if (changeFlags.dataChanged || changeFlags.viewportChanged || maskPropsChanged) {
       // if data is changed, do not debounce and immediately update the weight map
-      changeFlags.boundsChanged = this._updateBounds(changeFlags.dataChanged);
+      changeFlags.boundsChanged = this._updateBounds(changeFlags.dataChanged || maskPropsChanged);
       this._updateTextureRenderingBounds();
     }
 
     if (changeFlags.dataChanged || changeFlags.boundsChanged || maskPropsChanged) {
       // Update weight map immediately
       clearTimeout(this.state.updateTimer);
-      this.setState({isWeightMapDirty: true});
+      this.setState({isWeightMapDirty: true, updateTimer: null});
 
       if (changeFlags.dataChanged) {
         // Recreate weights transform if data changed, as buffer layout may have changed,
@@ -786,6 +786,12 @@ export default class HeatmapLayer<
       const viewport = this.context.viewport;
       this.context.viewport = this.internalState?.viewport || viewport;
       try {
+        if (this.state.updateTimer) {
+          clearTimeout(this.state.updateTimer);
+          this._updateBounds(true);
+          this._updateTextureRenderingBounds();
+          this.setState({updateTimer: null});
+        }
         const previousScale = this.state.weightColorScale;
         this._updateWeightmap(mask);
         if (previousScale !== this.state.weightColorScale && this.props.colorDomain) {
@@ -808,6 +814,7 @@ export default class HeatmapLayer<
       : [colorDomain[0] * scale, colorDomain[1] * scale];
   }
 
+  /** Renders source weights and records the scale used by the display layer. */
   _updateWeightmap(mask?: Record<string, unknown>) {
     const {radiusPixels} = this.props;
     const {worldBounds, textureSize, weightsScale, weightsTexture} = this.state;
