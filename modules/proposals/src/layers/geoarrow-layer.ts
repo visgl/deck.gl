@@ -11,12 +11,9 @@ import {
   type ArrowSolidPolygonLayerProps
 } from './arrow-solid-polygon-layer';
 
-/** Native GeoArrow geometries dispatched by the composite layer. */
-export type GeoArrowLayerGeometryType =
-  | 'geoarrow.point'
-  | 'geoarrow.linestring'
-  | 'geoarrow.polygon'
-  | 'geoarrow.multipolygon';
+import {resolveGeoArrowGeometry, type GeoArrowLayerGeometryType} from './resolve-geoarrow-geometry';
+
+export {resolveGeoArrowGeometry, type GeoArrowLayerGeometryType} from './resolve-geoarrow-geometry';
 
 /** GeoArrow metadata-driven composite props. Geometry-specific props pass to the selected child. */
 export type GeoArrowLayerProps = Omit<LayerProps, 'data'> & {
@@ -92,47 +89,4 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
         } as ArrowSolidPolygonLayerProps);
     }
   }
-}
-
-/** Resolves one native GeoArrow geometry column from schema extension metadata. */
-export function resolveGeoArrowGeometry(
-  data: Table | RecordBatch,
-  columnName?: string,
-  explicitGeometryType?: GeoArrowLayerGeometryType
-): {columnName: string; geometryType: GeoArrowLayerGeometryType} {
-  const fields = data.schema.fields;
-  const field = columnName
-    ? fields.find(candidate => candidate.name === columnName)
-    : fields.find(candidate =>
-        getGeoArrowExtensionName(candidate.metadata)?.startsWith('geoarrow.')
-      );
-  if (!field) {
-    throw new Error(
-      columnName
-        ? `GeoArrowLayer geometry column "${columnName}" is missing`
-        : 'GeoArrowLayer could not find a GeoArrow extension field'
-    );
-  }
-  const extensionName = explicitGeometryType ?? getGeoArrowExtensionName(field.metadata);
-  if (!isSupportedGeoArrowGeometryType(extensionName)) {
-    throw new Error(
-      `GeoArrowLayer does not yet dispatch "${extensionName ?? 'untyped'}"; use a native point, linestring, polygon, or multipolygon field`
-    );
-  }
-  return {columnName: field.name, geometryType: extensionName};
-}
-
-function getGeoArrowExtensionName(metadata: Map<string, string>): string | undefined {
-  return metadata.get('ARROW:extension:name') ?? metadata.get('ARROW:extension_name');
-}
-
-function isSupportedGeoArrowGeometryType(
-  value: string | undefined
-): value is GeoArrowLayerGeometryType {
-  return (
-    value === 'geoarrow.point' ||
-    value === 'geoarrow.linestring' ||
-    value === 'geoarrow.polygon' ||
-    value === 'geoarrow.multipolygon'
-  );
 }
