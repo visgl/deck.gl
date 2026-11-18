@@ -49,7 +49,7 @@ test('terrain globe height scale follows the projected meter-offset anchor', asy
       @compute @workgroup_size(1) fn main() {
         let anchor = project_position_vec3_f32(vec3<f32>(0.0));
         output[0] = vec4<f32>(terrain_globe_latitude_scale(anchor), 0.0, 0.0, 0.0);
-        if (terrain.mode > 100.0) { output[0] = textureLoad(terrain_map, vec2<i32>(0), 0); }
+        if (terrain.mode > 100.0) { output[0] = textureSampleLevel(terrain_map, terrain_mapSampler, vec2<f32>(0.5), 0.0); }
       }
     `,
     bindings: {output, terrain_map: texture}

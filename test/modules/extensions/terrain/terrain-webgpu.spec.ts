@@ -293,7 +293,7 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
       const fitted = await renderFrame(
         {
           extensions: [new TerrainExtension()],
-          terrainDrawMode: backend === 'webgl' ? 'offset' : undefined
+          terrainDrawMode: 'offset'
         },
         35,
         0,
@@ -307,6 +307,61 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
       expect(difference / totalBrightness(reference)).toBeLessThan(0.08);
     }
   );
+
+  if (backend === 'webgpu')
+    it('drapes a path and picks it at the terrain surface', async () => {
+      const terrain = createTerrain(() => 40, true);
+      const elevated = [{...DATA[0], path: DATA[0].path.map(([x, y]) => [x, y, 40])}];
+      const reference = await renderFrame({data: elevated, getWidth: 4}, false);
+      const fitted = await renderFrame(
+        {extensions: [new TerrainExtension()], terrainDrawMode: 'drape'},
+        false,
+        0,
+        terrain
+      );
+      expect(totalBrightness(reference)).toBeGreaterThan(1000);
+      expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
+      const [x, y] = deck!.getViewports()[0].project([-50, 0, 40]);
+      const picked = await deck!.pickObjectAsync({x, y, radius: 3});
+      expect(picked?.layer?.id).toBe('path-drape');
+      expect(picked?.index).toBe(0);
+      await renderFrame(
+        {data: [DATA[0], DATA[0]], extensions: [new TerrainExtension()], terrainDrawMode: 'drape'},
+        false,
+        0,
+        terrain
+      );
+      const first = await deck!.pickObjectAsync({x, y, radius: 3});
+      const layer = first!.layer!;
+      // Exercise the same disabled-index transition used by repeated picking.
+      // @ts-expect-error Inspect the disabled-ID state consumed by shader uniforms.
+      layer.internalState.disabledPickingIndices.push(first!.index);
+      const second = await deck!.pickObjectAsync({x, y, radius: 3});
+      expect([first!.index, second!.index].sort()).toEqual([0, 1]);
+      // @ts-expect-error Restore the disabled-ID state after the query.
+      layer.internalState.disabledPickingIndices.length = 0;
+    });
+
+  if (backend === 'webgpu')
+    it('composites translucent covers over transparent terrain', async () => {
+      const terrain = createTerrain(() => 40, true).clone({getColor: [255, 0, 0, 0]});
+      const elevated = [{...DATA[0], path: DATA[0].path.map(([x, y]) => [x, y, 40])}];
+      const reference = await renderFrame(
+        {data: elevated, getWidth: 4, getColor: [255, 255, 255, 128]},
+        false
+      );
+      const fitted = await renderFrame(
+        {
+          extensions: [new TerrainExtension()],
+          terrainDrawMode: 'drape',
+          getColor: [255, 255, 255, 128]
+        },
+        false,
+        0,
+        terrain
+      );
+      expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
+    });
 
   it('encodes terrain picking only when the terrain is pickable', async () => {
     const terrain = createTerrain(() => 25, true);
