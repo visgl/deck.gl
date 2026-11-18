@@ -114,6 +114,8 @@ Receives the loaded tile payload as `props.data` and the shared tile header as `
 
 Owned tilesets accept the same core tile options as `TileLayer`: `extent`, `tileSize`, `maxZoom`, `minZoom`, `maxCacheSize`, `maxCacheByteSize`, `lodStrategy`, `zRange`, `maxRequests`, `debounceTime`, `zoomOffset`, `visibleMinZoom`, and `visibleMaxZoom`.
 
+The experimental `_maxNewTilesPerFrame` prop works as in [`TileLayer`](../geo-layers/tile-layer.md#_maxnewtilesperframe). Tiles visible in any of the layer's views are always created right away.
+
 `refinementStrategy` supports `'best-available'`, `'no-overlap'`, `'never'`, and custom callbacks. Callbacks receive view-local tile facades: changes to `isVisible` affect only that view, while content and load state come from the common cache.
 
 ### Callbacks

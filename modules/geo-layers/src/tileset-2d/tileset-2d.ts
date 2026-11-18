@@ -650,6 +650,11 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     return prefetchTiles;
   }
 
+  /** Scheduling priority of a tile across views; lower values load first, negative ones are not needed. */
+  getRequestPriority(tile: Tile2DHeader<DataT>): number {
+    return this._getRequestPriority(tile);
+  }
+
   // Returns true if any tile's visibility changed
   /** Updates legacy selection and refinement flags without changing independent consumers. */
   private updateTileStates() {

@@ -54,7 +54,8 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   debounceTime: 0,
   zoomOffset: 0,
   visibleMinZoom: null,
-  visibleMaxZoom: null
+  visibleMaxZoom: null,
+  _maxNewTilesPerFrame: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 1}
 };
 
 /** All props supported by the TileLayer */
@@ -176,6 +177,15 @@ type _TileLayerProps<DataT> = {
    * @default null
    */
   visibleMaxZoom?: number | null;
+
+  /**
+   * (Experimental) Maximum number of tiles that get sublayers per frame. Visible tiles are always
+   * created and count toward the limit; hidden tiles, such as prefetched coverage, wait for later
+   * frames.
+   *
+   * @default no limit
+   */
+  _maxNewTilesPerFrame?: number;
 };
 
 export type TileLayerPickingInfo<
@@ -208,6 +218,8 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     tileset: Tileset2D | null;
     isLoaded: boolean;
     frameNumber?: number;
+    /** Frame request that creates the sublayers deferred by `_maxNewTilesPerFrame` */
+    nextTilesFrame?: number;
   };
 
   initializeState() {
@@ -218,6 +230,9 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   finalizeState() {
+    if (this.state?.nextTilesFrame !== undefined) {
+      cancelAnimationFrame(this.state.nextTilesFrame);
+    }
     this.state?.tileset?.finalize();
   }
 
@@ -405,6 +420,39 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     info.sourceTileSubLayer.updateAutoHighlight(info);
   }
 
+  /** Returns the hidden tiles whose sublayers wait for a later frame to stay within `_maxNewTilesPerFrame` */
+  private _getDeferredTiles(): Set<Tile2DHeader> {
+    const tileset = this.state.tileset!;
+    const newTiles = tileset.tiles.filter(tile => (tile.isLoaded || tile.content) && !tile.layers);
+    // Visible tiles are always created, so that pacing never opens a hole
+    const hiddenTiles = newTiles.filter(tile => !tile.isVisible);
+    const maxHiddenTiles = Math.max(
+      this.props._maxNewTilesPerFrame - (newTiles.length - hiddenTiles.length),
+      0
+    );
+    if (hiddenTiles.length <= maxHiddenTiles) {
+      return new Set();
+    }
+
+    // Create the coverage most likely to be shown next first, and tiles no view needs last
+    const priorities = new Map<Tile2DHeader, number>();
+    for (const tile of hiddenTiles) {
+      const priority = tileset.getRequestPriority(tile);
+      priorities.set(tile, priority < 0 ? Number.MAX_SAFE_INTEGER : priority);
+    }
+    hiddenTiles.sort((a, b) => priorities.get(a)! - priorities.get(b)!);
+
+    // `setNeedsUpdate` has no effect during an update, so request it from the next frame
+    this.state.nextTilesFrame ??= requestAnimationFrame(() => {
+      const layer = this.getCurrentLayer() as this | null;
+      if (layer) {
+        layer.state.nextTilesFrame = undefined;
+        layer.setNeedsUpdate();
+      }
+    });
+    return new Set(hiddenTiles.slice(maxHiddenTiles));
+  }
+
   renderLayers(): Layer | null | LayersList {
     const {visibleMinZoom, visibleMaxZoom, minZoom, extent} = this.props;
     const zoom = this.context.viewport.zoom;
@@ -419,10 +467,11 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       }
       return [];
     }
+    const deferredTiles = this._getDeferredTiles();
     return this.state.tileset!.tiles.map((tile: Tile2DHeader) => {
       const subLayerProps = this.getSubLayerPropsByTile(tile);
       // cache the rendered layer in the tile
-      if (!tile.isLoaded && !tile.content) {
+      if ((!tile.isLoaded && !tile.content) || deferredTiles.has(tile)) {
         // nothing to show
       } else if (!tile.layers) {
         const layers = this.renderSubLayers({
