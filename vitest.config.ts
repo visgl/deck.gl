@@ -291,7 +291,7 @@ const projects = [
           // 2. WebGL context contention when running many tests in parallel
           isolate: false,
           fileParallelism: false,
-          setupFiles: ['./test/setup/vitest-browser-setup.ts'],
+          setupFiles: ['./test/setup/vitest-browser-setup.ts', './test/setup/release-webgl-contexts.ts'],
           browser: {
             enabled: true,
             provider: headlessPlaywright,
@@ -322,7 +322,7 @@ const projects = [
           testTimeout: 30000,
           isolate: false,
           fileParallelism: false,
-          setupFiles: ['./test/setup/vitest-browser-setup.ts'],
+          setupFiles: ['./test/setup/vitest-browser-setup.ts', './test/setup/release-webgl-contexts.ts'],
           browser: {
             enabled: true,
             provider: browserPlaywright,

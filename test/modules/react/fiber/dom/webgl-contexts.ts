@@ -7,14 +7,13 @@ import {afterEach, beforeEach} from 'vitest';
 type WebGLContext = WebGLRenderingContext | WebGL2RenderingContext;
 
 /**
- * Releases the WebGL contexts that a test file's real `Deck` and map instances create.
+ * Releases the WebGL contexts that each test's real `Deck` and map instances create.
  *
- * Finalizing a `Deck` or removing a map does not release its WebGL context. The headless project
- * runs every test file in one page, where Chromium keeps a limited number of contexts and drops the
- * oldest one first: the shared test device, after which every GPU test fails with
- * "WebGL context is lost". Call this at a file's top level. It records each WebGL context created
- * during a test and loses it after the test, once the test has unmounted its roots. Contexts that
- * existed before the test, such as the shared test device's, are left alone.
+ * `test/setup/release-webgl-contexts.ts` already releases a file's contexts when the file ends.
+ * These specs mount several roots per file, each with its own canvas and often a map, so they
+ * release after every test instead to keep the page well under Chromium's context limit. Call this
+ * at a file's top level. It records each WebGL context created during a test and loses it after
+ * the test, once the test has unmounted its roots.
  */
 export function releaseWebGLContextsAfterEach(): void {
   const created: WebGLContext[] = [];
