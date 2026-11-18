@@ -9,9 +9,12 @@ import {build} from 'esbuild';
 import {expect, test} from 'vitest';
 import {getCJSBuildOptions, getCJSEntries} from '../../../modules/react/build-cjs.mjs';
 
+/** Loads real modules, such as React, for the evaluated bundles. */
 const require = createRequire(import.meta.url);
+/** Directory of `@deck.gl/react`. */
 const PACKAGE_ROOT = resolve(import.meta.dirname, '../../../modules/react');
 
+/** A CommonJS entry: the file to bundle and the bundle it publishes. */
 type Entry = {input: string; output: string};
 
 /** The package's CommonJS entries, bundled from source instead of `dist`. */
