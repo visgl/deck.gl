@@ -4,6 +4,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### TileLayer tile creation pacing
+
+[`TileLayer`](./api-reference/geo-layers/tile-layer.md#_maxnewtilesperframe) accepts an experimental `_maxNewTilesPerFrame` prop that spreads the sublayer creation of hidden tiles, such as prefetched coverage, over several frames. Visible tiles are always created right away.
+
 ### Tile coverage prefetching
 
 [`TileLayer`](./api-reference/geo-layers/tile-layer.md#lodstrategy) and [`TerrainLayer`](./api-reference/geo-layers/terrain-layer.md) accept `lodStrategy: 'coverage'`. Alongside the tiles in view, the layer requests their lower resolution ancestors and shows them while sharper tiles load, which reduces blank areas during camera transitions. The default, `'none'`, keeps the current behavior.
