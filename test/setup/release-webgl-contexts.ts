@@ -15,13 +15,23 @@
 import {afterAll} from 'vitest';
 import {webglDevice} from '@luma.gl/core/test-utils-legacy';
 
+/** A WebGL 1 or WebGL 2 rendering context. */
 type WebGLContext = WebGLRenderingContext | WebGL2RenderingContext;
+/** The WebGL contexts created since the current test file started. */
 type ContextRecorder = {created: Set<WebGLContext>};
 
+/** Global key for the recorder, so the `getContext` wrapper is installed once per page. */
 const RECORDER_KEY = '__deckTestWebGLContexts';
+/** The shared synchronous test device's context, which is never released. */
 const sharedContext: WebGLContext | undefined = webglDevice?.gl;
+/** The page's recorder, shared by every test file. */
 const recorder = installRecorder();
 
+/**
+ * Wraps `HTMLCanvasElement.prototype.getContext` to record each WebGL context it returns.
+ * Runs once per page: later test files reuse the recorder stored on `globalThis`.
+ * @returns The page's recorder.
+ */
 function installRecorder(): ContextRecorder {
   const global = globalThis as typeof globalThis & {[RECORDER_KEY]?: ContextRecorder};
   const existing = global[RECORDER_KEY];
