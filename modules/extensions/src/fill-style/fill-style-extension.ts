@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {createFloatParameterTexture} from '../utils/float-parameter-texture';
-import {LayerExtension} from '@deck.gl/core';
+import {LayerExtension, _packNormalizedColor as packNormalizedColor} from '@deck.gl/core';
 
 import {FillStyleModuleProps, patternPlugin, patternPluginWGSL} from './shader-module';
 import {packProceduralPatterns, type ProceduralPatternMapping} from './procedural-pattern';
@@ -12,6 +12,7 @@ import type {
   Layer,
   LayerContext,
   Color,
+  CompositeLayer,
   DefaultProps,
   Accessor,
   AccessorFunction,
@@ -29,6 +30,9 @@ function leastCommonMultiple(a: number, b: number): number {
   return (a / x) * b;
 }
 
+/** Fully transparent default pattern background in byte RGBA. */
+const DEFAULT_BACKGROUND_COLOR: Color = [0, 0, 0, 0];
+
 const defaultProps: DefaultProps<FillStyleExtensionProps> = {
   fillPatternEnabled: true,
   fillPatternAtlas: {
@@ -42,7 +46,7 @@ const defaultProps: DefaultProps<FillStyleExtensionProps> = {
   getFillPattern: {type: 'accessor', value: d => d.pattern},
   getFillPatternScale: {type: 'accessor', value: 1},
   getFillPatternOffset: {type: 'accessor', value: [0, 0]},
-  getFillPatternBackgroundColor: {type: 'accessor', value: [0, 0, 0, 0]}
+  getFillPatternBackgroundColor: {type: 'accessor', value: DEFAULT_BACKGROUND_COLOR}
 };
 
 export type FillStyleExtensionProps<DataT = any> = {
@@ -98,7 +102,8 @@ export type FillStyleExtensionProps<DataT = any> = {
   /**
    * Accessor for the color filled behind the pattern. The pattern is composited on top of it, so
    * the background is visible wherever the pattern is transparent. Fully transparent by default,
-   * which leaves the area behind the pattern unfilled.
+   * which leaves the area behind the pattern unfilled. Plain arrays use 0–1 channels
+   * with Deck’s `normalizedColors` option and 0–255 channels otherwise.
    * @default [0, 0, 0, 0]
    */
   getFillPatternBackgroundColor?: Accessor<DataT, Color>;
@@ -129,6 +134,26 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
 
   isEnabled(layer: Layer<FillStyleExtensionProps>): boolean {
     return layer.getAttributeManager() !== null && !('pathTesselator' in layer.state);
+  }
+
+  /** Forward the pattern background accessor to composite children using byte channels. */
+  getSubLayerProps(this: CompositeLayer, extension: this): any {
+    const props = super.getSubLayerProps(extension);
+    const color: Accessor<any, Color> | undefined = props.getFillPatternBackgroundColor;
+    const normalized = !this.parent && Boolean(this.context.normalizedColors);
+    if (normalized && typeof color === 'function') {
+      props.updateTriggers.getFillPatternBackgroundColor = withNormalizedColorTrigger(
+        props.updateTriggers.getFillPatternBackgroundColor
+      );
+    }
+    if (normalized && color && color !== DEFAULT_BACKGROUND_COLOR) {
+      const accessor: Accessor<any, Color> =
+        typeof color === 'function'
+          ? (object, info) => toByteColor(color(object, info))
+          : toByteColor(color);
+      props.getFillPatternBackgroundColor = accessor;
+    }
+    return props;
   }
 
   getShaders(this: Layer<FillStyleExtensionProps>, extension: this): any {
@@ -175,6 +200,7 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
         fillPatternBackgroundColors: {
           size: 4,
           type: 'unorm8',
+          semanticType: 'color',
           stepMode: 'dynamic',
           accessor: 'getFillPatternBackgroundColor',
           defaultValue: [0, 0, 0, 255]
@@ -295,4 +321,22 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       proceduralPatternTexture: createFloatParameterTexture(this.context.device, packedPatterns)
     };
   }
+}
+
+/** Pack a normalized plain-array color for a byte-encoded sublayer accessor. */
+function toByteColor(color: Color): Color {
+  if (!Array.isArray(color)) {
+    return color;
+  }
+  /** Byte RGBA result, with opaque alpha as the fallback. */
+  const packed: [number, number, number, number] = [0, 0, 0, 255];
+  packNormalizedColor(color, packed, 0, 4);
+  return packed;
+}
+
+/** Add a normalization marker while preserving shallow update-trigger comparisons. */
+function withNormalizedColorTrigger(trigger: unknown): unknown {
+  if (Array.isArray(trigger)) return [true, ...trigger];
+  if (trigger && typeof trigger === 'object') return {...trigger, _normalizedColors: true};
+  return [true, trigger];
 }
