@@ -285,14 +285,21 @@ export default class HeatmapLayer<
       this._updateColorTexture(opts, normalized);
     }
 
-    if (this.state.isWeightMapDirty) {
-      this._updateWeightmap();
-    }
-
     this.setState({zoom: opts.context.viewport.zoom});
   }
 
   renderLayers(): LayersList | Layer {
+    if (this.state.isWeightMapDirty) {
+      this._updateWeightmap();
+    }
+    const displayExtensions = this.props.extensions.filter(extension => {
+      if (extension.constructor['extensionName'] === 'DataFilterExtension') {
+        // Update counts from source points after the extension has updated its state.
+        extension.draw.call(this, {context: this.context}, extension);
+        return false;
+      }
+      return true;
+    });
     const {
       weightsTexture,
       triPositionBuffer,
@@ -308,6 +315,7 @@ export default class HeatmapLayer<
     return new TriangleLayerClass(
       this.getSubLayerProps({
         id: 'triangle-layer',
+        extensions: displayExtensions,
         updateTriggers
       }),
       {
@@ -589,17 +597,20 @@ export default class HeatmapLayer<
     });
     this._createWeightsTransform(weightsTransformShaders);
 
-    const maxWeightsTransformShaders = this.getShaders({
+    const maxWeightsTransformShaders = {
+      shaderAssembler: this.context.shaderAssembler,
       // Reduction operates on texture values, not projected positions or sizes.
       defines: {USE_EXTERNAL_PROJECTION: false},
       source: maxSource,
       vs: maxVs,
       fs: maxFs,
       modules: [maxWeightUniforms]
-    });
+    };
     const maxWeightTransform = new TextureTransform(device, {
       id: `${this.id}-max-weights-transform`,
       targetTexture: maxWeightsTexture!,
+      targetTextureChannels: 4,
+      targetTextureVarying: 'outTexture',
       ...maxWeightsTransformShaders,
       ...(device.type === 'webgpu'
         ? {colorAttachmentFormats: [maxWeightsTexture!.format as TextureFormatColor]}
@@ -619,7 +630,7 @@ export default class HeatmapLayer<
         blendAlphaSrcFactor: 'one',
         blendAlphaDstFactor: 'one'
       }
-    });
+    } as TextureTransformProps);
 
     const maxWeightProps: MaxWeightProps = {inTexture: weightsTexture!, textureSize};
     maxWeightTransform.model.shaderInputs.setProps({
@@ -840,6 +851,12 @@ export default class HeatmapLayer<
       },
       weight: weightProps
     });
+    for (const extension of this.props.extensions) {
+      const shaderProps = extension.getAggregationShaderProps.call(this, extension);
+      if (shaderProps) {
+        weightsTransform.model.shaderInputs.setProps(shaderProps);
+      }
+    }
     weightsTransform.run({
       parameters: {viewport: [0, 0, textureSize, textureSize]},
       clearColor: [0, 0, 0, 0]

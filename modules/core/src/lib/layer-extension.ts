@@ -39,6 +39,14 @@ export default abstract class LayerExtension<OptionsT = unknown> {
     return null;
   }
 
+  /** Supplies shader props for a layer's offscreen aggregation pass. */
+  getAggregationShaderProps(
+    this: Layer,
+    extension: this
+  ): Record<string, Record<string, unknown>> | undefined {
+    return undefined;
+  }
+
   /** Only called if attached to a CompositeLayer */
   getSubLayerProps(this: CompositeLayer, extension: this): any {
     const {defaultProps} = extension.constructor as typeof LayerExtension;

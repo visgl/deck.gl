@@ -12,6 +12,11 @@ _v10.0 should be thought of as a pre-release. We wanted to get the new capabilit
 
 *These highlights describe goals for v10. Some features are still in development.*
 
+### Heatmap filtering
+
+- `DataFilterExtension` filters the points that contribute to `HeatmapLayer` on WebGPU.
+
+
 ### GPU
 
 - **WebGPU** 🚧 — WebGPU is now the default renderer with full feature support.

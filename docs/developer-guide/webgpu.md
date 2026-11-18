@@ -104,8 +104,6 @@ The table below covers the public extensions in `@deck.gl/extensions`. All liste
 | `@deck.gl/extensions` | `MaskExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `TerrainExtension` | ✅ | ✅ |
 
-Data filtering on `HeatmapLayer` is available only on WebGL.
-
 `TerrainExtension` supports both `terrainDrawMode` values on WebGPU. Terrain sources used for offset fitting must report their elevation range. See the [terrain extension reference](../api-reference/extensions/terrain-extension.md#limitations).
 
 ## Effects

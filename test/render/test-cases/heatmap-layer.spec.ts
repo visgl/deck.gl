@@ -7,6 +7,7 @@ import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
+import {DataFilterExtension} from '@deck.gl/extensions';
 
 import {points} from 'deck.gl-test/data';
 
@@ -29,6 +30,26 @@ const testCases = [
         getWeight: d => d.SPACES,
         radiusPixels: 35,
         threshold: 0.1
+      })
+    ],
+    goldenImage: './test/render/golden-images/heatmap-lnglat.png'
+  },
+  {
+    // Golden: the baseline heatmap with the added high-weight point filtered out.
+    name: 'heatmap-lnglat-filtered',
+    viewState: {latitude: 37.75, longitude: -122.44, zoom: 11.5, pitch: 30, bearing: 0},
+    layers: [
+      new HeatmapLayer({
+        id: 'heatmap-lnglat-filtered',
+        data: [...points, {...points[0], SPACES: 1000000}],
+        opacity: 0.8,
+        getPosition: d => d.COORDINATES,
+        getWeight: d => d.SPACES,
+        radiusPixels: 35,
+        threshold: 0.1,
+        extensions: [new DataFilterExtension()],
+        getFilterValue: (_, {index}) => Number(index === points.length),
+        filterRange: [0, 0]
       })
     ],
     goldenImage: './test/render/golden-images/heatmap-lnglat.png'
