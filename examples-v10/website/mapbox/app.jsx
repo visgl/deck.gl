@@ -79,6 +79,7 @@ export default function App() {
     onClick: ({object}) => object && setSelectedPOI(object.hex),
     getHexagon: {sql: 'hex'},
     sqlFunctions: [LOG10],
+    // Interpolate the original yellow-to-red palette in log-count space.
     getFillColor: {
       sql: `\
         RGBA8(

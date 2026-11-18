@@ -244,6 +244,7 @@ export default function App({
       getHexagon: {sql: 'hex'},
       stroked: false,
       extruded: false,
+      // Interpolate the original coverage palette in square-root-count space.
       getFillColor: {
         sql: `\
           RGBA8(
