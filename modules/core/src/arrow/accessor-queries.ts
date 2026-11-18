@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Table, type Vector} from 'apache-arrow';
+import {Field, FixedSizeList, Table, Uint8, vectorFromArray, type Vector} from 'apache-arrow';
 import {compileArrowScales, parseSQLScaleAST, type ResolvedScale} from '@math.gl/sql/scales';
 import type {SQLFunctions, SQLParser} from '../types/layer-props';
 import {evaluateColumnExpression} from './column-constructors';
@@ -59,7 +59,26 @@ export function evaluateAccessorQueries(
       const {value, scale} = parseSQLScaleAST(expression);
       return [name, {value, scale: {...scale, nullColor: [0, 0, 0, 0] as const}}] as const;
     });
-  const compiled = compileArrowScales(data, Object.fromEntries(scaleExpressions), functions);
+  const compiled = compileArrowScales(
+    data,
+    Object.fromEntries(
+      scaleExpressions.filter(
+        ([
+          ,
+          {
+            scale: {domain}
+          }
+        ]) => {
+          if (!('column' in domain)) {
+            return true;
+          }
+          const column = data.getChild(domain.column);
+          return !column || column.nullCount !== column.length;
+        }
+      )
+    ),
+    functions
+  );
   const scales = Object.fromEntries(
     Object.entries(compiled).map(([name, {scale}]) => [name, scale])
   );
@@ -83,7 +102,11 @@ export function evaluateAccessorQueries(
     for (const {name, expression, isColorScale} of parsed) {
       // A new domain can change the color of previously evaluated rows.
       columns[name] = isColorScale
-        ? compiled[name].evaluate(input)
+        ? (compiled[name]?.evaluate(input) ??
+          vectorFromArray(
+            Array.from({length: input.numRows}, () => [0, 0, 0, 0]),
+            new FixedSizeList(4, new Field('item', new Uint8(), false))
+          ))
         : (previousBatch?.getChild(name) ?? evaluateColumnExpression(expression, input, functions));
     }
     return new Table(columns).batches;

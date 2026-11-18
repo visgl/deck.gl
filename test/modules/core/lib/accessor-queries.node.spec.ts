@@ -359,3 +359,18 @@ test('SQL scales use the caller parser and SQL functions', () => {
   expect(parse).toHaveBeenCalledExactlyOnceWith('custom scale');
   expect(Array.from(table.getChild('getColor')!.get(1))).toEqual([255, 255, 255, 255]);
 });
+
+test('an all-null scale domain leaves other SQL accessors usable', () => {
+  const data = tableFromArrays({value: [null, null], radius: [1, 2]});
+  const {table, scales} = evaluateAccessorQueries(
+    data,
+    {
+      getFillColor: "SCALE_COLOR(value, DOMAIN(value), PALETTE('#000000', '#ffffff'))",
+      getRadius: 'radius + 1'
+    },
+    undefined
+  );
+  expect(Array.from(table.getChild('getRadius')!)).toEqual([2, 3]);
+  expect(Array.from(table.getChild('getFillColor')!.get(0))).toEqual([0, 0, 0, 0]);
+  expect(scales.getFillColor).toBeUndefined();
+});
