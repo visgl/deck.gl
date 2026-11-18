@@ -50,6 +50,7 @@ export default class MapLibreOverlay implements IControl {
   private _deck?: Deck<any>;
   private _map?: MapLibreMap;
   private _container?: HTMLDivElement;
+  private _controlContainer?: HTMLDivElement;
   /** Layers whose groups were last resolved into the map, while a newer resolve is deferred */
   private _appliedLayers?: LayersList;
   private readonly _interleaved: boolean;
@@ -177,6 +178,8 @@ export default class MapLibreOverlay implements IControl {
       position: 'absolute',
       left: 0,
       top: 0,
+      // MapLibre control corners use z-index 2. Keep Deck above the map but below controls.
+      zIndex: 1,
       textAlign: 'initial',
       pointerEvents: 'none'
     });
@@ -214,7 +217,11 @@ export default class MapLibreOverlay implements IControl {
     map.on('dblclick', this._handleMouseEvent);
 
     this._updateContainerSize();
-    return container;
+    // A canvas inside a control corner shares its stacking context and can cover other controls.
+    // Mount it directly on the map; leave an empty element in the requested control slot.
+    map.getContainer().appendChild(container);
+    this._controlContainer = document.createElement('div');
+    return this._controlContainer;
   }
 
   private _onAddInterleaved(map: MapLibreMap): HTMLDivElement {
@@ -248,6 +255,8 @@ export default class MapLibreOverlay implements IControl {
     // MapLibre leaves removing the element to the control. A canvas that Deck does not own, such
     // as the `device` prop's, would otherwise stay in this container and stop resizing with the map.
     this._container?.remove();
+    this._controlContainer?.remove();
+    this._controlContainer = undefined;
   }
 
   private _onRemoveInterleaved(map: MapLibreMap): void {
