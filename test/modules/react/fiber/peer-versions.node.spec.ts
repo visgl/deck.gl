@@ -7,13 +7,16 @@ import {dirname, resolve} from 'node:path';
 import semver from 'semver';
 import {expect, test} from 'vitest';
 
+/** The `package.json` fields this test reads. */
 type PackageJson = {
   version: string;
   dependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
 };
 
+/** `@deck.gl/react`'s manifest. */
 const PACKAGE_JSON = resolve(import.meta.dirname, '../../../../modules/react/package.json');
+/** The parsed `@deck.gl/react` manifest. */
 const pkg = JSON.parse(readFileSync(PACKAGE_JSON, 'utf8')) as PackageJson;
 /** Reads an installed dependency's manifest the way Node resolves it from the package. */
 function readDependency(name: string): PackageJson {

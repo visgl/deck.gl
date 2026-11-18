@@ -8,7 +8,9 @@ import {build, type Metafile} from 'esbuild';
 import {expect, test} from 'vitest';
 import {getCJSBuildOptions, getCJSEntries} from '../../../../modules/react/build-cjs.mjs';
 
+/** Directory of `@deck.gl/react`. */
 const PACKAGE_ROOT = resolve(import.meta.dirname, '../../../../modules/react');
+/** The package's source directory. */
 const SRC = resolve(PACKAGE_ROOT, 'src');
 
 /**
@@ -23,6 +25,7 @@ const STATELESS_SHARED_MODULES = [
   'wrappers/factories.tsx'
 ];
 
+/** A CommonJS entry: the file to bundle and the bundle it publishes. */
 type Entry = {input: string; output: string};
 
 /** The package's CommonJS entries, bundled from source instead of `dist`. */
@@ -49,6 +52,7 @@ async function bundleCJS(entry: Entry, entries: Entry[]): Promise<Metafile> {
   return result.metafile;
 }
 
+/** Lists the TypeScript files under a directory, recursively. */
 function listSourceFiles(dir: string): string[] {
   return readdirSync(dir, {withFileTypes: true}).flatMap(item =>
     item.isDirectory()
