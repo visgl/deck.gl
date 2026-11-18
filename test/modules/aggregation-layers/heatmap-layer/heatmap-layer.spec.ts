@@ -528,3 +528,31 @@ test('Heatmap borrows GPU columns and updates row prefixes', async ({skip}) => {
     expect(await webgpuDevice.handle.popErrorScope()).toBeNull();
   }
 });
+
+test('Heatmap selects a blendable and filterable WebGPU accumulation format', () => {
+  for (const [blend, filter, half, expected] of [
+    [true, true, true, 'rgba32float'],
+    [true, false, true, 'rgba16float'],
+    [false, true, true, 'rgba16float'],
+    [false, false, false, 'rgba8unorm']
+  ] as const) {
+    let format: string | undefined;
+    HeatmapLayer.prototype._setupTextureParams.call({
+      context: {
+        device: {
+          type: 'webgpu',
+          limits: {maxTextureDimension2D: 1024},
+          getTextureFormatCapabilities: name =>
+            name === 'rgba32float'
+              ? {render: true, blend, filter}
+              : {render: true, blend: half, filter: half}
+        }
+      },
+      props: {weightsTextureSize: 512},
+      setState: state => {
+        format = state.format;
+      }
+    } as any);
+    expect(format).toBe(expected);
+  }
+});
