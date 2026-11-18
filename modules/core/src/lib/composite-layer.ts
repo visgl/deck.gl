@@ -195,7 +195,7 @@ export default abstract class CompositeLayer<PropsT extends {} = {}> extends Lay
     } = this.props;
     const newProps = {
       id: '',
-      updateTriggers: {},
+      updateTriggers: {} as Record<string, unknown>,
       opacity,
       pickable,
       visible,
