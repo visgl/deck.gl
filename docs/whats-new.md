@@ -15,9 +15,10 @@ Target release date: EOY 2026. Alpha releases available.
 
 ### Apache Arrow
 
-- **Apache Arrow** — Layers accept Arrow tables and columns (`arrow.Vector`)
-- **Arrow streaming** — Layers incrementally render RecordBatches as they arrive
-- **Arrow** — loads data formats as binary columnar Arrow tables instead of JS arrays.
+- **Arrow** data — The Layer `data` prop now supports Arrow tables
+- **Arrow attributes** — Layer accessors now support Arrow columns (`arrow.Vector`s)
+- **Arrow loading** — `data` URLs now load Arrow tables instead of JS arrays.
+- **Arrow streaming** — Layer data prop accepts `AsyncIterable<arrow.RecordBatch>` and incrementally transforms and renders RecordBatches as they arrive.
 - **GeoArrow** — Full support for GeoArrow and GeoParquet source data and `geoarrow.union` and `geoarrow.wkb` rendering.
 
 ### SQL
@@ -46,6 +47,7 @@ The `@deck.gl/react` module is now a deep React Fiber integration.
 
 ### Layers
 
+- `Tile2DLayer` and `MVT2DLayer` can now share a `Tileset2D` and reuse loaded tiles across layers and views.
 - `TextLayer` uses `@luma.gl/text/fonts` for bitmap and SDF font atlas generation and glyph packing. Existing font settings and the custom font renderer hook remain supported.
 
 ### Aggregation extensions with GPUVector inputs
