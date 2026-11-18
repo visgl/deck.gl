@@ -5,7 +5,7 @@
 import * as React from 'react';
 import {cloneElement} from 'react';
 
-const MAP_STYLE = {position: 'absolute'};
+const MAP_STYLE = {position: 'absolute', zIndex: -1};
 
 export default function evaluateChildren(
   children: React.ReactNode | Function,
@@ -28,6 +28,8 @@ export default function evaluateChildren(
         onLoad: event => {
           const canvasContainer = event.target.getCanvasContainer();
           Object.assign(canvasContainer.style, {position: 'absolute', inset: 0, zIndex: -1});
+          // Keep the entire map below Deck until its canvas is ready.
+          event.target.getContainer().style.zIndex = 'auto';
           children.props.onLoad?.(event);
         }
       });
