@@ -11,8 +11,6 @@ Target release date: EOY 2026. Alpha releases available.
 - **WebGPU** — WebGPU is now the default renderer with full feature support.
 - **Apache Arrow** — Layers accept Arrow tables and columns (`arrow.Vector`)
 - **Arrow streaming** — Layers incrementally render RecordBatches as they arrive
-- **SQL table transforms** — Use SQL to transform Arrow tables after loading.
-- **SQL accessors** — Use SQL select expressions to extract layer attributes from your loaded data.
 - **GPU vectors** — Layers accept chunked GPU buffers from luma.gl’s GPU Graph.
 
 ### Data Loading
@@ -22,6 +20,8 @@ Target release date: EOY 2026. Alpha releases available.
 
 ### SQL
 
+- **SQL table transforms** — Use SQL to transform Arrow tables after loading.
+- **SQL accessors** — Use SQL select expressions to extract layer attributes from your loaded data.
 - **SQL query pushdowns** — data loaders skip work your query doesn’t need (such as loading unused columns, rows, etc from the source data)
 
 ### Projections
