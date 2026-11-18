@@ -6,6 +6,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Target release date: EOY 2026. Alpha releases available.
 
+v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, SQL expression powered big data library. It brings support for non-mercator projection and initial hooks for advanced GPU compute integration.
+
+_v10.0 should be thought of as a pre-release. We wanted to get the new capabilities into the hands of users as soon as possible, which means that some APIs have not yet settled and may change in v10.1._
+
 *These highlights describe goals for v10. Some features are still in development.*
 
 ### GPU
