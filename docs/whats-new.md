@@ -48,10 +48,11 @@ The `@deck.gl/react` module is now a deep React Fiber integration.
 
 - `TextLayer` uses `@luma.gl/text/fonts` for bitmap and SDF font atlas generation and glyph packing. Existing font settings and the custom font renderer hook remain supported.
 
-### ScreenGrid extensions with GPUVector inputs
+### Aggregation extensions with GPUVector inputs
 
-[ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#gpuvector-inputs-unstable)
-supports ClipExtension and source-position BrushingExtension when positions and weights are supplied as GPUVectors.
+[ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#gpuvector-inputs-unstable),
+GridLayer, HexagonLayer, and ContourLayer also support clipping, brushing, and numeric filtering
+with [borrowed GPU columns](./api-reference/aggregation-layers/aggregator.md#gpu-column-extensions).
 
 ### Contour compute aggregation
 

@@ -25,8 +25,22 @@ import type {Aggregator} from './aggregator/aggregator';
 import type {WebGPUAggregatorOptions} from './aggregator/webgpu-aggregator/webgpu-aggregator';
 import {AttributeWithScale} from './utils/scale-utils';
 import {CPUAggregator} from './aggregator/cpu-aggregator/cpu-aggregator';
-import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
-import {Buffer} from '@luma.gl/core';
+import {GPUConstant, GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
+import {Buffer, type BufferLayout, type VertexFormat} from '@luma.gl/core';
+
+/** Low position components for directly bound float32 positions. */
+const ZERO_POSITION_LOW = new GPUConstant({format: 'float32x3', value: new Float32Array(3)});
+
+/** Satisfies the brushing shader input when the source position is used instead. */
+const ZERO_BRUSHING_TARGET = new GPUConstant({format: 'float32x2', value: new Float32Array(2)});
+
+/** Vertex columns consumed by the supported aggregation input extensions. */
+export type AggregationExtensionAttributes = {
+  /** Numeric DataFilter values, in the same row order as positions. */
+  filterValues?: GPUVector;
+  /** Custom brushing targets, in the same row order as positions. */
+  brushingTargets?: GPUVector<'float32x2'>;
+};
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
   data: LayerDataSource<DataT>;
@@ -40,6 +54,8 @@ export type AggregationLayerProps<DataT> = CompositeLayerProps & {
    * @experimental
    */
   weights?: readonly GPUVector[] | null;
+  /** Borrowed per-point extension columns for native compute aggregation. @experimental */
+  extensionAttributes?: AggregationExtensionAttributes | null;
   /** Bounds in input coordinates for GPU positions used by world-space binning. */
   dataBounds?: [number[], number[]] | null;
 };
@@ -53,6 +69,7 @@ export default abstract class AggregationLayer<
     aggregator: {type: 'object', value: null, optional: true},
     positions: {type: 'object', value: null, optional: true},
     weights: {type: 'array', value: null, optional: true, compare: 1},
+    extensionAttributes: {type: 'object', value: null, optional: true, compare: 1},
     dataBounds: {type: 'array', value: null, optional: true, compare: 2}
   };
 
@@ -63,9 +80,73 @@ export default abstract class AggregationLayer<
       : super.getNumInstances();
   }
 
-  /** Whether this layer can bind extensions alongside borrowed aggregation columns. */
-  protected supportsGPUColumnExtensions(): boolean {
-    return false;
+  /** Validate and return the borrowed attributes consumed by the input filter pass. */
+  private getGPUColumnExtensionBindings(): Record<string, GPUVector | GPUConstant> {
+    const {positions, weights, aggregator, extensions, extensionAttributes} = this.props;
+    if (aggregator || this.state.aggregatorType !== 'webgpu' || positions?.format !== 'float32x3') {
+      throw new Error('GPU column extensions require native compute and float32x3 positions');
+    }
+
+    const names =
+      this.getAggregationChannelCount() === 1 ? ['counts'] : ['colorWeights', 'elevationWeights'];
+    const attributes: Record<string, GPUVector | GPUConstant> = {
+      positions,
+      positions64Low: ZERO_POSITION_LOW
+    };
+    /** Validate row alignment, format and vertex buffer usage before binding a column. */
+    const addColumn = (name: string, vector: GPUVector | undefined, format: string) => {
+      if (
+        vector?.format !== format ||
+        vector.length !== positions.length ||
+        !(getGPUVectorData(vector).buffer.usage & Buffer.VERTEX)
+      ) {
+        throw new Error(
+          `Invalid GPU column for ${name}: expected ${format}, one value per position and VERTEX usage`
+        );
+      }
+      attributes[name] = vector;
+    };
+    addColumn('positions', positions, 'float32x3');
+    for (const [index, name] of names.entries()) addColumn(name, weights?.[index], 'float32');
+
+    for (const extension of extensions) {
+      switch ((extension.constructor as typeof LayerExtension).extensionName) {
+        case 'ClipExtension':
+          break;
+        case 'BrushingExtension': {
+          const {brushingTarget} = this.props as {brushingTarget?: string};
+          if (brushingTarget === 'source') attributes.brushingTargets = ZERO_BRUSHING_TARGET;
+          else if (brushingTarget === 'custom') {
+            addColumn('brushingTargets', extensionAttributes?.brushingTargets, 'float32x2');
+          } else {
+            throw new Error('GPU column brushing requires a source or custom target');
+          }
+          break;
+        }
+        case 'DataFilterExtension': {
+          const {filterSize, categorySize, fp64, countItems} = extension.opts as {
+            filterSize?: number;
+            categorySize?: number;
+            fp64?: boolean;
+            countItems?: boolean;
+          };
+          if (!filterSize || categorySize || fp64 || countItems) {
+            throw new Error(
+              'GPU column filtering requires numeric DataFilter without fp64 or item counting'
+            );
+          }
+          addColumn(
+            'filterValues',
+            extensionAttributes?.filterValues,
+            filterSize === 1 ? 'float32' : `float32x${filterSize}`
+          );
+          break;
+        }
+        default:
+          throw new Error('Unsupported extension for GPU aggregation columns');
+      }
+    }
+    return attributes;
   }
 
   /** GPU columns are forwarded directly to the aggregator, like ArcLayer's column path. */
@@ -78,15 +159,10 @@ export default abstract class AggregationLayer<
     if (aggregator?.requiresProjectedPositions && this.state.preproject) {
       throw new Error('GPU aggregation positions must use the custom view coordinate system');
     }
-    if (
-      (!aggregator && this.state.aggregatorType !== 'webgpu') ||
-      (extensions.length && !this.supportsGPUColumnExtensions()) ||
-      !weights
-    ) {
-      throw new Error(
-        'GPU columns require a compatible aggregator, weights, and supported extensions'
-      );
+    if ((!aggregator && this.state.aggregatorType !== 'webgpu') || !weights) {
+      throw new Error('GPU columns require a compatible aggregator and weights');
     }
+    if (extensions.length) this.getGPUColumnExtensionBindings();
     if (
       this.getNumInstances() > positions.length ||
       weights.length !== this.getAggregationChannelCount() ||
@@ -147,7 +223,22 @@ export default abstract class AggregationLayer<
       shaders: this.getAggregationShaders(),
       requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
       bindAttributes: model => {
-        const manager = this.getCurrentLayer()!.getAttributeManager()!;
+        const layer = this.getCurrentLayer()! as this;
+        if (layer.props.positions) {
+          const attributes = layer.getGPUColumnExtensionBindings();
+          const layouts: BufferLayout[] = Object.entries(attributes).map(([name, column]) => ({
+            name,
+            stepMode: 'instance',
+            byteStride:
+              column instanceof GPUConstant
+                ? column.value.byteLength
+                : getGPUVectorData(column).byteStride,
+            attributes: [{attribute: name, format: column.format as VertexFormat, byteOffset: 0}]
+          }));
+          model.setGPUAttributes(attributes, layouts);
+          return;
+        }
+        const manager = layer.getAttributeManager()!;
         model.setGPUAttributes(
           manager.getGPUVectors(),
           manager.getBufferLayouts().map(layout => ({...layout, stepMode: 'instance' as const}))
@@ -414,6 +505,7 @@ export default abstract class AggregationLayer<
     if (
       params.props.positions !== params.oldProps.positions ||
       params.props.weights !== params.oldProps.weights ||
+      !deepEqual(params.props.extensionAttributes, params.oldProps.extensionAttributes, 1) ||
       params.props.numInstances !== params.oldProps.numInstances
     ) {
       this.state.aggregator?.setNeedsUpdate();

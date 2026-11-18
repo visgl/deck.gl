@@ -324,9 +324,7 @@ Notes:
 - The built-in WebGPU compute path accepts buffers with `STORAGE` or `COPY_SRC` usage.
 - Use positions in the view's coordinate system for custom views.
 - Borrowed columns require positions that do not need CPU preprojection.
-- The built-in compute aggregator supports [ClipExtension](../extensions/clip-extension.md)
-  and [BrushingExtension](../extensions/brushing-extension.md) with `brushingTarget: 'source'`.
-  Both require borrowed `float32x3` positions and weights whose buffers also have `VERTEX` usage.
+- See [GPU column extensions](./aggregator.md#gpu-column-extensions) for clipping, brushing, and numeric filtering.
 
 ## Source
 

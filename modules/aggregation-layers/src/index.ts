@@ -8,7 +8,10 @@ export {default as ContourLayer} from './contour-layer/contour-layer';
 export {default as GridLayer} from './grid-layer/grid-layer';
 export {default as HeatmapLayer} from './heatmap-layer/heatmap-layer';
 
-export {default as _AggregationLayer} from './common/aggregation-layer';
+export {
+  default as _AggregationLayer,
+  type AggregationExtensionAttributes
+} from './common/aggregation-layer';
 export {WebGLAggregator, CPUAggregator, ReadbackAggregator} from './common/aggregator/index';
 
 // types
