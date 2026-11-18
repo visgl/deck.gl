@@ -24,3 +24,10 @@ the [documentation of ArcLayer](../../../docs/api-reference/layers/arc-layer.md)
 ### Basemap
 
 The basemap in this example is provided by [OpenFreeMap](https://openfreemap.org/). To use an alternative base map solution, visit [this guide](https://deck.gl/docs/get-started/using-with-map#using-other-basemap-services)
+### Full website dataset
+
+This example loads the full website dataset with `GeoParquetLoader` from `@loaders.gl/tables/parquet`. The `parquet.shape: 'geojson-table'` option supplies GeoJSON features to `GeoJsonLayer`, preserving its styling and picking API. Geometry uses WKB with GeoParquet metadata and internal Zstd compression.
+
+The 3,220 counties retain source order: migration map keys reference county row indices. Properties include `name`, `centroid`, and signed net `flows`.
+
+Standalone installations use deck.gl v10 and loaders.gl 5.0.0-beta.12; the package overrides keep the loader runtime aligned.

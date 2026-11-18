@@ -2,24 +2,26 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
 import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
+import {GeoParquetLoader} from '@loaders.gl/tables/parquet';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {load} from '@loaders.gl/core';
 
 import {Feature, LineString, MultiLineString} from 'geojson';
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 
-// Source data GeoJSON
+// Full website geometry in GeoParquet; properties retain their original names.
 const DATA_URL = {
   ACCIDENTS:
-    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/highway/accidents.csv',
-  ROADS: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/highway/roads.json'
+    'https://raw.githubusercontent.com/visgl/deck.gl-data/886cf5ab469bba3816aa5a32d4454835e0ce5951/examples/highway/accidents-full.csv',
+  ROADS:
+    'https://media.githubusercontent.com/media/visgl/deck.gl-data/886cf5ab469bba3816aa5a32d4454835e0ce5951/examples/highway/roads.parquet'
 };
 
 export const COLOR_SCALE = scaleThreshold<number, Color>()
@@ -133,23 +135,58 @@ function renderTooltip({
 export default function App({
   device,
   roads = DATA_URL.ROADS,
-  year,
+  year = 1990,
   accidents,
-  mapStyle = MAP_STYLE
+  mapStyle = MAP_STYLE,
+  onDataLoad
 }: {
   device?: Device;
   roads?: string | Road[];
   accidents?: Accident[];
   year?: number;
   mapStyle?: string;
+  /** Reports loaded path and vertex counts to the website controls. */
+  onDataLoad?: (stats: {count: number; vertexCount: number}) => void;
 }) {
   const [hoverInfo, setHoverInfo] = useState<PickingInfo<Road>>();
-  const {incidents, fatalities} = useMemo(() => aggregateAccidents(accidents), [accidents]);
+  const [loadedAccidents, setLoadedAccidents] = useState<Accident[]>();
+  useEffect(() => {
+    if (accidents) {
+      return;
+    }
+    let active = true;
+    load(DATA_URL.ACCIDENTS, CSVLoader, {csv: {shape: 'object-row-table'}}).then(table => {
+      if (active) {
+        setLoadedAccidents(table.data as Accident[]);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [accidents]);
+  const {incidents, fatalities} = useMemo(
+    () => aggregateAccidents(accidents || loadedAccidents),
+    [accidents, loadedAccidents]
+  );
 
   const layers = [
     new GeoJsonLayer<RoadProperties>({
       id: 'geojson',
       data: roads,
+      loaders: [GeoParquetLoader],
+      loadOptions: {parquet: {shape: 'geojson-table'}},
+      onDataLoad: loaded => {
+        const features = Array.isArray(loaded) ? loaded : loaded.features;
+        const paths = features.flatMap(feature =>
+          feature.geometry.type === 'LineString'
+            ? [feature.geometry.coordinates]
+            : feature.geometry.coordinates
+        );
+        onDataLoad?.({
+          count: paths.length,
+          vertexCount: paths.reduce((sum, path) => sum + path.length, 0)
+        });
+      },
       lineWidthMinPixels: 0.5,
 
       getLineColor: (f: Road) => {
@@ -173,8 +210,8 @@ export default function App({
       onHover: setHoverInfo,
 
       updateTriggers: {
-        getLineColor: {year},
-        getLineWidth: {year}
+        getLineColor: {year, fatalities},
+        getLineWidth: {year, incidents}
       },
 
       transitions: {
@@ -199,12 +236,7 @@ export default function App({
   );
 }
 
-export async function renderToDOM(container: HTMLDivElement) {
-  const root = createRoot(container);
-  root.render(<App />);
-
-  const accidents = (await load(DATA_URL.ACCIDENTS, CSVLoader, {csv: {shape: 'object-row-table'}}))
-    .data;
-
-  root.render(<App accidents={accidents} year={accidents[0].year} />);
+/** Mounts the standalone example. */
+export function renderToDOM(container: HTMLDivElement) {
+  createRoot(container).render(<App />);
 }
