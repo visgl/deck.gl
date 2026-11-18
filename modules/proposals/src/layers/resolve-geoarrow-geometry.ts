@@ -4,14 +4,20 @@
 
 import type {Schema} from 'apache-arrow';
 
-/** Native GeoArrow geometries dispatched by the composite layer. */
+/** GeoArrow encodings accepted by the composite layer. */
 export type GeoArrowLayerGeometryType =
   | 'geoarrow.point'
   | 'geoarrow.linestring'
   | 'geoarrow.polygon'
-  | 'geoarrow.multipolygon';
+  | 'geoarrow.multipolygon'
+  | 'geoarrow.multipoint'
+  | 'geoarrow.multilinestring'
+  | 'geoarrow.wkb'
+  | 'geoarrow.wkt'
+  | 'geoarrow.geometry'
+  | 'geoarrow.geometrycollection';
 
-/** Resolves one native GeoArrow geometry column from schema extension metadata. */
+/** Resolves one GeoArrow geometry column from schema extension metadata. */
 export function resolveGeoArrowGeometry(
   data: {schema: Schema},
   columnName?: string,
@@ -32,9 +38,7 @@ export function resolveGeoArrowGeometry(
   }
   const extensionName = explicitGeometryType ?? getGeoArrowExtensionName(field.metadata);
   if (!isSupportedGeoArrowGeometryType(extensionName)) {
-    throw new Error(
-      `GeoArrowLayer does not yet dispatch "${extensionName ?? 'untyped'}"; use a native point, linestring, polygon, or multipolygon field`
-    );
+    throw new Error(`GeoArrowLayer does not yet dispatch "${extensionName ?? 'untyped'}"`);
   }
   return {columnName: field.name, geometryType: extensionName};
 }
@@ -52,6 +56,12 @@ function isSupportedGeoArrowGeometryType(
     value === 'geoarrow.point' ||
     value === 'geoarrow.linestring' ||
     value === 'geoarrow.polygon' ||
-    value === 'geoarrow.multipolygon'
+    value === 'geoarrow.multipolygon' ||
+    value === 'geoarrow.multipoint' ||
+    value === 'geoarrow.multilinestring' ||
+    value === 'geoarrow.wkb' ||
+    value === 'geoarrow.wkt' ||
+    value === 'geoarrow.geometry' ||
+    value === 'geoarrow.geometrycollection'
   );
 }
