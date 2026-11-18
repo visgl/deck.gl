@@ -543,7 +543,9 @@ test('Heatmap selects a blendable and filterable WebGPU accumulation format', ()
           type: 'webgpu',
           limits: {maxTextureDimension2D: 1024},
           getTextureFormatCapabilities: name =>
-            name === 'rgba32float' ? {blend, filter} : {blend: half, filter: half}
+            name === 'rgba32float'
+              ? {render: true, blend, filter}
+              : {render: true, blend: half, filter: half}
         }
       },
       props: {weightsTextureSize: 512},

@@ -489,18 +489,18 @@ export default class HeatmapLayer<
     const {weightsTextureSize} = this.props;
 
     const textureSize = Math.min(weightsTextureSize, device.limits.maxTextureDimension2D);
-    const isWebGPU = device.type === 'webgpu';
-    /** Candidate WebGPU targets in descending precision. */
+    /** Candidate targets in descending precision. */
     const floatFormats = ['rgba32float', 'rgba16float'] as const;
-    const format: TextureFormat = isWebGPU
-      ? (floatFormats.find(candidate => {
-          /** The target must support accumulation and linear sampling. */
-          const capabilities = device.getTextureFormatCapabilities(candidate);
-          return capabilities.blend && capabilities.filter;
-        }) ?? 'rgba8unorm')
-      : FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature))
-        ? 'rgba32float'
-        : 'rgba8unorm';
+    const format: TextureFormat =
+      floatFormats.find(candidate => {
+        /** Check support for accumulation and linear sampling separately. */
+        const capabilities = device.getTextureFormatCapabilities(candidate);
+        if (!capabilities.render || !capabilities.filter) return false;
+        if (device.type === 'webgl' && candidate === 'rgba32float') {
+          return FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
+        }
+        return capabilities.blend;
+      }) ?? 'rgba8unorm';
     const floatTargetSupport = format !== 'rgba8unorm';
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
     this.setState({textureSize, format, weightsScale});
