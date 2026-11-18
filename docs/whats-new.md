@@ -4,6 +4,11 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### `@deck.gl/react/legacy`
+
+The current [`@deck.gl/react`](./api-reference/react/overview.md#deckglreactlegacy) API is also
+exported from `@deck.gl/react/legacy`, so apps can keep it when the package root changes in v10.
+
 ### Contour compute aggregation
 
 On WebGPU devices, [ContourLayer](./api-reference/aggregation-layers/contour-layer.md#compute-aggregation) aggregates points in a compute shader before generating contours.
