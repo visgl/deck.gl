@@ -3,5 +3,5 @@
 // Copyright (c) vis.gl contributors
 
 // The current React API, also published as `@deck.gl/react/legacy`.
-export * from './legacy';
-export {default} from './legacy';
+export * from './legacy/index';
+export {default} from './legacy/index';
