@@ -352,7 +352,8 @@ implicit source. `FROM data` is optional. Omit `query` to use the loaded data as
 For an in-memory Arrow table, the default parser also supports relational SQL with
 an explicit `FROM data`, for example
 `SELECT hex, SUM(count) AS visits FROM data GROUP BY hex`.
-math.gl executes the grouped query across the whole table.
+math.gl executes the grouped query across the whole table. Nullish data and empty
+row arrays render as empty layers until data arrives.
 
 For URL inputs, provide a source-capable loader. Loaders that support query pushdown
 can optimize loading based on the supplied query. When the layer has a custom

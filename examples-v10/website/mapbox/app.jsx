@@ -90,22 +90,20 @@ export default function App({data}) {
       getWidth: {sql: 'CASE WHEN count > 30 THEN count / 15 ELSE 2 END'}
     });
 
-  const poiLayer =
-    arcs &&
-    new H3HexagonLayer({
-      id: 'deckgl-pois',
-      data: arcs,
-      query: 'SELECT hex, SUM(count) AS count FROM data GROUP BY hex',
-      opacity: 0.4,
-      pickable: true,
-      autoHighlight: true,
-      onClick: ({object}) => object && setSelectedPOI(object.hex),
-      getHexagon: {sql: 'hex'},
-      getFillColor: d => colorScale(d.count),
-      extruded: false,
-      stroked: false,
-      beforeId: firstLabelLayerId
-    });
+  const poiLayer = new H3HexagonLayer({
+    id: 'deckgl-pois',
+    data: arcs,
+    query: 'SELECT hex, SUM(count) AS count FROM data GROUP BY hex',
+    opacity: 0.4,
+    pickable: true,
+    autoHighlight: true,
+    onClick: ({object}) => object && setSelectedPOI(object.hex),
+    getHexagon: {sql: 'hex'},
+    getFillColor: d => colorScale(d.count),
+    extruded: false,
+    stroked: false,
+    beforeId: firstLabelLayerId
+  });
 
   return (
     <Map

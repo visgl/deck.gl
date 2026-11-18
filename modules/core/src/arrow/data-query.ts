@@ -28,6 +28,9 @@ export async function queryLayerData(
     }
     return query(sql, {...(options as QueryOptions), source: input, loaders, sqlParser});
   }
+  if (input == null || (Array.isArray(input) && input.length === 0)) {
+    return input ?? [];
+  }
   const data = unwrapLoaderArrowResult(input);
   if (!isArrowTable(data)) {
     throw new Error('query requires a URL or Arrow table data');

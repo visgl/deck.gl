@@ -80,6 +80,34 @@ test('layer query groups matching keys across Arrow record batches', async () =>
   );
 });
 
+test.each([null, undefined])(
+  'grouped query waits for data when initialized with %s',
+  async data => {
+    const device = new NullDevice({});
+    const manager = new LayerManager(device, {viewport: new Viewport()});
+    const onError = vi.fn();
+    const layer = new QueryLayer({
+      id: 'grouped',
+      data,
+      query: 'SELECT hex, SUM(count) AS visits FROM data GROUP BY hex',
+      onError
+    });
+    try {
+      manager.setLayers([layer]);
+      await vi.waitFor(() => expect(layer.isLoaded).toBe(true));
+      expect(layer.props.data).toEqual([]);
+      const next = layer.clone({data: tableFromArrays({hex: ['a', 'a'], count: [2, 3]})});
+      manager.setLayers([next]);
+      await vi.waitFor(() => expect(next.isLoaded).toBe(true));
+      expect((next.props.data as ReturnType<typeof tableFromArrays>).get(0)?.visits).toBe(5);
+      expect(onError).not.toHaveBeenCalled();
+    } finally {
+      manager.finalize();
+      device.destroy();
+    }
+  }
+);
+
 test('changing the query parser refreshes a reused layer', async () => {
   const device = new NullDevice({});
   const manager = new LayerManager(device, {viewport: new Viewport()});

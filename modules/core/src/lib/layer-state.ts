@@ -4,7 +4,7 @@
 
 // deck.gl, MIT license
 import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
-import {equalLoaderOptions} from '../utils/loader-utils';
+import {compareLoaderOptions} from '@loaders.gl/core';
 import ComponentState from '../lifecycle/component-state';
 
 import Layer from './layer';
@@ -156,7 +156,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
             options: isURL ? layer.getLoadOptions() : undefined
           }
         : undefined;
-    const changed = !equalLoaderOptions(this.dataRequest, request);
+    const changed = !compareLoaderOptions(this.dataRequest, request);
     this.dataRequest = request;
     return changed;
   }
