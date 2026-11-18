@@ -9,7 +9,7 @@ import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {isArrowTable} from '@math.gl/arrow';
+import {isArrowTable} from '@math.gl/core/arrow';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';

@@ -40,7 +40,7 @@ import {areCRSEqual, resolveCRS} from '../utils/crs';
 import {supportsSourceCRS} from '../shaderlib/project/coordinate-systems';
 import LayerState, {ChangeFlags} from './layer-state';
 
-import {worldToPixels} from '@math.gl/web-mercator';
+import {worldToPixels} from '@math.gl/geospatial/web-mercator';
 import {vec3TransformMat4 as transformMat4} from '@math.gl/core';
 
 import {load, loadInBatches} from '@loaders.gl/core';

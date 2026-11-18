@@ -20,7 +20,7 @@ import {
 } from '@luma.gl/core';
 import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
 import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
-import {pixelsToWorld} from '@math.gl/web-mercator';
+import {pixelsToWorld} from '@math.gl/geospatial/web-mercator';
 import {
   Accessor,
   AccessorFunction,

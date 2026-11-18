@@ -22,7 +22,7 @@ import {
 import type {Model} from '@luma.gl/engine';
 import type {SamplerProps, Texture} from '@luma.gl/core';
 import {normalizeByteColor3, normalizeByteColor4} from '@luma.gl/shaders';
-import {lngLatToWorld} from '@math.gl/web-mercator';
+import {lngLatToWorld} from '@math.gl/geospatial/web-mercator';
 
 import createMesh from './create-mesh';
 import {getMetersPerUnit} from '../utils';

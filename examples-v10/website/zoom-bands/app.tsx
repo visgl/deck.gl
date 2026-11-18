@@ -9,7 +9,7 @@ import {GridLayer} from '@deck.gl/aggregation-layers';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {isArrowTable} from '@math.gl/arrow';
+import {isArrowTable} from '@math.gl/core/arrow';
 import type {Table} from 'apache-arrow';
 
 import type {Color, Layer, MapViewState, PickingInfo} from '@deck.gl/core';
@@ -258,7 +258,7 @@ export default function App({
             LIBELLEFRANCAIS
           WHERE LONGITUDE <> '' AND LATITUDE <> ''
         `,
-      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+      getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
       onDataLoad: onTreesLoaded,
       radiusUnits: 'pixels',
       getRadius: 1,

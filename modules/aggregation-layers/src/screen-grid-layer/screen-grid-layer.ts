@@ -22,7 +22,7 @@ import AggregationLayer, {type AggregationLayerProps} from '../common/aggregatio
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 import {defaultColorRange} from '../common/utils/color-utils';
-import {worldToPixels} from '@math.gl/web-mercator';
+import {worldToPixels} from '@math.gl/geospatial/web-mercator';
 
 import {Buffer} from '@luma.gl/core';
 import {GPUConstant, getGPUVectorData} from '@luma.gl/graph/gpu-data';

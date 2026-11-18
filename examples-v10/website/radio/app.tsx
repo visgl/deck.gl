@@ -240,7 +240,7 @@ export default function App({
             latitude: Float64Array.from(stations, station => station.latitude)
           }) as LayerDataT;
         },
-        getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+        getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
         getFillColor: [40, 40, 40, 128],
         getRadius: 20,
         radiusMinPixels: 2

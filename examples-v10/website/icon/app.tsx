@@ -137,7 +137,7 @@ export default function App({
             year: source.map(meteorite => meteorite.year)
           }) as LayerDataT;
         },
-        getPosition: {sql: 'FLOAT64x2(LIST_EXTRACT(coordinates, 1), LIST_EXTRACT(coordinates, 2))'},
+        getPosition: {sql: 'ARRAY_FLOAT64(coordinates[1], coordinates[2])'},
         getIcon: () => 'marker',
         sizeUnits: 'meters',
         sizeScale: 2000,
