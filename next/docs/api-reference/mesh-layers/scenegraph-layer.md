@@ -364,11 +364,13 @@ Method called to retrieve the center position for each object in the `data` stre
 
 An Arrow vector supplies one value per object. See [position columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
 
+Deck’s [`normalizedColors`](https://deck.gl/next/docs/api-reference/core/deck.md#normalizedcolors) lets top-level layers accept 0–1 plain-array instance colors. Byte defaults, typed arrays, and binary inputs retain their encoding.
+
 #### `getColor` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getcolor "Direct link to getcolor")
 
 * Default: `[0, 0, 0, 255]`
 
-For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied. Only used if `texture` is empty.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Plain arrays use 0–255 channels by default and 0–1 when Deck enables `normalizedColors`. Omitted alpha is opaque (255 or 1, respectively). Only used if `texture` is empty.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.

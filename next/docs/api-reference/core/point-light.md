@@ -32,7 +32,7 @@ The constructor for the `PointLight` class. Use this to create a new `PointLight
 const pointLight = new PointLight({color, intensity, position});
 ```
 
-* `color` - (number\[3],) RGB color of point light source, default value is `[255, 255, 255]`.
+* `color` - (number\[3],) RGB color of point light source, default value is `[255, 255, 255]`. Custom RGB arrays use 0–1 channels when Deck’s [`normalizedColors`](https://deck.gl/next/docs/api-reference/core/deck.md#normalizedcolors) is enabled and 0–255 channels otherwise.
 
 * `intensity` - (number) Strength of point light source, default value is `1.0`.
 

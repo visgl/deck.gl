@@ -329,6 +329,8 @@ The following props control the solid fill of `Polygon` and `MultiPolygon` featu
 
 Whether to draw filled polygons (solid fill) and points (circles). Note that for each polygon, only the area between the outer polygon and any holes will be filled. This prop is effective only when the polygon is NOT extruded.
 
+With Deck's [`normalizedColors`](https://deck.gl/next/docs/api-reference/core/deck.md#normalizedcolors), plain-array color accessors on a top-level GeoJsonLayer use 0–1 channels. This includes constants and callback results for fills, strokes, icons, and text colors. Omitted alpha is opaque. The layer converts these colors to bytes before forwarding them to its sublayers. Built-in defaults, typed arrays, and binary attributes keep their existing encoding.
+
 #### `getFillColor` ([Accessor\<Color>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getfillcolor "Direct link to getfillcolor")
 
 * Default: `[0, 0, 0, 255]`

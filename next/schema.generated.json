@@ -186,7 +186,7 @@
                     "const": false
                   }
                 ],
-                "description": "Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0-255. Default `[0, 0, 0, 0]` (transparent)."
+                "description": "Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0–255 by default or 0–1 with Deck's normalizedColors. Default `[0, 0, 0, 0]` (transparent)."
               },
               "clearDepth": {
                 "anyOf": [
@@ -673,7 +673,7 @@
                     "const": false
                   }
                 ],
-                "description": "Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0-255. Default `[0, 0, 0, 0]` (transparent)."
+                "description": "Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0–255 by default or 0–1 with Deck's normalizedColors. Default `[0, 0, 0, 0]` (transparent)."
               },
               "clearDepth": {
                 "anyOf": [
@@ -1151,7 +1151,7 @@
                     "const": false
                   }
                 ],
-                "description": "Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0-255. Default `[0, 0, 0, 0]` (transparent)."
+                "description": "Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0–255 by default or 0–1 with Deck's normalizedColors. Default `[0, 0, 0, 0]` (transparent)."
               },
               "clearDepth": {
                 "anyOf": [
@@ -1627,7 +1627,7 @@
                     "const": false
                   }
                 ],
-                "description": "Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0-255. Default `[0, 0, 0, 0]` (transparent)."
+                "description": "Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0–255 by default or 0–1 with Deck's normalizedColors. Default `[0, 0, 0, 0]` (transparent)."
               },
               "clearDepth": {
                 "anyOf": [
@@ -6335,7 +6335,7 @@
                   "$ref": "#/definitions/Color"
                 },
                 "description": "Specified as an array of colors [color1, color2, ...].",
-                "default": "`6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)"
+                "default": "`6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)\nCustom plain-array entries are 0–1 when Deck normalizedColors is enabled."
               },
               "colorScaleType": {
                 "type": "string",
@@ -6577,7 +6577,7 @@
                 "items": {
                   "$ref": "#/definitions/Color"
                 },
-                "description": "Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`"
+                "description": "Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd` Custom plain-array entries are 0–1 when Deck normalizedColors is enabled."
               },
               "coverage": {
                 "type": "number",
@@ -7129,7 +7129,7 @@
                 "items": {
                   "$ref": "#/definitions/Color"
                 },
-                "description": "Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`"
+                "description": "Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd` Custom plain-array entries are 0–1 when Deck normalizedColors is enabled."
               },
               "coverage": {
                 "type": "number",
@@ -7426,7 +7426,7 @@
                   "$ref": "#/definitions/Color"
                 },
                 "description": "Specified as an array of colors [color1, color2, ...].",
-                "default": "`6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)"
+                "default": "`6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)\nCustom plain-array entries are 0–1 when Deck normalizedColors is enabled."
               },
               "intensity": {
                 "type": "number",
@@ -10178,7 +10178,7 @@
               },
               "color": {
                 "$ref": "#/definitions/Color",
-                "description": "Color to use if texture is unavailable. *"
+                "description": "Color to use if texture is unavailable. Plain arrays use 0–1 with Deck normalizedColors."
               },
               "wireframe": {
                 "type": "boolean",
@@ -13990,7 +13990,7 @@
         },
         "color": {
           "$ref": "#/definitions/Color",
-          "description": "RGBA color array to be used to render the contour.",
+          "description": "RGBA color used to render the contour. Plain arrays use 0–1 channels when Deck's `normalizedColors` is enabled and byte channels otherwise.",
           "default": [
             255,
             255,

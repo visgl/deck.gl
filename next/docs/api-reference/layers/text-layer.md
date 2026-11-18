@@ -441,6 +441,10 @@ Width of outline around the text, relative to the font size. Only effective if `
 
 Color of outline around the text, in `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
+With Deck's [`normalizedColors`](https://deck.gl/next/docs/api-reference/core/deck.md#normalizedcolors), plain arrays for `outlineColor` on a top-level layer use 0–1 channels. Built-in defaults and byte typed arrays retain their byte encoding.
+
+On top-level TextLayer, Deck's [`normalizedColors`](https://deck.gl/next/docs/api-reference/core/deck.md#normalizedcolors) also applies to plain arrays and callback results for glyph, background, and border colors. Omitted alpha is opaque.
+
 ### Data Accessors[​](#data-accessors "Direct link to Data Accessors")
 
 #### `getText` ([Accessor\<string>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional)[​](#gettext "Direct link to gettext")

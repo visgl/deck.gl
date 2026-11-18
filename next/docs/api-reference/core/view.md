@@ -102,7 +102,9 @@ Default `false`.
 
 #### `clearColor` (number\[] | false, optional)[​](#clearcolor "Direct link to clearcolor")
 
-Specifies the color to clear the viewport with, as an array of four numbers `[r, g, b, a?]`. Each channel should be an integer between 0 and 255. For example, `[255, 0, 0, 255]` for opaque red. If `clearColor` is `false`, the depth buffer will not be cleared. If `clear` is set to `false`, this property will be ignored.
+Specifies the color to clear the viewport with as `[r, g, b, a?]`. By default, channels use 0–255 (for example, `[255, 0, 0, 255]` for opaque red). With Deck's [`normalizedColors`](https://deck.gl/next/docs/api-reference/core/deck.md#normalizedcolors), channels use 0–1.
+
+An omitted alpha is opaque, and an explicit zero alpha is transparent. Set `clearColor: false` to skip clearing the color buffer. This property only applies when `clear` is enabled.
 
 Default `[0, 0, 0, 0]` (transparent).
 

@@ -277,9 +277,7 @@ CPU aggregation is used as fallback in the following cases:
 
 ##### Compute aggregation[​](#compute-aggregation "Direct link to Compute aggregation")
 
-On a WebGPU device, HexagonLayer uses compute aggregation with explicit `colorDomain` and `elevationDomain`.
-
-Picking, extensions, domain callbacks, percentile filtering, quantile scales, and ordinal color scales use CPU aggregation instead. Dense grids exceeding device buffer limits also use CPU aggregation.
+On a WebGPU device, HexagonLayer aggregates in compute shaders when `gpuAggregation` is true. Automatic domains, picking, domain callbacks, quantile and ordinal scales and percentiles copy results back to the CPU after each change. Until the copy lands, the previous cells stay visible and cannot be picked. With `colorDomain`, `elevationDomain`, linear or quantize scales and default percentiles, new cells draw without waiting. Extensions work with accessor data. [GPU column inputs](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md#gpu-column-inputs) also need `dataBounds`. Data over the device buffer limits uses CPU aggregation.
 
 #### `radius` (number, optional)[​](#radius "Direct link to radius")
 

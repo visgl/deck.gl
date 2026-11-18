@@ -2,6 +2,10 @@
 
 ## Upgrading to v10[​](#upgrading-to-v10 "Direct link to Upgrading to v10")
 
+### View clear color alpha[​](#view-clear-color-alpha "Direct link to View clear color alpha")
+
+A View's [`clearColor`](https://deck.gl/next/docs/api-reference/core/view.md#clearcolor) with an explicit zero alpha, such as `[0, 0, 0, 0]`, now clears to transparent. Previously a zero alpha cleared to opaque. To keep an opaque clear, pass alpha `255` or omit it.
+
 ### WebGLAggregator outputs[​](#webglaggregator-outputs "Direct link to WebGLAggregator outputs")
 
 `WebGLAggregator.getBins()` and `getResult(channel)` now return borrowed `GPUVector` views instead of binary attribute descriptors. They can still be passed directly as layer binary attributes. For direct buffer access, use `getGPUVectorData(vector)` from `@luma.gl/graph/gpu-data` and read its `buffer`, `byteOffset`, and `byteStride` instead of the former descriptor's `buffer`, `offset`, and `stride` fields.
@@ -165,6 +169,23 @@ const commonPosition2 = layer.projectPosition(lnglat, {
 
 });
 ```
+
+### Deck props set to `undefined`[​](#deck-props-set-to-undefined "Direct link to deck-props-set-to-undefined")
+
+A [`Deck`](https://deck.gl/next/docs/api-reference/core/deck.md) prop set to `undefined`, in the constructor or in `setProps`, now uses its default value. In the constructor this is the same as leaving the prop out. In `setProps`, leaving a prop out still keeps its current value. Previously an explicit `undefined` replaced the default. For some props this threw an error or stopped rendering, such as a callback like `onAfterRender: debug ? callback : undefined`.
+
+A few props behaved differently with `undefined`. To keep that behavior, pass these instead:
+
+| Prop                              | `undefined` now              | To get the previous behavior                                |
+| --------------------------------- | ---------------------------- | ----------------------------------------------------------- |
+| `width`, `height`                 | `'100%'`                     | `null`, to leave the canvas size to your CSS                |
+| `onError`                         | Logs the error (the default) | `null`, to ignore errors                                    |
+| `debug`                           | `false`                      | `true`, to enable GPU debug mode                            |
+| `layers`, `widgets` in `setProps` | Removes them                 | Leave the prop out of `setProps` to keep the current ones   |
+| `useDevicePixels`                 | `true`                       | `false`, to render one canvas pixel per CSS pixel           |
+| `touchAction`                     | `'none'`                     | The `touch-action` value you want, such as `'manipulation'` |
+
+`null` is unchanged. Props without a default are also unchanged.
 
 ## Upgrading to v9.4[​](#upgrading-to-v94 "Direct link to Upgrading to v9.4")
 

@@ -212,7 +212,7 @@ Requires `pickable` to be true.
 
 * Default: `[0, 0, 128, 128]`
 
-RGBA color to blend with the highlighted object (either the hovered over object if `autoHighlight: true`, or the object at the index specified by `highlightedObjectIndex`). When the value is a 3 component (RGB) array, a default alpha of 255 is applied.
+RGBA color to blend with the highlighted object (either the hovered over object if `autoHighlight: true`, or the object at the index specified by `highlightedObjectIndex`). Channels use 0–255 by default. With Deck’s [`normalizedColors`](https://deck.gl/next/docs/api-reference/core/deck.md#normalizedcolors), plain-array constants and callback results on top-level layers use 0–1 channels. Omitted alpha is opaque in either mode. The built-in highlight and composite sublayer colors retain their byte interpretation.
 
 * If an array is supplied, it is used for the object that is currently highlighted.
 * If a function is supplied, it is called with a [pickingInfo](https://deck.gl/next/docs/developer-guide/interactivity.md#the-pickinginfo-object) object when the hovered object changes. The return value is used as the highlight color for the picked object. Only works with `autoHighlight: true`.

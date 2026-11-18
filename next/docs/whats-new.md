@@ -2,7 +2,69 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
-## Unreleased[​](#unreleased "Direct link to Unreleased")
+## deck.gl v10[​](#deckgl-v10 "Direct link to deck.gl v10")
+
+Target release date: EOY 2026. Alpha releases available.
+
+*These highlights describe the goals for v10, and some features are still in development.*
+
+### Core Improvements[​](#core-improvements "Direct link to Core Improvements")
+
+* **WebGPU** — WebGPU is now the default renderer with full feature support.
+* **GPU vectors** — Layers accept chunked GPU buffers from luma.gl’s GPU Graph.
+
+### Apache Arrow[​](#apache-arrow "Direct link to Apache Arrow")
+
+* **Apache Arrow** — Layers accept Arrow tables and columns (`arrow.Vector`)
+* **Arrow streaming** — Layers incrementally render RecordBatches as they arrive
+* **Arrow** — loads data formats as binary columnar Arrow tables instead of JS arrays.
+* **GeoArrow** — Full support for GeoArrow and GeoParquet source data and `geoarrow.union` and `geoarrow.wkb` rendering.
+
+### SQL[​](#sql "Direct link to SQL")
+
+* **SQL table transforms** — Use SQL to transform Arrow tables after loading.
+* **SQL accessors** — Use SQL select expressions to extract layer attributes from your loaded data.
+* **SQL query pushdowns** — data loaders skip work your query doesn’t need (such as loading unused columns, rows, etc from the source data)
+
+### Projections[​](#projections "Direct link to Projections")
+
+* **Non Web Mercator projections** — `CustomProjectionView` renders longitude/latitude data in a planar projection specified by an EPSG code or PROJ string.
+* **Source data CRS** is preserved during loading and projected automatically
+* **Curved geometry** — Set `resolution` to subdivide paths, polygons, and bitmaps so they follow the projection’s curves.
+
+### High Dynamic Range (HDR)[​](#high-dynamic-range-hdr "Direct link to High Dynamic Range (HDR)")
+
+* **Normalized colors** — Set `normalizedColors` to use RGB values from 0 to 1.
+
+### React[​](#react "Direct link to React")
+
+The `@deck.gl/react` module is now a deep React Fiber integration.
+
+* **React components** — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
+* **Map integrations** — Use dedicated React entry points for Mapbox, MapLibre, and Google Maps.
+* **Migration** — The previous React API moves to `@deck.gl/react/legacy`.
+
+### Layers[​](#layers "Direct link to Layers")
+
+* `TextLayer` uses `@luma.gl/text/fonts` for bitmap and SDF font atlas generation and glyph packing. Existing font settings and the custom font renderer hook remain supported.
+
+### Contour compute aggregation[​](#contour-compute-aggregation "Direct link to Contour compute aggregation")
+
+On WebGPU devices, [ContourLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/contour-layer.md#compute-aggregation) aggregates points in a compute shader before generating contours.
+
+### Optional graph aggregation[​](#optional-graph-aggregation "Direct link to Optional graph aggregation")
+
+The experimental [`_GraphScreenGridAggregator`](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md#graphscreengridaggregator) lets applications customize ScreenGrid aggregation using GPU graphs.
+
+### CARTO heatmap palettes[​](#carto-heatmap-palettes "Direct link to CARTO heatmap palettes")
+
+CARTO HeatmapTileLayer accepts normalized plain-array palettes with Deck’s `normalizedColors` option.
+
+### Normalized color inputs[​](#normalized-color-inputs "Direct link to Normalized color inputs")
+
+Deck's [`normalizedColors`](https://deck.gl/next/docs/api-reference/core/deck.md#normalizedcolors) option enables 0–1 plain-array color constants and callbacks for top-level ScatterplotLayer, LineLayer, and ArcLayer, PathLayer, PolygonLayer, SolidPolygonLayer, and GeoJsonLayer, as well as [View clear colors](https://deck.gl/next/docs/api-reference/core/view.md#clearcolor) and [top-level layer highlights](https://deck.gl/next/docs/api-reference/core/layer.md#highlightcolor). Top-level bitmap tints, bitmap transparency, and text outlines also use the setting. IconLayer, PointCloudLayer, and ColumnLayer also honor this setting for color accessors. GridLayer, HexagonLayer, ScreenGridLayer, and HeatmapLayer accept normalized palette entries, and ContourLayer accepts normalized line and band colors.
+
+SimpleMeshLayer and ScenegraphLayer instance colors honor Deck’s `normalizedColors` option. Top-level TextLayer glyph, background, and border colors honor Deck’s `normalizedColors` option.
 
 ### Experimental batch loading[​](#experimental-batch-loading "Direct link to Experimental batch loading")
 
@@ -18,7 +80,7 @@ Layers with column support accept Arrow vectors directly through their existing 
 
 ### Hexagon compute aggregation[​](#hexagon-compute-aggregation "Direct link to Hexagon compute aggregation")
 
-HexagonLayer supports WebGPU aggregation with explicit color and elevation domains, using the shared reducer and GPUVector rendering path.
+On WebGPU devices, [HexagonLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/hexagon-layer.md#compute-aggregation) aggregates in compute shaders, including with automatic domains, picking, quantile and ordinal scales, percentiles and extensions.
 
 ### ScreenGrid and Grid compute rendering features[​](#screengrid-and-grid-compute-rendering-features "Direct link to ScreenGrid and Grid compute rendering features")
 
@@ -69,6 +131,10 @@ Release date: September 5, 2026
 deck.gl v9.4 is expected to be the final release in the v9 series. It brings together a collection of completed improvements focused on performance, stability, and usability, and is intended to be a highly compatible, highly recommended upgrade for all v9 applications.
 
 Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
+
+### Terrain fitting[​](#terrain-fitting "Direct link to Terrain fitting")
+
+Use [`TerrainExtension`](https://deck.gl/next/docs/api-reference/extensions/terrain-extension.md) with `terrainDrawMode: 'offset'` to fit objects to the uppermost terrain surface. Texture draping remains WebGL-only.
 
 ### WebGPU[​](#webgpu "Direct link to WebGPU")
 
@@ -252,7 +318,7 @@ Class-specific improvements:
 * [GlobeController](https://deck.gl/next/docs/api-reference/core/globe-controller.md) - Major bug fixes and improved stability.
 * [OrthographicView](https://deck.gl/next/docs/api-reference/core/orthographic-view.md) is moving away from 2d-array zoom and adds per-axis `zoom*`, `minZoom*`, `maxZoom*` props.
 
-### Layers[​](#layers "Direct link to Layers")
+### Layers[​](#layers-1 "Direct link to Layers")
 
 ![TextLayer clipping feature](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-clipping.gif?raw=true)
 
@@ -327,7 +393,7 @@ See documentation about how to [test WebGPU support](https://deck.gl/next/docs/d
 * [`View.clone()`](https://deck.gl/next/docs/api-reference/core/view.md#clone) - New method that simplifies creating new Views with modified props, similar to `Layer.clone()`
 * Multi-view clear support - Enhanced support for controlling clear color, depth, and stencil buffers across multiple views, via [`clear`](https://deck.gl/next/docs/api-reference/core/view.md#clear), [`clearColor`](https://deck.gl/next/docs/api-reference/core/view.md#clearcolor), [`clearDepth`](https://deck.gl/next/docs/api-reference/core/view.md#cleardepth), [`clearStencil`](https://deck.gl/next/docs/api-reference/core/view.md#clearstencil) props
 
-### Layers[​](#layers-1 "Direct link to Layers")
+### Layers[​](#layers-2 "Direct link to Layers")
 
 * New [A5Layer](https://deck.gl/next/docs/api-reference/geo-layers/a5-layer.md) - renders cells from the [A5](https://a5geo.org) geospatial indexing system. See new [Global Grid Layers](https://deck.gl/next/examples/global-grids) example
 * IconLayer - new [`sizeBasis`](https://deck.gl/next/docs/api-reference/layers/icon-layer.md#sizebasis) prop
@@ -1591,7 +1657,7 @@ It is no longer necessary for deck.gl applications to track screen size and mana
 <DeckGL width='100%' height='100%'/>
 ```
 
-### Layers[​](#layers-2 "Direct link to Layers")
+### Layers[​](#layers-3 "Direct link to Layers")
 
 #### TextLayer (New)[​](#textlayer-new "Direct link to TextLayer (New)")
 
@@ -1936,7 +2002,7 @@ Release date: November, 2016
 * The `DeckGL` component now cancels animation loop on unmount, important when repeatedly creating/destroying deck.gl components.
 * The `DeckGL` component no longer manages WebGL blending modes, as this is better done directly by layers.
 
-### Layers[​](#layers-3 "Direct link to Layers")
+### Layers[​](#layers-4 "Direct link to Layers")
 
 * All layers now support accessors, removing the need for applications to transform data before passing it to deck.gl.
 * Layer props and accessors now always expect arrays (e.g. colors are expected as `[r,g,b,a]` instead of `{r,g,b,a}` etc).
@@ -2041,7 +2107,7 @@ Release date: May 2016
 
 * Ability to specify canvas ID and customize styles
 
-### Layers[​](#layers-4 "Direct link to Layers")
+### Layers[​](#layers-5 "Direct link to Layers")
 
 * Added data deep comparison support
 

@@ -278,6 +278,14 @@ new Deck({
 // layers is in the shape of [[<layer>, <layer>], null, [<layer>, <layer>], ...]
 ```
 
+#### `normalizedColors` (boolean, optional)[​](#normalizedcolors "Direct link to normalizedcolors")
+
+Default: `false`.
+
+When enabled, supported color props interpret plain JavaScript arrays as 0–1 channels, including arrays returned by accessor functions. Missing alpha is opaque. Color attributes and palette textures pack channels into bytes. Built-in defaults, byte typed arrays, Arrow columns, and binary or GPU inputs retain their existing encodings.
+
+See [Normalized colors](https://deck.gl/next/docs/developer-guide/using-layers.md#normalized-colors) for the list of supported props and migration examples.
+
 #### `layerFilter` (Function)[​](#layerfilter "Direct link to layerfilter")
 
 * Default: `null`
@@ -896,7 +904,7 @@ Notes:
 
 #### `pickObject`[​](#pickobject "Direct link to pickobject")
 
-![](https://img.shields.io/badge/WebGPU-�❌-brightgreen.svg?style=flat-square)
+![](https://img.shields.io/badge/WebGPU-❌-brightgreen.svg?style=flat-square)
 
 Get the closest pickable and visible object at the given screen coordinate.
 

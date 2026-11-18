@@ -393,6 +393,8 @@ Method called to retrieve the position of each column, in `[x, y]`. An optional 
 
 An Arrow vector supplies one value per object. See [position columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
 
+On top-level layers, Deck's [`normalizedColors`](https://deck.gl/next/docs/api-reference/core/deck.md#normalizedcolors) option interprets plain-array color constants and callback results as 0–1 channels. Built-in defaults, typed arrays, binary inputs, and Arrow color columns retain their encoding.
+
 #### `getFillColor` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getfillcolor "Direct link to getfillcolor")
 
 * Default: `[0, 0, 0, 255]`

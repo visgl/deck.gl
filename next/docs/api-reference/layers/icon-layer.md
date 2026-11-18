@@ -672,6 +672,8 @@ The size of each object, in units specified by `sizeUnits` (default pixels). By 
 
 An Arrow vector supplies one value per object. See [scalar columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#scalars) for requirements.
 
+On top-level layers, Deck's [`normalizedColors`](https://deck.gl/next/docs/api-reference/core/deck.md#normalizedcolors) option interprets plain-array color constants and callback results as 0–1 channels. Built-in defaults, typed arrays, binary inputs, and Arrow color columns retain their encoding.
+
 #### `getColor` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getcolor "Direct link to getcolor")
 
 * Default: `[0, 0, 0, 255]`

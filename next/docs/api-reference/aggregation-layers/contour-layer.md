@@ -359,19 +359,11 @@ The `ContourLayer` renders the following sublayers:
 * `lines` - For Isolines, rendered by [PathLayer](https://deck.gl/next/docs/api-reference/layers/path-layer.md)
 * `bands` - For Isobands, rendered by [SolidPolygonLayer](https://deck.gl/next/docs/api-reference/layers/solid-polygon-layer.md)
 
-## GPUVector inputs 🧪[​](#gpuvector-inputs-unstable "Direct link to GPUVector inputs 🧪")
+## Compute aggregation[​](#compute-aggregation "Direct link to Compute aggregation")
 
-> GPU buffer layouts are internal to layer implementations and can change in future releases.
+On a WebGPU device, `gpuAggregation: true` aggregates points in a compute shader for all five `aggregation` operations. Contours are still generated on the CPU, so they update a frame or more after each change. Previous contours remain visible until the new results arrive. [DataFilterExtension](https://deck.gl/next/docs/api-reference/extensions/data-filter-extension.md), [ClipExtension](https://deck.gl/next/docs/api-reference/extensions/clip-extension.md), and [BrushingExtension](https://deck.gl/next/docs/api-reference/extensions/brushing-extension.md) filter input points before aggregation. Layers with other extensions use CPU aggregation on WebGPU.
 
-GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
-
-* `positions` – A GPUVector of input positions.
-* `weights` – An array containing one matching weight vector.
-* `dataBounds` – `[min, max]` – Bounds in input coordinates.
-
-Notes:
-
-* Use a custom aggregator that accepts GPU inputs. It defines the supported formats and chunking.
+ContourLayer also accepts [GPU column inputs](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md#gpu-column-inputs), which need `dataBounds`.
 
 ## Source[​](#source "Direct link to Source")
 

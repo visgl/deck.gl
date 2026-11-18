@@ -129,6 +129,10 @@ How data should be fitted to the terrain surface. If not specified, will be auto
 | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | ![](https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/docs/terrain-fit-offset.jpg)*terrainDrawMode: offset* | ![](https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/docs/terrain-fit-drape.jpg)*terrainDrawMode: drape* |
 
+## Limitations[​](#limitations "Direct link to Limitations")
+
+On WebGPU, terrain sources must include their elevation range in `getBounds()`. `TerrainLayer` and non-instanced `SimpleMeshLayer` meshes provide this range. Texture draping (`terrainDrawMode: 'drape'`) is available only on WebGL. On WebGPU, omitting `terrainDrawMode` selects `'offset'`.
+
 ## Source[​](#source "Direct link to Source")
 
 [modules/extensions/src/terrain](https://github.com/visgl/deck.gl/tree/8.6-release/modules/extensions/src/terrain)
