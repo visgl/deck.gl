@@ -1548,6 +1548,49 @@ test('Deck#props explicitly undefined use defaults', async () => {
   });
 });
 
+test('Deck#setProps layers undefined removes the layers', async () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [new ScatterplotLayer({id: 'points', data: []})]
+  });
+
+  try {
+    await waitForRender(deck);
+    // @ts-expect-error Accessing protected member
+    expect(deck.layerManager.getLayers().length, 'layer added').toBe(1);
+
+    deck.setProps({layers: undefined});
+    expect(deck.props.layers, 'layers falls back to default').toEqual([]);
+    // Layer changes are applied on the next update
+    await waitForRender(deck);
+    // @ts-expect-error Accessing protected member
+    expect(deck.layerManager.getLayers().length, 'layers removed').toBe(0);
+  } finally {
+    deck.finalize();
+  }
+});
+
+test('Deck#props effects undefined initializes without throwing', async () => {
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [],
+    effects: undefined
+  });
+
+  try {
+    await waitForRender(deck);
+    expect(deck.props.effects, 'effects falls back to default').toEqual([]);
+  } finally {
+    deck.finalize();
+  }
+});
+
 test('Deck waits for asynchronous viewports before initializing and updating layers', async () => {
   const initialGate = createDeferred<void>();
   const nextGate = createDeferred<void>();

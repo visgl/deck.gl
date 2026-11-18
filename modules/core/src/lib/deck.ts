@@ -333,7 +333,10 @@ const defaultProps: DeckProps = {
 function resolveUndefinedProps<PropsT extends DeckProps<any>>(props: PropsT): PropsT {
   const resolvedProps: Record<string, unknown> = {...props};
   for (const key in resolvedProps) {
-    if (resolvedProps[key] === undefined && key in defaultProps) {
+    if (
+      resolvedProps[key] === undefined &&
+      Object.prototype.hasOwnProperty.call(defaultProps, key)
+    ) {
       resolvedProps[key] = defaultProps[key as keyof DeckProps];
     }
   }
