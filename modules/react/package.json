@@ -41,6 +41,9 @@
     "src"
   ],
   "sideEffects": false,
+  "scripts": {
+    "build": "node build-cjs.mjs"
+  },
   "peerDependencies": {
     "@deck.gl/core": "~10.0.0-alpha",
     "@deck.gl/widgets": "~10.0.0-alpha",
