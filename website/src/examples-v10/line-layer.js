@@ -59,7 +59,7 @@ class LineDemo extends Component {
   /** Renders the Arrow demo with the current controls and data. */
   render() {
     /** Provides params, data, ...other props for the example. */
-    const {params, onStateChange, ...otherProps} = this.props;
+    const {params, ...otherProps} = this.props;
     /** Provides widgets for the example. */
     const widgets = [new StatsWidget({type: 'device'})];
 
@@ -69,8 +69,9 @@ class LineDemo extends Component {
         key={this.props.device?.type}
         device={this.props.device}
         airports={`${DATA_URI}/airports.json`}
-        onDataLoad={count => onStateChange({count})}
+        flightPaths={`${DATA_URI}/flight-path-data.txt`}
         lineWidth={params.width.value}
+        onDataLoad={count => this.props.onStateChange({count})}
         widgets={widgets}
       />
     );

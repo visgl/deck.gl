@@ -99,6 +99,7 @@ test('ScenegraphLayer#tests', () => {
           new ModelNode({
             model: new Model(device!, {
               geometry: new CubeGeometry(),
+              parameters: {depthFormat: 'depth24plus'},
               vs,
               fs,
               modules: [project32],
@@ -114,6 +115,9 @@ test('ScenegraphLayer#tests', () => {
     onAfterUpdate: ({layer}) => {
       if (layer.props.scenegraph) {
         expect(layer.state.scenegraph, 'State scenegraph').toBeTruthy();
+        if (layer.context.device.type === 'webgpu') {
+          expect(layer.getModels()[0].parameters.depthFormat).toBeUndefined();
+        }
         expect(layer.state.animator, 'State animator').toBeTruthy();
         expect(
           layer.state.animator.getAnimations()[0].speed === 10,

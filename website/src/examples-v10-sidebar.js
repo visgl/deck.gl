@@ -43,7 +43,7 @@ const sidebars = {
         withStatus('line-layer', 'ready'),
         withStatus('point-cloud-layer', 'ready'),
         withStatus('scatterplot-layer', 'ready'),
-        withStatus('scenegraph-layer', 'started'),
+        withStatus('scenegraph-layer', 'ready'),
         'screen-grid-layer',
         // 'simple-mesh-layer',
         'terrain-layer',

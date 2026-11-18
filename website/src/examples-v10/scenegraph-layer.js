@@ -36,6 +36,7 @@ class ScenegraphDemo extends Component {
           Flight data:
           <a href="https://opensky-network.org">The OpenSky Network</a>
         </p>
+        <p>{meta.source === 'live' ? 'Live positions' : 'Simulated fallback replay'}</p>
         <div className="layout">
           <div className="stat col-1-2">
             No. of Planes
@@ -56,6 +57,7 @@ class ScenegraphDemo extends Component {
         key={this.props.device?.type}
         sizeScale={params.sizeScale.value}
         onDataLoad={count => this.props.onStateChange({count})}
+        onDataSource={source => this.props.onStateChange({source})}
       />
     );
   }

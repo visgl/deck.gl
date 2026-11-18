@@ -421,8 +421,8 @@ test.each([0, 20])(
     expect(container.querySelector('#map-child')).toBeNull();
     expect(deckInstance!.drawReasons).toEqual(['placeholder WebGPU viewport']);
 
-    deckInstance!.width = 100;
-    deckInstance!.height = 50;
+    deckInstance!.width = 99.82;
+    deckInstance!.height = 49.82;
     deckInstance!.viewports = [
       {
         id: 'default-view',
@@ -449,7 +449,7 @@ test.each([0, 20])(
   }
 );
 
-test('DeckGL#external WebGPU device synchronizes view changes through custom render', () => {
+test.each([100, 99.82])('DeckGL#external WebGPU synchronizes at CSS width %s', width => {
   let capturedProps: Record<string, any> | undefined;
   let deckInstance: TestDeck;
   let viewportReadCount = 0;
@@ -490,14 +490,14 @@ test('DeckGL#external WebGPU device synchronizes view changes through custom ren
           type: 'webgpu',
           getDefaultCanvasContext: () => ({canvas: document.createElement('canvas')})
         } as any,
-        width: 100,
+        width,
         height: 50,
         initialViewState: TEST_VIEW_STATE
       })
     );
   });
 
-  deckInstance!.width = 100;
+  deckInstance!.width = width;
   deckInstance!.height = 50;
 
   const viewportReadCountBeforeChange = viewportReadCount;

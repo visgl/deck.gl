@@ -11,7 +11,8 @@ import {
   picking,
   log,
   _LayerColumns as LayerColumns,
-  _deepEqual as deepEqual
+  _deepEqual as deepEqual,
+  _isArrowVector as isArrowVector
 } from '@deck.gl/core';
 import {type Device, type RenderPipelineParameters} from '@luma.gl/core';
 import {pbrMaterial} from '@luma.gl/shaders';
@@ -46,7 +47,6 @@ import {
   LayerDataSource,
   Position,
   Color,
-  Accessor,
   ArrowAccessor,
   DefaultProps
 } from '@deck.gl/core';
@@ -121,24 +121,36 @@ type _ScenegraphLayerProps<DataT> = {
   getColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
   /**
    * Orientation in [pitch, yaw, roll] in degrees.
+   * Accepts constants, callbacks, Arrow triples, or SQL expressions on Arrow data.
    * @see https://en.wikipedia.org/wiki/Euler_angles
    * @default [0, 0, 0]
    */
-  getOrientation?: Accessor<DataT, Readonly<[number, number, number]>>;
+  getOrientation?: ArrowAccessor<
+    DataT,
+    Readonly<[number, number, number]>,
+    FixedSizeList<Int | Float>
+  >;
   /**
    * Scaling factor of the model along each axis.
+   * Accepts constants, callbacks, Arrow triples, or SQL expressions on Arrow data.
    * @default [1, 1, 1]
    */
-  getScale?: Accessor<DataT, Readonly<[number, number, number]>>;
+  getScale?: ArrowAccessor<DataT, Readonly<[number, number, number]>, FixedSizeList<Int | Float>>;
   /**
    * Translation from the anchor point, [x, y, z] in meters.
+   * Accepts constants, callbacks, Arrow triples, or SQL expressions on Arrow data.
    * @default [0, 0, 0]
    */
-  getTranslation?: Accessor<DataT, Readonly<[number, number, number]>>;
+  getTranslation?: ArrowAccessor<
+    DataT,
+    Readonly<[number, number, number]>,
+    FixedSizeList<Int | Float>
+  >;
   /**
-   * TransformMatrix. If specified, `getOrientation`, `getScale` and `getTranslation` are ignored.
+   * Column-major 4x4 matrix, constant, callback, Arrow vector, or SQL expression.
+   * If specified, `getOrientation`, `getScale` and `getTranslation` are ignored.
    */
-  getTransformMatrix?: Accessor<DataT, number[]>;
+  getTransformMatrix?: ArrowAccessor<DataT, number[], FixedSizeList<Int | Float>>;
   /**
    * Called after the layer has rendered for the first time.
    * Used by Tile3DLayer to signal that a tile's sublayer is visible,
@@ -197,11 +209,11 @@ const defaultProps: DefaultProps<ScenegraphLayerProps> = {
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
   // [pitch, yaw, roll]
-  getOrientation: {type: 'accessor', value: [0, 0, 0]},
-  getScale: {type: 'accessor', value: [1, 1, 1]},
-  getTranslation: {type: 'accessor', value: [0, 0, 0]},
+  getOrientation: {type: 'accessor', arrow: true, value: [0, 0, 0]},
+  getScale: {type: 'accessor', arrow: true, value: [1, 1, 1]},
+  getTranslation: {type: 'accessor', arrow: true, value: [0, 0, 0]},
   // 4x4 matrix
-  getTransformMatrix: {type: 'accessor', value: []},
+  getTransformMatrix: {type: 'accessor', arrow: true, value: []},
 
   loaders: [GLTFLoader]
 };
@@ -312,7 +324,10 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
   /** Converts instance columns independently of glTF assets and animation. */
   private updateColumns(params: UpdateParameters<this>): void {
-    if (!Object.keys(this.resolveColumns(COLUMN_DEFINITIONS)).length) {
+    if (
+      !Object.keys(this.resolveColumns(COLUMN_DEFINITIONS)).length &&
+      !TRANSFORM_ACCESSORS.some(name => isArrowVector(this.props[name]))
+    ) {
       if (!this.state.columns) return;
       this.state.columns.destroy();
       this.state.columns = undefined;
@@ -403,6 +418,12 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       const models: Model[] = [];
       scenegraph.traverse(node => {
         if (node instanceof ModelNode) {
+          if (device.type === 'webgpu') {
+            // glTF's fixed depth format must not override the current picking/drawing pass.
+            const parameters = {...node.model.parameters};
+            delete parameters.depthFormat;
+            node.model.setParameters(parameters);
+          }
           models.push(node.model);
         }
       });

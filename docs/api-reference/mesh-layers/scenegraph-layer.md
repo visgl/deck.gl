@@ -305,6 +305,8 @@ Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in de
 
 * If an array is provided, it is used as the orientation for all objects.
 * If a function is provided, it is called on each object to retrieve its orientation.
+* An Arrow fixed-size list vector supplies three numeric components per object.
+* With Arrow data, `{sql: 'FLOAT32x3(pitch, heading, roll)'}` evaluates an orientation per row.
 
 #### `getScale` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getscale}
 
@@ -314,6 +316,11 @@ Scaling factor on the mesh along each axis.
 
 * If an array is provided, it is used as the scale for all objects.
 * If a function is provided, it is called on each object to retrieve its scale.
+* An Arrow fixed-size list vector supplies three numeric components per object.
+* With Arrow data, `{sql: 'FLOAT32x3(size, size, size)'}` evaluates a scale per row.
+
+Transform vectors must match the data length. Null rows or components use the
+accessor default. `getTransformMatrix` continues to override both accessors.
 
 #### `getTranslation` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettranslation}
 
@@ -323,6 +330,7 @@ Translation of the mesh along each axis. Offset from the center position given b
 
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.
+* An Arrow triple or `{sql: 'FLOAT32x3(dx, dy, dz)'}` supplies a translation per row.
 
 #### `getTransformMatrix` ([Accessor&lt;number[16]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettransformmatrix}
 
@@ -333,6 +341,17 @@ Explicitly define a 4x4 column-major model matrix for the mesh. If provided, wil
 
 * If an array is provided, it is used as the transform matrix for all objects.
 * If a function is provided, it is called on each object to retrieve its transform matrix.
+
+Arrow fixed-size lists of 16 numeric components and SQL expressions are supported. Matrices
+use column-major order, for example:
+
+```typescript
+getTransformMatrix: {sql: 'ARRAY[1,0,0,0,0,1,0,0,0,0,1,0,dx,dy,dz,1]'}
+```
+
+A non-null matrix overrides orientation, scale, and translation for that row. A null matrix
+uses those accessors instead. Null matrix components use the corresponding identity component.
+
 
 #### `sizeMinPixels` (number, optional) {#sizeminpixels}
 
