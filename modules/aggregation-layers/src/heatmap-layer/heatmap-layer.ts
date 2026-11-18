@@ -204,8 +204,8 @@ export default class HeatmapLayer<
     normalizedColorRange?: boolean;
     gpuPositionsLow?: Buffer;
     isWeightMapDirty?: boolean;
-    /** Color domain associated with the current weight texture. */
-    weightColorDomain?: Readonly<[number, number]>;
+    /** Conversion from sum-domain units to weights in the current texture. */
+    weightColorScale?: number;
     weightsTexture?: Texture;
     maxWeightsTexture?: Texture;
     colorTexture?: Texture;
@@ -258,7 +258,6 @@ export default class HeatmapLayer<
       props['maskId'] !== oldProps['maskId'] ||
       props['maskInverted'] !== oldProps['maskInverted'] ||
       props['maskByInstance'] !== oldProps['maskByInstance'];
-    if (maskPropsChanged) this.setState({isWeightMapDirty: true});
 
     if (changeFlags.dataChanged || changeFlags.viewportChanged) {
       // if data is changed, do not debounce and immediately update the weight map
@@ -266,7 +265,7 @@ export default class HeatmapLayer<
       this._updateTextureRenderingBounds();
     }
 
-    if (changeFlags.dataChanged || changeFlags.boundsChanged) {
+    if (changeFlags.dataChanged || changeFlags.boundsChanged || maskPropsChanged) {
       // Update weight map immediately
       clearTimeout(this.state.updateTimer);
       this.setState({isWeightMapDirty: true});
@@ -340,7 +339,7 @@ export default class HeatmapLayer<
         weightsTexture,
         intensity,
         threshold,
-        colorDomain: this.state.weightColorDomain || DEFAULT_COLOR_DOMAIN
+        colorDomain: this._getColorDomain()
       }
     );
   }
@@ -787,9 +786,9 @@ export default class HeatmapLayer<
       const viewport = this.context.viewport;
       this.context.viewport = this.internalState?.viewport || viewport;
       try {
-        const previousDomain = this.state.weightColorDomain;
+        const previousScale = this.state.weightColorScale;
         this._updateWeightmap(mask);
-        if (!deepEqual(previousDomain, this.state.weightColorDomain, 1)) {
+        if (previousScale !== this.state.weightColorScale && this.props.colorDomain) {
           this.setNeedsUpdate();
         }
       } finally {
@@ -799,14 +798,14 @@ export default class HeatmapLayer<
   }
 
   /** Returns the domain in accumulated weight per texel for the display pass. */
-  private _getColorDomain(weightMapWidth: number): Readonly<[number, number]> {
+  private _getColorDomain(): Readonly<[number, number]> {
     const {colorDomain, aggregation} = this.props;
-    if (!colorDomain || aggregation !== 'SUM') return colorDomain || DEFAULT_COLOR_DOMAIN;
-    const {textureSize, weightsScale} = this.state;
-    const {viewport} = this.context;
-    const scale =
-      (viewport.distanceScales.metersPerUnit[2] * weightMapWidth * weightsScale) / textureSize;
-    return [colorDomain[0] * scale, colorDomain[1] * scale];
+    if (!colorDomain) return DEFAULT_COLOR_DOMAIN;
+    if (aggregation !== 'SUM') return colorDomain;
+    const scale = this.state.weightColorScale;
+    return scale === undefined
+      ? DEFAULT_COLOR_DOMAIN
+      : [colorDomain[0] * scale, colorDomain[1] * scale];
   }
 
   _updateWeightmap(mask?: Record<string, unknown>) {
@@ -815,7 +814,11 @@ export default class HeatmapLayer<
     const weightsTransform = this.state.weightsTransform!;
     this.state.isWeightMapDirty = false;
     const commonBounds = this._worldToCommonBounds(worldBounds, {useLayerCoordinateSystem: true});
-    this.state.weightColorDomain = this._getColorDomain(commonBounds[2] - commonBounds[0]);
+    this.state.weightColorScale =
+      (this.context.viewport.distanceScales.metersPerUnit[2] *
+        (commonBounds[2] - commonBounds[0]) *
+        weightsScale) /
+      textureSize;
 
     const attributeManager = this.getAttributeManager()!;
     const attributes = attributeManager.getAttributes();

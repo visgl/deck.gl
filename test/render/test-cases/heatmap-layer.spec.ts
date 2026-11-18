@@ -12,7 +12,9 @@ import {DataFilterExtension, MaskExtension} from '@deck.gl/extensions';
 
 import {points} from 'deck.gl-test/data';
 
+/** Position of the high-weight point removed by the mask. */
 const outlier = [-122.44, 37.75];
+/** Mask polygon with a hole centered on the high-weight point. */
 const maskBoundary = [
   [
     [-123, 37],
