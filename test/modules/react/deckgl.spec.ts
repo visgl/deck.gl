@@ -11,6 +11,7 @@ import {
   useEffect,
   useState,
   act,
+  type CSSProperties,
   type Ref,
   type RefObject
 } from 'react';
@@ -806,5 +807,105 @@ test('DeckGL#rerender does not force redraw', async () => {
   act(() => {
     root.render(null);
   });
+  container.remove();
+});
+
+test('DeckGL#stacks react-map-gl Map children around the canvas', async () => {
+  const ref = createRef<DeckGLRef>();
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+
+  const box = {position: 'absolute', width: 20, height: 20} as const;
+  const MockMap = ({style}: {mapStyle: string; style?: CSSProperties}) =>
+    createElement(
+      'div',
+      {style: {...style, width: '100%', height: '100%'}},
+      createElement('div', {id: 'test-basemap', style: {...box, left: 0, top: 0}}),
+      createElement('div', {id: 'test-control', style: {...box, left: 40, top: 0, zIndex: 2}})
+    );
+
+  const {onAfterRender, waitUntilReady} = createRenderTracker();
+  act(() => {
+    root.render(
+      createElement(
+        'div',
+        {style: {position: 'relative', width: 200, height: 200}},
+        createElement(
+          DeckGL,
+          {
+            initialViewState: TEST_VIEW_STATE,
+            ref,
+            width: 200,
+            height: 200,
+            onAfterRender
+          },
+          createElement(MockMap, {mapStyle: 'https://map/style.json'}),
+          createElement('div', {id: 'test-overlay', style: {...box, left: 80, top: 0}})
+        )
+      )
+    );
+  });
+  await waitUntilReady(ref);
+  // Children are positioned on the render that follows deck initialization
+  await vi.waitUntil(() => document.getElementById('test-overlay'));
+
+  const elementAt = (id: string) => {
+    const {left, top} = document.getElementById(id)!.getBoundingClientRect();
+    return document.elementFromPoint(left + 10, top + 10);
+  };
+  expect(elementAt('test-basemap')?.id, 'map is under the canvas').not.toBe('test-basemap');
+  expect(elementAt('test-control')?.id, 'map control is over the canvas').toBe('test-control');
+  expect(elementAt('test-overlay')?.id, 'other child is over the canvas').toBe('test-overlay');
+
+  const ownedDevice = ref.current?.deck?.device;
+  act(() => root.unmount());
+  ownedDevice?.loseDevice();
+  ownedDevice?.destroy();
+  container.remove();
+});
+
+test('DeckGL#shared device canvas stays above a react-map-gl Map', async () => {
+  const {luma} = await import('@luma.gl/core');
+  const {webgl2Adapter} = await import('@luma.gl/core/webgl');
+  const device = await luma.createDevice({
+    type: 'webgl',
+    adapters: [webgl2Adapter],
+    createCanvasContext: {container: document.createElement('div'), width: 8, height: 8}
+  });
+
+  const ref = createRef<DeckGLRef>();
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+
+  const MockMap = ({style}: {mapStyle: string; style?: CSSProperties}) =>
+    createElement('div', {id: 'test-map', style});
+
+  const {onAfterRender, waitUntilReady} = createRenderTracker();
+  act(() => {
+    root.render(
+      createElement(
+        DeckGL,
+        {device, initialViewState: TEST_VIEW_STATE, ref, onAfterRender},
+        createElement(MockMap, {mapStyle: 'https://map/style.json'})
+      )
+    );
+  });
+  await waitUntilReady(ref);
+  await vi.waitUntil(() => document.getElementById('test-map'));
+
+  const map = document.getElementById('test-map')!;
+  const canvas = device.getDefaultCanvasContext().canvas as HTMLCanvasElement;
+  expect(
+    map.compareDocumentPosition(canvas) & Node.DOCUMENT_POSITION_FOLLOWING,
+    'canvas follows the map in the DOM'
+  ).toBeTruthy();
+  const wrapperLeft = document.getElementById('deckgl-wrapper')!.getBoundingClientRect().left;
+  expect(canvas.getBoundingClientRect().left, 'canvas is not offset').toBe(wrapperLeft);
+
+  act(() => root.unmount());
+  device.loseDevice();
+  device.destroy();
   container.remove();
 });

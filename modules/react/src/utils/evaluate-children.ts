@@ -5,7 +5,8 @@
 import * as React from 'react';
 import {cloneElement} from 'react';
 
-const MAP_STYLE = {position: 'absolute', zIndex: -1};
+// No z-index: it would make the map a stacking context and trap its controls under the canvas
+const MAP_STYLE = {position: 'absolute'};
 
 export default function evaluateChildren(
   children: React.ReactNode | Function,
@@ -21,7 +22,6 @@ export default function evaluateChildren(
     // Special treatment for react-map-gl's Map component
     // to support shorthand use case <DeckGL><StaticMap /></DeckGL>
     if (isReactMap(children)) {
-      // Place map under the canvas
       childProps.style = MAP_STYLE;
       return cloneElement(children, childProps);
     }
@@ -30,6 +30,18 @@ export default function evaluateChildren(
     }
   }
 
+  return children;
+}
+
+/** Moves the maps found by `evaluateChildren` to `maps`, which are rendered before the canvas */
+export function extractMaps(children: React.ReactNode, maps: React.ReactNode[]): React.ReactNode {
+  if (Array.isArray(children)) {
+    return children.map(child => extractMaps(child, maps));
+  }
+  if (isComponent(children) && children.props.style === MAP_STYLE) {
+    maps.push(children);
+    return null;
+  }
   return children;
 }
 

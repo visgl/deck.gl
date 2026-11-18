@@ -41,27 +41,27 @@ const TEST_CHILDREN = [
 ];
 
 test('positionChildrenUnderViews#before initialization', () => {
-  let children = positionChildrenUnderViews({
+  let {children} = positionChildrenUnderViews({
     children: TEST_CHILDREN,
     deck: null
   });
   expect(children.length, 'Should not fail if deck is not initialized').toBe(0);
 
-  children = positionChildrenUnderViews({
+  ({children} = positionChildrenUnderViews({
     children: TEST_CHILDREN,
     deck: {}
-  });
+  }));
   expect(children.length, 'Should not fail if deck is not initialized').toBe(0);
 
-  children = positionChildrenUnderViews({
+  ({children} = positionChildrenUnderViews({
     children: TEST_CHILDREN,
     deck: {viewManager: {views: []}}
-  });
+  }));
   expect(children.length, 'Should not fail if deck has no view').toBe(0);
 });
 
 test('positionChildrenUnderViews', () => {
-  const children = positionChildrenUnderViews({
+  const {children} = positionChildrenUnderViews({
     children: TEST_CHILDREN,
     deck: {viewManager: dummyViewManager, canvas: document.createElement('canvas')}
   });
@@ -101,10 +101,35 @@ test('positionChildrenUnderViews', () => {
   expect(wrappedChild.props.id, 'element child preserves id').toBe('element-under-view');
 });
 
+test('positionChildrenUnderViews#map goes before the canvas', () => {
+  const {maps, children} = positionChildrenUnderViews({
+    children: [
+      createElement('div', {id: 'test-map', mapStyle: 'https://map/style.json'}),
+      createElement('div', {id: 'test-label'}),
+      props => createElement('div', {id: 'test-function-map', mapStyle: 'url', ...props})
+    ],
+    deck: {viewManager: dummyViewManager, canvas: document.createElement('canvas')}
+  });
+
+  expect(maps.length, 'Returns wrapped map').toBe(1);
+  expect(maps[0].key, 'Map has deck context').toBe('view-map--map-context');
+  expect(maps[0].type, 'Map is wrapped in DeckGlContext.Provider').toBe(DeckGlContext.Provider);
+
+  const wrappedView = maps[0].props.children;
+  expect(wrappedView.key, 'Has map wrapper').toBe('view-map--map');
+  expect(wrappedView.props.children.props.id, 'Wrapper has the map').toBe('test-map');
+  expect(wrappedView.props.children.props.style.zIndex, 'Map has no z-index').toBeUndefined();
+
+  const otherChildren = children[0].props.children.props.children;
+  expect(otherChildren[0], 'Map is removed from the view').toBe(null);
+  expect(otherChildren[1].props.id, 'Other child stays in the view').toBe('test-label');
+  expect(otherChildren[2].props.id, 'Function child stays in the view').toBe('test-function-map');
+});
+
 test('positionChildrenUnderViews#override ContextProvider', () => {
   const context = React.createContext();
 
-  const children = positionChildrenUnderViews({
+  const {children} = positionChildrenUnderViews({
     children: TEST_CHILDREN,
     deck: {
       viewManager: dummyViewManager,
