@@ -55,9 +55,9 @@ export default class IconClusterLayer<
       });
       index.load(
         // @ts-ignore Supercluster expects proper GeoJSON feature
-        (props.data as DataT[]).map(d => ({
+        Array.from(props.data as Iterable<DataT>, d => ({
           geometry: {coordinates: (props.getPosition as Function)(d)},
-          properties: d
+          properties: {...d}
         }))
       );
       this.setState({index});

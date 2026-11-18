@@ -17,6 +17,8 @@ npm start
 
 ### Data format
 
+The website and standalone app load the same Zstandard-compressed Parquet table with all 45,716 meteorites. `coordinates` is a fixed-size longitude/latitude pair; zero denotes an unknown year. The unclustered layer uses Arrow columns. Clustering materializes GeoJSON features for Supercluster.
+
 Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/icon), showing information of meteorite landings. [Source](https://data.nasa.gov/Space-Science/Meteorite-Landings/gh4g-9sfh) 
 
 To use your own data, check out

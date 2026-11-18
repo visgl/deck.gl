@@ -9,7 +9,9 @@ import {DeckGL} from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
 import {tableFromArrays} from 'apache-arrow';
-import {JSONTableLoader} from '@loaders.gl/tables/json';
+import {ParquetLoader} from '@loaders.gl/tables/parquet';
+import parquetWorkerUrl from '@loaders.gl/tables/parquet/parquet-worker.js?url';
+import {isArrowTable} from '@math.gl/core/arrow';
 
 import IconClusterLayer from './icon-cluster-layer';
 import type {IconClusterLayerPickingInfo} from './icon-cluster-layer';
@@ -17,9 +19,9 @@ import type {LayerData, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {IconLayerProps} from '@deck.gl/layers';
 import {Device} from '@luma.gl/core';
 
-// Source data JSON
+// Full meteorite landings table
 const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/icon/meteorites.json'; // eslint-disable-line
+  'https://media.githubusercontent.com/media/visgl/deck.gl-data/479ec6c4c9788b2e80df9a1fe3e42443208523e2/examples/icon/meteorites.parquet';
 
 const MAP_VIEW = new MapView({repeat: true});
 const INITIAL_VIEW_STATE: MapViewState = {
@@ -80,6 +82,7 @@ function renderTooltip(info: IconClusterLayerPickingInfo<Meteorite>) {
 export default function App({
   device,
   data = DATA_URL,
+  onDataLoad,
   iconMapping = 'data/location-icon-mapping.json',
   iconAtlas = 'data/location-icon-atlas.png',
   showCluster = true,
@@ -88,6 +91,7 @@ export default function App({
   device?: Device;
   showCluster?: boolean;
   data?: string | Meteorite[];
+  onDataLoad?: (count: number) => void;
   iconMapping?: string;
   iconAtlas?: string;
   mapStyle?: string;
@@ -107,10 +111,19 @@ export default function App({
 
   const layerProps: IconLayerProps<Meteorite> = {
     id: 'icon',
-    // Sample row: {coordinates: [28.96, 13.66033], name: "Al Zarnkh", class: "LL5", mass: "700", year: 2001}
+    // Sample row: {coordinates: [-5.86666, 30.23322], name: "Northwest Africa 724", class: "LL3", mass: 1200, year: 0}
     data,
+    loaders: [ParquetLoader],
+    loadOptions: {parquet: {workerUrl: parquetWorkerUrl}},
+    onDataLoad: table => {
+      if (isArrowTable(table)) {
+        onDataLoad?.(table.numRows);
+      } else if (Array.isArray(table)) {
+        onDataLoad?.(table.length);
+      }
+    },
     pickable: true,
-    getPosition: d => d.coordinates,
+    getPosition: d => Array.from(d.coordinates) as [number, number],
     iconAtlas,
     iconMapping
   };
@@ -124,7 +137,6 @@ export default function App({
     : new IconLayer({
         ...layerProps,
         id: 'icon',
-        loaders: [JSONTableLoader],
         dataTransform: <LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT => {
           if (!Array.isArray(source)) {
             return source as LayerDataT;

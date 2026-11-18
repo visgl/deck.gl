@@ -13,15 +13,16 @@ import {MapView} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {scaleLog} from 'd3-scale';
-import {CSVLoader} from '@loaders.gl/tables/csv';
-import {load} from '@loaders.gl/core';
+import {ParquetLoader} from '@loaders.gl/tables/parquet';
+import parquetWorkerUrl from '@loaders.gl/tables/parquet/parquet-worker.js?url';
+import {isArrowTable} from '@math.gl/core/arrow';
 
 import type {Color, MapViewState} from '@deck.gl/core';
 import type {CollisionFilterExtensionProps} from '@deck.gl/extensions';
 
-// Sample data
+// Full GeoNames cities table
 const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/text-layer/cities-1000.csv';
+  'https://media.githubusercontent.com/media/visgl/deck.gl-data/479ec6c4c9788b2e80df9a1fe3e42443208523e2/examples/text-layer/cities-1000.parquet';
 
 const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 39.1,
@@ -53,13 +54,15 @@ const colorScale = scaleLog<Color>()
 
 export default function App({
   device,
-  data,
+  data = DATA_URL,
+  onDataLoad,
   noOverlap = true,
   fontSize = 32,
   mapStyle = MAP_STYLE
 }: {
   device?: Device;
-  data?: City[];
+  data?: string | City[];
+  onDataLoad?: (count: number) => void;
   noOverlap?: boolean;
   fontSize?: number;
   mapStyle?: string;
@@ -76,7 +79,17 @@ export default function App({
 
   const textLayer = new TextLayer<City, CollisionFilterExtensionProps<City>>({
     id: 'world-cities',
+    // Sample row: {name: 'Quillacollo', population: 172405, longitude: -66.27838, latitude: -17.39228}
     data,
+    loaders: [ParquetLoader],
+    loadOptions: {parquet: {workerUrl: parquetWorkerUrl}},
+    onDataLoad: table => {
+      if (isArrowTable(table)) {
+        onDataLoad?.(table.numRows);
+      } else if (Array.isArray(table)) {
+        onDataLoad?.(table.length);
+      }
+    },
     characterSet: 'auto',
     fontSettings: {
       buffer: 8
@@ -118,10 +131,6 @@ export default function App({
   );
 }
 
-export async function renderToDOM(container: HTMLDivElement) {
-  const root = createRoot(container);
-  root.render(<App />);
-
-  const cities = (await load(DATA_URL, CSVLoader, {csv: {shape: 'object-row-table'}})).data;
-  root.render(<App data={cities} />);
+export function renderToDOM(container: HTMLDivElement) {
+  createRoot(container).render(<App />);
 }

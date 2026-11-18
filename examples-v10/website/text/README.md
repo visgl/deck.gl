@@ -15,6 +15,8 @@ npm start
 
 ### Data format
 
+The website and standalone app load the same Zstandard-compressed Parquet table with 140,867 cities. Coordinates retain their original precision and signed latitudes. `ParquetLoader` returns an Arrow table; TextLayer reads its rows directly.
+
 Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/text-layer), showing all cities with a population > 1000 or seats of administration.
 
 The dataset is created by [GeoNames](https://data.opendatasoft.com/explore/dataset/geonames-all-cities-with-a-population-1000%40public/information/?disjunctive.cou_name_en) under the CC BY 4.0 license. Accessed on February 9, 2023.
