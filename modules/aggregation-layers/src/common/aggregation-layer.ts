@@ -69,7 +69,7 @@ export default abstract class AggregationLayer<
     aggregator: {type: 'object', value: null, optional: true},
     positions: {type: 'object', value: null, optional: true},
     weights: {type: 'array', value: null, optional: true, compare: 1},
-    extensionAttributes: {type: 'object', value: null, optional: true},
+    extensionAttributes: {type: 'object', value: null, optional: true, compare: 1},
     dataBounds: {type: 'array', value: null, optional: true, compare: 2}
   };
 
@@ -505,7 +505,7 @@ export default abstract class AggregationLayer<
     if (
       params.props.positions !== params.oldProps.positions ||
       params.props.weights !== params.oldProps.weights ||
-      params.props.extensionAttributes !== params.oldProps.extensionAttributes ||
+      !deepEqual(params.props.extensionAttributes, params.oldProps.extensionAttributes, 1) ||
       params.props.numInstances !== params.oldProps.numInstances
     ) {
       this.state.aggregator?.setNeedsUpdate();

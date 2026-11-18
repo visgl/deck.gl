@@ -763,6 +763,16 @@ for (const LayerClass of [ScreenGridLayer, GridLayer, HexagonLayer, ContourLayer
           {timeout: 10000}
         );
       }
+      if (LayerClass === ScreenGridLayer) {
+        const aggregator = layer.state.aggregator;
+        const invalidate = vi.spyOn(aggregator, 'setNeedsUpdate');
+        try {
+          manager.setLayers([layer.clone({opacity: 0.5, extensionAttributes: {filterValues}})]);
+          expect(invalidate).not.toHaveBeenCalled();
+        } finally {
+          invalidate.mockRestore();
+        }
+      }
       expect(buffer.destroyed).toBe(false);
     } finally {
       manager.finalize();
