@@ -187,3 +187,5 @@ export {
 } from './shaderlib/path/path-uniforms';
 
 export {isArrowVector as _isArrowVector} from './arrow/upstream-math/is-arrow-vector';
+
+export type {ResolvedScale, ResolvedScaleDescriptor} from '@math.gl/core/color';

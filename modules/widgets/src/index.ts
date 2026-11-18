@@ -88,3 +88,5 @@ export {
   CoordinatesGeocoder as _CoordinatesGeocoder,
   CurrentLocationGeocoder as _CurrentLocationGeocoder
 } from './lib/geocode/geocoders';
+
+export {ColorScaleWidget, type ColorScaleWidgetProps} from './color-scale-widget';

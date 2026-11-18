@@ -811,6 +811,15 @@ Used to propagate errors thrown in layers to the deck.gl error handling system. 
 - `error` (Error) - a JavaScript Error object
 - `message` (string, optional) - additional contextual description to amend the error message with
 
+#### `getResolvedColorScales()`
+
+Returns a read-only map of accessor names to `ResolvedScale` objects. The type is
+available from `@deck.gl/core`. A scale descriptor provides the domain and color
+range, and `sample(value)` returns RGBA channels in `[0, 1]`. The method returns
+`undefined` during evaluation or on layers without SQL color accessors. Call it
+after a deck redraw to read a newly resolved scale. Composite layers expose the
+scales on their rendered sublayers.
+
 ### Layer Lifecycle Methods
 
 For more information about when these methods are called, see [layer lifecycle](../../developer-guide/custom-layers/layer-lifecycle.md).
