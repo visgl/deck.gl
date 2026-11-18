@@ -9,12 +9,12 @@ Target release date: EOY 2026. Alpha releases available.
 ### Core Improvements
 
 - **WebGPU** — WebGPU is now the default renderer with full feature support.
-- **Apache Arrow** — Layers accept Arrow tables and columns (`arrow.Vector`)
-- **Arrow streaming** — Layers incrementally render RecordBatches as they arrive
 - **GPU vectors** — Layers accept chunked GPU buffers from luma.gl’s GPU Graph.
 
-### Data Loading
+### Apache Arrow
 
+- **Apache Arrow** — Layers accept Arrow tables and columns (`arrow.Vector`)
+- **Arrow streaming** — Layers incrementally render RecordBatches as they arrive
 - **Arrow** — loads data formats as binary columnar Arrow tables instead of JS arrays.
 - **GeoArrow** — Full support for GeoArrow and GeoParquet source data and `geoarrow.union` and `geoarrow.wkb` rendering.
 
