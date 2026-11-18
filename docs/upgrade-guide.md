@@ -188,8 +188,9 @@ const commonPosition2 = layer.projectPosition(lnglat, {
 ### Deck props set to `undefined`
 
 A [`Deck`](./api-reference/core/deck.md) prop set to `undefined`, in the constructor or in
-`setProps`, now uses its default value, the same as leaving the prop out. Previously an
-explicit `undefined` replaced the default. For some props this threw an error or stopped
+`setProps`, now uses its default value. In the constructor this is the same as leaving the prop
+out. In `setProps`, leaving a prop out still keeps its current value. Previously an explicit
+`undefined` replaced the default. For some props this threw an error or stopped
 rendering, such as a callback like `onAfterRender: debug ? callback : undefined`.
 
 A few props behaved differently with `undefined`. To keep that behavior, pass these instead:
