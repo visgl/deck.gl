@@ -29,6 +29,16 @@ import {WebGPUAggregator} from '../common/aggregator/webgpu-aggregator/webgpu-ag
 import {Matrix4} from '@math.gl/core';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 
+/** Extensions whose hooks filter source points during aggregation. */
+const INPUT_FILTER_EXTENSIONS = ['DataFilterExtension', 'ClipExtension', 'BrushingExtension'];
+
+/** Whether a contour extension filters source points. */
+function isInputFilter(extension: LayerExtension): boolean {
+  return INPUT_FILTER_EXTENSIONS.includes(
+    (extension.constructor as typeof LayerExtension).extensionName
+  );
+}
+
 const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
 
@@ -144,15 +154,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   getAggregatorType(): string {
     if (this.props.gpuAggregation && this.context.device.type === 'webgpu') {
       // Preserve the existing sublayer behavior for extensions that are not input filters.
-      if (
-        this.props.extensions.some(
-          extension =>
-            !['DataFilterExtension', 'ClipExtension', 'BrushingExtension'].includes(
-              (extension.constructor as typeof LayerExtension).extensionName
-            )
-        )
-      )
-        return 'cpu';
+      if (this.props.extensions.some(extension => !isInputFilter(extension))) return 'cpu';
       if (
         (!this.props.positions &&
           !WebGPUAggregator.supportsData(this.props.data, ['getPosition', 'getWeight'])) ||
@@ -535,9 +537,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           getColor: getContourColor,
           getWidth: d => d.contour.strokeWidth ?? DEFAULT_STROKE_WIDTH,
           widthUnits: 'pixels',
-          ...(this.state.aggregatorType === 'webgpu'
-            ? {extensions: this.props._subLayerProps?.lines?.extensions ?? []}
-            : {})
+          extensions: this.getContourExtensions('lines')
         }
       );
 
@@ -557,13 +557,23 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           modelMatrix,
           getPolygon: d => d.vertices,
           getFillColor: getContourColor,
-          ...(this.state.aggregatorType === 'webgpu'
-            ? {extensions: this.props._subLayerProps?.bands?.extensions ?? []}
-            : {})
+          extensions: this.getContourExtensions('bands')
         }
       );
 
     return [lineLayer, bandsLayer];
+  }
+
+  /** Forward explicit overrides and omit input filters already run by the GPU aggregator. */
+  private getContourExtensions(id: 'lines' | 'bands'): LayerExtension[] {
+    const {extensions, _subLayerProps} = this.props;
+    const {aggregatorType} = this.state;
+    return (
+      _subLayerProps?.[id]?.extensions ??
+      (aggregatorType === 'gpu' || aggregatorType === 'webgpu'
+        ? extensions.filter(extension => !isInputFilter(extension))
+        : extensions)
+    );
   }
 
   /** Attach the contour definition associated with the picked line or band. */

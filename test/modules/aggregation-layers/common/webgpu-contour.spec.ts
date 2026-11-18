@@ -6,7 +6,7 @@ import {test, expect, vi} from 'vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {OrthographicView, WebMercatorViewport} from '@deck.gl/core';
 import {ContourLayer, CPUAggregator} from '@deck.gl/aggregation-layers';
-import {DataFilterExtension} from '@deck.gl/extensions';
+import {DataFilterExtension, PathStyleExtension} from '@deck.gl/extensions';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {WebGPUAggregator} from '../../../../modules/aggregation-layers/src/common/aggregator/webgpu-aggregator/webgpu-aggregator';
 
@@ -302,5 +302,39 @@ test('Contour compute updates bins when the data filter range changes', async ({
         );
       }
     }))
+  });
+});
+
+test('Contour keeps rendering extensions on CPU contour lines', async ({skip}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  const extension = new PathStyleExtension({dash: true});
+  await testLayerAsync({
+    Layer: ContourComputationLayer,
+    device,
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {target: [0, 0, 0], zoom: 0}
+    }),
+    testCases: [
+      {
+        props: {
+          data: [
+            [1, 1],
+            [21, 21]
+          ],
+          getPosition: position => position,
+          cellSize: 10,
+          contours: [{threshold: 0.5}],
+          extensions: [extension]
+        },
+        onAfterUpdate({layer}) {
+          expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+          const [lines] = ContourLayer.prototype.renderLayers.call(layer) as any[];
+          expect(lines.props.extensions).toEqual([extension]);
+        }
+      }
+    ]
   });
 });
