@@ -161,6 +161,7 @@ export default function App({
   );
 }
 
+/** Mounts the standalone example. */
 export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }
