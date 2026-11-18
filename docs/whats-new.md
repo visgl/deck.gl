@@ -14,6 +14,10 @@ The experimental [`_GraphScreenGridAggregator`](./api-reference/aggregation-laye
 lets applications customize ScreenGrid aggregation using GPU graphs.
 
 
+### CARTO heatmap palettes
+
+CARTO HeatmapTileLayer accepts normalized plain-array palettes with Deck’s `normalizedColors` option.
+
 ### Normalized color inputs
 
 Deck's [`normalizedColors`](./api-reference/core/deck.md#normalizedcolors) option enables
