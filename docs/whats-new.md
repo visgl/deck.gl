@@ -25,6 +25,7 @@ retain their existing color conventions.
 IconLayer, PointCloudLayer, and ColumnLayer also honor this setting for color accessors.
 
 SimpleMeshLayer and ScenegraphLayer instance colors honor Deck’s `normalizedColors` option.
+Top-level TextLayer glyph, background, and border colors honor Deck’s `normalizedColors` option.
 
 ### Experimental batch loading
 
