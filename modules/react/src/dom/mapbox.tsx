@@ -6,8 +6,9 @@ import 'client-only';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import type {MapboxOverlayProps} from '@deck.gl/mapbox';
 import {attachControl, type ControlHostLike} from './attach-control';
-// By package name, so this root shares the main entry's renderer instead of inlining a copy.
-import {createDeckGL} from '@deck.gl/react';
+// Through the main entry file, so the CommonJS build shares its root component instead of
+// inlining a copy.
+import {createDeckGL} from '../index';
 import type {DeckGLRootProps} from '../types/index';
 
 /** Props accepted by the Mapbox-overlay React Fiber root. */

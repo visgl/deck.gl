@@ -47,7 +47,6 @@
       "@deck.gl/maplibre": ["./modules/maplibre/src"],
       "@deck.gl/mesh-layers": ["./modules/mesh-layers/src"],
       "@deck.gl/react/legacy": ["./modules/react/src/legacy"],
-      "@deck.gl/react/reconciler": ["./modules/react/src/reconciler"],
       "@deck.gl/react": ["./modules/react/src"],
       "@deck.gl/test-utils": ["./modules/test-utils/src"],
 

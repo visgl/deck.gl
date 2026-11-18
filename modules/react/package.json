@@ -95,6 +95,9 @@
     "./dist/types/jsx.*",
     "./src/types/jsx.*"
   ],
+  "scripts": {
+    "build": "node build-cjs.mjs"
+  },
   "dependencies": {
     "client-only": "^0.0.1",
     "its-fine": "^2.0.0",
