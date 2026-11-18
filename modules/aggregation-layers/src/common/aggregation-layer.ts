@@ -114,7 +114,7 @@ export default abstract class AggregationLayer<
         case 'ClipExtension':
           break;
         case 'BrushingExtension': {
-          const {brushingTarget} = this.props as typeof this.props & {brushingTarget?: string};
+          const {brushingTarget} = this.props as {brushingTarget?: string};
           if (brushingTarget === 'source') attributes.brushingTargets = ZERO_BRUSHING_TARGET;
           else if (brushingTarget === 'custom') {
             addColumn('brushingTargets', extensionAttributes?.brushingTargets, 'float32x2');
