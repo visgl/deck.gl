@@ -83,6 +83,7 @@ export default class MaskEffect implements Effect {
       this._updateMaskedAggregations(layers, removedMasks);
       return {didRender};
     }
+    const previousMasks = this.masks;
     this.masks = {};
 
     // Map layers to channels
@@ -103,7 +104,9 @@ export default class MaskEffect implements Effect {
       didRender ||= result;
     }
 
-    this._updateMaskedAggregations(layers, didRender);
+    const channelRemoved =
+      previousMasks && Object.keys(previousMasks).some(id => !this.masks?.[id]);
+    this._updateMaskedAggregations(layers, didRender || Boolean(channelRemoved));
     return {didRender};
   }
 

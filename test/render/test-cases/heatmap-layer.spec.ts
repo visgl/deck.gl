@@ -4,7 +4,7 @@
 
 import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
-import type {TestCase} from '../deck-test-utils';
+import {defaultOnAfterRender, type TestCase} from '../deck-test-utils';
 
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 import {PolygonLayer} from '@deck.gl/layers';
@@ -58,7 +58,7 @@ const testCases = [
     layers: [
       new PolygonLayer({
         id: 'heatmap-mask',
-        data: [maskBoundary],
+        data: [maskBoundary.slice(0, 1)],
         getPolygon: d => d,
         operation: 'mask',
         stroked: false
@@ -76,6 +76,22 @@ const testCases = [
         maskByInstance: true
       })
     ],
+    onAfterRender: params =>
+      defaultOnAfterRender({
+        ...params,
+        done: () => {
+          const mask = params.layers.find(layer => layer.id === 'heatmap-mask');
+          if (mask.props.data[0].length === 1) {
+            params.deck.setProps({
+              layers: params.layers
+                .filter(layer => !layer.parent)
+                .map(layer => (layer === mask ? mask.clone({data: [maskBoundary]}) : layer))
+            });
+          } else {
+            params.done();
+          }
+        }
+      }),
     goldenImage: './test/render/golden-images/heatmap-lnglat.png'
   },
   {
