@@ -44,7 +44,13 @@ export function makeGeoArrowFeatureAccessor<Value extends Color | number>(
   /** Value used when a style column contains null. */
   const nullValue =
     descriptor && 'nullValue' in descriptor ? (descriptor.nullValue as Value) : fallback;
-  if (source === undefined || typeof source === 'number' || Array.isArray(source)) {
+  if (
+    source === undefined ||
+    typeof source === 'number' ||
+    Array.isArray(source) ||
+    source instanceof Uint8Array ||
+    source instanceof Uint8ClampedArray
+  ) {
     return () => (source === undefined ? fallback : (source as Value));
   }
   /** Resolved Arrow vector. */

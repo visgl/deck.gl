@@ -8,6 +8,7 @@ import {
   type Layer,
   type LayerProps,
   type PickingInfo,
+  type Unit,
   type UpdateParameters
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -45,6 +46,20 @@ export type GeoArrowLayerProps = Omit<LayerProps, 'data'> & {
   colors?: ArrowPathLayerProps['colors'];
   /** Linestring width. */
   widths?: ArrowPathLayerProps['widths'];
+  /** Multiplier applied to point radii in pixels. */
+  radiusScale?: number;
+  /** Minimum point radius in pixels. */
+  radiusMinPixels?: number;
+  /** Maximum point radius in pixels. */
+  radiusMaxPixels?: number;
+  /** Units for line widths. Defaults to pixels. */
+  widthUnits?: Unit;
+  /** Multiplier applied to line widths. */
+  widthScale?: number;
+  /** Minimum line width in pixels. */
+  widthMinPixels?: number;
+  /** Maximum line width in pixels. */
+  widthMaxPixels?: number;
   /** Optional pre-tessellated polygon interpretation. */
   tessellated?: ArrowSolidPolygonLayerProps['tessellated'];
   /** GPU model selection forwarded to the selected native renderer. */
@@ -63,9 +78,10 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
   override updateState(params: UpdateParameters<this>): void {
     super.updateState(params);
     /** Current source and geometry selection. */
-    const {props, oldProps} = params;
+    const {props, oldProps, changeFlags} = params;
     if (
       this.state.geometry &&
+      !changeFlags.dataChanged &&
       props.data === oldProps.data &&
       props.getGeometry === oldProps.getGeometry &&
       props.geometryType === oldProps.geometryType
@@ -121,7 +137,21 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
         ...layerProps,
         ...this.getSubLayerProps({id: 'features'}),
         data: features,
+        highlightedObjectIndex:
+          layerProps.highlightedObjectIndex == null
+            ? -1
+            : features.findIndex(
+                feature => feature.properties.rowIndex === layerProps.highlightedObjectIndex
+              ),
         stroked: false,
+        pointRadiusUnits: 'pixels',
+        pointRadiusScale: layerProps.radiusScale ?? 1,
+        pointRadiusMinPixels: layerProps.radiusMinPixels ?? 0,
+        pointRadiusMaxPixels: layerProps.radiusMaxPixels ?? 1e9,
+        lineWidthUnits: layerProps.widthUnits ?? 'pixels',
+        lineWidthScale: layerProps.widthScale ?? 1,
+        lineWidthMinPixels: layerProps.widthMinPixels ?? 0,
+        lineWidthMaxPixels: layerProps.widthMaxPixels ?? Number.MAX_SAFE_INTEGER,
         getPointRadius: makeGeoArrowFeatureAccessor(data, getRadius, 1),
         getFillColor: makeGeoArrowFeatureAccessor(data, getFillColor, [0, 0, 0, 255]),
         getLineColor: makeGeoArrowFeatureAccessor(data, colors, [0, 0, 0, 255]),
