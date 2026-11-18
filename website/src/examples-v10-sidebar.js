@@ -35,10 +35,10 @@ const sidebars = {
         'contour-layer',
         'geojson-layer-polygons',
         'geojson-layer-paths',
-        withStatus('global-grids', 'started'),
+        withStatus('global-grids', 'ready'),
         withStatus('grid-layer', 'started'),
         'heatmap-layer',
-        withStatus('hexagon-layer', 'started'),
+        withStatus('hexagon-layer', 'ready'),
         withStatus('icon-layer', 'started'),
         withStatus('line-layer', 'ready'),
         withStatus('point-cloud-layer', 'ready'),
@@ -71,7 +71,7 @@ const sidebars = {
     {
       type: 'category',
       label: 'Integrations',
-      items: ['arcgis', 'carto', 'google-3d-tiles', 'google-maps', withStatus('mapbox', 'started'), withStatus('maplibre', 'started')]
+      items: ['arcgis', 'carto', 'google-3d-tiles', 'google-maps', withStatus('mapbox', 'ready'), withStatus('maplibre', 'started')]
     },
     {
       type: 'category',

@@ -4,7 +4,7 @@
 
 import React, {Component} from 'react';
 import {readableInteger} from '../utils/format-utils';
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import App, {COLOR_SCALE} from 'v10-website-examples/geojson/app';
 
 import {makeExample} from '../components';
@@ -16,12 +16,6 @@ class GeoJsonDemo extends Component {
 
   /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
-
-  /** Data sources loaded before rendering the demo. */
-  static data = {
-    url: `${DATA_URI}/vancouver-blocks.txt`,
-    worker: '/workers/geojson-data-decoder.js'
-  };
 
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/geojson`;
@@ -84,7 +78,8 @@ class GeoJsonDemo extends Component {
 
   /** Renders the Arrow demo with the current controls and data. */
   render() {
-    return <App {...this.props} />;
+    const {data, ...otherProps} = this.props;
+    return <App {...otherProps} onDataLoad={stats => this.props.onStateChange(stats)} />;
   }
 }
 
