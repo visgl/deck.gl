@@ -15,7 +15,7 @@ import {
 } from '@deck.gl/layers';
 import {GridLayer} from '@deck.gl/aggregation-layers';
 
-import {MaskExtension} from '@deck.gl/extensions';
+import {MaskExtension, _TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 import * as DATA from '../../../../examples/layer-browser/src/data-samples';
 import type {DeckProps} from '@deck.gl/core';
 import {equals} from '@math.gl/core';
@@ -795,6 +795,48 @@ test('pickingTest#unproject3D', async () => {
 
   deck.finalize();
 });
+
+test.each(['terrain', 'extension'])(
+  'pickingTest#unproject3D uses layer depth after removing %s',
+  async removed => {
+    const deck = new Deck(DECK_PROPS);
+    const terrain = new PolygonLayer({
+      id: 'terrain-depth',
+      data: [VIEW_STATE],
+      getPolygon: ({longitude, latitude}) => [
+        [longitude - 0.02, latitude - 0.02, 0],
+        [longitude + 0.02, latitude - 0.02, 0],
+        [longitude + 0.02, latitude + 0.02, 0],
+        [longitude - 0.02, latitude + 0.02, 0]
+      ],
+      operation: 'terrain+draw'
+    });
+    const overlay = new ColumnLayer({
+      id: 'above-terrain',
+      data: [VIEW_STATE],
+      getPosition: d => [d.longitude, d.latitude],
+      radius: 100,
+      extruded: true,
+      getElevation: 1000,
+      pickable: true,
+      extensions: [new TerrainExtension()],
+      terrainDrawMode: 'drape'
+    });
+    try {
+      await updateDeckProps(deck, {layers: [terrain, overlay]});
+      await updateDeckProps(deck, {
+        layers: removed === 'terrain' ? [overlay] : [terrain, overlay.clone({extensions: []})]
+      });
+      const pick = deck.pickObject({x: 250, y: 275, unproject3D: true});
+      expect(pick?.layer?.id).toBe(overlay.id);
+      expect(pick?.coordinate?.[2]).toBeCloseTo(1000, 0);
+    } finally {
+      const gl = deck.getCanvas()?.getContext('webgl2');
+      deck.finalize();
+      gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    }
+  }
+);
 
 function updateDeckProps(deck: Deck, props: DeckProps): Promise<void> {
   return new Promise(resolve => {
