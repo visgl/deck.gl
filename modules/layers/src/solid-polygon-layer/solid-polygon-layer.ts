@@ -125,8 +125,8 @@ const defaultProps: DefaultProps<SolidPolygonLayerProps> = {
 
   getPolygon: {type: 'accessor', arrow: 'row', value: (f: any) => f.polygon},
   getElevation: {type: 'accessor', arrow: 'row', value: 1000},
-  getFillColor: {type: 'accessor', arrow: 'row', value: DEFAULT_COLOR},
-  getLineColor: {type: 'accessor', arrow: 'row', value: DEFAULT_COLOR},
+  getFillColor: {type: 'accessor', arrow: 'row-color', value: DEFAULT_COLOR},
+  getLineColor: {type: 'accessor', arrow: 'row-color', value: DEFAULT_COLOR},
 
   material: true
 };

@@ -147,7 +147,7 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   _projectionNoCut: false,
 
   getPath: {type: 'accessor', arrow: 'row', value: (object: any) => object.path},
-  getColor: {type: 'accessor', arrow: 'row', value: DEFAULT_COLOR},
+  getColor: {type: 'accessor', arrow: 'row-color', value: DEFAULT_COLOR},
   getWidth: {type: 'accessor', arrow: 'row', value: 1},
 
   // deprecated props

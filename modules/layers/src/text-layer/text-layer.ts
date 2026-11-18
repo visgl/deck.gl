@@ -243,8 +243,8 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
   background: false,
-  getBackgroundColor: {type: 'accessor', arrow: 'row', value: DEFAULT_BACKGROUND_COLOR},
-  getBorderColor: {type: 'accessor', arrow: 'row', value: DEFAULT_COLOR},
+  getBackgroundColor: {type: 'accessor', arrow: 'row-color', value: DEFAULT_BACKGROUND_COLOR},
+  getBorderColor: {type: 'accessor', arrow: 'row-color', value: DEFAULT_COLOR},
   getBorderWidth: {type: 'accessor', arrow: 'row', value: 0},
   backgroundBorderRadius: {type: 'object', value: 0},
   backgroundPadding: {type: 'array', value: [0, 0, 0, 0]},
@@ -266,7 +266,7 @@ const defaultProps: DefaultProps<TextLayerProps> = {
 
   getText: {type: 'accessor', arrow: 'row', value: (x: any) => x.text},
   getPosition: {type: 'accessor', arrow: 'row', value: (x: any) => x.position},
-  getColor: {type: 'accessor', arrow: 'row', value: DEFAULT_COLOR},
+  getColor: {type: 'accessor', arrow: 'row-color', value: DEFAULT_COLOR},
   getSize: {type: 'accessor', arrow: 'row', value: 32},
   getAngle: {type: 'accessor', arrow: 'row', value: 0},
   getTextAnchor: {type: 'accessor', arrow: 'row', value: 'middle'},

@@ -74,7 +74,7 @@ type ArrayPropType<T = any[]> = BasePropType<T> & {
 type AccessorPropType<T = any> = BasePropType<T> & {
   type: 'accessor';
   /** Accept Arrow vectors. Use row mode for accessors read by existing row consumers. */
-  arrow?: boolean | 'row';
+  arrow?: boolean | 'row' | 'row-color';
   /** Accepted constant types when the default value is a callback. */
   constantTypes?: readonly 'array'[];
 };

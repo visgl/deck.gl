@@ -13,7 +13,11 @@ import type {FilterContext} from '../passes/layers-pass';
 import type {LayersList, LayerContext} from './layer-manager';
 import type {CompositeLayerProps, Accessor, AccessorContext, Color} from '../types/layer-props';
 import {ConstructorOf} from '../types/types';
-import {PROP_TYPES_SYMBOL} from '../lifecycle/constants';
+import {
+  ACCESSOR_QUERIES_SYMBOL,
+  PROP_TYPES_SYMBOL,
+  ROW_ACCESSOR_COLUMNS_SYMBOL
+} from '../lifecycle/constants';
 
 const TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
@@ -250,6 +254,21 @@ export default abstract class CompositeLayer<PropsT extends {} = {}> extends Lay
           updateTriggers: Object.assign(newProps.updateTriggers, passThroughProps.updateTriggers)
         });
       }
+    }
+
+    /** Row accessor columns must invalidate children controlled by parent callbacks. */
+    const rowColumns = Object.entries(this.props[ROW_ACCESSOR_COLUMNS_SYMBOL] ?? {});
+    for (const [name, query] of Object.entries(this.props[ACCESSOR_QUERIES_SYMBOL] ?? {})) {
+      const type = this.props[PROP_TYPES_SYMBOL][name];
+      if (type && 'arrow' in type && typeof type.arrow === 'string' && query.column) {
+        rowColumns.push([name, query.column]);
+      }
+    }
+    if (rowColumns.length) {
+      newProps.updateTriggers = {
+        ...newProps.updateTriggers,
+        all: [newProps.updateTriggers['all'], ...rowColumns.flat()]
+      };
     }
 
     return newProps;

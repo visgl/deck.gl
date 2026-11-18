@@ -71,22 +71,26 @@ export function createProps<PropsT extends {}>(
   for (const name of Object.keys(propsInstance)) {
     const type = propTypes[name];
     const value = propsInstance[name];
+    /** Row consumers read a callback; typed column consumers retain the vector. */
+    const rowMode = type?.type === 'accessor' && typeof type.arrow === 'string';
+    /** Byte-encoded color callbacks share the Arrow color convention. */
+    const rowColor = rowMode && type.arrow === 'row-color';
     if (type?.type === 'accessor' && type.arrow && typeof value?.sql === 'string') {
       const queries = (propsInstance[ACCESSOR_QUERIES_SYMBOL] ??= Object.create(null));
       /** SQL expression and its eventual result column. */
       const query: {sql: string; column?: Vector} = {sql: value.sql};
       /** Row accessor backed by the current SQL result. */
       const readRow = (_row: unknown, {index}: {index: number}) =>
-        readAccessorValue(query.column?.get(index));
+        readAccessorValue(query.column?.get(index), rowColor);
       queries[name] = query;
       Object.defineProperty(propsInstance, name, {
         enumerable: true,
-        get: () => (query.column ? (type.arrow === 'row' ? readRow : query.column) : type.value)
+        get: () => (query.column ? (rowMode ? readRow : query.column) : type.value)
       });
-    } else if (type?.type === 'accessor' && type.arrow === 'row' && isArrowVector(value)) {
+    } else if (rowMode && isArrowVector(value)) {
       (propsInstance[ROW_ACCESSOR_COLUMNS_SYMBOL] ??= Object.create(null))[name] = value;
       propsInstance[name] = (_row: unknown, {index}: {index: number}) =>
-        readAccessorValue(value.get(index));
+        readAccessorValue(value.get(index), rowColor);
     }
   }
 

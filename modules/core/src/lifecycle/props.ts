@@ -199,7 +199,7 @@ function diffDataProps(props, oldProps): string | false | {startRow: number; end
   if (
     Object.keys(oldQueries ?? {}).some(
       name =>
-        props[PROP_TYPES_SYMBOL][name]?.arrow === 'row' &&
+        typeof props[PROP_TYPES_SYMBOL][name]?.arrow === 'string' &&
         queries?.[name]?.sql !== oldQueries[name].sql
     )
   ) {

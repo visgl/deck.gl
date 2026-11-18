@@ -245,9 +245,9 @@ const defaultProps: DefaultProps<PolygonLayerProps> = {
 
   getPolygon: {type: 'accessor', arrow: 'row', value: (f: any) => f.polygon},
   // Polygon fill color
-  getFillColor: {type: 'accessor', arrow: 'row', value: defaultFillColor},
+  getFillColor: {type: 'accessor', arrow: 'row-color', value: defaultFillColor},
   // Point, line and polygon outline color
-  getLineColor: {type: 'accessor', arrow: 'row', value: defaultLineColor},
+  getLineColor: {type: 'accessor', arrow: 'row-color', value: defaultLineColor},
   // Line and polygon outline accessors
   getLineWidth: {type: 'accessor', arrow: 'row', value: 1},
   // Polygon extrusion accessor

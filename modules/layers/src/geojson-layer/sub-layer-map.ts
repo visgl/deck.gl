@@ -134,7 +134,10 @@ export function getDefaultProps({
   for (const key in props) {
     /** GeoJSON sublayers use wrapped feature rows for styling accessors. */
     const value = type.defaultProps[props[key]];
-    result[key] = value?.type === 'accessor' ? {...value, arrow: 'row'} : value;
+    result[key] =
+      value?.type === 'accessor'
+        ? {...value, arrow: key.endsWith('Color') ? 'row-color' : 'row'}
+        : value;
   }
   return result;
 }

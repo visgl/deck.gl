@@ -22,7 +22,7 @@ import {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {CubeGeometry, GroupNode} from '@luma.gl/engine';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
-import {Field, Schema, Table, tableFromArrays} from 'apache-arrow';
+import {Field, List, Schema, Table, Uint8, tableFromArrays, vectorFromArray} from 'apache-arrow';
 
 /** Inputs with matching geometry, text, position, and style columns. */
 function makeTable() {
@@ -169,3 +169,47 @@ for (const [Layer, accessors] of cases) {
     }
   });
 }
+
+test('TextLayer refreshes sublayer colors when an Arrow or SQL accessor changes', async () => {
+  const data = tableFromArrays({
+    position: [[0, 0]],
+    normalizedColor: [[1, 0, 0, 1]]
+  });
+  const integerColors = vectorFromArray(
+    [[0, 255, 0, 255]],
+    new List(new Field('item', new Uint8()))
+  );
+  const checkColor =
+    (color: number[]) =>
+    ({layer}) => {
+      if (layer.isLoaded && !layer.internalState?.needsUpdate) {
+        const glyphs = layer.getSubLayers().find(sublayer => sublayer.id.endsWith('-characters'));
+        const attribute = glyphs.getAttributeManager().getAttributes().instanceColors;
+        expect(Array.from(attribute.value.slice(0, 4))).toEqual(color);
+      }
+    };
+  await testLayerAsync({
+    Layer: TextLayer,
+    device,
+    draw: false,
+    testCases: [
+      {
+        props: {
+          data,
+          getPosition: data.getChild('position')!,
+          getText: () => 'A',
+          getColor: data.getChild('normalizedColor')!
+        },
+        onAfterUpdate: checkColor([255, 0, 0, 255])
+      },
+      {updateProps: {getColor: integerColors}, onAfterUpdate: checkColor([0, 255, 0, 255])},
+      {
+        updateProps: {getColor: {sql: 'normalizedColor'}},
+        onAfterUpdate: checkColor([255, 0, 0, 255])
+      }
+    ],
+    onError: error => {
+      throw error;
+    }
+  });
+});
