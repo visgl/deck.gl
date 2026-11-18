@@ -86,7 +86,7 @@ export default function App({data}) {
       data: arcs,
       query: `SELECT home_lng, home_lat, count WHERE hex = '${selectedPOI}'`,
       getSourcePosition: selectedPOICentroid,
-      getTargetPosition: {sql: 'FLOAT64x2(home_lng, home_lat)'},
+      getTargetPosition: {sql: 'ARRAY_FLOAT64(home_lng, home_lat)'},
       getSourceColor: [255, 0, 128],
       getTargetColor: [0, 200, 255],
       getWidth: {sql: 'CASE WHEN count > 30 THEN count / 15 ELSE 2 END'}

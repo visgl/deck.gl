@@ -65,7 +65,7 @@ export default function App({
       },
       radiusScale: radius,
       radiusMinPixels: 0.25,
-      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+      getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
       getFillColor: {
         sql: `\
           RGBA8(

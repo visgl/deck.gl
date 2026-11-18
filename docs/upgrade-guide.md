@@ -6,6 +6,11 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
+### SQL accessor functions
+
+math.gl now provides `LIST_EXTRACT` and `STRUCT_EXTRACT`. Rename custom declarations
+that use either reserved name and update their SQL call sites.
+
 ### View clear color alpha
 
 A View's [`clearColor`](./api-reference/core/view.md#clearcolor) with an explicit zero alpha,

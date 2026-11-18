@@ -8,7 +8,6 @@ import {
   type ArrowTableFunction
 } from '@math.gl/sql/arrow';
 import {SQRT} from '@math.gl/sql/math-functions';
-import {bindNestedExtraction} from './nested-extraction';
 import type {Expression} from '@math.gl/sql/expressions';
 import {
   Field,
@@ -73,41 +72,11 @@ export function evaluateColumnExpression(
     }
     return column;
   }
-  // Upstream reserves built-in extraction names. Keep deck's custom overrides private.
-  const aliases = new Map<string, string>();
-  for (const fn of sqlFunctions) {
-    const name = fn.name.toUpperCase();
-    if (name === 'LIST_EXTRACT' || name === 'STRUCT_EXTRACT') {
-      let alias = '_DECK_' + name;
-      while (sqlFunctions.some(candidate => candidate.name.toUpperCase() === alias)) alias += '_';
-      aliases.set(name, alias);
-    }
-  }
-  const declarations = sqlFunctions.map(fn => ({
-    ...fn,
-    name: aliases.get(fn.name.toUpperCase()) ?? fn.name
-  }));
-  /** Copies the parsed expression while redirecting custom extraction calls. */
-  const redirectCalls = (value: any): any => {
-    if (Array.isArray(value)) return value.map(redirectCalls);
-    if (!value || typeof value !== 'object') return value;
-    const result = Object.fromEntries(
-      Object.entries(value).map(([key, child]) => [key, redirectCalls(child)])
-    );
-    if (result.type === 'CallExpression' && result.callee?.type === 'Identifier') {
-      result.callee.name = aliases.get(result.callee.name.toUpperCase()) ?? result.callee.name;
-    }
-    return result;
-  };
-  expression = redirectCalls(expression);
-  const functions = declarations.some(fn => fn.name.toUpperCase() === 'SQRT')
-    ? [...declarations]
-    : [SQRT, ...declarations];
-  const inputSchema = input.schema;
-  const compile = (expression: ArrowExpression) => {
-    const bound = bindNestedExtraction(expression as Expression, inputSchema, functions);
-    return compileArrowExpression(bound, {inputSchema, functions}).evaluateTable(input);
-  };
+  const functions = sqlFunctions.some(fn => fn.name.toUpperCase() === 'SQRT')
+    ? [...sqlFunctions]
+    : [SQRT, ...sqlFunctions];
+  const compile = (value: ArrowExpression) =>
+    compileArrowExpression(value, {inputSchema: input.schema, functions}).evaluateTable(input);
   const call = expression as FunctionCall;
   if (
     call.type === 'CallExpression' &&
