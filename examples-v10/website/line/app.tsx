@@ -117,11 +117,10 @@ export default function App({
         },
         getColor: {
           sql: `\
-            RGBA8(
-              1 - start[3] / 5000,
-              128 * start[3] / (255 * 10000),
-              start[3] / 10000,
-              1 - start[3] / 10000
+            SCALE_COLOR(
+              start[3],
+              DOMAIN(0, 5000, 10000),
+              PALETTE('#ff0000ff', '#00408080', '#0080ff00')
             )`
         },
         getWidth: lineWidth,
