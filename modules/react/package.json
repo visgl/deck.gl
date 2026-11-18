@@ -110,8 +110,8 @@
     "@deck.gl/maplibre": "~10.0.0-alpha",
     "@deck.gl/mesh-layers": "~10.0.0-alpha",
     "@deck.gl/widgets": "~10.0.0-alpha",
-    "react": ">=19.0.0",
-    "react-dom": ">=19.0.0"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
     "@deck.gl/aggregation-layers": {
