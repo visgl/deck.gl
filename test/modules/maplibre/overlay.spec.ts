@@ -668,7 +668,14 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS.slice(1)) {
 
 test('MapLibreOverlay keeps controls above overlaid rendering in every control slot', async () => {
   const container = document.createElement('div');
-  Object.assign(container.style, {position: 'relative', width: '400px', height: '300px'});
+  Object.assign(container.style, {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    zIndex: 1000,
+    width: '400px',
+    height: '300px'
+  });
   document.body.append(container);
   const map = new MapLibreV5Map({
     container,
@@ -678,10 +685,10 @@ test('MapLibreOverlay keeps controls above overlaid rendering in every control s
   try {
     await new Promise<void>(resolve => map.once('load', () => resolve()));
     for (const position of ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const) {
-      const overlay = new MapLibreOverlay({interleaved: false, layers: []});
+      const overlay = new MapLibreOverlay({device, interleaved: false, layers: []});
       map.addControl(overlay, position);
       await waitForRender(() => Boolean(overlay._deck?.isInitialized));
-      const canvasContainer = overlay.getCanvas()!.parentElement!;
+      const canvasContainer = overlay._deck!.props.parent as HTMLElement;
       expect(canvasContainer.parentElement).toBe(container);
       const attribution = container.querySelector('.maplibregl-ctrl-attrib')!;
       const corner = attribution.parentElement!;

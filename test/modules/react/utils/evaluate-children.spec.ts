@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import evaluateChildren from '@deck.gl/react/utils/evaluate-children';
 import React, {createElement} from 'react';
 
@@ -63,4 +63,20 @@ test('evaluateChildren', () => {
       }
     });
   }
+});
+
+test('evaluateChildren keeps map controls above Deck and forwards onLoad', () => {
+  const onLoad = vi.fn();
+  const canvasContainer = document.createElement('div');
+  const event = {target: {getCanvasContainer: () => canvasContainer}};
+  const childProps = {width: 400};
+  const child = createElement('div', {mapStyle: 'https://map/style.json', onLoad});
+  const result = evaluateChildren(child, childProps) as React.ReactElement<any>;
+
+  expect(result.props.style.zIndex).toBeUndefined();
+  result.props.onLoad(event);
+  expect(canvasContainer.style.zIndex).toBe('-1');
+  expect(canvasContainer.style.inset).toBe('0px');
+  expect(onLoad).toHaveBeenCalledWith(event);
+  expect(childProps).toEqual({width: 400});
 });

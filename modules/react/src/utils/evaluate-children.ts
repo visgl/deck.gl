@@ -5,7 +5,7 @@
 import * as React from 'react';
 import {cloneElement} from 'react';
 
-const MAP_STYLE = {position: 'absolute', zIndex: -1};
+const MAP_STYLE = {position: 'absolute'};
 
 export default function evaluateChildren(
   children: React.ReactNode | Function,
@@ -21,9 +21,16 @@ export default function evaluateChildren(
     // Special treatment for react-map-gl's Map component
     // to support shorthand use case <DeckGL><StaticMap /></DeckGL>
     if (isReactMap(children)) {
-      // Place map under the canvas
-      childProps.style = MAP_STYLE;
-      return cloneElement(children, childProps);
+      // Only the basemap canvas belongs below Deck; HTML controls stay above it.
+      return cloneElement(children, {
+        ...childProps,
+        style: MAP_STYLE,
+        onLoad: event => {
+          const canvasContainer = event.target.getCanvasContainer();
+          Object.assign(canvasContainer.style, {position: 'absolute', inset: 0, zIndex: -1});
+          children.props.onLoad?.(event);
+        }
+      });
     }
     if (needsDeckGLViewProps(children)) {
       return cloneElement(children, childProps);
