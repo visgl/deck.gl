@@ -6,6 +6,7 @@ import {test, expect, vi, afterEach} from 'vitest';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {TileLayer} from '@deck.gl/geo-layers';
+import {Tile2DLayer} from '@deck.gl/proposals/layers';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -30,7 +31,7 @@ const tileProps = {
 } as const;
 
 /** Runs the layer lifecycle without a deck and returns the ids of tiles with sublayers. */
-async function setup(layer: TileLayer, viewport: WebMercatorViewport) {
+async function setup(layer: TileLayer | Tile2DLayer, viewport: WebMercatorViewport) {
   const requestAnimationFrame = vi.fn(() => 1);
   vi.stubGlobal('requestAnimationFrame', requestAnimationFrame);
   vi.stubGlobal('cancelAnimationFrame', vi.fn());
@@ -45,12 +46,16 @@ async function setup(layer: TileLayer, viewport: WebMercatorViewport) {
 
   const getCreatedIds = () => {
     layer.renderLayers();
-    return tileset!.tiles.filter(tile => tile.layers).map(tile => tile.id);
+    return tileset!.tiles
+      .filter(tile =>
+        layer instanceof TileLayer ? tile.layers : layer.state.tileLayers.has(tile.id)
+      )
+      .map(tile => tile.id);
   };
   return {getCreatedIds, requestAnimationFrame};
 }
 
-for (const Layer of [TileLayer]) {
+for (const Layer of [TileLayer, Tile2DLayer]) {
   test(`${Layer.layerName}#_maxNewTilesPerFrame creates hidden tiles on later frames`, async () => {
     const layer = new Layer({...tileProps, _maxNewTilesPerFrame: 2});
     const {getCreatedIds, requestAnimationFrame} = await setup(layer, singleTileViewport);
