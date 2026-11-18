@@ -13,7 +13,7 @@ import {
 import {GeoJsonLayer, type GeoJsonLayerProps} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
 import {Matrix4} from '@math.gl/core';
-import {worldToLngLat} from '@math.gl/web-mercator';
+import {worldToLngLat} from '@math.gl/geospatial/web-mercator';
 import {load} from '@loaders.gl/core';
 import {MVTWorkerLoader} from '@loaders.gl/tiles/mvt';
 import {Tile2DLayer, type Tile2DLayerProps} from '../tile-2d-layer/index';

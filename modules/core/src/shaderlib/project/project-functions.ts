@@ -7,7 +7,7 @@ import {PROJECTION_MODE} from './constants';
 import {getOffsetOrigin} from './viewport-uniforms';
 import {vec3} from '@math.gl/core';
 import {vec4} from '@math.gl/core';
-import {addMetersToLngLat} from '@math.gl/web-mercator';
+import {addMetersToLngLat} from '@math.gl/geospatial/web-mercator';
 import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import type {CoordinateSystem} from '../../lib/constants';
 import type Viewport from '../../viewports/viewport';

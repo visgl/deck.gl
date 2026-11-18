@@ -6,7 +6,7 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
-import {isArrowTable} from '@math.gl/arrow';
+import {isArrowTable} from '@math.gl/core/arrow';
 import {JSONTableLoader} from '@loaders.gl/tables/json';
 import {ScatterplotLayer} from '@deck.gl/layers';
 

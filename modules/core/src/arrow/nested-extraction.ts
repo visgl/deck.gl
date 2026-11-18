@@ -3,8 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {DataType, Field, vectorFromArray, type Schema, type Vector} from 'apache-arrow';
-import {compileArrowExpression, type ArrowTableFunction} from '@math.gl/expressions/arrow';
-import type {Expression} from '@math.gl/expressions';
+import {compileArrowExpression, type ArrowTableFunction} from '@math.gl/sql/arrow';
+import type {Expression} from '@math.gl/sql/expressions';
 
 /** Binds deck.gl's default extraction functions to concrete nested Arrow field types. */
 export function bindNestedExtraction(

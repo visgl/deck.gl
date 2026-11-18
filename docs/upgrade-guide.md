@@ -87,10 +87,16 @@ layer and extension draws.
 
 ### loaders.gl and math.gl v5 beta
 
-Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.10`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.12`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
 | Previous import | Replacement import |
 | --- | --- |
+| `@math.gl/web-mercator` | `@math.gl/geospatial/web-mercator` |
+| `@math.gl/arrow` | `@math.gl/core/arrow` |
+| `@math.gl/expressions` | `@math.gl/sql/expressions` |
+| `@math.gl/expressions/sql` | `@math.gl/sql/parser` |
+| `@math.gl/expressions/arrow` | `@math.gl/sql/arrow` |
+| `@loaders.gl/arrow` | `@loaders.gl/tables/arrow` |
 | `@loaders.gl/loader-utils`, `@loaders.gl/schema`, `@loaders.gl/polyfills` | Corresponding subpaths of `@loaders.gl/core` |
 | `@loaders.gl/csv`, `@loaders.gl/json` | `@loaders.gl/tables/csv`, `@loaders.gl/tables/json` |
 | `@loaders.gl/gltf`, `@loaders.gl/obj` | `@loaders.gl/scene/gltf`, `@loaders.gl/scene/obj` |
