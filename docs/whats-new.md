@@ -50,21 +50,10 @@ The `@deck.gl/react` module is now a deep React Fiber integration.
 - `Tile2DLayer` and `MVT2DLayer` can now share a `Tileset2D` and reuse loaded tiles across layers and views.
 - `TextLayer` uses `@luma.gl/text/fonts` for bitmap and SDF font atlas generation and glyph packing. Existing font settings and the custom font renderer hook remain supported.
 
-### Aggregation extensions with GPUVector inputs
+### Aggregation Layers
 
-[ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#gpuvector-inputs-unstable),
-GridLayer, HexagonLayer, and ContourLayer also support clipping, brushing, and numeric filtering
-with [borrowed GPU columns](./api-reference/aggregation-layers/aggregator.md#gpu-column-extensions).
-
-### Contour compute aggregation
-
-On WebGPU devices, [ContourLayer](./api-reference/aggregation-layers/contour-layer.md#compute-aggregation) aggregates points in a compute shader before generating contours.
-
-### Optional graph aggregation
-
-The experimental [`_GraphScreenGridAggregator`](./api-reference/aggregation-layers/aggregator.md#graphscreengridaggregator)
-lets applications customize ScreenGrid aggregation using GPU graphs.
-
+- GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer accept custom aggregators with GPUVector results.
+- These layers support clipping, brushing, and numeric filtering with GPUVector inputs.
 
 ### CARTO heatmap palettes
 
@@ -98,42 +87,6 @@ including positions, colors, and scalar values. Numeric rendering inputs use sha
 conversion; cell layers preserve source-feature identity while expanding identifiers.
 See [Using with Arrow](./developer-guide/using-with-arrow.md) for shared rules and each
 layer's prop descriptions for supported inputs.
-
-### Async CPU aggregation of GPU inputs
-
-[`ReadbackAggregator`](./api-reference/aggregation-layers/cpu-aggregator.md#readbackaggregator) runs CPU aggregation on GPUVector inputs, so you can compare CPU and GPU timings on the same buffers.
-
-### Hexagon compute aggregation
-
-On WebGPU devices, [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md#compute-aggregation)
-aggregates in compute shaders, including with automatic domains, picking, quantile and ordinal
-scales, percentiles and extensions.
-
-### ScreenGrid and Grid compute rendering features
-
-Compute aggregation now supports automatic domains, picking metadata, accessor-based
-extensions, and Grid distribution scales and percentile filtering. Explicit-domain rendering
-continues to consume GPU vectors directly; CPU-facing metadata uses asynchronous snapshots.
-
-### Grid compute aggregation
-
-`GridLayer` supports two-channel compute aggregation with explicit color and elevation domains.
-Color and elevation results stay in GPU vectors consumed directly by the cell layer. The
-implementation shares column preparation and reduction kernels with ScreenGrid. See
-[GridLayer](./api-reference/aggregation-layers/grid-layer.md#compute-aggregation).
-
-### ScreenGrid compute aggregation
-
-`ScreenGridLayer` can aggregate on WebGPU using an explicit `colorDomain`, with
-picking and extensions disabled. SUM, MEAN, MIN, MAX, and COUNT produce GPUVector
-outputs consumed directly by the cell layer. See [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#compute-aggregation).
-
-### Custom aggregators
-
-GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer now accept custom aggregator
-instances. Custom aggregators can publish GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and
-channel values. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
-result layouts, and supported scales and contours.
 
 ### luma.gl v10 alpha.13
 
