@@ -339,7 +339,7 @@ export default class HeatmapLayer<
         weightsTexture,
         intensity,
         threshold,
-        colorDomain: this._getColorDomain()
+        getColorDomain: () => this._getColorDomain()
       }
     );
   }
@@ -792,11 +792,7 @@ export default class HeatmapLayer<
           this._updateTextureRenderingBounds();
           this.setState({updateTimer: null});
         }
-        const previousScale = this.state.weightColorScale;
         this._updateWeightmap(mask);
-        if (previousScale !== this.state.weightColorScale && this.props.colorDomain) {
-          this.setNeedsUpdate();
-        }
       } finally {
         this.context.viewport = viewport;
       }

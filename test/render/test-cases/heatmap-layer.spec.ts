@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {describe} from 'vitest';
+import {describe, expect} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import {defaultOnAfterRender, type TestCase} from '../deck-test-utils';
 
@@ -107,6 +107,48 @@ const testCases = [
         }
       }),
     goldenImage: './test/render/golden-images/heatmap-lnglat.png'
+  },
+  {
+    name: 'heatmap-lnglat-mask-display',
+    viewState: {latitude: 37.75, longitude: -122.44, zoom: 11.5, pitch: 0, bearing: 0},
+    layers: [
+      new PolygonLayer({
+        id: 'heatmap-display-mask',
+        data: [
+          [
+            maskBoundary[0],
+            [
+              [-122.46, 37.73],
+              [-122.46, 37.77],
+              [-122.42, 37.77],
+              [-122.42, 37.73]
+            ]
+          ]
+        ],
+        getPolygon: d => d,
+        operation: 'mask',
+        stroked: false
+      }),
+      new HeatmapLayer({
+        id: 'heatmap-display',
+        data: [outlier],
+        getPosition: d => d,
+        radiusPixels: 35,
+        colorDomain: [1, 2],
+        extensions: [new MaskExtension()],
+        maskId: 'heatmap-display-mask',
+        maskByInstance: false
+      })
+    ],
+    onAfterRender: ({layers, done}) => {
+      const display = layers.find(layer => layer.id === 'heatmap-display-triangle-layer');
+      const {colorDomain} = display.getModels()[0].shaderInputs.getUniformValues().triangle;
+      expect(colorDomain[0]).toBeGreaterThan(0);
+      expect(colorDomain[1]).toBeCloseTo(colorDomain[0] * 2);
+      done();
+    },
+    imageDiffOptions: {threshold: 1},
+    goldenImage: './test/render/golden-images/heatmap-mask-display-empty.png'
   },
   {
     // Golden: the baseline heatmap with the added high-weight point filtered out.
