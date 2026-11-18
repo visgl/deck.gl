@@ -15,7 +15,7 @@ const defaultProps = {
 export type TerrainExtensionProps = {
   /**
    * controls whether an object is drawn over the terrain surface by its anchor (usually defined by an accessor called `getPosition`, e.g. icon, scatterplot) or by its geometry (e.g. path, polygon).
-   * If not specified, the mode is inferred from the layer. Layers with anchors default to offset fitting.
+   * If not specified, layers with anchors or `extruded: true` use `'offset'`, and other layers use `'drape'`.
    */
   terrainDrawMode?: 'offset' | 'drape';
 };

@@ -81,6 +81,8 @@ The website gallery includes three new sections: Arrow Layers, Visual Effects, a
 
 [`MaskExtension`](./api-reference/extensions/mask-extension.md) supports up to four masks on WebGPU in map and globe views, including inverted masks and picking.
 
+[`TerrainExtension`](./api-reference/extensions/terrain-extension.md) supports offset fitting and texture draping on WebGPU, including picking on draped layers.
+
 Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) with `countItems` to report how many objects pass numeric or category filters.
 
 ### Custom projections (Experimental)
@@ -102,10 +104,6 @@ Release date: September 5, 2026
 deck.gl v9.4 is expected to be the final release in the v9 series. It brings together a collection of completed improvements focused on performance, stability, and usability, and is intended to be a highly compatible, highly recommended upgrade for all v9 applications.
 
 Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
-
-### Terrain fitting
-
-Use [`TerrainExtension`](./api-reference/extensions/terrain-extension.md) with `terrainDrawMode: 'offset'` to fit objects to the uppermost terrain surface. Texture draping overlays layer colors and picking data on the terrain surface.
 
 ### WebGPU
 
