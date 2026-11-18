@@ -55,7 +55,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             props: {
               data: {attributes: {positions, texCoords}},
               vertexCount: 4,
-              colorDomain: [0, 1],
+              getColorDomain: () => [0, 1],
               aggregationMode: 0,
               threshold: 0,
               intensity: 1,

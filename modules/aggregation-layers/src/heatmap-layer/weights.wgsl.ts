@@ -47,6 +47,9 @@ fn vertexMain(attributes: WeightAttributes) -> WeightVaryings {
   );
   output.pointCoordinates = (offset + vec2<f32>(1.0)) * 0.5;
   output.weights = vec4<f32>(attributes.instanceWeights * weight.weightsScale, 0.0, 0.0, 1.0);
+  geometry.worldPosition = attributes.instancePositions;
+  geometry.position = vec4<f32>(commonPosition, 1.0);
+  DECKGL_FILTER_GL_POSITION(&output.position, geometry);
   return output;
 }
 

@@ -15,6 +15,7 @@ _v10.0 should be thought of as a pre-release. We wanted to get the new capabilit
 ### Heatmap filtering
 
 - `DataFilterExtension` filters the points that contribute to `HeatmapLayer` on WebGPU.
+- `MaskExtension` limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
 
 
 ### GPU
