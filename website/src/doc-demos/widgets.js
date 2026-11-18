@@ -2,6 +2,7 @@ import OpenFreeMapAttribution from '../components/openfreemap-attribution';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import CodeBlock from '@theme/CodeBlock';
 import {
+  ColorScaleWidget,
   ScreenshotWidget,
   FullscreenWidget,
   CompassWidget,
@@ -33,6 +34,7 @@ import { Map } from 'react-map-gl/maplibre';
 import { useColorMode } from '@docusaurus/theme-common';
 import { cloneMapStyle, MAPBOX_STYLES, DATA_URI } from '../constants/defaults';
 import {OBJLoader} from '@loaders.gl/scene/obj';
+import {tableFromArrays} from 'apache-arrow';
 
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson'; //eslint-disable-line
@@ -535,6 +537,22 @@ export function ThemeWidgetDemo() {
 export function ScaleWidgetDemo() {
   return <GeoDemoBase map mapLabels widgets={[new ScaleWidget({placement: 'top-left'})]} />
 }
+/** Demonstrates discovery and updates using a real SQL color scale. */
+export function ColorScaleWidgetDemo() {
+  const layers = useMemo(() => [
+    new ScatterplotLayer({
+      id: 'Readings',
+      data: tableFromArrays({x: [-60, -40, -20, 0, 20, 40, 60], reading: [0, 1, 2, 3, 4, 5, 6]}),
+      coordinateSystem: 'cartesian',
+      getPosition: {sql: 'ARRAY_FLOAT64(x, 0)'},
+      getFillColor: {sql: "SCALE_COLOR(reading, DOMAIN(reading), PALETTE('viridis'))"},
+      getRadius: 7
+    })
+  ], []);
+  const widgets = useMemo(() => [new ColorScaleWidget({placement: 'bottom-right'})], []);
+  return <NonGeoDemoBase views={new OrthographicView()} layers={layers} widgets={widgets} />;
+}
+
 export function SplitterWidgetDemo() {
   const { colorMode } = useColorMode();
 

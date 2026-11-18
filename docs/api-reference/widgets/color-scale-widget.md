@@ -1,5 +1,9 @@
 # ColorScaleWidget
 
+import {ColorScaleWidgetDemo} from '@site/src/doc-demos/widgets';
+
+<ColorScaleWidgetDemo />
+
 Displays legends for SQL color accessors on visible layers. The widget discovers
 scales from the rendered layers, including composite sublayers, and updates after
 their accessor evaluation completes. It shows category swatches, numeric intervals,
