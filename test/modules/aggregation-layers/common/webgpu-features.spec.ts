@@ -5,7 +5,7 @@
 import {test, expect, vi} from 'vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {OrthographicView} from '@deck.gl/core';
-import {GridLayer, ScreenGridLayer} from '@deck.gl/aggregation-layers';
+import {ContourLayer, GridLayer, HexagonLayer, ScreenGridLayer} from '@deck.gl/aggregation-layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {WebGPUAggregator} from '../../../../modules/aggregation-layers/src/common/aggregator/webgpu-aggregator/webgpu-aggregator';
@@ -585,80 +585,192 @@ test('ScreenGrid clips borrowed positions and weights without calling their acce
   }
 });
 
-test('ScreenGrid brushes borrowed positions when the pointer moves', async ({skip}) => {
-  const device = await getWebGPUTestDevice();
-  if (!device) return skip();
-  const {LayerManager} = await import('@deck.gl/core');
-  const {Buffer} = await import('@luma.gl/core');
-  const {GPUVector} = await import('@luma.gl/graph/gpu-data');
-  const {BrushingExtension} = await import('@deck.gl/extensions');
-  const viewport = new OrthographicView().makeViewport({
-    width: 100,
-    height: 100,
-    viewState: {target: [0, 0, 0], zoom: 0}
-  });
-  const buffer = device.createBuffer({
-    data: new Float32Array([0, 0, 0, 2, 20, 20, 0, 3]),
-    usage: Buffer.VERTEX | Buffer.STORAGE
-  });
-  const positions = new GPUVector({
-    type: 'buffer',
-    name: 'positions',
-    format: 'float32x3',
-    length: 2,
-    byteStride: 16,
-    buffer,
-    ownsBuffer: false
-  });
-  const weights = new GPUVector({
-    type: 'buffer',
-    name: 'weights',
-    format: 'float32',
-    length: 2,
-    byteOffset: 12,
-    byteStride: 16,
-    buffer,
-    ownsBuffer: false
-  });
-  const manager = new LayerManager(device, {viewport});
-  const layer = new ScreenGridLayer({
-    positions,
-    weights: [weights],
-    cellSizePixels: 100,
-    extensions: [new BrushingExtension()],
-    brushingRadius: 2
-  });
-  device.handle.pushErrorScope('validation');
-  try {
-    manager.setLayers([layer]);
-    for (const [position, expected] of [
-      [[0, 0], 2],
-      [[20, 20], 3]
-    ] as const) {
-      const [x, y] = viewport.project(position);
-      layer.setShaderModuleProps({
-        brushing: {viewport, mousePosition: {x, y}, brushingRadius: 2, brushingTarget: 'source'}
-      });
-      layer.draw({
-        shaderModuleProps: {
-          project: {
-            viewport,
-            coordinateSystem: 'cartesian',
-            coordinateOrigin: [0, 0, 0],
-            devicePixelRatio: 1
+for (const brushingTarget of ['source', 'custom'] as const) {
+  test(`ScreenGrid brushes borrowed ${brushingTarget} targets when the pointer moves`, async ({
+    skip
+  }) => {
+    const device = await getWebGPUTestDevice();
+    if (!device) return skip();
+    const {LayerManager} = await import('@deck.gl/core');
+    const {Buffer} = await import('@luma.gl/core');
+    const {GPUVector} = await import('@luma.gl/graph/gpu-data');
+    const {BrushingExtension} = await import('@deck.gl/extensions');
+    const viewport = new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {target: [0, 0, 0], zoom: 0}
+    });
+    const buffer = device.createBuffer({
+      data: new Float32Array([0, 0, 0, 2, 20, 20, 20, 20, 0, 3, 0, 0]),
+      usage: Buffer.VERTEX | Buffer.STORAGE
+    });
+    const positions = new GPUVector({
+      type: 'buffer',
+      name: 'positions',
+      format: 'float32x3',
+      length: 2,
+      byteStride: 24,
+      buffer,
+      ownsBuffer: false
+    });
+    const weights = new GPUVector({
+      type: 'buffer',
+      name: 'weights',
+      format: 'float32',
+      length: 2,
+      byteOffset: 12,
+      byteStride: 24,
+      buffer,
+      ownsBuffer: false
+    });
+    const brushingTargets = new GPUVector({
+      type: 'buffer',
+      name: 'brushingTargets',
+      format: 'float32x2',
+      length: 2,
+      byteOffset: 16,
+      byteStride: 24,
+      buffer,
+      ownsBuffer: false
+    });
+    const manager = new LayerManager(device, {viewport});
+    const layer = new ScreenGridLayer({
+      positions,
+      weights: [weights],
+      cellSizePixels: 100,
+      brushingTarget,
+      extensionAttributes: brushingTarget === 'custom' ? {brushingTargets} : undefined,
+      extensions: [new BrushingExtension()],
+      brushingRadius: 2
+    });
+    device.handle.pushErrorScope('validation');
+    try {
+      manager.setLayers([layer]);
+      for (const [position, expected] of [
+        [[0, 0], 2],
+        [[20, 20], 3]
+      ] as const) {
+        const [x, y] = viewport.project(position);
+        layer.setShaderModuleProps({
+          brushing: {viewport, mousePosition: {x, y}, brushingRadius: 2, brushingTarget}
+        });
+        layer.draw({
+          shaderModuleProps: {
+            project: {
+              viewport,
+              coordinateSystem: 'cartesian',
+              coordinateOrigin: [0, 0, 0],
+              devicePixelRatio: 1
+            }
           }
-        }
-      } as any);
-      await vi.waitFor(
-        () => expect(layer.state.aggregator.getResultDomain(0)).toEqual([expected, expected]),
-        {timeout: 10000}
-      );
+        } as any);
+        await vi.waitFor(
+          () =>
+            expect(layer.state.aggregator.getResultDomain(0)).toEqual(
+              Array(2).fill(brushingTarget === 'custom' ? 5 - expected : expected)
+            ),
+          {timeout: 10000}
+        );
+      }
+    } finally {
+      manager.finalize();
+      positions.destroy();
+      weights.destroy();
+      brushingTargets.destroy();
+      buffer.destroy();
+      expect(await device.handle.popErrorScope()).toBeNull();
     }
-  } finally {
-    manager.finalize();
-    positions.destroy();
-    weights.destroy();
-    buffer.destroy();
-    expect(await device.handle.popErrorScope()).toBeNull();
-  }
-});
+  });
+}
+
+for (const LayerClass of [ScreenGridLayer, GridLayer, HexagonLayer, ContourLayer]) {
+  test(`${LayerClass.layerName} binds borrowed DataFilter values`, async ({skip}) => {
+    const device = await getWebGPUTestDevice();
+    if (!device) return skip();
+    const {LayerManager} = await import('@deck.gl/core');
+    const {Buffer} = await import('@luma.gl/core');
+    const {GPUVector} = await import('@luma.gl/graph/gpu-data');
+    const viewport = new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {target: [0, 0, 0], zoom: 0}
+    });
+    const buffer = device.createBuffer({
+      data: new Float32Array([1, 1, 0, 2, 0, 2, 2, 0, 3, 1]),
+      usage: Buffer.VERTEX | Buffer.STORAGE
+    });
+    const positions = new GPUVector({
+      type: 'buffer',
+      name: 'positions',
+      format: 'float32x3',
+      length: 2,
+      byteStride: 20,
+      buffer,
+      ownsBuffer: false
+    });
+    /** Return a scalar view of the interleaved row buffer. */
+    const scalar = (name: string, byteOffset: number) =>
+      new GPUVector({
+        type: 'buffer',
+        name,
+        format: 'float32',
+        length: 2,
+        byteOffset,
+        byteStride: 20,
+        buffer,
+        ownsBuffer: false
+      });
+    const weight = scalar('weights', 12);
+    const filterValues = scalar('filterValues', 16);
+    const manager = new LayerManager(device, {viewport});
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    const layer = new LayerClass({
+      positions,
+      weights:
+        LayerClass === GridLayer || LayerClass === HexagonLayer ? [weight, weight] : [weight],
+      extensionAttributes: {filterValues},
+      coordinateSystem: 'cartesian',
+      dataBounds: [
+        [1, 1, 0],
+        [2, 2, 0]
+      ],
+      extensions: [new DataFilterExtension({filterSize: 1})]
+    });
+    device.handle.pushErrorScope('validation');
+    try {
+      manager.setLayers([layer]);
+      for (const [filterRange, expected] of [
+        [[0, 0], 2],
+        [[1, 1], 3]
+      ] as const) {
+        layer.setShaderModuleProps({dataFilter: {extensions: layer.props.extensions, filterRange}});
+        layer.draw({
+          shaderModuleProps: {
+            project: {
+              viewport,
+              coordinateSystem: 'cartesian',
+              coordinateOrigin: [0, 0, 0],
+              devicePixelRatio: 1
+            }
+          }
+        } as any);
+        await vi.waitFor(
+          () => expect(layer.state.aggregator.getResultDomain(0)).toEqual([expected, expected]),
+          {timeout: 10000}
+        );
+      }
+      expect(buffer.destroyed).toBe(false);
+    } finally {
+      manager.finalize();
+      positions.destroy();
+      weight.destroy();
+      filterValues.destroy();
+      buffer.destroy();
+      expect(await device.handle.popErrorScope()).toBeNull();
+    }
+  });
+}
