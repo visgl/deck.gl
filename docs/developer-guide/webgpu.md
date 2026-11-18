@@ -90,19 +90,21 @@ or distribution scales keeps the result path on the GPU.
 
 ## Extensions
 
-The table below covers the public extensions in `@deck.gl/extensions`. Most remain WebGL-only because they rely on GLSL shader injections, GLSL-only shader modules, or extra render/picking passes that have not been ported to WebGPU. `BrushingExtension` and `ClipExtension` support standard rendering primitives on WebGPU. Custom shaders need compatible hooks. ScreenGridLayer and GridLayer execute compatible extension hooks on input points before reduction; DataFilterExtension filtering and ClipExtension are covered by aggregation regression tests.
+The table below covers the public extensions in `@deck.gl/extensions`. All listed extensions support WebGPU. Custom shaders need compatible hooks. ScreenGridLayer and GridLayer execute compatible extension hooks on input points before reduction; DataFilterExtension filtering and ClipExtension are covered by aggregation regression tests.
 
 | Module | Extension | WebGL | WebGPU |
 | --- | --- | --- | --- |
 | `@deck.gl/extensions` | `BrushingExtension` | ✅ | ✅ |
-| `@deck.gl/extensions` | `DataFilterExtension` | ✅ | ✅ Filtering; `countItems` requires WebGL |
+| `@deck.gl/extensions` | `DataFilterExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `Fp64Extension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `PathStyleExtension` | ✅ | ✅ |
-| `@deck.gl/extensions` | `FillStyleExtension` | ✅ | ❌ |
+| `@deck.gl/extensions` | `FillStyleExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `ClipExtension` | ✅ | ✅ |
-| `@deck.gl/extensions` | `CollisionFilterExtension` | ✅ | ❌ |
+| `@deck.gl/extensions` | `CollisionFilterExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `MaskExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `TerrainExtension` | ✅ | ✅ |
+
+Data filtering on `HeatmapLayer` is available only on WebGL.
 
 `TerrainExtension` supports both `terrainDrawMode` values on WebGPU. Terrain sources used for offset fitting must report their elevation range. See the [terrain extension reference](../api-reference/extensions/terrain-extension.md#limitations).
 
