@@ -2,6 +2,8 @@ This is a standalone version of the TextLayer example on [deck.gl](http://deck.g
 
 ### Usage
 
+This example requires deck.gl v10. npm overrides and Yarn resolutions keep loaders.gl core and table loaders on matching prerelease versions.
+
 Copy the content of this folder to your project. 
 
 ```bash
