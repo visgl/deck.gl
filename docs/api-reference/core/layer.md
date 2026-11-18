@@ -382,6 +382,15 @@ in the range 0–1, this packs them into an 8-bit RGBA color with full opacity.
 getFillColor: {sql: 'RGBA8(red, green, blue, 1)'}
 ```
 
+A color accessor can also use a top-level SQL color scale:
+
+```ts
+getFillColor: {sql: "SCALE_COLOR(temperature, DOMAIN(temperature), PALETTE('viridis'))"}
+```
+
+The domain resolves against the complete loaded table. When data changes, existing
+rows can receive new colors. Missing values are transparent.
+
 #### `dataTransform` (Function, optional) {#datatransform}
 
 Executed to manipulate remote data when it's fetched. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.

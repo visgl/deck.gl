@@ -704,7 +704,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         evaluateAccessorQueries(source, expressions, parseExpression, previous, functions)
       )
       .then(
-        table => {
+        ({table}) => {
           const layer = currentLayer();
           if (layer) {
             request.table = table;
