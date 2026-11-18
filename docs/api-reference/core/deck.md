@@ -243,16 +243,13 @@ new Deck({
 
 Default: `false`.
 
-When enabled, top-level ScatterplotLayer, LineLayer, ArcLayer, PathLayer, PolygonLayer, SolidPolygonLayer, IconLayer, PointCloudLayer, and ColumnLayer interpret plain JavaScript arrays
-passed to their color accessors, including arrays returned by callbacks, as 0–1 channels.
-Channels are clamped and rounded to bytes for GPU storage. Omitted alpha is opaque.
-Built-in defaults, typed arrays, Arrow columns, and binary inputs keep their existing encoding.
-[View clear colors](./view.md#clearcolor) and [top-level layer highlights](./layer.md#highlightcolor)
-also use 0–1 channels when enabled.
-Top-level BitmapLayer tint and transparency and TextLayer outline colors also follow this setting.
-Top-level [GeoJsonLayer color accessors](../layers/geojson-layer.md#getfillcolor) also use this convention.
-Top-level SimpleMeshLayer and ScenegraphLayer instance color accessors also use this convention.
-Composite-generated colors, other layers, and other color properties continue to use their documented conventions.
+When enabled, supported color props interpret plain JavaScript arrays as 0–1 channels,
+including arrays returned by accessor functions. Missing alpha is opaque. Color attributes and
+palette textures pack channels into bytes. Built-in defaults, byte typed arrays, Arrow columns,
+and binary or GPU inputs retain their existing encodings.
+
+See [Normalized colors](../../developer-guide/using-layers.md#normalized-colors) for the list of
+supported props and migration examples.
 
 #### `layerFilter` (Function) {#layerfilter}
 
