@@ -20,6 +20,7 @@ import {Bounds, TileBoundingBox, TileIndex, ZRange} from './types';
 import {TileLoadProps} from './types';
 import {memoize} from './memoize';
 import {refineTileStates} from './refinement';
+import {getCoverageFloors, getCoverageTileIndices} from './coverage';
 
 /*
    show cached parent tile if children are loading
@@ -56,9 +57,13 @@ export type RefinementStrategy =
   | 'best-available'
   | RefinementStrategyFunction;
 
+/** Whether lower resolution ancestors of selected tiles are prefetched as coverage. */
+export type LODStrategy = 'none' | 'coverage';
+
 const DEFAULT_CACHE_SCALE = 5;
 const SELECTED_TILE_PRIORITY = 0;
 const VISIBLE_TILE_PRIORITY = 1e8;
+const PREFETCH_TILE_PRIORITY = 2e8;
 const MAX_TILE_DISTANCE_PRIORITY = VISIBLE_TILE_PRIORITY - SELECTED_TILE_PRIORITY - 1;
 
 /** Loading, traversal, and cache options shared by the default view and registered consumers. */
@@ -84,6 +89,8 @@ export type Tileset2DProps<DataT = any, ViewStateT = Viewport> = {
   maxCacheByteSize?: number | null;
   /** How the tile layer refines the visibility of tiles. @default 'best-available' */
   refinementStrategy?: RefinementStrategy;
+  /** Whether ancestors of selected tiles are prefetched as coverage. @default 'none' */
+  lodStrategy?: LODStrategy;
   /** Range of minimum and maximum heights in the tile. */
   zRange?: ZRange | null;
   /** The maximum number of concurrent getTileData calls. @default 6 */
@@ -118,6 +125,7 @@ export const DEFAULT_TILESET2D_PROPS: Omit<
   maxCacheSize: null,
   maxCacheByteSize: null,
   refinementStrategy: 'best-available',
+  lodStrategy: 'none',
   zRange: null,
   maxRequests: 6,
   debounceTime: 0,
@@ -152,6 +160,8 @@ type ConsumerState<DataT = any> = {
   selectedTiles: Set<Tile2DHeader<DataT>>;
   /** Tiles currently marked render-visible for this consumer. */
   visibleTiles: Set<Tile2DHeader<DataT>>;
+  /** Coverage ancestors prefetched for this consumer, by request rank. */
+  prefetchTiles: Map<Tile2DHeader<DataT>, number>;
 };
 /** Tile-content cache with a compatibility default view and independent registered consumers. */
 export class Tileset2D<DataT = any, ViewStateT = Viewport> {
@@ -206,6 +216,8 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
   private _zRange: ZRange | null;
   /** Tiles selected by the compatibility default consumer, or null before its first update. */
   private _selectedTiles: Tile2DHeader[] | null;
+  /** Coverage ancestors prefetched for the default consumer, by request rank. */
+  private _prefetchTiles = new Map<Tile2DHeader, number>();
   /** Default-consumer visibility revision returned by update. */
   private _frameNumber: number;
   /** Model transform used by the default consumer. */
@@ -362,6 +374,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     this._cache.clear();
     this._tiles = [];
     this._selectedTiles = null;
+    this._prefetchTiles.clear();
     this._consumers.clear();
     this._cacheByteSize = 0;
     this._updateStats();
@@ -440,6 +453,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
         modelMatrixInverse: this._modelMatrixInverse
       });
       this._selectedTiles = tileIndices.map(index => this._getTile(index, true));
+      this._prefetchTiles = this.getPrefetchTiles(viewport, this._selectedTiles);
 
       if (this._dirty) {
         // Some new tiles are added
@@ -448,6 +462,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
       // Check for needed reloads explicitly even if the view/matrix has not changed.
     } else if (this.needsReload) {
       this._selectedTiles = this._selectedTiles!.map(tile => this._getTile(tile.index, true));
+      this._prefetchTiles = this.getPrefetchTiles(viewport, this._selectedTiles);
     }
 
     // Update tile states
@@ -616,6 +631,25 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     return {x, y, z};
   }
 
+  /** Creates the coverage ancestors of a view's selected tiles; empty unless `lodStrategy` is 'coverage'. */
+  getPrefetchTiles(
+    viewport: Viewport,
+    selectedTiles: Tile2DHeader<DataT>[]
+  ): Map<Tile2DHeader<DataT>, number> {
+    const prefetchTiles = new Map<Tile2DHeader<DataT>, number>();
+    if (this.opts.lodStrategy === 'coverage') {
+      const indices = getCoverageTileIndices(
+        selectedTiles.map(tile => tile.index),
+        getCoverageFloors(viewport, this._minZoom),
+        this
+      );
+      for (const {index, rank} of indices.values()) {
+        prefetchTiles.set(this._getTile(index, true), rank);
+      }
+    }
+    return prefetchTiles;
+  }
+
   // Returns true if any tile's visibility changed
   /** Updates legacy selection and refinement flags without changing independent consumers. */
   private updateTileStates() {
@@ -639,7 +673,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     // Strategy-specific state logic
     const tiles = Array.from(this._cache.values());
     if (typeof refinementStrategy === 'function') refinementStrategy(tiles);
-    else refineTileStates(tiles, refinementStrategy, tile => tile);
+    else refineTileStates(tiles, refinementStrategy, tile => tile, this.opts.lodStrategy);
 
     i = 0;
     // Check if any visibility has changed
@@ -662,14 +696,16 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     if (this._consumers.size) {
       let visible = tile.isVisible;
       if (tile.isSelected) return 0;
+      let prefetchRank = this._prefetchTiles.get(tile) ?? Infinity;
       for (const consumer of this._consumers.values()) {
         if (consumer.selectedTiles.has(tile)) return 0;
         visible ||= consumer.visibleTiles.has(tile);
+        prefetchRank = Math.min(prefetchRank, consumer.prefetchTiles.get(tile) ?? Infinity);
       }
-      return visible ? VISIBLE_TILE_PRIORITY : -1;
+      return visible ? VISIBLE_TILE_PRIORITY : this._getPrefetchPriority(tile, prefetchRank);
     }
     if (!tile.isSelected && !tile.isVisible) {
-      return -1;
+      return this._getPrefetchPriority(tile, this._prefetchTiles.get(tile) ?? Infinity);
     }
 
     // RequestScheduler loads lower priority values first.
@@ -678,6 +714,14 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
       return SELECTED_TILE_PRIORITY + distance;
     }
     return VISIBLE_TILE_PRIORITY + distance;
+  }
+
+  /** Requests coverage after selected and visible tiles, finer ancestors first. */
+  private _getPrefetchPriority(tile: Tile2DHeader, rank: number): number {
+    // An evicted tile is no longer coverage, so its queued request is dropped
+    return rank < Infinity && this._cache.get(tile.id) === tile
+      ? PREFETCH_TILE_PRIORITY + rank
+      : -1;
   }
 
   /** Computes distance from the viewport center to the projected tile footprint. */
@@ -772,13 +816,14 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     const {maxRequests = 0} = this.opts;
     const selectedTiles = this._getSelectedTilesUnion();
     const visibleTiles = this._getVisibleTilesUnion();
+    const prefetchTiles = this._getPrefetchTilesUnion();
     const abortCandidates: Tile2DHeader<DataT>[] = [];
     let ongoingRequestCount = 0;
 
     for (const tile of this._cache.values()) {
       if (tile.isLoading) {
         ongoingRequestCount++;
-        if (!selectedTiles.has(tile) && !visibleTiles.has(tile)) {
+        if (!selectedTiles.has(tile) && !visibleTiles.has(tile) && !prefetchTiles.has(tile)) {
           abortCandidates.push(tile);
         }
       }
@@ -831,12 +876,16 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     const overflown = this._cache.size > maxCacheSize || this._cacheByteSize > maxCacheByteSize;
 
     if (overflown) {
-      for (const [id, tile] of this._cache) {
-        if (!visibleTiles.has(tile) && !selectedTiles.has(tile)) {
-          this._removeCachedTile(id, tile);
-          tile.abort();
-          this._handleTileUnload(tile);
-        }
+      const prefetchTiles = this._getPrefetchTilesUnion();
+      const candidates = Array.from(this._cache.values()).filter(
+        tile => !visibleTiles.has(tile) && !selectedTiles.has(tile)
+      );
+      // Evict stale tiles before coverage prefetched for the current views, each in LRU order
+      candidates.sort((a, b) => Number(prefetchTiles.has(a)) - Number(prefetchTiles.has(b)));
+      for (const tile of candidates) {
+        this._removeCachedTile(tile.id, tile);
+        tile.abort();
+        this._handleTileUnload(tile);
         if (this._cache.size <= maxCacheSize && this._cacheByteSize <= maxCacheByteSize) {
           break;
         }
@@ -941,6 +990,11 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     return this.opts.refinementStrategy || STRATEGY_DEFAULT;
   }
 
+  /** Whether ancestors of selected tiles are prefetched as coverage. */
+  get lodStrategy(): LODStrategy {
+    return this.opts.lodStrategy || 'none';
+  }
+
   /** Adapter currently used for traversal and tile metadata. */
   get adapter(): Tileset2DAdapter<ViewStateT> | null {
     return this.opts.adapter;
@@ -954,7 +1008,11 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
 
   /** Registers a consumer so cache pruning can account for its selected tiles. */
   attachConsumer(id: symbol): void {
-    this._consumers.set(id, {selectedTiles: new Set(), visibleTiles: new Set()});
+    this._consumers.set(id, {
+      selectedTiles: new Set(),
+      visibleTiles: new Set(),
+      prefetchTiles: new Map()
+    });
     this._updateStats();
   }
 
@@ -966,15 +1024,17 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     this._updateStats();
   }
 
-  /** Updates the selected and visible tile sets for one consumer. */
+  /** Updates the selected, visible and prefetched tiles for one consumer. */
   updateConsumer(
     id: symbol,
     selectedTiles: Tile2DHeader<DataT>[],
-    visibleTiles: Tile2DHeader<DataT>[]
+    visibleTiles: Tile2DHeader<DataT>[],
+    prefetchTiles: Map<Tile2DHeader<DataT>, number> = new Map()
   ): void {
     this._consumers.set(id, {
       selectedTiles: new Set(selectedTiles),
-      visibleTiles: new Set(visibleTiles)
+      visibleTiles: new Set(visibleTiles),
+      prefetchTiles
     });
     this._pruneRequests();
     this._resizeCache();
@@ -1163,6 +1223,17 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     const union = new Set<Tile2DHeader<DataT>>(this._tiles.filter(tile => tile.isVisible));
     for (const consumer of this._consumers.values()) {
       for (const tile of consumer.visibleTiles) {
+        union.add(tile);
+      }
+    }
+    return union;
+  }
+
+  /** Returns the union of prefetched coverage tiles across all consumers. */
+  private _getPrefetchTilesUnion(): Set<Tile2DHeader<DataT>> {
+    const union = new Set<Tile2DHeader<DataT>>(this._prefetchTiles.keys());
+    for (const consumer of this._consumers.values()) {
+      for (const tile of consumer.prefetchTiles.keys()) {
         union.add(tile);
       }
     }

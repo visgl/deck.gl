@@ -420,6 +420,43 @@ test('TileLayer#debounceTime', async () => {
   });
 });
 
+test('TileLayer#lodStrategy', () => {
+  const testViewport = new WebMercatorViewport({width: 1200, height: 400, zoom: 8});
+  const testCases = [
+    {
+      title: 'lodStrategy = none',
+      props: {getTileData: () => new Promise(() => {})},
+      onAfterUpdate: ({layer}) => {
+        const {tileset} = layer.state;
+        expect(tileset.opts.lodStrategy, 'assigns tileset#lodStrategy').toBe('none');
+        expect(tileset.tiles.length, 'requests the selected tiles').toBe(
+          tileset.selectedTiles.length
+        );
+      }
+    },
+    {
+      title: 'lodStrategy = coverage',
+      updateProps: {lodStrategy: 'coverage'},
+      onAfterUpdate: ({layer}) => {
+        const {tileset} = layer.state;
+        expect(tileset.opts.lodStrategy, 'assigns tileset#lodStrategy').toBe('coverage');
+        expect(tileset.tiles.length, 'requests coverage ancestors').toBeGreaterThan(
+          tileset.selectedTiles.length
+        );
+      }
+    }
+  ];
+
+  testLayer({
+    Layer: TileLayer,
+    viewport: testViewport,
+    testCases,
+    onError: err => {
+      throw err;
+    }
+  });
+});
+
 function sleep(ms) {
   return new Promise(resolve => {
     /* global setTimeout */

@@ -26,6 +26,7 @@ import {
   type TileLoadProps,
   type _TileZRange as ZRange,
   type RefinementStrategy,
+  type LODStrategy,
   _TILE_REFINEMENT_DEFAULT as STRATEGY_DEFAULT
 } from '@deck.gl/geo-layers';
 import {_Tile2DView as Tile2DView} from '@deck.gl/geo-layers';
@@ -91,6 +92,7 @@ const defaultProps: DefaultProps<Tile2DLayerProps> = {
   maxCacheSize: null,
   maxCacheByteSize: null,
   refinementStrategy: STRATEGY_DEFAULT,
+  lodStrategy: 'none',
   zRange: null,
   maxRequests: 6,
   debounceTime: 0,
@@ -107,6 +109,7 @@ const TILE2D_LAYER_DEFAULT_OPTION_VALUES = {
   minZoom: 0,
   tileSize: 512,
   refinementStrategy: STRATEGY_DEFAULT,
+  lodStrategy: 'none',
   extent: null,
   maxRequests: 6,
   debounceTime: 0,
@@ -160,6 +163,8 @@ export type Tile2DLayerProps<DataT = unknown> = CompositeLayerProps & {
   maxCacheByteSize?: number | null;
   /** Placeholder refinement strategy. */
   refinementStrategy?: RefinementStrategy;
+  /** Whether lower resolution ancestors of selected tiles are prefetched as coverage. */
+  lodStrategy?: LODStrategy;
   /** Elevation bounds used during geospatial tile selection. */
   zRange?: ZRange | null;
   /** Maximum concurrent requests. */
@@ -383,6 +388,7 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
       maxCacheSize,
       maxCacheByteSize,
       refinementStrategy,
+      lodStrategy,
       extent,
       maxZoom,
       minZoom,
@@ -438,6 +444,12 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
       'refinementStrategy',
       refinementStrategy,
       TILE2D_LAYER_DEFAULT_OPTION_VALUES.refinementStrategy
+    );
+    this._assignTilesetOptionIfExplicit(
+      options,
+      'lodStrategy',
+      lodStrategy,
+      TILE2D_LAYER_DEFAULT_OPTION_VALUES.lodStrategy
     );
     this._assignTilesetOptionIfExplicit(
       options,

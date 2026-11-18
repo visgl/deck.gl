@@ -2,10 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
-import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-import {WebMercatorViewport, OrthographicView, Viewport} from '@deck.gl/core';
+import {test, expect, vi} from 'vitest';
+import {_Tileset2D as Tileset2D, Tile2DHeader} from '@deck.gl/geo-layers';
+import {
+  WebMercatorViewport,
+  OrthographicView,
+  Viewport,
+  _GlobeViewport as GlobeViewport
+} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
+import {Tile2DView} from '../../../../modules/geo-layers/src/tileset-2d/tile-2d-view';
 
 const testViewState = {
   bearing: 0,
@@ -145,6 +151,172 @@ test('Tileset2D#getRequestPriority keeps unprojectable tiles within priority tie
 
   tileset.finalize();
 });
+
+test('Tileset2D#lodStrategy', () => {
+  const tileset = new Tileset2D({getTileData, onTileLoad: () => {}});
+  tileset.update(testViewport);
+  expect(
+    tileset.tiles.map(tile => tile.id),
+    'none requests the selected tile'
+  ).toEqual(['1171-1566-12']);
+
+  tileset.setOptions({lodStrategy: 'coverage'});
+  tileset.update(testViewport);
+  expect(
+    tileset.tiles.map(tile => tile.id),
+    'coverage requests its ancestors'
+  ).toEqual(['0-0-0', '585-783-11', '1171-1566-12']);
+
+  tileset.finalize();
+});
+
+test('Tileset2D#lodStrategy requests coverage after selected and visible tiles', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    maxCacheSize: 10
+  });
+  tileset.update(new WebMercatorViewport({...testViewState, longitude: -100, latitude: 80}));
+  const placeholder = tileset.selectedTiles![0];
+  tileset.update(new GlobeViewport(testViewState));
+  // As if refinement kept the previous tile as a placeholder
+  placeholder.isVisible = true;
+  const priority = (id: string) => (tileset as any)._getRequestPriority(tileset._cache.get(id));
+
+  expect(priority('1171-1566-12'), 'selected tile first').toBeLessThan(priority(placeholder.id));
+  expect(priority(placeholder.id), 'then visible placeholders').toBeLessThan(
+    priority('585-783-11')
+  );
+  expect(priority('585-783-11'), 'then the parent').toBeLessThan(priority('18-24-6'));
+  expect(priority('18-24-6'), 'then the coverage floor').toBeLessThan(priority('4-6-4'));
+  placeholder.isVisible = false;
+  expect(priority(placeholder.id), 'stale tiles are dropped').toBeLessThan(0);
+
+  tileset.finalize();
+});
+
+test('Tileset2D#lodStrategy does not abort coverage requests', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    maxRequests: 1
+  });
+  tileset.update(new WebMercatorViewport({...testViewState, longitude: -100, latitude: 80}));
+  const abort = vi.spyOn(Tile2DHeader.prototype, 'abort');
+  tileset.update(testViewport);
+  const abortedIds = abort.mock.contexts.map(tile => (tile as Tile2DHeader).id);
+  abort.mockRestore();
+
+  expect(abortedIds.sort(), 'only stale requests are aborted').toEqual([
+    '455-229-11',
+    '910-459-12'
+  ]);
+  for (const id of ['1171-1566-12', '585-783-11', '0-0-0']) {
+    expect(tileset._cache.get(id)?.isLoading, `${id} request continues`).toBe(true);
+  }
+
+  tileset.finalize();
+});
+
+test('Tileset2D#lodStrategy unions coverage across views', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    maxRequests: 1
+  });
+  const flatView = new Tile2DView(tileset);
+  const globeView = new Tile2DView(tileset);
+  const abort = vi.spyOn(Tile2DHeader.prototype, 'abort');
+  flatView.update(new WebMercatorViewport(testViewState));
+  globeView.update(new GlobeViewport(testViewState));
+  expect(abort, 'coverage requests of both views continue').not.toHaveBeenCalled();
+  abort.mockRestore();
+  const priority = (id: string) => (tileset as any)._getRequestPriority(tileset._cache.get(id));
+
+  expect(
+    globeView.selectedTiles!.map(tile => tile.id),
+    'globe selection'
+  ).toEqual(['585-782-11', '1171-1566-12']);
+  expect(
+    tileset.tiles.map(tile => tile.id),
+    'flat and globe coverage are requested'
+  ).toEqual([
+    '0-0-0',
+    '4-6-4',
+    '18-24-6',
+    '292-391-10',
+    '585-782-11',
+    '585-783-11',
+    '1171-1566-12'
+  ]);
+  expect(priority('1171-1566-12'), 'selected tiles first').toBe(priority('585-782-11'));
+  expect(priority('585-782-11'), 'then parents').toBeLessThan(priority('585-783-11'));
+  expect(priority('585-783-11'), 'flat and globe parents share a rank').toBe(
+    priority('292-391-10')
+  );
+  expect(priority('292-391-10'), 'then coverage floors').toBeLessThan(priority('0-0-0'));
+  expect(priority('0-0-0'), 'flat and globe floors share a rank').toBe(priority('18-24-6'));
+  expect(priority('18-24-6'), 'then the globe fallback').toBeLessThan(priority('4-6-4'));
+
+  flatView.finalize();
+  globeView.finalize();
+  tileset.finalize();
+});
+
+test('Tileset2D#lodStrategy evicts stale tiles before coverage', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    maxCacheSize: 5
+  });
+  const staticView = new Tile2DView(tileset);
+  const movingView = new Tile2DView(tileset);
+  staticView.update(testViewport);
+  movingView.update(new WebMercatorViewport({...testViewState, longitude: -100, latitude: 80}));
+  // The moving view leaves its tiles, which were requested after the static view's coverage
+  movingView.update(new WebMercatorViewport({...testViewState, longitude: 100, latitude: -30}));
+
+  expect(tileset._cache.has('585-783-11'), 'coverage of the static view is kept').toBe(true);
+  for (const id of ['910-459-12', '455-229-11']) {
+    expect(tileset._cache.has(id), `stale ${id} is evicted`).toBe(false);
+  }
+
+  staticView.finalize();
+  movingView.finalize();
+  tileset.finalize();
+});
+
+for (const consumer of ['default', 'independent']) {
+  test(`Tileset2D#lodStrategy keeps loaded tiles above coverage (${consumer})`, async () => {
+    const pendingZooms = new Set<number>();
+    const tileset = new Tileset2D({
+      getTileData: ({index}) => (pendingZooms.has(index.z) ? new Promise(() => {}) : {}),
+      lodStrategy: 'coverage',
+      maxRequests: 0
+    });
+    const view = consumer === 'independent' ? new Tile2DView(tileset) : null;
+    const update = (zoom: number) =>
+      (view || tileset).update(
+        new WebMercatorViewport({...testViewState, width: 256, height: 256, zoom})
+      );
+    update(13);
+    await vi.waitFor(() => expect(tileset.tiles.every(tile => tile.isLoaded)).toBe(true));
+
+    // Zoom out past the prefetched parents while the new tiles load
+    pendingZooms.add(11);
+    update(11);
+    const visibleIds = tileset.tiles
+      .filter(tile => (view || tileset).isTileVisible(tile))
+      .map(tile => tile.id);
+    expect(visibleIds, 'loaded zoom 12 tile is shown above the zoom 0 coverage').toEqual([
+      '0-0-0',
+      '1171-1566-12'
+    ]);
+
+    view?.finalize();
+    tileset.finalize();
+  });
+}
 
 test('Tileset2D#updateOnModelMatrix', () => {
   const tileset = new Tileset2D({

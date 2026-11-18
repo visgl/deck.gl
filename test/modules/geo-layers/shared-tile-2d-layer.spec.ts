@@ -288,6 +288,19 @@ describe('Tile2DLayer', () => {
     expect(tilesetOptions).not.toHaveProperty('maxZoom');
   });
 
+  it('forwards lodStrategy to the owned tileset', () => {
+    const data = 'https://example.com/{z}/{x}/{y}.json';
+    const coverageLayer = new Tile2DLayer({
+      id: 'shared-tile-coverage',
+      data,
+      lodStrategy: 'coverage'
+    });
+    const defaultLayer = new Tile2DLayer({id: 'shared-tile-default', data});
+
+    expect((coverageLayer as any)._getTilesetOptions().lodStrategy).toBe('coverage');
+    expect((defaultLayer as any)._getTilesetOptions()).not.toHaveProperty('lodStrategy');
+  });
+
   it('shares one Tileset2D across multiple consumers and views', async () => {
     const sharedTileset = Tileset2D.fromTileSource<TestTileData>(createMockTileSource(), {
       extent: null

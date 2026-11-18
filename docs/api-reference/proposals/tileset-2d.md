@@ -65,6 +65,7 @@ Provide either `getTileData` or `tileSource`. Standard deck.gl viewports work wi
 | `zoomOffset` | `0` | Adjustment applied before source-zoom rounding |
 | `visibleMinZoom`, `visibleMaxZoom` | `null` | View zoom range where selection and rendering are enabled |
 | `refinementStrategy` | `'best-available'` | Placeholder policy described below |
+| `lodStrategy` | `'none'` | `'coverage'` also requests lower resolution ancestors of each view's selection; see [TileLayer](../geo-layers/tile-layer.md#lodstrategy) |
 | `zRange` | `null` | Optional elevation bounds for traversal |
 | `onTileLoad`, `onTileUnload`, `onTileError` | No-op | Owner callbacks for cache events; layers also subscribe independently |
 
@@ -143,6 +144,6 @@ Legacy `update(viewport, {zRange, modelMatrix})` drives one default consumer and
 
 Standard applications do not need a custom adapter. `Tileset2DAdapter<ViewStateT>` is useful when a source has a different tile pyramid or an application uses a non-deck view representation. Its `getTileIndices(context)` selects indices, and `getTileBoundingBox(context, index)` supplies geographic or planar bounds. The public `tile2DDeckAdapter` delegates to the same traversal utility as the compatibility layers.
 
-Low-level `attachConsumer(id)`, `updateConsumer(id, selectedTiles, visibleTiles)`, and `detachConsumer(id)` control retention for custom consumers. `getTile(index, true)` starts or reuses a request; `prepareTiles()` synchronizes the tile tree before refinement. Normal `Tile2DLayer` applications must not call these methods themselves.
+Low-level `attachConsumer(id)`, `updateConsumer(id, selectedTiles, visibleTiles, prefetchTiles?)`, and `detachConsumer(id)` control retention for custom consumers. `getTile(index, true)` starts or reuses a request; `getPrefetchTiles(viewport, selectedTiles)` starts or reuses the coverage requests of a view; `prepareTiles()` synchronizes the tile tree before refinement. Normal `Tile2DLayer` applications must not call these methods themselves.
 
 See the [shared-tileset example](/examples-v10/shared-tile-2d-layer) for ownership, subscriptions, and multiple consumers in one application.
