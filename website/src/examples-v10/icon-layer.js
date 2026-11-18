@@ -4,7 +4,7 @@
 
 import React, {Component} from 'react';
 import styled from 'styled-components';
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App from 'v10-website-examples/icon/app';
 
@@ -93,8 +93,6 @@ class IconDemo extends Component {
           device={this.props.device}
           {...otherProps}
           onDataLoad={count => this.props.onStateChange({count})}
-          iconAtlas={`${DATA_URI}/../examples/icon/location-icon-atlas.png`}
-          iconMapping={`${DATA_URI}/../examples/icon/location-icon-mapping.json`}
           showCluster={params.cluster.value}
         />
       </IconDemoContainer>

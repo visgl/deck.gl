@@ -83,8 +83,8 @@ export default function App({
   device,
   data = DATA_URL,
   onDataLoad,
-  iconMapping = 'data/location-icon-mapping.json',
-  iconAtlas = 'data/location-icon-atlas.png',
+  iconMapping = new URL('./data/location-icon-mapping.json', import.meta.url).href,
+  iconAtlas = new URL('./data/location-icon-atlas.png', import.meta.url).href,
   showCluster = true,
   mapStyle = MAP_STYLE
 }: {
