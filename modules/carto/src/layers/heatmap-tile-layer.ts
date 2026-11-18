@@ -233,6 +233,7 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
     return changeFlags.somethingChanged;
   }
 
+  /** Refresh the palette texture when its colors or the Deck color convention change. */
   updateState(opts: UpdateParameters<this>) {
     const {props, oldProps} = opts;
     super.updateState(opts);
