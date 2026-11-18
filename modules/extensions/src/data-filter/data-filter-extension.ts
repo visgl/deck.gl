@@ -294,6 +294,7 @@ export default class DataFilterExtension extends LayerExtension<
       filterModel.device.submit(commandEncoder.finish());
 
       if (!didDraw) {
+        if (this.isComposite) this.setNeedsUpdate();
         this.setNeedsRedraw();
         return;
       }

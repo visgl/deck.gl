@@ -40,7 +40,10 @@ export default abstract class LayerExtension<OptionsT = unknown> {
   }
 
   /** Supplies shader props for a layer's offscreen aggregation pass. */
-  getAggregationShaderProps(this: Layer, extension: this): Record<string, unknown> | undefined {
+  getAggregationShaderProps(
+    this: Layer,
+    extension: this
+  ): Record<string, Record<string, unknown>> | undefined {
     return undefined;
   }
 

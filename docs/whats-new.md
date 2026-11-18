@@ -148,6 +148,8 @@ The website gallery includes three new sections: Arrow Layers, Visual Effects, a
 
 ### Extension updates
 
+[`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) can filter the points that contribute to a `HeatmapLayer` on WebGPU.
+
 [`MaskExtension`](./api-reference/extensions/mask-extension.md) supports up to four masks on WebGPU in map and globe views, including inverted masks and picking.
 
 [`TerrainExtension`](./api-reference/extensions/terrain-extension.md) supports offset fitting and texture draping on WebGPU, including picking on draped layers.
