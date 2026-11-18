@@ -4,6 +4,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Tile coverage prefetching
+
+[`TileLayer`](./api-reference/geo-layers/tile-layer.md#lodstrategy) and [`TerrainLayer`](./api-reference/geo-layers/terrain-layer.md) accept `lodStrategy: 'coverage'`. Alongside the tiles in view, the layer requests their lower resolution ancestors and shows them while sharper tiles load, which reduces blank areas during camera transitions. The default, `'none'`, keeps the current behavior.
+
 ### Contour compute aggregation
 
 On WebGPU devices, [ContourLayer](./api-reference/aggregation-layers/contour-layer.md#compute-aggregation) aggregates points in a compute shader before generating contours.
