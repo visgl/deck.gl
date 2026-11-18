@@ -7,6 +7,7 @@ import {Deck, LightingEffect, log, MapView, PostProcessEffect} from '@deck.gl/co
 import {ScatterplotLayer} from '@deck.gl/layers';
 import * as fc from 'fast-check';
 import React from 'react';
+import {device} from '@deck.gl/test-utils/vitest';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
 import {createRoot, roots, unmountAtNode} from '@deck.gl/react/reconciler/renderer';
@@ -124,8 +125,9 @@ describe('renderer', () => {
 
       try {
         const root = createRoot(createTestRootElement());
-        const first = {layers: [new ScatterplotLayer({id: 'first', data: []})]};
-        const second = {layers: [new ScatterplotLayer({id: 'second', data: []})]};
+        // The shared test device keeps each configured `Deck` from creating a WebGL context.
+        const first = {device, layers: [new ScatterplotLayer({id: 'first', data: []})]};
+        const second = {device, layers: [new ScatterplotLayer({id: 'second', data: []})]};
         root.configure(first);
         root.configure(second);
 
@@ -231,7 +233,7 @@ describe('renderer', () => {
       const canvas = document.createElement('canvas');
       const root = createRoot(canvas);
 
-      expect(() => root.configure({canvas, interleaved: true} as never)).not.toThrow();
+      expect(() => root.configure({canvas, device, interleaved: true} as never)).not.toThrow();
       expect(root.store.getState().deckgl).toBeInstanceOf(Deck);
     });
 
