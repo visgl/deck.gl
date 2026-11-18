@@ -194,7 +194,7 @@ const projects = [
         test: {
           name: 'node',
           environment: 'node',
-          include: ['test/modules/**/*.node.spec.ts', ...privateNodeTests],
+          include: ['test/modules/**/*.node.spec.ts', 'examples-v10/**/*.node.spec.ts', ...privateNodeTests],
           globals: false,
           testTimeout: 30000,
           setupFiles: ['./test/setup/vitest-node-setup.ts'],

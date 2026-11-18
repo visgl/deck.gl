@@ -9,7 +9,14 @@ import {CubeGeometry, Model, ModelNode, GroupNode} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {device as webglDevice} from '@deck.gl/test-utils/vitest';
 import {makeGPUVectorFromArrow} from '@luma.gl/graph/arrow';
-import {Vector, vectorFromArray, FixedSizeList, Field, Float32} from 'apache-arrow';
+import {
+  Vector,
+  vectorFromArray,
+  tableFromArrays,
+  FixedSizeList,
+  Field,
+  Float32
+} from 'apache-arrow';
 
 for (const backend of ['webgl', 'webgpu'] as const) {
   test(`Scenegraph columns preserve model identity and borrowed buffers (${backend})`, async ({
@@ -72,6 +79,24 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       expect(layer.getNumInstances()).toBe(2);
       expect((await deck.pickObjectAsync({x: 84, y: 64}))?.index).toBe(1);
       const firstModel = model;
+      const sqlProps = {
+        ...props,
+        data: tableFromArrays({size: [10, 10]}),
+        getOrientation: {sql: 'FLOAT32x3(0, 90, 0)'},
+        getScale: {sql: 'FLOAT32x3(1000, 1000, 1000)'},
+        getTranslation: {sql: 'FLOAT32x3(1000, 0, 0)'},
+        getTransformMatrix: {sql: 'ARRAY[size,0,0,0,0,size,0,0,0,0,size,0,0,0,0,1]'}
+      };
+      layer = new ScenegraphLayer(sqlProps);
+      deck.setProps({layers: [layer]});
+      await expect.poll(() => layer.isLoaded).toBe(true);
+      expect((await deck.pickObjectAsync({x: 84, y: 64}))?.index).toBe(1);
+      expect(await deck.pickObjectAsync({x: 100, y: 64})).toBeNull();
+      layer = new ScenegraphLayer({...sqlProps, data: tableFromArrays({size: [20, 20]})});
+      deck.setProps({layers: [layer]});
+      await expect.poll(() => layer.isLoaded).toBe(true);
+      expect((await deck.pickObjectAsync({x: 100, y: 64}))?.index).toBe(1);
+      expect(model).toBe(firstModel);
       const gpuProps = {
         ...props,
         positions,

@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {createIterable, type _ColumnDefinition as ColumnDefinition} from '@deck.gl/core';
+import {
+  createIterable,
+  _isArrowVector as isArrowVector,
+  type _ColumnDefinition as ColumnDefinition
+} from '@deck.gl/core';
 import {Buffer, type Device} from '@luma.gl/core';
 import {MATRIX_ATTRIBUTES, getMeshInstanceTransform} from './matrix';
 
@@ -59,7 +63,9 @@ export function prepareMeshColumnTransforms(
   if (!descriptor) {
     const accessors = TRANSFORM_ACCESSORS.map(name => props[name]);
     const constant =
-      (typeof accessors[0] !== 'function' && accessors[0]?.length === 16) ||
+      (!isArrowVector(accessors[0]) &&
+        typeof accessors[0] !== 'function' &&
+        accessors[0]?.length === 16) ||
       accessors.every(accessor => Array.isArray(accessor));
     const count = constant ? 1 : length;
     const values = new Float32Array(count * 12);
@@ -67,13 +73,22 @@ export function prepareMeshColumnTransforms(
     for (let index = 0; index < count; index++) {
       info.index = index;
       const row = rows.at(index);
-      const matrix = typeof accessors[0] === 'function' ? accessors[0](row, info) : accessors[0];
+      const matrix = readTransformAccessor(accessors[0], row, info, length, 16, []);
       const [orientation, scale, translation] =
         matrix?.length === 16
           ? [[], [], []]
           : accessors
               .slice(1)
-              .map(accessor => (typeof accessor === 'function' ? accessor(row, info) : accessor));
+              .map((accessor, accessorIndex) =>
+                readTransformAccessor(
+                  accessor,
+                  row,
+                  info,
+                  length,
+                  3,
+                  accessorIndex === 1 ? [1, 1, 1] : [0, 0, 0]
+                )
+              );
       values.set(getMeshInstanceTransform(matrix, orientation, scale, translation), index * 12);
     }
     descriptor = {value: values, constant};
@@ -97,4 +112,36 @@ export function prepareMeshColumnTransforms(
       }
     ])
   );
+}
+
+/** Reads an Arrow transform row while preserving callback and constant semantics. */
+function readTransformAccessor(
+  accessor: any,
+  row: unknown,
+  info: {index: number},
+  length: number,
+  size: number,
+  fallback: number[]
+): number[] {
+  if (!isArrowVector(accessor)) {
+    return typeof accessor === 'function' ? accessor(row, info) : accessor;
+  }
+  if (accessor.length !== length) {
+    throw new Error('Mesh transform column length must match data');
+  }
+  const value = accessor.get(info.index);
+  if (value == null) return fallback;
+  if ((accessor.type as {listSize?: number}).listSize !== size || value.length !== size) {
+    throw new Error('Invalid mesh transform column size');
+  }
+  return Array.from(value as Iterable<number | bigint | null>, (component, axis) => {
+    if (component == null) return size === 16 ? Number(axis % 5 === 0) : fallback[axis];
+    if (
+      (typeof component !== 'number' && typeof component !== 'bigint') ||
+      !Number.isFinite(Number(component))
+    ) {
+      throw new Error('Mesh transform columns require finite numbers');
+    }
+    return Number(component);
+  });
 }

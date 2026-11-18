@@ -21,7 +21,9 @@ See [profile page on sketchfab](https://sketchfab.com/3d-models/boeing747-1a7563
 licensed under [Creative Commons](https://creativecommons.org/licenses/by/4.0/).
 
 The example tries to load live flight data from [Opensky Network](https://opensky-network.org)
-and falls back to a bundled snapshot if the API is unavailable.
+every 60 seconds. If unavailable, it cycles through three bundled-data frames every five
+seconds: the original snapshot and simulated positions extrapolated by 60 and 120 seconds
+from speed and heading. The panel distinguishes live positions from simulated replay.
 
 To use your own data, check out
 the [documentation of ScenegraphLayer](../../../docs/api-reference/mesh-layers/scenegraph-layer.md).
