@@ -6,6 +6,8 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Target release date: EOY 2026. Alpha releases available.
 
+The highlights below describe the final v10 release target. In the current alpha, WebGPU is opt-in. Full WebGPU coverage, GeoArrow union and WKB rendering, and the React Fiber API (including the legacy import path) are planned for the final release.
+
 ### Core Improvements
 
 - **WebGPU** — WebGPU is now the default renderer with full feature support.
