@@ -83,13 +83,22 @@ export const renderer: ReturnType<typeof reactReconciler> = reactReconciler(
   >
 );
 
-// Lets React DevTools show the tree inside each `DeckGL` root. react-reconciler@0.33 reads the
-// name and version from the host config; the argument only satisfies older typings.
-renderer.injectIntoDevTools({
-  bundleType: process.env.NODE_ENV === 'production' ? 0 : 1,
-  rendererPackageName: RENDERER_PACKAGE_NAME,
-  version: RENDERER_VERSION
-});
+/**
+ * Registers the renderer with React DevTools, which then shows the tree inside each `DeckGL`
+ * root. Called once when this module loads. react-reconciler@0.33 reads the name and version
+ * from the host config; the argument only satisfies older typings.
+ *
+ * @internal
+ */
+export function registerWithDevTools(): void {
+  renderer.injectIntoDevTools({
+    bundleType: process.env.NODE_ENV === 'production' ? 0 : 1,
+    rendererPackageName: RENDERER_PACKAGE_NAME,
+    version: RENDERER_VERSION
+  });
+}
+
+registerWithDevTools();
 
 /**
  * Active reconciler roots registry

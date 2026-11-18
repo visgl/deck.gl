@@ -148,11 +148,17 @@ type RootWidgets = DeckProps<ViewOrViews>['widgets'];
 
 /** The root props that are combined with committed JSX descriptors. */
 interface RootDescriptorProps {
+  /** The root's `effects` prop. */
   _passedEffects?: Effect[];
+  /** The root's `layers` prop. */
   _passedLayers: LayersList;
+  /** The root's `views` prop. */
   _passedViews?: ViewOrViews;
+  /** The root's `widgets` prop. */
   _passedWidgets?: RootWidgets;
+  /** True when the root drives a map overlay instead of a standalone `Deck`. */
   isExternalOverlay?: boolean;
+  /** Sends JSX views to the external overlay. */
   forwardViews?: boolean;
 }
 

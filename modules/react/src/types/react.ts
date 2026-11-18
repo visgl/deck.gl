@@ -18,6 +18,7 @@ export type OnDeckChange<Instance = Deck> = (instance: Instance | null) => void;
 
 /** Shared React-owned props for a concrete deck.gl renderer root. */
 export type DeckGLRootProps<Instance, Props, MapT = never> = Props & {
+  /** deck.gl elements, and components that render them. */
   children?: ReactNode;
   /** Lifecycle notification for the root-specific deck.gl instance and its cleanup. */
   onDeckChange?: OnDeckChange<Instance>;

@@ -28,16 +28,20 @@ interface RootErrorBoundaryState {
  * does, so the error surfaces from `DeckGL` like an error from any other component.
  */
 export class RootErrorBoundary extends Component<RootErrorBoundaryProps, RootErrorBoundaryState> {
+  /** Starts without a caught error. */
   state: RootErrorBoundaryState = {failed: false};
 
+  /** Records that a descendant threw, so the next render shows nothing. */
   static getDerivedStateFromError(): RootErrorBoundaryState {
     return {failed: true};
   }
 
+  /** Hands the caught error to `onError`. */
   componentDidCatch(error: unknown): void {
     this.props.onError(error);
   }
 
+  /** Renders the children until an error is caught, then nothing. */
   render(): ReactNode {
     return this.state.failed ? null : this.props.children;
   }
