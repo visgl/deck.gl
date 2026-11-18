@@ -185,6 +185,27 @@ const commonPosition2 = layer.projectPosition(lnglat, {
 });
 ```
 
+### Deck props set to `undefined`
+
+A [`Deck`](./api-reference/core/deck.md) prop set to `undefined`, in the constructor or in
+`setProps`, now uses its default value. In the constructor this is the same as leaving the prop
+out. In `setProps`, leaving a prop out still keeps its current value. Previously an explicit
+`undefined` replaced the default. For some props this threw an error or stopped
+rendering, such as a callback like `onAfterRender: debug ? callback : undefined`.
+
+A few props behaved differently with `undefined`. To keep that behavior, pass these instead:
+
+| Prop | `undefined` now | To get the previous behavior |
+| --- | --- | --- |
+| `width`, `height` | `'100%'` | `null`, to leave the canvas size to your CSS |
+| `onError` | Logs the error (the default) | `null`, to ignore errors |
+| `debug` | `false` | `true`, to enable GPU debug mode |
+| `layers`, `widgets` in `setProps` | Removes them | Leave the prop out of `setProps` to keep the current ones |
+| `useDevicePixels` | `true` | `false`, to render one canvas pixel per CSS pixel |
+| `touchAction` | `'none'` | The `touch-action` value you want, such as `'manipulation'` |
+
+`null` is unchanged. Props without a default are also unchanged.
+
 ## Upgrading to v9.4
 
 ### GlobeView meter offsets
