@@ -323,7 +323,9 @@ Notes:
 
 - The built-in WebGPU compute path accepts buffers with `STORAGE` or `COPY_SRC` usage.
 - Use positions in the view's coordinate system for custom views.
-- The compute path requires a configuration without extensions or CPU position preprojection.
+- Borrowed columns require positions that do not need CPU preprojection.
+- The built-in compute aggregator supports [ClipExtension](../extensions/clip-extension.md)
+  with borrowed `float32x3` positions and weights whose buffers also have `VERTEX` usage.
 
 ## Source
 
