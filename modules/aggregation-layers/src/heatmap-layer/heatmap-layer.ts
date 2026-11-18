@@ -308,6 +308,9 @@ export default class HeatmapLayer<
     return new TriangleLayerClass(
       this.getSubLayerProps({
         id: 'triangle-layer',
+        extensions: this.props.extensions.filter(
+          extension => extension.constructor['extensionName'] !== 'DataFilterExtension'
+        ),
         updateTriggers
       }),
       {
@@ -589,14 +592,15 @@ export default class HeatmapLayer<
     });
     this._createWeightsTransform(weightsTransformShaders);
 
-    const maxWeightsTransformShaders = this.getShaders({
+    const maxWeightsTransformShaders = {
+      shaderAssembler: this.context.shaderAssembler,
       // Reduction operates on texture values, not projected positions or sizes.
       defines: {USE_EXTERNAL_PROJECTION: false},
       source: maxSource,
       vs: maxVs,
       fs: maxFs,
       modules: [maxWeightUniforms]
-    });
+    };
     const maxWeightTransform = new TextureTransform(device, {
       id: `${this.id}-max-weights-transform`,
       targetTexture: maxWeightsTexture!,
@@ -840,6 +844,12 @@ export default class HeatmapLayer<
       },
       weight: weightProps
     });
+    for (const extension of this.props.extensions) {
+      const shaderProps = extension.getAggregationShaderProps.call(this, extension);
+      if (shaderProps) {
+        weightsTransform.model.shaderInputs.setProps(shaderProps);
+      }
+    }
     weightsTransform.run({
       parameters: {viewport: [0, 0, textureSize, textureSize]},
       clearColor: [0, 0, 0, 0]

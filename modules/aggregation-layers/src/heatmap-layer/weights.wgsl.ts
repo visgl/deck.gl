@@ -59,6 +59,8 @@ fn fragmentMain(varyings: WeightVaryings) -> @location(0) vec4<f32> {
 
   let gaussian = exp(-pow(2.0 * distanceFromCenter, 2.0) / 0.05555) /
     (1.77245385 * 0.166666);
-  return varyings.weights * gaussian;
+  var weights = varyings.weights * gaussian;
+  DECKGL_FILTER_COLOR(&weights, fragmentGeometry);
+  return weights;
 }
 `;
