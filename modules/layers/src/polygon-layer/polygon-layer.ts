@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor, ArrowAccessorFunction} from '@deck.gl/core';
 import {
   Accessor,
   AccessorFunction,
@@ -148,28 +149,28 @@ type _PolygonLayerProps<DataT = unknown> = {
   lineDashJustified?: boolean;
 
   /** Called on each object in the data stream to retrieve its corresponding polygon. */
-  getPolygon?: AccessorFunction<DataT, any>;
+  getPolygon?: ArrowAccessorFunction<DataT, any>;
 
   /**
    * Fill collor value or accessor.
    *
    * @default [0, 0, 0, 255]
    */
-  getFillColor?: Accessor<DataT, Color>;
+  getFillColor?: ArrowAccessor<DataT, Color>;
 
   /**
    * Line color value or accessor.
    *
    * @default [0, 0, 0, 255]
    */
-  getLineColor?: Accessor<DataT, Color>;
+  getLineColor?: ArrowAccessor<DataT, Color>;
 
   /**
    * Line width value or accessor.
    *
    * @default 1
    */
-  getLineWidth?: Accessor<DataT, number>;
+  getLineWidth?: ArrowAccessor<DataT, number>;
 
   /**
    * Elevation valur or accessor.
@@ -178,7 +179,7 @@ type _PolygonLayerProps<DataT = unknown> = {
    *
    * @default 1000
    */
-  getElevation?: Accessor<DataT, number>;
+  getElevation?: ArrowAccessor<DataT, number>;
 
   /**
    * This property has been moved to `PathStyleExtension`.
@@ -242,15 +243,15 @@ const defaultProps: DefaultProps<PolygonLayerProps> = {
   lineMiterLimit: 4,
   lineAntialiasing: false,
 
-  getPolygon: {type: 'accessor', value: (f: any) => f.polygon},
+  getPolygon: {type: 'accessor', arrow: 'row', value: (f: any) => f.polygon},
   // Polygon fill color
-  getFillColor: {type: 'accessor', value: defaultFillColor},
+  getFillColor: {type: 'accessor', arrow: 'row', value: defaultFillColor},
   // Point, line and polygon outline color
-  getLineColor: {type: 'accessor', value: defaultLineColor},
+  getLineColor: {type: 'accessor', arrow: 'row', value: defaultLineColor},
   // Line and polygon outline accessors
-  getLineWidth: {type: 'accessor', value: 1},
+  getLineWidth: {type: 'accessor', arrow: 'row', value: 1},
   // Polygon extrusion accessor
-  getElevation: {type: 'accessor', value: 1000},
+  getElevation: {type: 'accessor', arrow: 'row', value: 1000},
 
   // Optional material for 'lighting' shader module
   material: true
@@ -318,7 +319,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
-      let polygon = getPolygon(object, objectInfo);
+      let polygon = (getPolygon as AccessorFunction<DataT, any>)(object, objectInfo);
       if (_normalize) {
         polygon = Polygon.normalize(polygon, positionSize);
       }
@@ -388,16 +389,20 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
     /** Number of color channels configured for the stroke child. */
     const strokeColorSize = this.props._subLayerProps?.stroke?.colorFormat === 'RGB' ? 3 : 4;
     /** Fill accessor encoded for the fill child's attribute. */
-    const fillColor = this.getSubLayerColorAccessor(getFillColor, defaultFillColor, fillColorSize);
+    const fillColor = this.getSubLayerColorAccessor(
+      getFillColor as Accessor<DataT, Color>,
+      defaultFillColor,
+      fillColorSize
+    );
     /** Wireframe accessor encoded for the fill child's attribute. */
     const wireframeColor = this.getSubLayerColorAccessor(
-      getLineColor,
+      getLineColor as Accessor<DataT, Color>,
       defaultLineColor,
       fillColorSize
     );
     /** Stroke accessor encoded for the path child's attribute. */
     const strokeColor = this.getSubLayerColorAccessor(
-      getLineColor,
+      getLineColor as Accessor<DataT, Color>,
       defaultLineColor,
       strokeColorSize
     );

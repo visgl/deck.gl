@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor, ArrowAccessorFunction} from '@deck.gl/core';
 import {normalizeByteColor4} from '@luma.gl/shaders';
 import {CompositeLayer, createIterable, log} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
@@ -91,15 +92,15 @@ type _TextLayerProps<DataT> = {
   /** Background color accessor.
    * @default [255, 255, 255, 255]
    */
-  getBackgroundColor?: Accessor<DataT, Color>;
+  getBackgroundColor?: ArrowAccessor<DataT, Color>;
   /** Border color accessor.
    * @default [0, 0, 0, 255]
    */
-  getBorderColor?: Accessor<DataT, Color>;
+  getBorderColor?: ArrowAccessor<DataT, Color>;
   /** Border width accessor.
    * @default 0
    */
-  getBorderWidth?: Accessor<DataT, number>;
+  getBorderWidth?: ArrowAccessor<DataT, number>;
   /** The border radius of the background.
    * If a number is supplied, it is the same border radius in pixel for all corners.
    * If an array of 4 is supplied, it is interpreted as `[bottom_right_corner, top_right_corner, bottom_left_corner, top_left_corner]` border radius in pixel.
@@ -159,41 +160,41 @@ type _TextLayerProps<DataT> = {
   /**
    * Label text accessor
    */
-  getText?: AccessorFunction<DataT, string>;
+  getText?: ArrowAccessorFunction<DataT, string>;
   /**
    * Anchor position accessor
    */
-  getPosition?: Accessor<DataT, Position>;
+  getPosition?: ArrowAccessor<DataT, Position>;
   /**
    * Label color accessor
    * @default [0, 0, 0, 255]
    */
-  getColor?: Accessor<DataT, Color>;
+  getColor?: ArrowAccessor<DataT, Color>;
   /**
    * Label size accessor
    * @default 32
    */
-  getSize?: Accessor<DataT, number>;
+  getSize?: ArrowAccessor<DataT, number>;
   /**
    * Label rotation accessor, in degrees
    * @default 0
    */
-  getAngle?: Accessor<DataT, number>;
+  getAngle?: ArrowAccessor<DataT, number>;
   /**
    * Horizontal alignment accessor
    * @default 'middle'
    */
-  getTextAnchor?: Accessor<DataT, 'start' | 'middle' | 'end'>;
+  getTextAnchor?: ArrowAccessor<DataT, 'start' | 'middle' | 'end'>;
   /**
    * Vertical alignment accessor
    * @default 'center'
    */
-  getAlignmentBaseline?: Accessor<DataT, 'top' | 'center' | 'bottom'>;
+  getAlignmentBaseline?: ArrowAccessor<DataT, 'top' | 'center' | 'bottom'>;
   /**
    * Label offset from the anchor position, [x, y] in pixels
    * @default [0, 0]
    */
-  getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
+  getPixelOffset?: ArrowAccessor<DataT, Readonly<[number, number]>>;
   /**
    * @deprecated Use `background` and `getBackgroundColor` instead
    */
@@ -204,7 +205,7 @@ type _TextLayerProps<DataT> = {
    * Use negative width/height to disable clipping.
    * @default [0, 0, -1, -1]
    */
-  getContentBox?: Accessor<DataT, [x: number, y: number, width: number, height: number]>;
+  getContentBox?: ArrowAccessor<DataT, [x: number, y: number, width: number, height: number]>;
 
   /**
    * Minimum visible region of the content box in screen pixels. If the visible width or height is smaller than the specified cutoff, the corresponding text is hidden completely.
@@ -242,9 +243,9 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   sizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
   background: false,
-  getBackgroundColor: {type: 'accessor', value: DEFAULT_BACKGROUND_COLOR},
-  getBorderColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getBorderWidth: {type: 'accessor', value: 0},
+  getBackgroundColor: {type: 'accessor', arrow: 'row', value: DEFAULT_BACKGROUND_COLOR},
+  getBorderColor: {type: 'accessor', arrow: 'row', value: DEFAULT_COLOR},
+  getBorderWidth: {type: 'accessor', arrow: 'row', value: 0},
   backgroundBorderRadius: {type: 'object', value: 0},
   backgroundPadding: {type: 'array', value: [0, 0, 0, 0]},
 
@@ -263,15 +264,15 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   contentAlignHorizontal: 'none',
   contentAlignVertical: 'none',
 
-  getText: {type: 'accessor', value: (x: any) => x.text},
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
-  getColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getSize: {type: 'accessor', value: 32},
-  getAngle: {type: 'accessor', value: 0},
-  getTextAnchor: {type: 'accessor', value: 'middle'},
-  getAlignmentBaseline: {type: 'accessor', value: 'center'},
-  getPixelOffset: {type: 'accessor', value: [0, 0]},
-  getContentBox: {type: 'accessor', value: [0, 0, -1, -1]},
+  getText: {type: 'accessor', arrow: 'row', value: (x: any) => x.text},
+  getPosition: {type: 'accessor', arrow: 'row', value: (x: any) => x.position},
+  getColor: {type: 'accessor', arrow: 'row', value: DEFAULT_COLOR},
+  getSize: {type: 'accessor', arrow: 'row', value: 32},
+  getAngle: {type: 'accessor', arrow: 'row', value: 0},
+  getTextAnchor: {type: 'accessor', arrow: 'row', value: 'middle'},
+  getAlignmentBaseline: {type: 'accessor', arrow: 'row', value: 'center'},
+  getPixelOffset: {type: 'accessor', arrow: 'row', value: [0, 0]},
+  getContentBox: {type: 'accessor', arrow: 'row', value: [0, 0, -1, -1]},
 
   // deprecated
   backgroundColor: {deprecatedFor: ['background', 'getBackgroundColor']}
@@ -373,7 +374,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   private _updateText() {
     const {data, characterSet} = this.props;
     const textBuffer = (data as any).attributes?.getText;
-    let {getText} = this.props;
+    let getText = this.props.getText as AccessorFunction<DataT, string>;
     let startIndices: number[] = (data as any).startIndices;
     let numInstances: number;
 
@@ -466,13 +467,15 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {getTextAnchor, getAlignmentBaseline} = this.props;
     const anchorX =
       TEXT_ANCHOR[
-        typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
+        typeof getTextAnchor === 'function'
+          ? getTextAnchor(object, objectInfo)
+          : (getTextAnchor as string)
       ];
     const anchorY =
       ALIGNMENT_BASELINE[
         typeof getAlignmentBaseline === 'function'
           ? getAlignmentBaseline(object, objectInfo)
-          : getAlignmentBaseline
+          : (getAlignmentBaseline as string)
       ];
 
     return [((anchorX - 1) * width) / 2, ((anchorY - 1) * height) / 2, width, height];
@@ -492,13 +495,15 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     } = this.transformParagraph(object, objectInfo);
     const anchorX =
       TEXT_ANCHOR[
-        typeof getTextAnchor === 'function' ? getTextAnchor(object, objectInfo) : getTextAnchor
+        typeof getTextAnchor === 'function'
+          ? getTextAnchor(object, objectInfo)
+          : (getTextAnchor as string)
       ];
     const anchorY =
       ALIGNMENT_BASELINE[
         typeof getAlignmentBaseline === 'function'
           ? getAlignmentBaseline(object, objectInfo)
-          : getAlignmentBaseline
+          : (getAlignmentBaseline as string)
       ];
 
     const numCharacters = x.length;
@@ -565,14 +570,20 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     } = this.props;
 
     /** Byte-encoded glyph color accessor. Preserves the built-in default. */
-    const glyphColor = this.getSubLayerColorAccessor(getColor, DEFAULT_COLOR);
+    const glyphColor = this.getSubLayerColorAccessor(
+      getColor as Accessor<DataT, Color>,
+      DEFAULT_COLOR
+    );
     /** Byte-encoded background fill color accessor. Preserves the built-in default. */
     const backgroundColor = this.getSubLayerColorAccessor(
-      getBackgroundColor,
+      getBackgroundColor as Accessor<DataT, Color>,
       DEFAULT_BACKGROUND_COLOR
     );
     /** Byte-encoded background border color accessor. Preserves the built-in default. */
-    const borderColor = this.getSubLayerColorAccessor(getBorderColor, DEFAULT_COLOR);
+    const borderColor = this.getSubLayerColorAccessor(
+      getBorderColor as Accessor<DataT, Color>,
+      DEFAULT_COLOR
+    );
 
     const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
     const BackgroundLayerClass = this.getSubLayerClass('background', TextBackgroundLayer);

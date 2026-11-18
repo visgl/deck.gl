@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor, ArrowAccessorFunction} from '@deck.gl/core';
 /* global setTimeout clearTimeout */
 import {
   getBounds,
@@ -78,8 +79,8 @@ const AGGREGATION_MODE = {
 const defaultProps: DefaultProps<HeatmapLayerProps> = {
   positions: {type: 'object', value: null, optional: true},
   weights: {type: 'array', value: null, optional: true, compare: 1},
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
-  getWeight: {type: 'accessor', value: 1},
+  getPosition: {type: 'accessor', arrow: 'row', value: (x: any) => x.position},
+  getWeight: {type: 'accessor', arrow: 'row', value: 1},
   intensity: {type: 'number', min: 0, value: 1},
   radiusPixels: {type: 'number', min: 1, max: 100, value: 50},
   colorRange: defaultColorRange,
@@ -181,14 +182,14 @@ type _HeatmapLayerProps<DataT> = {
    *
    * @default d => d.position
    */
-  getPosition?: AccessorFunction<DataT, Position>;
+  getPosition?: ArrowAccessorFunction<DataT, Position>;
 
   /**
    * The weight of each object.
    *
    * @default 1
    */
-  getWeight?: Accessor<DataT, number>;
+  getWeight?: ArrowAccessor<DataT, number>;
 };
 
 /** Visualizes the spatial distribution of data. */

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor} from '@deck.gl/core';
 import {WebGPUScreenGridAggregator} from './webgpu-screen-grid-aggregator';
 
 import {
@@ -28,8 +29,8 @@ const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   cellMarginPixels: {type: 'number', value: 2, min: 0},
   colorRange: defaultColorRange,
   colorScaleType: 'linear',
-  getPosition: {type: 'accessor', value: (d: any) => d.position},
-  getWeight: {type: 'accessor', value: 1},
+  getPosition: {type: 'accessor', arrow: 'row', value: (d: any) => d.position},
+  getWeight: {type: 'accessor', arrow: 'row', value: 1},
 
   gpuAggregation: true,
   aggregation: 'SUM'
@@ -79,14 +80,14 @@ export type _ScreenGridLayerProps<DataT> = {
    *
    * @default d => d.position
    */
-  getPosition?: Accessor<DataT, Position>;
+  getPosition?: ArrowAccessor<DataT, Position>;
 
   /**
    * The weight of each object.
    *
    * @default 1
    */
-  getWeight?: Accessor<DataT, number>;
+  getWeight?: ArrowAccessor<DataT, number>;
 
   /**
    * Perform aggregation is performed on GPU.

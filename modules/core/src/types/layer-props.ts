@@ -77,13 +77,16 @@ export type AccessorFunction<In, Out> = (
 /** Either a uniform value for all objects, or a function that returns a value for each object. */
 export type Accessor<In, Out> = Out | AccessorFunction<In, Out>;
 
-/** A constant, row callback, Arrow column, or SQL expression on opted-in accessors.
- * GPUVector inputs are only supported by separate column props.
- */
-export type ArrowAccessor<In, Out, ArrowType extends DataType = DataType> =
-  | Accessor<In, Out>
+/** A row callback, Arrow column, or SQL expression on an opted-in accessor. */
+export type ArrowAccessorFunction<In, Out, ArrowType extends DataType = DataType> =
+  | AccessorFunction<In, Out>
   | Vector<ArrowType>
   | {readonly sql: string};
+
+/** A constant or a row, Arrow, or SQL accessor. Direct GPU vectors use separate column props. */
+export type ArrowAccessor<In, Out, ArrowType extends DataType = DataType> =
+  | Out
+  | ArrowAccessorFunction<In, Out, ArrowType>;
 
 /** A position in the format of `[lng, lat, alt?]` or `[x, y, z?]` depending on the coordinate system.
  * See https://deck.gl/docs/developer-guide/coordinate-systems#positions

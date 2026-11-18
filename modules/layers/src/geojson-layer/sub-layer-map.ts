@@ -132,7 +132,9 @@ export function getDefaultProps({
 }): Record<string, any> {
   const result = {};
   for (const key in props) {
-    result[key] = type.defaultProps[props[key]];
+    /** GeoJSON sublayers use wrapped feature rows for styling accessors. */
+    const value = type.defaultProps[props[key]];
+    result[key] = value?.type === 'accessor' ? {...value, arrow: 'row'} : value;
   }
   return result;
 }
