@@ -644,7 +644,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       return;
     }
     const source = this.props.data;
-    if (state.isAsyncPropLoading('data') && !isArrowTable(unwrapLoaderArrowResult(source))) {
+    if (
+      source == null ||
+      (Array.isArray(source) && source.length === 0) ||
+      (state.isAsyncPropLoading('data') && !isArrowTable(unwrapLoaderArrowResult(source)))
+    ) {
       state.accessorQueries = undefined;
       return;
     }

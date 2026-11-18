@@ -76,8 +76,6 @@ export default function App({data}) {
     [data]
   );
 
-  const hexes = useMemo(() => aggregateHexes(data), [data]);
-
   /** Draws visitor trips for the selected POI. */
   const arcLayer =
     arcs &&
@@ -94,12 +92,13 @@ export default function App({data}) {
 
   const poiLayer = new H3HexagonLayer({
     id: 'deckgl-pois',
-    data: hexes,
+    data: arcs,
+    query: 'SELECT hex, SUM(count) AS count FROM data GROUP BY hex',
     opacity: 0.4,
     pickable: true,
     autoHighlight: true,
     onClick: ({object}) => object && setSelectedPOI(object.hex),
-    getHexagon: d => d.hex,
+    getHexagon: {sql: 'hex'},
     getFillColor: d => colorScale(d.count),
     extruded: false,
     stroked: false,
@@ -126,20 +125,6 @@ export default function App({data}) {
       <Layer {...buildings3DLayer} />
     </Map>
   );
-}
-
-function aggregateHexes(data) {
-  if (!data) {
-    return null;
-  }
-  const result = {};
-  for (const object of data) {
-    if (!result[object.hex]) {
-      result[object.hex] = {hex: object.hex, count: 0};
-    }
-    result[object.hex].count += object.count;
-  }
-  return Object.values(result);
 }
 
 function getFirstLabelLayerId(style) {

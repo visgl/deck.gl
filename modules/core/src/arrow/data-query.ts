@@ -28,9 +28,21 @@ export async function queryLayerData(
     }
     return query(sql, {...(options as QueryOptions), source: input, loaders, sqlParser});
   }
+  if (input == null || (Array.isArray(input) && input.length === 0)) {
+    return input ?? [];
+  }
   const data = unwrapLoaderArrowResult(input);
   if (!isArrowTable(data)) {
     throw new Error('query requires a URL or Arrow table data');
   }
-  return query(sql, {source: data, sqlParser});
+  let scanQuery: Query;
+  try {
+    scanQuery = sqlParser(sql);
+  } catch (error) {
+    // Custom parsers own their grammar and diagnostics.
+    if (parse !== defaultSQLParser.parseQuery) throw error;
+    const {queryArrowSQL} = await import('@math.gl/sql');
+    return queryArrowSQL(sql, new Map([['data', data]]));
+  }
+  return query(scanQuery, {source: data});
 }
