@@ -7,13 +7,14 @@ import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
 import type {Device} from '@luma.gl/core';
-import {GeoJsonLayer} from '@deck.gl/layers';
+import {isArrowTable} from '@math.gl/core/arrow';
+import {GeoArrowLayer} from '../../../modules/proposals/src/layers/geoarrow-layer';
+import {Field, FixedSizeList, Float32, Uint8, vectorFromArray, type Table} from 'apache-arrow';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
 import {GeoParquetLoader} from '@loaders.gl/tables/parquet';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {load} from '@loaders.gl/core';
 
-import {Feature, LineString, MultiLineString} from 'geojson';
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 
 // Full website geometry in GeoParquet; properties retain their original names.
@@ -68,18 +69,18 @@ type RoadProperties = {
   length: number;
 };
 
-type Road = Feature<LineString | MultiLineString, RoadProperties>;
+type Road = RoadProperties;
 
 function getKey({state, type, id}: Accident | RoadProperties) {
   return `${state}-${type}-${id}`;
 }
 
-function aggregateAccidents(accidents?: Accident[]) {
+function aggregateAccidents(accidents?: Accident[] | Table) {
   const incidents: {[year: number]: Record<string, number>} = {};
   const fatalities: {[year: number]: Record<string, number>} = {};
 
   if (accidents) {
-    for (const a of accidents) {
+    for (const a of accidents as Iterable<Accident>) {
       const r = (incidents[a.year] = incidents[a.year] || {});
       const f = (fatalities[a.year] = fatalities[a.year] || {});
       const key = getKey(a);
@@ -106,7 +107,7 @@ function renderTooltip({
   }
 
   const {object, x, y} = hoverInfo;
-  const props = object.properties;
+  const props = object;
   const key = getKey(props);
   const f = fatalities[year][key];
   const r = incidents[year][key];
@@ -141,23 +142,25 @@ export default function App({
   onDataLoad
 }: {
   device?: Device;
-  roads?: string | Road[];
-  accidents?: Accident[];
+  roads?: string | Table;
+  accidents?: Accident[] | Table;
   year?: number;
   mapStyle?: string;
-  /** Reports loaded path and vertex counts to the website controls. */
-  onDataLoad?: (stats: {count: number; vertexCount: number}) => void;
+  /** Reports the loaded road feature count to the website controls. */
+  onDataLoad?: (stats: {count: number}) => void;
 }) {
   const [hoverInfo, setHoverInfo] = useState<PickingInfo<Road>>();
-  const [loadedAccidents, setLoadedAccidents] = useState<Accident[]>();
+  const [loadedRoads, setLoadedRoads] = useState<Table>();
+  const roadTable = typeof roads === 'string' ? loadedRoads : roads;
+  const [loadedAccidents, setLoadedAccidents] = useState<Table>();
   useEffect(() => {
     if (accidents) {
       return;
     }
     let active = true;
-    load(DATA_URL.ACCIDENTS, CSVLoader, {csv: {shape: 'object-row-table'}}).then(table => {
-      if (active) {
-        setLoadedAccidents(table.data as Accident[]);
+    load(DATA_URL.ACCIDENTS, CSVLoader).then(table => {
+      if (active && isArrowTable(table)) {
+        setLoadedAccidents(table);
       }
     });
     return () => {
@@ -169,55 +172,48 @@ export default function App({
     [accidents, loadedAccidents]
   );
 
+  const styles = useMemo(() => {
+    if (!roadTable) {
+      return null;
+    }
+    const colors: number[][] = [];
+    const widths = new Float32Array(roadTable.numRows);
+    const roadFatalities = fatalities[year];
+    const roadIncidents = incidents[year];
+    let index = 0;
+    for (const road of roadTable) {
+      const key = getKey(road);
+      const color = roadFatalities
+        ? COLOR_SCALE(((roadFatalities[key] || 0) / road.length) * 1000)
+        : [200, 200, 200];
+      colors.push([color[0], color[1], color[2], 255]);
+      widths[index++] = roadIncidents
+        ? WIDTH_SCALE(((roadIncidents[key] || 0) / road.length) * 1000)
+        : 10;
+    }
+    return {
+      colors: vectorFromArray(colors, new FixedSizeList(4, new Field('channel', new Uint8()))),
+      widths: vectorFromArray(widths, new Float32())
+    };
+  }, [roadTable, year, fatalities, incidents]);
+
   const layers = [
-    new GeoJsonLayer<RoadProperties>({
-      id: 'geojson',
+    new GeoArrowLayer({
+      id: 'roads',
       data: roads,
       loaders: [GeoParquetLoader],
-      loadOptions: {parquet: {shape: 'geojson-table'}},
-      onDataLoad: loaded => {
-        const features = Array.isArray(loaded) ? loaded : loaded.features;
-        const paths = features.flatMap(feature =>
-          feature.geometry.type === 'LineString'
-            ? [feature.geometry.coordinates]
-            : feature.geometry.coordinates
-        );
-        onDataLoad?.({
-          count: paths.length,
-          vertexCount: paths.reduce((sum, path) => sum + path.length, 0)
-        });
-      },
-      lineWidthMinPixels: 0.5,
-
-      getLineColor: (f: Road) => {
-        if (!fatalities[year]) {
-          return [200, 200, 200];
+      onDataLoad: table => {
+        if (isArrowTable(table)) {
+          setLoadedRoads(table);
+          onDataLoad?.({count: table.numRows});
         }
-        const key = getKey(f.properties);
-        const fatalitiesPer1KMile = ((fatalities[year][key] || 0) / f.properties.length) * 1000;
-        return COLOR_SCALE(fatalitiesPer1KMile);
       },
-      getLineWidth: (f: Road) => {
-        if (!incidents[year]) {
-          return 10;
-        }
-        const key = getKey(f.properties);
-        const incidentsPer1KMile = ((incidents[year][key] || 0) / f.properties.length) * 1000;
-        return WIDTH_SCALE(incidentsPer1KMile);
-      },
-
+      colors: styles?.colors,
+      widths: styles?.widths,
+      widthUnits: 'meters',
+      widthMinPixels: 0.5,
       pickable: true,
-      onHover: setHoverInfo,
-
-      updateTriggers: {
-        getLineColor: {year, fatalities},
-        getLineWidth: {year, incidents}
-      },
-
-      transitions: {
-        getLineColor: 1000,
-        getLineWidth: 1000
-      }
+      onHover: setHoverInfo
     })
   ];
 
