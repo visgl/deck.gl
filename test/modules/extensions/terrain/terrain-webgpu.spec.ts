@@ -363,6 +363,20 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
       expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
     });
 
+  if (backend === 'webgpu')
+    it('applies terrain opacity to the draped cover', async () => {
+      const terrain = createTerrain(() => 40, true);
+      const props = {
+        extensions: [new TerrainExtension()],
+        terrainDrawMode: 'drape' as const
+      };
+      const opaque = await renderFrame(props, false, 0, terrain);
+      const faded = await renderFrame(props, false, 0, terrain.clone({opacity: 0.5}));
+      const brightness = totalBrightness(opaque);
+      expect(brightness).toBeGreaterThan(1000);
+      expect(totalBrightness(faded) / brightness).toBeCloseTo(0.5, 1);
+    });
+
   it('encodes terrain picking only when the terrain is pickable', async () => {
     const terrain = createTerrain(() => 25, true);
     const props = {extensions: [new TerrainExtension()], terrainDrawMode: 'offset' as const};

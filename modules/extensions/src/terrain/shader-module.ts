@@ -249,7 +249,9 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
     color = pixel;
   } else {
     // pixel is premultiplied
-    color = pixel + color * (1.0 - pixel.a);
+    float alpha = pixel.a + color.a * (1.0 - pixel.a);
+    vec3 rgb = pixel.rgb + color.rgb * color.a * (1.0 - pixel.a);
+    color = vec4(alpha > 0.0 ? rgb / alpha : vec3(0.0), alpha);
   }
   return;
 }
