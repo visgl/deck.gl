@@ -699,6 +699,20 @@ for (const borrowed of [false, true]) {
       const outside = onePoint.clone({clipBounds: [-122.1, 38.1, -122.05, 38.2]});
       manager.setLayers([outside]);
       expect((await readWeights(outside)).some(Boolean)).toBe(false);
+      /** Get the retained display layer after changing the clipping mode. */
+      const display = () =>
+        manager.getLayers().find(layer => layer instanceof TriangleLayer) as TriangleLayer;
+      expect(display().state.model.shaderInputs.modules.clip).toBeUndefined();
+
+      const displayClipped = outside.clone({clipByInstance: false});
+      manager.setLayers([displayClipped]);
+      expect((await readWeights(displayClipped)).some(Boolean)).toBe(true);
+      expect(display().state.model.shaderInputs.modules.clip).toBeDefined();
+
+      const sourceClipped = displayClipped.clone({clipByInstance: true});
+      manager.setLayers([sourceClipped]);
+      expect((await readWeights(sourceClipped)).some(Boolean)).toBe(false);
+      expect(display().state.model.shaderInputs.modules.clip).toBeUndefined();
       expect(errors).toEqual([]);
     } finally {
       manager.finalize();
