@@ -63,6 +63,7 @@ export type _ScreenGridLayerProps<DataT> = {
    * Specified as an array of colors [color1, color2, ...].
    *
    * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
+   * Custom plain-array entries are 0–1 when Deck normalizedColors is enabled.
    */
   colorRange?: Color[];
 
@@ -348,6 +349,8 @@ export default class ScreenGridLayer<
       }),
       {
         numInstances: aggregator.binCount,
+        normalizedColorRange:
+          this.usesNormalizedColors() && this.props.colorRange !== defaultColorRange,
         data: {
           length: aggregator.binCount,
           attributes: {

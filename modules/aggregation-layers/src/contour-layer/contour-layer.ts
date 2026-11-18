@@ -22,6 +22,7 @@ import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/ag
 import AggregationLayer, {type AggregationLayerProps} from '../common/aggregation-layer';
 import {generateContours, Contour, ContourLine, ContourPolygon} from './contour-utils';
 import {getAggregatorValueReader} from './value-reader';
+import {toByteColor} from '../common/utils/color-utils';
 import {getBinIdRange} from '../common/utils/bounds-utils';
 import {createAggregationViewport} from '../common/utils/projection-utils';
 import {WebGPUAggregator} from '../common/aggregator/webgpu-aggregator/webgpu-aggregator';
@@ -501,6 +502,10 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
     const {lines, polygons} = contourData;
     const {zOffset} = this.props;
+    const normalized = this.usesNormalizedColors();
+    /** Convert user-supplied contour styles at the sublayer boundary. */
+    const getContourColor = ({contour}: ContourLine | ContourPolygon) =>
+      contour.color ? (normalized ? toByteColor(contour.color) : contour.color) : DEFAULT_COLOR;
     const frame = this.state.contourFrame!;
     const cellOriginCommon = frame.origin;
     const cellSizeCommon = frame.size;
@@ -518,7 +523,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       lines.length > 0 &&
       new LinesSubLayerClass(
         this.getSubLayerProps({
-          id: 'lines'
+          id: 'lines',
+          updateTriggers: {getColor: [this.props.contours, normalized]}
         }),
         {
           data: lines,
@@ -526,7 +532,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           coordinateOrigin: [0, 0, 0],
           modelMatrix,
           getPath: d => d.vertices,
-          getColor: d => d.contour.color ?? DEFAULT_COLOR,
+          getColor: getContourColor,
           getWidth: d => d.contour.strokeWidth ?? DEFAULT_STROKE_WIDTH,
           widthUnits: 'pixels',
           ...(this.state.aggregatorType === 'webgpu'
@@ -541,7 +547,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       polygons.length > 0 &&
       new BandsSubLayerClass(
         this.getSubLayerProps({
-          id: 'bands'
+          id: 'bands',
+          updateTriggers: {getFillColor: [this.props.contours, normalized]}
         }),
         {
           data: polygons,
@@ -549,7 +556,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           coordinateOrigin: [0, 0, 0],
           modelMatrix,
           getPolygon: d => d.vertices,
-          getFillColor: d => d.contour.color ?? DEFAULT_COLOR,
+          getFillColor: getContourColor,
           ...(this.state.aggregatorType === 'webgpu'
             ? {extensions: this.props._subLayerProps?.bands?.extensions ?? []}
             : {})

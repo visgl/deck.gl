@@ -99,6 +99,7 @@ type _GridLayerProps<DataT> = {
 
   /**
    * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`
+   * Custom plain-array entries are 0–1 when Deck normalizedColors is enabled.
    */
   colorRange?: Color[];
 
@@ -745,6 +746,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         cellSizeCommon,
         elevationScale,
         colorRange,
+        normalizedColorRange: this.usesNormalizedColors() && colorRange !== defaultColorRange,
         colorScaleType,
         elevationRange,
         extruded,

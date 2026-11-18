@@ -20,11 +20,13 @@ Deck's [`normalizedColors`](./api-reference/core/deck.md#normalizedcolors) optio
 0–1 plain-array color constants and callbacks for top-level ScatterplotLayer, LineLayer, and
 ArcLayer, PathLayer, PolygonLayer, SolidPolygonLayer, and GeoJsonLayer, as well as [View clear colors](./api-reference/core/view.md#clearcolor) and
 [top-level layer highlights](./api-reference/core/layer.md#highlightcolor). Top-level bitmap tints,
-bitmap transparency, and text outlines also use the setting. Other composite layers
-retain their existing color conventions.
+bitmap transparency, and text outlines also use the setting.
 IconLayer, PointCloudLayer, and ColumnLayer also honor this setting for color accessors.
+GridLayer, HexagonLayer, ScreenGridLayer, and HeatmapLayer accept normalized palette entries,
+and ContourLayer accepts normalized line and band colors.
 
 SimpleMeshLayer and ScenegraphLayer instance colors honor Deck’s `normalizedColors` option.
+Top-level TextLayer glyph, background, and border colors honor Deck’s `normalizedColors` option.
 
 ### Experimental batch loading
 
