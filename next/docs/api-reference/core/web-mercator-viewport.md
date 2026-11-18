@@ -79,7 +79,7 @@ Inherits all [Viewport methods](https://deck.gl/next/docs/api-reference/core/vie
 
 `viewport.crs` describes deck.gl's `OSMTile512` coordinate system. X increases eastward and Y increases southward across a 512-unit zoom-zero tile; Z is altitude in meters. Its bounds `[[0, 0], [512, 512]]` describe an appropriate rendering target, not the projection algorithm's validity limits. This is a tile-coordinate convention, distinct from EPSG:3857 coordinates in meters.
 
-The descriptor's WGS84 converters use `@math.gl/web-mercator`. Conversion preserves altitude and continuous longitude; explicit normalization wraps longitude and clamps latitude to the Mercator rendering extent. The viewport retains its northward Y in common space and its existing meter-based altitude scaling.
+The descriptor's WGS84 converters use `@math.gl/geospatial/web-mercator`. Conversion preserves altitude and continuous longitude; explicit normalization wraps longitude and clamps latitude to the Mercator rendering extent. The viewport retains its northward Y in common space and its existing meter-based altitude scaling.
 
 ## Methods[​](#methods "Direct link to Methods")
 
@@ -172,7 +172,7 @@ Parameters:
 
 * `bounds` (number\[2]\[2]) - Bounding box in `[[longitude, latitude], [longitude, latitude]]`.
 
-* `opts` (object) - See additional options in [@math.gl/web-mercator](https://math.gl/modules/web-mercator/docs/api-reference/web-mercator-utils#fitboundsopts)
+* `opts` (object) - See additional options in [@math.gl/geospatial/web-mercator](https://math.gl/modules/web-mercator/docs/api-reference/web-mercator-utils#fitboundsopts)
 
   * `width` (number) - If not supplied, will use the current width of the viewport (default `1`)
   * `height` (number) - If not supplied, will use the current height of the viewport (default `1`)

@@ -10,7 +10,7 @@ While the `Viewport` class can certainly be used directly if you need and are ab
 
 The base class uses an optional, already-resolved `crs` descriptor for its default WGS84-to-target conversion and target-coordinate distance scales. Linear target axes default to metre-based common units using the descriptor’s unit factors. Without a descriptor, positions remain in local coordinates; supplying longitude and latitude does not select a projection. CRS resolution belongs to the View, not the viewport constructor.
 
-Specialized viewports retain their projection conventions. In particular, `WebMercatorViewport` and geospatial `FirstPersonViewport` use `@math.gl/web-mercator` for their Mercator projection, altitude scaling, and high-precision distance scales.
+Specialized viewports retain their projection conventions. In particular, `WebMercatorViewport` and geospatial `FirstPersonViewport` use `@math.gl/geospatial/web-mercator` for their Mercator projection, altitude scaling, and high-precision distance scales.
 
 ## Overview of Viewport Classes[​](#overview-of-viewport-classes "Direct link to Overview of Viewport Classes")
 

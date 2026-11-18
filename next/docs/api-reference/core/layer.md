@@ -332,7 +332,9 @@ Additional math.gl Arrow functions for this layer's SQL accessors. Functions ove
 
 #### `query` (string, optional)[​](#query "Direct link to query")
 
-SQL to execute through loaders.gl when `data` is an Arrow table, a promise resolving to an Arrow table, or a URL. The result becomes the layer's loaded data and is available to accessor queries, accessors, and picking. The layer's data is the implicit source. `FROM data` is optional. Omit `query` to use the loaded data as-is.
+SQL to execute when `data` is an Arrow table, a promise resolving to an Arrow table, or a URL. The result becomes the layer's loaded data and is available to accessor queries, accessors, and picking. The layer's data is the implicit source. `FROM data` is optional. Omit `query` to use the loaded data as-is.
+
+For an in-memory Arrow table, the default parser also supports relational SQL with an explicit `FROM data`, for example `SELECT hex, SUM(count) AS visits FROM data GROUP BY hex`. math.gl executes the grouped query across the whole table. Nullish data and empty row arrays render as empty layers until data arrives.
 
 For URL inputs, provide a source-capable loader. Loaders that support query pushdown can optimize loading based on the supplied query. When the layer has a custom `fetch`, SQL runs on the Arrow table returned by that function. Deck loads the SQL parser on first use.
 

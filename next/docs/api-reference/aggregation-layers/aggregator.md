@@ -221,6 +221,16 @@ The layer owns the supplied instance and destroys it when replaced or finalized.
 
 Custom implementations receive `binIdRange`, `binOptions`, operations, and projection/extension settings through `setProps`. Accessor inputs remain available as `Attribute` objects; `Attribute.getGPUVector()` exposes their typed GPU columns. Allocate outputs in `update()` before sublayers are built, and encode GPU work in `preDraw()` before those sublayers draw. Notify `onUpdate` when a channel's output changes, following the existing aggregator lifecycle.
 
+### GPU column extensions[​](#gpu-column-extensions "Direct link to GPU column extensions")
+
+The built-in compute aggregators for ScreenGridLayer, GridLayer, HexagonLayer, and ContourLayer can apply ClipExtension, BrushingExtension, and numeric DataFilterExtension to borrowed GPU columns. Use single-chunk `float32x3` positions and scalar `float32` weights. Both buffers need `VERTEX` usage in addition to the normal compute requirements.
+
+* ClipExtension and `brushingTarget: 'source'` use the position column.
+* For `brushingTarget: 'custom'`, set `extensionAttributes.brushingTargets` to a `float32x2` GPUVector.
+* For numeric DataFilterExtension, set `extensionAttributes.filterValues` to a float32 GPUVector whose component count matches `filterSize`. Category filtering, `fp64`, and item counting require accessor inputs.
+
+Extension columns must have one row per position in the same order and one concrete buffer with `VERTEX` usage. The layer borrows these buffers.
+
 ### GPU column results[​](#gpu-column-results "Direct link to GPU column results")
 
 `getBins()` and `getResult(channel)` may return either the existing `BinaryAttribute` or a borrowed `GPUVector`. Cell rendering uses the same AttributeManager/`GPUVectorModel` path as accessor-backed layers, including ArcLayer. The vector adapter preserves offsets and strides without uploading, copying, or reading the buffer. Results require one concrete buffer chunk: `float32x2` bin IDs and `float32` channel values. Result vectors and buffers remain owned by the aggregator, and must stay valid through sublayer drawing.

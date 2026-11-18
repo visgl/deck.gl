@@ -250,7 +250,7 @@ Overrides the parser for [layer queries](https://deck.gl/next/docs/api-reference
 
 Additional math.gl Arrow functions available to SQL accessors in every layer. A layer can override a function by name through its own [`sqlFunctions`](https://deck.gl/next/docs/api-reference/core/layer.md#sqlfunctions) prop. Function names are case-insensitive.
 
-SQL accessors can use `LIST_EXTRACT(column, index)` and `STRUCT_EXTRACT(column, 'field')` by default. List indices start at 1, negative indices count from the end, and an out-of-range index returns null.
+SQL accessors can use `LIST_EXTRACT(column, index)` and `STRUCT_EXTRACT(column, 'field')` by default. List indices start at 1, negative indices count from the end, and a non-integer or out-of-range index returns null.
 
 #### `layers` (LayersList)[​](#layers "Direct link to layers")
 

@@ -418,7 +418,8 @@ Notes:
 
 * The built-in WebGPU compute path accepts buffers with `STORAGE` or `COPY_SRC` usage.
 * Use positions in the view's coordinate system for custom views.
-* The compute path requires a configuration without extensions or CPU position preprojection.
+* Borrowed columns require positions that do not need CPU preprojection.
+* See [GPU column extensions](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md#gpu-column-extensions) for clipping, brushing, and numeric filtering.
 
 ## Source[​](#source "Direct link to Source")
 

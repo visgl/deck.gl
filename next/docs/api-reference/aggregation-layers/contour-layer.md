@@ -361,7 +361,7 @@ The `ContourLayer` renders the following sublayers:
 
 ## Compute aggregation[​](#compute-aggregation "Direct link to Compute aggregation")
 
-On a WebGPU device, `gpuAggregation: true` aggregates points in a compute shader for all five `aggregation` operations. Contours are still generated on the CPU, so they update a frame or more after each change. Previous contours remain visible until the new results arrive. [DataFilterExtension](https://deck.gl/next/docs/api-reference/extensions/data-filter-extension.md), [ClipExtension](https://deck.gl/next/docs/api-reference/extensions/clip-extension.md), and [BrushingExtension](https://deck.gl/next/docs/api-reference/extensions/brushing-extension.md) filter input points before aggregation. Layers with other extensions use CPU aggregation on WebGPU.
+On a WebGPU device, `gpuAggregation: true` aggregates points in a compute shader for all five `aggregation` operations. Contours are still generated on the CPU, so they update a frame or more after each change. Previous contours remain visible until the new results arrive. [DataFilterExtension](https://deck.gl/next/docs/api-reference/extensions/data-filter-extension.md), [ClipExtension](https://deck.gl/next/docs/api-reference/extensions/clip-extension.md), and [BrushingExtension](https://deck.gl/next/docs/api-reference/extensions/brushing-extension.md) filter input points before aggregation. They also support [borrowed GPU columns](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md#gpu-column-extensions). Layers with other extensions use CPU aggregation on WebGPU.
 
 ContourLayer also accepts [GPU column inputs](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md#gpu-column-inputs), which need `dataBounds`.
 
