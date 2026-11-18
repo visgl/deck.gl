@@ -106,9 +106,9 @@ The table below covers the public extensions in `@deck.gl/extensions`. Most rema
 | `@deck.gl/extensions` | `ClipExtension`            | ✅    | ✅                                        |
 | `@deck.gl/extensions` | `CollisionFilterExtension` | ✅    | ❌                                        |
 | `@deck.gl/extensions` | `MaskExtension`            | ✅    | ✅                                        |
-| `@deck.gl/extensions` | `TerrainExtension`         | ✅    | 🚧                                        |
+| `@deck.gl/extensions` | `TerrainExtension`         | ✅    | ✅                                        |
 
-`TerrainExtension` supports GPU height-map fitting with `terrainDrawMode: 'offset'`. Texture draping remains WebGL-only. See the [terrain extension reference](https://deck.gl/next/docs/api-reference/extensions/terrain-extension.md#limitations).
+`TerrainExtension` supports both `terrainDrawMode` values on WebGPU. Terrain sources used for offset fitting must report their elevation range. See the [terrain extension reference](https://deck.gl/next/docs/api-reference/extensions/terrain-extension.md#limitations).
 
 ## Effects[​](#effects "Direct link to Effects")
 

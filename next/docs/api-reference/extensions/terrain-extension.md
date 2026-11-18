@@ -131,7 +131,7 @@ How data should be fitted to the terrain surface. If not specified, will be auto
 
 ## Limitations[​](#limitations "Direct link to Limitations")
 
-On WebGPU, terrain sources must include their elevation range in `getBounds()`. `TerrainLayer` and non-instanced `SimpleMeshLayer` meshes provide this range. Texture draping (`terrainDrawMode: 'drape'`) is available only on WebGL. On WebGPU, omitting `terrainDrawMode` selects `'offset'`.
+On WebGPU, terrain sources must include their elevation range in `getBounds()`. `TerrainLayer` and non-instanced `SimpleMeshLayer` meshes provide this range.
 
 ## Source[​](#source "Direct link to Source")
 

@@ -6,20 +6,24 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Target release date: EOY 2026. Alpha releases available.
 
-*These highlights describe the goals for v10, and some features are still in development.*
+v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, SQL expression powered big data library. It brings support for non-mercator projection and initial hooks for advanced GPU compute integration.
 
-### Core Improvements[​](#core-improvements "Direct link to Core Improvements")
+*v10.0 should be thought of as a pre-release. We wanted to get the new capabilities into the hands of users as soon as possible, which means that some APIs have not yet settled and may change in v10.1.*
 
-* **WebGPU** — WebGPU is now the default renderer with full feature support.
-* **GPU vectors** — Layers accept chunked GPU buffers from luma.gl’s GPU Graph.
+*These highlights describe goals for v10. Some features are still in development.*
+
+### GPU[​](#gpu "Direct link to GPU")
+
+* **WebGPU** 🚧 — WebGPU is now the default renderer with full feature support.
+* **GPU vectors** — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph.
 
 ### Apache Arrow[​](#apache-arrow "Direct link to Apache Arrow")
 
-* **Arrow** data — The Layer `data` prop now supports Arrow tables
-* **Arrow attributes** — Layer accessors now support Arrow columns (`arrow.Vector`s)
+* **Arrow data** — The Layer `data` prop now supports Arrow tables
 * **Arrow loading** — `data` URLs now load Arrow tables instead of JS arrays.
 * **Arrow streaming** — Layer data prop accepts `AsyncIterable<arrow.RecordBatch>` and incrementally transforms and renders RecordBatches as they arrive.
-* **GeoArrow** — Full support for GeoArrow and GeoParquet source data and `geoarrow.union` and `geoarrow.wkb` rendering.
+* **Arrow accessors** — Layer accessors now support Arrow columns (`arrow.Vector`s)
+* **GeoArrow** 🚧 — Full support for GeoArrow and GeoParquet source data and `geoarrow.union` and `geoarrow.wkb` rendering.
 
 ### SQL[​](#sql "Direct link to SQL")
 
@@ -29,7 +33,7 @@ Target release date: EOY 2026. Alpha releases available.
 
 ### Projections[​](#projections "Direct link to Projections")
 
-* **Non Web Mercator projections** — `CustomProjectionView` renders longitude/latitude data in a planar projection specified by an EPSG code or PROJ string.
+* **Non Web Mercator projections** — [`CustomProjectionView`](https://deck.gl/next/docs/api-reference/core/custom-projection-view.md) renders longitude/latitude data in a planar projection specified by an EPSG code or PROJ string.
 * **Source data CRS** is preserved during loading and projected automatically
 * **Curved geometry** — Set `resolution` to subdivide paths, polygons, and bitmaps so they follow the projection’s curves.
 
@@ -41,94 +45,30 @@ Target release date: EOY 2026. Alpha releases available.
 
 The `@deck.gl/react` module is now a deep React Fiber integration.
 
-* **React components** — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
-* **Map integrations** — Use dedicated React entry points for Mapbox, MapLibre, and Google Maps.
-* **Migration** — The previous React API moves to `@deck.gl/react/legacy`.
+* **React components** 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
+* **Map integrations** 🚧 — Use dedicated React entry points for Mapbox, MapLibre, and Google Maps.
+* **Migration** 🚧 — The previous React API moves to `@deck.gl/react/legacy`.
 
 ### Layers[​](#layers "Direct link to Layers")
 
-* `Tile2DLayer` and `MVT2DLayer` can now share a `Tileset2D` and reuse loaded tiles across layers and views.
-* `TextLayer` uses `@luma.gl/text/fonts` for bitmap and SDF font atlas generation and glyph packing. Existing font settings and the custom font renderer hook remain supported.
+* [`TextLayer`](https://deck.gl/next/docs/api-reference/layers/text-layer.md) 🚧 uses `@luma.gl/text/fonts` for bitmap and SDF font atlas generation and glyph packing. Existing font settings and the custom font renderer hook remain supported.
 
-### Aggregation extensions with GPUVector inputs[​](#aggregation-extensions-with-gpuvector-inputs "Direct link to Aggregation extensions with GPUVector inputs")
+### Tile Layers[​](#tile-layers "Direct link to Tile Layers")
 
-[ScreenGridLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/screen-grid-layer.md#gpuvector-inputs-unstable), GridLayer, HexagonLayer, and ContourLayer also support clipping, brushing, and numeric filtering with [borrowed GPU columns](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md#gpu-column-extensions).
+* `Tile2DLayer` and `MVT2DLayer` 🚧 can now share a `Tileset2D` and reuse loaded tiles across layers and views.
 
-### Contour compute aggregation[​](#contour-compute-aggregation "Direct link to Contour compute aggregation")
+### Aggregation Layers[​](#aggregation-layers "Direct link to Aggregation Layers")
 
-On WebGPU devices, [ContourLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/contour-layer.md#compute-aggregation) aggregates points in a compute shader before generating contours.
+* [GridLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/grid-layer.md), [HexagonLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/hexagon-layer.md), [ScreenGridLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/screen-grid-layer.md), and [ContourLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/contour-layer.md) now accept [custom aggregators](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md) with GPUVector results.
+* These layers now support clipping, brushing, and numeric filtering with [GPUVector inputs](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md#gpu-column-extensions).
 
-### Optional graph aggregation[​](#optional-graph-aggregation "Direct link to Optional graph aggregation")
+### Extensions[​](#extensions "Direct link to Extensions")
 
-The experimental [`_GraphScreenGridAggregator`](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md#graphscreengridaggregator) lets applications customize ScreenGrid aggregation using GPU graphs.
+* [MaskExtension](https://deck.gl/next/docs/api-reference/extensions/mask-extension.md) now supports [GlobeView](https://deck.gl/next/docs/api-reference/core/globe-view.md).
 
-### CARTO heatmap palettes[​](#carto-heatmap-palettes "Direct link to CARTO heatmap palettes")
+### Examples[​](#examples "Direct link to Examples")
 
-CARTO HeatmapTileLayer accepts normalized plain-array palettes with Deck’s `normalizedColors` option.
-
-### Normalized color inputs[​](#normalized-color-inputs "Direct link to Normalized color inputs")
-
-Deck's [`normalizedColors`](https://deck.gl/next/docs/api-reference/core/deck.md#normalizedcolors) option enables 0–1 plain-array color constants and callbacks for top-level ScatterplotLayer, LineLayer, and ArcLayer, PathLayer, PolygonLayer, SolidPolygonLayer, and GeoJsonLayer, as well as [View clear colors](https://deck.gl/next/docs/api-reference/core/view.md#clearcolor) and [top-level layer highlights](https://deck.gl/next/docs/api-reference/core/layer.md#highlightcolor). Top-level bitmap tints, bitmap transparency, and text outlines also use the setting. IconLayer, PointCloudLayer, and ColumnLayer also honor this setting for color accessors. GridLayer, HexagonLayer, ScreenGridLayer, and HeatmapLayer accept normalized palette entries, and ContourLayer accepts normalized line and band colors.
-
-SimpleMeshLayer and ScenegraphLayer instance colors honor Deck’s `normalizedColors` option. Top-level TextLayer glyph, background, and border colors honor Deck’s `normalizedColors` option.
-
-### Experimental batch loading[​](#experimental-batch-loading "Direct link to Experimental batch loading")
-
-Layers support `_dataLoadOptions: 'auto' | 'batched' | 'snapshots'` for complete URL loading, appended batches, or replacement Arrow snapshots. `onDataProgress` reports each accepted batch. Streams support Arrow record batches and tables without converting Arrow columns to rows. See [Layer](https://deck.gl/next/docs/api-reference/core/layer.md#_dataloadoptions).
-
-### Arrow accessor inputs[​](#arrow-accessor-inputs "Direct link to Arrow accessor inputs")
-
-Layers with column support accept Arrow vectors directly through their existing accessors, including positions, colors, and scalar values. Numeric rendering inputs use shared luma.gl conversion; cell layers preserve source-feature identity while expanding identifiers. See [Using with Arrow](https://deck.gl/next/docs/developer-guide/using-with-arrow.md) for shared rules and each layer's prop descriptions for supported inputs.
-
-### Async CPU aggregation of GPU inputs[​](#async-cpu-aggregation-of-gpu-inputs "Direct link to Async CPU aggregation of GPU inputs")
-
-[`ReadbackAggregator`](https://deck.gl/next/docs/api-reference/aggregation-layers/cpu-aggregator.md#readbackaggregator) runs CPU aggregation on GPUVector inputs, so you can compare CPU and GPU timings on the same buffers.
-
-### Hexagon compute aggregation[​](#hexagon-compute-aggregation "Direct link to Hexagon compute aggregation")
-
-On WebGPU devices, [HexagonLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/hexagon-layer.md#compute-aggregation) aggregates in compute shaders, including with automatic domains, picking, quantile and ordinal scales, percentiles and extensions.
-
-### ScreenGrid and Grid compute rendering features[​](#screengrid-and-grid-compute-rendering-features "Direct link to ScreenGrid and Grid compute rendering features")
-
-Compute aggregation now supports automatic domains, picking metadata, accessor-based extensions, and Grid distribution scales and percentile filtering. Explicit-domain rendering continues to consume GPU vectors directly; CPU-facing metadata uses asynchronous snapshots.
-
-### Grid compute aggregation[​](#grid-compute-aggregation "Direct link to Grid compute aggregation")
-
-`GridLayer` supports two-channel compute aggregation with explicit color and elevation domains. Color and elevation results stay in GPU vectors consumed directly by the cell layer. The implementation shares column preparation and reduction kernels with ScreenGrid. See [GridLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/grid-layer.md#compute-aggregation).
-
-### ScreenGrid compute aggregation[​](#screengrid-compute-aggregation "Direct link to ScreenGrid compute aggregation")
-
-`ScreenGridLayer` can aggregate on WebGPU using an explicit `colorDomain`, with picking and extensions disabled. SUM, MEAN, MIN, MAX, and COUNT produce GPUVector outputs consumed directly by the cell layer. See [ScreenGridLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/screen-grid-layer.md#compute-aggregation).
-
-### Custom aggregators[​](#custom-aggregators "Direct link to Custom aggregators")
-
-GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer now accept custom aggregator instances. Custom aggregators can publish GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and channel values. See [Aggregator](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md) for ownership, result layouts, and supported scales and contours.
-
-### luma.gl v10 alpha.13[​](#lumagl-v10-alpha13 "Direct link to luma.gl v10 alpha.13")
-
-The v10 packages use luma.gl alpha.13. Layer models delegate typed vector and constant-buffer binding and render-target format tracking to luma.gl. WebGPU layer draws restore dynamic render-pass parameters after drawing. Custom shader plugins use the renamed injection-target API; see the [upgrade guide](https://deck.gl/next/docs/upgrade-guide.md).
-
-### deck.gl v10 examples (Experimental)[​](#deckgl-v10-examples-experimental "Direct link to deck.gl v10 examples (Experimental)")
-
-The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](https://deck.gl/next/examples-v10/v10/arrow-path-layer), [riverfront weather](https://deck.gl/next/examples-v10/v10/weather), and [GPU graph exploration](https://deck.gl/next/examples-v10/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
-
-### Extension updates[​](#extension-updates "Direct link to Extension updates")
-
-[`MaskExtension`](https://deck.gl/next/docs/api-reference/extensions/mask-extension.md) supports up to four masks on WebGPU in map and globe views, including inverted masks and picking.
-
-Use [`DataFilterExtension`](https://deck.gl/next/docs/api-reference/extensions/data-filter-extension.md) with `countItems` to report how many objects pass numeric or category filters.
-
-### Custom projections (Experimental)[​](#custom-projections-experimental "Direct link to Custom projections (Experimental)")
-
-[`_CustomProjectionView`](https://deck.gl/next/docs/api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](https://deck.gl/next/docs/api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](https://deck.gl/next/docs/api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/geospatial/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
-
-Custom projection inverse conversions that return non-finite coordinates are reported as invalid, consistent with conversions that throw.
-
-Paths and polygons can follow curved projected edges with the experimental [`_projectionTolerance`](https://deck.gl/next/docs/api-reference/layers/path-layer.md#_projectiontolerance) prop.
-
-### Layer source CRS (Experimental)[​](#layer-source-crs-experimental "Direct link to Layer source CRS (Experimental)")
-
-Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
+* Examples have been updated to use Arrow loading and SQL accessors.
 
 ## deck.gl v9.4[​](#deckgl-v94 "Direct link to deck.gl v9.4")
 
@@ -137,10 +77,6 @@ Release date: September 5, 2026
 deck.gl v9.4 is expected to be the final release in the v9 series. It brings together a collection of completed improvements focused on performance, stability, and usability, and is intended to be a highly compatible, highly recommended upgrade for all v9 applications.
 
 Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
-
-### Terrain fitting[​](#terrain-fitting "Direct link to Terrain fitting")
-
-Use [`TerrainExtension`](https://deck.gl/next/docs/api-reference/extensions/terrain-extension.md) with `terrainDrawMode: 'offset'` to fit objects to the uppermost terrain surface. Texture draping remains WebGL-only.
 
 ### WebGPU[​](#webgpu "Direct link to WebGPU")
 
@@ -333,7 +269,7 @@ Class-specific improvements:
 * Improvements to [Tile3DLayer](https://deck.gl/next/docs/api-reference/geo-layers/tile-3d-layer.md) including better performance and tile tracking.
 * WebGPU now materializes constant layer attributes into full buffers through `AttributeManager`, improving compatibility for layers that rely on constant accessors.
 
-### Extensions[​](#extensions "Direct link to Extensions")
+### Extensions[​](#extensions-1 "Direct link to Extensions")
 
 * [PathStyleExtension](https://deck.gl/next/docs/api-reference/extensions/path-style-extension.md) now supports dashed strokes on [ScatterplotLayer](https://deck.gl/next/docs/api-reference/layers/scatterplot-layer.md) and [TextLayer](https://deck.gl/next/docs/api-reference/layers/text-layer.md) backgrounds, in addition to PathLayer. See [#9864](https://github.com/visgl/deck.gl/issues/9864).
 
@@ -530,7 +466,7 @@ Release date: March 9, 2023
 | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
 | ![](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/collision-filter-extension.gif?raw=true)*CollisionFilterExtension* | ![](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/terrain-extension.gif?raw=true)*TerrainExtension* | ![](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/wms-layer.gif?raw=true)*WMSLayer* |
 
-### Extensions[​](#extensions-1 "Direct link to Extensions")
+### Extensions[​](#extensions-2 "Direct link to Extensions")
 
 Two new extensions are added in the 8.9 release: `CollisionFilterExtension` and `TerrainExtension`.
 
@@ -1970,7 +1906,7 @@ JavaScript build tooling continues to evolve and efforts have been made to ensur
 * **Pure ES6 source code**: With few exceptions (e.g some JSX usage in examples), the source code of deck.gl and related modules are now all restricted to conformant ES6 (i.e. no ES2016 or ES2017, flow or similar syntax is used). This means that the source code can run directly (ie. without transpilation) in Node.js and modern browsers. You could potentially import code directly from `deck.gl/src` to experiment with this.
 * **Buble support** in examples. [Buble](https://buble.surge.sh/guide/) is a nice alternative to babel if you have a simple app and don't need all the power of babel. Many of the examples now use buble for faster and smaller builds.
 
-### Examples[​](#examples "Direct link to Examples")
+### Examples[​](#examples-1 "Direct link to Examples")
 
 Code examples have been improved in several ways:
 
