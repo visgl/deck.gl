@@ -72,11 +72,14 @@ export function watchFlightData(
   fetchSnapshot: (signal: AbortSignal) => Promise<FlightSnapshot>,
   onSnapshot: (snapshot: FlightSnapshot, source: 'live' | 'replay') => void
 ): () => void {
+  /** Cancels the active live request when polling stops. */
   const controller = new AbortController();
+  /** Fallback snapshots shown while live data is unavailable. */
   const frames = createFallbackFlightFrames(fallback);
   let frame = 0;
   let replayTimer: ReturnType<typeof setInterval> | undefined;
   let pollTimer: ReturnType<typeof setTimeout> | undefined;
+  /** Starts replay if it is not already running. */
   const startReplay = () => {
     if (replayTimer !== undefined) return;
     frame = 0;
@@ -86,6 +89,7 @@ export function watchFlightData(
       onSnapshot(frames[frame], 'replay');
     }, 5000);
   };
+  /** Fetches the next live snapshot and schedules the next poll. */
   const poll = async () => {
     try {
       const snapshot = await fetchSnapshot(controller.signal);

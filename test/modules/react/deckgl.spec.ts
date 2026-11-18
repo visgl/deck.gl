@@ -421,8 +421,8 @@ test.each([0, 20])(
     expect(container.querySelector('#map-child')).toBeNull();
     expect(deckInstance!.drawReasons).toEqual(['placeholder WebGPU viewport']);
 
-    deckInstance!.width = 100;
-    deckInstance!.height = 50;
+    deckInstance!.width = 99.82;
+    deckInstance!.height = 49.82;
     deckInstance!.viewports = [
       {
         id: 'default-view',
