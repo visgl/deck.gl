@@ -18,7 +18,7 @@ import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
 import type {Matrix4Like} from '@math.gl/core';
 import type {Expression} from '@math.gl/sql/expressions';
-import type {SQLQuery} from '@math.gl/sql/parser';
+import type {SQLParameters, SQLParameterOptions, SQLQuery} from '@math.gl/sql/parser';
 import type {ArrowTableFunction} from '@math.gl/sql/arrow';
 
 /** Additional Arrow functions available to SQL accessors. */
@@ -27,7 +27,7 @@ export type SQLFunctions = readonly ArrowTableFunction[];
 /** Optional SQL parser methods supplied by the application to Deck. */
 export type SQLParser = {
   /** Parses a SELECT query against the loaded layer table. */
-  parseQuery?: (sql: string) => SQLQuery;
+  parseQuery?: (sql: string, options?: SQLParameterOptions) => SQLQuery;
   /** Parses an SQL expression used by an Arrow accessor. */
   parseExpression?: (sql: string) => Expression;
 };
@@ -157,6 +157,12 @@ export type LayerProps = {
   data?: unknown;
   /** SQL executed on an Arrow table or URL supplied to `data`. Requires a SQL parser. */
   query?: string | null;
+  /** SQL evaluated on the original data source. Takes precedence over query. */
+  dataQuery?: string | null;
+  /** SQL evaluated on the loaded Arrow table when its referenced bindings change. */
+  reactiveQuery?: string | null;
+  /** Named SQL values shared by both statements. */
+  reactiveQueryParameters?: SQLParameters | null;
   /** Adds or overrides named Arrow functions for this layer’s SQL accessors. */
   sqlFunctions?: SQLFunctions | null;
   /**

@@ -7,6 +7,7 @@ import {unwrapLoaderArrowResult} from '../utils/loader-utils';
 import {isArrowTable} from './upstream-math/is-arrow-table';
 import {sqlParser as defaultSQLParser} from './upstream-math/sql-parser';
 import type {Loader} from '@loaders.gl/core/loader-utils';
+import type {SQLParameterSnapshot} from '@math.gl/sql/parser';
 import type {SQLParser} from '../types/layer-props';
 
 /** Executes SQL on URL or in-memory Arrow data through loaders.gl. */
@@ -15,11 +16,12 @@ export async function queryLayerData(
   sql: string,
   loaders: Loader[] | undefined,
   options: unknown,
-  parseQuery: SQLParser['parseQuery']
+  parseQuery: SQLParser['parseQuery'],
+  parameters?: SQLParameterSnapshot
 ) {
   const parse = parseQuery ?? defaultSQLParser.parseQuery;
   const sqlParser = (statement: string) => {
-    const parsed = parse(statement) as Query;
+    const parsed = parse(statement, {parameters}) as Query;
     return !('command' in parsed) && parsed.from === 'data' ? {...parsed, from: undefined} : parsed;
   };
   if (typeof input === 'string') {
@@ -42,7 +44,7 @@ export async function queryLayerData(
     // Custom parsers own their grammar and diagnostics.
     if (parse !== defaultSQLParser.parseQuery) throw error;
     const {queryArrowSQL} = await import('@math.gl/sql');
-    return queryArrowSQL(sql, new Map([['data', data]]));
+    return queryArrowSQL(sql, new Map([['data', data]]), {parameters});
   }
   return query(scanQuery, {source: data});
 }

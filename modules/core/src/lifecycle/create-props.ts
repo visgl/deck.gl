@@ -56,7 +56,10 @@ export function createProps<PropsT extends {}>(
     }
   }
 
-  if (propsInstance.query && 'data' in propsInstance[ASYNC_RESOLVED_SYMBOL]) {
+  if (
+    (propsInstance.query || propsInstance.dataQuery || propsInstance.reactiveQuery) &&
+    'data' in propsInstance[ASYNC_RESOLVED_SYMBOL]
+  ) {
     // A query makes even in-memory data resolve asynchronously. Retain the original table.
     propsInstance[ASYNC_ORIGINAL_SYMBOL].data = propsInstance[ASYNC_RESOLVED_SYMBOL].data;
     delete propsInstance[ASYNC_RESOLVED_SYMBOL].data;
