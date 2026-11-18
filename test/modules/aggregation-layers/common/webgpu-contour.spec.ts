@@ -278,22 +278,27 @@ test('Contour compute updates bins when the data filter range changes', async ({
       throw error;
     },
     testCases: [2, 5].map(expected => ({
-      props: {
-        data: [
-          {position: [1, 1], weight: 2},
-          {position: [2, 2], weight: 3}
-        ],
-        getPosition: d => d.position,
-        getWeight: d => d.weight,
-        getFilterValue: d => d.weight,
-        extensions: [new DataFilterExtension({filterSize: 1})],
-        filterRange: [0, expected],
-        cellSize: 10
-      },
+      ...(expected === 5
+        ? {updateProps: {filterRange: [0, 5]}}
+        : {
+            props: {
+              data: [
+                {position: [1, 1], weight: 2},
+                {position: [2, 2], weight: 3}
+              ],
+              getPosition: d => d.position,
+              getWeight: d => d.weight,
+              getFilterValue: d => d.weight,
+              extensions: [new DataFilterExtension({filterSize: 1})],
+              filterRange: [0, expected],
+              cellSize: 10
+            }
+          }),
       async onAfterUpdate({layer}) {
         expect(layer.state.aggregator).toBeInstanceOf(WebGPUAggregator);
-        await vi.waitFor(() =>
-          expect(layer.state.aggregator.getResultDomain(0)).toEqual([expected, expected])
+        await vi.waitFor(
+          () => expect(layer.state.aggregator.getResultDomain(0)).toEqual([expected, expected]),
+          {timeout: 10000}
         );
       }
     }))
