@@ -141,6 +141,16 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   /** Select an aggregation backend compatible with current inputs and extensions. */
   getAggregatorType(): string {
     if (this.props.gpuAggregation && this.context.device.type === 'webgpu') {
+      // Preserve the existing sublayer behavior for extensions that are not input filters.
+      if (
+        this.props.extensions.some(
+          extension =>
+            !['DataFilterExtension', 'ClipExtension', 'BrushingExtension'].includes(
+              extension.constructor['extensionName']
+            )
+        )
+      )
+        return 'cpu';
       if (
         (!this.props.positions &&
           !WebGPUAggregator.supportsData(this.props.data, ['getPosition', 'getWeight'])) ||
@@ -518,7 +528,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           getColor: d => d.contour.color ?? DEFAULT_COLOR,
           getWidth: d => d.contour.strokeWidth ?? DEFAULT_STROKE_WIDTH,
           widthUnits: 'pixels',
-          ...(this.state.aggregatorType === 'webgpu' ? {extensions: []} : {})
+          ...(this.state.aggregatorType === 'webgpu'
+            ? {extensions: this.props._subLayerProps?.lines?.extensions ?? []}
+            : {})
         }
       );
 
@@ -537,7 +549,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           modelMatrix,
           getPolygon: d => d.vertices,
           getFillColor: d => d.contour.color ?? DEFAULT_COLOR,
-          ...(this.state.aggregatorType === 'webgpu' ? {extensions: []} : {})
+          ...(this.state.aggregatorType === 'webgpu'
+            ? {extensions: this.props._subLayerProps?.bands?.extensions ?? []}
+            : {})
         }
       );
 
