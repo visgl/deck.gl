@@ -65,6 +65,21 @@ test.each([false, true])('query works with Arrow table data (promised: %s)', asy
   await vi.waitFor(() => expect(state.getAsyncProp('data')).toBe(table));
 });
 
+test('layer query groups matching keys across Arrow record batches', async () => {
+  const first = tableFromArrays({hex: ['a', 'b'], count: [2, 7]});
+  const data = first.concat(tableFromArrays({hex: ['a'], count: [3]}));
+  const layer = new QueryLayer({
+    data,
+    query: 'SELECT hex, SUM(count) AS visits FROM data GROUP BY hex ORDER BY hex'
+  });
+  Object.assign(layer, {context: {}});
+  const state = new LayerState({attributeManager: null, layer});
+  state.setAsyncProps(layer.props);
+  await vi.waitFor(() =>
+    expect(Array.from(state.getAsyncProp('data').getChild('visits'))).toEqual([5, 7])
+  );
+});
+
 test('changing the query parser refreshes a reused layer', async () => {
   const device = new NullDevice({});
   const manager = new LayerManager(device, {viewport: new Viewport()});

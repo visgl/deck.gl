@@ -76,8 +76,6 @@ export default function App({data}) {
     [data]
   );
 
-  const hexes = useMemo(() => aggregateHexes(data), [data]);
-
   /** Draws visitor trips for the selected POI. */
   const arcLayer =
     arcs &&
@@ -92,19 +90,22 @@ export default function App({data}) {
       getWidth: {sql: 'CASE WHEN count > 30 THEN count / 15 ELSE 2 END'}
     });
 
-  const poiLayer = new H3HexagonLayer({
-    id: 'deckgl-pois',
-    data: hexes,
-    opacity: 0.4,
-    pickable: true,
-    autoHighlight: true,
-    onClick: ({object}) => object && setSelectedPOI(object.hex),
-    getHexagon: d => d.hex,
-    getFillColor: d => colorScale(d.count),
-    extruded: false,
-    stroked: false,
-    beforeId: firstLabelLayerId
-  });
+  const poiLayer =
+    arcs &&
+    new H3HexagonLayer({
+      id: 'deckgl-pois',
+      data: arcs,
+      query: 'SELECT hex, SUM(count) AS count FROM data GROUP BY hex',
+      opacity: 0.4,
+      pickable: true,
+      autoHighlight: true,
+      onClick: ({object}) => object && setSelectedPOI(object.hex),
+      getHexagon: {sql: 'hex'},
+      getFillColor: d => colorScale(d.count),
+      extruded: false,
+      stroked: false,
+      beforeId: firstLabelLayerId
+    });
 
   return (
     <Map
@@ -126,20 +127,6 @@ export default function App({data}) {
       <Layer {...buildings3DLayer} />
     </Map>
   );
-}
-
-function aggregateHexes(data) {
-  if (!data) {
-    return null;
-  }
-  const result = {};
-  for (const object of data) {
-    if (!result[object.hex]) {
-      result[object.hex] = {hex: object.hex, count: 0};
-    }
-    result[object.hex].count += object.count;
-  }
-  return Object.values(result);
 }
 
 function getFirstLabelLayerId(style) {

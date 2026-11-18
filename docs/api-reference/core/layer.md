@@ -344,10 +344,15 @@ override matching [Deck functions](./deck.md#sqlfunctions) by name.
 
 #### `query` (string, optional) {#query}
 
-SQL to execute through loaders.gl when `data` is an Arrow table, a promise resolving
+SQL to execute when `data` is an Arrow table, a promise resolving
 to an Arrow table, or a URL. The result becomes the layer's loaded data and is
 available to accessor queries, accessors, and picking. The layer's data is the
 implicit source. `FROM data` is optional. Omit `query` to use the loaded data as-is.
+
+For an in-memory Arrow table, the default parser also supports relational SQL with
+an explicit `FROM data`, for example
+`SELECT hex, SUM(count) AS visits FROM data GROUP BY hex`.
+math.gl executes the grouped query across the whole table.
 
 For URL inputs, provide a source-capable loader. Loaders that support query pushdown
 can optimize loading based on the supplied query. When the layer has a custom
