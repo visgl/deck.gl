@@ -213,3 +213,39 @@ test('TextLayer refreshes sublayer colors when an Arrow or SQL accessor changes'
     }
   });
 });
+
+test('PathLayer repeats an RGBA SQL color across vertices in RGB format', async () => {
+  const data = tableFromArrays({
+    path: [
+      [
+        [0, 0],
+        [1, 0],
+        [2, 0]
+      ]
+    ],
+    color: [[1, 0.5, 0, 1]]
+  });
+  await testLayerAsync({
+    Layer: PathLayer,
+    device,
+    draw: false,
+    testCases: [
+      {
+        props: {
+          data,
+          colorFormat: 'RGB',
+          getPath: data.getChild('path')!,
+          getColor: {sql: 'color'}
+        },
+        onAfterUpdate: ({layer}) => {
+          if (layer.isLoaded && !layer.internalState?.needsUpdate) {
+            const {instanceColors} = layer.getAttributeManager()!.getAttributes();
+            expect(Array.from(instanceColors.value!.slice(0, 6))).toEqual([
+              255, 128, 0, 255, 128, 0
+            ]);
+          }
+        }
+      }
+    ]
+  });
+});

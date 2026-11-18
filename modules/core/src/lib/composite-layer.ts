@@ -265,9 +265,11 @@ export default abstract class CompositeLayer<PropsT extends {} = {}> extends Lay
       }
     }
     if (rowColumns.length) {
+      const all = newProps.updateTriggers.all;
+      const allEntries = all && typeof all === 'object' ? Object.entries(all).flat() : [all];
       newProps.updateTriggers = {
         ...newProps.updateTriggers,
-        all: [newProps.updateTriggers['all'], ...rowColumns.flat()]
+        all: [...allEntries, ...rowColumns.flat()]
       };
     }
 

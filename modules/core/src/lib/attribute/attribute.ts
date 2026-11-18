@@ -680,7 +680,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
           for (let offset = 0; offset < objectValue.length; offset += size) {
             packNormalizedColor(objectValue, value as TypedArray, i + offset, size, offset);
           }
-        } else if (objectValue && objectValue.length > size) {
+        } else if (
+          objectValue &&
+          objectValue.length > size &&
+          !(size === 3 && objectValue instanceof Uint8ClampedArray && objectValue.length === 4)
+        ) {
           (value as TypedArray).set(objectValue, i);
         } else {
           attribute._normalizeValue(objectValue, objectInfo.target, 0);
