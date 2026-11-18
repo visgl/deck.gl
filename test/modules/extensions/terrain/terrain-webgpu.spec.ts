@@ -240,7 +240,7 @@ function createTerrain(height: (x: number, y: number) => number, draw = false, o
     _instanced: false,
     getPosition: [0, 0, 0],
     getColor: [0, 0, 0],
-    material: false,
+    material: {unlit: true},
     operation: operation ?? (draw ? 'terrain+draw' : 'terrain'),
     parameters: {depthWriteEnabled: true, cullMode: 'none'}
   });
@@ -374,7 +374,7 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
       const faded = await renderFrame(props, false, 0, terrain.clone({opacity: 0.5}));
       const brightness = totalBrightness(opaque);
       expect(brightness).toBeGreaterThan(1000);
-      expect(totalBrightness(faded) / brightness).toBeCloseTo(0.5, 1);
+      expect(totalBrightness(faded) / brightness).toBeCloseTo(Math.pow(0.5, 1 / 2.2), 2);
     });
 
   it('encodes terrain picking only when the terrain is pickable', async () => {
