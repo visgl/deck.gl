@@ -20,6 +20,10 @@ _v10.0 should be thought of as a pre-release. We wanted to get the new capabilit
 - `MaskExtension` limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
 
 
+### ContourLayer
+
+- The experimental [`gpuGeometry` option](./api-reference/aggregation-layers/contour-layer.md#compute-aggregation) generates and renders isolines on WebGPU without reading back the bins.
+
 ### GPU
 
 - **WebGPU** 🚧 — WebGPU is now the default renderer with full feature support.
