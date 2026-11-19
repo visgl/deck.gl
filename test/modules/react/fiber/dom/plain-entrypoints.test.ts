@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
@@ -36,7 +35,7 @@ describe('plain entrypoint isolation', () => {
   it('loads the native root and the factories without any optional peer', async () => {
     blockImports(OPTIONAL_PEERS);
 
-    const dom = await import('@deck.gl/react/dom');
+    const dom = await import('@deck.gl/react/dom/index');
 
     expect(dom.DeckGL).toBeDefined();
     expect(dom.createLayerComponent).toBeDefined();

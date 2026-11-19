@@ -6,6 +6,7 @@
 import type {Deck, DeckProps, View} from '@deck.gl/core';
 import type {ReactNode, Ref} from 'react';
 
+/** The `views` value a `Deck` accepts: one view, an array, or `null`. */
 type ViewOrViews = View | View[] | null;
 
 /**
@@ -17,6 +18,7 @@ export type OnDeckChange<Instance = Deck> = (instance: Instance | null) => void;
 
 /** Shared React-owned props for a concrete deck.gl renderer root. */
 export type DeckGLRootProps<Instance, Props, MapT = never> = Props & {
+  /** deck.gl elements, and components that render them. */
   children?: ReactNode;
   /** Lifecycle notification for the root-specific deck.gl instance and its cleanup. */
   onDeckChange?: OnDeckChange<Instance>;

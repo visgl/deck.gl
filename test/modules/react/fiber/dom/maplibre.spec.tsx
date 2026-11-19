@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 import {OrthographicView} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';

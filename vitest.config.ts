@@ -228,9 +228,6 @@ const projects = [
           include: ['test/modules/react/fiber/**/*.test.{ts,tsx}'],
           globals: false,
           testTimeout: 30000,
-          // As in deck.gl-community's react-fiber config, which these tests were written for.
-          clearMocks: true,
-          setupFiles: ['./test/modules/react/fiber/reconciler/setup.ts'],
           typecheck: {
             enabled: true,
             include: ['test/modules/react/fiber/**/*.test-d.{ts,tsx}'],

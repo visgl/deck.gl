@@ -7,10 +7,11 @@ import {Deck, LightingEffect, log, MapView, PostProcessEffect} from '@deck.gl/co
 import {PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import * as fc from 'fast-check';
 import React from 'react';
+import {device} from '@deck.gl/test-utils/vitest';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
-import {createLayerComponent, createViewComponent} from '@deck.gl/react/wrappers/factories';
 import {createRoot, roots, unmountAtNode} from '@deck.gl/react/reconciler/renderer';
+import {createLayerComponent, createViewComponent} from '@deck.gl/react/wrappers/factories';
 import type {ReconcilerRoot, RootElement} from '@deck.gl/react/reconciler/types';
 import {createTestRoot} from './test-renderer';
 import {TestWidget} from './test-widget';
@@ -125,8 +126,9 @@ describe('renderer', () => {
 
       try {
         const root = createRoot(createTestRootElement());
-        const first = {layers: [new ScatterplotLayer({id: 'first', data: []})]};
-        const second = {layers: [new ScatterplotLayer({id: 'second', data: []})]};
+        // The shared test device keeps each configured `Deck` from creating a WebGL context.
+        const first = {device, layers: [new ScatterplotLayer({id: 'first', data: []})]};
+        const second = {device, layers: [new ScatterplotLayer({id: 'second', data: []})]};
         root.configure(first);
         root.configure(second);
 
@@ -232,7 +234,7 @@ describe('renderer', () => {
       const canvas = document.createElement('canvas');
       const root = createRoot(canvas);
 
-      expect(() => root.configure({canvas, interleaved: true} as never)).not.toThrow();
+      expect(() => root.configure({canvas, device, interleaved: true} as never)).not.toThrow();
       expect(root.store.getState().deckgl).toBeInstanceOf(Deck);
     });
 
@@ -358,6 +360,42 @@ describe('renderer', () => {
       expect(roots.has(firstNode)).toBe(false);
       expect(roots.get(secondNode)).toBe(second.root);
       expect(second.root.store.getState().deckgl).toBe(second.deck);
+    });
+
+    it('runs the tree’s effect cleanups before it finalizes deckgl', async () => {
+      const {root, deck, flush} = createTestRoot();
+      const order: string[] = [];
+      deck.finalize.mockImplementation(() => {
+        order.push('finalize');
+      });
+      function Child() {
+        React.useLayoutEffect(
+          () => () => {
+            order.push(`layout cleanup, deckgl ${root.store.getState().deckgl ? 'set' : 'null'}`);
+          },
+          []
+        );
+        React.useEffect(
+          () => () => {
+            order.push(`passive cleanup, deckgl ${root.store.getState().deckgl ? 'set' : 'null'}`);
+          },
+          []
+        );
+        return null;
+      }
+      await React.act(async () => {
+        root.render(React.createElement(Child));
+        await flush();
+      });
+
+      unmountAtNode(getRootElement(root));
+      await React.act(flush);
+
+      expect(order).toEqual([
+        'layout cleanup, deckgl set',
+        'passive cleanup, deckgl set',
+        'finalize'
+      ]);
     });
 
     it('should handle unmounting non-existent node gracefully', () => {
@@ -796,5 +834,40 @@ describe('renderer', () => {
         consoleErrorSpy.mockRestore();
       }
     });
+  });
+});
+
+describe('Suspense', () => {
+  it('shows only the fallback when mounted content suspends again', async () => {
+    const {deck, root} = createTestRoot();
+    const content = new ScatterplotLayer({data: [], id: 'content'});
+    const fallback = new ScatterplotLayer({data: [], id: 'fallback'});
+    const pending = new Promise(() => {});
+    let suspended = false;
+
+    function Content() {
+      if (suspended) {
+        throw pending;
+      }
+      return React.createElement('deckLayer', {layer: content});
+    }
+
+    const render = () =>
+      React.act(async () => {
+        root.render(
+          React.createElement(
+            React.Suspense,
+            {fallback: React.createElement('deckLayer', {layer: fallback})},
+            React.createElement(Content)
+          )
+        );
+      });
+
+    await render();
+    expect(deck.getLayerIds(), 'content is shown').toStrictEqual(['content']);
+
+    suspended = true;
+    await render();
+    expect(deck.getLayerIds(), 'only the fallback is shown').toStrictEqual(['fallback']);
   });
 });

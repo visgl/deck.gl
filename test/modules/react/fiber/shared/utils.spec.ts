@@ -3,8 +3,6 @@
 // Copyright (c) vis.gl contributors
 // Copyright (c) Deckgl Fiber Renderer contributors
 
-// @vitest-environment node
-
 import * as fc from 'fast-check';
 import {describe, expect, expectTypeOf, it} from 'vitest';
 
@@ -137,10 +135,9 @@ describe('Utility Functions Tests', () => {
       expectTypeOf(isBrowserEnvironment).toBeBoolean();
     });
 
-    // Skipped until the follow-up to the copy adapts it: the headless project runs in Chromium, where `document` exists.
-    it.skip('should be false in Node.js test environment', () => {
-      // vitest.config.ts uses environment: 'node', so no document exists
-      expect(isBrowserEnvironment).toBeFalsy();
+    it('should be true in the browser test environment', () => {
+      // The headless project runs in Chromium, where `document` exists
+      expect(isBrowserEnvironment).toBe(true);
     });
   });
 });

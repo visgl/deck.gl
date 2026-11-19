@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 import {useInsertionEffect, useRef} from 'react';
 
@@ -9,8 +8,8 @@ import {useInsertionEffect, useRef} from 'react';
  * Returns a stable function that invokes the latest committed callback.
  *
  * This compatibility implementation intentionally has a stable identity, unlike
- * React's native `useEffectEvent`. Keep it internal so callers cannot depend on
- * that difference while React 19.0 and 19.1 remain supported.
+ * React's native `useEffectEvent`, which callers rely on (for example as an effect dependency).
+ * Keep it internal so it can't be confused with the native hook.
  */
 export function useEffectEvent<Args extends unknown[], Return>(
   callback: (...args: Args) => Return

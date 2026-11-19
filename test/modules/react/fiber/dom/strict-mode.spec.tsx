@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 import {type Deck, LightingEffect, MapView} from '@deck.gl/core';
 import type {MapboxOverlay} from '@deck.gl/mapbox';
@@ -13,7 +12,7 @@ import {act, StrictMode, useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {afterEach, beforeEach, expect, test, vi} from 'vitest';
 
-import {DeckGL} from '@deck.gl/react/dom';
+import {DeckGL} from '@deck.gl/react/dom/index';
 import {DeckGL as MapboxDeckGL} from '@deck.gl/react/dom/mapbox';
 import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/dom/maplibre';
 import {ScatterplotLayer} from '@deck.gl/react/wrappers/layers';

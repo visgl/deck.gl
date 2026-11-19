@@ -213,7 +213,20 @@ describe('config-events', () => {
       expect(result).toBe(DiscreteEventPriority);
     });
 
-    it('should return currentEventPriority if currentUpdatePriority is DefaultEventPriority', () => {
+    it('should return the event priority of a click when no update priority is set', () => {
+      // Arrange
+      setCurrentUpdatePriority(DefaultEventPriority);
+      // @ts-expect-error - setting window.event for test
+      window.event = {type: 'click'};
+
+      // Act
+      const result = resolveUpdatePriority();
+
+      // Assert
+      expect(result).toBe(DiscreteEventPriority);
+    });
+
+    it('should return DefaultEventPriority outside an event when no update priority is set', () => {
       // Arrange
       setCurrentUpdatePriority(DefaultEventPriority);
 
@@ -224,9 +237,11 @@ describe('config-events', () => {
       expect(result).toBe(DefaultEventPriority);
     });
 
-    it('should prefer currentUpdatePriority over currentEventPriority', () => {
+    it('should prefer currentUpdatePriority over the event priority', () => {
       // Arrange
       setCurrentUpdatePriority(ContinuousEventPriority);
+      // @ts-expect-error - setting window.event for test
+      window.event = {type: 'click'};
 
       // Act
       const result = resolveUpdatePriority();

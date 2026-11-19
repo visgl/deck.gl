@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 // The `map` prop attaches the overlay as soon as the root creates it, which is usually before the
 // map's style has loaded. These tests check that deck.gl still renders in that case.

@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 // Uses the real reconciler with a fake overlay, so errors travel the same path as in an app.
 import {log} from '@deck.gl/core';

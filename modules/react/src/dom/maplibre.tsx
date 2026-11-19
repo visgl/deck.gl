@@ -1,13 +1,14 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 import 'client-only';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import type {MapLibreOverlayProps} from '@deck.gl/maplibre';
 import {attachControl, type ControlHostLike} from './attach-control';
-import {createDeckGL} from './components';
+// Through the main entry file, so the CommonJS build shares its root component instead of
+// inlining a copy.
+import {createDeckGL} from '../index';
 import type {DeckGLRootProps} from '../types/index';
 
 /** Props accepted by the MapLibre-overlay React Fiber root. */

@@ -1,11 +1,11 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 // Every widget class that @deck.gl/widgets exports, as a component that takes the widget's props.
 import type {View} from '@deck.gl/core';
 import {
+  _ColorScaleWidget as DeckColorScaleWidget,
   CompassWidget as DeckCompassWidget,
   ContextMenuWidget as DeckContextMenuWidget,
   FullscreenWidget as DeckFullscreenWidget,
@@ -28,6 +28,7 @@ import {
   ZoomWidget as DeckZoomWidget
 } from '@deck.gl/widgets';
 import type {
+  ColorScaleWidgetProps,
   CompassWidgetProps,
   ContextMenuWidgetProps,
   FullscreenWidgetProps,
@@ -52,6 +53,10 @@ import type {
 import type {ReactElement} from 'react';
 
 import {renderWidget} from './factories';
+
+export function _ColorScaleWidget(props: ColorScaleWidgetProps): ReactElement {
+  return renderWidget(new DeckColorScaleWidget(props));
+}
 
 export function CompassWidget(props: CompassWidgetProps): ReactElement {
   return renderWidget(new DeckCompassWidget(props));

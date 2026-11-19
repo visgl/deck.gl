@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 import * as deckAggregationLayers from '@deck.gl/aggregation-layers';
 import * as deckCore from '@deck.gl/core';
@@ -102,8 +101,7 @@ describe('built-in wrappers', () => {
     });
   }
 
-  // Skipped until the follow-up to the copy adapts it: deck.gl master added `_ColorScaleWidget`, which has no wrapper yet.
-  it.skip('wraps every widget class of @deck.gl/widgets under the same name', async () => {
+  it('wraps every widget class of @deck.gl/widgets under the same name', async () => {
     const widgetNames = Object.entries(deckWidgets)
       .filter(
         ([, value]) => typeof value === 'function' && value.prototype instanceof deckCore.Widget

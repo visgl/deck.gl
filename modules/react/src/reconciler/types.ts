@@ -44,14 +44,18 @@ export interface Container {
 }
 
 /**
- * Layers, views and widgets collected from one committed JSX tree, in depth-first order.
+ * Effects, layers, views and widgets collected from one committed JSX tree, in depth-first order.
  *
  * @internal
  */
 export interface JsxDescriptors {
+  /** Effects from `deckEffect` elements. */
   effects: Effect[];
+  /** Layers from `deckLayer` elements and layer components. */
   layers: Layer[];
+  /** Views from `deckView` elements and view components. */
   views: View[];
+  /** Widgets from `deckWidget` elements and widget components. */
   widgets: Widget[];
 }
 
@@ -89,6 +93,12 @@ export interface Instance {
 
   /** Child instances in the reconciler tree */
   children: Instance[];
+
+  /**
+   * True for the hidden copy React makes while a Suspense boundary shows its fallback.
+   * A hidden instance and its children are not sent to deck.gl.
+   */
+  hidden?: boolean;
 }
 
 /**
@@ -176,6 +186,7 @@ export type CreateExternalOverlay = (props: DeckGLConfiguration) => DeckGLRender
 
 /** @internal Immutable reconciler-root capability configuration. */
 export interface RootOptions {
+  /** Creates the overlay for map roots instead of a standalone `Deck`. */
   createExternalOverlay?: CreateExternalOverlay;
   /** Sends JSX views to the external overlay. See `CreateDeckGLOptions.forwardViews`. */
   forwardViews?: boolean;
