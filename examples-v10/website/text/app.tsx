@@ -61,7 +61,7 @@ export default function App({
   mapStyle = MAP_STYLE
 }: {
   device?: Device;
-  data?: string | City[];
+  data?: string;
   /** Called after data loads with the total row count, before visibility or filtering. */
   onDataLoad?: (count: number) => void;
   noOverlap?: boolean;
@@ -87,8 +87,6 @@ export default function App({
     onDataLoad: table => {
       if (isArrowTable(table)) {
         onDataLoad?.(table.numRows);
-      } else if (Array.isArray(table)) {
-        onDataLoad?.(table.length);
       }
     },
     characterSet: 'auto',
@@ -97,10 +95,10 @@ export default function App({
     },
 
     // TextLayer options
-    getText: d => d.name,
-    getPosition: d => [d.longitude, d.latitude],
+    getText: {sql: 'name'},
+    getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
     getColor: d => colorScale(d.population),
-    getSize: d => Math.pow(d.population, 0.25) / 40,
+    getSize: {sql: 'SQRT(SQRT(population)) / 40'},
     sizeScale: fontSize,
     sizeMaxPixels,
     sizeMinPixels,

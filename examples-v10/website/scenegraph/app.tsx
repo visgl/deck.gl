@@ -161,8 +161,12 @@ export default function App({
       const pitch = (-Math.atan2(verticalRate ?? 0, velocity ?? 0) * 180) / Math.PI;
       return [pitch, -(trueTrack ?? 0), 90];
     },
-    getScale: ({lastContact}) => {
-      return lastContact < -DROP_IF_OLDER_THAN_SECONDS ? [0, 0, 0] : [1, 1, 1];
+    getScale: {
+      sql: `\
+        CASE WHEN lastContact < -${DROP_IF_OLDER_THAN_SECONDS}
+          THEN ARRAY_FLOAT32(0, 0, 0)
+          ELSE ARRAY_FLOAT32(1, 1, 1)
+        END`
     }
   });
 

@@ -47,7 +47,7 @@ const sidebars = {
         'screen-grid-layer',
         // 'simple-mesh-layer',
         'terrain-layer',
-        'text-layer',
+        withStatus('text-layer', 'started'),
         'text-layer-clipping',
         'tile-layer',
         'tile-layer-non-geospatial',
