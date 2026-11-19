@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {describe, test, expect} from 'vitest';
-import {_GlobeViewport as GlobeViewport, MapView, OrthographicView} from '@deck.gl/core';
+import {GlobeViewport, MapView, OrthographicView} from '@deck.gl/core';
 import {WIDTH, HEIGHT} from './constants';
 import {expandViewMatrix, SF_VIEW_STATE, VIEW_PRESETS} from './view-presets';
 

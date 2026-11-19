@@ -7,7 +7,7 @@ import {runRenderTestSuite} from '../render-test-suite';
 import {expandViewMatrix} from '../view-presets';
 import type {TestCase} from '../deck-test-utils';
 
-import {MapView, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {MapView, OrthographicView, GlobeView} from '@deck.gl/core';
 import type {Unit} from '@deck.gl/core';
 import {PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {
-  _GlobeViewport as GlobeViewport,
+  GlobeViewport,
   type GetPickingInfoParams,
   type UpdateParameters,
   type Layer,

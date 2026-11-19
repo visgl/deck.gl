@@ -6,7 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {OrthographicView, GlobeView} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
 import {Fp64Extension, PathStyleExtension} from '@deck.gl/extensions';
 
