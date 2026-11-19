@@ -236,6 +236,49 @@ test.for([false, true])(
   }
 );
 
+test('DataFilterExtension#WebGPU composes with a custom layer shader plugin', async () => {
+  const customColor: ShaderPlugin = {
+    name: 'customColor',
+    injections: {
+      'glsl:fs:DECKGL_FILTER_COLOR': 'color.r *= 0.5;',
+      'wgsl:fs:DECKGL_FILTER_COLOR': '(*color).r *= 0.5;'
+    }
+  };
+  class CustomScatterplotLayer extends ScatterplotLayer {
+    static layerName = 'CustomScatterplotLayer';
+
+    getShaders() {
+      const shaders = super.getShaders();
+      return {...shaders, plugins: [...(shaders.plugins || []), customColor]};
+    }
+  }
+
+  const fixture = await createFixture();
+  try {
+    const layer = new CustomScatterplotLayer({
+      ...baseProps,
+      id: 'custom-filter',
+      data: {
+        length: 2,
+        attributes: {
+          getPosition: {value: new Float32Array([0, 0, 0, 30, 0, 0]), size: 3},
+          getFilterValue: new Float32Array([0, 1])
+        }
+      },
+      extensions: [new DataFilterExtension()],
+      filterRange: [0, 0]
+    });
+    const red = await fixture.render(layer);
+    expect(red(64)).toBeGreaterThanOrEqual(127);
+    expect(red(64)).toBeLessThanOrEqual(128);
+    expect(red(94)).toBe(0);
+    expect((await fixture.deck.pickObjectAsync({x: 64, y: 64}))?.index).toBe(0);
+    expect(await fixture.deck.pickObjectAsync({x: 94, y: 64})).toBeNull();
+  } finally {
+    await fixture.finalize();
+  }
+});
+
 test.each([true, false])(
   'DataFilterExtension#WebGPU primitive pipelines (instance=%s)',
   async clipByInstance => {
