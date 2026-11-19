@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import React, {useCallback, useState} from 'react';
 import {createRoot} from 'react-dom/client';

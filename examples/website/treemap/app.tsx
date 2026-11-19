@@ -4,7 +4,7 @@
 
 import React, {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import {OrthographicView} from '@deck.gl/core';
 import type {PickingInfo, Color} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';

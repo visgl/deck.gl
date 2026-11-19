@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {createRoot} from 'react-dom/client';
 
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import {
   View,
   PickingInfo,

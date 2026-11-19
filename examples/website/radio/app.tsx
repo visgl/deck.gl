@@ -9,7 +9,7 @@ import {Map} from 'react-map-gl/maplibre';
 import {MapView, WebMercatorViewport, FlyToInterpolator} from '@deck.gl/core';
 import {ScatterplotLayer, PathLayer} from '@deck.gl/layers';
 import {MVTLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
