@@ -665,13 +665,13 @@
   border-radius: 4px;
   box-sizing: border-box;
   pointer-events: auto;
-  overscroll-behavior: contain;
   padding: 8px 12px;
   font-size: 10px;
   width: 290px;
 }
 .deck-widget-color-scale details {
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .deck-widget-color-scale summary {

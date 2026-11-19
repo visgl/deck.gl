@@ -69,6 +69,7 @@ test('_ColorScaleWidget respects screen filters and its attached viewport', asyn
     expect(style.color).toBe('rgb(4, 5, 6)');
     const scrollport = panel.querySelector('details')!;
     expect(getComputedStyle(scrollport).overflowY).toBe('auto');
+    expect(getComputedStyle(scrollport).overscrollBehavior).toBe('contain');
     expect(style.pointerEvents).toBe('auto');
     expect(getComputedStyle(scrollport).maxHeight).toBe('360px');
     expect(getComputedStyle(widgetRoot).display).not.toBe('none');
