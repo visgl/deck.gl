@@ -668,6 +668,11 @@
   padding: 8px 12px;
   min-width: 144px;
 }
+.deck-widget-color-scale summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
 .deck-widget-color-scale ul {
   list-style: none;
   padding: 0;

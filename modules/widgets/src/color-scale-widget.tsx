@@ -117,13 +117,15 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
   static defaultProps = {
     ...Widget.defaultProps,
     id: 'color-scale',
-    label: 'Color scales',
+    label: 'Legend',
     viewId: null
   };
   /** Root CSS class for the legend. */
   className = 'deck-widget-color-scale';
   /** Available height in CSS pixels. */
   private viewHeight = 0;
+  /** Whether the viewer left the legend contents expanded. */
+  private expanded = true;
   /** Scales displayed by the most recent redraw. */
   private entries: LegendEntry[] = [];
 
@@ -203,13 +205,20 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
             maxHeight: `max(0px, calc(${this.viewHeight}px - 2 * var(--widget-margin, 12px)))`
           }}
         >
-          <strong>{this.props.label}</strong>
-          {this.entries.map(({layerId, accessor, label, scale}) => (
-            <div key={JSON.stringify([layerId, accessor])}>
-              <div>{label}</div>
-              <ColorLegend scale={scale} />
-            </div>
-          ))}
+          <details
+            open={this.expanded}
+            onToggle={event => {
+              this.expanded = event.currentTarget.open;
+            }}
+          >
+            <summary>{this.props.label}</summary>
+            {this.entries.map(({layerId, accessor, label, scale}) => (
+              <div key={JSON.stringify([layerId, accessor])}>
+                <div>{label}</div>
+                <ColorLegend scale={scale} />
+              </div>
+            ))}
+          </details>
         </section>
       ) : null,
       rootElement

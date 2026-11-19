@@ -72,6 +72,15 @@ test('_ColorScaleWidget respects screen filters and its attached viewport', asyn
     expect(style.maxHeight).toBe('376px');
     expect(getComputedStyle(widgetRoot).display).not.toBe('none');
 
+    const disclosure = panel.querySelector('details')!;
+    const heading = disclosure.querySelector('summary')!;
+    expect(heading.textContent).toBe('Legend');
+    expect(disclosure.open).toBe(true);
+    heading.click();
+    expect(disclosure.open).toBe(false);
+    heading.click();
+    expect(disclosure.open).toBe(true);
+
     tester.setProps({layerFilter: () => false});
     await vi.waitFor(() => expect(legend()).toBeUndefined());
     expect(getComputedStyle(widgetRoot).display).toBe('none');
