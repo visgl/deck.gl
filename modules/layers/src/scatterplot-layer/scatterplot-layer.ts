@@ -356,6 +356,9 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       this.state.columns = undefined;
       this.internalState!.attributeManager = super._getAttributeManager();
       this.initializeAccessorAttributes();
+      for (const extension of this.props.extensions) {
+        extension.initializeState.call(this, this.context, extension);
+      }
       this.state.model?.destroy();
       this.state.model = this._getModel();
     }
@@ -367,6 +370,11 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       throw new Error('Scatterplot Arrow columns do not support extensions');
     const enteringColumns = !this.state.columns;
     if (enteringColumns) {
+      if (params.changeFlags.extensionsChanged) {
+        for (const extension of params.oldProps.extensions ?? []) {
+          extension.finalizeState.call(this, this.context, extension);
+        }
+      }
       this.internalState!.attributeManager?.finalize();
       this.internalState!.attributeManager = null;
       this.state.columns = new ScatterplotLayerColumns(this.context.device);

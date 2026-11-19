@@ -344,6 +344,7 @@ export default class DataFilterExtension extends LayerExtension<
     const filterModel = this.state.filterModel as Model;
 
     this.state.filterModel = null;
+    this.state.filterFBO = null;
     filterFBO?.colorAttachments[0].texture.destroy();
     filterFBO?.destroy();
     filterModel?.destroy();

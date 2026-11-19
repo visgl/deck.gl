@@ -3,13 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import type {ShaderPlugin} from '@luma.gl/shaders';
-import {beforeEach, expect, test} from 'vitest';
+import {beforeEach, expect, test, vi} from 'vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension, BrushingExtension, ClipExtension} from '@deck.gl/extensions';
 import {luma, Texture, Buffer} from '@luma.gl/core';
 import {webgpuAdapter} from '@luma.gl/core/webgpu';
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
 
 async function createFixture() {
   const container = document.createElement('div');
@@ -428,4 +429,44 @@ test.each([true, false])(
 // These regressions also run in the WebGL browser project.
 beforeEach(async context => {
   if (!(await getWebGPUTestDevice())) context.skip();
+});
+
+test('DataFilterExtension restores filter attributes when an Arrow Scatterplot re-enters row mode', async () => {
+  const fixture = await createFixture();
+  try {
+    const extensions = [new DataFilterExtension({filterSize: 1})];
+    const layer = new ScatterplotLayer({
+      ...baseProps,
+      data: [{value: 0.5}, {value: 2}],
+      getPosition: vectorFromArray(
+        [
+          [0, 0],
+          [30, 0]
+        ],
+        new FixedSizeList(2, new Field('values', new Float32(), false))
+      ),
+      getFilterValue: object => object.value,
+      filterRange: [0, 1],
+      extensions
+    });
+    const unfiltered = layer.clone({extensions: []});
+    const restored = unfiltered.clone({extensions});
+    for (const current of [layer, unfiltered, restored]) {
+      await fixture.render(current);
+      await vi.waitFor(() => expect(current.isLoaded).toBe(true));
+      const red = await fixture.render(current);
+      expect(red(64)).toBe(255);
+      if (current === unfiltered) {
+        expect(current.getAttributeManager()).toBeNull();
+        expect(red(94)).toBe(255);
+      } else {
+        expect(current.getAttributeManager()?.attributes.filterValues).toBeDefined();
+        expect(red(94)).toBe(0);
+        expect((await fixture.deck.pickObjectAsync({x: 64, y: 64}))?.index).toBe(0);
+        expect(await fixture.deck.pickObjectAsync({x: 94, y: 64})).toBeNull();
+      }
+    }
+  } finally {
+    await fixture.finalize();
+  }
 });

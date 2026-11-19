@@ -4,6 +4,7 @@
 
 import {afterAll, beforeAll, expect, test, vi} from 'vitest';
 import {GPUDataEvaluator} from '@luma.gl/graph/gpu-simple-graph';
+import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {device, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {ArrowConverter} from '@deck.gl/core/arrow';
@@ -291,6 +292,47 @@ test('Scatterplot switches between Arrow columns and row attributes with extensi
       }
     ]
   });
+});
+
+test('Scatterplot still rejects direct GPUVector columns with extensions', async () => {
+  const {LayerExtension} = await import('@deck.gl/core');
+  const buffer = device.createBuffer({data: new Float32Array([2, 4])});
+  const radii = new GPUVector({
+    type: 'buffer',
+    name: 'radii',
+    buffer,
+    format: 'float32',
+    length: 2,
+    ownsBuffer: false
+  });
+  const errors: Error[] = [];
+  try {
+    await testLayerAsync({
+      Layer: ScatterplotLayer,
+      draw: false,
+      testCases: [
+        {
+          props: {
+            data: [{}, {}],
+            getPosition: [0, 0],
+            radii,
+            extensions: [new LayerExtension()]
+          }
+        }
+      ],
+      onError: error => {
+        errors.push(error);
+      }
+    });
+    expect(errors.length).toBeGreaterThan(0);
+    for (const error of errors) {
+      expect(error.message).toContain('Scatterplot Arrow columns do not support extensions');
+    }
+    expect(buffer.destroyed).toBe(false);
+  } finally {
+    radii.destroy();
+    buffer.destroy();
+  }
 });
 
 for (const backend of ['webgl', 'webgpu'] as const) {
