@@ -2,6 +2,7 @@ import OpenFreeMapAttribution from '../components/openfreemap-attribution';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import CodeBlock from '@theme/CodeBlock';
 import {
+  _ColorScaleWidget,
   ScreenshotWidget,
   FullscreenWidget,
   CompassWidget,
@@ -26,13 +27,14 @@ import {
 } from '@deck.gl/widgets';
 import { MapView, OrthographicView, OrbitView } from '@deck.gl/core';
 import { DeckGL } from '@deck.gl/react';
-import { ScatterplotLayer, GeoJsonLayer, IconLayer, TextLayer } from '@deck.gl/layers';
+import { ScatterplotLayer, GeoJsonLayer, IconLayer, PolygonLayer, TextLayer } from '@deck.gl/layers';
 import { SimpleMeshLayer } from '@deck.gl/mesh-layers';
 import { MVTLayer } from '@deck.gl/geo-layers';
 import { Map } from 'react-map-gl/maplibre';
 import { useColorMode } from '@docusaurus/theme-common';
 import { cloneMapStyle, MAPBOX_STYLES, DATA_URI } from '../constants/defaults';
 import {OBJLoader} from '@loaders.gl/scene/obj';
+import {tableFromArrays} from 'apache-arrow';
 
 const COUNTRIES =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_scale_rank.geojson'; //eslint-disable-line
@@ -535,6 +537,70 @@ export function ThemeWidgetDemo() {
 export function ScaleWidgetDemo() {
   return <GeoDemoBase map mapLabels widgets={[new ScaleWidget({placement: 'top-left'})]} />
 }
+/** Creates a compact choropleth with adjoining districts and sample canopy coverage. */
+function makeCanopyDistricts() {
+  const junctions = [
+    [[-122, -64], [-66, -81], [-7, -78], [59, -69], [105, -49]],
+    [[-136, -21], [-69, -30], [-13, -16], [49, -23], [119, -9]],
+    [[-127, 27], [-76, 22], [-4, 32], [55, 20], [125, 38]],
+    [[-101, 65], [-58, 77], [0, 68], [68, 78], [108, 66]]
+  ];
+  const path = Array.from({length: 12}, (_, index) => {
+    const row = Math.floor(index / 4);
+    const col = index % 4;
+    return [
+      ...junctions[row][col],
+      ...junctions[row][col + 1],
+      ...junctions[row + 1][col + 1],
+      ...junctions[row + 1][col]
+    ];
+  });
+  return tableFromArrays({path, coverage: [17, 26, 54, 74, 22, 38, 61, 81, 31, 45, 66, 89]});
+}
+
+/** Demonstrates discovery of a quantile SQL color scale on a polygon layer. */
+export function ColorScaleWidgetDemo() {
+  const layers = useMemo(() => [
+    new PolygonLayer({
+      id: 'Tree canopy (%)',
+      data: makeCanopyDistricts(),
+      coordinateSystem: 'cartesian',
+      positionFormat: 'XY',
+      getPolygon: {sql: 'path'},
+      getFillColor: {sql: "SCALE_QUANTILE(coverage, 5, PALETTE('viridis'))"},
+      getLineColor: [240, 244, 252],
+      lineWidthMinPixels: 2,
+      pickable: true,
+      autoHighlight: true
+    }),
+    new ScatterplotLayer({
+      id: 'Tree height (m)',
+      data: tableFromArrays({
+        x: [-103, -82, -66, -32, 0, 24, 66, 90],
+        y: [-42, 12, -3, 37, -46, 8, 48, -21],
+        height: [5.12, 14.7, 11.3, 24.2, 18.6, 15.3, 28.1, 32.8]
+      }),
+      coordinateSystem: 'cartesian',
+      getPosition: {sql: 'ARRAY_FLOAT64(x, y)'},
+      getFillColor: {sql: "SCALE_COLOR(height, DOMAIN(height), PALETTE('#fff4b3', '#f18f27', '#8f1d32'))"},
+      getLineColor: [255, 255, 255],
+      getRadius: 5,
+      stroked: true,
+      lineWidthMinPixels: 1,
+      pickable: true
+    })
+  ], []);
+  const widgets = useMemo(() => [new _ColorScaleWidget()], []);
+  return <NonGeoDemoBase
+    views={new OrthographicView()}
+    layers={layers}
+    widgets={widgets}
+    getTooltip={({object}) => object && (object.height == null
+      ? `Tree canopy: ${object.coverage}%`
+      : `Tree height: ${object.height} m`)}
+  />;
+}
+
 export function SplitterWidgetDemo() {
   const { colorMode } = useColorMode();
 

@@ -1782,6 +1782,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.props.onBeforeRender({device, gl});
 
+    // Reuse the renderer's visibility decisions without invoking user filters again.
+    const renderedLayers = new Map<Viewport, Set<Layer>>();
     const opts = {
       target: this.props._framebuffer,
       layers: this.layerManager!.getLayers(),
@@ -1790,7 +1792,16 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       views: this.viewManager!.getViews(),
       pass: 'screen',
       effects: this.effectManager!.getEffects(),
-      ...renderOptions
+      ...renderOptions,
+      /** Records one eligible layer for the screen widgets in each viewport. */
+      onLayerEligible: (layer: Layer, viewport: Viewport) => {
+        let layers = renderedLayers.get(viewport);
+        if (!layers) {
+          layers = new Set();
+          renderedLayers.set(viewport, layers);
+        }
+        layers.add(layer);
+      }
     };
 
     if (
@@ -1837,7 +1848,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // Only when drawing to screen, update all widgets (UI components)
       this.widgetManager!.onRedraw({
         viewports: opts.viewports,
-        layers: opts.layers
+        layers: opts.layers,
+        renderedLayers
       });
     }
 

@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable react/no-direct-mutation-state */
+import type {ResolvedScale} from '@math.gl/core/color';
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/core/webgl';
 import {unwrapLoaderArrowResult} from '../utils/loader-utils';
@@ -690,6 +691,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       expressions,
       parseExpression,
       functions,
+      scales: previous?.scales,
       pending: true
     };
     state.accessorQueries = request;
@@ -704,10 +706,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         evaluateAccessorQueries(source, expressions, parseExpression, previous, functions)
       )
       .then(
-        ({table}) => {
+        ({table, scales}) => {
           const layer = currentLayer();
           if (layer) {
             request.table = table;
+            request.scales = Object.keys(scales).length ? scales : undefined;
             request.pending = false;
             request.columns = Object.fromEntries(
               Object.keys(expressions).map(name => [name, table.getChild(name)!])
@@ -720,12 +723,23 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         error => {
           const layer = currentLayer();
           if (layer) {
+            request.scales = undefined;
             request.pending = false;
             layer.setNeedsUpdate();
             layer.raiseError(error, 'evaluating SQL accessors');
           }
         }
       );
+  }
+
+  /**
+   * Experimental. Returns resolved SQL color scales keyed by accessor. The result is undefined
+   * until the first evaluation completes. While updating, it describes the previously applied
+   * colors.
+   * Color samples use normalized RGBA channels in [0, 1].
+   */
+  _getResolvedColorScales(): Readonly<Record<string, ResolvedScale>> | undefined {
+    return this.internalState?.accessorQueries?.scales;
   }
 
   /** Called once to set up the initial state. Layers can create WebGL resources here. */
