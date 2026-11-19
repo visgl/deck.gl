@@ -666,7 +666,7 @@
   pointer-events: auto;
   overscroll-behavior: contain;
   padding: 8px 12px;
-  min-width: 144px;
+  min-width: 176px;
 }
 .deck-widget-color-scale summary {
   cursor: pointer;
@@ -698,4 +698,29 @@
 .deck-color-scale-domain {
   display: flex;
   justify-content: space-between;
+}
+
+.deck-color-scale-bins {
+  display: flex;
+  height: 12px;
+  margin-top: 4px;
+}
+.deck-color-scale-bins > span {
+  flex: 1;
+}
+.deck-color-scale-breaks {
+  position: relative;
+  height: 1.3em;
+  font-size: 0.85em;
+}
+.deck-color-scale-breaks > span {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.deck-color-scale-breaks > span:first-child {
+  transform: none;
+}
+.deck-color-scale-breaks > span:last-child {
+  transform: translateX(-100%);
 }

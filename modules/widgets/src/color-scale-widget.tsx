@@ -19,6 +19,8 @@ export type ColorScaleWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Accessible heading for the legend. */
   label?: string;
+  /** Maximum significant digits in numeric labels (1–21). Defaults to 2. */
+  precision?: number;
 };
 
 /** One resolved scale and the layer accessor that produced it. */
@@ -48,9 +50,6 @@ const SCALE_TYPE_LABELS: Record<ResolvedScale['descriptor']['type'], string> = {
   piecewise: 'Piecewise'
 };
 
-/** Keeps displayed boundaries readable without changing the underlying scale. */
-const SCALE_NUMBER_FORMAT = new Intl.NumberFormat(undefined, {maximumSignificantDigits: 6});
-
 /** Converts an accessor identifier to a readable label for layers with several scales. */
 function formatAccessorLabel(accessor: string): string {
   return accessor
@@ -67,7 +66,7 @@ function cssColor(sample: ReturnType<ResolvedScale['sample']>): string {
 }
 
 /** Renders category swatches, discrete intervals, or a sampled continuous ramp. */
-function ColorLegend({scale}: {scale: ResolvedScale}) {
+function ColorLegend({scale, format}: {scale: ResolvedScale; format: (value: number) => string}) {
   const {domain, thresholds, type} = scale.descriptor;
   if (type === 'ordinal') {
     return (
@@ -89,6 +88,29 @@ function ColorLegend({scale}: {scale: ResolvedScale}) {
   const maximum = Number(domain[domain.length - 1]);
   if (thresholds?.length) {
     const boundaries = [minimum, ...thresholds, maximum];
+    if (type === 'quantile') {
+      return (
+        <>
+          <div className="deck-color-scale-bins">
+            {boundaries.slice(0, -1).map((lower, index) => (
+              <span
+                key={index}
+                style={{
+                  backgroundColor: cssColor(scale.sample(lower / 2 + boundaries[index + 1] / 2))
+                }}
+              />
+            ))}
+          </div>
+          <div className="deck-color-scale-breaks">
+            {boundaries.map((boundary, index) => (
+              <span key={index} style={{left: `${(100 * index) / (boundaries.length - 1)}%`}}>
+                {format(boundary)}
+              </span>
+            ))}
+          </div>
+        </>
+      );
+    }
     return (
       <ul>
         {boundaries.slice(0, -1).map((lower, index) => {
@@ -99,7 +121,7 @@ function ColorLegend({scale}: {scale: ResolvedScale}) {
                 className="deck-color-scale-swatch"
                 style={{backgroundColor: cssColor(scale.sample(lower / 2 + upper / 2))}}
               />
-              {`${SCALE_NUMBER_FORMAT.format(lower)} – ${SCALE_NUMBER_FORMAT.format(upper)}`}
+              {`${format(lower)} – ${format(upper)}`}
             </li>
           );
         })}
@@ -118,8 +140,8 @@ function ColorLegend({scale}: {scale: ResolvedScale}) {
         style={{background: `linear-gradient(to right, ${samples.join(', ')})`}}
       />
       <div className="deck-color-scale-domain">
-        <span>{SCALE_NUMBER_FORMAT.format(minimum)}</span>
-        <span>{SCALE_NUMBER_FORMAT.format(maximum)}</span>
+        <span>{format(minimum)}</span>
+        <span>{format(maximum)}</span>
       </div>
     </>
   );
@@ -136,7 +158,8 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
     ...Widget.defaultProps,
     id: 'color-scale',
     label: 'Legend',
-    viewId: null
+    viewId: null,
+    precision: 2
   };
   /** Root CSS class for the legend. */
   className = 'deck-widget-color-scale';
@@ -215,6 +238,9 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
 
   /** Renders each discovered layer accessor legend. */
   override onRenderHTML(rootElement: HTMLElement): void {
+    const {format} = new Intl.NumberFormat(undefined, {
+      maximumSignificantDigits: this.props.precision
+    });
     render(
       this.entries.length ? (
         <section
@@ -236,7 +262,7 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
                   <span>{label}</span>
                   <small>{SCALE_TYPE_LABELS[scale.descriptor.type]}</small>
                 </div>
-                <ColorLegend scale={scale} />
+                <ColorLegend scale={scale} format={format} />
               </div>
             ))}
           </details>

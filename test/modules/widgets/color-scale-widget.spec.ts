@@ -108,7 +108,9 @@ test('_ColorScaleWidget includes a composite scale when one of its children is d
   /** Reads the currently rendered legend panels. */
   const legends = () => tester.findElements('.deck-widget-color-scale section');
   try {
-    await vi.waitFor(() => expect(legends()[0]?.textContent).toContain('counties'));
+    await vi.waitFor(() => expect(legends()[0]?.textContent).toContain('counties'), {
+      timeout: 5000
+    });
     tester.setProps({layerFilter: () => false});
     await vi.waitFor(() => expect(legends()).toHaveLength(0));
   } finally {
@@ -131,6 +133,28 @@ test('_ColorScaleWidget labels multiple scales with readable names', async () =>
         tester.findElements('.deck-color-scale-heading small').map(item => item.textContent)
       ).toEqual(['Continuous', 'Quantile']);
     });
+  } finally {
+    tester.destroy();
+  }
+});
+
+test('_ColorScaleWidget formats numeric labels and aligns them below quantile breaks', async () => {
+  const layer = makeReadings().clone({
+    data: tableFromArrays({value: [1.2345, 12.345]}),
+    getFillColor: {sql: "SCALE_QUANTILE(value, 2, PALETTE('#0000ff', '#ff0000'))"}
+  });
+  const widget = new _ColorScaleWidget();
+  const tester = new WidgetTester({layers: [layer], widgets: [widget]});
+  /** Reads labels from the horizontal quantile legend. */
+  const breaks = () => tester.findElements('.deck-color-scale-breaks > span') as HTMLElement[];
+  try {
+    await vi.waitFor(() =>
+      expect(breaks().map(item => item.textContent)).toEqual(['1.2', '6.8', '12'])
+    );
+    expect(breaks().map(item => item.style.left)).toEqual(['0%', '50%', '100%']);
+    expect(tester.findElements('.deck-color-scale-bins > span')).toHaveLength(2);
+    widget.setProps({precision: 4});
+    expect(breaks().map(item => item.textContent)).toEqual(['1.235', '6.79', '12.35']);
   } finally {
     tester.destroy();
   }

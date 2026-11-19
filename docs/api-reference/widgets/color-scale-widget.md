@@ -19,3 +19,7 @@ const widgets = [new _ColorScaleWidget()];
 Pass `widgets` to Deck or DeckGL alongside layers using SQL color scales.
 The legend starts expanded. Select its heading to collapse or reopen it. The optional
 `label` prop sets the heading and defaults to `Legend`.
+
+Quantile bins appear side by side with numeric labels at their breaks. Set
+`precision` to change the maximum significant digits used for numbers. The
+default is two.

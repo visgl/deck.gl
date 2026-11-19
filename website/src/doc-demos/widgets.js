@@ -572,6 +572,22 @@ export function ColorScaleWidgetDemo() {
       lineWidthMinPixels: 2,
       pickable: true,
       autoHighlight: true
+    }),
+    new ScatterplotLayer({
+      id: 'Tree height (m)',
+      data: tableFromArrays({
+        x: [-103, -82, -66, -32, 0, 24, 66, 90],
+        y: [-42, 12, -3, 37, -46, 8, 48, -21],
+        height: [5.12, 14.7, 11.3, 24.2, 18.6, 15.3, 28.1, 32.8]
+      }),
+      coordinateSystem: 'cartesian',
+      getPosition: {sql: 'ARRAY_FLOAT64(x, y)'},
+      getFillColor: {sql: "SCALE_COLOR(height, DOMAIN(height), PALETTE('#fff4b3', '#f18f27', '#8f1d32'))"},
+      getLineColor: [255, 255, 255],
+      getRadius: 5,
+      stroked: true,
+      lineWidthMinPixels: 1,
+      pickable: true
     })
   ], []);
   const widgets = useMemo(() => [new _ColorScaleWidget()], []);
@@ -579,7 +595,9 @@ export function ColorScaleWidgetDemo() {
     views={new OrthographicView()}
     layers={layers}
     widgets={widgets}
-    getTooltip={({object}) => object && `Tree canopy: ${object.coverage}%`}
+    getTooltip={({object}) => object && (object.height == null
+      ? `Tree canopy: ${object.coverage}%`
+      : `Tree height: ${object.height} m`)}
   />;
 }
 
