@@ -36,6 +36,9 @@ export function getDeviceCanvas(device: Device): DeviceCanvas | null {
 /** Number of live Decks rendering to each canvas. */
 const liveDecks = new WeakMap<DeviceCanvas, number>();
 
+/** Releases waiting for the last Deck on a canvas to stop, such as one that borrowed a device. */
+const pendingReleases = new WeakMap<DeviceCanvas, () => void>();
+
 /**
  * Records that a Deck renders to `canvas`. Call {@link releaseCanvas} once when it stops.
  * @param canvas The canvas of the Deck's device.
@@ -54,24 +57,42 @@ export function releaseCanvas(canvas: DeviceCanvas): void {
     liveDecks.set(canvas, count);
   } else {
     liveDecks.delete(canvas);
+    const pending = pendingReleases.get(canvas);
+    pendingReleases.delete(canvas);
+    pending?.();
   }
 }
 
+/** Whether a canvas is in the document. An `OffscreenCanvas` never is. */
+function isInDocument(canvas: DeviceCanvas): boolean {
+  return 'isConnected' in canvas && canvas.isConnected;
+}
+
 /**
- * Loses a created device once it has initialized, unless a Deck is rendering to its canvas again.
+ * Loses a created device once it has initialized. If a Deck still renders to its canvas, for
+ * example one that was passed the device, the release waits until the last such Deck stops.
  * @param created The device to release.
+ * @param canRelease Checked again just before the device is lost.
  */
-export function loseCreatedDevice(created: CreatedDevice): void {
-  created.device.then(
-    device => {
-      if (!liveDecks.has(created.canvas) && !device.isLost) {
-        device.loseDevice();
+export function loseCreatedDevice(
+  created: CreatedDevice,
+  canRelease: () => boolean = () => true
+): void {
+  const release = () => {
+    created.device.then(
+      device => {
+        if (liveDecks.has(created.canvas)) {
+          pendingReleases.set(created.canvas, release);
+        } else if (!device.isLost && canRelease()) {
+          device.loseDevice();
+        }
+      },
+      () => {
+        // Device creation failed, so there is no context to release.
       }
-    },
-    () => {
-      // Device creation failed, so there is no context to release.
-    }
-  );
+    );
+  };
+  release();
 }
 
 /**
@@ -97,8 +118,8 @@ export function releaseCanvasContext(deck: {readonly _createdDevice: CreatedDevi
   }
   const {canvas} = created;
   setTimeout(() => {
-    if (!('isConnected' in canvas && canvas.isConnected)) {
-      loseCreatedDevice(created);
+    if (!isInDocument(canvas)) {
+      loseCreatedDevice(created, () => !isInDocument(canvas));
     }
   }, 0);
 }

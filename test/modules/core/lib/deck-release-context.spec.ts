@@ -144,8 +144,8 @@ test('_releaseCanvasContext keeps a context that another Deck borrowed', async (
   await nextTask();
   expect(gl.isContextLost(), 'the second Deck renders with the same device').toBe(false);
 
+  // The release waits for the last Deck on the canvas, with no further call.
   second.finalize();
-  releaseCanvasContext(first);
   await nextTask();
   expect(gl.isContextLost()).toBe(true);
 });
