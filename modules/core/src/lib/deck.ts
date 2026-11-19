@@ -1793,6 +1793,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       pass: 'screen',
       effects: this.effectManager!.getEffects(),
       ...renderOptions,
+      /** Records one eligible layer for the screen widgets in each viewport. */
       onLayerEligible: (layer: Layer, viewport: Viewport) => {
         let layers = renderedLayers.get(viewport);
         if (!layers) {

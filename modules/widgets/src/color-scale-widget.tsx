@@ -11,7 +11,7 @@ import {
 } from '@deck.gl/core';
 import {render} from 'preact';
 
-/** Options for the automatic SQL color legend. */
+/** Options for the experimental automatic SQL color legend. */
 export type ColorScaleWidgetProps = WidgetProps & {
   /** Widget placement. Defaults to bottom-right. */
   placement?: WidgetPlacement;
@@ -22,7 +22,14 @@ export type ColorScaleWidgetProps = WidgetProps & {
 };
 
 /** One resolved scale and the layer accessor that produced it. */
-type LegendEntry = {layerId: string; accessor: string; scale: ResolvedScale};
+type LegendEntry = {
+  /** Identifier of the layer that declares the scale. */
+  layerId: string;
+  /** Name of the SQL accessor that supplies colors. */
+  accessor: string;
+  /** Resolved descriptor and sampler used to render the legend. */
+  scale: ResolvedScale;
+};
 
 /** Converts a normalized color sample into a CSS color. */
 function cssColor(sample: ReturnType<ResolvedScale['sample']>): string {
@@ -90,7 +97,11 @@ function ColorLegend({scale}: {scale: ResolvedScale}) {
   );
 }
 
-/** Shows the SQL color scales of currently visible layers. */
+/**
+ * Shows the SQL color scales of currently visible layers.
+ *
+ * @remarks Experimental widget. Its options and behavior may change.
+ */
 export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
   /** Default identifier and accessible heading. */
   static defaultProps = {

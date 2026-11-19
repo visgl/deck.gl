@@ -43,7 +43,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     pending: boolean;
     table?: Table;
     columns?: Record<string, Vector>;
-    /** Scales resolved for the current accessor evaluation. */
+    /** Resolved scales for the colors currently applied to the layer. */
     scales?: Readonly<Record<string, ResolvedScale>>;
   };
   /** Options and parser used by the current data request. */

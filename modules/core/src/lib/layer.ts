@@ -737,6 +737,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
    * until the first evaluation completes. While updating, it describes the previously applied
    * colors.
    * Color samples use normalized RGBA channels in [0, 1].
+   *
+   * @remarks Experimental API. The scale metadata contract may change.
    */
   _getResolvedColorScales(): Readonly<Record<string, ResolvedScale>> | undefined {
     return this.internalState?.accessorQueries?.scales;

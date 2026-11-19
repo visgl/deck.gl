@@ -414,9 +414,13 @@ test('an all-null expression domain leaves other SQL accessors usable', () => {
 test('resolved color scales remain available while SQL accessors refresh', async () => {
   const device = new NullDevice({});
   const manager = new LayerManager(device, {viewport: new Viewport()});
+  /** Minimal layer that resolves a SQL color accessor. */
   class ColorLayer extends Layer {
+    /** Layer type used by the fixture. */
     static layerName = 'ColorLayer';
+    /** Enables SQL for the color accessor. */
     static defaultProps = {getColor: {type: 'accessor', arrow: true, value: [0, 0, 0, 255]}};
+    /** The fixture needs no render resources. */
     initializeState() {}
   }
   const layer = new ColorLayer({

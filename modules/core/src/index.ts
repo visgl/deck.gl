@@ -188,4 +188,5 @@ export {
 
 export {isArrowVector as _isArrowVector} from './arrow/upstream-math/is-arrow-vector';
 
+/** Scale metadata types exposed by the experimental color scale accessor. */
 export type {ResolvedScale, ResolvedScaleDescriptor} from '@math.gl/core/color';

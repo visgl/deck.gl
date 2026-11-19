@@ -21,12 +21,15 @@ function makeReadings(id = 'readings') {
 
 /** Excludes a child in the same way that a composite filters cached sublayers. */
 class ReadingsGroup extends CompositeLayer {
+  /** Layer type used by the fixture. */
   static layerName = 'ReadingsGroup';
 
+  /** Suppresses all children of the test composite. */
   filterSubLayer() {
     return false;
   }
 
+  /** Creates a child with its own SQL scale. */
   renderLayers() {
     return makeReadings('hidden-child');
   }
@@ -43,6 +46,7 @@ test('_ColorScaleWidget respects screen filters and its attached viewport', asyn
     layers: [layer, new ReadingsGroup()],
     widgets: [new _ColorScaleWidget({viewId: 'left'})]
   });
+  /** Reads the panel associated with the attached view. */
   const legend = () => tester.findElements('.deck-widget-color-scale section')[0];
   try {
     await vi.waitFor(() => expect(layer._getResolvedColorScales()).toBeDefined());
@@ -87,6 +91,7 @@ test('_ColorScaleWidget includes a composite scale when one of its children is d
     stroked: false
   });
   const tester = new WidgetTester({layers: [layer], widgets: [new _ColorScaleWidget()]});
+  /** Reads the currently rendered legend panels. */
   const legends = () => tester.findElements('.deck-widget-color-scale section');
   try {
     await vi.waitFor(() => expect(legends()[0]?.textContent).toContain('counties · getFillColor'));
