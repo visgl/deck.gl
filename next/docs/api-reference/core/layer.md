@@ -354,6 +354,14 @@ If the table has `red`, `green`, and `blue` columns with floating-point values i
 getFillColor: {sql: 'RGBA8(red, green, blue, 1)'}
 ```
 
+A color accessor can also use a top-level SQL color scale:
+
+```
+getFillColor: {sql: "SCALE_COLOR(temperature, DOMAIN(temperature), PALETTE('viridis'))"}
+```
+
+The domain resolves against the complete loaded table. When data changes, existing rows can receive new colors. Missing values are transparent.
+
 #### `dataTransform` (Function, optional)[​](#datatransform "Direct link to datatransform")
 
 Executed to manipulate remote data when it's fetched. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.
@@ -867,6 +875,10 @@ Used to propagate errors thrown in layers to the deck.gl error handling system. 
 
 * `error` (Error) - a JavaScript Error object
 * `message` (string, optional) - additional contextual description to amend the error message with
+
+#### `_getResolvedColorScales()` 🧪[​](#_getresolvedcolorscales- "Direct link to _getresolvedcolorscales-")
+
+Returns a read-only map of accessor names to `ResolvedScale` objects. The type is available from `@deck.gl/core`. A scale descriptor provides the domain and color range, and `sample(value)` returns RGBA channels in `[0, 1]`. The method returns `undefined` before the first evaluation completes or on layers without SQL color accessors. During replacement, the method returns the scales for the previously applied colors. Call it after a deck redraw to read the latest scales.
 
 ### Layer Lifecycle Methods[​](#layer-lifecycle-methods "Direct link to Layer Lifecycle Methods")
 

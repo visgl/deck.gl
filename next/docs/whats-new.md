@@ -14,49 +14,49 @@ v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, S
 
 ### Heatmap filtering[​](#heatmap-filtering "Direct link to Heatmap filtering")
 
-* `ClipExtension` filters HeatmapLayer source points on WebGPU, including borrowed GPUVectors.
+* [`ClipExtension`](https://deck.gl/next/docs/api-reference/extensions/clip-extension.md) filters HeatmapLayer source points on WebGPU, including borrowed GPUVectors.
 
-* `DataFilterExtension` filters the points that contribute to `HeatmapLayer` on WebGPU.
+* [`DataFilterExtension`](https://deck.gl/next/docs/api-reference/extensions/data-filter-extension.md) filters the points that contribute to `HeatmapLayer` on WebGPU.
 
-* `MaskExtension` limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
+* [`MaskExtension`](https://deck.gl/next/docs/api-reference/extensions/mask-extension.md) limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
 
 ### GPU[​](#gpu "Direct link to GPU")
 
-* **WebGPU** 🚧 — WebGPU is now the default renderer with full feature support.
-* **GPU vectors** — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph.
+* [**WebGPU**](https://deck.gl/next/docs/developer-guide/webgpu.md) 🚧 — WebGPU is now the default renderer with full feature support.
+* [**GPU vectors**](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#direct-gpuvector-inputs) — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph.
 
 ### Apache Arrow[​](#apache-arrow "Direct link to Apache Arrow")
 
-* **Arrow data** — The Layer `data` prop now supports Arrow tables
-* **Arrow loading** — `data` URLs now load Arrow tables instead of JS arrays.
-* **Arrow streaming** — Layer data prop accepts `AsyncIterable<arrow.RecordBatch>` and incrementally transforms and renders RecordBatches as they arrive.
-* **Arrow accessors** — Layer accessors now support Arrow columns (`arrow.Vector`s)
-* **GeoArrow** 🚧 — Full support for GeoArrow and GeoParquet source data and `geoarrow.union` and `geoarrow.wkb` rendering.
+* [**Arrow data**](https://deck.gl/next/docs/api-reference/core/layer.md#data) — The Layer `data` prop now supports Arrow tables
+* [**Arrow loading**](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#loading-and-updates) — `data` URLs now load Arrow tables instead of JS arrays.
+* [**Arrow streaming**](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#streaming-arrow-data) — Layer data prop accepts `AsyncIterable<arrow.RecordBatch>` and incrementally transforms and renders RecordBatches as they arrive.
+* [**Arrow accessors**](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#supplying-columns) — Layer accessors now support Arrow columns (`arrow.Vector`s)
+* [**GeoArrow**](https://deck.gl/next/docs/api-reference/proposals/arrow-layers.md) 🚧 — Full support for GeoArrow and GeoParquet source data and `geoarrow.union` and `geoarrow.wkb` rendering.
 
 ### SQL[​](#sql "Direct link to SQL")
 
-* **SQL table transforms** — Use SQL to transform Arrow tables after loading.
-* **SQL accessors** — Use SQL select expressions to extract layer attributes from your loaded data.
-* **SQL query pushdowns** — data loaders skip work your query doesn’t need (such as loading unused columns, rows, etc from the source data)
+* [**SQL table transforms**](https://deck.gl/next/docs/api-reference/core/layer.md#query) — Use SQL to transform Arrow tables after loading.
+* [**SQL accessors**](https://deck.gl/next/docs/api-reference/core/layer.md#sql-accessor-inputs) — Use SQL select expressions to extract layer attributes from your loaded data.
+* [**SQL query pushdowns**](https://deck.gl/next/docs/api-reference/core/layer.md#query) — data loaders skip work your query doesn’t need (such as loading unused columns, rows, etc from the source data)
 
 ### Projections[​](#projections "Direct link to Projections")
 
 * **Non Web Mercator projections** — [`CustomProjectionView`](https://deck.gl/next/docs/api-reference/core/custom-projection-view.md) renders longitude/latitude data in a planar projection specified by an EPSG code or PROJ string.
-* **Source data CRS** is preserved during loading and projected automatically
-* **Curved geometry** — Set `resolution` to subdivide paths, polygons, and bitmaps so they follow the projection’s curves.
+* [**Source data CRS**](https://deck.gl/next/docs/developer-guide/coordinate-systems.md#positions) is preserved during loading and projected automatically
+* **Curved geometry** — Set [`resolution`](https://deck.gl/next/docs/api-reference/core/view.md#resolution) to subdivide paths, polygons, and bitmaps so they follow the projection’s curves.
 
 ### Colors[​](#colors "Direct link to Colors")
 
-* **Normalized colors** — Set `normalizedColors` to use RGB values from 0 to 1.
-* **Color scales** — Map data values to colors.
-* **ColorScaleWidget** 🚧 — Display a color scale as a legend.
+* [**Normalized colors**](https://deck.gl/next/docs/developer-guide/using-layers.md#normalized-colors) — Set `normalizedColors` to use RGB values from 0 to 1.
+* [**Color scales**](https://deck.gl/next/docs/api-reference/core/layer.md#sql-accessor-inputs) — Map Arrow values to colors with SQL.
+* [`_ColorScaleWidget`](https://deck.gl/next/docs/api-reference/widgets/color-scale-widget.md) 🧪 displays legends for SQL color scales on visible layers.
 
 ### React[​](#react "Direct link to React")
 
 The `@deck.gl/react` module is now a deep React Fiber integration.
 
-* **React components** 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
-* **Map integrations** 🚧 — Use dedicated React entry points for Mapbox, MapLibre, and Google Maps.
+* [**React components**](https://deck.gl/next/docs/api-reference/react/overview.md) 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
+* **Map integrations** 🚧 — Use dedicated React entry points for [Mapbox](https://deck.gl/next/docs/developer-guide/base-maps/using-with-mapbox.md), [MapLibre](https://deck.gl/next/docs/developer-guide/base-maps/using-with-maplibre.md), and [Google Maps](https://deck.gl/next/docs/developer-guide/base-maps/using-with-google-maps.md).
 * **Migration** — The previous React API is available from [`@deck.gl/react/legacy`](https://deck.gl/next/docs/api-reference/react/overview.md#deckglreactlegacy), so apps can move to it before the package root changes.
 
 ### Layers[​](#layers "Direct link to Layers")
@@ -65,7 +65,7 @@ The `@deck.gl/react` module is now a deep React Fiber integration.
 
 ### Tile Layers[​](#tile-layers "Direct link to Tile Layers")
 
-* `Tile2DLayer` and `MVT2DLayer` 🚧 can now share a `Tileset2D` and reuse loaded tiles across layers and views.
+* [`Tile2DLayer`](https://deck.gl/next/docs/api-reference/proposals/tile-2d-layer.md) and [`MVT2DLayer`](https://deck.gl/next/docs/api-reference/proposals/mvt-2d-layer.md) 🚧 can now share a [`Tileset2D`](https://deck.gl/next/docs/api-reference/proposals/tileset-2d.md) and reuse loaded tiles across layers and views.
 
 ### Aggregation Layers[​](#aggregation-layers "Direct link to Aggregation Layers")
 
@@ -78,7 +78,7 @@ The `@deck.gl/react` module is now a deep React Fiber integration.
 
 ### Examples[​](#examples "Direct link to Examples")
 
-* Examples have been updated to use Arrow loading and SQL accessors.
+* [Examples v10](https://deck.gl/next/examples-v10) have been updated to use Arrow loading and SQL accessors.
 
 ## deck.gl v9.4[​](#deckgl-v94 "Direct link to deck.gl v9.4")
 

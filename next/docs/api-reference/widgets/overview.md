@@ -16,6 +16,7 @@ This module contains the following widgets:
 * [CompassWidget](https://deck.gl/next/docs/api-reference/widgets/compass-widget.md)
 * [GeocoderWidget](https://deck.gl/next/docs/api-reference/widgets/geocoder-widget.md)
 * [ScaleWidget](https://deck.gl/next/docs/api-reference/widgets/scale-widget.md)
+* [\_ColorScaleWidget](https://deck.gl/next/docs/api-reference/widgets/color-scale-widget.md)
 
 ### View Widgets[​](#view-widgets "Direct link to View Widgets")
 

@@ -328,7 +328,8 @@ Notes:
 * Offsets and strides are preserved.
 * The position vector supplies the input count. `numInstances` can select a prefix.
 * Borrowed columns require WebGPU and positions that do not need CPU preprojection.
-* [ClipExtension](https://deck.gl/next/docs/api-reference/extensions/clip-extension.md) supports borrowed columns. Other extensions require accessor inputs.
+* [ClipExtension](https://deck.gl/next/docs/api-reference/extensions/clip-extension.md) reads the position column.
+* For numeric [DataFilterExtension](https://deck.gl/next/docs/api-reference/extensions/data-filter-extension.md), pass `extensionAttributes.filterValues` as a single-chunk float32 vector with one row per position and a component count matching `filterSize`. Category filtering, `fp64`, and item counting require accessor inputs.
 
 ## Source[​](#source "Direct link to Source")
 
