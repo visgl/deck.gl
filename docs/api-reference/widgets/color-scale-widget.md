@@ -21,5 +21,6 @@ The legend starts expanded. Select its heading to collapse or reopen it. The opt
 `label` prop sets the heading and defaults to `Legend`.
 
 Quantile bins appear side by side with numeric labels at their breaks. Set
-`precision` to change the maximum significant digits used for numbers. The
-default is two.
+`precision` to change the significant digits used for numbers. The legend starts
+with two significant digits by default and uses more when needed to distinguish
+nearby values.

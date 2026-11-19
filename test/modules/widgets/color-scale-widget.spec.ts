@@ -159,3 +159,18 @@ test('_ColorScaleWidget formats numeric labels and aligns them below quantile br
     tester.destroy();
   }
 });
+
+test('_ColorScaleWidget distinguishes nearby values at the default precision', async () => {
+  const layer = makeReadings().clone({
+    data: tableFromArrays({value: [1000000, 1000001]})
+  });
+  const tester = new WidgetTester({layers: [layer], widgets: [new _ColorScaleWidget()]});
+  try {
+    await vi.waitFor(() => {
+      const labels = tester.findElements('.deck-color-scale-domain span');
+      expect(labels.map(label => label.textContent)).toEqual(['1,000,000', '1,000,001']);
+    });
+  } finally {
+    tester.destroy();
+  }
+});

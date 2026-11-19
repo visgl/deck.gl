@@ -19,7 +19,7 @@ export type ColorScaleWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Accessible heading for the legend. */
   label?: string;
-  /** Maximum significant digits in numeric labels (1–21). Defaults to 2. */
+  /** Starting significant digits for numeric labels (1–21). Defaults to 2. */
   precision?: number;
 };
 
@@ -65,8 +65,18 @@ function cssColor(sample: ReturnType<ResolvedScale['sample']>): string {
   return `rgba(${Math.round(red * 255)}, ${Math.round(green * 255)}, ${Math.round(blue * 255)}, ${alpha})`;
 }
 
+/** Increases precision only when distinct boundaries would receive identical labels. */
+function formatScaleNumbers(boundaries: number[], precision: number): (value: number) => string {
+  const values = [...new Set(boundaries)];
+  let formatter = new Intl.NumberFormat(undefined, {maximumSignificantDigits: precision});
+  while (precision < 21 && new Set(values.map(formatter.format)).size < values.length) {
+    formatter = new Intl.NumberFormat(undefined, {maximumSignificantDigits: ++precision});
+  }
+  return formatter.format;
+}
+
 /** Renders category swatches, discrete intervals, or a sampled continuous ramp. */
-function ColorLegend({scale, format}: {scale: ResolvedScale; format: (value: number) => string}) {
+function ColorLegend({scale, precision}: {scale: ResolvedScale; precision: number}) {
   const {domain, thresholds, type} = scale.descriptor;
   if (type === 'ordinal') {
     return (
@@ -86,8 +96,9 @@ function ColorLegend({scale, format}: {scale: ResolvedScale; format: (value: num
 
   const minimum = Number(domain[0]);
   const maximum = Number(domain[domain.length - 1]);
+  const boundaries = [minimum, ...(thresholds ?? []), maximum];
+  const format = formatScaleNumbers(boundaries, precision);
   if (thresholds?.length) {
-    const boundaries = [minimum, ...thresholds, maximum];
     if (type === 'quantile') {
       return (
         <>
@@ -234,9 +245,6 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
 
   /** Renders each discovered layer accessor legend. */
   override onRenderHTML(rootElement: HTMLElement): void {
-    const {format} = new Intl.NumberFormat(undefined, {
-      maximumSignificantDigits: this.props.precision
-    });
     render(
       this.entries.length ? (
         <section
@@ -258,7 +266,7 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
                   <span>{label}</span>
                   <small>{SCALE_TYPE_LABELS[scale.descriptor.type]}</small>
                 </div>
-                <ColorLegend scale={scale} format={format} />
+                <ColorLegend scale={scale} precision={this.props.precision} />
               </div>
             ))}
           </details>
