@@ -166,6 +166,33 @@ webglTest.each(gpuDebugTestCases)(
   }
 );
 
+webglTest('Deck#uses and preserves a caller-owned WebGL context', async () => {
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl2')!;
+  const onWebGLInitialized = vi.fn();
+  const deck = new Deck({
+    gl,
+    width: 1,
+    height: 1,
+    onWebGLInitialized,
+    initialViewState: {longitude: 0, latitude: 0, zoom: 0}
+  });
+  const loseContext = gl.getExtension('WEBGL_lose_context');
+  try {
+    try {
+      await waitForRender(deck);
+      expect(deck.device?.type).toBe('webgl');
+      expect(deck.device?.getDefaultCanvasContext().canvas).toBe(canvas);
+      expect(onWebGLInitialized).toHaveBeenCalledExactlyOnceWith(gl);
+    } finally {
+      deck.finalize();
+    }
+    expect(gl.isContextLost()).toBe(false);
+  } finally {
+    loseContext?.loseContext();
+  }
+});
+
 test('Deck#constructor', async () => {
   const callbacks = {
     onDeviceInitialized: 0,
