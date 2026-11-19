@@ -8,7 +8,12 @@ import {CustomProjectionState} from '@deck.gl/core/controllers/custom-projection
 import {MapState} from '@deck.gl/core/controllers/map-controller';
 import testController, {createTestController} from './test-controller';
 import {createTestViewport} from '../viewports/test-crs';
-import {lngLatToWorld, worldToLngLat, pixelsToWorld, worldToPixels} from '@math.gl/web-mercator';
+import {
+  lngLatToWorld,
+  worldToLngLat,
+  pixelsToWorld,
+  worldToPixels
+} from '@math.gl/geospatial/web-mercator';
 
 // Synthetic converters keep controller edge cases independent of CRS resolution.
 class TestProjectionView extends CustomProjectionView {

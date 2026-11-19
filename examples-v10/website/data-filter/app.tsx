@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState, useMemo} from 'react';
+import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
@@ -10,16 +10,17 @@ import type {Device} from '@luma.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {MapView} from '@deck.gl/core';
-import {CSVLoader} from '@loaders.gl/tables/csv';
-import {load} from '@loaders.gl/core';
+import {ParquetLoader} from '@loaders.gl/tables/parquet';
+import parquetWorkerUrl from '@loaders.gl/tables/parquet/parquet-worker.js?url';
+import {isArrowTable} from '@math.gl/core/arrow';
 import RangeInput from './range-input';
 
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
 import type {DataFilterExtensionProps} from '@deck.gl/extensions';
 
-// Source data GeoJSON
+// Full USGS earthquake table
 const DATA_URL =
-  'https://raw.githubusercontent.com/uber-web/kepler.gl-data/master/earthquakes/data.csv'; // eslint-disable-line
+  'https://media.githubusercontent.com/media/visgl/deck.gl-data/479ec6c4c9788b2e80df9a1fe3e42443208523e2/examples/data-filter/earthquakes.parquet';
 
 // This is only needed for this particular dataset - the default view assumes
 // that the furthest geometries are on the ground. Because we are drawing the
@@ -63,21 +64,6 @@ function formatLabel(timestamp: number) {
   return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}`;
 }
 
-function getTimeRange(data?: Earthquake[]): [minTime: number, maxTime: number] | null {
-  if (!data) {
-    return null;
-  }
-  return data.reduce(
-    (range, d) => {
-      const t = d.timestamp;
-      range[0] = Math.min(range[0], t);
-      range[1] = Math.max(range[1], t);
-      return range;
-    },
-    [Infinity, -Infinity]
-  );
-}
-
 function getTooltip({object}: PickingInfo<Earthquake>) {
   return (
     object &&
@@ -91,45 +77,61 @@ function getTooltip({object}: PickingInfo<Earthquake>) {
 
 export default function App({
   device,
-  data,
+  data = DATA_URL,
+  onDataLoad,
   mapStyle = MAP_STYLE
 }: {
   device?: Device;
-  data?: Earthquake[];
+  data?: string | Earthquake[];
+  /** Called after data loads with the total row count, before visibility or filtering. */
+  onDataLoad?: (count: number) => void;
   mapStyle?: string;
 }) {
   const [filter, setFilter] = useState<[start: number, end: number] | null>(null);
 
-  const timeRange = useMemo(() => getTimeRange(data), [data]);
-  const filterValue = filter || timeRange;
+  const [timeRange, setTimeRange] = useState<[number, number] | null>(null);
+  const filterValue = filter || timeRange || [0, 0];
 
   const layers = [
-    filterValue &&
-      new ScatterplotLayer<Earthquake, DataFilterExtensionProps<Earthquake>>({
-        id: 'earthquakes',
-        data,
-        opacity: 0.8,
-        radiusScale: 100,
-        radiusMinPixels: 1,
-        wrapLongitude: true,
+    new ScatterplotLayer<Earthquake, DataFilterExtensionProps<Earthquake>>({
+      id: 'earthquakes',
+      // Sample row: {timestamp: 283998078600, latitude: 32.43, longitude: 141.651, depth: 32, magnitude: 5.2}
+      data,
+      loaders: [ParquetLoader],
+      loadOptions: {parquet: {workerUrl: parquetWorkerUrl}},
+      onDataLoad: table => {
+        const rows = isArrowTable(table) || Array.isArray(table) ? table : [];
+        let min = Infinity;
+        let max = -Infinity;
+        for (const row of rows) {
+          min = Math.min(min, row.timestamp);
+          max = Math.max(max, row.timestamp);
+        }
+        setTimeRange(Number.isFinite(min) ? [min, max] : null);
+        onDataLoad?.(isArrowTable(table) ? table.numRows : rows.length);
+      },
+      opacity: 0.8,
+      radiusScale: 100,
+      radiusMinPixels: 1,
+      wrapLongitude: true,
 
-        getPosition: d => [d.longitude, d.latitude, -d.depth * 1000],
-        getRadius: d => Math.pow(2, d.magnitude),
-        getFillColor: d => {
-          const r = Math.sqrt(Math.max(d.depth, 0));
-          return [255 - r * 15, r * 5, r * 10];
-        },
+      getPosition: d => [d.longitude, d.latitude, -d.depth * 1000],
+      getRadius: d => Math.pow(2, d.magnitude),
+      getFillColor: d => {
+        const r = Math.sqrt(Math.max(d.depth, 0));
+        return [255 - r * 15, r * 5, r * 10];
+      },
 
-        getFilterValue: d => d.timestamp,
-        filterRange: [filterValue[0], filterValue[1]],
-        filterSoftRange: [
-          filterValue[0] * 0.9 + filterValue[1] * 0.1,
-          filterValue[0] * 0.1 + filterValue[1] * 0.9
-        ],
-        extensions: [dataFilter],
+      getFilterValue: d => d.timestamp,
+      filterRange: [filterValue[0], filterValue[1]],
+      filterSoftRange: [
+        filterValue[0] * 0.9 + filterValue[1] * 0.1,
+        filterValue[0] * 0.1 + filterValue[1] * 0.9
+      ],
+      extensions: [dataFilter],
 
-        pickable: true
-      })
+      pickable: true
+    })
   ];
 
   return (
@@ -159,18 +161,7 @@ export default function App({
   );
 }
 
-export async function renderToDOM(container: HTMLDivElement) {
-  const root = createRoot(container);
-  root.render(<App />);
-
-  const data = (await load(DATA_URL, CSVLoader, {csv: {shape: 'object-row-table'}})).data;
-
-  const earthquakes = data.map(row => ({
-    timestamp: new Date(`${row.DateTime} UTC`).getTime(),
-    latitude: row.Latitude,
-    longitude: row.Longitude,
-    depth: row.Depth,
-    magnitude: row.Magnitude
-  }));
-  root.render(<App data={earthquakes} />);
+/** Mounts the standalone example. */
+export function renderToDOM(container: HTMLDivElement) {
+  createRoot(container).render(<App />);
 }

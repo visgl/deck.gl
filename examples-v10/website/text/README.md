@@ -2,6 +2,8 @@ This is a standalone version of the TextLayer example on [deck.gl](http://deck.g
 
 ### Usage
 
+This example requires deck.gl v10. npm overrides and Yarn resolutions keep loaders.gl core and table loaders on matching prerelease versions.
+
 Copy the content of this folder to your project. 
 
 ```bash
@@ -14,6 +16,8 @@ npm start
 ```
 
 ### Data format
+
+The website and standalone app load the same Zstandard-compressed Parquet table with 140,867 cities. Coordinates retain their original precision and signed latitudes. `ParquetLoader` returns an Arrow table; TextLayer reads its rows directly.
 
 Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/text-layer), showing all cities with a population > 1000 or seats of administration.
 

@@ -6,10 +6,9 @@ import {
   compileArrowExpression,
   type ArrowExpression,
   type ArrowTableFunction
-} from '@math.gl/expressions/arrow';
-import {SQRT} from '@math.gl/expressions/math';
-import {bindNestedExtraction} from './nested-extraction';
-import type {Expression} from '@math.gl/expressions';
+} from '@math.gl/sql/arrow';
+import {SQRT} from '@math.gl/sql/math-functions';
+import type {Expression} from '@math.gl/sql/expressions';
 import {
   Field,
   FixedSizeList,
@@ -76,11 +75,8 @@ export function evaluateColumnExpression(
   const functions = sqlFunctions.some(fn => fn.name.toUpperCase() === 'SQRT')
     ? [...sqlFunctions]
     : [SQRT, ...sqlFunctions];
-  const inputSchema = input.schema;
-  const compile = (expression: ArrowExpression) => {
-    const bound = bindNestedExtraction(expression as Expression, inputSchema, functions);
-    return compileArrowExpression(bound, {inputSchema, functions}).evaluateTable(input);
-  };
+  const compile = (value: ArrowExpression) =>
+    compileArrowExpression(value, {inputSchema: input.schema, functions}).evaluateTable(input);
   const call = expression as FunctionCall;
   if (
     call.type === 'CallExpression' &&

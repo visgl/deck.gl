@@ -10,7 +10,7 @@ import type {LayerOverlayProps, Map} from './types';
 import {getLayerGroupId} from './resolve-layer-groups';
 
 import {clamp} from '@math.gl/core';
-import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
+import {lngLatToWorld, unitsPerMeter} from '@math.gl/geospatial/web-mercator';
 
 export const MAPBOX_VIEW_ID = 'mapbox';
 

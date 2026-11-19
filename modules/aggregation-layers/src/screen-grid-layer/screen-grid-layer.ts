@@ -21,7 +21,7 @@ import AggregationLayer, {type AggregationLayerProps} from '../common/aggregatio
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 import {defaultColorRange} from '../common/utils/color-utils';
-import {worldToPixels} from '@math.gl/web-mercator';
+import {worldToPixels} from '@math.gl/geospatial/web-mercator';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   cellSizePixels: {type: 'number', value: 100, min: 1},
@@ -166,18 +166,10 @@ export default class ScreenGridLayer<
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUScreenGridAggregator {
     if (type === 'webgpu')
-      return new WebGPUScreenGridAggregator(this.context.device, {
-        shaders: this.getAggregationShaders(),
-        requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
-        bindAttributes: model => {
-          const layer = this.getCurrentLayer()! as this;
-          const manager = layer.getAttributeManager()!;
-          model.setGPUAttributes(
-            manager.getGPUVectors(),
-            manager.getBufferLayouts().map(layout => ({...layout, stepMode: 'instance' as const}))
-          );
-        }
-      });
+      return new WebGPUScreenGridAggregator(
+        this.context.device,
+        this.getComputeAggregatorOptions()
+      );
     if (type === 'cpu' || !WebGLAggregator.isSupported(this.context.device)) {
       return new CPUAggregator({
         dimensions: 2,

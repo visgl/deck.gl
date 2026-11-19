@@ -221,6 +221,7 @@ const GPU_PATH_SHADER = makePathShaderWGSL({
   vertexEntry: storageVertexEntry,
   vertexSetup: storageVertexSetup,
   vertexOutput: storageVertexOutput,
+  pickingFilter: '',
   extraVaryings:
     '@location(9) measure: f32, @location(10) @interpolate(flat) pathPickingColor: vec3<f32>,',
   fragmentFilter: /* wgsl */ `

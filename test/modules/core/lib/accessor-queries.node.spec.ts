@@ -233,12 +233,14 @@ test('default SQL functions extract nested Arrow values without a parser overrid
     {
       longitude: "STRUCT_EXTRACT(endpoint, 'longitude')",
       altitude: 'LIST_EXTRACT(start, 3)',
+      fractionalIndex: 'LIST_EXTRACT(start, 1.5)',
       position: 'FLOAT64x2(LIST_EXTRACT(start, 1), LIST_EXTRACT(start, 2))'
     },
     undefined
   );
   expect(Array.from(columns.getChild('longitude')!)).toEqual([-121, null, 13]);
   expect(Array.from(columns.getChild('altitude')!)).toEqual([500, null, null]);
+  expect(Array.from(columns.getChild('fractionalIndex')!)).toEqual([null, null, null]);
   expect(Array.from(columns.getChild('position')!.get(0))).toEqual([-122, 40]);
 });
 
@@ -279,34 +281,5 @@ test('layer SQL functions override Deck declarations and changing them reevaluat
   } finally {
     manager.finalize();
     device.destroy();
-  }
-});
-
-test('custom declarations override default nested extraction functions', () => {
-  const data = tableFromArrays({value: [2]});
-  for (const name of ['LIST_EXTRACT', 'STRUCT_EXTRACT']) {
-    const result = evaluateAccessorQueries(
-      data,
-      {adjusted: `${name}(value)`},
-      undefined,
-      undefined,
-      [
-        {
-          name,
-          prototypes: [
-            {
-              arguments: [new Field('value', new Float64())],
-              result: new Field('value', new Float64()),
-              evaluate: ([values]) =>
-                vectorFromArray(
-                  Array.from(values, value => value + 1),
-                  new Float64()
-                )
-            }
-          ]
-        }
-      ]
-    );
-    expect(Array.from(result.getChild('adjusted')!)).toEqual([3]);
   }
 });

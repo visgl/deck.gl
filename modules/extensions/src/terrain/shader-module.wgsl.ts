@@ -11,11 +11,13 @@ ${Object.entries(TERRAIN_MODE)
 
 struct TerrainUniforms {
   mode: f32,
+  isPickingCover: f32,
   bounds: vec4<f32>,
   heightRange: vec2<f32>,
 };
 @group(0) @binding(auto) var<uniform> terrain: TerrainUniforms;
 @group(0) @binding(auto) var terrain_map: texture_2d<f32>;
+@group(0) @binding(auto) var terrain_mapSampler: sampler;
 
 fn terrain_globe_to_mercator(position: vec3<f32>) -> vec2<f32> {
   let sinLat = clamp(position.z / length(position), -0.999998, 0.999998);
@@ -73,6 +75,8 @@ export const terrainWGSLVertexInjection = /* wgsl */ `
     terrainMercPos = terrain_globe_to_mercator(commonPos);
     terrainHeightWGSL = length(commonPos) - GLOBE_RADIUS;
   }
+  terrainMercPosWGSL = terrainMercPos;
+  terrainPickingColorWGSL = geometry.pickingColor;
   if (terrain.mode == TERRAIN_MODE_SKIP) {
     *position = vec4<f32>(0.0);
   } else if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
@@ -102,7 +106,33 @@ export const terrainWGSLVertexInjection = /* wgsl */ `
 `;
 export const terrainWGSLFragmentInjection = /* wgsl */ `
   if (terrain.mode == TERRAIN_MODE_SKIP) { discard; }
+  if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY) {
+    let uv = (terrainMercPosWGSL - terrain.bounds.xy) / terrain.bounds.zw;
+    return textureSampleLevel(terrain_map, terrain_mapSampler, vec2<f32>(uv.x, 1.0 - uv.y), 0.0);
+  }
   if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
     return terrain_encode_height(terrainHeightWGSL);
   }
+`;
+
+/** Composites a premultiplied terrain cover over a straight-alpha surface. */
+export const terrainWGSLCoverInjection = /* wgsl */ `
+  if (terrain.mode == TERRAIN_MODE_USE_COVER) {
+    let uv = (terrainMercPosWGSL - terrain.bounds.xy) / terrain.bounds.zw;
+    let pixel = textureSampleLevel(terrain_map, terrain_mapSampler, vec2<f32>(uv.x, 1.0 - uv.y), 0.0);
+    let alpha = pixel.a + (*color).a * (1.0 - pixel.a);
+    let premultiplied = pixel.rgb + (*color).rgb * (*color).a * (1.0 - pixel.a);
+    *color = vec4<f32>(premultiplied / max(alpha, 0.000001), alpha);
+  }
+`;
+
+/** Writes cover IDs and composites covers on shaders without a lighting hook. */
+export const terrainWGSLColorInjection = /* wgsl */ `
+  if (terrain.isPickingCover > 0.5) {
+    if (!picking_isColorValid(terrainPickingColorWGSL)) { discard; }
+    *color = vec4<f32>(terrainPickingColorWGSL, 1.0);
+  }
+#ifndef TERRAIN_COVER_BEFORE_LIGHTING
+  ${terrainWGSLCoverInjection}
+#endif
 `;
