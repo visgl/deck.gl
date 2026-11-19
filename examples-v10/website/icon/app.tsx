@@ -8,14 +8,14 @@ import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
 import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
-import type {Table} from 'apache-arrow';
+import {tableFromJSON, type Table} from 'apache-arrow';
 import {ParquetLoader} from '@loaders.gl/tables/parquet';
 import parquetWorkerUrl from '@loaders.gl/tables/parquet/parquet-worker.js?url';
 import {isArrowTable} from '@math.gl/core/arrow';
 
 import IconClusterLayer from './icon-cluster-layer';
 import type {IconClusterLayerPickingInfo} from './icon-cluster-layer';
-import type {PickingInfo, MapViewState} from '@deck.gl/core';
+import type {LayerData, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {IconLayerProps} from '@deck.gl/layers';
 import {Device} from '@luma.gl/core';
 
@@ -138,6 +138,11 @@ export default function App({
     : new IconLayer({
         ...layerProps,
         id: 'icon',
+        // JSON URLs can load row arrays. Parquet and direct Arrow tables pass through.
+        dataTransform: <LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT =>
+          (typeof data === 'string' && Array.isArray(source)
+            ? tableFromJSON(source)
+            : source) as LayerDataT,
         getPosition: Array.isArray(data)
           ? layerProps.getPosition
           : {sql: 'ARRAY_FLOAT64(coordinates[1], coordinates[2])'},
