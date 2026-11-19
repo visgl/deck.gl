@@ -114,7 +114,7 @@ Keep vectors stable between renders and supply new vectors when their contents c
 
 ## Limitations[​](#limitations "Direct link to Limitations")
 
-Rendering columns must have equal lengths and matching chunk structures, and must not contain nulls. Arrow rendering accessors do not support attribute transitions or layer extensions. Use row accessors when you need those features.
+Rendering columns must have equal lengths and matching chunk structures, and must not contain nulls. Direct column bindings do not support attribute transitions or layer extensions. ScatterplotLayer uses row-based attributes for Arrow and SQL accessors when extensions are active.
 
 See each layer's prop descriptions for supported inputs and the [loading data guide](https://deck.gl/next/docs/developer-guide/loading-data.md) for other ways to provide data.
 

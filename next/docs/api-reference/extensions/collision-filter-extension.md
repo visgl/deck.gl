@@ -128,12 +128,13 @@ Props to override when computing collisions. A common use case is to increase th
 collisionTestProps: {radiusScale: 2}
 ```
 
-#### `getCollisionPriority` ([Accessor\<number>](https://deck.gl/next/docs/developer-guide/using-layers.md#accessors), optional)[​](#getcollisionpriority "Direct link to getcollisionpriority")
+#### `getCollisionPriority` (number | Accessor | arrow\.Vector | SQL expression, optional)[​](#getcollisionpriority "Direct link to getcollisionpriority")
 
 The collision priority of each object. Features with higher values are shown preferentially. The priority is a number in the range -1000 -> 1000, values outside will be clamped.
 
 * If a number is provided, it is used for all objects in the layer.
 * If a function is provided, it is called on each object to retrieve its priority.
+* Arrow columns and SQL expressions supply one priority per source row.
 
 ## Using with transparent layers[​](#using-with-transparent-layers "Direct link to Using with transparent layers")
 

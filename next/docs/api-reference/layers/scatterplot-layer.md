@@ -363,7 +363,7 @@ If `true`, circles are rendered with smoothed edges. If `false`, circles are ren
 
 ### Data Accessors[​](#data-accessors "Direct link to Data Accessors")
 
-Arrow inputs follow the shared [column requirements and limitations](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#limitations).
+Arrow inputs follow the shared [column requirements and limitations](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#limitations). When extensions are active, Arrow and SQL accessors use the same row-based attribute path as callbacks. If you supply Arrow columns without data rows, the column length supplies the instance count and callbacks can use the row index.
 
 #### `getPosition` (constant | Accessor | arrow\.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square%22)[​](#getposition "Direct link to getposition")
 
