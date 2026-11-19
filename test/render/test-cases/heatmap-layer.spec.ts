@@ -30,6 +30,13 @@ const maskBoundary = [
   ]
 ];
 
+/** The first outlier is rejected by the mask and the second by the numeric filter. */
+const binaryPoints = [
+  ...points,
+  {COORDINATES: outlier, SPACES: 1000000},
+  {...points[0], SPACES: 1000000}
+];
+
 const testCases = [
   {
     name: 'heatmap-lnglat',
@@ -166,6 +173,44 @@ const testCases = [
         threshold: 0.1,
         extensions: [new DataFilterExtension()],
         getFilterValue: (_, {index}) => Number(index === points.length),
+        filterRange: [0, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/heatmap-lnglat.png'
+  },
+  {
+    // Golden: the baseline heatmap with both binary outliers removed before aggregation.
+    name: 'heatmap-lnglat-binary-mask-and-filter',
+    viewState: {latitude: 37.75, longitude: -122.44, zoom: 11.5, pitch: 30, bearing: 0},
+    layers: [
+      new PolygonLayer({
+        id: 'binary-heatmap-mask',
+        data: [maskBoundary],
+        getPolygon: d => d,
+        operation: 'mask',
+        stroked: false
+      }),
+      new HeatmapLayer({
+        id: 'binary-heatmap',
+        data: {
+          length: binaryPoints.length,
+          attributes: {
+            getPosition: {
+              value: new Float64Array(binaryPoints.flatMap(d => [...d.COORDINATES, 0])),
+              size: 3
+            },
+            getWeight: new Float32Array(binaryPoints.map(d => d.SPACES)),
+            getFilterValue: new Float32Array(
+              binaryPoints.map((_, index) => Number(index > points.length))
+            )
+          }
+        },
+        opacity: 0.8,
+        radiusPixels: 35,
+        threshold: 0.1,
+        extensions: [new MaskExtension(), new DataFilterExtension()],
+        maskId: 'binary-heatmap-mask',
+        maskByInstance: true,
         filterRange: [0, 0]
       })
     ],
