@@ -19,7 +19,10 @@ function nextTask(): Promise<void> {
 }
 
 /** Renders a DeckGL root and resolves with its canvas's context once it has loaded. */
-async function renderDeckGL(props: {device?: unknown} = {}, strict = false) {
+async function renderDeckGL(
+  props: {device?: unknown; canvas?: HTMLCanvasElement} = {},
+  strict = false
+) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
@@ -30,7 +33,7 @@ async function renderDeckGL(props: {device?: unknown} = {}, strict = false) {
   const element = <DeckGL width={4} height={4} onLoad={onLoad} {...(props as object)} />;
   await act(() => root.render(strict ? <StrictMode>{element}</StrictMode> : element));
   await loaded;
-  const gl = container.querySelector('canvas')!.getContext('webgl2')!;
+  const gl = (props.canvas ?? container.querySelector('canvas')!).getContext('webgl2')!;
   return {root, container, gl};
 }
 
@@ -62,4 +65,27 @@ test('the DeckGL root never releases a device the app passed', async () => {
   container.remove();
   await nextTask();
   expect(testDevice.isLost).toBe(false);
+});
+
+test('the DeckGL root leaves a canvas the app passed under app control', async () => {
+  const canvas = document.createElement('canvas');
+  document.body.appendChild(canvas);
+  const {root, container} = await renderDeckGL({canvas});
+  const gl = canvas.getContext('webgl2')!;
+
+  // The app detaches its canvas as it unmounts the component, then reuses it.
+  canvas.remove();
+  await act(() => root.unmount());
+  container.remove();
+  await nextTask();
+  expect(gl.isContextLost(), 'not released: the app may reuse it').toBe(false);
+
+  document.body.appendChild(canvas);
+  const remounted = await renderDeckGL({canvas});
+  expect(gl.isContextLost(), 'the remounted root renders on the same context').toBe(false);
+
+  await act(() => remounted.root.unmount());
+  remounted.container.remove();
+  canvas.remove();
+  gl.getExtension('WEBGL_lose_context')?.loseContext();
 });

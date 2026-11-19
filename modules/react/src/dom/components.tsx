@@ -272,6 +272,9 @@ function createDeckGLComponent<Props, Instance extends DeckGLRenderer, MapT = ne
       const rootElement = isExternalOverlay
         ? getDetachedRoot(detachedRoot, rootOptions)
         : getCanvasRoot(config.canvas, canvas, resolvedCanvas);
+      // Only the <canvas> this component rendered is known to be unused after unmount. A canvas
+      // the app passed as `canvas` stays under the app's control, so it may be reused later.
+      const ownsCanvas = !isExternalOverlay && !config.canvas;
 
       if (rootElement) {
         return () => {
@@ -282,9 +285,10 @@ function createDeckGLComponent<Props, Instance extends DeckGLRenderer, MapT = ne
           overlay.current = null;
           const deck = roots.get(rootElement)?.store.getState().deckgl;
           unmountAtNode(rootElement);
-          // React never reuses this canvas after unmount, so free the context Deck created for it
-          // once it is removed. Map overlays render to Deck's own canvas or the map's context.
-          if (deck && !isExternalOverlay) {
+          // React never reuses the canvas it rendered after unmount, so free the context Deck
+          // created for it once it is removed. Map overlays render to Deck's own canvas or the
+          // map's context, and an app's own `canvas` is left to the app.
+          if (deck && ownsCanvas) {
             releaseCanvasContext(deck as Deck);
           }
         };
