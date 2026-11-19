@@ -3,6 +3,8 @@
 // Copyright (c) vis.gl contributors
 // Copyright (c) Deckgl Fiber Renderer contributors
 
+// @vitest-environment jsdom
+
 import {describe, expect, it} from 'vitest';
 
 import {globalScope} from '@deck.gl/react/shared/constants';
