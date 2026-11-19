@@ -6,9 +6,7 @@ import 'client-only';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import type {GoogleMapsOverlayProps} from '@deck.gl/google-maps';
 import {attachGoogleMap, type GoogleMap} from './attach-google-map';
-// Through the main entry file, so the CommonJS build shares its root component instead of
-// inlining a copy.
-import {createDeckGL} from '../index';
+import {createDeckGL} from '../index'; // so CommonJS shares the root entry's copy
 import type {DeckGLRootProps} from '../types/index';
 
 /** Props accepted by the Google Maps-overlay React Fiber root. */

@@ -5,14 +5,11 @@
 
 import 'client-only';
 import {assert, type Deck, type View} from '@deck.gl/core';
-// Import the reconciler through its entry file, so the CommonJS build (`build-cjs.mjs`) makes this a
-// `require` of the `/reconciler` bundle: one instance of its roots, DevTools registration and error
-// boundary class. See `test/modules/react/fiber/cjs-entries.node.spec.ts`.
 import {
   createRoot,
   unmountAtNode,
   _RootErrorBoundary as RootErrorBoundary
-} from '../reconciler/index';
+} from '../reconciler/index'; // so CommonJS shares the /reconciler entry's copy
 import type {
   DeckGLConfiguration,
   ReconcilerRoot,
