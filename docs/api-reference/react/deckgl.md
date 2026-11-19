@@ -28,8 +28,6 @@ Like any React component, `DeckGL` can accept child components. Typical React co
 - Base maps such as the [`Map`](https://visgl.github.io/react-map-gl/docs/api-reference/map) component from `react-map-gl`, which can synchronize with deck.gl's view state.
 - [Widgets](./overview.md#using-react-wrapped-widgets), which can display and control deck.gl state.
 
-For a `react-map-gl` child, the basemap canvas renders below deck.gl while attribution, navigation controls, and popups remain above it. The map's `onLoad` callback is preserved.
-
 ```js
 import {DeckGL} from '@deck.gl/react';
 import {Map} from 'react-map-gl/maplibre';
