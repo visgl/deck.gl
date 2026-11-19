@@ -444,6 +444,27 @@ describe('DeckGL Component Tests', () => {
       );
     });
 
+    it('still unmounts the root when onDeckChange throws during teardown', () => {
+      // React reports the error from the cleanup; jsdom has no `reportError`.
+      vi.stubGlobal('reportError', vi.fn());
+      const onDeckChange = vi.fn((deck: unknown) => {
+        if (deck === null) {
+          throw new Error('app cleanup failed');
+        }
+      });
+      const {unmount} = render(<DeckGL onDeckChange={onDeckChange} />);
+
+      try {
+        unmount();
+      } catch {
+        // React may rethrow the cleanup error; the root must be unmounted either way.
+      }
+
+      expect(onDeckChange).toHaveBeenLastCalledWith(null);
+      expect(mockUnmountAtNode).toHaveBeenCalledOnce();
+      vi.unstubAllGlobals();
+    });
+
     it('should notify config updates with the root-specific instance', () => {
       const onDeckChange = vi.fn();
       const {rerender} = render(

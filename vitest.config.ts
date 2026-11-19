@@ -283,7 +283,17 @@ const projects = [
           // headless and render, so keep them in `browser` only for manual
           // debugging until the shared interaction harness is reworked.
           include: ['test/modules/**/*.spec.ts', 'test/modules/react/**/*.spec.tsx', ...privateBrowserTests],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/proposals/test/effects/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
+          exclude: [
+            ...excludedTests,
+            'test/modules/**/*.node.spec.ts',
+            'modules/proposals/test/effects/**/*.node.spec.ts',
+            'modules/proposals/test/layers/**/*.node.spec.ts',
+            // Temporarily excluded until #11221 merges: finalized Decks don't release their WebGL
+            // context yet, and the renderer's specs push the shared page past Chromium's context
+            // limit, which loses the test device for every later file. They still run in the
+            // `browser` project.
+            'test/modules/react/fiber/**/*.spec.{ts,tsx}'
+          ],
           globals: false,
           testTimeout: 30000,
           // Disable isolation and file parallelism to avoid:
