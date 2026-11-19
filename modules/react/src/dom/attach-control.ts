@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 /** A map that hosts deck.gl as a control, such as a Mapbox or MapLibre `Map`. */
 export interface ControlHost {

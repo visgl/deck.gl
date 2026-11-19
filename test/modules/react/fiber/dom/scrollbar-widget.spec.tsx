@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 import {type Deck, OrthographicView, type OrthographicViewState} from '@deck.gl/core';
 import {ScrollbarWidget} from '@deck.gl/widgets';

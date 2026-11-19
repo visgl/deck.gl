@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 // @vitest-environment node
 // esbuild's JS API rejects jsdom's TextEncoder, so this file runs in Node.

@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 // Uses the real reconciler, so each overlay is created and finalized as it is in an app.
 import {ScatterplotLayer} from '@deck.gl/layers';

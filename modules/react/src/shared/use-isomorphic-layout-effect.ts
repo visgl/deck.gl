@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 import {useLayoutEffect} from 'react';
 import {isBrowserEnvironment, noop} from './utils';

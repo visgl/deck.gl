@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 import * as deckAggregationLayers from '@deck.gl/aggregation-layers';
 import * as deckCore from '@deck.gl/core';

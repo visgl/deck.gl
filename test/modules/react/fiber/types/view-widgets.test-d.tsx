@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 // Widgets that manage views, and multi-view props, type-check as they do in @deck.gl/react.
 import {MapView} from '@deck.gl/core';
