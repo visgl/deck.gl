@@ -102,20 +102,18 @@ export const MATRIX_ATTRIBUTES = {
     const constantOrientation = Array.isArray(getOrientation);
     const constantTranslation = Array.isArray(getTranslation);
 
-    const hasMatrix = constantMatrix || (!arrayMatrix && Boolean(getTransformMatrix(data[0])));
-
-    if (hasMatrix) {
-      attribute.constant = constantMatrix;
-    } else {
-      attribute.constant = constantOrientation && constantScale && constantTranslation;
-    }
+    /** A matrix callback can override the other transforms on any row. */
+    const hasMatrixAccessor = typeof getTransformMatrix === 'function';
+    attribute.constant =
+      constantMatrix ||
+      (!hasMatrixAccessor && constantOrientation && constantScale && constantTranslation);
 
     const instanceModelMatrixData = attribute.value;
 
     if (attribute.constant) {
       let matrix;
 
-      if (hasMatrix) {
+      if (constantMatrix) {
         modelMatrix.set(getTransformMatrix);
         matrix = getExtendedMat3FromMat4(modelMatrix);
       } else {
@@ -136,10 +134,10 @@ export const MATRIX_ATTRIBUTES = {
         objectInfo.index++;
         let matrix;
 
-        if (hasMatrix) {
-          modelMatrix.set(
-            constantMatrix ? getTransformMatrix : getTransformMatrix(object, objectInfo)
-          );
+        /** Read the current row with its actual accessor context. */
+        const transform = hasMatrixAccessor ? getTransformMatrix(object, objectInfo) : null;
+        if (transform?.length === 16) {
+          modelMatrix.set(transform);
           matrix = getExtendedMat3FromMat4(modelMatrix);
         } else {
           matrix = valueArray;

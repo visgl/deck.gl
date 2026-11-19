@@ -212,18 +212,12 @@ export default class DataFilterExtension extends LayerExtension<
     updateDataFilterCategoryAttributes(this, {props, oldProps, changeFlags}, categorySize);
   }
 
-  // eslint-disable-next-line max-statements
-  draw(this: Layer<DataFilterExtensionProps>, params: any, extension: this) {
-    const filterFBO = this.state.filterFBO as Framebuffer;
-    const filterModel = this.state.filterModel as Model;
-    const filterNeedsUpdate = this.state.filterNeedsUpdate as boolean;
-
+  /** Supplies the filter state to both rendering and aggregation shaders. */
+  getAggregationShaderProps(this: Layer<DataFilterExtensionProps>, extension: this) {
     if (!this.state.categoryBitMask) {
-      extension._updateCategoryBitMask.call(this, params, extension);
+      extension._updateCategoryBitMask.call(this, undefined, extension);
     }
-
     const {
-      onFilteredItemsChange,
       extensions,
       filterEnabled,
       filterRange,
@@ -232,7 +226,7 @@ export default class DataFilterExtension extends LayerExtension<
       filterTransformColor,
       filterCategories
     } = this.props;
-    const dataFilterProps: DataFilterModuleProps = {
+    const dataFilter: DataFilterModuleProps = {
       extensions,
       filterEnabled,
       filterRange,
@@ -242,8 +236,18 @@ export default class DataFilterExtension extends LayerExtension<
       filterCategories
     };
     if (this.state.categoryBitMask) {
-      dataFilterProps.categoryBitMask = this.state.categoryBitMask as CategoryBitMask;
+      dataFilter.categoryBitMask = this.state.categoryBitMask as CategoryBitMask;
     }
+    return {dataFilter};
+  }
+
+  // eslint-disable-next-line max-statements
+  draw(this: Layer<DataFilterExtensionProps>, params: any, extension: this) {
+    const filterFBO = this.state.filterFBO as Framebuffer;
+    const filterModel = this.state.filterModel as Model;
+    const filterNeedsUpdate = this.state.filterNeedsUpdate as boolean;
+    const {onFilteredItemsChange} = this.props;
+    const {dataFilter: dataFilterProps} = extension.getAggregationShaderProps.call(this, extension);
     this.setShaderModuleProps({dataFilter: dataFilterProps});
 
     /* eslint-disable-next-line camelcase */
@@ -290,6 +294,15 @@ export default class DataFilterExtension extends LayerExtension<
       filterModel.device.submit(commandEncoder.finish());
 
       if (!didDraw) {
+        if (this.isComposite) {
+          // Composite layer updates clear their dirty flags after rendering sublayers.
+          queueMicrotask(() => {
+            const layer = this.getCurrentLayer();
+            if (layer?.state.filterModel === filterModel && layer.state.filterNeedsUpdate) {
+              layer.setNeedsUpdate();
+            }
+          });
+        }
         this.setNeedsRedraw();
         return;
       }

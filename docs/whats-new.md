@@ -12,6 +12,12 @@ _v10.0 should be thought of as a pre-release. We wanted to get the new capabilit
 
 *These highlights describe goals for v10. Some features are still in development.*
 
+### Heatmap filtering
+
+- `DataFilterExtension` filters the points that contribute to `HeatmapLayer` on WebGPU.
+- `MaskExtension` limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
+
+
 ### GPU
 
 - **WebGPU** 🚧 — WebGPU is now the default renderer with full feature support.
@@ -47,7 +53,7 @@ The `@deck.gl/react` module is now a deep React Fiber integration.
 
 - **React components** 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
 - **Map integrations** 🚧 — Use dedicated React entry points for Mapbox, MapLibre, and Google Maps.
-- **Migration** 🚧 — The previous React API moves to `@deck.gl/react/legacy`.
+- **Migration** — The previous React API is available from [`@deck.gl/react/legacy`](./api-reference/react/overview.md#deckglreactlegacy), so apps can move to it before the package root changes.
 
 ### Layers
 

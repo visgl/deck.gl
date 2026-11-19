@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, {Component} from 'react';
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App, {inFlowColors, outFlowColors} from 'v10-website-examples/arc/app';
 
@@ -23,12 +23,6 @@ class ArcDemo extends Component {
 
   /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
-
-  /** Data sources loaded before rendering the demo. */
-  static data = {
-    url: `${DATA_URI}/arc-data.txt`,
-    worker: '/workers/arc-data-decoder.js'
-  };
 
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/arc`;
@@ -87,12 +81,13 @@ class ArcDemo extends Component {
   /** Renders the Arrow demo with the current controls and data. */
   render() {
     /** Provides params, ...other props for the example. */
-    const {params, ...otherProps} = this.props;
+    const {data, params, ...otherProps} = this.props;
 
     return (
       <App
         {...otherProps}
         key={this.props.device?.type}
+        onDataLoad={stats => this.props.onStateChange(stats)}
         strokeWidth={params.lineWidth.value}
         onSelectCounty={this._onSelectCounty}
       />

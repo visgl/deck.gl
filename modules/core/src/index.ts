@@ -121,6 +121,7 @@ export type {
   CompositeLayerProps,
   Accessor,
   ArrowAccessor,
+  ArrowAccessorFunction,
   AccessorContext,
   AccessorFunction,
   LayerData,
