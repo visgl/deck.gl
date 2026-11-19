@@ -172,11 +172,27 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   billboard: false,
   antialiasing: true,
 
-  getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
-  getRadius: {type: 'accessor', arrow: true, value: 1},
-  getFillColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
-  getLineColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
-  getLineWidth: {type: 'accessor', arrow: true, value: 1},
+  getPosition: {
+    type: 'accessor',
+    arrow: true,
+    arrowWithExtensions: 'row',
+    constantTypes: ['array'],
+    value: defaultPosition
+  },
+  getRadius: {type: 'accessor', arrow: true, arrowWithExtensions: 'row', value: 1},
+  getFillColor: {
+    type: 'accessor',
+    arrow: true,
+    arrowWithExtensions: 'row-color',
+    value: DEFAULT_COLOR
+  },
+  getLineColor: {
+    type: 'accessor',
+    arrow: true,
+    arrowWithExtensions: 'row-color',
+    value: DEFAULT_COLOR
+  },
+  getLineWidth: {type: 'accessor', arrow: true, arrowWithExtensions: 'row', value: 1},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
   positions: {type: 'object', value: null, optional: true},
   radii: {type: 'object', value: null, optional: true},

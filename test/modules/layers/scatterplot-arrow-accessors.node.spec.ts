@@ -6,6 +6,7 @@ import {expect, test, vi} from 'vitest';
 import {NullDevice} from '@luma.gl/core/test-utils';
 import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {ScatterplotLayer, type ScatterplotLayerProps} from '@deck.gl/layers';
+import {DataFilterExtension} from '@deck.gl/extensions';
 import {Field, FixedSizeList, Float32, Float64, Int16, Uint8, vectorFromArray} from 'apache-arrow';
 import {validateProps, diffProps} from '../../../modules/core/src/lifecycle/props';
 import {resolveColumns} from '../../../modules/core/src/lib/resolve-columns';
@@ -163,4 +164,12 @@ test('Scatterplot normalizes plain color fallbacks alongside Arrow columns', asy
     columns.destroy();
     device.destroy();
   }
+});
+
+test('Scatterplot exposes Arrow accessor rows to extensions and restores columns on clone', () => {
+  const layer = new ScatterplotLayer({...arrowProps, extensions: [new DataFilterExtension()]});
+  expect(hasScatterplotColumns(layer.props)).toBe(false);
+  expect(typeof layer.props.getRadius).toBe('function');
+  expect(typeof layer.props.getFillColor).toBe('function');
+  expect(hasScatterplotColumns(layer.clone({extensions: []}).props)).toBe(true);
 });

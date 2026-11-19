@@ -270,7 +270,7 @@ If `true`, circles are rendered with smoothed edges. If `false`, circles are ren
 
 ### Data Accessors
 
-Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
+Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations). When extensions are active, Arrow and SQL accessors use the same row-based attribute path as callbacks.
 
 #### `getPosition` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
