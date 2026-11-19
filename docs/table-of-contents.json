@@ -61,6 +61,26 @@
       },
       {
         "type": "category",
+        "label": "Using with React",
+        "items": [
+          "developer-guide/react/get-started",
+          {
+            "type": "category",
+            "label": "Using with maps",
+            "link": {"type": "doc", "id": "developer-guide/react/using-with-maps"},
+            "items": [
+              "developer-guide/react/base-maps/using-with-mapbox",
+              "developer-guide/react/base-maps/using-with-maplibre",
+              "developer-guide/react/base-maps/using-with-google-maps",
+              "developer-guide/react/base-maps/using-with-custom-overlays"
+            ]
+          },
+          "developer-guide/react/migrate-from-deckgl-react",
+          "developer-guide/react/debugging"
+        ]
+      },
+      {
+        "type": "category",
         "label": "Writing Custom Layers",
         "items": [
           "developer-guide/custom-layers/README",
@@ -338,7 +358,18 @@
         "items": [
           "api-reference/react/overview",
           "api-reference/react/deckgl",
-          "api-reference/react/use-widget"
+          "api-reference/react/deck-canvas",
+          "api-reference/react/components",
+          "api-reference/react/native-elements",
+          {
+            "type": "category",
+            "label": "@deck.gl/react/legacy",
+            "items": [
+              "api-reference/react/legacy/overview",
+              "api-reference/react/legacy/deckgl",
+              "api-reference/react/legacy/use-widget"
+            ]
+          }
         ]
       },
       {
