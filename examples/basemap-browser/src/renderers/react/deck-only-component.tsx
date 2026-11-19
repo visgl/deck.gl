@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, {useMemo, useCallback} from 'react';
-import DeckGL from '@deck.gl/react/legacy';
+import DeckGL from '@deck.gl/react';
 import {MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import type {Config} from '../../types';
 import {getBaseMapViewState} from '../../config';

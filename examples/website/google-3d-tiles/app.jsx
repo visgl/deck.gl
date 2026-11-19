@@ -5,7 +5,7 @@
 import React, {useState, useMemo, useCallback} from 'react';
 import {scaleLinear} from 'd3-scale';
 import {createRoot} from 'react-dom/client';
-import {DeckGL} from '@deck.gl/react/legacy';
+import {DeckGL} from '@deck.gl/react';
 import {MapView, _GlobeView as GlobeView, TerrainController} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {Tile3DLayer} from '@deck.gl/geo-layers';

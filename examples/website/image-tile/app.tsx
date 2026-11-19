@@ -6,7 +6,7 @@
 import React, {useState, useEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 
-import {DeckGL} from '@deck.gl/react/legacy';
+import {DeckGL} from '@deck.gl/react';
 import type {Device} from '@luma.gl/core';
 import {OrthographicView} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';

@@ -5,7 +5,7 @@
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react/legacy';
+import {DeckGL} from '@deck.gl/react';
 import type {Device} from '@luma.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';

@@ -5,7 +5,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL, GeoJsonLayer, ArcLayer} from 'deck.gl';
-import {CompassWidget} from '@deck.gl/react/legacy';
+import {CompassWidget} from '@deck.gl/react';
 import '@deck.gl/widgets/stylesheet.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz

@@ -6,7 +6,7 @@
 import React, {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react/legacy';
+import {DeckGL} from '@deck.gl/react';
 import type {Device} from '@luma.gl/core';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {BrushingExtension} from '@deck.gl/extensions';
