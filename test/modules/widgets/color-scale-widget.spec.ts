@@ -174,3 +174,27 @@ test('_ColorScaleWidget distinguishes nearby values at the default precision', a
     tester.destroy();
   }
 });
+
+test('_ColorScaleWidget gives long quantile labels room and scrolls the row', async () => {
+  const layer = makeReadings().clone({
+    data: tableFromArrays({value: [1000000, 1000001, 1000002, 1000003, 1000004, 1000005]}),
+    getFillColor: {sql: "SCALE_QUANTILE(value, 5, PALETTE('viridis'))"}
+  });
+  const tester = new WidgetTester({layers: [layer], widgets: [new _ColorScaleWidget()]});
+  /** Finds the scroll container once the scale has evaluated. */
+  const quantile = () => tester.findElements('.deck-color-scale-quantile')[0];
+  try {
+    await vi.waitFor(() => expect(quantile()).toBeDefined(), {timeout: 5000});
+    const row = quantile();
+    const labels = [...row.querySelectorAll('.deck-color-scale-breaks > span')];
+    expect(labels).toHaveLength(6);
+    expect(row.scrollWidth).toBeGreaterThan(row.clientWidth);
+    for (let index = 1; index < labels.length; index++) {
+      expect(labels[index - 1].getBoundingClientRect().right).toBeLessThan(
+        labels[index].getBoundingClientRect().left
+      );
+    }
+  } finally {
+    tester.destroy();
+  }
+});

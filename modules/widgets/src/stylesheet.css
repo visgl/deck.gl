@@ -700,6 +700,12 @@
   justify-content: space-between;
 }
 
+.deck-color-scale-quantile {
+  max-width: 240px;
+  overflow-x: auto;
+  font-variant-numeric: tabular-nums;
+}
+
 .deck-color-scale-bins {
   display: flex;
   height: 12px;

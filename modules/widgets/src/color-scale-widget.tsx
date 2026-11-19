@@ -100,26 +100,31 @@ function ColorLegend({scale, precision}: {scale: ResolvedScale; precision: numbe
   const format = formatScaleNumbers(boundaries, precision);
   if (thresholds?.length) {
     if (type === 'quantile') {
+      const labels = boundaries.map(format);
+      const binCount = thresholds.length + 1;
+      const labelWidth = Math.ceil(1.5 * Math.max(...labels.map(label => label.length))) + 1;
       return (
-        <>
-          <div className="deck-color-scale-bins">
-            {boundaries.slice(0, -1).map((lower, index) => (
-              <span
-                key={index}
-                style={{
-                  backgroundColor: cssColor(scale.sample(lower / 2 + boundaries[index + 1] / 2))
-                }}
-              />
-            ))}
+        <div className="deck-color-scale-quantile" tabIndex={0} aria-label="Quantile scale">
+          <div style={{minWidth: `${labelWidth * binCount}ch`}}>
+            <div className="deck-color-scale-bins">
+              {boundaries.slice(0, -1).map((lower, index) => (
+                <span
+                  key={index}
+                  style={{
+                    backgroundColor: cssColor(scale.sample(lower / 2 + boundaries[index + 1] / 2))
+                  }}
+                />
+              ))}
+            </div>
+            <div className="deck-color-scale-breaks">
+              {labels.map((label, index) => (
+                <span key={index} style={{left: `${(100 * index) / binCount}%`}}>
+                  {label}
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="deck-color-scale-breaks">
-            {boundaries.map((boundary, index) => (
-              <span key={index} style={{left: `${(100 * index) / (boundaries.length - 1)}%`}}>
-                {format(boundary)}
-              </span>
-            ))}
-          </div>
-        </>
+        </div>
       );
     }
     return (
