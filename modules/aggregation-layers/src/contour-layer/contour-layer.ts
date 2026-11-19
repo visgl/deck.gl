@@ -512,8 +512,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   /** Invalidate contours when a new aggregate snapshot is available. */
   private _onAggregationUpdate() {
-    const {aggregator, binIdRange, gpuIsolines} = this.state;
-    if (gpuIsolines) {
+    const {aggregator, binIdRange} = this.state;
+    if (this._getGPUIsolineCellCount()) {
       this.state.isolinesDirty = true;
       return;
     }
