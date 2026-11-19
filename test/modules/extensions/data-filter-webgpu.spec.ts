@@ -474,3 +474,41 @@ test.each([true, false])(
     }
   }
 );
+
+test('DataFilterExtension waits for promised rows before calling Scatterplot accessors', async () => {
+  const fixture = await createFixture();
+  try {
+    const rows = [
+      {radius: 10, value: 0.5},
+      {radius: 10, value: 2}
+    ];
+    let resolveRows!: (data: typeof rows) => void;
+    const data = new Promise<typeof rows>(resolve => {
+      resolveRows = resolve;
+    });
+    const layer = new ScatterplotLayer({
+      ...baseProps,
+      data,
+      getPosition: vectorFromArray(
+        [
+          [0, 0],
+          [30, 0]
+        ],
+        new FixedSizeList(2, new Field('values', new Float32(), false))
+      ),
+      getRadius: row => row.radius,
+      getFilterValue: row => row.value,
+      filterRange: [0, 1],
+      extensions: [new DataFilterExtension({filterSize: 1})]
+    });
+    await fixture.render(layer);
+    expect(layer.getNumInstances()).toBe(0);
+    resolveRows(rows);
+    await vi.waitFor(() => expect(layer.isLoaded).toBe(true));
+    const red = await fixture.render(layer);
+    expect(red(64)).toBe(255);
+    expect(red(94)).toBe(0);
+  } finally {
+    await fixture.finalize();
+  }
+});

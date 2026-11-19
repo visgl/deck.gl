@@ -624,7 +624,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Returns the table used by column-aware layers while leaving the loaded prop intact. */
   protected getColumnData(): LayerData<unknown> {
     const data = unwrapLoaderArrowResult(this.props.data) as LayerData<unknown>;
-    if (Array.isArray(data) && data.length === 0) {
+    if (
+      Array.isArray(data) &&
+      data.length === 0 &&
+      !this.internalState?.isAsyncPropLoading('data')
+    ) {
       const columns = this.props[ROW_ACCESSOR_COLUMNS_SYMBOL];
       for (const [name, column] of Object.entries(columns ?? {})) {
         const type = this.props[PROP_TYPES_SYMBOL][name];
