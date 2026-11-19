@@ -6,7 +6,7 @@ import {GeoParquetLoader} from '@loaders.gl/tables/parquet';
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer, PolygonLayer} from '@deck.gl/layers';
 import {LightingEffect, AmbientLight, _SunLight as SunLight} from '@deck.gl/core';

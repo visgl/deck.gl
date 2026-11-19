@@ -4,7 +4,7 @@
 
 import React, {Component} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import DeckGL from '@deck.gl/react/legacy';
 import {MapView} from '@deck.gl/core';
 import * as layers from '@deck.gl/layers';
 import JSONLayer from './json-layer/json-layer';
