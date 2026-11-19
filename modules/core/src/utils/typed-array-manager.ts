@@ -52,7 +52,11 @@ export class TypedArrayManager {
         return typedArray;
       }
       if (newSize * typedArray.BYTES_PER_ELEMENT <= typedArray.buffer.byteLength) {
-        return new Type(typedArray.buffer as ArrayBuffer, 0, newSize) as T;
+        const grownArray = new Type(typedArray.buffer as ArrayBuffer, 0, newSize) as T;
+        if (initialize) {
+          grownArray.fill(0, typedArray.length);
+        }
+        return grownArray;
       }
     }
 
