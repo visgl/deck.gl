@@ -691,6 +691,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       expressions,
       parseExpression,
       functions,
+      scales: previous?.scales,
       pending: true
     };
     state.accessorQueries = request;
@@ -722,6 +723,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         error => {
           const layer = currentLayer();
           if (layer) {
+            request.scales = undefined;
             request.pending = false;
             layer.setNeedsUpdate();
             layer.raiseError(error, 'evaluating SQL accessors');
@@ -732,7 +734,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /**
    * Returns resolved SQL color scales keyed by accessor. The result is undefined
-   * until the current accessor evaluation completes. Composite scales belong to sublayers.
+   * until the first evaluation completes. While updating, it describes the previously applied
+   * colors. Composite scales belong to sublayers.
    * Color samples use normalized RGBA channels in [0, 1].
    */
   getResolvedColorScales(): Readonly<Record<string, ResolvedScale>> | undefined {

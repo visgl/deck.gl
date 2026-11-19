@@ -410,3 +410,32 @@ test('an all-null expression domain leaves other SQL accessors usable', () => {
   expect(Array.from(table.getChild('getFillColor')!.get(0))).toEqual([0, 0, 0, 0]);
   expect(scales.getFillColor).toBeUndefined();
 });
+
+test('resolved color scales remain available while SQL accessors refresh', async () => {
+  const device = new NullDevice({});
+  const manager = new LayerManager(device, {viewport: new Viewport()});
+  class ColorLayer extends Layer {
+    static layerName = 'ColorLayer';
+    static defaultProps = {getColor: {type: 'accessor', arrow: true, value: [0, 0, 0, 255]}};
+    initializeState() {}
+  }
+  const layer = new ColorLayer({
+    data: tableFromArrays({value: [0, 10]}),
+    getColor: {sql: "SCALE_COLOR(value, DOMAIN(value), PALETTE('#000000', '#ffffff'))"}
+  });
+  try {
+    manager.setLayers([layer]);
+    await vi.waitFor(() => expect(layer.getResolvedColorScales()?.getColor).toBeDefined());
+    const scales = layer.getResolvedColorScales();
+    const next = layer.clone({data: tableFromArrays({value: [0, 20]})});
+    manager.setLayers([next]);
+    expect(next.isLoaded).toBe(false);
+    expect(next.getResolvedColorScales()).toBe(scales);
+    await vi.waitFor(() =>
+      expect(next.getResolvedColorScales()?.getColor.descriptor.domain).toEqual([0, 20])
+    );
+  } finally {
+    manager.finalize();
+    device.destroy();
+  }
+});

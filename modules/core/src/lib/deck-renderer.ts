@@ -75,6 +75,8 @@ export default class DeckRenderer {
     viewports: Viewport[];
     views: {[viewId: string]: View};
     onViewportActive: (viewport: Viewport) => void;
+    /** Reports screen-layer eligibility to the caller. */
+    onLayerEligible?: LayersPassRenderOptions['onLayerEligible'];
     effects: Effect[];
     target?: Framebuffer | null;
     canvasContext?: CanvasContext | PresentationContext;

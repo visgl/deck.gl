@@ -2,19 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {
-  Widget,
-  type Layer,
-  type ResolvedScale,
-  type WidgetPlacement,
-  type WidgetProps
-} from '@deck.gl/core';
+import {Widget, type ResolvedScale, type WidgetPlacement, type WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
 
 /** Options for the automatic SQL color legend. */
 export type ColorScaleWidgetProps = WidgetProps & {
   /** Widget placement. Defaults to bottom-right. */
   placement?: WidgetPlacement;
+  /** Limits the legend to the specified view when supplied. */
+  viewId?: string | null;
   /** Accessible heading for the legend. */
   label?: string;
 };
@@ -89,29 +85,59 @@ function ColorLegend({scale}: {scale: ResolvedScale}) {
 }
 
 /** Shows the SQL color scales of currently visible layers. */
-export class ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
-  static defaultProps = {...Widget.defaultProps, id: 'color-scale', label: 'Color scales'};
+export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
+  /** Default identifier and accessible heading. */
+  static defaultProps = {
+    ...Widget.defaultProps,
+    id: 'color-scale',
+    label: 'Color scales',
+    viewId: null
+  };
+  /** Root CSS class for the legend. */
   className = 'deck-widget-color-scale';
+  /** Available height in CSS pixels. */
+  private maxHeight = 0;
   /** Scales displayed by the most recent redraw. */
   private entries: LegendEntry[] = [];
+
+  /** Attaches the legend to its configured view. */
+  constructor(props: ColorScaleWidgetProps = {}) {
+    super(props);
+    this.viewId = this.props.viewId;
+  }
+
+  /** Updates options and the selected view. */
+  override setProps(props: Partial<ColorScaleWidgetProps>): void {
+    if (props.viewId !== undefined) {
+      this.viewId = props.viewId;
+    }
+    super.setProps(props);
+  }
 
   /** Position of the legend in its view. */
   get placement(): WidgetPlacement {
     return this.props.placement ?? 'bottom-right';
   }
 
-  /** Discovers scales from rendered layers, including visible sublayers. */
-  override onRedraw({layers}: {layers: Layer[]}): void {
-    const entries = layers.flatMap(layer =>
-      layer.props.visible
-        ? Object.entries(layer.getResolvedColorScales() ?? {}).map(([accessor, scale]) => ({
-            layerId: layer.id,
-            accessor,
-            scale
-          }))
-        : []
+  /** Discovers scales in the screen views associated with the widget. */
+  override onRedraw({viewports, renderedLayers}: Parameters<Widget['onRedraw']>[0]): void {
+    const layers = new Set(
+      viewports.flatMap(viewport => [...(renderedLayers?.get(viewport) ?? [])])
     );
+    const entries = [...layers].flatMap(layer =>
+      Object.entries(layer.getResolvedColorScales() ?? {}).map(([accessor, scale]) => ({
+        layerId: layer.id,
+        accessor,
+        scale
+      }))
+    );
+    const height = Math.max(
+      0,
+      ...viewports.map(viewport => viewport.height + (this.viewId ? 0 : viewport.y))
+    );
+    const maxHeight = Math.max(0, height - 16);
     if (
+      this.maxHeight === maxHeight &&
       entries.length === this.entries.length &&
       entries.every((entry, index) => {
         const previous = this.entries[index];
@@ -124,6 +150,7 @@ export class ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
     )
       return;
     this.entries = entries;
+    this.maxHeight = maxHeight;
     this.updateHTML();
   }
 
@@ -131,7 +158,7 @@ export class ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
   override onRenderHTML(rootElement: HTMLElement): void {
     render(
       this.entries.length ? (
-        <section aria-label={this.props.label}>
+        <section aria-label={this.props.label} style={{maxHeight: this.maxHeight}}>
           <strong>{this.props.label}</strong>
           {this.entries.map(({layerId, accessor, scale}) => (
             <div key={JSON.stringify([layerId, accessor])}>

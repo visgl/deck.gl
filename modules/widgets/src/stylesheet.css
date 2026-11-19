@@ -652,9 +652,15 @@
 }
 
 .deck-widget-color-scale section {
-  background: var(--deck-widget-background, white);
-  color: var(--deck-widget-color, black);
+  background: var(--menu-background, #fff);
+  backdrop-filter: var(--menu-backdrop-filter, unset);
+  color: var(--menu-text, rgb(24, 24, 26));
+  box-shadow: var(--menu-shadow, none);
   border-radius: 4px;
+  box-sizing: border-box;
+  overflow: auto;
+  pointer-events: auto;
+  overscroll-behavior: contain;
   padding: 8px 12px;
   min-width: 144px;
 }

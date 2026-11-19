@@ -2,7 +2,7 @@ import OpenFreeMapAttribution from '../components/openfreemap-attribution';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import CodeBlock from '@theme/CodeBlock';
 import {
-  ColorScaleWidget,
+  _ColorScaleWidget,
   ScreenshotWidget,
   FullscreenWidget,
   CompassWidget,
@@ -549,7 +549,7 @@ export function ColorScaleWidgetDemo() {
       getRadius: 7
     })
   ], []);
-  const widgets = useMemo(() => [new ColorScaleWidget({placement: 'bottom-right'})], []);
+  const widgets = useMemo(() => [new _ColorScaleWidget({placement: 'bottom-right'})], []);
   return <NonGeoDemoBase views={new OrthographicView()} layers={layers} widgets={widgets} />;
 }
 
