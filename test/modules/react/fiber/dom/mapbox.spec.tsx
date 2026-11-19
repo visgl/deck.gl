@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {OrthographicView} from '@deck.gl/core';
 import type {MapboxOverlay} from '@deck.gl/mapbox';
 import mapboxgl from 'mapbox-gl';
@@ -5,7 +10,7 @@ import {act} from 'react';
 import {createRoot} from 'react-dom/client';
 import {expect, test, vi} from 'vitest';
 
-import {DeckGL} from '../mapbox';
+import {DeckGL} from '@deck.gl/react/dom/mapbox';
 
 const webglTest = navigator.userAgent.includes('jsdom') ? test.skip : test;
 

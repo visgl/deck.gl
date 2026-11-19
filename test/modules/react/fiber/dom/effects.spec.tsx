@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {
   AmbientLight,
   type Deck,
@@ -11,7 +16,7 @@ import {act} from 'react';
 import {createRoot} from 'react-dom/client';
 import {expect, test} from 'vitest';
 
-import {DeckGL} from '../index';
+import {DeckGL} from '@deck.gl/react/dom';
 
 const webglTest = navigator.userAgent.includes('jsdom') ? test.skip : test;
 

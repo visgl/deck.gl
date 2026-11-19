@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
 type DevToolsHook = {
@@ -19,11 +24,11 @@ describe('React DevTools', () => {
     scope.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {isDisabled: false, supportsFiber: true, inject};
 
     vi.resetModules();
-    await import('../renderer');
+    await import('@deck.gl/react/reconciler/renderer');
 
     expect(inject).toHaveBeenCalledTimes(1);
     expect(inject.mock.calls[0][0]).toMatchObject({
-      rendererPackageName: '@deck.gl-community/react-fiber',
+      rendererPackageName: '@deck.gl/react',
       version: expect.any(String)
     });
   });

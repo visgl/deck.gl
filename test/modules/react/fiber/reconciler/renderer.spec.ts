@@ -1,12 +1,17 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {Deck, LightingEffect, log, MapView, PostProcessEffect} from '@deck.gl/core';
 import {PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import * as fc from 'fast-check';
 import React from 'react';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
-import {createLayerComponent, createViewComponent} from '../../wrappers/factories';
-import {createRoot, roots, unmountAtNode} from '../renderer';
-import type {ReconcilerRoot, RootElement} from '../types';
+import {createLayerComponent, createViewComponent} from '@deck.gl/react/wrappers/factories';
+import {createRoot, roots, unmountAtNode} from '@deck.gl/react/reconciler/renderer';
+import type {ReconcilerRoot, RootElement} from '@deck.gl/react/reconciler/types';
 import {createTestRoot} from './test-renderer';
 import {TestWidget} from './test-widget';
 

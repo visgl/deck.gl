@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import 'client-only';
 import {assert, type Deck, type View} from '@deck.gl/core';
 import {createRoot, unmountAtNode} from '../reconciler/index';

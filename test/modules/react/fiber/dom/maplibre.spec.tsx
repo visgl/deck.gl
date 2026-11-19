@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {OrthographicView} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import type {MapLibreOverlay} from '@deck.gl/maplibre';
@@ -6,7 +11,7 @@ import {createRoot} from 'react-dom/client';
 import {act} from 'react';
 import {expect, test, vi} from 'vitest';
 
-import {DeckGL} from '../maplibre';
+import {DeckGL} from '@deck.gl/react/dom/maplibre';
 
 const webglTest = navigator.userAgent.includes('jsdom') ? test.skip : test;
 

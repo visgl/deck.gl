@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import * as deckAggregationLayers from '@deck.gl/aggregation-layers';
 import * as deckCore from '@deck.gl/core';
 import {AmbientLight, Layer, LightingEffect as DeckLightingEffect} from '@deck.gl/core';
@@ -9,19 +14,19 @@ import type {ShaderPass} from '@luma.gl/shaders';
 import {act, type ComponentType} from 'react';
 import {afterEach, describe, expect, it} from 'vitest';
 
-import {createTestRoot} from '../../reconciler/__tests__/test-renderer';
-import * as aggregationLayers from '../aggregation-layers';
-import * as core from '../core';
+import {createTestRoot} from '../reconciler/test-renderer';
+import * as aggregationLayers from '@deck.gl/react/wrappers/aggregation-layers';
+import * as core from '@deck.gl/react/wrappers/core';
 import {
   createEffectComponent,
   createLayerComponent,
   createViewComponent,
   createWidgetComponent
-} from '../factories';
-import * as geoLayers from '../geo-layers';
-import * as layers from '../layers';
-import * as meshLayers from '../mesh-layers';
-import * as widgets from '../widgets';
+} from '@deck.gl/react/wrappers/factories';
+import * as geoLayers from '@deck.gl/react/wrappers/geo-layers';
+import * as layers from '@deck.gl/react/wrappers/layers';
+import * as meshLayers from '@deck.gl/react/wrappers/mesh-layers';
+import * as widgets from '@deck.gl/react/wrappers/widgets';
 
 /** A shader pass with one prop, enough for deck.gl to build a `PostProcessEffect`. */
 const tint = {name: 'tint', fs: '', passes: []} as unknown as ShaderPass<{

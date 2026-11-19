@@ -1,6 +1,11 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {describe, expect, it} from 'vitest';
 
-import {hasSameConfigProperties} from '../has-same-config-properties';
+import {hasSameConfigProperties} from '@deck.gl/react/shared/has-same-config-properties';
 
 describe('hasSameConfigProperties', () => {
   it('returns true for the same object', () => {

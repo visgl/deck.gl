@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {describe, expect, it, vi} from 'vitest';
 
@@ -7,8 +12,8 @@ import {
   preparePortalMount,
   requestPostPaintCallback,
   resetAfterCommit
-} from '../config';
-import type {Container} from '../types';
+} from '@deck.gl/react/reconciler/config';
+import type {Container} from '@deck.gl/react/reconciler/types';
 import {createMockInstance} from './test-utils';
 
 describe('config-lifecycle', () => {

@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import type {Deck} from '@deck.gl/core';
 import {render, waitFor} from '@testing-library/react';
 import {createRef, StrictMode} from 'react';
@@ -17,12 +22,12 @@ const providerMocks = vi.hoisted(() => {
 vi.mock('@deck.gl/mapbox', () => ({MapboxOverlay: providerMocks.mapboxOverlay}));
 vi.mock('@deck.gl/maplibre', () => ({MapLibreOverlay: providerMocks.maplibreOverlay}));
 
-import {createDeckGL, DeckGL} from '../components';
-import {DeckGL as MapboxDeckGL} from '../mapbox';
-import {DeckGL as MapLibreDeckGL} from '../maplibre';
+import {createDeckGL, DeckGL} from '@deck.gl/react/dom/components';
+import {DeckGL as MapboxDeckGL} from '@deck.gl/react/dom/mapbox';
+import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/dom/maplibre';
 
 // Mock the reconciler module
-vi.mock(import('../../reconciler'), () => {
+vi.mock(import('@deck.gl/react/reconciler'), () => {
   const mockRender = vi.fn<() => void>();
   const mockConfigure = vi.fn<() => void>();
   const mockDeckGL = {};
@@ -74,7 +79,7 @@ vi.mock(import('../../reconciler'), () => {
 
 // Get the mocks after they've been set up
 const {mockRender, mockConfigure, mockCreateRoot, mockDeckGL, mockUnmountAtNode, mockRoots} =
-  (await import('../../reconciler')) as unknown as {
+  (await import('@deck.gl/react/reconciler')) as unknown as {
     mockRender: ReturnType<typeof vi.fn>;
     mockConfigure: ReturnType<typeof vi.fn>;
     mockCreateRoot: ReturnType<typeof vi.fn>;

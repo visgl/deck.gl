@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import 'client-only';
 import type {Effect, Layer, View} from '@deck.gl/core';
 import type {ReactElement, ReactNode} from 'react';

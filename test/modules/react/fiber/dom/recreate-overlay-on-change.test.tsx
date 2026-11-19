@@ -1,10 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 // Uses the real reconciler: a recreated overlay must receive the JSX layers through a
 // full commit into its new root, not only the `layers` prop.
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {act, render} from '@testing-library/react';
 import {StrictMode} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {createDeckGL} from '../components';
+import {createDeckGL} from '@deck.gl/react/dom/components';
 
 type FakeOverlayProps = {enabled?: boolean; pickingRadius?: number};
 

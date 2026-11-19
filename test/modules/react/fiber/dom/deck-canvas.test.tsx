@@ -1,10 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {Component, StrictMode, type ReactNode} from 'react';
 import {cleanup, render} from '@testing-library/react';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {MapView} from '@deck.gl/core';
 import type {Deck, DeckProps, Widget} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {DeckCanvas} from '../deck-canvas';
+import {DeckCanvas} from '@deck.gl/react/dom/deck-canvas';
 
 vi.mock('client-only', () => ({}));
 afterEach(cleanup);

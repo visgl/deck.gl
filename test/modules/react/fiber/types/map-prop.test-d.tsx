@@ -1,11 +1,16 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import mapboxgl from 'mapbox-gl';
 import {Map as MapLibreMap} from 'maplibre-gl';
 import type {ComponentProps} from 'react';
 import {describe, expectTypeOf, it} from 'vitest';
-import {createDeckGL, DeckGL} from '../../dom/components';
-import type {DeckGLRenderer} from '../../shared/store';
-import {DeckGL as MapboxDeckGL} from '../../dom/mapbox';
-import {DeckGL as MapLibreDeckGL} from '../../dom/maplibre';
+import {createDeckGL, DeckGL} from '@deck.gl/react/dom/components';
+import type {DeckGLRenderer} from '@deck.gl/react/shared/store';
+import {DeckGL as MapboxDeckGL} from '@deck.gl/react/dom/mapbox';
+import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/dom/maplibre';
 
 declare const maplibreMap: MapLibreMap;
 declare const mapboxMap: mapboxgl.Map;

@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {MapView, OrbitView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {createElement} from 'react';

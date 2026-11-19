@@ -1,6 +1,11 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {describe, expect, expectTypeOf, it} from 'vitest';
 
-import * as reconcilerModule from '../index';
+import * as reconcilerModule from '@deck.gl/react/reconciler';
 
 describe('index', () => {
   it('should export createRoot', () => {

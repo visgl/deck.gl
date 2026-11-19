@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 /**
  * Reference to the global scope object (window in browsers, self in workers)
  *
@@ -14,7 +19,7 @@ export const globalScope =
 declare const __VERSION__: string | undefined;
 
 /** The package name React DevTools shows for this renderer. */
-export const RENDERER_PACKAGE_NAME = '@deck.gl-community/react-fiber';
+export const RENDERER_PACKAGE_NAME = '@deck.gl/react';
 
 /** The renderer version React DevTools shows, or a placeholder when running from source. */
 export const RENDERER_VERSION =

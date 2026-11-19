@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {LightingEffect, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
@@ -10,9 +15,9 @@ import {
   finalizeContainerChildren,
   finalizeInitialChildren,
   replaceContainerChildren
-} from '../config';
-import type {ChildSet, Container, Instance} from '../types';
-import {flattenTree, organizeList} from '../utils';
+} from '@deck.gl/react/reconciler/config';
+import type {ChildSet, Container, Instance} from '@deck.gl/react/reconciler/types';
+import {flattenTree, organizeList} from '@deck.gl/react/reconciler/utils';
 import {TestWidget} from './test-widget';
 import {createMockInstance} from './test-utils';
 

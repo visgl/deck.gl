@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {
   LightingEffect,
   MapView,
@@ -9,7 +14,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {createElement} from 'react';
 import {describe, expect, it} from 'vitest';
 
-import type {DeckGLElements} from '../jsx';
+import type {DeckGLElements} from '@deck.gl/react/types/jsx';
 
 describe('JSX type tests', () => {
   it('should expose native layer and view elements', () => {

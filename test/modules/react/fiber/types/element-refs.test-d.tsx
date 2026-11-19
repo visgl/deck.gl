@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 // Refs on the native elements receive the deck.gl instance (see getPublicInstance).
 import {
   type Effect,
@@ -12,7 +17,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {createRef} from 'react';
 import {describe, expect, it} from 'vitest';
 
-import '../jsx';
+import '@deck.gl/react/types/jsx';
 
 class TestWidget extends Widget {
   className = 'test-widget';

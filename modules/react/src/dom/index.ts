@@ -1,10 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 export {createDeckGL, DeckGL} from './components';
 /**
  * Re-export public types from the package root.
  *
  * This supports:
  * ```ts
- * import {type DeckGLProps} from '@deck.gl-community/react-fiber';
+ * import {type DeckGLProps} from '@deck.gl/react';
  * ```
  */
 export type {DeckGLRootProps, DeckGLProps, OnDeckChange} from '../types/index';

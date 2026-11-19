@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 // Every widget class that @deck.gl/widgets exports, as a component that takes the widget's props.
 import type {View} from '@deck.gl/core';
 import {

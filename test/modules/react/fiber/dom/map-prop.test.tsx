@@ -1,10 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 // Uses the real reconciler, so each overlay is created and finalized as it is in an app.
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {act, render} from '@testing-library/react';
 import {StrictMode} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {attachControl, type ControlHost} from '../attach-control';
-import {createDeckGL} from '../components';
+import {attachControl, type ControlHost} from '@deck.gl/react/dom/attach-control';
+import {createDeckGL} from '@deck.gl/react/dom/components';
 
 type FakeOverlayProps = {interleaved?: boolean; pickingRadius?: number};
 type FakeOverlay = {

@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 // @vitest-environment node
 // Invariant: DeckGL roots never touch `document` or `window` during render. All DOM
 // resolution happens in effects, so every root entry point must server-render in plain Node.
@@ -5,10 +10,10 @@ import {createElement} from 'react';
 import type {ComponentType} from 'react';
 import {renderToString} from 'react-dom/server';
 import {describe, expect, it, vi} from 'vitest';
-import {createDeckGL, DeckGL} from '../index';
-import {DeckGL as GoogleMapsDeckGL} from '../google-maps';
-import {DeckGL as MapboxDeckGL} from '../mapbox';
-import {DeckGL as MapLibreDeckGL} from '../maplibre';
+import {createDeckGL, DeckGL} from '@deck.gl/react/dom';
+import {DeckGL as GoogleMapsDeckGL} from '@deck.gl/react/dom/google-maps';
+import {DeckGL as MapboxDeckGL} from '@deck.gl/react/dom/mapbox';
+import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/dom/maplibre';
 
 function renderOnServer(Component: ComponentType<any>, props: object = {}): string {
   return renderToString(createElement(Component, props, null));

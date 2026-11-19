@@ -1,8 +1,13 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {describe, expect, it, vi} from 'vitest';
 import {MapView} from '@deck.gl/core';
 import type {Deck, DeckProps, Widget} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {getCanvasRegistry} from '../deck-canvas-registry';
+import {getCanvasRegistry} from '@deck.gl/react/dom/deck-canvas-registry';
 
 function createDeck(): Deck<any> {
   const deck = {

@@ -1,9 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 // @vitest-environment node
 
 import * as fc from 'fast-check';
 import {describe, expect, expectTypeOf, it} from 'vitest';
 
-import {isDefined, isFn, isBrowserEnvironment, noop, toPascal} from '../utils';
+import {isDefined, isFn, isBrowserEnvironment, noop, toPascal} from '@deck.gl/react/shared/utils';
 
 describe('Utility Functions Tests', () => {
   describe('isDefined()', () => {

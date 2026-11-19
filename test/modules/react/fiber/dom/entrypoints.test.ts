@@ -1,9 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {describe, expect, it} from 'vitest';
-import * as dom from '../index';
-import * as googleMaps from '../google-maps';
-import * as mapbox from '../mapbox';
-import * as maplibre from '../maplibre';
-import packageJson from '../../../package.json';
+import * as dom from '@deck.gl/react/dom';
+import * as googleMaps from '@deck.gl/react/dom/google-maps';
+import * as mapbox from '@deck.gl/react/dom/mapbox';
+import * as maplibre from '@deck.gl/react/dom/maplibre';
+import packageJson from '../../../../../modules/react/package.json';
 
 describe('native entrypoint export matrix', () => {
   it('exports standalone APIs from the package root entrypoint', () => {

@@ -1,10 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 // Widgets that manage views, and multi-view props, type-check as they do in @deck.gl/react.
 import {MapView} from '@deck.gl/core';
 import {_SplitterWidget as SplitterWidget, ZoomWidget} from '@deck.gl/widgets';
 import {createRef} from 'react';
 import {describe, expect, it} from 'vitest';
 
-import {DeckGL} from '../../dom/index';
+import {DeckGL} from '@deck.gl/react/dom';
 
 describe('view-layout widgets and multi-view props', () => {
   it('accepts a widget typed for several views', () => {

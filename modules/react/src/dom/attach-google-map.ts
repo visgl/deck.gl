@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 /// <reference types="google.maps" />
 import type {GoogleMapsOverlay} from '@deck.gl/google-maps';
 

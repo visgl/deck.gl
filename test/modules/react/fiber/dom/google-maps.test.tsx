@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 // Uses the real reconciler and the real GoogleMapsOverlay against a fake `google.maps.Map`, so no
 // Google Maps API key or script is needed. The fake map never reports a rendering type, so the
 // overlay attaches and detaches without creating its deck.gl instance.
@@ -7,8 +12,8 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {act, render} from '@testing-library/react';
 import {StrictMode} from 'react';
 import {afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
-import {attachGoogleMap, type GoogleMap} from '../attach-google-map';
-import {DeckGL} from '../google-maps';
+import {attachGoogleMap, type GoogleMap} from '@deck.gl/react/dom/attach-google-map';
+import {DeckGL} from '@deck.gl/react/dom/google-maps';
 
 /** A `google.maps.Map` with only what `GoogleMapsOverlay.setMap` calls. */
 class FakeGoogleMap {

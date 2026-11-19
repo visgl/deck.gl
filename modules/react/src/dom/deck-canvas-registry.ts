@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import type {Deck, DeckProps, Layer, LayersList, View, Widget} from '@deck.gl/core';
 
 export type CanvasContribution = {

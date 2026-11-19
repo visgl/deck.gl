@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {LightingEffect, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
@@ -8,8 +13,8 @@ import {
   cloneInstance,
   createInstance,
   createTextInstance
-} from '../config';
-import type {Instance, Props, Type} from '../types';
+} from '@deck.gl/react/reconciler/config';
+import type {Instance, Props, Type} from '@deck.gl/react/reconciler/types';
 import {createMockHostContext, setupLogSpy} from './test-utils';
 import {TestWidget} from './test-widget';
 

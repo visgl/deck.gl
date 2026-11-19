@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {describe, expect, it} from 'vitest';
 
@@ -12,7 +17,7 @@ import {
   unhideInstance,
   unhideTextInstance,
   waitForCommitToBeReady
-} from '../config';
+} from '@deck.gl/react/reconciler/config';
 import {createMockInstance} from './test-utils';
 
 describe('config-suspense', () => {

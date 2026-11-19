@@ -1,8 +1,13 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import type {Effect, Layer, LayersList, View, Widget} from '@deck.gl/core';
 import {vi} from 'vitest';
 
-import {createRoot, unmountAtNode} from '../renderer';
-import type {RootElement} from '../types';
+import {createRoot, unmountAtNode} from '@deck.gl/react/reconciler/renderer';
+import type {RootElement} from '@deck.gl/react/reconciler/types';
 
 /**
  * Test renderer that mocks the Deck.gl methods used by the reconciler

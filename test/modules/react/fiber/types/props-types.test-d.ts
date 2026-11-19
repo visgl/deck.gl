@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import type {MapboxOverlay} from '@deck.gl/mapbox';
@@ -5,12 +10,12 @@ import type {MapLibreOverlay} from '@deck.gl/maplibre';
 import type {Deck} from '@deck.gl/core';
 import {createElement, createRef} from 'react';
 import type {ComponentProps, ReactNode, Ref} from 'react';
-import {DeckGL} from '../../dom/components';
-import {DeckGL as MapboxDeckGL} from '../../dom/mapbox';
-import {DeckGL as MapLibreDeckGL} from '../../dom/maplibre';
+import {DeckGL} from '@deck.gl/react/dom/components';
+import {DeckGL as MapboxDeckGL} from '@deck.gl/react/dom/mapbox';
+import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/dom/maplibre';
 import {describe, expect, expectTypeOf, it} from 'vitest';
 
-import type {DeckGLProps} from '../react';
+import type {DeckGLProps} from '@deck.gl/react/types/react';
 
 describe('Props Type Tests', () => {
   it('keeps plain and provider root callback types distinct', () => {

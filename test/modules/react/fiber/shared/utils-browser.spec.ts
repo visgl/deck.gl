@@ -1,9 +1,14 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 // @vitest-environment jsdom
 
 import {describe, expect, it} from 'vitest';
 
-import {globalScope} from '../constants';
-import {isBrowserEnvironment} from '../utils';
+import {globalScope} from '@deck.gl/react/shared/constants';
+import {isBrowserEnvironment} from '@deck.gl/react/shared/utils';
 
 describe('Utility Functions Tests (Browser Environment)', () => {
   describe('isBrowserEnvironment()', () => {

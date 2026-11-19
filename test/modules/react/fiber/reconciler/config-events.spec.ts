@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {
   ContinuousEventPriority,
@@ -13,7 +18,7 @@ import {
   resolveUpdatePriority,
   setCurrentUpdatePriority,
   trackSchedulerEvent
-} from '../config';
+} from '@deck.gl/react/reconciler/config';
 
 describe('config-events', () => {
   let originalEvent: typeof window.event;

@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {describe, expect, it} from 'vitest';
 
@@ -10,8 +15,8 @@ import {
   prepareScopeUpdate,
   resetFormInstance,
   shouldAttemptEagerTransition
-} from '../config';
-import type {Container, HostContext, Props} from '../types';
+} from '@deck.gl/react/reconciler/config';
+import type {Container, HostContext, Props} from '@deck.gl/react/reconciler/types';
 import {createMockHostContext, createMockInstance} from './test-utils';
 
 describe('config-misc', () => {

@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {Widget, type WidgetPlacement, type WidgetProps} from '@deck.gl/core';
 
 /** A minimal concrete widget, so tests do not depend on @deck.gl/widgets. */

@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 // oxlint-disable typescript/no-empty-object-type
 // oxlint-disable unicorn/require-module-specifiers
 // oxlint-disable import/no-empty-named-blocks

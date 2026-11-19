@@ -1,8 +1,13 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import type {Layer, View} from '@deck.gl/core';
 import {log} from '@deck.gl/core';
 import {expect, vi} from 'vitest';
 
-import type {HostContext, Instance} from '../types';
+import type {HostContext, Instance} from '@deck.gl/react/reconciler/types';
 
 /**
  * Creates a mock Instance wrapper

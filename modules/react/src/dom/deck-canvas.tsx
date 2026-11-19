@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import 'client-only';
 import type {Deck, DeckProps, LayersList, View, Widget} from '@deck.gl/core';
 import {useId, useRef} from 'react';

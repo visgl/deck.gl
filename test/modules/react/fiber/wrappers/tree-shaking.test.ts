@@ -1,10 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 // @vitest-environment node
 // esbuild's JS API rejects jsdom's TextEncoder, so this file runs in Node.
 import {build} from 'esbuild';
 import {fileURLToPath} from 'node:url';
 import {describe, expect, it} from 'vitest';
 
-const WRAPPERS = fileURLToPath(new URL('..', import.meta.url));
+const WRAPPERS = fileURLToPath(new URL('../../../../../modules/react/src/wrappers/', import.meta.url));
 
 // Everything a deck.gl app already ships, so the sizes count only the layer module and the wrappers.
 const EXTERNAL = ['react', 'react/*', '@deck.gl/core', '@luma.gl/*', '@loaders.gl/*', '@math.gl/*'];

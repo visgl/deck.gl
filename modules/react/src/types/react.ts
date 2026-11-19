@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import type {Deck, DeckProps, View} from '@deck.gl/core';
 import type {ReactNode, Ref} from 'react';
 

@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {afterEach, describe, expect, it, vi} from 'vitest';
 
 // The optional peers: each subpath that needs one loads it, and the root loads none of them.
@@ -31,7 +36,7 @@ describe('plain entrypoint isolation', () => {
   it('loads the native root and the factories without any optional peer', async () => {
     blockImports(OPTIONAL_PEERS);
 
-    const dom = await import('../index');
+    const dom = await import('@deck.gl/react/dom');
 
     expect(dom.DeckGL).toBeDefined();
     expect(dom.createLayerComponent).toBeDefined();
@@ -40,7 +45,7 @@ describe('plain entrypoint isolation', () => {
   it('loads /layers without the other layer packages', async () => {
     blockImports(OPTIONAL_PEERS.filter(name => name !== '@deck.gl/layers'));
 
-    const layers = await import('../../wrappers/layers');
+    const layers = await import('@deck.gl/react/wrappers/layers');
 
     expect(layers.ScatterplotLayer).toBeDefined();
   });
@@ -48,7 +53,7 @@ describe('plain entrypoint isolation', () => {
   it('loads /google-maps without the other optional peers', async () => {
     blockImports(OPTIONAL_PEERS.filter(name => name !== '@deck.gl/google-maps'));
 
-    const googleMaps = await import('../google-maps');
+    const googleMaps = await import('@deck.gl/react/dom/google-maps');
 
     expect(googleMaps.DeckGL).toBeDefined();
   });
@@ -56,7 +61,7 @@ describe('plain entrypoint isolation', () => {
   it('loads /core without any optional peer', async () => {
     blockImports(OPTIONAL_PEERS);
 
-    const core = await import('../../wrappers/core');
+    const core = await import('@deck.gl/react/wrappers/core');
 
     expect(core.MapView).toBeDefined();
   });

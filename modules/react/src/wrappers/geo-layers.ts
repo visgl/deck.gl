@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 // Every public layer class that @deck.gl/geo-layers exports, as a component that takes the
 // layer's props and type parameters.
 import type {ReactElement} from 'react';

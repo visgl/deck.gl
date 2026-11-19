@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {type Deck, type Layer, MapView, type View} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {_SplitterWidget as SplitterWidget, ZoomWidget} from '@deck.gl/widgets';
@@ -5,7 +10,7 @@ import {act, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {expect, test} from 'vitest';
 
-import {DeckGL} from '../index';
+import {DeckGL} from '@deck.gl/react/dom';
 
 const webglTest = navigator.userAgent.includes('jsdom') ? test.skip : test;
 

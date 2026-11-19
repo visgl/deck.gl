@@ -1,15 +1,20 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {AmbientLight, OrthographicView as DeckOrthographicView} from '@deck.gl/core';
 import {DataFilterExtension, type DataFilterExtensionProps} from '@deck.gl/extensions';
 import {ScatterplotLayer as DeckScatterplotLayer} from '@deck.gl/layers';
 import type {ShaderPass} from '@luma.gl/shaders';
 import {describe, expect, it} from 'vitest';
 
-import '../../types/jsx';
-import {LightingEffect, MapView, PostProcessEffect} from '../core';
-import {createLayerComponent, createViewComponent} from '../factories';
-import {TileLayer} from '../geo-layers';
-import {GeoJsonLayer, ScatterplotLayer} from '../layers';
-import {_SplitterWidget as SplitterWidget, ZoomWidget} from '../widgets';
+import '@deck.gl/react/types/jsx';
+import {LightingEffect, MapView, PostProcessEffect} from '@deck.gl/react/wrappers/core';
+import {createLayerComponent, createViewComponent} from '@deck.gl/react/wrappers/factories';
+import {TileLayer} from '@deck.gl/react/wrappers/geo-layers';
+import {GeoJsonLayer, ScatterplotLayer} from '@deck.gl/react/wrappers/layers';
+import {_SplitterWidget as SplitterWidget, ZoomWidget} from '@deck.gl/react/wrappers/widgets';
 
 type Point = {position: [number, number]; size: number};
 const points: Point[] = [{position: [0, 0], size: 1}];

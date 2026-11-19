@@ -1,10 +1,15 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 // Uses the real reconciler with a fake overlay, so errors travel the same path as in an app.
 import {log} from '@deck.gl/core';
 import {act, render} from '@testing-library/react';
 import {Component} from 'react';
 import type {ReactNode} from 'react';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import {createDeckGL} from '../components';
+import {createDeckGL} from '@deck.gl/react/dom/components';
 
 const CustomDeckGL = createDeckGL({
   createExternalOverlay: () => ({finalize: vi.fn(), setProps: vi.fn()})

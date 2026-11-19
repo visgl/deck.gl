@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import {MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {describe, expect, it} from 'vitest';
@@ -7,8 +12,8 @@ import {
   getPublicInstance,
   getRootHostContext,
   shouldSetTextContent
-} from '../config';
-import type {Container} from '../types';
+} from '@deck.gl/react/reconciler/config';
+import type {Container} from '@deck.gl/react/reconciler/types';
 import {createMockHostContext, createMockInstance} from './test-utils';
 
 describe('config-host-context', () => {

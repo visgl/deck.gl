@@ -1,3 +1,8 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+// Copyright (c) Deckgl Fiber Renderer contributors
+
 import type {Layer, View} from '@deck.gl/core';
 import {Deck, assert, log} from '@deck.gl/core';
 import {RENDERER_PACKAGE_NAME, RENDERER_VERSION} from '../shared/constants';
@@ -49,7 +54,7 @@ import type {
  * @example
  * ```typescript
  * // Advanced usage: direct container access
- * import { renderer } from '@deck.gl-community/react-fiber/reconciler';
+ * import { renderer } from '@deck.gl/react/reconciler';
  *
  * const container = renderer.createContainer(
  *   hostContext,
@@ -95,7 +100,7 @@ renderer.injectIntoDevTools({
  * @example
  * ```typescript
  * // Advanced usage: check if root exists for container
- * import { roots } from '@deck.gl-community/react-fiber/reconciler';
+ * import { roots } from '@deck.gl/react/reconciler';
  *
  * if (roots.has(containerElement)) {
  *   const existingRoot = roots.get(containerElement);
@@ -190,7 +195,7 @@ export function unmountAtNode(node: RootElement) {
  *
  * @example
  * ```typescript
- * import { createRoot } from '@deck.gl-community/react-fiber/reconciler';
+ * import { createRoot } from '@deck.gl/react/reconciler';
  * import { ScatterplotLayer } from '@deck.gl/layers';
  *
  * const root = createRoot(container);
