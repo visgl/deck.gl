@@ -75,7 +75,7 @@ export default function App({device}) {
       coordinateSystem: 'cartesian',
       getPosition: {sql: 'ARRAY_FLOAT64(x, y)'},
       getColor: {sql: 'RGBA8(red, 0.5, blue, 1)'},
-      getOrientation: d => [d.yaw, 0, -90]
+      getOrientation: {sql: 'ARRAY_FLOAT32(yaw, 0, -90)'}
     }),
     // only needed when using shadows - a plane for shadows to drop on
     new SolidPolygonLayer({
