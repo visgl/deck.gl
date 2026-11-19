@@ -45,9 +45,11 @@ _v10.0 should be thought of as a pre-release. We wanted to get the new capabilit
 - **Source data CRS** is preserved during loading and projected automatically
 - **Curved geometry** — Set `resolution` to subdivide paths, polygons, and bitmaps so they follow the projection’s curves.
 
-### High Dynamic Range (HDR)
+### Colors
 
 - **Normalized colors** — Set `normalizedColors` to use RGB values from 0 to 1.
+- **Color scales** — Map data values to colors.
+- **ColorScaleWidget** 🚧 — Display a color scale as a legend.
 
 ### React
 
