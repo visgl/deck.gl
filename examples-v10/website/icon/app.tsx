@@ -140,7 +140,7 @@ export default function App({
         id: 'icon',
         // JSON URLs can load row arrays. Parquet and direct Arrow tables pass through.
         dataTransform: <LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT =>
-          (typeof data === 'string' && Array.isArray(source)
+          (typeof data === 'string' && Array.isArray(source) && source.length > 0
             ? tableFromJSON(source)
             : source) as LayerDataT,
         getPosition: Array.isArray(data)
