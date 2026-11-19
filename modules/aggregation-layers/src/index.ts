@@ -36,3 +36,9 @@ export type {
 } from './common/aggregator/index';
 
 export {GraphScreenGridAggregator as _GraphScreenGridAggregator} from './screen-grid-layer/graph-screen-grid-aggregator';
+
+export {
+  Aggregation as _Aggregation,
+  GridAggregation as _GridAggregation
+} from './experimental/aggregation';
+export {AggregatedLayer as _AggregatedLayer} from './experimental/aggregated-layer';
