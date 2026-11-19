@@ -567,7 +567,7 @@ export function ColorScaleWidgetDemo() {
       coordinateSystem: 'cartesian',
       positionFormat: 'XY',
       getPolygon: {sql: 'path'},
-      getFillColor: {sql: "SCALE_QUANTILE(coverage, 5, PALETTE('viridis'))"},
+      getFillColor: {sql: "SCALE_QUANTILE(coverage, 5, PALETTE('#000000', '#07542a', '#0d873f', '#1cbd53', '#51ef70'))"},
       getLineColor: [240, 244, 252],
       lineWidthMinPixels: 2,
       pickable: true,
@@ -588,16 +588,34 @@ export function ColorScaleWidgetDemo() {
       stroked: true,
       lineWidthMinPixels: 1,
       pickable: true
+    }),
+    new ScatterplotLayer({
+      id: 'Tree species',
+      data: tableFromArrays({
+        x: [-82, -24, 37, 88],
+        y: [-57, 42, 55, 26],
+        species: ['Oak', 'Maple', 'Pine', 'Oak']
+      }),
+      coordinateSystem: 'cartesian',
+      getPosition: {sql: 'ARRAY_FLOAT64(x, y)'},
+      getFillColor: {
+        sql: "SCALE_ORDINAL(species, CATEGORIES('Oak', 'Maple', 'Pine'), PALETTE('#2c7bb6', '#d7191c', '#1a9641'))"
+      },
+      getRadius: 7,
+      getLineColor: [255, 255, 255],
+      stroked: true,
+      lineWidthMinPixels: 1,
+      pickable: true
     })
   ], []);
-  const widgets = useMemo(() => [new _ColorScaleWidget()], []);
+  const widgets = useMemo(() => [new _ColorScaleWidget({categoricalLayout: 'wrap'})], []);
   return <NonGeoDemoBase
     views={new OrthographicView()}
     layers={layers}
     widgets={widgets}
-    getTooltip={({object}) => object && (object.height == null
+    getTooltip={({object}) => object && (object.species || (object.height == null
       ? `Tree canopy: ${object.coverage}%`
-      : `Tree height: ${object.height} m`)}
+      : `Tree height: ${object.height} m`))}
   />;
 }
 

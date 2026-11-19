@@ -277,7 +277,13 @@ On a WebGPU device, `gpuAggregation: true` aggregates points in a compute shader
 more after each change. Previous contours remain visible until the new results arrive.
 [DataFilterExtension](../extensions/data-filter-extension.md), [ClipExtension](../extensions/clip-extension.md),
 and [BrushingExtension](../extensions/brushing-extension.md) filter input points before aggregation. They also support [borrowed GPU columns](./aggregator.md#gpu-column-extensions).
-Layers with other extensions use CPU aggregation on WebGPU.
+With accessor inputs, PathStyleExtension, FillStyleExtension, and MaskExtension
+can style contours while binning remains on the GPU. Unknown extensions select CPU aggregation.
+
+Set the experimental `gpuGeometry` prop to `true` to generate isolines from the bin
+buffer and draw them without readback. This path supports numeric thresholds, with
+picking disabled and no line sublayer overrides or rendering extensions.
+Isobands and other configurations use CPU contour geometry.
 
 ContourLayer also accepts [GPU column inputs](./aggregator.md#gpu-column-inputs), which need `dataBounds`.
 

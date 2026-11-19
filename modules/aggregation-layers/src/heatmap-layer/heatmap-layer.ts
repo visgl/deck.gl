@@ -17,7 +17,8 @@ import {
   Texture,
   TextureProps,
   TextureFormat,
-  TextureFormatColor
+  TextureFormatColor,
+  type VertexFormat
 } from '@luma.gl/core';
 import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
 import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
@@ -62,6 +63,11 @@ function isClipExtension(extension: LayerExtension): boolean {
   return (extension.constructor as typeof LayerExtension).extensionName === 'ClipExtension';
 }
 
+/** Recognize DataFilterExtension without importing the extensions package. */
+function isDataFilterExtension(extension: LayerExtension): boolean {
+  return (extension.constructor as typeof LayerExtension).extensionName === 'DataFilterExtension';
+}
+
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const MAX_WEIGHT_REDUCTION_SIZE = 16;
 const TEXTURE_PROPS: TextureProps = {
@@ -85,6 +91,7 @@ const AGGREGATION_MODE = {
 const defaultProps: DefaultProps<HeatmapLayerProps> = {
   positions: {type: 'object', value: null, optional: true},
   weights: {type: 'array', value: null, optional: true, compare: 1},
+  extensionAttributes: {type: 'object', value: null, optional: true, compare: 1},
   getPosition: {type: 'accessor', arrow: 'row', value: (x: any) => x.position},
   getWeight: {type: 'accessor', arrow: 'row', value: 1},
   intensity: {type: 'number', min: 0, value: 1},
@@ -121,6 +128,8 @@ type _HeatmapLayerProps<DataT> = {
    * @experimental
    */
   weights?: readonly GPUVector[] | null;
+  /** Borrowed numeric DataFilter values in position row order. @experimental */
+  extensionAttributes?: {filterValues?: GPUVector} | null;
 
   /**
    * Radius of the circle in pixels, to which the weight of an object is distributed.
@@ -314,7 +323,7 @@ export default class HeatmapLayer<
     }
     const displayExtensions = this.props.extensions.filter(extension => {
       if (isClipExtension(extension) && this._clipsSourcePoints()) return false;
-      if (extension.constructor['extensionName'] === 'DataFilterExtension') {
+      if (isDataFilterExtension(extension)) {
         // Update counts from source points after the extension has updated its state.
         extension.draw.call(this, {context: this.context}, extension);
         return false;
@@ -405,6 +414,8 @@ export default class HeatmapLayer<
     changeFlags.dataChanged =
       ((opts.props.positions !== opts.oldProps.positions ||
         opts.props.weights?.[0] !== opts.oldProps.weights?.[0] ||
+        opts.props.extensionAttributes?.filterValues !==
+          opts.oldProps.extensionAttributes?.filterValues ||
         opts.props.numInstances !== opts.oldProps.numInstances) &&
         'GPU columns changed') ||
       (opts.changeFlags.projectionChanged && 'projection changed') ||
@@ -458,13 +469,16 @@ export default class HeatmapLayer<
   protected override _updateAttributes(): void {
     const {positions, weights, extensions} = this.props;
     if (!positions) {
-      if (weights) throw new Error('Heatmap weights require positions');
+      if (weights || this.props.extensionAttributes?.filterValues)
+        throw new Error('Heatmap weights and extension columns require positions');
       super._updateAttributes();
       return;
     }
     if (
       this.context.device.type !== 'webgpu' ||
-      extensions.some(extension => !isClipExtension(extension)) ||
+      extensions.some(
+        extension => !isClipExtension(extension) && !isDataFilterExtension(extension)
+      ) ||
       this.state.preproject
     ) {
       throw new Error(
@@ -483,6 +497,7 @@ export default class HeatmapLayer<
     }
     getGPUVectorData(positions);
     getGPUVectorData(weight);
+    this._getBorrowedFilterValues();
     this.updateAttributes({});
   }
 
@@ -548,6 +563,37 @@ export default class HeatmapLayer<
     }
   }
 
+  /** Validate the column consumed by the borrowed input accumulation pass. */
+  private _getBorrowedFilterValues() {
+    const {positions, extensions, extensionAttributes} = this.props;
+    const extension = extensions.find(isDataFilterExtension);
+    if (!positions || !extension) return null;
+
+    const {filterSize, categorySize, fp64, countItems} = extension.opts as {
+      filterSize?: number;
+      categorySize?: number;
+      fp64?: boolean;
+      countItems?: boolean;
+    };
+    if (!filterSize || categorySize || fp64 || countItems) {
+      throw new Error(
+        'Heatmap GPU column filtering requires numeric DataFilter without fp64 or item counting'
+      );
+    }
+    const format = (filterSize === 1 ? 'float32' : `float32x${filterSize}`) as VertexFormat;
+    const vector = extensionAttributes?.filterValues;
+    if (
+      vector?.format !== format ||
+      vector.length !== positions.length ||
+      !(getGPUVectorData(vector).buffer.usage & Buffer.VERTEX)
+    ) {
+      throw new Error(
+        `Invalid Heatmap filterValues: expected ${format}, one value per position and VERTEX usage`
+      );
+    }
+    return {...getGPUVectorData(vector), format};
+  }
+
   /** Whether ClipExtension filters source points instead of the display quad. */
   private _clipsSourcePoints(): boolean {
     return this.context.device.type === 'webgpu' && this.props['clipByInstance'] !== false;
@@ -565,6 +611,7 @@ export default class HeatmapLayer<
     const isWebGPU = this.context.device.type === 'webgpu';
     const attributeManager = this.getAttributeManager()!;
 
+    const filterValues = this._getBorrowedFilterValues();
     weightsTransform?.destroy();
     weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
@@ -587,6 +634,18 @@ export default class HeatmapLayer<
               byteStride: getGPUVectorData(this.props.weights![0]).byteStride,
               attributes: [{attribute: 'instanceWeights', format: 'float32', byteOffset: 0}]
             },
+            ...(filterValues
+              ? [
+                  {
+                    name: 'filterValues',
+                    stepMode: 'instance' as const,
+                    byteStride: filterValues.byteStride,
+                    attributes: [
+                      {attribute: 'filterValues', format: filterValues.format, byteOffset: 0}
+                    ]
+                  }
+                ]
+              : []),
             {
               name: 'instancePositions64Low',
               stepMode: 'instance',
@@ -864,6 +923,7 @@ export default class HeatmapLayer<
     if (this.props.positions) {
       const positions = getGPUVectorData(this.props.positions);
       const weights = getGPUVectorData(this.props.weights![0]);
+      const filterValues = this._getBorrowedFilterValues();
       const size = Math.max(1, this.getNumInstances()) * 12;
       if (!this.state.gpuPositionsLow || this.state.gpuPositionsLow.byteLength < size) {
         this.state.gpuPositionsLow?.destroy();
@@ -876,12 +936,14 @@ export default class HeatmapLayer<
         {
           instancePositions: positions.buffer as Buffer,
           instanceWeights: weights.buffer as Buffer,
-          instancePositions64Low: this.state.gpuPositionsLow
+          instancePositions64Low: this.state.gpuPositionsLow,
+          ...(filterValues && {filterValues: filterValues.buffer as Buffer})
         },
         {
           byteOffsets: {
             instancePositions: positions.byteOffset,
-            instanceWeights: weights.byteOffset
+            instanceWeights: weights.byteOffset,
+            ...(filterValues && {filterValues: filterValues.byteOffset})
           }
         }
       );

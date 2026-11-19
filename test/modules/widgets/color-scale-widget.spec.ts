@@ -67,9 +67,11 @@ test('_ColorScaleWidget respects screen filters and its attached viewport', asyn
     const style = getComputedStyle(panel);
     expect(style.backgroundColor).toBe('rgb(1, 2, 3)');
     expect(style.color).toBe('rgb(4, 5, 6)');
-    expect(style.overflowY).toBe('auto');
+    const scrollport = panel.querySelector('details')!;
+    expect(getComputedStyle(scrollport).overflowY).toBe('auto');
+    expect(getComputedStyle(scrollport).overscrollBehavior).toBe('contain');
     expect(style.pointerEvents).toBe('auto');
-    expect(style.maxHeight).toBe('376px');
+    expect(getComputedStyle(scrollport).maxHeight).toBe('360px');
     expect(getComputedStyle(widgetRoot).display).not.toBe('none');
 
     const disclosure = panel.querySelector('details')!;
@@ -123,16 +125,63 @@ test('_ColorScaleWidget labels multiple scales with readable names', async () =>
     stroked: true,
     getLineColor: {sql: "SCALE_QUANTILE(value, 2, PALETTE('#0000ff', '#ff0000'))"}
   });
-  const tester = new WidgetTester({layers: [layer], widgets: [new _ColorScaleWidget()]});
+  const widget = new _ColorScaleWidget();
+  const tester = new WidgetTester({layers: [layer], widgets: [widget]});
   try {
     await vi.waitFor(() => {
       const label = tester.findElements('.deck-widget-color-scale section')[0]?.textContent;
       expect(label).toContain('readings · fill color');
       expect(label).toContain('readings · line color');
-      expect(
-        tester.findElements('.deck-color-scale-heading small').map(item => item.textContent)
-      ).toEqual(['Continuous', 'Quantile']);
     });
+    const ramp = tester.findElements('.deck-color-scale-ramp')[0];
+    const {left, width} = ramp.getBoundingClientRect();
+    const hover = () =>
+      ramp.dispatchEvent(
+        new PointerEvent('pointermove', {
+          clientX: left + width * 0.123456,
+          bubbles: true
+        })
+      );
+    const tooltip = () => tester.findElements('.deck-color-scale-sample')[0];
+    hover();
+    await vi.waitFor(() =>
+      expect(tooltip()?.querySelector('.deck-color-scale-sample-value')?.textContent).toBe('1.2')
+    );
+    expect(tooltip().querySelector('small')?.textContent).toBe('continuous');
+    expect(tooltip().querySelector('.deck-color-scale-description')?.textContent).toContain(
+      'continuous ramp'
+    );
+    const color = tooltip().querySelector<HTMLElement>('.deck-color-scale-swatch')?.style
+      .backgroundColor;
+    ramp
+      .closest<HTMLElement>('section')
+      ?.style.setProperty('--menu-background', 'rgb(24 24 26 / 0.5)');
+    expect(getComputedStyle(tooltip()).backgroundColor).toBe(
+      'color(srgb 0.0941176 0.0941176 0.101961)'
+    );
+    widget.setProps({precision: 4});
+    await vi.waitFor(() =>
+      expect(tooltip()?.querySelector('.deck-color-scale-sample-value')?.textContent).toBe('1.235')
+    );
+    expect(
+      tooltip().querySelector<HTMLElement>('.deck-color-scale-swatch')?.style.backgroundColor
+    ).toBe(color);
+    expect(color).toMatch(/^rgb/);
+    const bin = tester.findElements('.deck-color-scale-bins > span')[0] as HTMLElement;
+    bin.focus();
+    await vi.waitFor(() => {
+      const focusedTooltip = tester.findElements(
+        '.deck-color-scale-sample[data-input="keyboard"]'
+      )[0];
+      expect(getComputedStyle(focusedTooltip).display).toBe('none');
+    });
+    ramp.dispatchEvent(new PointerEvent('pointerleave'));
+    await vi.waitFor(() => {
+      expect(tooltip()?.getAttribute('data-input')).toBe('keyboard');
+      expect(getComputedStyle(tooltip()).display).not.toBe('none');
+    });
+    bin.blur();
+    await vi.waitFor(() => expect(tooltip()).toBeUndefined());
   } finally {
     tester.destroy();
   }
@@ -152,9 +201,25 @@ test('_ColorScaleWidget formats numeric labels and aligns them below quantile br
       expect(breaks().map(item => item.textContent)).toEqual(['1.2', '6.8', '12'])
     );
     expect(breaks().map(item => item.style.left)).toEqual(['0%', '50%', '100%']);
-    expect(tester.findElements('.deck-color-scale-bins > span')).toHaveLength(2);
+    const bins = () => tester.findElements('.deck-color-scale-bins > span');
+    expect(bins()).toHaveLength(2);
+    expect(bins()[0].getAttribute('aria-label')).toMatch(/^1\.2 – 6\.8$/);
+    (bins()[0] as HTMLElement).focus();
+    await vi.waitFor(() =>
+      expect(tester.findElements('.deck-color-scale-sample-value')[0]?.textContent).toMatch(
+        /^1\.2 – 6\.8$/
+      )
+    );
+    const tooltip = tester.findElements('.deck-color-scale-sample')[0];
+    expect(tooltip.closest('details')).toBeNull();
+    expect(getComputedStyle(bins()[0].closest('details')!).overflowY).toBe('auto');
+    expect(tooltip.querySelector('small')?.textContent).toBe('quantile');
+    expect(tester.findElements('.deck-color-scale-description')[0]?.textContent).toContain(
+      'same number of observations'
+    );
     widget.setProps({precision: 4});
     expect(breaks().map(item => item.textContent)).toEqual(['1.235', '6.79', '12.35']);
+    expect(bins()[0].getAttribute('aria-label')).toMatch(/^1\.235 – 6\.79$/);
   } finally {
     tester.destroy();
   }
@@ -175,20 +240,23 @@ test('_ColorScaleWidget distinguishes nearby values at the default precision', a
   }
 });
 
-test('_ColorScaleWidget gives long quantile labels room and scrolls the row', async () => {
+test('_ColorScaleWidget keeps all quantile colors visible with long labels', async () => {
   const layer = makeReadings().clone({
     data: tableFromArrays({value: [1000000, 1000001, 1000002, 1000003, 1000004, 1000005]}),
     getFillColor: {sql: "SCALE_QUANTILE(value, 5, PALETTE('viridis'))"}
   });
   const tester = new WidgetTester({layers: [layer], widgets: [new _ColorScaleWidget()]});
-  /** Finds the scroll container once the scale has evaluated. */
+  /** Finds the quantile scale once it has evaluated. */
   const quantile = () => tester.findElements('.deck-color-scale-quantile')[0];
   try {
     await vi.waitFor(() => expect(quantile()).toBeDefined(), {timeout: 5000});
     const row = quantile();
+    expect(row.querySelector('.deck-color-scale-bins > span')?.getAttribute('aria-label')).toMatch(
+      /^1,000,000 – 1,000,001$/
+    );
     const labels = [...row.querySelectorAll('.deck-color-scale-breaks > span')];
     expect(labels).toHaveLength(6);
-    expect(row.scrollWidth).toBeGreaterThan(row.clientWidth);
+    expect(row.scrollWidth).toBe(row.clientWidth);
     for (let index = 1; index < labels.length; index++) {
       expect(labels[index - 1].getBoundingClientRect().right).toBeLessThan(
         labels[index].getBoundingClientRect().left
