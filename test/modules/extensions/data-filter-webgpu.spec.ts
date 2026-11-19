@@ -431,42 +431,46 @@ beforeEach(async context => {
   if (!(await getWebGPUTestDevice())) context.skip();
 });
 
-test('DataFilterExtension restores filter attributes when an Arrow Scatterplot re-enters row mode', async () => {
-  const fixture = await createFixture();
-  try {
-    const extensions = [new DataFilterExtension({filterSize: 1})];
-    const layer = new ScatterplotLayer({
-      ...baseProps,
-      data: [{value: 0.5}, {value: 2}],
-      getPosition: vectorFromArray(
-        [
-          [0, 0],
-          [30, 0]
-        ],
-        new FixedSizeList(2, new Field('values', new Float32(), false))
-      ),
-      getFilterValue: object => object.value,
-      filterRange: [0, 1],
-      extensions
-    });
-    const unfiltered = layer.clone({extensions: []});
-    const restored = unfiltered.clone({extensions});
-    for (const current of [layer, unfiltered, restored]) {
-      await fixture.render(current);
-      await vi.waitFor(() => expect(current.isLoaded).toBe(true));
-      const red = await fixture.render(current);
-      expect(red(64)).toBe(255);
-      if (current === unfiltered) {
-        expect(current.getAttributeManager()).toBeNull();
-        expect(red(94)).toBe(255);
-      } else {
-        expect(current.getAttributeManager()?.attributes.filterValues).toBeDefined();
-        expect(red(94)).toBe(0);
-        expect((await fixture.deck.pickObjectAsync({x: 64, y: 64}))?.index).toBe(0);
-        expect(await fixture.deck.pickObjectAsync({x: 94, y: 64})).toBeNull();
+test.each([true, false])(
+  'DataFilterExtension restores filter attributes when an Arrow Scatterplot re-enters row mode (with rows: %s)',
+  async withRows => {
+    const fixture = await createFixture();
+    try {
+      const extensions = [new DataFilterExtension({filterSize: 1})];
+      const layer = new ScatterplotLayer({
+        ...baseProps,
+        data: withRows ? [{value: 0.5}, {value: 2}] : [],
+        getPosition: vectorFromArray(
+          [
+            [0, 0],
+            [30, 0]
+          ],
+          new FixedSizeList(2, new Field('values', new Float32(), false))
+        ),
+        getFilterValue: (_object, {index}) => (index === 0 ? 0.5 : 2),
+        filterRange: [0, 1],
+        extensions
+      });
+      const unfiltered = layer.clone({extensions: []});
+      const restored = unfiltered.clone({extensions});
+      for (const current of [layer, unfiltered, restored]) {
+        await fixture.render(current);
+        await vi.waitFor(() => expect(current.isLoaded).toBe(true));
+        const red = await fixture.render(current);
+        expect(current.getNumInstances()).toBe(2);
+        expect(red(64)).toBe(255);
+        if (current === unfiltered) {
+          expect(current.getAttributeManager()).toBeNull();
+          expect(red(94)).toBe(255);
+        } else {
+          expect(current.getAttributeManager()?.attributes.filterValues).toBeDefined();
+          expect(red(94)).toBe(0);
+          expect((await fixture.deck.pickObjectAsync({x: 64, y: 64}))?.index).toBe(0);
+          expect(await fixture.deck.pickObjectAsync({x: 94, y: 64})).toBeNull();
+        }
       }
+    } finally {
+      await fixture.finalize();
     }
-  } finally {
-    await fixture.finalize();
   }
-});
+);

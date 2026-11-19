@@ -18,7 +18,9 @@ import {
   ACCESSOR_QUERIES_SYMBOL,
   COMPONENT_SYMBOL,
   LIFECYCLE,
-  Lifecycle
+  Lifecycle,
+  PROP_TYPES_SYMBOL,
+  ROW_ACCESSOR_COLUMNS_SYMBOL
 } from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
@@ -621,7 +623,17 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Returns the table used by column-aware layers while leaving the loaded prop intact. */
   protected getColumnData(): LayerData<unknown> {
-    return unwrapLoaderArrowResult(this.props.data) as LayerData<unknown>;
+    const data = unwrapLoaderArrowResult(this.props.data) as LayerData<unknown>;
+    if (Array.isArray(data) && data.length === 0) {
+      const columns = this.props[ROW_ACCESSOR_COLUMNS_SYMBOL];
+      for (const [name, column] of Object.entries(columns ?? {})) {
+        const type = this.props[PROP_TYPES_SYMBOL][name];
+        if (type?.type === 'accessor' && type.arrowWithExtensions) {
+          return {length: column.length};
+        }
+      }
+    }
+    return data;
   }
 
   /** Merges Deck and layer declarations by SQL name, with the layer taking precedence. */
