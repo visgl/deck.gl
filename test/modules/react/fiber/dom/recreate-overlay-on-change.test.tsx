@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 // Uses the real reconciler: a recreated overlay must receive the JSX layers through a
 // full commit into its new root, not only the `layers` prop.

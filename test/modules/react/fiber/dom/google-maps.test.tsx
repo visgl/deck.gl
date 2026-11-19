@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 // Uses the real reconciler and the real GoogleMapsOverlay against a fake `google.maps.Map`, so no
 // Google Maps API key or script is needed. The fake map never reports a rendering type, so the

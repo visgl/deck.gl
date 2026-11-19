@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 import {AmbientLight, OrthographicView as DeckOrthographicView} from '@deck.gl/core';
 import {DataFilterExtension, type DataFilterExtensionProps} from '@deck.gl/extensions';

@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 import {Component, StrictMode, type ReactNode} from 'react';
 import {cleanup, render} from '@testing-library/react';

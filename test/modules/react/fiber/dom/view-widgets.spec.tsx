@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 import {type Deck, type Layer, MapView, type View} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';

@@ -1,7 +1,6 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Copyright (c) Deckgl Fiber Renderer contributors
 
 // @vitest-environment node
 // Invariant: DeckGL roots never touch `document` or `window` during render. All DOM
