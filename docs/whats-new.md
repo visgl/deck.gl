@@ -47,8 +47,8 @@ _v10.0 should be thought of as a pre-release. We wanted to get the new capabilit
 
 ### Colors
 
-- **Normalized colors** — Set `normalizedColors` to use RGB values from 0 to 1.
-- **Color scales** — Map data values to colors.
+- [**Normalized colors**](./developer-guide/using-layers.md#normalized-colors) — Set `normalizedColors` to use RGB values from 0 to 1.
+- [**Color scales**](./api-reference/core/layer.md#sql-accessor-inputs) — Map Arrow values to colors with SQL.
 - [`_ColorScaleWidget`](./api-reference/widgets/color-scale-widget.md) 🧪 displays legends for SQL color scales on visible layers.
 
 ### React
