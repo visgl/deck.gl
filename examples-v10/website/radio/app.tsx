@@ -12,6 +12,7 @@ import {MVTLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
 import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
+import {SQRT} from '@math.gl/sql/math-functions';
 import {scaleLinear} from 'd3-scale';
 import {isArrowTable} from '@math.gl/core/arrow';
 import SearchBar from './search-bar';
@@ -244,7 +245,8 @@ export default function App({
       getHexagon: {sql: 'hex'},
       stroked: false,
       extruded: false,
-      // Interpolate the original coverage palette in square-root-count space.
+      sqlFunctions: [SQRT],
+      // Interpolate the coverage palette in square-root-count space.
       getFillColor: {
         sql: `\
           SCALE_COLOR(
