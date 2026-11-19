@@ -126,10 +126,16 @@ export default class ComponentState<ComponentT extends Component> {
       this._createAsyncPropData(propName, defaultValues[propName]);
       /** Whether this input finished resolving without waiting for a promise or stream. */
       const resolved = this._updateAsyncProp(propName, value);
-      // Use transformed value before notifying callbacks that read component props.
-      resolvedValues[propName] = this.getAsyncProp(propName);
-      if (resolved) {
-        this._onResolve(propName, resolvedValues[propName]);
+      if (!resolved && this.isAsyncPropLoading(propName)) {
+        // A pending transform needs the state-backed getter and the original input for cloning.
+        originalValues[propName] = value;
+        delete resolvedValues[propName];
+      } else {
+        // Use transformed value before notifying callbacks that read component props.
+        resolvedValues[propName] = this.getAsyncProp(propName);
+        if (resolved) {
+          this._onResolve(propName, resolvedValues[propName]);
+        }
       }
     }
 
@@ -193,8 +199,7 @@ export default class ComponentState<ComponentT extends Component> {
     }
 
     // else, normal, non-async value. Just store value for now
-    this._setPropValue(propName, value);
-    return true;
+    return this._setPropValue(propName, value);
   }
 
   // Whenever async props are changing, we need to make a copy of oldProps
@@ -226,7 +231,7 @@ export default class ComponentState<ComponentT extends Component> {
   }
 
   // Set normal, non-async value
-  private _setPropValue(propName: string, value: any) {
+  private _setPropValue(propName: string, value: any): boolean {
     // Save the current value before overwriting so that diffProps can access both
     this._freezeAsyncOldProps();
 
@@ -236,10 +241,15 @@ export default class ComponentState<ComponentT extends Component> {
         asyncProp,
         propName === 'data' ? unwrapLoaderArrowResult(value) : value
       );
+      if (propName === 'data' && value instanceof Promise) {
+        this._watchPromise(propName, value, true);
+        return false;
+      }
       asyncProp.resolvedValue = value;
       asyncProp.pendingLoadCount++;
       asyncProp.resolvedLoadCount = asyncProp.pendingLoadCount;
     }
+    return true;
   }
 
   // Set a just resolved async value, calling onAsyncPropUpdates if value changes asynchronously
@@ -260,13 +270,13 @@ export default class ComponentState<ComponentT extends Component> {
   }
 
   // Tracks a promise, sets the prop when loaded, handles load count
-  private _watchPromise(propName: string, promise: Promise<any>) {
+  private _watchPromise(propName: string, promise: Promise<any>, processed = false) {
     const asyncProp = this.asyncProps[propName];
     if (asyncProp) {
       asyncProp.pendingLoadCount++;
       const loadCount = asyncProp.pendingLoadCount;
       promise
-        .then(data => {
+        .then(async data => {
           if (!this.component) {
             // This component state has been finalized
             return;
@@ -279,10 +289,18 @@ export default class ComponentState<ComponentT extends Component> {
           if (propName === 'data' && isAsyncIterable(data)) {
             return this._resolveAsyncIterable(propName, data, loadCount);
           }
-          data = this._postProcessValue(
-            asyncProp,
-            propName === 'data' ? unwrapLoaderArrowResult(data) : data
-          );
+          if (!processed) {
+            data = this._postProcessValue(
+              asyncProp,
+              propName === 'data' ? unwrapLoaderArrowResult(data) : data
+            );
+            if (propName === 'data' && data instanceof Promise) {
+              data = await data;
+              if (!this.component || loadCount !== asyncProp.pendingLoadCount) {
+                return;
+              }
+            }
+          }
           this._setAsyncPropValue(propName, data, loadCount);
           if (this.component && loadCount === asyncProp.pendingLoadCount) {
             this._onResolve(propName, data);
@@ -290,6 +308,10 @@ export default class ComponentState<ComponentT extends Component> {
         })
         .catch(error => {
           if (this.component && loadCount === asyncProp.pendingLoadCount) {
+            if (propName === 'data') {
+              asyncProp.resolvedLoadCount = loadCount;
+              this.onAsyncPropUpdated(propName, asyncProp.resolvedValue);
+            }
             this._onError(propName, error);
           }
         });
@@ -321,6 +343,7 @@ export default class ComponentState<ComponentT extends Component> {
     let arrowBatches: import('apache-arrow').RecordBatch[] = [];
     let lastResult: unknown = data;
     let chunkKind: 'rows' | 'arrow' | undefined;
+    let transforming = false;
 
     try {
       for await (const chunk of iterable) {
@@ -387,7 +410,21 @@ export default class ComponentState<ComponentT extends Component> {
             ? chunk.data
             : chunk;
         if (dataTransform) {
-          data = dataTransform(rows, data) as any[];
+          const result = dataTransform(rows, data);
+          if (result instanceof Promise) {
+            transforming = true;
+            if (asyncProp.resolvedLoadCount === loadCount) {
+              asyncProp.resolvedLoadCount--;
+              this.onAsyncPropUpdated(propName, lastResult);
+            }
+            data = await result;
+            transforming = false;
+            if (!this.component || loadCount !== asyncProp.pendingLoadCount) {
+              return;
+            }
+          } else {
+            data = result;
+          }
         } else {
           data = data.concat(rows);
         }
@@ -406,15 +443,19 @@ export default class ComponentState<ComponentT extends Component> {
         }
       }
 
-      if (this.component && loadCount === asyncProp.pendingLoadCount && !chunkKind) {
-        // An empty replacement stream still clears old data and finishes loading.
-        this._setAsyncPropValue(propName, data, loadCount);
-      }
       if (this.component && loadCount === asyncProp.pendingLoadCount) {
+        // An empty replacement stream still clears old data and finishes loading.
+        if (!chunkKind) {
+          this._setAsyncPropValue(propName, lastResult, loadCount);
+        }
         this._onResolve(propName, lastResult);
       }
     } catch (error) {
       if (this.component && loadCount === asyncProp.pendingLoadCount) {
+        if (transforming) {
+          asyncProp.resolvedLoadCount = loadCount;
+          this.onAsyncPropUpdated(propName, lastResult);
+        }
         this._onError(propName, error as Error);
       }
     }

@@ -283,3 +283,50 @@ test('layer SQL functions override Deck declarations and changing them reevaluat
     device.destroy();
   }
 });
+
+test.each(['direct', 'promise', 'url', 'query'])(
+  'a %s data transform keeps the layer loading through SQL accessors',
+  async input => {
+    const device = new NullDevice({});
+    const manager = new LayerManager(device, {viewport: new Viewport()});
+    const source = tableFromArrays({x: [1, 2], y: [3, 4]});
+    const transformed = tableFromArrays({x: [5, 6], y: [7, 8]});
+    const gate = Promise.withResolvers<Table>();
+    const transform = vi.fn((_data: Table) => gate.promise);
+    const onDataLoad = vi.fn();
+    const layer = new QueryLayer({
+      data: input === 'url' ? 'data.csv' : input === 'promise' ? Promise.resolve(source) : source,
+      query: input === 'query' ? 'SELECT x, y FROM data WHERE x = 2' : null,
+      fetch: () => Promise.resolve(source),
+      dataTransform: transform,
+      getPosition: {sql: 'FLOAT64x2(x, y)'},
+      onDataLoad
+    });
+    try {
+      manager.setLayers([layer]);
+      await vi.waitFor(() => expect(transform).toHaveBeenCalledOnce());
+      expect(layer.isLoaded).toBe(false);
+      expect(onDataLoad).not.toHaveBeenCalled();
+      expect(layer.props.data).not.toBeInstanceOf(Promise);
+
+      if (input === 'query') {
+        expect(transform.mock.calls[0]![0].numRows).toBe(1);
+      }
+      gate.resolve(transformed);
+      await vi.waitFor(() => expect(onDataLoad).toHaveBeenCalledOnce());
+      manager.updateLayers();
+      expect(layer.isLoaded).toBe(false);
+      await vi.waitFor(() => {
+        manager.updateLayers();
+        expect(layer.isLoaded).toBe(true);
+        expect(Array.from((layer.props.getPosition as Vector).get(0))).toEqual([5, 7]);
+      });
+      expect(layer.props.data).toBe(transformed);
+      expect(onDataLoad).toHaveBeenCalledOnce();
+      expect(onDataLoad.mock.calls[0]![0]).toBe(transformed);
+    } finally {
+      manager.finalize();
+      device.destroy();
+    }
+  }
+);
