@@ -9,7 +9,9 @@ import {build} from 'esbuild';
 import {fileURLToPath} from 'node:url';
 import {describe, expect, it} from 'vitest';
 
-const WRAPPERS = fileURLToPath(new URL('../../../../../modules/react/src/wrappers/', import.meta.url));
+const WRAPPERS = fileURLToPath(
+  new URL('../../../../../modules/react/src/wrappers/', import.meta.url)
+);
 
 // Everything a deck.gl app already ships, so the sizes count only the layer module and the wrappers.
 const EXTERNAL = ['react', 'react/*', '@deck.gl/core', '@luma.gl/*', '@loaders.gl/*', '@math.gl/*'];

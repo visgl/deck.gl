@@ -131,32 +131,32 @@ describe('DeckGL Component Tests', () => {
     it.each([
       {DeckGL: MapboxDeckGL, createOverlay: providerMocks.mapboxOverlay, name: 'Mapbox'},
       {DeckGL: MapLibreDeckGL, createOverlay: providerMocks.maplibreOverlay, name: 'MapLibre'}
-    ])('recreates the $name overlay when interleaved changes', ({
-      DeckGL: ProviderDeckGL,
-      createOverlay
-    }) => {
-      const onDeckChange = vi.fn();
-      const child = <div>Content</div>;
-      const {rerender} = render(
-        <ProviderDeckGL interleaved={false} onDeckChange={onDeckChange}>
-          {child}
-        </ProviderDeckGL>
-      );
-      const firstRoot = mockCreateRoot.mock.calls[0][0] as HTMLDivElement;
-      const firstOverlay = createOverlay.mock.results[0]?.value;
+    ])(
+      'recreates the $name overlay when interleaved changes',
+      ({DeckGL: ProviderDeckGL, createOverlay}) => {
+        const onDeckChange = vi.fn();
+        const child = <div>Content</div>;
+        const {rerender} = render(
+          <ProviderDeckGL interleaved={false} onDeckChange={onDeckChange}>
+            {child}
+          </ProviderDeckGL>
+        );
+        const firstRoot = mockCreateRoot.mock.calls[0][0] as HTMLDivElement;
+        const firstOverlay = createOverlay.mock.results[0]?.value;
 
-      rerender(
-        <ProviderDeckGL interleaved onDeckChange={onDeckChange}>
-          {child}
-        </ProviderDeckGL>
-      );
-      const secondOverlay = createOverlay.mock.results[1]?.value;
+        rerender(
+          <ProviderDeckGL interleaved onDeckChange={onDeckChange}>
+            {child}
+          </ProviderDeckGL>
+        );
+        const secondOverlay = createOverlay.mock.results[1]?.value;
 
-      expect(createOverlay).toHaveBeenCalledTimes(2);
-      expect(createOverlay).toHaveBeenLastCalledWith({interleaved: true});
-      expect(mockUnmountAtNode).toHaveBeenCalledExactlyOnceWith(firstRoot);
-      expect(onDeckChange.mock.calls).toEqual([[firstOverlay], [null], [secondOverlay]]);
-    });
+        expect(createOverlay).toHaveBeenCalledTimes(2);
+        expect(createOverlay).toHaveBeenLastCalledWith({interleaved: true});
+        expect(mockUnmountAtNode).toHaveBeenCalledExactlyOnceWith(firstRoot);
+        expect(onDeckChange.mock.calls).toEqual([[firstOverlay], [null], [secondOverlay]]);
+      }
+    );
 
     it.each([
       {DeckGL: MapboxDeckGL, createOverlay: providerMocks.mapboxOverlay, name: 'Mapbox'},
@@ -599,20 +599,20 @@ describe('DeckGL Component Tests', () => {
     it.each([
       {DeckGL: MapboxDeckGL, createOverlay: providerMocks.mapboxOverlay, name: 'Mapbox'},
       {DeckGL: MapLibreDeckGL, createOverlay: providerMocks.maplibreOverlay, name: 'MapLibre'}
-    ])('follows the $name overlay when it is recreated', ({
-      DeckGL: ProviderDeckGL,
-      createOverlay
-    }) => {
-      const ref = vi.fn();
-      const {rerender, unmount} = render(<ProviderDeckGL interleaved={false} ref={ref} />);
-      const firstOverlay = createOverlay.mock.results[0]?.value;
+    ])(
+      'follows the $name overlay when it is recreated',
+      ({DeckGL: ProviderDeckGL, createOverlay}) => {
+        const ref = vi.fn();
+        const {rerender, unmount} = render(<ProviderDeckGL interleaved={false} ref={ref} />);
+        const firstOverlay = createOverlay.mock.results[0]?.value;
 
-      rerender(<ProviderDeckGL interleaved ref={ref} />);
-      const secondOverlay = createOverlay.mock.results[1]?.value;
-      unmount();
+        rerender(<ProviderDeckGL interleaved ref={ref} />);
+        const secondOverlay = createOverlay.mock.results[1]?.value;
+        unmount();
 
-      expect(ref.mock.calls).toEqual([[firstOverlay], [null], [secondOverlay], [null]]);
-    });
+        expect(ref.mock.calls).toEqual([[firstOverlay], [null], [secondOverlay], [null]]);
+      }
+    );
   });
 
   describe('Canvas ref timing', () => {
