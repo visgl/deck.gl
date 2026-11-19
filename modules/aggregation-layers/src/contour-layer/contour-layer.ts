@@ -144,6 +144,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     BinOptions & {
       /** Owned geometry for each numeric threshold. */
       gpuIsolines?: GPUIsolines[];
+      /** Distinguishes sublayers that borrow different output buffers. */
+      isolineGeneration?: number;
       /** The output columns need to be regenerated before drawing. */
       isolinesDirty?: boolean;
       // Aggregator result
@@ -342,6 +344,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       this.setState({contourData: null});
     }
 
+    aggregator.setProps({readback: !this._getGPUIsolineCellCount()});
     return aggregatorChanged;
   }
 
@@ -449,19 +452,24 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   /** Dispose of the current GPU output frame. */
   private _releaseGPUIsolines(): void {
-    for (const geometry of this.state.gpuIsolines || []) geometry.destroy();
+    const geometries = this.state.gpuIsolines;
+    if (!geometries) return;
     this.state.gpuIsolines = undefined;
+    // LayerManager reconciles and finalizes the borrowing sublayers synchronously.
+    queueMicrotask(() => {
+      for (const geometry of geometries) geometry.destroy();
+    });
   }
 
   /** GPU geometry uses fixed slots for two disconnected segments per marching cell. */
   private _getGPUIsolineCellCount(): number {
     const {gpuGeometry, pickable, contours, extensions, _subLayerProps} = this.props;
-    const {aggregatorType, binIdRange, aggregator} = this.state;
+    const {aggregatorType, binIdRange} = this.state;
     if (
       !gpuGeometry ||
       pickable ||
       aggregatorType !== 'webgpu' ||
-      !aggregator.binCount ||
+      !this.getNumInstances() ||
       !contours.length ||
       contours.some(contour => !Number.isFinite(contour.threshold)) ||
       extensions.some(extension => !isInputFilter(extension)) ||
@@ -482,6 +490,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       this.state.gpuIsolines[0].cellCount !== cellCount
     ) {
       this._releaseGPUIsolines();
+      this.state.isolineGeneration = (this.state.isolineGeneration ?? 0) + 1;
       this.state.gpuIsolines = contours.map(() => new GPUIsolines(this.context.device, cellCount));
     }
     this.state.isolinesDirty = true;
@@ -496,17 +505,20 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const normalized = this.usesNormalizedColors();
     return this.state.gpuIsolines.map(({sourcePositions, targetPositions, widths}, index) => {
       const {color} = contours[index];
-      return new LineLayer(this.getSubLayerProps({id: `isolines-${index}`}), {
-        sourcePositions,
-        targetPositions,
-        widths,
-        getColor: color ? (normalized ? toByteColor(color) : color) : DEFAULT_COLOR,
-        widthUnits: 'pixels',
-        coordinateSystem: 'cartesian',
-        coordinateOrigin: [0, 0, 0],
-        modelMatrix,
-        extensions: []
-      });
+      return new LineLayer(
+        this.getSubLayerProps({id: `isolines-${this.state.isolineGeneration}-${index}`}),
+        {
+          sourcePositions,
+          targetPositions,
+          widths,
+          getColor: color ? (normalized ? toByteColor(color) : color) : DEFAULT_COLOR,
+          widthUnits: 'pixels',
+          coordinateSystem: 'cartesian',
+          coordinateOrigin: [0, 0, 0],
+          modelMatrix,
+          extensions: []
+        }
+      );
     });
   }
 

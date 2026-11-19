@@ -124,6 +124,10 @@ test('ContourLayer generates WebGPU isolines without reading bins to the CPU', a
   const readSegments = async () => {
     const line = manager.getLayers().find(item => item instanceof LineLayer) as LineLayer;
     expect(line).toBeDefined();
+    await vi.waitFor(() => {
+      expect(line.isLoaded).toBe(true);
+      expect(line.getNumInstances()).toBe(line.props.sourcePositions!.length);
+    });
     const {buffer} = getGPUVectorData(line.props.sourcePositions!);
     const output = new Float32Array((await buffer.readAsync()).buffer);
     const segments: string[] = [];
@@ -170,7 +174,16 @@ test('ContourLayer generates WebGPU isolines without reading bins to the CPU', a
     draw(gpuGeometry);
     expect(await readSegments()).toHaveLength(4);
 
-    const cpu = gpuGeometry.clone({gpuAggregation: false});
+    const originalLines = manager.getLayers().find(item => item instanceof LineLayer)!;
+    const resized = gpuGeometry.clone({contours: [{threshold: 1}, {threshold: 2}]});
+    manager.setLayers([resized]);
+    draw(resized);
+    const resizedLines = manager.getLayers().filter(item => item instanceof LineLayer);
+    expect(resizedLines).toHaveLength(2);
+    expect(resizedLines.map(line => line.id)).not.toContain(originalLines.id);
+    expect(await readSegments()).toHaveLength(4);
+
+    const cpu = resized.clone({gpuAggregation: false});
     manager.setLayers([cpu]);
     expect(manager.getLayers().some(item => item instanceof PathLayer)).toBe(true);
     expect(manager.getLayers().some(item => item instanceof LineLayer)).toBe(false);
