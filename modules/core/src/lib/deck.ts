@@ -1582,8 +1582,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this._createdDevice = {
       canvas,
       device,
-      // An OffscreenCanvas in multi-canvas mode is always Deck's own.
-      ownsCanvas: canvas === this._ownedCanvas || !(canvas instanceof HTMLCanvasElement)
+      // Decided by where the canvas came from, not by its class: a canvas from another window
+      // (an iframe) fails `instanceof HTMLCanvasElement` in this one. Multi-canvas mode always
+      // renders to an OffscreenCanvas that Deck created.
+      ownsCanvas: this._isMultiCanvasMode() || canvas === this._ownedCanvas
     };
     return device;
   }
