@@ -32,7 +32,7 @@ const sidebars = {
       items: [
         withStatus('arc-layer', 'started'),
         'bitmap-layer',
-        'contour-layer',
+        withStatus('contour-layer', 'ready'),
         'geojson-layer-polygons',
         'geojson-layer-paths',
         withStatus('global-grids', 'ready'),
