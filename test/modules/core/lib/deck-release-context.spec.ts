@@ -149,3 +149,27 @@ test('_releaseCanvasContext keeps a context that another Deck borrowed', async (
   await nextTask();
   expect(gl.isContextLost()).toBe(true);
 });
+
+test('Deck#finalize leaves a canvas from another window to the app', async () => {
+  const iframe = document.createElement('iframe');
+  document.body.appendChild(iframe);
+  const iframeDocument = iframe.contentDocument!;
+  const canvas = iframeDocument.createElement('canvas');
+  Object.assign(canvas, SIZE);
+  iframeDocument.body.appendChild(canvas);
+  expect(canvas instanceof HTMLCanvasElement, 'a canvas from another realm').toBe(false);
+
+  const deck = await createDeck({canvas});
+  const gl = getContext(deck);
+  deck.finalize();
+  await nextTask();
+  expect(gl.isContextLost(), 'the app may reuse its canvas').toBe(false);
+
+  // A new Deck on the same canvas still renders.
+  const next = await createDeck({canvas});
+  expect(getContext(next)).toBe(gl);
+  expect(gl.isContextLost()).toBe(false);
+  next.finalize();
+  gl.getExtension('WEBGL_lose_context')?.loseContext();
+  iframe.remove();
+});
