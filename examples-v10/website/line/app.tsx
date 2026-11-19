@@ -7,7 +7,7 @@ import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
-import {isArrowTable} from '@math.gl/arrow';
+import {isArrowTable} from '@math.gl/core/arrow';
 import {JSONTableLoader} from '@loaders.gl/tables/json';
 
 import type {PickingInfo, MapViewState, Widget} from '@deck.gl/core';
@@ -80,7 +80,7 @@ export default function App({
         data: airports,
         loaders: [JSONTableLoader],
         radiusScale: 20,
-        getPosition: {sql: 'FLOAT64x2(LIST_EXTRACT(coordinates, 1), LIST_EXTRACT(coordinates, 2))'},
+        getPosition: {sql: 'ARRAY_FLOAT64(coordinates[1], coordinates[2])'},
         getFillColor: [255, 140, 0],
         getRadius: {
           sql: "CASE WHEN type = 'major' THEN 100 WHEN type = 'small' THEN 30 ELSE 60 END"
@@ -101,27 +101,27 @@ export default function App({
         opacity: 0.8,
         getSourcePosition: {
           sql: `\
-            FLOAT64x3(
-              LIST_EXTRACT(start, 1),
-              LIST_EXTRACT(start, 2),
-              LIST_EXTRACT(start, 3)
+            ARRAY_FLOAT64(
+              start[1],
+              start[2],
+              start[3]
             )`
         },
         getTargetPosition: {
           sql: `\
-            FLOAT64x3(
-              LIST_EXTRACT("end", 1),
-              LIST_EXTRACT("end", 2),
-              LIST_EXTRACT("end", 3)
+            ARRAY_FLOAT64(
+              "end"[1],
+              "end"[2],
+              "end"[3]
             )`
         },
         getColor: {
           sql: `\
             RGBA8(
-              1 - LIST_EXTRACT(start, 3) / 5000,
-              128 * LIST_EXTRACT(start, 3) / (255 * 10000),
-              LIST_EXTRACT(start, 3) / 10000,
-              1 - LIST_EXTRACT(start, 3) / 10000
+              1 - start[3] / 5000,
+              128 * start[3] / (255 * 10000),
+              start[3] / 10000,
+              1 - start[3] / 10000
             )`
         },
         getWidth: lineWidth,

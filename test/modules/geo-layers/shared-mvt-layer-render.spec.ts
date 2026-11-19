@@ -8,7 +8,7 @@ import {expect, test, vi} from 'vitest';
 import {Tileset2D} from '@deck.gl/geo-layers';
 import {MVT2DLayer, Tile2DLayer} from '@deck.gl/proposals/layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {lngLatToWorld} from '@math.gl/web-mercator';
+import {lngLatToWorld} from '@math.gl/geospatial/web-mercator';
 
 /** Simultaneous projection modes must draw and pick regardless of activation order. */
 test('one MVT layer renders simultaneous map and globe views in either order', async () => {

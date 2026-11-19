@@ -2,115 +2,79 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
-## Unreleased
+## deck.gl v10
 
-### Contour compute aggregation
+Target release date: EOY 2026. Alpha releases available.
 
-On WebGPU devices, [ContourLayer](./api-reference/aggregation-layers/contour-layer.md#compute-aggregation) aggregates points in a compute shader before generating contours.
+v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, SQL expression powered big data library. It brings support for non-mercator projection and initial hooks for advanced GPU compute integration.
 
-### Optional graph aggregation
+_v10.0 should be thought of as a pre-release. We wanted to get the new capabilities into the hands of users as soon as possible, which means that some APIs have not yet settled and may change in v10.1._
 
-The experimental [`_GraphScreenGridAggregator`](./api-reference/aggregation-layers/aggregator.md#graphscreengridaggregator)
-lets applications customize ScreenGrid aggregation using GPU graphs.
+*These highlights describe goals for v10. Some features are still in development.*
+
+### Heatmap filtering
+
+- `DataFilterExtension` filters the points that contribute to `HeatmapLayer` on WebGPU.
+- `MaskExtension` limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
 
 
-### CARTO heatmap palettes
+### GPU
 
-CARTO HeatmapTileLayer accepts normalized plain-array palettes with Deck’s `normalizedColors` option.
+- **WebGPU** 🚧 — WebGPU is now the default renderer with full feature support.
+- **GPU vectors** — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph.
 
-### Normalized color inputs
+### Apache Arrow
 
-Deck's [`normalizedColors`](./api-reference/core/deck.md#normalizedcolors) option enables
-0–1 plain-array color constants and callbacks for top-level ScatterplotLayer, LineLayer, and
-ArcLayer, PathLayer, PolygonLayer, SolidPolygonLayer, and GeoJsonLayer, as well as [View clear colors](./api-reference/core/view.md#clearcolor) and
-[top-level layer highlights](./api-reference/core/layer.md#highlightcolor). Top-level bitmap tints,
-bitmap transparency, and text outlines also use the setting.
-IconLayer, PointCloudLayer, and ColumnLayer also honor this setting for color accessors.
-GridLayer, HexagonLayer, ScreenGridLayer, and HeatmapLayer accept normalized palette entries,
-and ContourLayer accepts normalized line and band colors.
+- **Arrow data** — The Layer `data` prop now supports Arrow tables
+- **Arrow loading** — `data` URLs now load Arrow tables instead of JS arrays.
+- **Arrow streaming** — Layer data prop accepts `AsyncIterable<arrow.RecordBatch>` and incrementally transforms and renders RecordBatches as they arrive.
+- **Arrow accessors** — Layer accessors now support Arrow columns (`arrow.Vector`s)
+- **GeoArrow** 🚧 — Full support for GeoArrow and GeoParquet source data and `geoarrow.union` and `geoarrow.wkb` rendering.
 
-SimpleMeshLayer and ScenegraphLayer instance colors honor Deck’s `normalizedColors` option.
-Top-level TextLayer glyph, background, and border colors honor Deck’s `normalizedColors` option.
+### SQL
 
-### Experimental batch loading
+- **SQL table transforms** — Use SQL to transform Arrow tables after loading.
+- **SQL accessors** — Use SQL select expressions to extract layer attributes from your loaded data.
+- **SQL query pushdowns** — data loaders skip work your query doesn’t need (such as loading unused columns, rows, etc from the source data)
 
-Layers support `_dataLoadOptions: 'auto' | 'batched' | 'snapshots'` for complete URL loading,
-appended batches, or replacement Arrow snapshots. `onDataProgress` reports each accepted batch.
-Streams support Arrow record batches and tables without converting Arrow
-columns to rows. See [Layer](./api-reference/core/layer.md#_dataloadoptions).
+### Projections
 
-### Arrow accessor inputs
+- **Non Web Mercator projections**  —  [`CustomProjectionView`](./api-reference/core/custom-projection-view.md) renders longitude/latitude data in a planar projection specified by an EPSG code or PROJ string.
+- **Source data CRS** is preserved during loading and projected automatically
+- **Curved geometry** — Set `resolution` to subdivide paths, polygons, and bitmaps so they follow the projection’s curves.
 
-Layers with column support accept Arrow vectors directly through their existing accessors,
-including positions, colors, and scalar values. Numeric rendering inputs use shared luma.gl
-conversion; cell layers preserve source-feature identity while expanding identifiers.
-See [Using with Arrow](./developer-guide/using-with-arrow.md) for shared rules and each
-layer's prop descriptions for supported inputs.
+### High Dynamic Range (HDR)
 
-### Async CPU aggregation of GPU inputs
+- **Normalized colors** — Set `normalizedColors` to use RGB values from 0 to 1.
 
-[`ReadbackAggregator`](./api-reference/aggregation-layers/cpu-aggregator.md#readbackaggregator) runs CPU aggregation on GPUVector inputs, so you can compare CPU and GPU timings on the same buffers.
+### React
 
-### Hexagon compute aggregation
+The `@deck.gl/react` module is now a deep React Fiber integration.
 
-On WebGPU devices, [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md#compute-aggregation)
-aggregates in compute shaders, including with automatic domains, picking, quantile and ordinal
-scales, percentiles and extensions.
+- **React components** 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
+- **Map integrations** 🚧 — Use dedicated React entry points for Mapbox, MapLibre, and Google Maps.
+- **Migration** 🚧 — The previous React API moves to `@deck.gl/react/legacy`.
 
-### ScreenGrid and Grid compute rendering features
+### Layers
 
-Compute aggregation now supports automatic domains, picking metadata, accessor-based
-extensions, and Grid distribution scales and percentile filtering. Explicit-domain rendering
-continues to consume GPU vectors directly; CPU-facing metadata uses asynchronous snapshots.
+- [`TextLayer`](./api-reference/layers/text-layer.md) 🚧 uses `@luma.gl/text/fonts` for bitmap and SDF font atlas generation and glyph packing. Existing font settings and the custom font renderer hook remain supported.
 
-### Grid compute aggregation
+### Tile Layers
 
-`GridLayer` supports two-channel compute aggregation with explicit color and elevation domains.
-Color and elevation results stay in GPU vectors consumed directly by the cell layer. The
-implementation shares column preparation and reduction kernels with ScreenGrid. See
-[GridLayer](./api-reference/aggregation-layers/grid-layer.md#compute-aggregation).
+- `Tile2DLayer` and `MVT2DLayer` 🚧 can now share a `Tileset2D` and reuse loaded tiles across layers and views.
 
-### ScreenGrid compute aggregation
+### Aggregation Layers
 
-`ScreenGridLayer` can aggregate on WebGPU using an explicit `colorDomain`, with
-picking and extensions disabled. SUM, MEAN, MIN, MAX, and COUNT produce GPUVector
-outputs consumed directly by the cell layer. See [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#compute-aggregation).
+- [GridLayer](./api-reference/aggregation-layers/grid-layer.md), [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md), [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md), and [ContourLayer](./api-reference/aggregation-layers/contour-layer.md) now accept [custom aggregators](./api-reference/aggregation-layers/aggregator.md) with GPUVector results.
+- These layers now support clipping, brushing, and numeric filtering with [GPUVector inputs](./api-reference/aggregation-layers/aggregator.md#gpu-column-extensions).
 
-### Custom aggregators
+### Extensions
 
-GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer now accept custom aggregator
-instances. Custom aggregators can publish GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and
-channel values. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
-result layouts, and supported scales and contours.
+- [MaskExtension](./api-reference/extensions/mask-extension.md) now supports [GlobeView](./api-reference/core/globe-view.md).
 
-### luma.gl v10 alpha.13
+### Examples
 
-The v10 packages use luma.gl alpha.13. Layer models delegate typed vector and
-constant-buffer binding and render-target format tracking to luma.gl. WebGPU
-layer draws restore dynamic render-pass parameters after drawing. Custom shader
-plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-guide.md).
-
-### deck.gl v10 examples (Experimental)
-
-The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples-v10/v10/arrow-path-layer), [riverfront weather](/examples-v10/v10/weather), and [GPU graph exploration](/examples-v10/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
-
-### Extension updates
-
-[`MaskExtension`](./api-reference/extensions/mask-extension.md) supports up to four masks on WebGPU in map and globe views, including inverted masks and picking.
-
-Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) with `countItems` to report how many objects pass numeric or category filters.
-
-### Custom projections (Experimental)
-
-[`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/geospatial/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
-
-Custom projection inverse conversions that return non-finite coordinates are reported as invalid, consistent with conversions that throw.
-
-Paths and polygons can follow curved projected edges with the experimental [`_projectionTolerance`](./api-reference/layers/path-layer.md#_projectiontolerance) prop.
-
-### Layer source CRS (Experimental)
-
-Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
+- Examples have been updated to use Arrow loading and SQL accessors.
 
 ## deck.gl v9.4
 
@@ -119,10 +83,6 @@ Release date: September 5, 2026
 deck.gl v9.4 is expected to be the final release in the v9 series. It brings together a collection of completed improvements focused on performance, stability, and usability, and is intended to be a highly compatible, highly recommended upgrade for all v9 applications.
 
 Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
-
-### Terrain fitting
-
-Use [`TerrainExtension`](./api-reference/extensions/terrain-extension.md) with `terrainDrawMode: 'offset'` to fit objects to the uppermost terrain surface. Texture draping remains WebGL-only.
 
 ### WebGPU
 

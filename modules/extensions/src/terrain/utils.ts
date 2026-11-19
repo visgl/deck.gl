@@ -16,7 +16,11 @@ export function createRenderTarget(
 ) {
   return device.createFramebuffer({
     id: opts.id,
-    depthStencilAttachment: opts.depth ? 'depth32float' : undefined,
+    depthStencilAttachment: opts.depth
+      ? 'depth32float'
+      : device.type === 'webgpu'
+        ? 'depth24plus'
+        : undefined,
     colorAttachments: [
       device.createTexture({
         id: opts.id,

@@ -4,7 +4,7 @@
 
 import React, {Component} from 'react';
 import styled from 'styled-components';
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App from 'v10-website-examples/icon/app';
 
@@ -42,12 +42,6 @@ const IconDemoContainer = styled.div`
 class IconDemo extends Component {
   /** Title shown above the example controls. */
   static title = 'Meteorites Landings';
-
-  /** Data sources loaded before rendering the demo. */
-  static data = {
-    url: `${DATA_URI}/meteorites.txt`,
-    worker: '/workers/meteorites-decoder.js'
-  };
 
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/icon`;
@@ -98,9 +92,7 @@ class IconDemo extends Component {
           key={this.props.device?.type}
           device={this.props.device}
           {...otherProps}
-          data={data}
-          iconAtlas={`${DATA_URI}/../examples/icon/location-icon-atlas.png`}
-          iconMapping={`${DATA_URI}/../examples/icon/location-icon-mapping.json`}
+          onDataLoad={count => this.props.onStateChange({count})}
           showCluster={params.cluster.value}
         />
       </IconDemoContainer>

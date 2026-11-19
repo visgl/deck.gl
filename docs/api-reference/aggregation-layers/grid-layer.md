@@ -564,7 +564,7 @@ Notes:
 
 - The built-in WebGPU compute path requires buffers with `STORAGE` or `COPY_SRC` usage.
 - Use positions in the view's coordinate system for custom views.
-- The compute path requires a configuration without extensions or CPU position preprojection.
+- Positions must not require CPU preprojection. See [GPU column extensions](./aggregator.md#gpu-column-extensions) for supported extensions.
 
 ## Source
 

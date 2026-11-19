@@ -18,11 +18,15 @@ struct TriangleVaryings {
 @vertex
 fn vertexMain(attributes: TriangleAttributes) -> TriangleVaryings {
   var output: TriangleVaryings;
-  output.position = project_position_to_clipspace(
+  geometry.worldPosition = attributes.positions;
+  let projectedPosition = project_position_to_clipspace_and_commonspace(
     attributes.positions,
     vec3<f32>(0.0),
     vec3<f32>(0.0)
   );
+  geometry.position = projectedPosition.commonPosition;
+  output.position = projectedPosition.clipPosition;
+  DECKGL_FILTER_GL_POSITION(&output.position, geometry);
   // WebGPU render-target textures use a top-left origin.
   output.textureCoordinates = vec2<f32>(attributes.texCoords.x, 1.0 - attributes.texCoords.y);
 
@@ -60,6 +64,7 @@ fn fragmentMain(varyings: TriangleVaryings) -> @location(0) vec4<f32> {
   }
 
   color.a *= min(weight * varyings.intensityMinimum, 1.0) * layer.opacity;
+  DECKGL_FILTER_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
 }
 `;

@@ -8,6 +8,7 @@ import {testLayer, testLayerAsync, generateLayerTests, device} from '@deck.gl/te
 import {LayerManager, MapView, _GPUVectorModel as GPUVectorModel} from '@deck.gl/core';
 import {Buffer} from '@luma.gl/core';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
+import {DataFilterExtension} from '@deck.gl/extensions';
 import {default as TriangleLayer} from '@deck.gl/aggregation-layers/heatmap-layer/triangle-layer';
 import {
   maxWeightUniforms,
@@ -54,7 +55,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             props: {
               data: {attributes: {positions, texCoords}},
               vertexCount: 4,
-              colorDomain: [0, 1],
+              getColorDomain: () => [0, 1],
               aggregationMode: 0,
               threshold: 0,
               intensity: 1,
@@ -407,6 +408,42 @@ test('HeatmapLayer#binaryData', () => {
   });
 });
 
+test('HeatmapLayer counts current categories after loading on WebGPU', async ({skip}) => {
+  const gpu = await getWebGPUTestDevice();
+  if (!gpu) return skip();
+  const manager = new LayerManager(gpu, {viewport: viewport0});
+  const counts: number[] = [];
+  const errors: Error[] = [];
+  manager.setProps({onError: error => errors.push(error)});
+  const empty = new HeatmapLayer({
+    id: 'heatmap-category-count',
+    data: [] as {position: [number, number]; category: string}[],
+    getPosition: d => d.position,
+    extensions: [new DataFilterExtension({filterSize: 0, categorySize: 1, countItems: true})],
+    getFilterCategory: d => d.category,
+    filterCategories: ['a'],
+    onFilteredItemsChange: ({count}) => counts.push(count)
+  });
+  try {
+    manager.setLayers([empty]);
+    await expect.poll(() => counts.at(-1)).toBe(0);
+    const loaded = empty.clone({
+      data: [
+        {position: [-122.4, 37.8], category: 'a'},
+        {position: [-122.3, 37.7], category: 'b'},
+        {position: [-122.3, 37.75], category: 'b'}
+      ]
+    });
+    manager.setLayers([loaded]);
+    await expect.poll(() => counts.at(-1)).toBe(1);
+    manager.setLayers([loaded.clone({filterCategories: ['b']})]);
+    await expect.poll(() => counts.at(-1)).toBe(2);
+    expect(errors).toEqual([]);
+  } finally {
+    manager.finalize();
+  }
+});
+
 test('HeatmapLayer#WebGPU binary positions', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) {
@@ -526,5 +563,33 @@ test('Heatmap borrows GPU columns and updates row prefixes', async ({skip}) => {
     weights.destroy();
     buffer.destroy();
     expect(await webgpuDevice.handle.popErrorScope()).toBeNull();
+  }
+});
+
+test('Heatmap selects a blendable and filterable WebGPU accumulation format', () => {
+  for (const [blend, filter, half, expected] of [
+    [true, true, true, 'rgba32float'],
+    [true, false, true, 'rgba16float'],
+    [false, true, true, 'rgba16float'],
+    [false, false, false, 'rgba8unorm']
+  ] as const) {
+    let format: string | undefined;
+    HeatmapLayer.prototype._setupTextureParams.call({
+      context: {
+        device: {
+          type: 'webgpu',
+          limits: {maxTextureDimension2D: 1024},
+          getTextureFormatCapabilities: name =>
+            name === 'rgba32float'
+              ? {render: true, blend, filter}
+              : {render: true, blend: half, filter: half}
+        }
+      },
+      props: {weightsTextureSize: 512},
+      setState: state => {
+        format = state.format;
+      }
+    } as any);
+    expect(format).toBe(expected);
   }
 });
