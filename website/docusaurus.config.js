@@ -162,6 +162,10 @@ const config = {
             '@deck.gl/mapbox': resolve('../modules/mapbox/dist'),
             '@deck.gl/maplibre': resolve('../modules/maplibre/dist'),
             '@deck.gl/mesh-layers': resolve('../modules/mesh-layers/dist'),
+            // `examples/` imports the package root, which is the React 19 renderer in v10. The
+            // website runs React 18 and shows the current API, so the bare root resolves to
+            // `/legacy` until the v10 examples replace those apps.
+            '@deck.gl/react$': resolve('../modules/react/dist/legacy'),
             '@deck.gl/react': resolve('../modules/react/dist'),
             '@deck.gl/widgets': resolve('../modules/widgets/dist'),
             'proposal-examples': resolve('../examples-v10/proposals'),
