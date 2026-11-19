@@ -234,15 +234,15 @@ test('inverse conversion delegates to math.gl without forward validation or norm
   expect(normalize).not.toHaveBeenCalled();
 });
 
-test('viewport signatures consume CRS identity independently of converters and rendering bounds', () => {
+test('viewport signatures separate unkeyed descriptors and track bounds for size sampling', () => {
   const viewport = new CustomProjectionViewport(options);
   const sameIdentity = {
     ...crs,
     converter: {...crs.converter, WGS84: {...crs.converter.WGS84}, another: crs.converter.WGS84}
   };
   const equivalent = new CustomProjectionViewport({...options, crs: sameIdentity});
-  expect(equivalent.projectionSignature).toBe(viewport.projectionSignature);
-  expect(equivalent.sizeScaleSignature).toBe(viewport.sizeScaleSignature);
+  expect(equivalent.projectionSignature).not.toBe(viewport.projectionSignature);
+  expect(equivalent.sizeScaleSignature).not.toBe(viewport.sizeScaleSignature);
   const bounded = new CustomProjectionViewport({
     ...options,
     crs: {
@@ -253,6 +253,6 @@ test('viewport signatures consume CRS identity independently of converters and r
       ]
     }
   });
-  expect(bounded.projectionSignature).toBe(viewport.projectionSignature);
+  expect(bounded.projectionSignature).not.toBe(viewport.projectionSignature);
   expect(bounded.sizeScaleSignature).not.toBe(viewport.sizeScaleSignature);
 });

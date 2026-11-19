@@ -19,7 +19,13 @@ new Deck({
 });
 ```
 
-The view resolves its CRS descriptor asynchronously using `projectionEngine.getCRS(crs)`. Deck waits for the descriptor before creating its viewport and controller. Resolution errors reach Deck's `onError` callback. For standalone viewport creation, see [CustomProjectionViewport](./custom-projection-viewport.md#usage).
+For a CRS definition, the view resolves its descriptor asynchronously using `projectionEngine.getCRS(crs)`. Deck waits for the descriptor before creating its viewport and controller. Resolution errors reach Deck's `onError` callback. For standalone viewport creation, see [CustomProjectionViewport](./custom-projection-viewport.md#usage).
+
+Pass a prepared math.gl `CRSDescriptor` as `crs` to use an application-supplied converter, such as proj4js. The descriptor must describe a projected CRS with linear axes and a WGS84 converter. Deck uses the descriptor directly, including its rendering bounds. Treat descriptors as immutable and provide an execution identity that distinguishes backend, version, operation, and relevant resources. Without an identity, deck only reuses the same descriptor object.
+
+```js
+new CustomProjectionView({crs: preparedDescriptor, controller: true});
+```
 
 ## Constructor
 
@@ -27,7 +33,7 @@ Inherits [View options](./view.md#constructor), including layout, padding and co
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `crs` | Required | A supported planar CRS definition: an identifier such as `EPSG:3857`, a PROJ string, WKT, PROJJSON object, or math.gl spatial-reference object. Linear axis units are read from the descriptor. |
+| `crs` | Required | A supported planar CRS definition: an identifier such as `EPSG:3857`, a PROJ string, WKT, PROJJSON object, or math.gl spatial-reference object. Also accepts a prepared math.gl `CRSDescriptor`. Linear axis units are read from the descriptor. |
 | `resolution` | `0` | Subdivision intervals around the earth for paths, polygons and bitmaps. The step is `EarthCircumference / resolution`, converted to source CRS units. Higher values generate more detailed geometry. Zero disables subdivision. |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
 
@@ -37,7 +43,7 @@ The descriptor supplies conversion functions, WGS84 normalization, target-coordi
 
 ### `initialize()`
 
-Resolves the target descriptor and returns a promise. Deck calls this automatically. When using the view directly, await `initialize()` before calling `makeViewport()`; the latter returns `null` while the descriptor is unavailable.
+Returns a promise when resolving a definition asynchronously. A prepared descriptor initializes synchronously. Deck calls this automatically. When using the view directly, await `initialize()` before calling `makeViewport()`; the latter returns `null` while the descriptor is unavailable.
 
 ## View State
 

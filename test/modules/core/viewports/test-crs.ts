@@ -22,6 +22,8 @@ export function createTestCRS({
 } = {}): CRSDescriptor {
   return {
     signature: JSON.stringify([signature, metersPerUnit]),
+    // Recreated fixtures with the same signature represent the same execution during navigation.
+    executionIdentity: {backend: 'deck-test', version: '1', operation: signature},
     coordinateFrame: 'projected',
     projection: 'test',
     parameters: {fixture: signature},

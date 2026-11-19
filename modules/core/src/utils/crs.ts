@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {getCRSExecutionKey} from '@math.gl/geospatial/crs';
 import {projectionEngine} from '@math.gl/geospatial/projection';
 import type {
   CRSConversion,
@@ -96,4 +97,30 @@ export function resolveCRS(
   );
   resolvedCRS.set(key, pending);
   return pending;
+}
+
+/** Prepared descriptors carry the actual conversion functions, unlike CRS definitions. */
+export function isCRSDescriptor(crs: TypeScriptCRSInput | CRSDescriptor): crs is CRSDescriptor {
+  if (typeof crs !== 'object' || crs === null || !('converter' in crs)) return false;
+  const converter = (crs as CRSDescriptor).converter?.WGS84;
+  return (
+    typeof converter?.from === 'function' &&
+    typeof converter.to === 'function' &&
+    typeof converter.normalize === 'function'
+  );
+}
+
+const descriptorIds = new WeakMap<CRSDescriptor, number>();
+let nextDescriptorId = 0;
+
+/** Unknown execution identity permits reuse only for the same descriptor object. */
+export function getProjectionExecutionKey(crs: CRSDescriptor): string | number {
+  const key = getCRSExecutionKey(crs);
+  if (key !== null) return key;
+  let id = descriptorIds.get(crs);
+  if (id === undefined) {
+    id = nextDescriptorId++;
+    descriptorIds.set(crs, id);
+  }
+  return id;
 }

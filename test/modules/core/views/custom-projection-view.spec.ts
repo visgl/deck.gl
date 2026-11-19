@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {WGS84_CRS} from '@deck.gl/core/utils/crs';
+import {resolveCRS, WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {test, expect, vi} from 'vitest';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import * as core from '@deck.gl/core';
@@ -209,4 +209,61 @@ test('CustomProjectionView shares pending CRS resolution and initializes loaded 
   expect(loaded.makeViewport({width: 800, height: 600, viewState})).toBeInstanceOf(
     CustomProjectionViewport
   );
+});
+
+test('prepared descriptors preserve their converter and invalidate caches on backend changes', async () => {
+  const base = (await resolveCRS('EPSG:3857'))!;
+  const makeDescriptor = (backend: string, offset: number) => ({
+    ...base,
+    executionIdentity: {backend, version: '1', operation: base.signature},
+    converter: {
+      ...base.converter,
+      WGS84: {
+        ...base.converter.WGS84,
+        from: (p: number[]) => {
+          const projected = base.converter.WGS84.from(p);
+          projected[0] += offset;
+          return projected;
+        }
+      }
+    }
+  });
+  const first = makeDescriptor('native', 0);
+  const second = makeDescriptor('external', 100);
+  const a = new CustomProjectionView({crs: first});
+  const b = new CustomProjectionView({crs: second});
+  expect(a.equals(b)).toBe(false);
+  expect(a.equals(new CustomProjectionView({crs: makeDescriptor('native', 0)}))).toBe(true);
+  expect(a.initialize()).toBeUndefined();
+  b.initialize();
+  const dimensions = {width: 800, height: 600, viewState};
+  const av = a.makeViewport(dimensions)!;
+  const bv = b.makeViewport(dimensions)!;
+  expect(av.crs).toBe(first);
+  expect(bv.crs).toBe(second);
+  expect(bv.projectPosition([0, 0, 0])[0]).toBeGreaterThan(av.projectPosition([0, 0, 0])[0]);
+  expect(av.projectionSignature).not.toBe(bv.projectionSignature);
+  expect(av.sizeScaleSignature).not.toBe(bv.sizeScaleSignature);
+});
+
+test('prepared descriptors without execution identities reuse only the same object', async () => {
+  const base = (await resolveCRS('EPSG:3857'))!;
+  const first = {...base, executionIdentity: undefined};
+  const second = {...first};
+  const a = new CustomProjectionView({crs: first});
+  const same = new CustomProjectionView({crs: first});
+  const b = new CustomProjectionView({crs: second});
+  expect(a.equals(same)).toBe(true);
+  expect(a.equals(b)).toBe(false);
+  a.initialize();
+  same.initialize();
+  b.initialize();
+  const dimensions = {width: 800, height: 600, viewState};
+  const av = a.makeViewport(dimensions)!;
+  const sameViewport = same.makeViewport(dimensions)!;
+  const bv = b.makeViewport(dimensions)!;
+  expect(av.projectionSignature).toBe(sameViewport.projectionSignature);
+  expect(av.sizeScaleSignature).toBe(sameViewport.sizeScaleSignature);
+  expect(av.projectionSignature).not.toBe(bv.projectionSignature);
+  expect(av.sizeScaleSignature).not.toBe(bv.sizeScaleSignature);
 });
