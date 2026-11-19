@@ -4,7 +4,7 @@
 
 import React, {Component} from 'react';
 import {readableInteger} from '../utils/format-utils';
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import App from 'v10-website-examples/heatmap/app';
 
 import {makeExample} from '../components';
@@ -16,12 +16,6 @@ class HeatmapDemo extends Component {
 
   /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
-
-  /** Data sources loaded before rendering the demo. */
-  static data = {
-    url: `${DATA_URI}/screen-grid-data-uber-pickups-nyc.txt`,
-    worker: '/workers/screen-grid-data-decoder.js'
-  };
 
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/heatmap`;
@@ -69,7 +63,7 @@ class HeatmapDemo extends Component {
   /** Renders the Arrow demo with the current controls and data. */
   render() {
     /** Provides params, data for the example. */
-    const {params, data} = this.props;
+    const {params} = this.props;
     /** Provides radius pixels for the example. */
     const radiusPixels = params.radius.value;
     /** Provides intensity for the example. */
@@ -79,8 +73,9 @@ class HeatmapDemo extends Component {
 
     return (
       <App
-        {...this.props}
-        data={data}
+        mapStyle={this.props.mapStyle}
+        device={this.props.device}
+        onDataLoad={count => this.props.onStateChange({count})}
         intensity={intensity}
         threshold={threshold}
         radiusPixels={radiusPixels}
