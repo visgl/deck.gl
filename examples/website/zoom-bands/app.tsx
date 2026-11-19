@@ -7,7 +7,7 @@ import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {GridLayer} from '@deck.gl/aggregation-layers';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {DeckGL} from '@deck.gl/react/legacy';
+import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {load} from '@loaders.gl/core';
 

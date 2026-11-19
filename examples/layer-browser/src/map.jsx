@@ -9,7 +9,7 @@ import {Map, useControl} from 'react-map-gl/maplibre';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import autobind from 'react-autobind';
 
-import {DeckGL} from '@deck.gl/react/legacy';
+import {DeckGL} from '@deck.gl/react';
 import {View} from '@deck.gl/core';
 
 import LayerInfo from './components/layer-info';

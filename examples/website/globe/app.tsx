@@ -7,7 +7,7 @@ import {useState, useMemo, useCallback} from 'react';
 
 import {createRoot} from 'react-dom/client';
 
-import {DeckGL} from '@deck.gl/react/legacy';
+import {DeckGL} from '@deck.gl/react';
 import type {Device} from '@luma.gl/core';
 import {
   _GlobeView as GlobeView,

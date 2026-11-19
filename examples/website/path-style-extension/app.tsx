@@ -6,7 +6,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL, PopupWidget} from '@deck.gl/react/legacy';
+import {DeckGL, PopupWidget} from '@deck.gl/react';
 import {PathLayer, PolygonLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import '@deck.gl/widgets/stylesheet.css';
