@@ -52,6 +52,7 @@ export class TypedArrayManager {
         return typedArray;
       }
       if (newSize * typedArray.BYTES_PER_ELEMENT <= typedArray.buffer.byteLength) {
+        /** A view of the existing buffer that includes the newly requested elements. */
         const grownArray = new Type(typedArray.buffer as ArrayBuffer, 0, newSize) as T;
         if (initialize) {
           grownArray.fill(0, typedArray.length);
