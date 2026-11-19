@@ -96,6 +96,7 @@ export {packNormalizedColor as _packNormalizedColor} from './utils/color';
 export {count as _count} from './utils/count';
 export {deepEqual as _deepEqual} from './utils/deep-equal';
 export {default as _memoize} from './utils/memoize';
+export {releaseCanvasContext as _releaseCanvasContext} from './lib/release-device-context';
 export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
 export {applyStyles as _applyStyles, removeStyles as _removeStyles} from './utils/apply-styles';
