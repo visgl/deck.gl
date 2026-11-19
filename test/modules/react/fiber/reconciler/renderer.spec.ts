@@ -838,11 +838,14 @@ describe('renderer', () => {
 });
 
 describe('Suspense', () => {
-  it('shows only the fallback when mounted content suspends again', async () => {
+  it('shows only the fallback while mounted content suspends again, then the content', async () => {
     const {deck, root} = createTestRoot();
     const content = new ScatterplotLayer({data: [], id: 'content'});
     const fallback = new ScatterplotLayer({data: [], id: 'fallback'});
-    const pending = new Promise(() => {});
+    let resume!: () => void;
+    const pending = new Promise<void>(resolve => {
+      resume = resolve;
+    });
     let suspended = false;
 
     function Content() {
@@ -869,5 +872,12 @@ describe('Suspense', () => {
     suspended = true;
     await render();
     expect(deck.getLayerIds(), 'only the fallback is shown').toStrictEqual(['fallback']);
+
+    suspended = false;
+    await React.act(async () => {
+      resume();
+      await pending;
+    });
+    expect(deck.getLayerIds(), 'the content is back once it resolves').toStrictEqual(['content']);
   });
 });
