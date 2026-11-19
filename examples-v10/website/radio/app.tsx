@@ -247,13 +247,11 @@ export default function App({
       // Interpolate the original coverage palette in square-root-count space.
       getFillColor: {
         sql: `\
-          RGBA8(
-            (CASE WHEN count < 10 THEN 237 - 110 * (SQRT(count) - 1) / (SQRT(10) - 1)
-              ELSE 127 - 83 * (SQRT(count) - SQRT(10)) / (10 - SQRT(10)) END) / 255,
-            (CASE WHEN count < 10 THEN 248 - 43 * (SQRT(count) - 1) / (SQRT(10) - 1)
-              ELSE 205 - 78 * (SQRT(count) - SQRT(10)) / (10 - SQRT(10)) END) / 255,
-            (CASE WHEN count < 10 THEN 177 + 10 * (SQRT(count) - 1) / (SQRT(10) - 1)
-              ELSE 187 - 3 * (SQRT(count) - SQRT(10)) / (10 - SQRT(10)) END) / 255, 1)`
+          SCALE_COLOR(
+            SQRT(count),
+            DOMAIN(1, 3.1622776601683795, 10),
+            PALETTE('#edf8b1', '#7fcdbb', '#2c7fb8')
+          )`
       }
     }),
 
