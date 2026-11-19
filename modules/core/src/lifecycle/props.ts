@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {PROP_TYPES_SYMBOL} from './constants';
+import {ACCESSOR_QUERIES_SYMBOL, PROP_TYPES_SYMBOL, ROW_ACCESSOR_COLUMNS_SYMBOL} from './constants';
 
 export function validateProps(props) {
   const propTypes = props[PROP_TYPES_SYMBOL];
@@ -183,6 +183,27 @@ function diffDataProps(props, oldProps): string | false | {startRow: number; end
     // Otherwise, do a shallow equal on props
   } else if (props.data !== oldProps.data) {
     dataChanged = 'A new data container was supplied';
+  }
+  /** Row-oriented geometry and attribute preparation must revisit changed vectors. */
+  const columns = props[ROW_ACCESSOR_COLUMNS_SYMBOL];
+  const oldColumns = oldProps[ROW_ACCESSOR_COLUMNS_SYMBOL];
+  if (
+    Object.keys(columns ?? {}).some(name => columns[name] !== oldColumns?.[name]) ||
+    Object.keys(oldColumns ?? {}).some(name => !columns?.[name])
+  ) {
+    return 'An Arrow row accessor changed';
+  }
+  /** A removed or replaced SQL accessor may expose the default callback immediately. */
+  const queries = props[ACCESSOR_QUERIES_SYMBOL];
+  const oldQueries = oldProps[ACCESSOR_QUERIES_SYMBOL];
+  if (
+    Object.keys(oldQueries ?? {}).some(
+      name =>
+        typeof props[PROP_TYPES_SYMBOL][name]?.arrow === 'string' &&
+        queries?.[name]?.sql !== oldQueries[name].sql
+    )
+  ) {
+    return 'An Arrow row accessor query changed';
   }
   if (dataChanged && _dataDiff) {
     dataChanged = _dataDiff(props.data, oldProps.data) || dataChanged;

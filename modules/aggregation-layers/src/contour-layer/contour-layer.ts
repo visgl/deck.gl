@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor} from '@deck.gl/core';
 import {project} from '@deck.gl/core';
 
 import {
@@ -46,8 +47,8 @@ const defaultProps: DefaultProps<ContourLayerProps> = {
   // grid aggregation
   cellSize: {type: 'number', min: 1, value: 1000},
   gridOrigin: {type: 'array', compare: true, value: [0, 0]},
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
-  getWeight: {type: 'accessor', value: 1},
+  getPosition: {type: 'accessor', arrow: 'row', value: (x: any) => x.position},
+  getWeight: {type: 'accessor', arrow: 'row', value: 1},
   gpuAggregation: true,
   aggregation: 'SUM',
 
@@ -109,13 +110,13 @@ type _ContourLayerProps<DataT> = {
    * Method called to retrieve the position of each object.
    * @default object => object.position
    */
-  getPosition?: Accessor<DataT, Position>;
+  getPosition?: ArrowAccessor<DataT, Position>;
 
   /**
    * The weight of each object.
    * @default 1
    */
-  getWeight?: Accessor<DataT, number>;
+  getWeight?: ArrowAccessor<DataT, number>;
 };
 
 export type ContourLayerPickingInfo = PickingInfo<{

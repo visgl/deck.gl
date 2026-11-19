@@ -53,7 +53,7 @@ The `@deck.gl/react` module is now a deep React Fiber integration.
 
 - **React components** 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
 - **Map integrations** 🚧 — Use dedicated React entry points for Mapbox, MapLibre, and Google Maps.
-- **Migration** 🚧 — The previous React API moves to `@deck.gl/react/legacy`.
+- **Migration** — The previous React API is available from [`@deck.gl/react/legacy`](./api-reference/react/overview.md#deckglreactlegacy), so apps can move to it before the package root changes.
 
 ### Layers
 

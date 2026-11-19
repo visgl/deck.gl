@@ -109,6 +109,7 @@ const aliases = {
   '@deck.gl/mapbox': resolve(rootDir, 'modules/mapbox/src'),
   '@deck.gl/maplibre': resolve(rootDir, 'modules/maplibre/src'),
   '@deck.gl/mesh-layers': resolve(rootDir, 'modules/mesh-layers/src'),
+  '@deck.gl/react/legacy': resolve(rootDir, 'modules/react/src/legacy'),
   '@deck.gl/react': resolve(rootDir, 'modules/react/src'),
   '@deck.gl/test-utils': resolve(rootDir, 'modules/test-utils/src'),
   '@deck.gl/widgets': resolve(rootDir, 'modules/widgets/src'),

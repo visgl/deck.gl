@@ -22,6 +22,13 @@
   },
   "homepage": "https://deck.gl",
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "legacy": [
+        "dist/legacy/index.d.ts"
+      ]
+    }
+  },
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
@@ -29,6 +36,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./legacy": {
+      "types": "./dist/legacy/index.d.ts",
+      "import": "./dist/legacy/index.js",
+      "require": "./dist/legacy/index.cjs"
     }
   },
   "files": [
@@ -36,6 +48,9 @@
     "src"
   ],
   "sideEffects": false,
+  "scripts": {
+    "build": "node build-cjs.mjs"
+  },
   "dependencies": {
     "react-reconciler": "0.33.0"
   },
