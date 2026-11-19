@@ -173,3 +173,15 @@ test('Scatterplot exposes Arrow accessor rows to extensions and restores columns
   expect(typeof layer.props.getFillColor).toBe('function');
   expect(hasScatterplotColumns(layer.clone({extensions: []}).props)).toBe(true);
 });
+
+test('Scatterplot invalidates row attributes when an extension-enabled SQL accessor is removed', () => {
+  const layer = new ScatterplotLayer({
+    data: [],
+    extensions: [new DataFilterExtension()],
+    getRadius: {sql: 'radius'}
+  });
+  const updated = layer.clone({getRadius: () => 3});
+  expect(diffProps(updated.props, layer.props).dataChanged).toBe(
+    'An Arrow row accessor query changed'
+  );
+});

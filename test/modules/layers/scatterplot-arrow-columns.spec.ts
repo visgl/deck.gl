@@ -255,35 +255,42 @@ for (const backend of ['webgl', 'webgpu'] as const) {
   });
 }
 
-test('Scatterplot rejects extensions when entering or updating Arrow mode', async () => {
+test('Scatterplot switches between Arrow columns and row attributes with extensions', async () => {
   const {LayerExtension} = await import('@deck.gl/core');
-  const errors: Error[] = [];
+  const data = [{}, {}];
+  const arrowPositions = positions([
+    [0, 0],
+    [1, 1]
+  ]);
+  const extensions = [new LayerExtension()];
   await testLayerAsync({
     Layer: ScatterplotLayer,
     draw: false,
     testCases: [
-      {props: {data: [{}, {}], getPosition: () => [0, 0]}},
       {
-        updateProps: {
-          getPosition: positions([
-            [0, 0],
-            [1, 1]
-          ]),
-          extensions: [new LayerExtension()]
-        },
-        onAfterUpdate: () => expect(errors.at(-1)?.message).toContain('do not support extensions')
+        props: {data, getPosition: arrowPositions, extensions},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.columns).toBeUndefined();
+          expect(layer.getAttributeManager()).toBeTruthy();
+          expect(typeof layer.props.getPosition).toBe('function');
+        }
       },
-      {updateProps: {extensions: []}},
       {
-        updateProps: {extensions: [new LayerExtension()]},
-        onAfterUpdate: () => expect(errors.at(-1)?.message).toContain('do not support extensions')
+        updateProps: {extensions: []},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.columns).toBeDefined();
+          expect(layer.getAttributeManager()).toBeNull();
+        }
+      },
+      {
+        updateProps: {extensions},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.columns).toBeUndefined();
+          expect(layer.getAttributeManager()).toBeTruthy();
+        }
       }
-    ],
-    onError: error => {
-      errors.push(error);
-    }
+    ]
   });
-  expect(errors).toHaveLength(2);
 });
 
 for (const backend of ['webgl', 'webgpu'] as const) {
