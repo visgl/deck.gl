@@ -102,6 +102,11 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         expect(line?.index).toBe(2);
         expect(line?.object.label).toBe('line');
       }
+      const empty = new GeoArrowLayer({id: 'geometry', data: null, pickable: true});
+      deck.setProps({layers: [empty]});
+      await expect.poll(() => empty.state?.geometry).toBeNull();
+      expect(empty.getSubLayers()).toHaveLength(0);
+      expect((await deck.pickObjectAsync({x: 32, y: 32}))?.picked ?? false).toBe(false);
       expect(errors).toEqual([]);
     } finally {
       deck.finalize();

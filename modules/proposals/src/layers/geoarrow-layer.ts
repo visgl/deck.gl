@@ -31,7 +31,8 @@ export {resolveGeoArrowGeometry, type GeoArrowLayerGeometryType} from './resolve
 
 /** GeoArrow metadata-driven composite props. Geometry-specific props pass to the selected child. */
 export type GeoArrowLayerProps = Omit<LayerProps, 'data'> & {
-  data: Table | RecordBatch;
+  /** Geometry table, record batch, or a URL or promise that resolves to one. */
+  data?: Table | RecordBatch | string | Promise<Table | RecordBatch> | null;
   /** Geometry column. Defaults to the first field with GeoArrow extension metadata. */
   getGeometry?: string;
   /** Explicit geometry encoding when extension metadata is absent. */
@@ -88,8 +89,14 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
     ) {
       return;
     }
+    /** Resolved data. The base layer supplies an empty array before loading. */
+    const {data} = props;
+    if (!data || typeof data !== 'object' || !('schema' in data)) {
+      this.setState({geometry: null, features: null});
+      return;
+    }
     /** Selected field and declared encoding. */
-    const geometry = resolveGeoArrowGeometry(props.data, props.getGeometry, props.geometryType);
+    const geometry = resolveGeoArrowGeometry(data, props.getGeometry, props.geometryType);
     switch (geometry.geometryType) {
       case 'geoarrow.point':
       case 'geoarrow.linestring':
@@ -100,7 +107,7 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       default:
         this.setState({
           geometry,
-          features: makeGeoArrowFeatures(props.data, geometry.columnName, geometry.geometryType)
+          features: makeGeoArrowFeatures(data, geometry.columnName, geometry.geometryType)
         });
     }
   }
@@ -109,9 +116,11 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
   override getPickingInfo(params: GetPickingInfoParams): PickingInfo {
     /** Selection after the geometry sublayer resolves multipart features. */
     const info = super.getPickingInfo(params);
-    if (info.index >= 0) {
+    /** Source table for the picked row. */
+    const {data} = this.props;
+    if (info.index >= 0 && data && typeof data === 'object' && 'schema' in data) {
       info.index = this.state.features ? info.object.properties.rowIndex : info.index;
-      info.object = this.props.data.get(info.index);
+      info.object = data.get(info.index);
     }
     return info;
   }
@@ -132,6 +141,9 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
     } = this.props;
     /** Geometry prepared for the current input. */
     const {geometry, features} = this.state;
+    if (!geometry || !data || typeof data !== 'object' || !('schema' in data)) {
+      return null;
+    }
     if (features) {
       /** Inherited extension and accessor refresh triggers for the decoded child. */
       const subLayerProps = this.getSubLayerProps({id: 'features'});
