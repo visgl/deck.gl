@@ -131,6 +131,13 @@ type PropTypeDef =
   | ObjectPropType
   | null;
 
+/** Copies one-shot data iterators for layers that traverse their rows more than once. */
+function materializeDataIterator(value: any): any {
+  return typeof value?.next === 'function' && value[Symbol.iterator]?.() === value
+    ? Array.from(value)
+    : value;
+}
+
 const TYPE_DEFINITIONS = {
   boolean: {
     validate(value, propType: BooleanPropType) {
@@ -219,12 +226,11 @@ const TYPE_DEFINITIONS = {
       if (dataTransform) {
         value = dataTransform(value);
       }
-      if (
-        propType.materializeIterator &&
-        typeof value?.next === 'function' &&
-        value[Symbol.iterator]?.() === value
-      ) {
-        return Array.from(value);
+      if (propType.materializeIterator) {
+        value =
+          value instanceof Promise
+            ? value.then(materializeDataIterator)
+            : materializeDataIterator(value);
       }
       if (dataTransform) {
         return value;

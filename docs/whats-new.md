@@ -25,6 +25,10 @@ _v10.0 should be thought of as a pre-release. We wanted to get the new capabilit
 - **WebGPU** 🚧 — WebGPU is now the default renderer with full feature support.
 - **GPU vectors** — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph.
 
+### Data loading
+
+- `dataTransform` accepts promises. Loading indicators stay active through the transform and SQL accessor evaluation.
+
 ### Apache Arrow
 
 - **Arrow data** — The Layer `data` prop now supports Arrow tables

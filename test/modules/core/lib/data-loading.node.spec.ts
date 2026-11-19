@@ -405,3 +405,30 @@ test('a rejected transform clears loading and reports the error', async () => {
   expect(state.isAsyncPropLoading('data')).toBe(false);
   expect(complete).not.toHaveBeenCalled();
 });
+
+test.each(['direct', 'promise'])('a %s async transform materializes one-shot rows', async input => {
+  class IteratorLayer extends Layer {
+    static defaultProps = {
+      data: {type: 'data', value: [], async: true, materializeIterator: true}
+    };
+  }
+  const source = [1, 2];
+  const onDataLoad = vi.fn();
+  const dataTransform = vi.fn(async function (rows: number[]) {
+    return (function* () {
+      yield* rows;
+    })();
+  });
+  const layer = new IteratorLayer({
+    data: input === 'direct' ? source : Promise.resolve(source),
+    dataTransform,
+    onDataLoad
+  });
+  const state = new LayerState({layer, attributeManager: null});
+  Object.assign(layer, {internalState: state});
+  state.setAsyncProps(layer.props);
+  await vi.waitFor(() => expect(onDataLoad).toHaveBeenCalledOnce());
+  expect(dataTransform).toHaveBeenCalledOnce();
+  expect(layer.props.data).toEqual(source);
+  expect(state.isAsyncPropLoading('data')).toBe(false);
+});
