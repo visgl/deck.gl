@@ -9,7 +9,7 @@ import {
   createRoot,
   unmountAtNode,
   _RootErrorBoundary as RootErrorBoundary
-} from '../reconciler/index'; // so CommonJS shares the /reconciler entry's copy
+} from '../reconciler/index';
 import type {
   DeckGLConfiguration,
   ReconcilerRoot,
