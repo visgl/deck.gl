@@ -12,6 +12,10 @@ _v10.0 should be thought of as a pre-release. We wanted to get the new capabilit
 
 *These highlights describe goals for v10. Some features are still in development.*
 
+### Google Maps
+
+- [`GoogleMapsOverlay`](./api-reference/google-maps/google-maps-overlay.md) accepts an `overlayPane` option to control where its dedicated canvas sits in the Google Maps pane stack.
+
 ### Heatmap filtering
 
 - [`ClipExtension`](./api-reference/extensions/clip-extension.md) filters HeatmapLayer source points on WebGPU, including borrowed GPUVectors.
