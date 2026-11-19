@@ -11,15 +11,18 @@ import type {Device} from '@luma.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {animate} from 'popmotion';
-import {Field, Float64, List, tableFromArrays, vectorFromArray} from 'apache-arrow';
+import {ParquetLoader} from '@loaders.gl/tables/parquet';
+import parquetWorkerUrl from '@loaders.gl/tables/parquet/parquet-worker.js?url';
+import {isArrowTable} from '@math.gl/core/arrow';
+import {expandTrips, LOOP_LENGTH} from './trip-data';
 
 import type {Position, Color, LayerData, Material, MapViewState} from '@deck.gl/core';
 
-// Standalone JSON datasets
 const DATA_URL = {
   BUILDINGS:
-    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/trips/buildings.json', // eslint-disable-line
-  TRIPS: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/trips/trips-v7.json' // eslint-disable-line
+    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/trips/buildings.json',
+  TRIPS:
+    'https://media.githubusercontent.com/media/visgl/deck.gl-data/72dc29976856f5a9d01b3eb394818d66e3a0bf00/website/trips.parquet'
 };
 
 const ambientLight = new AmbientLight({
@@ -86,39 +89,30 @@ type Trip = {
   timestamps: number[];
 };
 
-/** Preserves one Arrow row per trip for both JSON loading and the website decoder. */
-function toTripTable<LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT {
-  const trips = source as Trip[];
-  const pointType = new List(new Field('coordinate', new Float64()));
-  const pathType = new List(new Field('point', pointType));
-  const timestampsType = new List(new Field('timestamp', new Float64()));
-  return tableFromArrays({
-    vendor: Int32Array.from(trips, trip => trip.vendor),
-    path: vectorFromArray(
-      trips.map(trip => trip.path),
-      pathType
-    ),
-    timestamps: vectorFromArray(
-      trips.map(trip => trip.timestamps),
-      timestampsType
-    )
-  }) as LayerDataT;
+type TripStats = {trips: number; vertices: number};
+
+/** Expands the shared segment dictionary into TripsLayer rows after loading. */
+function unpackTrips<LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT {
+  if (!isArrowTable(source)) {
+    throw new Error('Expected an Arrow table for Trips');
+  }
+  return expandTrips(source) as LayerDataT;
 }
 
 export default function App({
   device,
   buildings = DATA_URL.BUILDINGS,
-  trips = DATA_URL.TRIPS,
+  onDataLoad,
   trailLength = 180,
   initialViewState = INITIAL_VIEW_STATE,
   mapStyle = MAP_STYLE,
   theme = DEFAULT_THEME,
-  loopLength = 1800, // unit corresponds to the timestamp in source data
+  loopLength = LOOP_LENGTH,
   animationSpeed = 1
 }: {
   device?: Device;
   buildings?: string | Building[];
-  trips?: string | Trip[];
+  onDataLoad?: (stats: TripStats) => void;
   trailLength?: number;
   loopLength?: number;
   animationSpeed?: number;
@@ -150,9 +144,20 @@ export default function App({
     }),
     new TripsLayer<Trip>({
       id: 'trips',
-      // Sample row: {vendor: 0, path: [[-74.21, 40.82], ...], timestamps: [1191, ...]}
-      data: trips,
-      dataTransform: toTripTable,
+      // Route row: {vendor: 0, start: 197, end: 3845, segment_ids: [36501, ...]}
+      data: DATA_URL.TRIPS,
+      loaders: [ParquetLoader],
+      loadOptions: {parquet: {workerUrl: parquetWorkerUrl}},
+      dataTransform: unpackTrips,
+      onDataLoad: table => {
+        if (onDataLoad && isArrowTable(table)) {
+          let vertices = 0;
+          for (const {path} of table) {
+            vertices += path.length;
+          }
+          onDataLoad({trips: table.numRows, vertices});
+        }
+      },
       getPath: {sql: 'path'},
       getTimestamps: {sql: 'timestamps'},
       getColor: d => (d.vendor === 0 ? theme.trailColor0 : theme.trailColor1),

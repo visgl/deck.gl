@@ -18,17 +18,11 @@ class TripsDemo extends Component {
   /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
 
-  /** Data sources loaded before rendering the demo. */
-  static data = [
-    {
-      url: `${DATA_URI}/trips-data.txt`,
-      worker: '/workers/trips-data-decoder.js?loop=1800&trail=180'
-    },
-    {
-      url: `${DATA_URI}/building-data.txt`,
-      worker: '/workers/building-data-decoder.js'
-    }
-  ];
+  /** Buildings retain the website's full dataset. The app loads trips. */
+  static data = {
+    url: `${DATA_URI}/building-data.txt`,
+    worker: '/workers/building-data-decoder.js'
+  };
 
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/trips`;
@@ -59,7 +53,7 @@ class TripsDemo extends Component {
         </p>
         <div className="layout">
           <div className="stat col-1-2">
-            No. of Trips
+            Rendered Trips
             <b>{readableInteger(meta.trips || 0)}</b>
           </div>
           <div className="stat col-1-2">
@@ -86,8 +80,8 @@ class TripsDemo extends Component {
       <App
         {...otherProps}
         key={this.props.device?.type}
-        trips={data && data[0]}
-        buildings={data && data[1]}
+        buildings={data}
+        onDataLoad={this.props.onStateChange}
         animationSpeed={1}
         trailLength={params.trail.value}
       />
