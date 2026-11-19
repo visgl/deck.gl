@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkproject_website=self.webpackChunkproject_website||[]).push([["87597"],{96412(e,s,a){a.d(s,{BasisLoaderWithParser:()=>o});var r=a(43967),t=a(42351);let{preload:p,...l}=t.E,{preload:c,...i}=t.E;({...l});let o={...i,parse:r.af}}}]);
+//# sourceMappingURL=87597.299d5576.js.map

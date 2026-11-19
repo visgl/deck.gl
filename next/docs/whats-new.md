@@ -12,6 +12,14 @@ v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, S
 
 *These highlights describe goals for v10. Some features are still in development.*
 
+### Heatmap filtering[​](#heatmap-filtering "Direct link to Heatmap filtering")
+
+* `ClipExtension` filters HeatmapLayer source points on WebGPU, including borrowed GPUVectors.
+
+* `DataFilterExtension` filters the points that contribute to `HeatmapLayer` on WebGPU.
+
+* `MaskExtension` limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
+
 ### GPU[​](#gpu "Direct link to GPU")
 
 * **WebGPU** 🚧 — WebGPU is now the default renderer with full feature support.
@@ -37,9 +45,11 @@ v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, S
 * **Source data CRS** is preserved during loading and projected automatically
 * **Curved geometry** — Set `resolution` to subdivide paths, polygons, and bitmaps so they follow the projection’s curves.
 
-### High Dynamic Range (HDR)[​](#high-dynamic-range-hdr "Direct link to High Dynamic Range (HDR)")
+### Colors[​](#colors "Direct link to Colors")
 
 * **Normalized colors** — Set `normalizedColors` to use RGB values from 0 to 1.
+* **Color scales** — Map data values to colors.
+* **ColorScaleWidget** 🚧 — Display a color scale as a legend.
 
 ### React[​](#react "Direct link to React")
 
@@ -47,7 +57,7 @@ The `@deck.gl/react` module is now a deep React Fiber integration.
 
 * **React components** 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
 * **Map integrations** 🚧 — Use dedicated React entry points for Mapbox, MapLibre, and Google Maps.
-* **Migration** 🚧 — The previous React API moves to `@deck.gl/react/legacy`.
+* **Migration** — The previous React API is available from [`@deck.gl/react/legacy`](https://deck.gl/next/docs/api-reference/react/overview.md#deckglreactlegacy), so apps can move to it before the package root changes.
 
 ### Layers[​](#layers "Direct link to Layers")
 

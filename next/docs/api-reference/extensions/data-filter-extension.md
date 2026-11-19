@@ -378,10 +378,6 @@ filterRange: [rangeStart - ORIGIN_TS, rangeEnd - ORIGIN_TS]
 
 Given data filtering happens on GPU, not all layers of `@deck.gl/aggregation-layers` module, support this feature.
 
-### WebGL only:[​](#webgl-only "Direct link to WebGL only:")
-
-* `HeatmapLayer`: filtering is unavailable when rendering heatmaps with WebGPU.
-
 ### Always supported:[​](#always-supported "Direct link to Always supported:")
 
 * `GPUGridLayer`

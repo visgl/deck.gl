@@ -77,12 +77,12 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/carto`              | `ClusterTileLayer`  | ✅    | ❌      |
 | `@deck.gl/carto`              | `H3TileLayer`       | ✅    | ❌      |
 | `@deck.gl/carto`              | `HeatmapTileLayer`  | ✅    | ❌      |
-| `@deck.gl/carto`              | `PointLabelLayer`   | ✅    | ❌      |
+| `@deck.gl/carto`              | `PointLabelLayer`   | ✅    | 🚧      |
 | `@deck.gl/carto`              | `QuadbinTileLayer`  | ✅    | ❌      |
 | `@deck.gl/carto`              | `RasterTileLayer`   | ✅    | ❌      |
 | `@deck.gl/carto`              | `VectorTileLayer`   | ✅    | ❌      |
 
-`GeoJsonLayer` supports polygon, line, and text point rendering on WebGPU. `TextLayer` supports glyph rendering; text backgrounds and collision filtering still require WebGL.
+`GeoJsonLayer` supports polygon, line, and text point rendering on WebGPU. `TextLayer` supports glyph rendering and text backgrounds. The `PointLabelLayer` render suite covers label backgrounds and collision filtering on WebGPU.
 
 * `S2Layer`, `QuadkeyLayer`, and `GeohashLayer` inherit their WebGPU rendering from `PolygonLayer`, including extruded, stroked, and wireframe cells.
 * `H3HexagonLayer` supports both its high-precision `PolygonLayer` path and its instanced `ColumnLayer` path on WebGPU.
@@ -94,19 +94,19 @@ ScreenGridLayer and GridLayer can aggregate on the GPU with automatic domains an
 
 ## Extensions[​](#extensions "Direct link to Extensions")
 
-The table below covers the public extensions in `@deck.gl/extensions`. Most remain WebGL-only because they rely on GLSL shader injections, GLSL-only shader modules, or extra render/picking passes that have not been ported to WebGPU. `BrushingExtension` and `ClipExtension` support standard rendering primitives on WebGPU. Custom shaders need compatible hooks. ScreenGridLayer and GridLayer execute compatible extension hooks on input points before reduction; DataFilterExtension filtering and ClipExtension are covered by aggregation regression tests.
+The table below covers the public extensions in `@deck.gl/extensions`. All listed extensions support WebGPU. Custom shaders need compatible hooks. ScreenGridLayer and GridLayer execute compatible extension hooks on input points before reduction; DataFilterExtension filtering and ClipExtension are covered by aggregation regression tests.
 
-| Module                | Extension                  | WebGL | WebGPU                                    |
-| --------------------- | -------------------------- | ----- | ----------------------------------------- |
-| `@deck.gl/extensions` | `BrushingExtension`        | ✅    | ✅                                        |
-| `@deck.gl/extensions` | `DataFilterExtension`      | ✅    | ✅ Filtering; `countItems` requires WebGL |
-| `@deck.gl/extensions` | `Fp64Extension`            | ✅    | ✅                                        |
-| `@deck.gl/extensions` | `PathStyleExtension`       | ✅    | ✅                                        |
-| `@deck.gl/extensions` | `FillStyleExtension`       | ✅    | ❌                                        |
-| `@deck.gl/extensions` | `ClipExtension`            | ✅    | ✅                                        |
-| `@deck.gl/extensions` | `CollisionFilterExtension` | ✅    | ❌                                        |
-| `@deck.gl/extensions` | `MaskExtension`            | ✅    | ✅                                        |
-| `@deck.gl/extensions` | `TerrainExtension`         | ✅    | ✅                                        |
+| Module                | Extension                  | WebGL | WebGPU |
+| --------------------- | -------------------------- | ----- | ------ |
+| `@deck.gl/extensions` | `BrushingExtension`        | ✅    | ✅     |
+| `@deck.gl/extensions` | `DataFilterExtension`      | ✅    | ✅     |
+| `@deck.gl/extensions` | `Fp64Extension`            | ✅    | ✅     |
+| `@deck.gl/extensions` | `PathStyleExtension`       | ✅    | ✅     |
+| `@deck.gl/extensions` | `FillStyleExtension`       | ✅    | ✅     |
+| `@deck.gl/extensions` | `ClipExtension`            | ✅    | ✅     |
+| `@deck.gl/extensions` | `CollisionFilterExtension` | ✅    | ✅     |
+| `@deck.gl/extensions` | `MaskExtension`            | ✅    | ✅     |
+| `@deck.gl/extensions` | `TerrainExtension`         | ✅    | ✅     |
 
 `TerrainExtension` supports both `terrainDrawMode` values on WebGPU. Terrain sources used for offset fitting must report their elevation range. See the [terrain extension reference](https://deck.gl/next/docs/api-reference/extensions/terrain-extension.md#limitations).
 
@@ -121,16 +121,17 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 
 ## Features[​](#features "Direct link to Features")
 
-| Feature                                     | Status | Comment                                                                                                                                                 |
-| ------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Views                                       | 🚧     | The core `project` and `project32` shader modules have WGSL ports, so standard view/projection paths should work.                                       |
-| Picking                                     | ✅     | `Deck` does **async** picking on WebGPU, including hover and click picking paths.                                                                       |
-| Shader injection targets / layer extensions | 🚧     | `ClipExtension` uses ShaderPlugins on standard primitives; other extensions still require migration.                                                    |
-| GPU transforms                              | 🚧     | Underlying GPU transform APIs are evolving, but deck.gl still has transform-gated tests and no documented WebGPU support for transform-based workflows. |
-| Constant attributes                         | ✅     | `AttributeManager` now materializes constant attributes into full buffers on WebGPU as a compatibility path for layers that rely on constant accessors. |
-| Attribute transitions                       | 🚧     | Some layers disable transitions on WebGPU, and transition utilities still contain WebGL-specific buffer read paths.                                     |
-| Base map overlays                           | 🚧     | Transparent overlay integration still requires premultiplied-alpha work across deck and the base map stack.                                             |
-| Base map interleaving                       | ❌     | No current base map integration path supports WebGPU interleaving.                                                                                      |
+| Feature                   | Status | Comment                                                                                                                                                            |
+| ------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Views                     | 🚧     | The core `project` and `project32` shader modules have WGSL ports, so standard view/projection paths should work.                                                  |
+| Picking                   | ✅     | `Deck` does **async** picking on WebGPU, including hover and click picking paths.                                                                                  |
+| Built-in layer extensions | ✅     | See the [extension compatibility table](#extensions).                                                                                                              |
+| Custom layer shaders      | 🚧     | To use extensions, declare compatible [WGSL shader hooks](https://deck.gl/next/docs/developer-guide/custom-layers/layer-extensions.md#webgpu-shader-plugins). |
+| GPU transforms            | 🚧     | Underlying GPU transform APIs are evolving, but deck.gl still has transform-gated tests and no documented WebGPU support for transform-based workflows.            |
+| Constant attributes       | ✅     | `AttributeManager` now materializes constant attributes into full buffers on WebGPU as a compatibility path for layers that rely on constant accessors.            |
+| Attribute transitions     | 🚧     | Some layers disable transitions on WebGPU, and transition utilities still contain WebGL-specific buffer read paths.                                                |
+| Base map overlays         | 🚧     | Transparent overlay integration still requires premultiplied-alpha work across deck and the base map stack.                                                        |
+| Base map interleaving     | ❌     | No current base map integration path supports WebGPU interleaving.                                                                                                 |
 
 ## Background[​](#background "Direct link to Background")
 
