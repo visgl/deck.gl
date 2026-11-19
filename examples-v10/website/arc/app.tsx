@@ -6,7 +6,7 @@ import {GeoParquetLoader} from '@loaders.gl/tables/parquet';
 import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import {tableFromArrays} from 'apache-arrow';
 import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';

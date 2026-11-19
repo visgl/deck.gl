@@ -368,17 +368,18 @@
           "api-reference/widgets/loading-widget",
           "api-reference/widgets/popup-widget",
           "api-reference/widgets/reset-view-widget",
-          "api-reference/widgets/scale-widget",
           "api-reference/widgets/screenshot-widget",
           "api-reference/widgets/scrollbar-widget",
           "api-reference/widgets/selector-widget",
-          "api-reference/widgets/splitter-widget",
-          "api-reference/widgets/stats-widget",
           "api-reference/widgets/theme-widget",
-          "api-reference/widgets/timeline-widget",
           "api-reference/widgets/toggle-widget",
           "api-reference/widgets/view-layout",
-          "api-reference/widgets/zoom-widget"
+          "api-reference/widgets/zoom-widget",
+          "api-reference/widgets/color-scale-widget",
+          "api-reference/widgets/scale-widget",
+          "api-reference/widgets/splitter-widget",
+          "api-reference/widgets/stats-widget",
+          "api-reference/widgets/timeline-widget"
         ]
       }
     ]

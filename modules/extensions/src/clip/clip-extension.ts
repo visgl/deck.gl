@@ -51,8 +51,8 @@ export default class ClipExtension extends LayerExtension {
     return {plugins: [clipByInstance ? clipInstancePlugin : clipGeometryPlugin]};
   }
 
-  /* eslint-disable camelcase */
-  draw(this: Layer<Required<ClipExtensionProps>>): void {
+  /** Supply the same clip bounds to render and accumulation passes. */
+  getAggregationShaderProps(this: Layer<Required<ClipExtensionProps>>): {clip: ClipModuleProps} {
     const {clipBounds} = this.props;
     const {viewport} = this.context;
     const clipProps = {worldWidth: 0} as ClipModuleProps;
@@ -80,6 +80,11 @@ export default class ClipExtension extends LayerExtension {
       }
     }
 
-    this.setShaderModuleProps({clip: clipProps});
+    return {clip: clipProps};
+  }
+
+  /** Update the clip uniforms for ordinary layer draws. */
+  draw(this: Layer<Required<ClipExtensionProps>>, params: unknown, extension: this): void {
+    this.setShaderModuleProps(extension.getAggregationShaderProps.call(this));
   }
 }
