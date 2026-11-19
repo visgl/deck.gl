@@ -628,7 +628,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const columns = this.props[ROW_ACCESSOR_COLUMNS_SYMBOL];
       for (const [name, column] of Object.entries(columns ?? {})) {
         const type = this.props[PROP_TYPES_SYMBOL][name];
-        if (type?.type === 'accessor' && type.arrowWithExtensions) {
+        if (
+          type?.type === 'accessor' &&
+          'arrowWithExtensions' in type &&
+          type.arrowWithExtensions
+        ) {
           return {length: column.length};
         }
       }
