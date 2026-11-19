@@ -8,14 +8,14 @@ import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
 import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
-import {tableFromArrays} from 'apache-arrow';
+import type {Table} from 'apache-arrow';
 import {ParquetLoader} from '@loaders.gl/tables/parquet';
 import parquetWorkerUrl from '@loaders.gl/tables/parquet/parquet-worker.js?url';
 import {isArrowTable} from '@math.gl/core/arrow';
 
 import IconClusterLayer from './icon-cluster-layer';
 import type {IconClusterLayerPickingInfo} from './icon-cluster-layer';
-import type {LayerData, PickingInfo, MapViewState} from '@deck.gl/core';
+import type {PickingInfo, MapViewState} from '@deck.gl/core';
 import type {IconLayerProps} from '@deck.gl/layers';
 import {Device} from '@luma.gl/core';
 
@@ -90,7 +90,7 @@ export default function App({
 }: {
   device?: Device;
   showCluster?: boolean;
-  data?: string | Meteorite[];
+  data?: string | Meteorite[] | Table;
   /** Called after data loads with the total row count, before visibility or filtering. */
   onDataLoad?: (count: number) => void;
   iconMapping?: string;
@@ -138,19 +138,9 @@ export default function App({
     : new IconLayer({
         ...layerProps,
         id: 'icon',
-        dataTransform: <LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT => {
-          if (!Array.isArray(source)) {
-            return source as LayerDataT;
-          }
-          return tableFromArrays({
-            coordinates: source.map(meteorite => meteorite.coordinates),
-            name: source.map(meteorite => meteorite.name),
-            class: source.map(meteorite => meteorite.class),
-            mass: source.map(meteorite => meteorite.mass),
-            year: source.map(meteorite => meteorite.year)
-          }) as LayerDataT;
-        },
-        getPosition: {sql: 'ARRAY_FLOAT64(coordinates[1], coordinates[2])'},
+        getPosition: Array.isArray(data)
+          ? layerProps.getPosition
+          : {sql: 'ARRAY_FLOAT64(coordinates[1], coordinates[2])'},
         getIcon: () => 'marker',
         sizeUnits: 'meters',
         sizeScale: 2000,
