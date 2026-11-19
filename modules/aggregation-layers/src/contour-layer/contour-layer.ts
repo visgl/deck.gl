@@ -512,12 +512,14 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   /** Invalidate contours when a new aggregate snapshot is available. */
   private _onAggregationUpdate() {
-    const {aggregator, binIdRange} = this.state;
-    if (this._getGPUIsolineCellCount()) {
-      this.state.isolinesDirty = true;
+    const layer = this.getCurrentLayer() as this | null;
+    if (!layer) return;
+    const {aggregator, binIdRange} = layer.state;
+    if (layer._getGPUIsolineCellCount()) {
+      layer.state.isolinesDirty = true;
       return;
     }
-    this.setState({
+    layer.setState({
       aggregatedValueReader: getAggregatorValueReader({aggregator, binIdRange, channel: 0}),
       contourData: null
     });

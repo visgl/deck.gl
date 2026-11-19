@@ -157,7 +157,20 @@ test('ContourLayer generates WebGPU isolines without reading bins to the CPU', a
     draw(higherThreshold);
     expect(await readSegments()).toEqual([]);
 
-    const cpu = higherThreshold.clone({gpuAggregation: false, contours: [{threshold: 1}]});
+    const cpuGeometry = higherThreshold.clone({gpuGeometry: false, contours: [{threshold: 1}]});
+    manager.setLayers([cpuGeometry]);
+    draw(cpuGeometry);
+    await vi.waitFor(() => expect(aggregator.isLoaded).toBe(true));
+    manager.updateLayers();
+    expect(manager.getLayers().some(item => item instanceof PathLayer)).toBe(true);
+    expect(cpuGeometry.state.aggregator).toBe(aggregator);
+
+    const gpuGeometry = cpuGeometry.clone({gpuGeometry: true});
+    manager.setLayers([gpuGeometry]);
+    draw(gpuGeometry);
+    expect(await readSegments()).toHaveLength(4);
+
+    const cpu = gpuGeometry.clone({gpuAggregation: false});
     manager.setLayers([cpu]);
     expect(manager.getLayers().some(item => item instanceof PathLayer)).toBe(true);
     expect(manager.getLayers().some(item => item instanceof LineLayer)).toBe(false);
