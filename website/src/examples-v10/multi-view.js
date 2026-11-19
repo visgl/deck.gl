@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, {Component} from 'react';
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import App from 'v10-website-examples/radio/app';
 
 import {makeExample} from '../components';
@@ -12,12 +12,6 @@ import {makeExample} from '../components';
 class MultiViewDemo extends Component {
   /** Title shown above the example controls. */
   static title = 'Radio Stations in the United States';
-
-  /** Data sources loaded before rendering the demo. */
-  static data = {
-    url: `${DATA_URI}/radio-stations.txt`,
-    worker: '/workers/radio-data-decoder.js'
-  };
 
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/radio`;
@@ -44,12 +38,12 @@ class MultiViewDemo extends Component {
 
   /** Renders the Arrow demo with the current controls and data. */
   render() {
-    /** Provides params, data, ...other props for the example. */
-    const {params, data, ...otherProps} = this.props;
+    /** Passes website controls to the example. */
+    const {params, ...otherProps} = this.props;
     /** Provides show minimap for the example. */
     const showMinimap = params.showMinimap.value;
 
-    return <App {...otherProps} data={data} showMinimap={showMinimap} />;
+    return <App {...otherProps} showMinimap={showMinimap} />;
   }
 }
 

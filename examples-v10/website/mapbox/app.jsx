@@ -7,11 +7,10 @@ import {createRoot} from 'react-dom/client';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import {ArcLayer} from '@deck.gl/layers';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
-import {scaleLog} from 'd3-scale';
 import {cellToLatLng} from 'h3-js';
 import {load} from '@loaders.gl/core';
+import {LOG10} from '@math.gl/sql/math-functions';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {tableFromArrays} from 'apache-arrow';
 import {Map, NavigationControl, useControl, Layer} from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -20,15 +19,6 @@ const DATA_URL =
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
-const colorScale = scaleLog()
-  .domain([10, 100, 1000, 10000])
-  .range([
-    [255, 255, 178],
-    [254, 204, 92],
-    [253, 141, 60],
-    [227, 26, 28]
-  ]);
 
 const buildings3DLayer = {
   id: '3d-buildings',
@@ -49,7 +39,9 @@ function DeckGLOverlay(props) {
   return null;
 }
 
-export default function App({data}) {
+export default function App() {
+  /** Share the native Arrow table; GROUP BY runs on loaded data. */
+  const data = useMemo(() => load(DATA_URL, CSVLoader), []);
   const [selectedPOI, setSelectedPOI] = useState('8a283082aa17fff');
   const [firstLabelLayerId, setFirstLabelLayerId] = useState();
   const mapRef = useRef();
@@ -63,43 +55,42 @@ export default function App({data}) {
     return [lng, lat];
   }, [selectedPOI]);
 
-  /** Visitor rows used by the arc query regardless of the selected POI. */
-  const arcs = useMemo(
-    () =>
-      data &&
-      tableFromArrays({
-        hex: data.map(row => row.hex),
-        home_lng: Float64Array.from(data, row => row.home_lng),
-        home_lat: Float64Array.from(data, row => row.home_lat),
-        count: Float64Array.from(data, row => row.count)
-      }),
-    [data]
-  );
-
   /** Draws visitor trips for the selected POI. */
-  const arcLayer =
-    arcs &&
-    new ArcLayer({
-      id: 'deckgl-connections',
-      data: arcs,
-      query: `SELECT home_lng, home_lat, count WHERE hex = '${selectedPOI}'`,
-      getSourcePosition: selectedPOICentroid,
-      getTargetPosition: {sql: 'ARRAY_FLOAT64(home_lng, home_lat)'},
-      getSourceColor: [255, 0, 128],
-      getTargetColor: [0, 200, 255],
-      getWidth: {sql: 'CASE WHEN count > 30 THEN count / 15 ELSE 2 END'}
-    });
+  const arcLayer = new ArcLayer({
+    id: 'deckgl-connections',
+    // Sample row (hex,home_lng,home_lat,count): 8a28308148effff,-122.28443,37.78696,65
+    data,
+    query: `SELECT home_lng, home_lat, count WHERE hex = '${selectedPOI}'`,
+    getSourcePosition: selectedPOICentroid,
+    getTargetPosition: {sql: 'ARRAY_FLOAT64(home_lng, home_lat)'},
+    getSourceColor: [255, 0, 128],
+    getTargetColor: [0, 200, 255],
+    getWidth: {sql: 'CASE WHEN count > 30 THEN count / 15 ELSE 2 END'}
+  });
 
   const poiLayer = new H3HexagonLayer({
     id: 'deckgl-pois',
-    data: arcs,
+    // Sample row (hex,home_lng,home_lat,count): 8a28308148effff,-122.28443,37.78696,65
+    data,
     query: 'SELECT hex, SUM(count) AS count FROM data GROUP BY hex',
     opacity: 0.4,
     pickable: true,
     autoHighlight: true,
     onClick: ({object}) => object && setSelectedPOI(object.hex),
     getHexagon: {sql: 'hex'},
-    getFillColor: d => colorScale(d.count),
+    sqlFunctions: [LOG10],
+    // Interpolate the original yellow-to-red palette in log-count space.
+    getFillColor: {
+      sql: `\
+        RGBA8(
+          (CASE WHEN count < 1000 THEN 256 - LOG10(count)
+            ELSE 331 - 26 * LOG10(count) END) / 255,
+          (CASE WHEN count < 100 THEN 306 - 51 * LOG10(count)
+            WHEN count < 1000 THEN 330 - 63 * LOG10(count)
+            ELSE 486 - 115 * LOG10(count) END) / 255,
+          (CASE WHEN count < 100 THEN 264 - 86 * LOG10(count)
+            ELSE 156 - 32 * LOG10(count) END) / 255, 1)`
+    },
     extruded: false,
     stroked: false,
     beforeId: firstLabelLayerId
@@ -139,10 +130,5 @@ function getFirstLabelLayerId(style) {
 }
 
 export function renderToDOM(container) {
-  const root = createRoot(container);
-  root.render(<App />);
-
-  load(DATA_URL, CSVLoader, {csv: {shape: 'object-row-table'}}).then(data => {
-    root.render(<App data={data.data} />);
-  });
+  createRoot(container).render(<App />);
 }

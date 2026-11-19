@@ -18,7 +18,7 @@ import {TriangleProps, triangleUniforms} from './triangle-layer-uniforms';
 
 type _TriangleLayerProps = {
   data: {attributes: {positions: Buffer; texCoords: Buffer}};
-  colorDomain: Readonly<[number, number]>;
+  getColorDomain: () => Readonly<[number, number]>;
   aggregationMode: number;
   threshold: number;
   intensity: number;
@@ -86,7 +86,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     const {model} = this.state;
     const {
       aggregationMode,
-      colorDomain,
+      getColorDomain,
       intensity,
       threshold,
       colorTexture,
@@ -95,7 +95,8 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     } = this.props;
     const triangleProps: TriangleProps = {
       aggregationMode,
-      colorDomain,
+      // The mask effect can update the weight scale just before this draw.
+      colorDomain: getColorDomain(),
       intensity,
       threshold,
       colorTexture,

@@ -280,6 +280,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       vs,
       fs,
       source,
+      defines: {TERRAIN_COVER_BEFORE_LIGHTING: true},
       modules: [project32, color, phongMaterial, picking, simpleMeshUniforms]
     });
   }

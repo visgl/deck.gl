@@ -66,7 +66,6 @@ const testCases = [
   },
   {
     name: 'terrain-extension-drape',
-    skip: ['webgpu'],
     viewState: {
       longitude: -122.45,
       latitude: 37.75,
@@ -96,7 +95,6 @@ const testCases = [
     // No stroke: a draped PathLayer on GlobeView re-tessellates every frame, so the screenshot
     // never settles.
     name: 'terrain-extension-drape-fill-globe',
-    skip: ['webgpu'],
     views: new GlobeView({resolution: 36}),
     viewState: {
       longitude: -122.45,
