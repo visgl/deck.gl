@@ -4,12 +4,18 @@
 // Copyright (c) Deckgl Fiber Renderer contributors
 
 import 'client-only';
-import {assert, type Deck, type View} from '@deck.gl/core';
+import {
+  _releaseCanvasContext as releaseCanvasContext,
+  assert,
+  type Deck,
+  type View
+} from '@deck.gl/core';
 // Import the reconciler through its entry file, so the CommonJS build (`build-cjs.mjs`) makes this a
 // `require` of the `/reconciler` bundle: one instance of its roots, DevTools registration and error
 // boundary class. See `test/modules/react/fiber/cjs-entries.node.spec.ts`.
 import {
   createRoot,
+  roots,
   unmountAtNode,
   _RootErrorBoundary as RootErrorBoundary
 } from '../reconciler/index';
@@ -274,7 +280,13 @@ function createDeckGLComponent<Props, Instance extends DeckGLRenderer, MapT = ne
           detachOverlay();
           notifyDeckChange(null);
           overlay.current = null;
+          const deck = roots.get(rootElement)?.store.getState().deckgl;
           unmountAtNode(rootElement);
+          // React never reuses this canvas after unmount, so free the context Deck created for it
+          // once it is removed. Map overlays render to Deck's own canvas or the map's context.
+          if (deck && !isExternalOverlay) {
+            releaseCanvasContext(deck as Deck);
+          }
         };
       }
     }, [config.canvas]);

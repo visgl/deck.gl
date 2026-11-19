@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 import {createElement, useRef, useState, useMemo, useEffect, useImperativeHandle} from 'react';
-import {Deck} from '@deck.gl/core';
+import {Deck, _releaseCanvasContext as releaseCanvasContext} from '@deck.gl/core';
 import useIsomorphicLayoutEffect from './utils/use-isomorphic-layout-effect';
 
 import extractJSXLayers, {DeckGLRenderCallback} from './utils/extract-jsx-layers';
@@ -234,7 +234,14 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       canvas: canvasRef.current
     });
 
-    return () => thisRef.deck?.finalize();
+    return () => {
+      const deck = thisRef.deck;
+      if (deck) {
+        deck.finalize();
+        // React never reuses this canvas after unmount, so free its context once it is removed.
+        releaseCanvasContext(deck);
+      }
+    };
   }, []);
 
   useIsomorphicLayoutEffect(() => {

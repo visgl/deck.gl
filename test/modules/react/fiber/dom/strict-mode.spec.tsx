@@ -16,9 +16,6 @@ import {DeckGL} from '@deck.gl/react/dom/index';
 import {DeckGL as MapboxDeckGL} from '@deck.gl/react/dom/mapbox';
 import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/dom/maplibre';
 import {ScatterplotLayer} from '@deck.gl/react/wrappers/layers';
-import {releaseWebGLContextsAfterEach} from './webgl-contexts';
-
-releaseWebGLContextsAfterEach();
 
 const webglTest = navigator.userAgent.includes('jsdom') ? test.skip : test;
 

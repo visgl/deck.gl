@@ -15,6 +15,12 @@ import CanvasManager from './canvas-manager';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
+import {
+  type CreatedDevice,
+  loseCreatedDevice,
+  releaseCanvas,
+  retainCanvas
+} from './release-device-context';
 import {VERSION} from './init';
 
 import {luma} from '@luma.gl/core';
@@ -412,6 +418,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     getEventRoot: canvas => this._getEventRoot(canvas)
   });
   private _ownedCanvas: HTMLCanvasElement | null = null;
+  /**
+   * The device Deck created, if the app passed neither `device` nor `gl`. Kept after `finalize()`
+   * for a canvas the app passed, so `_releaseCanvasContext` can release it.
+   * @internal
+   */
+  _createdDevice: CreatedDevice | null = null;
   private _pickRequest: {
     mode: string;
     event: MjolnirPointerEvent | null;
@@ -538,6 +550,17 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this._ownedCanvas = null;
     }
     this._canvasContext = null;
+
+    // Free the WebGL context of a device Deck created. Deck removed its own canvas above, so
+    // nothing can render to it again. A canvas the app passed is the app's to release, with
+    // `_releaseCanvasContext`.
+    if (this._createdDevice) {
+      releaseCanvas(this._createdDevice.canvas);
+      if (this._createdDevice.ownsCanvas) {
+        loseCreatedDevice(this._createdDevice);
+        this._createdDevice = null;
+      }
+    }
   }
 
   /** Partially update props */
@@ -1512,8 +1535,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       alphaMode: this.props.deviceProps?.type === 'webgpu' ? 'premultiplied' : undefined
     };
 
+    const canvas = this._createDeviceCanvas(props);
+
     // Create the "best" device supported from the registered adapters
-    return luma.createDevice({
+    const device = luma.createDevice({
       // luma by default throws if a device is already attached
       // asynchronous device creation could happen after finalize() is called
       // TODO - createDevice should support AbortController?
@@ -1525,11 +1550,19 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       createCanvasContext: {
         ...defaultCanvasProps,
         ...canvasContextProps,
-        canvas: this._createDeviceCanvas(props),
+        canvas,
         useDevicePixels: this.props.useDevicePixels,
         autoResize: true
       }
     });
+    retainCanvas(canvas);
+    this._createdDevice = {
+      canvas,
+      device,
+      // An OffscreenCanvas in multi-canvas mode is always Deck's own.
+      ownsCanvas: canvas === this._ownedCanvas || !(canvas instanceof HTMLCanvasElement)
+    };
+    return device;
   }
 
   // Get the most relevant view state: props.viewState, if supplied, shadows internal viewState
