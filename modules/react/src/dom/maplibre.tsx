@@ -6,7 +6,7 @@ import 'client-only';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import type {MapLibreOverlayProps} from '@deck.gl/maplibre';
 import {attachControl, type ControlHostLike} from './attach-control';
-import {createDeckGL} from '../index'; // so CommonJS shares the root entry's copy
+import {createDeckGL} from '../index';
 import type {DeckGLRootProps} from '../types/index';
 
 /** Props accepted by the MapLibre-overlay React Fiber root. */
