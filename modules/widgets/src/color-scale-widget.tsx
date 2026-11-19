@@ -10,6 +10,7 @@ import {
   type WidgetProps
 } from '@deck.gl/core';
 import {render} from 'preact';
+import {useState} from 'preact/hooks';
 
 /** Options for the experimental automatic SQL color legend. */
 export type ColorScaleWidgetProps = WidgetProps & {
@@ -21,6 +22,8 @@ export type ColorScaleWidgetProps = WidgetProps & {
   label?: string;
   /** Starting significant digits for numeric labels (1–21). Defaults to 2. */
   precision?: number;
+  /** Layout of categorical swatches. Defaults to a vertical list. */
+  categoricalLayout?: 'vertical' | 'wrap';
 };
 
 /** One resolved scale and the layer accessor that produced it. */
@@ -41,13 +44,19 @@ const SCALE_TYPE_LABELS: Record<ResolvedScale['descriptor']['type'], string> = {
   sqrt: 'Square root',
   log: 'Logarithmic',
   symlog: 'Symmetric log',
-  sequential: 'Continuous',
+  sequential: 'continuous',
   diverging: 'Diverging',
   ordinal: 'Categorical',
   quantize: 'Quantized',
-  quantile: 'Quantile',
+  quantile: 'quantile',
   threshold: 'Threshold',
   piecewise: 'Piecewise'
+};
+
+/** Explains the scale types shown in the compact legend. */
+const SCALE_TYPE_DESCRIPTIONS: Partial<Record<ResolvedScale['descriptor']['type'], string>> = {
+  sequential: 'Interpolates colors along a continuous ramp.',
+  quantile: 'Places breaks so each interval contains roughly the same number of observations.'
 };
 
 /** Converts an accessor identifier to a readable label for layers with several scales. */
@@ -75,16 +84,93 @@ function formatScaleNumbers(boundaries: number[], precision: number): (value: nu
   return formatter.format;
 }
 
+/** Displays a formatted value with its sampled color. */
+function ColorSample({
+  label,
+  color,
+  type
+}: {
+  label: string;
+  color: string;
+  type: ResolvedScale['descriptor']['type'];
+}) {
+  return (
+    <span className="deck-color-scale-sample">
+      <span className="deck-color-scale-sample-value">
+        <span
+          className="deck-color-scale-swatch"
+          aria-hidden="true"
+          style={{backgroundColor: color}}
+        />
+        {label}
+      </span>
+      <small>{SCALE_TYPE_LABELS[type]}</small>
+      {SCALE_TYPE_DESCRIPTIONS[type] && (
+        <span className="deck-color-scale-description">{SCALE_TYPE_DESCRIPTIONS[type]}</span>
+      )}
+    </span>
+  );
+}
+
+/** Shows the sampled input value and its color as the pointer moves across the ramp. */
+function ColorRamp({
+  scale,
+  minimum,
+  maximum,
+  format
+}: {
+  scale: ResolvedScale;
+  minimum: number;
+  maximum: number;
+  format: (value: number) => string;
+}) {
+  const [value, setValue] = useState<number | null>(null);
+  const samples = Array.from({length: 33}, (_, index) => {
+    const fraction = index / 32;
+    return cssColor(scale.sample(minimum * (1 - fraction) + maximum * fraction));
+  });
+  return (
+    <div
+      className="deck-color-scale-ramp"
+      style={{background: `linear-gradient(to right, ${samples.join(', ')})`}}
+      onPointerMove={event => {
+        const {left, width} = event.currentTarget.getBoundingClientRect();
+        const fraction = Math.max(0, Math.min(1, (event.clientX - left) / width));
+        setValue(minimum * (1 - fraction) + maximum * fraction);
+      }}
+      onPointerLeave={() => setValue(null)}
+    >
+      {value !== null && (
+        <ColorSample
+          label={format(value)}
+          color={cssColor(scale.sample(value))}
+          type={scale.descriptor.type}
+        />
+      )}
+    </div>
+  );
+}
+
 /** Renders category swatches, discrete intervals, or a sampled continuous ramp. */
-function ColorLegend({scale, precision}: {scale: ResolvedScale; precision: number}) {
+function ColorLegend({
+  scale,
+  precision,
+  categoricalLayout
+}: {
+  scale: ResolvedScale;
+  precision: number;
+  categoricalLayout: ColorScaleWidgetProps['categoricalLayout'];
+}) {
+  const [hoveredBin, setHoveredBin] = useState<number | null>(null);
   const {domain, thresholds, type} = scale.descriptor;
   if (type === 'ordinal') {
     return (
-      <ul>
+      <ul className={categoricalLayout === 'wrap' ? 'deck-color-scale-categories-wrap' : undefined}>
         {domain.map(value => (
           <li key={String(value)}>
             <span
               className="deck-color-scale-swatch"
+              title={String(value)}
               style={{backgroundColor: cssColor(scale.sample(value))}}
             />
             {String(value)}
@@ -102,26 +188,47 @@ function ColorLegend({scale, precision}: {scale: ResolvedScale; precision: numbe
     if (type === 'quantile') {
       const labels = boundaries.map(format);
       const binCount = thresholds.length + 1;
-      const labelWidth = Math.ceil(1.5 * Math.max(...labels.map(label => label.length))) + 1;
+      const bins = boundaries.slice(0, -1).map((lower, index) => {
+        const upper = boundaries[index + 1];
+        const color = cssColor(scale.sample(lower / 2 + upper / 2));
+        return {color, description: `${format(lower)} – ${format(upper)}`};
+      });
       return (
-        <div className="deck-color-scale-quantile" tabIndex={0} aria-label="Quantile scale">
-          <div style={{minWidth: `${labelWidth * binCount}ch`}}>
-            <div className="deck-color-scale-bins">
-              {boundaries.slice(0, -1).map((lower, index) => (
+        <div className="deck-color-scale-quantile-legend">
+          {hoveredBin !== null && bins[hoveredBin] && (
+            <ColorSample
+              label={bins[hoveredBin].description}
+              color={bins[hoveredBin].color}
+              type={type}
+            />
+          )}
+          <div className="deck-color-scale-quantile" aria-label="Quantile scale">
+            <div className="deck-color-scale-bins" onPointerLeave={() => setHoveredBin(null)}>
+              {bins.map(({color, description}, index) => (
                 <span
                   key={index}
-                  style={{
-                    backgroundColor: cssColor(scale.sample(lower / 2 + boundaries[index + 1] / 2))
-                  }}
+                  aria-label={description}
+                  onPointerEnter={() => setHoveredBin(index)}
+                  style={{backgroundColor: color}}
                 />
               ))}
             </div>
             <div className="deck-color-scale-breaks">
-              {labels.map((label, index) => (
-                <span key={index} style={{left: `${(100 * index) / binCount}%`}}>
-                  {label}
-                </span>
-              ))}
+              {labels.map((label, index) => {
+                const endpoint = index === 0 || index === binCount;
+                return (
+                  <span
+                    key={index}
+                    title={label}
+                    style={{
+                      left: `${(100 * index) / binCount}%`,
+                      maxWidth: `calc(${(endpoint ? 50 : 100) / binCount}% - 1px)`
+                    }}
+                  >
+                    {label}
+                  </span>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -135,6 +242,7 @@ function ColorLegend({scale, precision}: {scale: ResolvedScale; precision: numbe
             <li key={index}>
               <span
                 className="deck-color-scale-swatch"
+                title={`${format(lower)} – ${format(upper)}`}
                 style={{backgroundColor: cssColor(scale.sample(lower / 2 + upper / 2))}}
               />
               {`${format(lower)} – ${format(upper)}`}
@@ -145,16 +253,9 @@ function ColorLegend({scale, precision}: {scale: ResolvedScale; precision: numbe
     );
   }
 
-  const samples = Array.from({length: 33}, (_, index) => {
-    const fraction = index / 32;
-    return cssColor(scale.sample(minimum * (1 - fraction) + maximum * fraction));
-  });
   return (
     <>
-      <div
-        className="deck-color-scale-ramp"
-        style={{background: `linear-gradient(to right, ${samples.join(', ')})`}}
-      />
+      <ColorRamp scale={scale} minimum={minimum} maximum={maximum} format={format} />
       <div className="deck-color-scale-domain">
         <span>{format(minimum)}</span>
         <span>{format(maximum)}</span>
@@ -171,7 +272,8 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
     id: 'color-scale',
     label: 'Legend',
     viewId: null,
-    precision: 2
+    precision: 2,
+    categoricalLayout: 'vertical' as const
   };
   /** Root CSS class for the legend. */
   className = 'deck-widget-color-scale';
@@ -264,14 +366,22 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
               this.expanded = event.currentTarget.open;
             }}
           >
-            <summary>{this.props.label}</summary>
+            <summary>
+              {this.props.label}
+              <span className="deck-color-scale-caret" aria-hidden="true" />
+            </summary>
             {this.entries.map(({layerId, accessor, label, scale}) => (
-              <div key={JSON.stringify([layerId, accessor])}>
+              <div className="deck-color-scale-entry" key={JSON.stringify([layerId, accessor])}>
                 <div className="deck-color-scale-heading">
                   <span>{label}</span>
-                  <small>{SCALE_TYPE_LABELS[scale.descriptor.type]}</small>
                 </div>
-                <ColorLegend scale={scale} precision={this.props.precision} />
+                <div className="deck-color-scale-body">
+                  <ColorLegend
+                    scale={scale}
+                    precision={this.props.precision}
+                    categoricalLayout={this.props.categoricalLayout}
+                  />
+                </div>
               </div>
             ))}
           </details>
