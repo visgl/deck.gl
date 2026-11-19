@@ -27,9 +27,19 @@ type LegendEntry = {
   layerId: string;
   /** Name of the SQL accessor that supplies colors. */
   accessor: string;
+  /** Name shown above this scale in the panel. */
+  label: string;
   /** Resolved descriptor and sampler used to render the legend. */
   scale: ResolvedScale;
 };
+
+/** Converts an accessor identifier to a readable label for layers with several scales. */
+function formatAccessorLabel(accessor: string): string {
+  return accessor
+    .replace(/^get(?=[A-Z])/, '')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .toLowerCase();
+}
 
 /** Converts a normalized color sample into a CSS color. */
 function cssColor(sample: ReturnType<ResolvedScale['sample']>): string {
@@ -151,13 +161,15 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
         }
       }
     }
-    const entries = [...layers].flatMap(layer =>
-      Object.entries(layer._getResolvedColorScales() ?? {}).map(([accessor, scale]) => ({
+    const entries = [...layers].flatMap(layer => {
+      const scales = Object.entries(layer._getResolvedColorScales() ?? {});
+      return scales.map(([accessor, scale]) => ({
         layerId: layer.id,
         accessor,
+        label: scales.length === 1 ? layer.id : `${layer.id} · ${formatAccessorLabel(accessor)}`,
         scale
-      }))
-    );
+      }));
+    });
     const height = Math.max(
       0,
       ...viewports.map(viewport => viewport.height + (this.viewId ? 0 : viewport.y))
@@ -170,6 +182,7 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
         return (
           entry.layerId === previous.layerId &&
           entry.accessor === previous.accessor &&
+          entry.label === previous.label &&
           entry.scale === previous.scale
         );
       })
@@ -191,11 +204,9 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
           }}
         >
           <strong>{this.props.label}</strong>
-          {this.entries.map(({layerId, accessor, scale}) => (
+          {this.entries.map(({layerId, accessor, label, scale}) => (
             <div key={JSON.stringify([layerId, accessor])}>
-              <div>
-                {layerId} · {accessor}
-              </div>
+              <div>{label}</div>
               <ColorLegend scale={scale} />
             </div>
           ))}

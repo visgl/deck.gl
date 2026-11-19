@@ -55,8 +55,9 @@ test('_ColorScaleWidget respects screen filters and its attached viewport', asyn
     const widgetRoot = tester.findElements('.deck-widget-color-scale')[0];
     expect(getComputedStyle(widgetRoot).display).toBe('none');
     tester.setProps({layerFilter: () => true});
-    await vi.waitFor(() => expect(legend()?.textContent).toContain('readings · getFillColor'));
+    await vi.waitFor(() => expect(legend()?.textContent).toContain('readings'));
     expect(legend()?.textContent).not.toContain('hidden-child');
+    expect(legend()?.textContent).not.toContain('getFillColor');
     expect(tester.findElements('.deck-color-scale-domain')[0]?.textContent).toBe('010');
 
     const panel = legend() as HTMLElement;
@@ -98,9 +99,26 @@ test('_ColorScaleWidget includes a composite scale when one of its children is d
   /** Reads the currently rendered legend panels. */
   const legends = () => tester.findElements('.deck-widget-color-scale section');
   try {
-    await vi.waitFor(() => expect(legends()[0]?.textContent).toContain('counties · getFillColor'));
+    await vi.waitFor(() => expect(legends()[0]?.textContent).toContain('counties'));
     tester.setProps({layerFilter: () => false});
     await vi.waitFor(() => expect(legends()).toHaveLength(0));
+  } finally {
+    tester.destroy();
+  }
+});
+
+test('_ColorScaleWidget labels multiple scales with readable names', async () => {
+  const layer = makeReadings().clone({
+    stroked: true,
+    getLineColor: {sql: "SCALE_COLOR(value, DOMAIN(value), PALETTE('#0000ff', '#ff0000'))"}
+  });
+  const tester = new WidgetTester({layers: [layer], widgets: [new _ColorScaleWidget()]});
+  try {
+    await vi.waitFor(() => {
+      const label = tester.findElements('.deck-widget-color-scale section')[0]?.textContent;
+      expect(label).toContain('readings · fill color');
+      expect(label).toContain('readings · line color');
+    });
   } finally {
     tester.destroy();
   }
