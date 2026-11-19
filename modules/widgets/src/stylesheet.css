@@ -656,6 +656,7 @@
 }
 
 .deck-widget-color-scale section {
+  position: relative;
   cursor: default;
   background: var(--menu-background, #fff);
   backdrop-filter: var(--menu-backdrop-filter, unset);
@@ -663,15 +664,14 @@
   box-shadow: var(--menu-shadow, none);
   border-radius: 4px;
   box-sizing: border-box;
-  overflow: auto;
   pointer-events: auto;
   overscroll-behavior: contain;
   padding: 8px 12px;
   font-size: 10px;
-  width: min(290px, calc(100vw - 24px));
+  width: 290px;
 }
-.deck-widget-color-scale section:has(.deck-color-scale-sample) {
-  overflow: visible;
+.deck-widget-color-scale details {
+  overflow: auto;
 }
 
 .deck-widget-color-scale summary {
@@ -717,6 +717,7 @@
 .deck-color-scale-heading > span {
   display: block;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .deck-widget-color-scale ul {
@@ -755,8 +756,8 @@
 }
 .deck-color-scale-sample {
   position: absolute;
-  right: 0;
-  bottom: 100%;
+  right: 4px;
+  top: 4px;
   padding: 2px 4px;
   background-color: #fff;
   color: rgb(24, 24, 26);
@@ -772,7 +773,7 @@
 .deck-color-scale-sample {
   z-index: 1;
   width: max-content;
-  max-width: 18em;
+  max-width: min(18em, calc(100% - 8px));
   white-space: normal;
 }
 

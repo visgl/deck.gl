@@ -67,9 +67,10 @@ test('_ColorScaleWidget respects screen filters and its attached viewport', asyn
     const style = getComputedStyle(panel);
     expect(style.backgroundColor).toBe('rgb(1, 2, 3)');
     expect(style.color).toBe('rgb(4, 5, 6)');
-    expect(style.overflowY).toBe('auto');
+    const scrollport = panel.querySelector('details')!;
+    expect(getComputedStyle(scrollport).overflowY).toBe('auto');
     expect(style.pointerEvents).toBe('auto');
-    expect(style.maxHeight).toBe('376px');
+    expect(getComputedStyle(scrollport).maxHeight).toBe('360px');
     expect(getComputedStyle(widgetRoot).display).not.toBe('none');
 
     const disclosure = panel.querySelector('details')!;
@@ -189,13 +190,16 @@ test('_ColorScaleWidget formats numeric labels and aligns them below quantile br
     const bins = () => tester.findElements('.deck-color-scale-bins > span');
     expect(bins()).toHaveLength(2);
     expect(bins()[0].getAttribute('aria-label')).toMatch(/^1\.2 – 6\.8$/);
-    bins()[0].dispatchEvent(new PointerEvent('pointerenter'));
+    (bins()[0] as HTMLElement).focus();
     await vi.waitFor(() =>
       expect(tester.findElements('.deck-color-scale-sample-value')[0]?.textContent).toMatch(
         /^1\.2 – 6\.8$/
       )
     );
-    expect(tester.findElements('.deck-color-scale-sample small')[0]?.textContent).toBe('quantile');
+    const tooltip = tester.findElements('.deck-color-scale-sample')[0];
+    expect(tooltip.closest('details')).toBeNull();
+    expect(getComputedStyle(bins()[0].closest('details')!).overflowY).toBe('auto');
+    expect(tooltip.querySelector('small')?.textContent).toBe('quantile');
     expect(tester.findElements('.deck-color-scale-description')[0]?.textContent).toContain(
       'same number of observations'
     );

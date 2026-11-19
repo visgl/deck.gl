@@ -10,6 +10,7 @@ import {
   type WidgetProps
 } from '@deck.gl/core';
 import {render} from 'preact';
+import {createPortal} from 'preact/compat';
 import {useState} from 'preact/hooks';
 
 /** Options for the experimental automatic SQL color legend. */
@@ -88,13 +89,15 @@ function formatScaleNumbers(boundaries: number[], precision: number): (value: nu
 function ColorSample({
   label,
   color,
-  type
+  type,
+  panel
 }: {
   label: string;
   color: string;
   type: ResolvedScale['descriptor']['type'];
+  panel: HTMLElement;
 }) {
-  return (
+  return createPortal(
     <span className="deck-color-scale-sample">
       <span className="deck-color-scale-sample-value">
         <span
@@ -108,7 +111,8 @@ function ColorSample({
       {SCALE_TYPE_DESCRIPTIONS[type] && (
         <span className="deck-color-scale-description">{SCALE_TYPE_DESCRIPTIONS[type]}</span>
       )}
-    </span>
+    </span>,
+    panel
   );
 }
 
@@ -124,7 +128,8 @@ function ColorRamp({
   maximum: number;
   format: (value: number) => string;
 }) {
-  const [value, setValue] = useState<number | null>(null);
+  const [hover, setHover] = useState<{fraction: number; panel: HTMLElement} | null>(null);
+  const value = hover ? minimum * (1 - hover.fraction) + maximum * hover.fraction : minimum;
   const samples = Array.from({length: 33}, (_, index) => {
     const fraction = index / 32;
     return cssColor(scale.sample(minimum * (1 - fraction) + maximum * fraction));
@@ -136,15 +141,19 @@ function ColorRamp({
       onPointerMove={event => {
         const {left, width} = event.currentTarget.getBoundingClientRect();
         const fraction = Math.max(0, Math.min(1, (event.clientX - left) / width));
-        setValue(minimum * (1 - fraction) + maximum * fraction);
+        const panel = event.currentTarget.closest('section');
+        if (panel) {
+          setHover({fraction, panel});
+        }
       }}
-      onPointerLeave={() => setValue(null)}
+      onPointerLeave={() => setHover(null)}
     >
-      {value !== null && (
+      {hover && (
         <ColorSample
           label={format(value)}
           color={cssColor(scale.sample(value))}
           type={scale.descriptor.type}
+          panel={hover.panel}
         />
       )}
     </div>
@@ -161,7 +170,9 @@ function ColorLegend({
   precision: number;
   categoricalLayout: ColorScaleWidgetProps['categoricalLayout'];
 }) {
-  const [hoveredBin, setHoveredBin] = useState<number | null>(null);
+  const [hoveredBin, setHoveredBin] = useState<{index: number; panel: HTMLElement} | null>(null);
+  const [focusedBin, setFocusedBin] = useState<{index: number; panel: HTMLElement} | null>(null);
+  const activeBin = hoveredBin ?? focusedBin;
   const {domain, thresholds, type} = scale.descriptor;
   if (type === 'ordinal') {
     return (
@@ -195,11 +206,12 @@ function ColorLegend({
       });
       return (
         <div className="deck-color-scale-quantile-legend">
-          {hoveredBin !== null && bins[hoveredBin] && (
+          {activeBin && bins[activeBin.index] && (
             <ColorSample
-              label={bins[hoveredBin].description}
-              color={bins[hoveredBin].color}
+              label={bins[activeBin.index].description}
+              color={bins[activeBin.index].color}
               type={type}
+              panel={activeBin.panel}
             />
           )}
           <div className="deck-color-scale-quantile" aria-label="Quantile scale">
@@ -208,7 +220,20 @@ function ColorLegend({
                 <span
                   key={index}
                   aria-label={description}
-                  onPointerEnter={() => setHoveredBin(index)}
+                  tabIndex={0}
+                  onPointerEnter={event => {
+                    const panel = event.currentTarget.closest('section');
+                    if (panel) {
+                      setHoveredBin({index, panel});
+                    }
+                  }}
+                  onFocus={event => {
+                    const panel = event.currentTarget.closest('section');
+                    if (panel) {
+                      setFocusedBin({index, panel});
+                    }
+                  }}
+                  onBlur={() => setFocusedBin(null)}
                   style={{backgroundColor: color}}
                 />
               ))}
@@ -279,6 +304,8 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
   className = 'deck-widget-color-scale';
   /** Available height in CSS pixels. */
   private viewHeight = 0;
+  /** Available width in CSS pixels. */
+  private viewWidth = 0;
   /** Whether the viewer left the legend contents expanded. */
   private expanded = true;
   /** Scales displayed by the most recent redraw. */
@@ -331,7 +358,12 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
       0,
       ...viewports.map(viewport => viewport.height + (this.viewId ? 0 : viewport.y))
     );
+    const width = Math.max(
+      0,
+      ...viewports.map(viewport => viewport.width + (this.viewId ? 0 : viewport.x))
+    );
     if (
+      this.viewWidth === width &&
       this.viewHeight === height &&
       entries.length === this.entries.length &&
       entries.every((entry, index) => {
@@ -347,6 +379,7 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
       return;
     this.entries = entries;
     this.viewHeight = height;
+    this.viewWidth = width;
     this.updateHTML();
   }
 
@@ -357,11 +390,14 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
         <section
           aria-label={this.props.label}
           style={{
-            maxHeight: `max(0px, calc(${this.viewHeight}px - 2 * var(--widget-margin, 12px)))`
+            maxWidth: `max(0px, calc(${this.viewWidth}px - 2 * var(--widget-margin, 12px)))`
           }}
         >
           <details
             open={this.expanded}
+            style={{
+              maxHeight: `max(0px, calc(${this.viewHeight}px - 2 * var(--widget-margin, 12px) - 16px))`
+            }}
             onToggle={event => {
               this.expanded = event.currentTarget.open;
             }}
