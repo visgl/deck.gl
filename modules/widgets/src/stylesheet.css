@@ -651,6 +651,10 @@
   white-space: normal;
 }
 
+.deck-widget-color-scale:empty {
+  display: none;
+}
+
 .deck-widget-color-scale section {
   background: var(--menu-background, #fff);
   backdrop-filter: var(--menu-backdrop-filter, unset);

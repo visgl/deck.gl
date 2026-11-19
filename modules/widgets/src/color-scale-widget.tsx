@@ -113,7 +113,7 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
   /** Root CSS class for the legend. */
   className = 'deck-widget-color-scale';
   /** Available height in CSS pixels. */
-  private maxHeight = 0;
+  private viewHeight = 0;
   /** Scales displayed by the most recent redraw. */
   private entries: LegendEntry[] = [];
 
@@ -162,9 +162,8 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
       0,
       ...viewports.map(viewport => viewport.height + (this.viewId ? 0 : viewport.y))
     );
-    const maxHeight = Math.max(0, height - 16);
     if (
-      this.maxHeight === maxHeight &&
+      this.viewHeight === height &&
       entries.length === this.entries.length &&
       entries.every((entry, index) => {
         const previous = this.entries[index];
@@ -177,7 +176,7 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
     )
       return;
     this.entries = entries;
-    this.maxHeight = maxHeight;
+    this.viewHeight = height;
     this.updateHTML();
   }
 
@@ -185,7 +184,12 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
   override onRenderHTML(rootElement: HTMLElement): void {
     render(
       this.entries.length ? (
-        <section aria-label={this.props.label} style={{maxHeight: this.maxHeight}}>
+        <section
+          aria-label={this.props.label}
+          style={{
+            maxHeight: `max(0px, calc(${this.viewHeight}px - 2 * var(--widget-margin, 12px)))`
+          }}
+        >
           <strong>{this.props.label}</strong>
           {this.entries.map(({layerId, accessor, scale}) => (
             <div key={JSON.stringify([layerId, accessor])}>

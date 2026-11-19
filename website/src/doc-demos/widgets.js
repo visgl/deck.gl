@@ -549,7 +549,7 @@ export function ColorScaleWidgetDemo() {
       getRadius: 7
     })
   ], []);
-  const widgets = useMemo(() => [new _ColorScaleWidget({placement: 'bottom-right'})], []);
+  const widgets = useMemo(() => [new _ColorScaleWidget()], []);
   return <NonGeoDemoBase views={new OrthographicView()} layers={layers} widgets={widgets} />;
 }
 

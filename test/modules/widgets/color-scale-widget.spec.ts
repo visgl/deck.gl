@@ -52,6 +52,8 @@ test('_ColorScaleWidget respects screen filters and its attached viewport', asyn
     await vi.waitFor(() => expect(layer._getResolvedColorScales()).toBeDefined());
     await tester.idle();
     expect(legend()).toBeUndefined();
+    const widgetRoot = tester.findElements('.deck-widget-color-scale')[0];
+    expect(getComputedStyle(widgetRoot).display).toBe('none');
     tester.setProps({layerFilter: () => true});
     await vi.waitFor(() => expect(legend()?.textContent).toContain('readings · getFillColor'));
     expect(legend()?.textContent).not.toContain('hidden-child');
@@ -66,10 +68,12 @@ test('_ColorScaleWidget respects screen filters and its attached viewport', asyn
     expect(style.color).toBe('rgb(4, 5, 6)');
     expect(style.overflowY).toBe('auto');
     expect(style.pointerEvents).toBe('auto');
-    expect(panel.style.maxHeight).toBe('384px');
+    expect(style.maxHeight).toBe('376px');
+    expect(getComputedStyle(widgetRoot).display).not.toBe('none');
 
     tester.setProps({layerFilter: () => false});
     await vi.waitFor(() => expect(legend()).toBeUndefined());
+    expect(getComputedStyle(widgetRoot).display).toBe('none');
   } finally {
     tester.destroy();
   }
