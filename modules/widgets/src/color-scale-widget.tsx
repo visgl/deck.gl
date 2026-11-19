@@ -147,11 +147,7 @@ function ColorLegend({scale, format}: {scale: ResolvedScale; format: (value: num
   );
 }
 
-/**
- * Shows the SQL color scales of currently visible layers.
- *
- * @remarks Experimental widget. Its options and behavior may change.
- */
+/** Experimental widget that shows SQL color scales for currently visible layers. */
 export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
   /** Default identifier and accessible heading. */
   static defaultProps = {
