@@ -166,7 +166,20 @@ test('_ColorScaleWidget labels multiple scales with readable names', async () =>
       tooltip().querySelector<HTMLElement>('.deck-color-scale-swatch')?.style.backgroundColor
     ).toBe(color);
     expect(color).toMatch(/^rgb/);
+    const bin = tester.findElements('.deck-color-scale-bins > span')[0] as HTMLElement;
+    bin.focus();
+    await vi.waitFor(() => {
+      const focusedTooltip = tester.findElements(
+        '.deck-color-scale-sample[data-input="keyboard"]'
+      )[0];
+      expect(getComputedStyle(focusedTooltip).display).toBe('none');
+    });
     ramp.dispatchEvent(new PointerEvent('pointerleave'));
+    await vi.waitFor(() => {
+      expect(tooltip()?.getAttribute('data-input')).toBe('keyboard');
+      expect(getComputedStyle(tooltip()).display).not.toBe('none');
+    });
+    bin.blur();
     await vi.waitFor(() => expect(tooltip()).toBeUndefined());
   } finally {
     tester.destroy();

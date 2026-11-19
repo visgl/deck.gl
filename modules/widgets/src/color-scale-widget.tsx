@@ -90,15 +90,17 @@ function ColorSample({
   label,
   color,
   type,
-  panel
+  panel,
+  fromKeyboard = false
 }: {
   label: string;
   color: string;
   type: ResolvedScale['descriptor']['type'];
   panel: HTMLElement;
+  fromKeyboard?: boolean;
 }) {
   return createPortal(
-    <span className="deck-color-scale-sample">
+    <span className="deck-color-scale-sample" data-input={fromKeyboard ? 'keyboard' : 'pointer'}>
       <span className="deck-color-scale-sample-value">
         <span
           className="deck-color-scale-swatch"
@@ -212,6 +214,7 @@ function ColorLegend({
               color={bins[activeBin.index].color}
               type={type}
               panel={activeBin.panel}
+              fromKeyboard={!hoveredBin}
             />
           )}
           <div className="deck-color-scale-quantile" aria-label="Quantile scale">

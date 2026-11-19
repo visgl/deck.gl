@@ -777,6 +777,11 @@
   white-space: normal;
 }
 
+.deck-widget-color-scale section:has(.deck-color-scale-sample[data-input='pointer'])
+  .deck-color-scale-sample[data-input='keyboard'] {
+  display: none;
+}
+
 .deck-color-scale-sample-value {
   display: flex;
   align-items: center;
