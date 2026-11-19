@@ -6,7 +6,7 @@ layers and widgets.
 
 ```tsx
 import {Deck, MapView} from '@deck.gl/core';
-import {DeckCanvas} from '@deck.gl-community/react-fiber';
+import {DeckCanvas} from '@deck.gl/react';
 import {useEffect, useRef, useState} from 'react';
 
 function Panels({londonLayers, tokyoLayers}) {

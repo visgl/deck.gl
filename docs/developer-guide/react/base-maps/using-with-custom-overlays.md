@@ -5,13 +5,13 @@ the same factory to bring your own overlay: a deck.gl overlay for a host map tha
 root in this package. Examples of such hosts include the Leaflet and Bing Maps integrations in
 this repository:
 
-- [`@deck.gl-community/leaflet`](../../../leaflet/README.md) and its
-  [`DeckOverlay`](../../../leaflet/api-reference/deck-overlay.md)
-- [`@deck.gl-community/bing-maps`](../../../bing-maps/README.md) and its
-  [`DeckOverlay`](../../../bing-maps/api-reference/deck-overlay.md)
+- [`@deck.gl-community/leaflet`](https://visgl.github.io/deck.gl-community/docs/modules/leaflet) and its
+  [`DeckOverlay`](https://visgl.github.io/deck.gl-community/docs/modules/leaflet/api-reference/deck-overlay)
+- [`@deck.gl-community/bing-maps`](https://visgl.github.io/deck.gl-community/docs/modules/bing-maps) and its
+  [`DeckOverlay`](https://visgl.github.io/deck.gl-community/docs/modules/bing-maps/api-reference/deck-overlay)
 
 [Using with maps](../using-with-maps.md) describes the behavior shared by every overlay root. The
-[DeckGL API](../../api-reference/deckgl.md#custom-compatible-overlays) defines the factory options.
+[DeckGL API](../../../api-reference/react/deckgl.md#custom-compatible-overlays) defines the factory options.
 
 ## Overlay requirements
 
@@ -32,7 +32,7 @@ Create the component once, at module scope, never during render. Creating it dur
 React remount the root on every render.
 
 ```tsx
-import {createDeckGL} from '@deck.gl-community/react-fiber';
+import {createDeckGL} from '@deck.gl/react';
 
 const DeckGL = createDeckGL({
   createExternalOverlay: props => new MyCompatibleOverlay({...props})
@@ -82,14 +82,14 @@ custom overlay root. JSX `<deckView>` descriptors reach the overlay only when th
 > This recipe is untested and may change.
 
 `@deck.gl/arcgis` does not provide a `setProps` and `finalize` overlay. Its
-[`DeckLayer`](https://deck.gl/docs/api-reference/arcgis/deck-layer) is an ArcGIS layer for a 2D
+[`DeckLayer`](../../../api-reference/arcgis/deck-layer.md) is an ArcGIS layer for a 2D
 `MapView`, whose deck.gl props are set through `layer.deck`. A small adapter lets `createDeckGL`
 drive it, and `attach` adds the layer to the ArcGIS map:
 
 ```tsx
 import {DeckLayer} from '@deck.gl/arcgis';
 import type ArcGISMap from '@arcgis/core/Map';
-import {createDeckGL} from '@deck.gl-community/react-fiber';
+import {createDeckGL} from '@deck.gl/react';
 
 const ArcGISDeckGL = createDeckGL({
   createExternalOverlay: props => {

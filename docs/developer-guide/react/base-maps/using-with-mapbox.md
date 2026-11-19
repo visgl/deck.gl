@@ -2,27 +2,27 @@
 
 | Import path | deck.gl overlay | Overlaid | Interleaved | React Map GL |
 | --- | --- | --- | --- | --- |
-| `@deck.gl-community/react-fiber/mapbox` | [`MapboxOverlay`](https://deck.gl/docs/api-reference/mapbox/mapbox-overlay) | ✓ | ✓ | ✓ |
+| `@deck.gl/react/mapbox` | [`MapboxOverlay`](../../../api-reference/mapbox/mapbox-overlay.md) | ✓ | ✓ | ✓ |
 
 [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/) is a JavaScript library for building web
 maps. The `/mapbox` provider root creates a
-[`MapboxOverlay`](https://deck.gl/docs/api-reference/mapbox/mapbox-overlay) from
-[`@deck.gl/mapbox`](https://deck.gl/docs/api-reference/mapbox/overview) and renders its JSX
+[`MapboxOverlay`](../../../api-reference/mapbox/mapbox-overlay.md) from
+[`@deck.gl/mapbox`](../../../api-reference/mapbox/overview.md) and renders its JSX
 layers into it. The application owns the Mapbox map and attaches the overlay to it.
 [Using with maps](../using-with-maps.md) describes the shared provider-root behavior and lifecycle.
 
-deck.gl's [Using with Mapbox](https://deck.gl/docs/developer-guide/base-maps/using-with-mapbox)
+deck.gl's [Using with Mapbox](../../base-maps/using-with-mapbox.md)
 guide covers the same integration without React Fiber.
 
 ## Integration modes
 
 - **Interleaved:** pass `interleaved` to render deck.gl layers into the Mapbox WebGL2 context. See
   deck.gl's
-  [interleaved mode](https://deck.gl/docs/developer-guide/base-maps/using-with-mapbox#interleaved)
+  [interleaved mode](../../base-maps/using-with-mapbox.md#interleaved)
   description, including its compatibility and limitations.
 - **Overlaid:** omit `interleaved`, or pass `false`, to render deck.gl into its own canvas inside
   the Mapbox controls container. See deck.gl's
-  [overlaid mode](https://deck.gl/docs/developer-guide/base-maps/using-with-mapbox#overlaid)
+  [overlaid mode](../../base-maps/using-with-mapbox.md#overlaid)
   description.
 - **Reverse controlled:** provider roots do not support this mode. See
   [Using with maps](../using-with-maps.md#reverse-controlled-maps).
@@ -52,7 +52,7 @@ Give Mapbox options to React Map GL. Its callback ref stores the map in state.
 ```tsx
 import {useState} from 'react';
 import Map, {type MapRef} from 'react-map-gl/mapbox';
-import {DeckGL} from '@deck.gl-community/react-fiber/mapbox';
+import {DeckGL} from '@deck.gl/react/mapbox';
 
 export function MapboxMap() {
   const [map, setMap] = useState<MapRef | null>(null);
@@ -80,7 +80,7 @@ renders no DOM node, so the container remains valid for Mapbox.
 ```tsx
 import {useEffect, useRef, useState} from 'react';
 import mapboxgl from 'mapbox-gl';
-import {DeckGL} from '@deck.gl-community/react-fiber/mapbox';
+import {DeckGL} from '@deck.gl/react/mapbox';
 
 export function ManualMapboxMap() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -126,7 +126,7 @@ hold the wrong instance. Pass the map in `map` instead.
 ### Mapbox token and alternatives
 
 Mapbox GL JS requires a Mapbox access token. deck.gl's guide explains how to
-[provide the token](https://deck.gl/docs/developer-guide/base-maps/using-with-mapbox#mapbox-token)
+[provide the token](../../base-maps/using-with-mapbox.md#mapbox-token)
 and lists
-[alternatives to the Mapbox base map service](https://deck.gl/docs/developer-guide/base-maps/using-with-mapbox#alternatives-to-mapbox-basemap-sevice),
-including [MapLibre](./using-with-maplibre.md).
+[alternatives to the Mapbox base map service](../../base-maps/using-with-mapbox.md#alternatives-to-mapbox-basemap-sevice),
+including [MapLibre](using-with-maplibre.md).

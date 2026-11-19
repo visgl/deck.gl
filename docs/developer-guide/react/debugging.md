@@ -29,7 +29,7 @@ At the same levels, deck.gl logs its side:
 | 2 | `Updating ScatterplotLayer({id: 'points'}) because: dataChanged`, `Updating 3 deck layers` | A layer was updated, and which change caused it |
 | 4 | `Matched ScatterplotLayer({id: 'points'}), state transfered`, `... does not need update` | A layer was matched with the previous render |
 
-deck.gl's lifecycle messages are only in development builds. To get them in a production build, see deck.gl's [Debugging](https://deck.gl/docs/developer-guide/debugging) page, which also covers GPU-level debugging with luma.gl.
+deck.gl's lifecycle messages are only in development builds. To get them in a production build, see deck.gl's [Debugging](../debugging.md) page, which also covers GPU-level debugging with luma.gl.
 
 The `debug` prop on `DeckGL` is passed to deck.gl unchanged. It does not turn on React Fiber's logs.
 
@@ -37,7 +37,7 @@ The `debug` prop on `DeckGL` is passed to deck.gl unchanged. It does not turn on
 
 If `Initializing` and `Finalizing` appear for the same layer on every render, deck.gl can't match it with its previous version. Usually the layer has no stable `id`. deck.gl matches layers by `id`, so a missing or changing one rebuilds the layer and its GPU resources every time.
 
-Outside production builds, React Fiber warns `ScatterplotLayer needs a stable id` when a layer or view keeps deck.gl's default id. deck.gl warns `Multiple new layers with same id` when two layers share one. See [Native elements](../api-reference/native-elements.md).
+Outside production builds, React Fiber warns `ScatterplotLayer needs a stable id` when a layer or view keeps deck.gl's default id. deck.gl warns `Multiple new layers with same id` when two layers share one. See [Native elements](../../api-reference/react/native-elements.md).
 
 ## React DevTools
 
@@ -55,4 +55,4 @@ Errors that deck.gl raises at runtime take a different path. A layer whose data 
 <DeckGL onError={(error, layer) => reportError(error, {layer: layer?.id})}>{/* ... */}</DeckGL>
 ```
 
-So an app that wants to catch every error needs both: an error boundary around `DeckGL` for errors from the React tree, and `onError` for errors from deck.gl. This matches `@deck.gl/react`, where `onError` also carries only deck.gl's errors.
+So an app that wants to catch every error needs both: an error boundary around `DeckGL` for errors from the React tree, and `onError` for errors from deck.gl. This matches `@deck.gl/react/legacy`, where `onError` also carries only deck.gl's errors.
