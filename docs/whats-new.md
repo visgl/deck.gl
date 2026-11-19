@@ -49,7 +49,7 @@ _v10.0 should be thought of as a pre-release. We wanted to get the new capabilit
 
 - **Normalized colors** — Set `normalizedColors` to use RGB values from 0 to 1.
 - **Color scales** — Map data values to colors.
-- **ColorScaleWidget** 🚧 — Display a color scale as a legend.
+- [`_ColorScaleWidget`](./api-reference/widgets/color-scale-widget.md) 🧪 displays legends for SQL color scales on visible layers.
 
 ### React
 
