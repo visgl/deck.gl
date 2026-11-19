@@ -11,7 +11,7 @@ import type {Device} from '@luma.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {animate} from 'popmotion';
-import {tableFromArrays} from 'apache-arrow';
+import {Field, Float64, List, tableFromArrays, vectorFromArray} from 'apache-arrow';
 
 import type {Position, Color, LayerData, Material, MapViewState} from '@deck.gl/core';
 
@@ -89,10 +89,19 @@ type Trip = {
 /** Preserves one Arrow row per trip for both JSON loading and the website decoder. */
 function toTripTable<LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT {
   const trips = source as Trip[];
+  const pointType = new List(new Field('coordinate', new Float64()));
+  const pathType = new List(new Field('point', pointType));
+  const timestampsType = new List(new Field('timestamp', new Float64()));
   return tableFromArrays({
     vendor: Int32Array.from(trips, trip => trip.vendor),
-    path: trips.map(trip => trip.path),
-    timestamps: trips.map(trip => trip.timestamps)
+    path: vectorFromArray(
+      trips.map(trip => trip.path),
+      pathType
+    ),
+    timestamps: vectorFromArray(
+      trips.map(trip => trip.timestamps),
+      timestampsType
+    )
   }) as LayerDataT;
 }
 
