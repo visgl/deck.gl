@@ -78,10 +78,12 @@ function finalizeOwnedDeck(deck: Deck): void {
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
 webglTest('Deck#creates an explicitly requested WebGL device', async () => {
+  const adapters = [webgpuAdapter];
+  Object.freeze(adapters);
   const deck = new Deck({
     width: 1,
     height: 1,
-    deviceProps: {type: 'webgl'},
+    deviceProps: {type: 'webgl', adapters},
     initialViewState: {longitude: 0, latitude: 0, zoom: 0}
   });
   try {
