@@ -34,6 +34,7 @@ export function _CustomProjectionView({
   return renderView(new DeckCustomProjectionView(props), children);
 }
 
+/** Renders `FirstPersonView` from `@deck.gl/core`; takes the view's props. Elements nested in it are not assigned to the view. */
 export function FirstPersonView({
   children,
   ...props
@@ -41,6 +42,7 @@ export function FirstPersonView({
   return renderView(new DeckFirstPersonView(props), children);
 }
 
+/** Renders `_GlobeView` from `@deck.gl/core`; takes the view's props. Elements nested in it are not assigned to the view. */
 export function _GlobeView({
   children,
   ...props
@@ -48,10 +50,12 @@ export function _GlobeView({
   return renderView(new DeckGlobeView(props), children);
 }
 
+/** Renders `MapView` from `@deck.gl/core`; takes the view's props. Elements nested in it are not assigned to the view. */
 export function MapView({children, ...props}: MapViewProps & {children?: ReactNode}): ReactElement {
   return renderView(new DeckMapView(props), children);
 }
 
+/** Renders `OrbitView` from `@deck.gl/core`; takes the view's props. Elements nested in it are not assigned to the view. */
 export function OrbitView({
   children,
   ...props
@@ -59,6 +63,7 @@ export function OrbitView({
   return renderView(new DeckOrbitView(props), children);
 }
 
+/** Renders `OrthographicView` from `@deck.gl/core`; takes the view's props. Elements nested in it are not assigned to the view. */
 export function OrthographicView({
   children,
   ...props
