@@ -1,13 +1,13 @@
 # @deck.gl/react
 
-This module integrates deck.gl with React. First-time deck.gl developers may find it helpful to read [Using deck.gl with React](../../get-started/using-with-react.md) before getting started.
+This module integrates deck.gl with React. First-time deck.gl developers may find it helpful to read [Using deck.gl with React](../../../get-started/using-with-react.md) before getting started.
 
 This module contains the following:
 
 ### React Components
 
 - [\<DeckGL/>](./deckgl.md)
-- Widgets in the [`@deck.gl/widgets`](../widgets/overview.md) module are re-exported as React components in this module.
+- Widgets in the [`@deck.gl/widgets`](../../widgets/overview.md) module are re-exported as React components in this module.
   - e.g. `import { ZoomWidget } from '@deck.gl/react';`
 
 ### React Hooks
@@ -43,7 +43,7 @@ import {DeckGL, ZoomWidget} from '@deck.gl/react/legacy';
 
 ## Using React-wrapped Widgets
 
-Here's a typical example of how to switch from using pure-js widgets in the [`@deck.gl/widgets`](../widgets/overview.md) module to their React-equivalent:
+Here's a typical example of how to switch from using pure-js widgets in the [`@deck.gl/widgets`](../../widgets/overview.md) module to their React-equivalent:
 
 ```diff
 -import { ZoomWidget } from '@deck.gl/widgets';
