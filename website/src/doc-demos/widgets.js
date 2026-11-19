@@ -27,7 +27,7 @@ import {
 } from '@deck.gl/widgets';
 import { MapView, OrthographicView, OrbitView } from '@deck.gl/core';
 import { DeckGL } from '@deck.gl/react';
-import { ScatterplotLayer, GeoJsonLayer, IconLayer, TextLayer } from '@deck.gl/layers';
+import { ScatterplotLayer, GeoJsonLayer, IconLayer, PolygonLayer, TextLayer } from '@deck.gl/layers';
 import { SimpleMeshLayer } from '@deck.gl/mesh-layers';
 import { MVTLayer } from '@deck.gl/geo-layers';
 import { Map } from 'react-map-gl/maplibre';
@@ -537,20 +537,50 @@ export function ThemeWidgetDemo() {
 export function ScaleWidgetDemo() {
   return <GeoDemoBase map mapLabels widgets={[new ScaleWidget({placement: 'top-left'})]} />
 }
-/** Demonstrates discovery and updates using a real SQL color scale. */
+/** Creates a compact choropleth with adjoining districts and sample canopy coverage. */
+function makeCanopyDistricts() {
+  const junctions = [
+    [[-122, -64], [-66, -81], [-7, -78], [59, -69], [105, -49]],
+    [[-136, -21], [-69, -30], [-13, -16], [49, -23], [119, -9]],
+    [[-127, 27], [-76, 22], [-4, 32], [55, 20], [125, 38]],
+    [[-101, 65], [-58, 77], [0, 68], [68, 78], [108, 66]]
+  ];
+  const path = Array.from({length: 12}, (_, index) => {
+    const row = Math.floor(index / 4);
+    const col = index % 4;
+    return [
+      ...junctions[row][col],
+      ...junctions[row][col + 1],
+      ...junctions[row + 1][col + 1],
+      ...junctions[row + 1][col]
+    ];
+  });
+  return tableFromArrays({path, coverage: [17, 26, 54, 74, 22, 38, 61, 81, 31, 45, 66, 89]});
+}
+
+/** Demonstrates discovery of a quantile SQL color scale on a polygon layer. */
 export function ColorScaleWidgetDemo() {
   const layers = useMemo(() => [
-    new ScatterplotLayer({
-      id: 'Readings',
-      data: tableFromArrays({x: [-60, -40, -20, 0, 20, 40, 60], reading: [0, 1, 2, 3, 4, 5, 6]}),
+    new PolygonLayer({
+      id: 'Tree canopy (%)',
+      data: makeCanopyDistricts(),
       coordinateSystem: 'cartesian',
-      getPosition: {sql: 'ARRAY_FLOAT64(x, 0)'},
-      getFillColor: {sql: "SCALE_COLOR(reading, DOMAIN(reading), PALETTE('viridis'))"},
-      getRadius: 7
+      positionFormat: 'XY',
+      getPolygon: {sql: 'path'},
+      getFillColor: {sql: "SCALE_QUANTILE(coverage, 5, PALETTE('viridis'))"},
+      getLineColor: [240, 244, 252],
+      lineWidthMinPixels: 2,
+      pickable: true,
+      autoHighlight: true
     })
   ], []);
   const widgets = useMemo(() => [new _ColorScaleWidget()], []);
-  return <NonGeoDemoBase views={new OrthographicView()} layers={layers} widgets={widgets} />;
+  return <NonGeoDemoBase
+    views={new OrthographicView()}
+    layers={layers}
+    widgets={widgets}
+    getTooltip={({object}) => object && `Tree canopy: ${object.coverage}%`}
+  />;
 }
 
 export function SplitterWidgetDemo() {

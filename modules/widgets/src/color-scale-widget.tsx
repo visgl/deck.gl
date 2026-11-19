@@ -33,6 +33,24 @@ type LegendEntry = {
   scale: ResolvedScale;
 };
 
+/** Short legend labels for each scale classification. */
+const SCALE_TYPE_LABELS: Record<ResolvedScale['descriptor']['type'], string> = {
+  linear: 'Linear',
+  sqrt: 'Square root',
+  log: 'Logarithmic',
+  symlog: 'Symmetric log',
+  sequential: 'Continuous',
+  diverging: 'Diverging',
+  ordinal: 'Categorical',
+  quantize: 'Quantized',
+  quantile: 'Quantile',
+  threshold: 'Threshold',
+  piecewise: 'Piecewise'
+};
+
+/** Keeps displayed boundaries readable without changing the underlying scale. */
+const SCALE_NUMBER_FORMAT = new Intl.NumberFormat(undefined, {maximumSignificantDigits: 6});
+
 /** Converts an accessor identifier to a readable label for layers with several scales. */
 function formatAccessorLabel(accessor: string): string {
   return accessor
@@ -81,7 +99,7 @@ function ColorLegend({scale}: {scale: ResolvedScale}) {
                 className="deck-color-scale-swatch"
                 style={{backgroundColor: cssColor(scale.sample(lower / 2 + upper / 2))}}
               />
-              {`${lower} – ${upper}`}
+              {`${SCALE_NUMBER_FORMAT.format(lower)} – ${SCALE_NUMBER_FORMAT.format(upper)}`}
             </li>
           );
         })}
@@ -100,8 +118,8 @@ function ColorLegend({scale}: {scale: ResolvedScale}) {
         style={{background: `linear-gradient(to right, ${samples.join(', ')})`}}
       />
       <div className="deck-color-scale-domain">
-        <span>{minimum}</span>
-        <span>{maximum}</span>
+        <span>{SCALE_NUMBER_FORMAT.format(minimum)}</span>
+        <span>{SCALE_NUMBER_FORMAT.format(maximum)}</span>
       </div>
     </>
   );
@@ -214,7 +232,10 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
             <summary>{this.props.label}</summary>
             {this.entries.map(({layerId, accessor, label, scale}) => (
               <div key={JSON.stringify([layerId, accessor])}>
-                <div>{label}</div>
+                <div className="deck-color-scale-heading">
+                  <span>{label}</span>
+                  <small>{SCALE_TYPE_LABELS[scale.descriptor.type]}</small>
+                </div>
                 <ColorLegend scale={scale} />
               </div>
             ))}

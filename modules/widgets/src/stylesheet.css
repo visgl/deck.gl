@@ -673,6 +673,13 @@
   font-weight: 600;
 }
 
+.deck-color-scale-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
 .deck-widget-color-scale ul {
   list-style: none;
   padding: 0;

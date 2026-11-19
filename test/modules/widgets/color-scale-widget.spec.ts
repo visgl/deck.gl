@@ -119,7 +119,7 @@ test('_ColorScaleWidget includes a composite scale when one of its children is d
 test('_ColorScaleWidget labels multiple scales with readable names', async () => {
   const layer = makeReadings().clone({
     stroked: true,
-    getLineColor: {sql: "SCALE_COLOR(value, DOMAIN(value), PALETTE('#0000ff', '#ff0000'))"}
+    getLineColor: {sql: "SCALE_QUANTILE(value, 2, PALETTE('#0000ff', '#ff0000'))"}
   });
   const tester = new WidgetTester({layers: [layer], widgets: [new _ColorScaleWidget()]});
   try {
@@ -127,6 +127,9 @@ test('_ColorScaleWidget labels multiple scales with readable names', async () =>
       const label = tester.findElements('.deck-widget-color-scale section')[0]?.textContent;
       expect(label).toContain('readings · fill color');
       expect(label).toContain('readings · line color');
+      expect(
+        tester.findElements('.deck-color-scale-heading small').map(item => item.textContent)
+      ).toEqual(['Continuous', 'Quantile']);
     });
   } finally {
     tester.destroy();
