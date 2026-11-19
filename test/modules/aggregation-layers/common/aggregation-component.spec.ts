@@ -14,12 +14,13 @@ const data = [
 ];
 
 test('Aggregation descriptors retain output until accessor triggers change', () => {
+  const slot = {};
   const first = new GridAggregation({data, getWeight: d => d.weight});
-  first.updateComponent(null, () => {});
+  first.updateComponent(slot, null, () => {});
   const bins = first.bins;
   expect(bins[0].value).toBe(5);
   const second = new GridAggregation({data, getWeight: d => d.weight * 2});
-  second.updateComponent(first, () => {});
+  second.updateComponent(slot, first, () => {});
   expect(second.bins).toBe(bins);
   first.finalizeComponent();
   expect(second.internalState!.component).toBe(second);
@@ -28,7 +29,7 @@ test('Aggregation descriptors retain output until accessor triggers change', () 
     getWeight: d => d.weight * 2,
     updateTriggers: {getWeight: 1}
   });
-  third.updateComponent(second, () => {});
+  third.updateComponent(slot, second, () => {});
   expect(third.bins[0].value).toBe(10);
   expect(third.bins).not.toBe(bins);
   third.finalizeComponent();

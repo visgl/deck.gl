@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {CompositeLayer, Layer, UpdateParameters} from '@deck.gl/core';
+import {CompositeLayer, Layer, LayerContext, UpdateParameters} from '@deck.gl/core';
 import {GridAggregation} from './aggregation';
 
 /** POC host for a Cartesian grid computation and an ordinary rendering layer. */
@@ -23,13 +23,14 @@ export class AggregatedLayer extends CompositeLayer<{
 
   updateState(params: UpdateParameters<this>): void {
     super.updateState(params);
-    this.props.aggregation.updateComponent(this.state.aggregation, () =>
+    this.props.aggregation.updateComponent(this.state, this.state.aggregation, () =>
       this.getCurrentLayer()?.setNeedsUpdate()
     );
     this.state.aggregation = this.props.aggregation;
   }
 
-  finalizeState(): void {
+  finalizeState(context: LayerContext): void {
+    super.finalizeState(context);
     this.state.aggregation?.finalizeComponent();
   }
 

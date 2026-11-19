@@ -417,6 +417,10 @@ test('Deck#useDevicePixels forwards to canvas context', async () => {
     // Numeric overrides should flow through unchanged so luma can size the drawing buffer.
     deck.setProps({useDevicePixels: 2});
     expect(useDevicePixels, 'numeric DPR override is forwarded').toBe(2);
+
+    // Explicitly undefined resets the canvas context to the default.
+    deck.setProps({useDevicePixels: undefined});
+    expect(useDevicePixels, 'undefined resets to default').toBe(true);
   } finally {
     deck.finalize();
   }
@@ -1481,6 +1485,54 @@ test('Deck#props omitted are unchanged', async () => {
                   'Layers remain set'
                 ).toBe(1);
 
+                deck.finalize();
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            }
+          });
+        } catch (error) {
+          reject(error);
+        }
+      }
+    });
+  });
+});
+
+test('Deck#props explicitly undefined use defaults', async () => {
+  await new Promise<void>((resolve, reject) => {
+    const deck = new Deck({
+      device,
+      width: 1,
+      height: 1,
+
+      viewState: {
+        longitude: 0,
+        latitude: 0,
+        zoom: 0
+      },
+
+      layers: [],
+
+      // e.g. `onAfterRender: debug ? callback : undefined`
+      onAfterRender: undefined,
+      onBeforeRender: () => {},
+
+      onLoad: () => {
+        try {
+          expect(deck.props.onAfterRender, 'onAfterRender falls back to default').toBe(
+            Deck.defaultProps.onAfterRender
+          );
+
+          deck.setProps({
+            onBeforeRender: undefined,
+            // Only called if rendering did not stop after the first frame
+            onAfterRender: () => {
+              try {
+                expect(deck.props.onBeforeRender, 'onBeforeRender restored to default').toBe(
+                  Deck.defaultProps.onBeforeRender
+                );
                 deck.finalize();
                 resolve();
               } catch (error) {

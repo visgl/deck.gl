@@ -96,13 +96,15 @@ function projectGlobeMeterOffsetsToFlatCommon(
   }
   // project.commonOrigin: sphere position of the coordinate origin
   const originCommon = viewport.projectPosition(origin);
-  // project_get_orientation_matrix(commonOrigin)
+  // project_get_orientation_matrix(commonOrigin): east, north and up
   const uz = vec3.normalize([] as number[], originCommon);
-  const ux = Math.abs(uz[2]) === 1 ? [1, 0, 0] : vec3.normalize([] as number[], [uz[1], -uz[0], 0]);
+  const horizontalLength = Math.hypot(uz[0], uz[1]);
+  const ux =
+    horizontalLength > 0 ? [-uz[1] / horizontalLength, uz[0] / horizontalLength, 0] : [1, 0, 0];
   const uy = vec3.cross([] as number[], uz, ux);
-  // enuMatrix * vec3(-x, -y, z) * metersToCommon
+  // enuMatrix * vec3(x, y, z) * metersToCommon
   const displaced = [0, 1, 2].map(
-    i => originCommon[i] + (ux[i] * -x + uy[i] * -y + uz[i] * z) * GLOBE_METERS_TO_COMMON
+    i => originCommon[i] + (ux[i] * x + uy[i] * y + uz[i] * z) * GLOBE_METERS_TO_COMMON
   );
   // project_globe_to_mercator_
   const lngLatZ = viewport.unprojectPosition(displaced);

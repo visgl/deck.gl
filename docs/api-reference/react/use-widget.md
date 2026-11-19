@@ -73,4 +73,4 @@ Returns:
 
 ## Source
 
-[modules/react/src/utils/use-widget.ts](https://github.com/visgl/deck.gl/blob/master/modules/react/src/utils/use-widget.ts)
+[modules/react/src/legacy/utils/use-widget.ts](https://github.com/visgl/deck.gl/blob/master/modules/react/src/legacy/utils/use-widget.ts)

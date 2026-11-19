@@ -83,20 +83,28 @@ The table below covers the public layer exports from the layer packages. It is d
 - `A5Layer` inherits its WebGPU rendering from `PolygonLayer` and supports both bigint and hexadecimal A5 cell identifiers.
 - `Tile3DLayer` supports point-cloud, glTF scenegraph, and I3S mesh tile content on WebGPU.
 
+ScreenGridLayer and GridLayer can aggregate on the GPU with automatic domains and picking
+metadata. GridLayer also supports percentile filtering and quantile/ordinal color scales.
+CPU-facing metadata uses asynchronous snapshots; explicit-domain rendering without picking
+or distribution scales keeps the result path on the GPU.
+
 ## Extensions
 
-The table below covers the public extensions in `@deck.gl/extensions`. Most remain WebGL-only because they rely on GLSL shader injections, GLSL-only shader modules, or extra render/picking passes that have not been ported to WebGPU. `BrushingExtension` and `ClipExtension` support standard rendering primitives on WebGPU. Custom and aggregation-specific shaders still need compatible hooks.
+The table below covers the public extensions in `@deck.gl/extensions`. All listed extensions support WebGPU. Custom shaders need compatible hooks. ScreenGridLayer and GridLayer execute compatible extension hooks on input points before reduction; DataFilterExtension filtering and ClipExtension are covered by aggregation regression tests.
 
 | Module | Extension | WebGL | WebGPU |
 | --- | --- | --- | --- |
 | `@deck.gl/extensions` | `BrushingExtension` | ✅ | ✅ |
-| `@deck.gl/extensions` | `DataFilterExtension` | ✅ | ✅ Filtering; `countItems` requires WebGL |
+| `@deck.gl/extensions` | `DataFilterExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `Fp64Extension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `PathStyleExtension` | ✅ | ✅ |
-| `@deck.gl/extensions` | `FillStyleExtension` | ✅ | ❌ |
+| `@deck.gl/extensions` | `FillStyleExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `ClipExtension` | ✅ | ✅ |
-| `@deck.gl/extensions` | `CollisionFilterExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `MaskExtension` | ✅ | ❌ |
+| `@deck.gl/extensions` | `CollisionFilterExtension` | ✅ | ✅ |
+| `@deck.gl/extensions` | `MaskExtension` | ✅ | ✅ |
+| `@deck.gl/extensions` | `TerrainExtension` | ✅ | ✅ |
+
+`TerrainExtension` supports both `terrainDrawMode` values on WebGPU. Terrain sources used for offset fitting must report their elevation range. See the [terrain extension reference](../api-reference/extensions/terrain-extension.md#limitations).
 
 ## Effects
 
@@ -113,7 +121,7 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 | --- | --- | --- |
 | Views | 🚧 | The core `project` and `project32` shader modules have WGSL ports, so standard view/projection paths should work. |
 | Picking | ✅ | `Deck` does **async** picking on WebGPU, including hover and click picking paths. |
-| Shader injection targets / layer extensions | 🚧 | `ClipExtension` uses ShaderPlugins on standard primitives; other extensions still require migration. |
+| Shader injection targets / layer extensions | 🚧 | Public extensions support WebGPU. Custom shaders need compatible hooks. |
 | GPU transforms | 🚧 | Underlying GPU transform APIs are evolving, but deck.gl still has transform-gated tests and no documented WebGPU support for transform-based workflows. |
 | Constant attributes | ✅  | `AttributeManager` now materializes constant attributes into full buffers on WebGPU as a compatibility path for layers that rely on constant accessors. |
 | Attribute transitions | 🚧 | Some layers disable transitions on WebGPU, and transition utilities still contain WebGL-specific buffer read paths. |

@@ -4,7 +4,9 @@
 
 import {WebGLBinSorter} from './webgl-bin-sorter';
 import {WebGLAggregationTransform} from './webgl-aggregation-transform';
-import {_deepEqual as deepEqual, log, BinaryAttribute} from '@deck.gl/core';
+import {_deepEqual as deepEqual, log} from '@deck.gl/core';
+
+import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
 
 import type {Aggregator, AggregationProps, AggregatedBin} from '../aggregator';
 import type {Device, Buffer, BufferLayout, TypedArray} from '@luma.gl/core';
@@ -73,8 +75,8 @@ export class WebGLAggregator implements Aggregator {
   protected aggregationTransform: WebGLAggregationTransform;
 
   /** Cached outputs */
-  protected binIds: BinaryAttribute | null = null;
-  protected results: BinaryAttribute[] = [];
+  protected binIds: GPUVector | null = null;
+  protected results: GPUVector[] = [];
 
   constructor(device: Device, props: WebGLAggregatorProps) {
     this.device = device;
@@ -94,33 +96,50 @@ export class WebGLAggregator implements Aggregator {
     this.setProps(props);
   }
 
-  getBins(): BinaryAttribute | null {
+  /** Returns borrowed bin IDs, valid until the next resize or destruction. */
+  getBins(): GPUVector | null {
     const buffer = this.aggregationTransform.binBuffer;
     if (!buffer) {
       return null;
     }
-    if (this.binIds?.buffer !== buffer) {
-      // deck.gl Attribute.setBinaryValue uses shallow comparison to determine if attribute value has changed
-      // For performance, only create a new binary attribute descriptor when Buffer changes
-      this.binIds = {buffer, type: 'float32', size: this.dimensions};
+    if (
+      !this.binIds ||
+      getGPUVectorData(this.binIds).buffer !== buffer ||
+      this.binIds.length !== this.binCount
+    ) {
+      this.binIds?.destroy();
+      this.binIds = new GPUVector({
+        type: 'buffer',
+        name: 'binIds',
+        buffer,
+        format: this.dimensions === 1 ? 'float32' : 'float32x2',
+        length: this.binCount,
+        byteStride: this.dimensions * 4,
+        ownsBuffer: false
+      });
     }
     return this.binIds;
   }
 
-  /** Returns an accessor to the output for a given channel. */
-  getResult(channel: 0 | 1 | 2): BinaryAttribute | null {
+  /** Returns a borrowed scalar view of a channel, valid until the next resize or destruction. */
+  getResult(channel: 0 | 1 | 2): GPUVector | null {
     const buffer = this.aggregationTransform.valueBuffer;
     if (!buffer || channel >= this.channelCount) {
       return null;
     }
-    if (this.results[channel]?.buffer !== buffer) {
-      this.results[channel] = {
+    const result = this.results[channel];
+    if (!result || getGPUVectorData(result).buffer !== buffer || result.length !== this.binCount) {
+      result?.destroy();
+      this.results[channel] = new GPUVector({
+        type: 'buffer',
+        name: `value${channel}`,
         buffer,
-        type: 'float32',
-        size: 1,
-        stride: this.channelCount * 4,
-        offset: channel * 4
-      };
+        format: 'float32',
+        length: this.binCount,
+        byteStride: this.channelCount * 4,
+        byteOffset: channel * 4,
+        ownsBuffer: false
+      });
     }
     return this.results[channel];
   }
@@ -167,6 +186,12 @@ export class WebGLAggregator implements Aggregator {
 
   /** Release GPU resources */
   destroy() {
+    this.binIds?.destroy();
+    this.binIds = null;
+    for (const result of this.results) {
+      result?.destroy();
+    }
+    this.results = [];
     this.binSorter.destroy();
     this.aggregationTransform.destroy();
   }
@@ -187,6 +212,11 @@ export class WebGLAggregator implements Aggregator {
       } else {
         const [[x0, x1], [y0, y1]] = binIdRange;
         this.binCount = (x1 - x0) * (y1 - y0);
+      }
+
+      // Degenerate cell sizes can produce non-finite ranges; expose an empty output.
+      if (!Number.isFinite(this.binCount) || this.binCount < 0) {
+        this.binCount = 0;
       }
 
       this.binSorter.setDimensions(this.binCount, binIdRange);

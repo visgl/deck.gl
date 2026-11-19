@@ -1,23 +1,8 @@
 # Stateful components and declarative aggregation (POC)
 
-Repeated construction should describe new props without recreating retained resources.
-This draft introduces `StatefulComponent` between `Component` and `Layer`, then uses it
-for an independently diffed Cartesian grid computation.
-
-## Boundaries
-
-`Component` keeps its existing props/defaults/clone responsibilities. `StatefulComponent`
-adds retained state, state adoption, existing deck.gl prop comparisons, and explicit
-owner-driven update/finalize hooks. `Layer` delegates state transfer and prop comparisons
-to that base while retaining its established scheduling, attribute invalidation, transitions,
-projection handling, and rendering lifecycle. This is an incremental extraction; layer
-initialization and finalization have not been routed through the new component hooks.
-
-The host calls `updateComponent(previous, requestUpdate)`. Matching ID and constructor
-preserve resources; replacements finalize the previous component. Async-prop completion
-requests another host update. Old descriptors retain references for asynchronous work but
-cannot finalize the current descriptor's resources. Descriptors are owned by one host slot;
-sharing one live stateful descriptor between owners is outside this prototype.
+Apps recreate layer descriptors on each render. deck.gl retains their GPU resources and
+reruns work when props change. This proposal gives other descriptors the same contract.
+In this example, `_GridAggregation` keeps its result when only the `ColumnLayer` props change.
 
 ## Example
 
@@ -50,6 +35,23 @@ is an ordinary ColumnLayer. New aggregation descriptors with equivalent props pr
 output identity; accessor changes use updateTriggers, exactly as layer accessors do.
 Rendering-only changes do not rerun aggregation. IDs are local to the owning slot.
 
+## Boundaries
+
+`Component` handles props, defaults, and cloning. `StatefulComponent` shares state transfer
+and prop comparison between layers and aggregations. `Layer` continues to manage scheduling,
+attributes, transitions, and rendering through its existing lifecycle.
+
+Aggregations use `OwnedComponent` to add explicit update and finalize hooks. The host calls
+`updateComponent(slot, previous, requestUpdate)` with a stable identity for each slot.
+Matching ID and constructor preserve resources. Replacing the descriptor finalizes the
+previous instance when its ID or class differs. Async-prop completion requests another host
+update. A live descriptor can belong to only one slot. Hosts that manage lists match IDs
+and select the previous descriptor for each slot.
+
+This POC adopts the layer model, where a new descriptor takes on the previous instance's state.
+`WidgetManager` and `EffectManager` retain their current instances and update them with `setProps`.
+Which lifecycle fits other consumers remains open.
+
 ## Other consumers
 
 Widgets could retain DOM resources, controllers could retain interaction state, effects
@@ -64,7 +66,7 @@ extension descriptor may be shared by multiple layers.
 
 ## Deliberately open in this draft
 
-- Context typing and owner identity, including rejecting accidental multi-owner adoption
+- Context typing for owners
 - Error recovery and asynchronous initialization/disposal
 - Whether component hooks should use a typed state parameter instead of public mutable state
 - Completing the extraction of Layer initialization/finalization without changing behavior

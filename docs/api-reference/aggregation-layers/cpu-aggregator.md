@@ -87,6 +87,22 @@ aggregator.setProps({
 });
 ```
 
+## ReadbackAggregator
+
+`ReadbackAggregator` runs CPU aggregation on GPU column inputs, for example to compare
+CPU and GPU aggregation on the same buffers. Import it from `@deck.gl/aggregation-layers`.
+
+Takes the [CPUAggregator constructor props](#constructor), plus:
+
+- `weightAttributes` (string[]) — Attribute names read by `getValue`, in channel order. One name per channel.
+
+Positions must be single-chunk `float32x2` or `float32x3` vectors; weights must be scalar
+`float32` vectors. Buffers require `COPY_SRC` usage. Strided/interleaved columns work.
+
+The layer initializes and owns the adapter. Input buffers remain caller-owned.
+Calling `update()` after destruction throws; create a new instance when switching back to CPU.
+See the [CPU/GPU comparison example](./aggregator.md#comparing-gpu-and-cpu-aggregation-with-the-same-inputs).
+
 ## Source
 
 [modules/aggregation-layers/src/common/aggregator/cpu-aggregator/cpu-aggregator.ts](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/common/aggregator/cpu-aggregator/cpu-aggregator.ts)

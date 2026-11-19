@@ -14,6 +14,7 @@ import type {Framebuffer, RenderPass} from '@luma.gl/core';
 import type {WebGLDevice} from '@luma.gl/core/webgl';
 import type {NumberArray4} from '@math.gl/core';
 
+import {normalizeByteColor4} from '@luma.gl/shaders';
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
@@ -56,6 +57,8 @@ export type LayersPassRenderOptions = {
   clearStack?: boolean;
   clearCanvas?: boolean;
   clearColor?: number[];
+  /** Interpret View clear colors as 0–1. */
+  normalizedColors?: boolean;
   /** Color write channels for layer pipelines and WebGL attachment clears. */
   colorMask?: number;
   scissorRect?: number[];
@@ -181,7 +184,8 @@ export default class LayersPass extends Pass {
                   view,
                   pass,
                   layers: options.layers,
-                  isPicking: options.isPicking
+                  isPicking: options.isPicking,
+                  normalizedColors: options.normalizedColors
                 },
                 drawLayerParams
               );
@@ -295,7 +299,8 @@ export default class LayersPass extends Pass {
       canvasContext,
       viewport,
       view,
-      isPicking
+      isPicking,
+      normalizedColors = false
     }: {
       layers: Layer[];
       shaderModuleProps: Record<string, any>;
@@ -305,6 +310,7 @@ export default class LayersPass extends Pass {
       viewport: Viewport;
       view?: View;
       isPicking?: boolean;
+      normalizedColors?: boolean;
     },
     drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
@@ -327,9 +333,16 @@ export default class LayersPass extends Pass {
         // references as colors and is already cleared to transparent black.
         // `clearColor: false` below still means "don't clear color" in both modes.
         if (Array.isArray(clearColor) && !isPicking) {
-          colorToUse = [...clearColor.slice(0, 3), clearColor[3] || 255].map(
-            c => c / 255
-          ) as NumberArray4;
+          // An omitted alpha is opaque. An explicit zero alpha clears to transparent.
+          colorToUse = normalizeByteColor4(
+            [
+              clearColor[0],
+              clearColor[1],
+              clearColor[2],
+              clearColor[3] ?? (normalizedColors ? 1 : 255)
+            ],
+            !normalizedColors
+          );
         } else if (clearColor === false) {
           colorToUse = false;
         }
@@ -580,7 +593,7 @@ export function layerIndexResolver(
   return resolveLayerIndex;
 }
 
-// Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
+// Convert viewport top-left CSS coordinates to framebuffer pixel coordinates
 function getGLViewport(
   device: Device,
   {
@@ -602,11 +615,16 @@ function getGLViewport(
   const [, drawingBufferHeight] = canvasContext.getDrawingBufferSize();
   const height = target ? target.height : drawingBufferHeight;
 
-  // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
+  // Viewports are in top-left CSS coordinates. WebGPU framebuffers also have a top-left origin,
+  // WebGL framebuffers have a bottom-left origin.
   const dimensions = viewport;
+  const y =
+    device.type === 'webgpu'
+      ? dimensions.y * pixelRatio
+      : height - (dimensions.y + dimensions.height) * pixelRatio;
   return [
     dimensions.x * pixelRatio,
-    height - (dimensions.y + dimensions.height) * pixelRatio,
+    y,
     dimensions.width * pixelRatio,
     dimensions.height * pixelRatio
   ];

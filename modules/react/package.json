@@ -3,7 +3,7 @@
   "description": "React Components for deck.gl",
   "license": "MIT",
   "type": "module",
-  "version": "9.4.0-beta.4",
+  "version": "10.0.0-alpha.1",
   "publishConfig": {
     "access": "public"
   },
@@ -22,6 +22,13 @@
   },
   "homepage": "https://deck.gl",
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "legacy": [
+        "dist/legacy/index.d.ts"
+      ]
+    }
+  },
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
@@ -29,6 +36,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./legacy": {
+      "types": "./dist/legacy/index.d.ts",
+      "import": "./dist/legacy/index.js",
+      "require": "./dist/legacy/index.cjs"
     }
   },
   "files": [
@@ -36,9 +48,12 @@
     "src"
   ],
   "sideEffects": false,
+  "scripts": {
+    "build": "node build-cjs.mjs"
+  },
   "peerDependencies": {
-    "@deck.gl/core": "~9.4.0",
-    "@deck.gl/widgets": "~9.4.0",
+    "@deck.gl/core": "~10.0.0-alpha",
+    "@deck.gl/widgets": "~10.0.0-alpha",
     "react": ">=16.3.0",
     "react-dom": ">=16.3.0"
   },

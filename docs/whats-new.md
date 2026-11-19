@@ -2,41 +2,79 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
-## Unreleased
+## deck.gl v10
 
-### Custom aggregators and GPUVector inputs
+Target release date: EOY 2026. Alpha releases available.
 
-GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer now accept custom aggregator
-instances. Custom aggregators can consume GPUVector position/weight columns and publish
-GPUVector cell results without copying them to the CPU. Existing defaults remain unchanged. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
-result layouts, and supported scales and contours.
+v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, SQL expression powered big data library. It brings support for non-mercator projection and initial hooks for advanced GPU compute integration.
 
-### luma.gl v10 alpha.10
+_v10.0 should be thought of as a pre-release. We wanted to get the new capabilities into the hands of users as soon as possible, which means that some APIs have not yet settled and may change in v10.1._
 
-The v10 packages use luma.gl alpha.10. Layer models delegate typed vector and
-constant-buffer binding and render-target format tracking to luma.gl. WebGPU
-layer draws restore dynamic render-pass parameters after drawing. Custom shader
-plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-guide.md).
+*These highlights describe goals for v10. Some features are still in development.*
 
-### ScatterplotLayer Arrow columns
+### Heatmap filtering
 
-ScatterplotLayer accepts Arrow vectors for positions and styling, with accessor and binary fallbacks. See [Using with Arrow](./developer-guide/using-with-arrow.md) for modes and [tabbed examples](./api-reference/layers/scatterplot-layer.md#arrow-columns).
+- `DataFilterExtension` filters the points that contribute to `HeatmapLayer` on WebGPU.
+- `MaskExtension` limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
 
-### deck.gl v10 examples (Experimental)
 
-The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples/v10/arrow-path-layer), [riverfront weather](/examples/v10/weather), and [GPU graph exploration](/examples/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
+### GPU
 
-### Extension updates
+- **WebGPU** 🚧 — WebGPU is now the default renderer with full feature support.
+- **GPU vectors** — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph.
 
-Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) with `countItems` to report how many objects pass numeric or category filters.
+### Apache Arrow
 
-### Custom projections (Experimental)
+- **Arrow data** — The Layer `data` prop now supports Arrow tables
+- **Arrow loading** — `data` URLs now load Arrow tables instead of JS arrays.
+- **Arrow streaming** — Layer data prop accepts `AsyncIterable<arrow.RecordBatch>` and incrementally transforms and renders RecordBatches as they arrive.
+- **Arrow accessors** — Layer accessors now support Arrow columns (`arrow.Vector`s)
+- **GeoArrow** 🚧 — Full support for GeoArrow and GeoParquet source data and `geoarrow.union` and `geoarrow.wkb` rendering.
 
-[`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/geospatial/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
+### SQL
 
-### Layer source CRS (Experimental)
+- **SQL table transforms** — Use SQL to transform Arrow tables after loading.
+- **SQL accessors** — Use SQL select expressions to extract layer attributes from your loaded data.
+- **SQL query pushdowns** — data loaders skip work your query doesn’t need (such as loading unused columns, rows, etc from the source data)
 
-Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
+### Projections
+
+- **Non Web Mercator projections**  —  [`CustomProjectionView`](./api-reference/core/custom-projection-view.md) renders longitude/latitude data in a planar projection specified by an EPSG code or PROJ string.
+- **Source data CRS** is preserved during loading and projected automatically
+- **Curved geometry** — Set `resolution` to subdivide paths, polygons, and bitmaps so they follow the projection’s curves.
+
+### High Dynamic Range (HDR)
+
+- **Normalized colors** — Set `normalizedColors` to use RGB values from 0 to 1.
+
+### React
+
+The `@deck.gl/react` module is now a deep React Fiber integration.
+
+- **React components** 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
+- **Map integrations** 🚧 — Use dedicated React entry points for Mapbox, MapLibre, and Google Maps.
+- **Migration** — The previous React API is available from [`@deck.gl/react/legacy`](./api-reference/react/overview.md#deckglreactlegacy), so apps can move to it before the package root changes.
+
+### Layers
+
+- [`TextLayer`](./api-reference/layers/text-layer.md) 🚧 uses `@luma.gl/text/fonts` for bitmap and SDF font atlas generation and glyph packing. Existing font settings and the custom font renderer hook remain supported.
+
+### Tile Layers
+
+- `Tile2DLayer` and `MVT2DLayer` 🚧 can now share a `Tileset2D` and reuse loaded tiles across layers and views.
+
+### Aggregation Layers
+
+- [GridLayer](./api-reference/aggregation-layers/grid-layer.md), [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md), [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md), and [ContourLayer](./api-reference/aggregation-layers/contour-layer.md) now accept [custom aggregators](./api-reference/aggregation-layers/aggregator.md) with GPUVector results.
+- These layers now support clipping, brushing, and numeric filtering with [GPUVector inputs](./api-reference/aggregation-layers/aggregator.md#gpu-column-extensions).
+
+### Extensions
+
+- [MaskExtension](./api-reference/extensions/mask-extension.md) now supports [GlobeView](./api-reference/core/globe-view.md).
+
+### Examples
+
+- Examples have been updated to use Arrow loading and SQL accessors.
 
 ## deck.gl v9.4
 

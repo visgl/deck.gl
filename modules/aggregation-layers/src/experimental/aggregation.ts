@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {_StatefulComponent} from '@deck.gl/core';
+import {_OwnedComponent} from '@deck.gl/core';
 
 /** Cartesian bins exposed by the lifecycle POC. */
 export type GridBin = {position: [number, number, number]; value: number; count: number};
 
 /** Declarative computation whose owner supplies scheduling and identity. */
-export abstract class Aggregation<PropsT extends {}> extends _StatefulComponent<PropsT> {
+export abstract class Aggregation<PropsT extends {}> extends _OwnedComponent<PropsT> {
   /** Compute output after relevant props change. */
   protected abstract updateAggregation(): void;
   protected updateComponentState(): void {

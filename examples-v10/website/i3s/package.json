@@ -1,0 +1,21 @@
+{
+  "name": "deckgl-examples-arcgis-i3s",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../../vite.config.local.mjs",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@loaders.gl/tiles-3d": "5.0.0-beta.12",
+    "deck.gl": "^9.0.0",
+    "maplibre-gl": "^5.0.0",
+    "react-map-gl": "^8.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.0",
+    "vite": "^7.3.3"
+  }
+}

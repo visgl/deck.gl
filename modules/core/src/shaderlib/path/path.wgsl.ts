@@ -38,16 +38,35 @@ export const pathShaderPlugin: ShaderPlugin = {
 export function makePathShaderWGSL({
   vertexEntry = '@vertex\nfn vertexMain(attributes: Attributes) -> Varyings',
   vertexSetup = '',
-  vertexOutput = '',
-  extraVaryings = '',
+  vertexOutput = 'varyings.pathPickingColor = geometry.pickingColor;',
+  extraVaryings = '@location(10) @interpolate(flat) pathPickingColor: vec3<f32>,',
   fragmentFilter = '',
-  colorFilter = ''
+  pickingFilter = /* wgsl */ `
+    if (picking.isActive > 0.5) {
+      if (!picking_isColorValid(varyings.pathPickingColor)) { discard; }
+      var extensionColor = vec4<f32>(varyings.pathPickingColor, 1.0);
+      DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+      return vec4<f32>(varyings.pathPickingColor, 1.0);
+    }
+  `,
+  colorFilter = /* wgsl */ `
+    if (picking.isHighlightActive > 0.5) {
+      let selected = picking_normalizeColor(picking.highlightedObjectColor);
+      if (picking_isColorZero(abs(varyings.pathPickingColor - selected))) {
+        let alpha = picking.highlightColor.a;
+        let blendedAlpha = alpha + color.a * (1.0 - alpha);
+        let ratio = alpha / max(blendedAlpha, 0.000001);
+        color = vec4<f32>(mix(color.rgb, picking.highlightColor.rgb, ratio), blendedAlpha);
+      }
+    }
+  `
 }: {
   vertexEntry?: string;
   vertexSetup?: string;
   vertexOutput?: string;
   extraVaryings?: string;
   fragmentFilter?: string;
+  pickingFilter?: string;
   colorFilter?: string;
 } = {}): string {
   return /* wgsl */ `\
@@ -396,6 +415,7 @@ ${vertexEntry} {
 #endif
 
     geometry.uv = join.pathPosition;
+    geometry.screenSpaceOffset = join.offset;
     varyings.position = vec4<f32>(
       currPositionScreen.xyz + join.offset * currPositionScreen.w,
       currPositionScreen.w
@@ -563,6 +583,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 #endif
   ${colorFilter}
   DECKGL_PATH_STYLE_COLOR(&color, varyings.vPathPosition, pathCoverage);
+  ${pickingFilter}
   DECKGL_FILTER_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
 }

@@ -20,7 +20,6 @@ export default class StatefulComponent<PropsT extends {} = {}> extends Component
     if (previous === this) return;
     this.state = previous.state;
     this.internalState = previous.internalState as ComponentState<this> | null;
-    this.internalState?.setAsyncProps(this.props);
   }
 
   /** Compare props using the same accessor and update-trigger rules as layers. */
@@ -30,8 +29,34 @@ export default class StatefulComponent<PropsT extends {} = {}> extends Component
   ) {
     return diffProps(newProps, oldProps);
   }
-  /** Adopt a matching descriptor's resources, or initialize a new component. */
-  updateComponent(previous: StatefulComponent<PropsT> | null, requestUpdate: () => void): void {
+}
+
+/** Experimental lifecycle for descriptors managed in a host-owned slot. */
+export class OwnedComponent<PropsT extends {} = {}> extends StatefulComponent<PropsT> {
+  private owner: object | null = null;
+
+  /**
+   * Called each time the host updates its slot. Adopts the previous descriptor's state
+   * when its ID and class match, and finalizes it otherwise.
+   * @param owner Stable identity of the host slot.
+   * @param previous The current descriptor in the slot, or null on first use.
+   * @param requestUpdate Called when an async prop resolves so the host can update again.
+   */
+  updateComponent(
+    owner: object,
+    previous: OwnedComponent<PropsT> | null,
+    requestUpdate: () => void
+  ): void {
+    if (
+      (this.owner && (this.owner !== owner || previous !== this)) ||
+      (previous && previous.owner !== owner)
+    ) {
+      throw new Error('Component descriptor is already owned or is outside the current slot');
+    }
+    if (this.internalState && this.internalState.component !== this) {
+      this.internalState = null;
+      this.state = {};
+    }
     if (
       previous &&
       previous !== this &&
@@ -39,9 +64,11 @@ export default class StatefulComponent<PropsT extends {} = {}> extends Component
       previous.constructor === this.constructor
     ) {
       this.transferComponentState(previous);
+      previous.owner = null;
     } else if (previous && previous !== this) {
       previous.finalizeComponent();
     }
+    this.owner = owner;
     const initialized = Boolean(this.internalState);
     if (!initialized) {
       this.internalState = new ComponentState(this);
@@ -75,5 +102,6 @@ export default class StatefulComponent<PropsT extends {} = {}> extends Component
     this.finalizeComponentState();
     this.internalState.finalize();
     this.internalState = null;
+    this.owner = null;
   }
 }

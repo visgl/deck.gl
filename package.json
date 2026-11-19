@@ -48,15 +48,18 @@
   "browser": {
     "jsdom": false
   },
+  "resolutions": {
+    "apache-arrow": "^21.2.0"
+  },
   "devDependencies": {
+    "apache-arrow": "^21.2.0",
     "@deck.gl-community/panels": "^9.4.2",
     "@floating-ui/dom": "^1.7.5",
-    "@loaders.gl/core": "5.0.0-beta.4",
-    "@loaders.gl/tables": "5.0.0-beta.4",
-    "@luma.gl/core": "10.0.0-alpha.10",
-    "@luma.gl/engine": "10.0.0-alpha.10",
-    "@math.gl/geospatial": "5.0.0-beta.4",
-    "@probe.gl/bench": "^4.1.1",
+    "@loaders.gl/core": "5.0.0-beta.12",
+    "@loaders.gl/tables": "5.0.0-beta.12",
+    "@luma.gl/core": "10.0.0-alpha.17",
+    "@luma.gl/engine": "10.0.0-alpha.17",
+    "@math.gl/geospatial": "5.0.0-beta.12",
     "@probe.gl/test-utils": "^4.1.1",
     "@types/jscodeshift": "^17.3.0",
     "@types/pngjs": "^6.0.5",
@@ -65,9 +68,11 @@
     "@vitest/browser-playwright": "^4.1.0",
     "@vitest/coverage-v8": "^4.1.0",
     "autoprefixer": "^10.5.4",
+    "esbuild": "^0.28.1",
     "jscodeshift": "^17.3.0",
     "jsdom": "^20.0.0",
     "pixelmatch": "^7.1.0",
+    "probe.gl": "^5.0.0",
     "playwright": "^1.64.1",
     "pngjs": "^7.0.0",
     "postcss": "^8.5.25",

@@ -24,6 +24,56 @@ test('CustomProjectionView uses the fixed Earth-circumference scale', async () =
   expect(viewport.projectPosition([180, 0])[0]).toBeCloseTo(256, 8);
 });
 
+test('descriptor-based projection preserves camera, source CRS and inverse coordinates', async () => {
+  const view = new CustomProjectionView(options);
+  await view.initialize();
+  const viewport = view.makeViewport({
+    width: 800,
+    height: 600,
+    viewState: {...viewState, center: [12, 45, 0]}
+  })!;
+  const world = [12, 45, 123];
+  const common = viewport.projectPosition(world);
+  expect(viewport.center[0]).toBeCloseTo(common[0], 8);
+  expect(viewport.center[1]).toBeCloseTo(common[1], 8);
+  viewport.unprojectPosition(common).forEach((value, i) => expect(value).toBeCloseTo(world[i], 6));
+  const target = viewport.crs.converter.WGS84.from(world);
+  viewport
+    .projectPosition(target, {sourceCrs: viewport.crs})
+    .forEach((value, i) => expect(value).toBeCloseTo(common[i], 8));
+});
+
+test('projection descriptors normalize equivalent meter and foot target coordinates', async () => {
+  const views = ['m', 'ft'].map(
+    units => new CustomProjectionView({crs: `+proj=merc +a=6378137 +b=6378137 +units=${units}`})
+  );
+  await Promise.all(views.map(view => view.initialize()));
+  const [meters, feet] = views.map(
+    view => view.makeViewport({width: 800, height: 600, viewState})!
+  );
+  const point = [12, 45, 123];
+  const expected = meters.projectPosition(point);
+  feet.projectPosition(point).forEach((value, i) => expect(value).toBeCloseTo(expected[i], 7));
+  feet.unprojectPosition(expected).forEach((value, i) => expect(value).toBeCloseTo(point[i], 6));
+});
+
+test('invalid inverse coordinates are reported consistently', async () => {
+  const view = new CustomProjectionView(options);
+  await view.initialize();
+  const viewport = view.makeViewport({width: 800, height: 600, viewState})!;
+  const crs = viewport.crs;
+  const to = vi.spyOn(crs.converter.WGS84, 'to').mockReturnValue([Infinity, 0, 0]);
+  try {
+    expect(viewport.unprojectPosition([0, 0, 0]).every(Number.isNaN)).toBe(true);
+    to.mockImplementation(() => {
+      throw new Error('outside domain');
+    });
+    expect(viewport.unprojectPosition([0, 0, 0]).every(Number.isNaN)).toBe(true);
+  } finally {
+    to.mockRestore();
+  }
+});
+
 test('Custom projection classes are exported only under experimental names', () => {
   for (const name of [
     'CustomProjectionView',

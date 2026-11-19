@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor} from '@deck.gl/core';
 import {project} from '@deck.gl/core';
 
 import {
@@ -14,17 +15,30 @@ import {
   Viewport,
   _deepEqual,
   UpdateParameters,
-  DefaultProps
+  DefaultProps,
+  type LayerExtension
 } from '@deck.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
 import AggregationLayer, {type AggregationLayerProps} from '../common/aggregation-layer';
 import {generateContours, Contour, ContourLine, ContourPolygon} from './contour-utils';
 import {getAggregatorValueReader} from './value-reader';
+import {toByteColor} from '../common/utils/color-utils';
 import {getBinIdRange} from '../common/utils/bounds-utils';
 import {createAggregationViewport} from '../common/utils/projection-utils';
+import {WebGPUAggregator} from '../common/aggregator/webgpu-aggregator/webgpu-aggregator';
 import {Matrix4} from '@math.gl/core';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
+
+/** Extensions whose hooks filter source points during aggregation. */
+const INPUT_FILTER_EXTENSIONS = ['DataFilterExtension', 'ClipExtension', 'BrushingExtension'];
+
+/** Whether a contour extension filters source points. */
+function isInputFilter(extension: LayerExtension): boolean {
+  return INPUT_FILTER_EXTENSIONS.includes(
+    (extension.constructor as typeof LayerExtension).extensionName
+  );
+}
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
@@ -33,8 +47,8 @@ const defaultProps: DefaultProps<ContourLayerProps> = {
   // grid aggregation
   cellSize: {type: 'number', min: 1, value: 1000},
   gridOrigin: {type: 'array', compare: true, value: [0, 0]},
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
-  getWeight: {type: 'accessor', value: 1},
+  getPosition: {type: 'accessor', arrow: 'row', value: (x: any) => x.position},
+  getWeight: {type: 'accessor', arrow: 'row', value: 1},
   gpuAggregation: true,
   aggregation: 'SUM',
 
@@ -96,13 +110,13 @@ type _ContourLayerProps<DataT> = {
    * Method called to retrieve the position of each object.
    * @default object => object.position
    */
-  getPosition?: Accessor<DataT, Position>;
+  getPosition?: ArrowAccessor<DataT, Position>;
 
   /**
    * The weight of each object.
    * @default 1
    */
-  getWeight?: Accessor<DataT, number>;
+  getWeight?: ArrowAccessor<DataT, number>;
 };
 
 export type ContourLayerPickingInfo = PickingInfo<{
@@ -127,16 +141,76 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       };
 
       binIdRange: [number, number][];
+      /** Completed contours and their transform retained while replacement metadata is pending. */
+      contourFrame?: {
+        data: {lines: ContourLine[]; polygons: ContourPolygon[]};
+        origin: number[];
+        size: number[];
+        scale: number[];
+      };
       aggregatorViewport: Viewport;
     } & AggregationLayer<any>['state'];
 
+  /** Select an aggregation backend compatible with current inputs and extensions. */
   getAggregatorType(): string {
+    if (this.props.gpuAggregation && this.context.device.type === 'webgpu') {
+      // Preserve the existing sublayer behavior for extensions that are not input filters.
+      if (this.props.extensions.some(extension => !isInputFilter(extension))) return 'cpu';
+      if (
+        (!this.props.positions &&
+          !WebGPUAggregator.supportsData(this.props.data, ['getPosition', 'getWeight'])) ||
+        (!this.props.positions &&
+          this.props.data ===
+            (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
+          !WebGPUAggregator.supportsAttributes(
+            this.getAttributeManager()!.attributes,
+            ['counts'],
+            this.context.device.limits.maxStorageBufferBindingSize
+          ))
+      )
+        return 'cpu';
+      if (
+        this.props.positions &&
+        !WebGPUAggregator.supportsColumns(
+          [this.props.positions, ...(this.props.weights || [])],
+          this.context.device.limits.maxStorageBufferBindingSize
+        )
+      ) {
+        throw new Error('Aggregation GPU input exceeds the storage buffer binding limit');
+      }
+      if (this.props.positions && this.state.preproject) {
+        throw new Error('Contour GPU columns must use the custom view coordinate system');
+      }
+      this._updateBinOptions();
+      const count = this.state.binIdRange.reduce((total, [start, end]) => total * (end - start), 1);
+      const limits = this.context.device.limits;
+      if (
+        !Number.isSafeInteger(count) ||
+        count * 8 > Math.min(limits.maxBufferSize, limits.maxStorageBufferBindingSize)
+      ) {
+        if (this.props.positions)
+          throw new Error('Contour aggregation exceeds device buffer limits');
+        return 'cpu';
+      }
+      return 'webgpu';
+    }
     return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
       ? 'gpu'
       : 'cpu';
   }
 
-  createAggregator(type: string): WebGLAggregator | CPUAggregator {
+  /** Construct the selected CPU, WebGL or WebGPU bin reducer. */
+  createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUAggregator {
+    if (type === 'webgpu')
+      return new WebGPUAggregator(this.context.device, {
+        ...this.getComputeAggregatorOptions(),
+        channelNames: ['counts'],
+        binOptions: binOptionsUniforms,
+        binning: `fn getBin(position: vec3f, low: vec3f) -> BinAssignment {
+        let positionCommon = project_position_vec3_f64(position, low);
+        return BinAssignment(vec2i(floor(positionCommon.xy / binOptions.cellSizeCommon)), true);
+      }`
+      });
     if (type === 'cpu') {
       return new CPUAggregator({
         dimensions: 2,
@@ -179,6 +253,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
+  /** Initialize contour data and the aggregation input attributes. */
   initializeState() {
     super.initializeState();
 
@@ -195,17 +270,22 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
+  /** Update binning, contour settings and asynchronous aggregation requirements. */
   updateState(params: UpdateParameters<this>) {
     const aggregatorChanged = super.updateState(params);
 
     const {props, oldProps, changeFlags} = params;
     const {aggregator} = this.state;
+    aggregator.setProps({readback: true});
     if (
       aggregatorChanged ||
       changeFlags.dataChanged ||
       props.positions !== oldProps.positions ||
       props.weights !== oldProps.weights ||
       props.dataBounds !== oldProps.dataBounds ||
+      props.modelMatrix !== oldProps.modelMatrix ||
+      props.coordinateOrigin !== oldProps.coordinateOrigin ||
+      changeFlags.projectionChanged ||
       props.cellSize !== oldProps.cellSize ||
       !_deepEqual(props.gridOrigin, oldProps.gridOrigin, 1) ||
       props.aggregation !== oldProps.aggregation
@@ -233,6 +313,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return aggregatorChanged;
   }
 
+  /** Compute world-space grid bounds and binning uniforms. */
   private _updateBinOptions() {
     const bounds = this.getBounds();
     if (this.props.positions && !this.props.dataBounds) {
@@ -292,7 +373,12 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       });
     }
 
-    this.setState({cellSizeCommon, cellOriginCommon, binIdRange, aggregatorViewport: viewport});
+    Object.assign(this.state, {
+      cellSizeCommon,
+      cellOriginCommon,
+      binIdRange,
+      aggregatorViewport: viewport
+    });
   }
 
   override draw(opts) {
@@ -303,6 +389,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     super.draw(opts);
   }
 
+  /** Invalidate contours when a new aggregate snapshot is available. */
   private _onAggregationUpdate() {
     const {aggregator, binIdRange} = this.state;
     this.setState({
@@ -311,12 +398,20 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
+  /** Generate completed contours or retain the previous frame while metadata is pending. */
   private _getContours(): {
     lines: ContourLine[];
     polygons: ContourPolygon[];
   } | null {
+    if (this.state.aggregator.isLoaded === false) return this.state.contourFrame?.data || null;
     const {aggregatedValueReader} = this.state;
-    if (!aggregatedValueReader) {
+    if (
+      !aggregatedValueReader ||
+      this.state.binIdRange.some(
+        ([start, end]) => !Number.isFinite(start) || !Number.isFinite(end) || end <= start
+      )
+    ) {
+      this.state.contourFrame = undefined;
       return null;
     }
 
@@ -331,10 +426,51 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       });
 
       this.state.contourData = contourData;
+      this.state.contourFrame = {
+        data: contourData,
+        origin: [...this.state.cellOriginCommon],
+        size: [...this.state.cellSizeCommon],
+        scale: project.isCustomProjection(this.context.viewport)
+          ? this.context.viewport.distanceScales.unitsPerWorldUnit.map(value => 1 / value)
+          : [1, 1, 1]
+      };
     }
     return this.state.contourData;
   }
 
+  /** Recheck current attributes and switch to CPU aggregation when compute cannot consume them. */
+  protected override updateAttributes(changedAttributes) {
+    // AttributeManager has populated current positions at this point. Backend selection
+    // during updateState can only see the previous position bounds.
+    if (
+      (changedAttributes.positions || changedAttributes.counts) &&
+      this.state.aggregatorType === 'webgpu' &&
+      (this.getAggregatorType() === 'cpu' ||
+        !WebGPUAggregator.supportsAttributes(
+          this.getAttributeManager()!.attributes,
+          ['counts'],
+          this.context.device.limits.maxStorageBufferBindingSize
+        ))
+    ) {
+      this.state.aggregator.destroy();
+      const aggregator = this.createAggregator('cpu');
+      this.setState({aggregator, aggregatorType: 'cpu'});
+      aggregator.setProps({
+        attributes: this.getAttributeManager()!.attributes,
+        pointCount: this.getNumInstances(),
+        operations: [this.props.aggregation],
+        binIdRange: this.state.binIdRange,
+        binOptions: {
+          cellSizeCommon: this.state.cellSizeCommon,
+          cellOriginCommon: this.state.cellOriginCommon
+        },
+        onUpdate: this._onAggregationUpdate.bind(this)
+      });
+    }
+    super.updateAttributes(changedAttributes);
+  }
+
+  /** Invalidate binning or weights when aggregation input attributes change. */
   onAttributeChange(id: string) {
     const {aggregator} = this.state;
     switch (id) {
@@ -361,6 +497,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
   }
 
+  /** Render isolines and isobands using the transform of their completed contour frame. */
   renderLayers(): LayersList | null {
     const contourData = this._getContours();
     if (!contourData) {
@@ -368,16 +505,17 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
     const {lines, polygons} = contourData;
     const {zOffset} = this.props;
-    const {cellOriginCommon, cellSizeCommon} = this.state;
+    const normalized = this.usesNormalizedColors();
+    /** Convert user-supplied contour styles at the sublayer boundary. */
+    const getContourColor = ({contour}: ContourLine | ContourPolygon) =>
+      contour.color ? (normalized ? toByteColor(contour.color) : contour.color) : DEFAULT_COLOR;
+    const frame = this.state.contourFrame!;
+    const cellOriginCommon = frame.origin;
+    const cellSizeCommon = frame.size;
 
     const LinesSubLayerClass = this.getSubLayerClass('lines', PathLayer);
     const BandsSubLayerClass = this.getSubLayerClass('bands', SolidPolygonLayer);
-    const {viewport} = this.context;
-    const modelMatrix = new Matrix4();
-    if (project.isCustomProjection(viewport)) {
-      const scale = viewport.distanceScales.unitsPerWorldUnit;
-      modelMatrix.scale(scale.map(value => 1 / value));
-    }
+    const modelMatrix = new Matrix4().scale(frame.scale);
     modelMatrix
       .translate([cellOriginCommon[0], cellOriginCommon[1], 0])
       .scale([cellSizeCommon[0], cellSizeCommon[1], zOffset]);
@@ -388,7 +526,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       lines.length > 0 &&
       new LinesSubLayerClass(
         this.getSubLayerProps({
-          id: 'lines'
+          id: 'lines',
+          updateTriggers: {getColor: [this.props.contours, normalized]}
         }),
         {
           data: lines,
@@ -396,9 +535,10 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           coordinateOrigin: [0, 0, 0],
           modelMatrix,
           getPath: d => d.vertices,
-          getColor: d => d.contour.color ?? DEFAULT_COLOR,
+          getColor: getContourColor,
           getWidth: d => d.contour.strokeWidth ?? DEFAULT_STROKE_WIDTH,
-          widthUnits: 'pixels'
+          widthUnits: 'pixels',
+          extensions: this.getContourExtensions('lines')
         }
       );
 
@@ -408,7 +548,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       polygons.length > 0 &&
       new BandsSubLayerClass(
         this.getSubLayerProps({
-          id: 'bands'
+          id: 'bands',
+          updateTriggers: {getFillColor: [this.props.contours, normalized]}
         }),
         {
           data: polygons,
@@ -416,13 +557,32 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           coordinateOrigin: [0, 0, 0],
           modelMatrix,
           getPolygon: d => d.vertices,
-          getFillColor: d => d.contour.color ?? DEFAULT_COLOR
+          getFillColor: getContourColor,
+          extensions: this.getContourExtensions('bands')
         }
       );
 
     return [lineLayer, bandsLayer];
   }
 
+  /** Forward explicit overrides and omit input filters already run by the GPU aggregator. */
+  private getContourExtensions(id: 'lines' | 'bands'): LayerExtension[] {
+    const {extensions, _subLayerProps} = this.props;
+    const {aggregatorType} = this.state;
+    if (_subLayerProps?.[id]?.extensions) return _subLayerProps[id].extensions;
+    if (aggregatorType === 'webgpu')
+      return extensions.filter(extension => !isInputFilter(extension));
+    // The WebGL sorter runs DataFilter but does not run the vertex position hook.
+    if (aggregatorType === 'gpu') {
+      return extensions.filter(
+        extension =>
+          (extension.constructor as typeof LayerExtension).extensionName !== 'DataFilterExtension'
+      );
+    }
+    return extensions;
+  }
+
+  /** Attach the contour definition associated with the picked line or band. */
   getPickingInfo(params: GetPickingInfoParams): ContourLayerPickingInfo {
     const info: ContourLayerPickingInfo = params.info;
     const {object} = info;
