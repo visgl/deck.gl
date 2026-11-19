@@ -112,3 +112,40 @@ test('_releaseCanvasContext never releases a device the app passed', async () =>
   await nextTask();
   expect(testDevice.isLost).toBe(false);
 });
+
+test('finalizing a Deck twice keeps the context another Deck uses', async () => {
+  const canvas = attachCanvas();
+  const first = await createDeck({canvas});
+  const gl = getContext(first);
+
+  first.finalize();
+  const second = await createDeck({canvas});
+  first.finalize();
+  canvas.remove();
+  releaseCanvasContext(first);
+  await nextTask();
+  expect(gl.isContextLost(), 'the second Deck still uses it').toBe(false);
+
+  second.finalize();
+  releaseCanvasContext(second);
+  await nextTask();
+  expect(gl.isContextLost()).toBe(true);
+});
+
+test('_releaseCanvasContext keeps a context that another Deck borrowed', async () => {
+  const canvas = attachCanvas();
+  const first = await createDeck({canvas});
+  const gl = getContext(first);
+  const second = await createDeck({device: first.device});
+
+  canvas.remove();
+  first.finalize();
+  releaseCanvasContext(first);
+  await nextTask();
+  expect(gl.isContextLost(), 'the second Deck renders with the same device').toBe(false);
+
+  second.finalize();
+  releaseCanvasContext(first);
+  await nextTask();
+  expect(gl.isContextLost()).toBe(true);
+});
