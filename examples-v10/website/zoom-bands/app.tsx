@@ -10,7 +10,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {DeckGL} from '@deck.gl/react/legacy';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {isArrowTable} from '@math.gl/core/arrow';
-import type {Table} from 'apache-arrow';
+import type {Table, Vector} from 'apache-arrow';
 
 import type {Color, Layer, MapViewState, PickingInfo} from '@deck.gl/core';
 import type {GridLayerPickingInfo} from '@deck.gl/aggregation-layers';
@@ -60,8 +60,8 @@ type Trees = {
    * Float64Array matches the 64-bit layout of `getPosition`, which GridLayer's GPU aggregation expects.
    */
   positions: Float64Array;
-  species: string[];
-  circumferences: Float32Array;
+  species: Vector;
+  circumferences: Vector;
   /** Latitude at the center of the data bounds, used by GridLayer to convert cellSize to common space */
   latitude: number;
 };
@@ -129,29 +129,24 @@ const LOAD_OPTIONS = {csv: {dynamicTyping: false}};
 
 /** Collects queried tree positions and statistics for the grid and tooltip. */
 function summarizeTrees(data: Table): Trees {
-  const trees = data.toArray() as unknown as {
-    longitude: number;
-    latitude: number;
-    LIBELLEFRANCAIS: string;
-    circumference: number;
-  }[];
-  const positions = new Float64Array(trees.length * 3);
-  const circumferences = new Float32Array(trees.length);
+  const longitude = data.getChild('longitude')!;
+  const latitude = data.getChild('latitude')!;
+  const positions = new Float64Array(data.numRows * 3);
   let minLatitude = Infinity;
   let maxLatitude = -Infinity;
-  trees.forEach((d, i) => {
-    positions[i * 3] = d.longitude;
-    positions[i * 3 + 1] = d.latitude;
-    circumferences[i] = d.circumference;
-    minLatitude = Math.min(minLatitude, d.latitude);
-    maxLatitude = Math.max(maxLatitude, d.latitude);
-  });
+  for (let index = 0; index < data.numRows; index++) {
+    const value = latitude.get(index);
+    positions[index * 3] = longitude.get(index);
+    positions[index * 3 + 1] = value;
+    minLatitude = Math.min(minLatitude, value);
+    maxLatitude = Math.max(maxLatitude, value);
+  }
 
   return {
-    length: trees.length,
+    length: data.numRows,
     positions,
-    species: trees.map(d => d.LIBELLEFRANCAIS),
-    circumferences,
+    species: data.getChild('LIBELLEFRANCAIS')!,
+    circumferences: data.getChild('circumference')!,
     latitude: (minLatitude + maxLatitude) / 2
   };
 }
@@ -280,8 +275,8 @@ export default function App({
         return null;
       }
       if (info.layer?.id === 'trees') {
-        const circumference = trees.circumferences[info.index];
-        return `${trees.species[info.index] || 'Unknown species'}\n${
+        const circumference = Math.fround(trees.circumferences.get(info.index));
+        return `${trees.species.get(info.index) || 'Unknown species'}\n${
           circumference ? `Circumference: ${circumference} cm` : ''
         }`;
       }
