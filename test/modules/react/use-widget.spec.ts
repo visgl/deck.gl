@@ -7,7 +7,7 @@ import {createElement, act, useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 
 import {Widget, log, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
-import {useWidget} from '@deck.gl/react';
+import {useWidget} from '@deck.gl/react/legacy';
 import {DeckGlContext} from '@deck.gl/react/legacy/utils/deckgl-context';
 
 // Required by React 19

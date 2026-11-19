@@ -160,7 +160,19 @@ const optimizeDepsConfig = {
     '@loaders.gl/core/polyfills',
     '@loaders.gl/core',
     '@loaders.gl/images',
-    'd3-hexbin'
+    'd3-hexbin',
+    // React renderer dependencies, used by the @deck.gl/react browser tests
+    'react',
+    'react-dom/client',
+    'react/jsx-dev-runtime',
+    'react/jsx-runtime',
+    'react-reconciler',
+    'react-reconciler/constants.js',
+    'its-fine',
+    'client-only',
+    'fast-check',
+    'mapbox-gl',
+    'maplibre-gl'
   ],
   // MapLibre v6 is native ESM. Add future ESM-only major aliases here.
   exclude: ['maplibre-gl-v6']
@@ -202,6 +214,30 @@ const projects = [
           // Unique sequence order for running multiple projects together
           sequence: {groupOrder: 1}
         },
+      },
+
+      // React project - the React renderer's unit tests (`*.test.ts(x)`) in jsdom, plus its type
+      // tests (`*.test-d.ts(x)`). Each file is isolated because these tests mock modules. The
+      // renderer's browser tests are `*.spec.tsx` files in the headless project.
+      {
+        extends: true,
+        resolve: {alias: aliases},
+        test: {
+          name: 'react',
+          environment: 'jsdom',
+          include: ['test/modules/react/fiber/**/*.test.{ts,tsx}'],
+          globals: false,
+          testTimeout: 30000,
+          // As in deck.gl-community's react-fiber config, which these tests were written for.
+          clearMocks: true,
+          setupFiles: ['./test/modules/react/fiber/reconciler/setup.ts'],
+          typecheck: {
+            enabled: true,
+            include: ['test/modules/react/fiber/**/*.test-d.{ts,tsx}'],
+            tsconfig: './test/modules/react/fiber/tsconfig.json'
+          },
+          sequence: {groupOrder: 1}
+        }
       },
 
       // Scripts project - codemod and build tool tests
@@ -249,8 +285,18 @@ const projects = [
           // automated runs. These browser-input tests have become flaky across
           // headless and render, so keep them in `browser` only for manual
           // debugging until the shared interaction harness is reworked.
-          include: ['test/modules/**/*.spec.ts', ...privateBrowserTests],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/proposals/test/effects/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
+          include: ['test/modules/**/*.spec.ts', 'test/modules/react/**/*.spec.tsx', ...privateBrowserTests],
+          exclude: [
+            ...excludedTests,
+            'test/modules/**/*.node.spec.ts',
+            'modules/proposals/test/effects/**/*.node.spec.ts',
+            'modules/proposals/test/layers/**/*.node.spec.ts',
+            // Temporarily excluded until #11221 merges: finalized Decks don't release their WebGL
+            // context yet, and the renderer's specs push the shared page past Chromium's context
+            // limit, which loses the test device for every later file. They still run in the
+            // `browser` project.
+            'test/modules/react/fiber/**/*.spec.{ts,tsx}'
+          ],
           globals: false,
           testTimeout: 30000,
           // Disable isolation and file parallelism to avoid:
@@ -283,7 +329,7 @@ const projects = [
         server: serverConfig,
         test: {
           name: 'browser',
-          include: ['test/modules/**/*.spec.ts', 'test/interaction/**/*.spec.ts', ...privateBrowserTests],
+          include: ['test/modules/**/*.spec.ts', 'test/modules/react/**/*.spec.tsx', 'test/interaction/**/*.spec.ts', ...privateBrowserTests],
           exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/proposals/test/effects/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
