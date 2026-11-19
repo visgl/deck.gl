@@ -73,7 +73,8 @@ class HeatmapDemo extends Component {
 
     return (
       <App
-        {...this.props}
+        mapStyle={this.props.mapStyle}
+        device={this.props.device}
         onDataLoad={count => this.props.onStateChange({count})}
         intensity={intensity}
         threshold={threshold}

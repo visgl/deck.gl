@@ -39,6 +39,7 @@ export default function App({
 }: {
   device?: Device;
   data?: string;
+  /** Called with the number of rows after the Arrow table loads. */
   onDataLoad?: (count: number) => void;
   intensity?: number;
   threshold?: number;

@@ -62,7 +62,7 @@ class ScreenGridDemo extends Component {
 
     return (
       <App
-        {...this.props}
+        mapStyle={this.props.mapStyle}
         onDataLoad={count => this.props.onStateChange({count})}
         key={this.props.device?.type}
         device={this.props.device}

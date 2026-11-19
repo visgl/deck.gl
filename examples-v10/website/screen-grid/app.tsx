@@ -47,6 +47,7 @@ export default function App({
   device
 }: {
   data?: string;
+  /** Called with the number of rows after the Arrow table loads. */
   onDataLoad?: (count: number) => void;
   cellSize?: number;
   gpuAggregation?: boolean;
