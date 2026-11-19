@@ -613,6 +613,7 @@ class ReadableHeatmapLayer extends HeatmapLayer {
   }
 }
 
+/** Read the accumulated density texture in its native format. */
 async function readWeights(
   gpu: NonNullable<Awaited<ReturnType<typeof getWebGPUTestDevice>>>,
   current: ReadableHeatmapLayer

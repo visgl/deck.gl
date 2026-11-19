@@ -63,6 +63,7 @@ function isClipExtension(extension: LayerExtension): boolean {
   return (extension.constructor as typeof LayerExtension).extensionName === 'ClipExtension';
 }
 
+/** Recognize DataFilterExtension without importing the extensions package. */
 function isDataFilterExtension(extension: LayerExtension): boolean {
   return (extension.constructor as typeof LayerExtension).extensionName === 'DataFilterExtension';
 }
