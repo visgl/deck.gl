@@ -364,3 +364,44 @@ test('new direct data reports its transformed value once', () => {
   expect(onDataLoad).toHaveBeenCalledTimes(2);
   expect(onDataLoad).toHaveBeenLastCalledWith(next.props.data, {propName: 'data', layer: next});
 });
+
+test('row streams await each transform before pulling the next batch', async () => {
+  const gate = Promise.withResolvers<number[]>();
+  const transform = vi.fn((rows, previous = []) =>
+    rows[0] === 1 ? gate.promise : previous.concat(rows)
+  );
+  const {state, run, progress} = makeState({dataTransform: transform});
+  const stream = run(chunks([1], [2]));
+  await vi.waitFor(() => expect(transform).toHaveBeenLastCalledWith([1], []));
+  expect(state.isAsyncPropLoading('data')).toBe(true);
+  expect(progress).not.toHaveBeenCalled();
+  gate.resolve([10]);
+  await stream;
+  expect(state.isAsyncPropLoading('data')).toBe(false);
+  expect(state.getAsyncProp('data')).toEqual([10, 2]);
+});
+
+test('an obsolete transform cannot publish data or report an error', async () => {
+  const gate = Promise.withResolvers<number[]>();
+  const transform = vi.fn(rows => (rows[0] === 1 ? gate.promise : rows));
+  const {state, complete, error} = makeState({dataTransform: transform});
+  state.setAsyncProps({data: Promise.resolve([1])} as never);
+  await vi.waitFor(() => expect(transform).toHaveBeenLastCalledWith([1]));
+  state.setAsyncProps({data: [2]} as never);
+  gate.reject(new Error('obsolete'));
+  await new Promise(resolve => setTimeout(resolve, 0));
+  expect(state.getAsyncProp('data')).toEqual([2]);
+  expect(complete).toHaveBeenCalledExactlyOnceWith('data', [2]);
+  expect(error).not.toHaveBeenCalled();
+});
+
+test('a rejected transform clears loading and reports the error', async () => {
+  const failure = new Error('transform failed');
+  const {state, complete, error} = makeState({
+    dataTransform: vi.fn(rows => (rows.length ? Promise.reject(failure) : rows))
+  });
+  state.setAsyncProps({data: Promise.resolve([1])} as never);
+  await vi.waitFor(() => expect(error).toHaveBeenCalledExactlyOnceWith('data', failure));
+  expect(state.isAsyncPropLoading('data')).toBe(false);
+  expect(complete).not.toHaveBeenCalled();
+});

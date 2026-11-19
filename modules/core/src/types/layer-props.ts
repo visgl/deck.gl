@@ -185,10 +185,13 @@ export type LayerProps = {
       ) => {startRow: number; endRow?: number}[])
     | null;
   /**
-   * Callback to manipulate remote data when it's fetched and parsed.
+   * Callback to transform parsed data. A promise keeps the layer loading until it resolves.
    */
   dataTransform?:
-    | (<LayerDataT = LayerData<unknown>>(data: unknown, previousData?: LayerDataT) => LayerDataT)
+    | (<LayerDataT = LayerData<unknown>>(
+        data: unknown,
+        previousData?: LayerDataT
+      ) => LayerDataT | Promise<LayerDataT>)
     | null;
   /**
    * Custom implementation to fetch and parse content from URLs.
