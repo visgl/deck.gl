@@ -176,7 +176,10 @@ export function unmountAtNode(node: RootElement) {
 
   if (root?.container) {
     log.log(3, 'DeckGL root unmounted')();
-    renderer.updateContainer(null, root.container, null, noop);
+    // Commit the unmount now, so the tree's layout and passive effect cleanups run while Deck is
+    // still live. On a concurrent root, `updateContainer` would only schedule it.
+    renderer.updateContainerSync(null, root.container, null, noop);
+    renderer.flushSyncWork();
 
     const state = root.store.getState();
     const deckgl = state.deckgl;

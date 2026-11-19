@@ -362,6 +362,42 @@ describe('renderer', () => {
       expect(second.root.store.getState().deckgl).toBe(second.deck);
     });
 
+    it('runs the tree’s effect cleanups before it finalizes deckgl', async () => {
+      const {root, deck, flush} = createTestRoot();
+      const order: string[] = [];
+      deck.finalize.mockImplementation(() => {
+        order.push('finalize');
+      });
+      function Child() {
+        React.useLayoutEffect(
+          () => () => {
+            order.push(`layout cleanup, deckgl ${root.store.getState().deckgl ? 'set' : 'null'}`);
+          },
+          []
+        );
+        React.useEffect(
+          () => () => {
+            order.push(`passive cleanup, deckgl ${root.store.getState().deckgl ? 'set' : 'null'}`);
+          },
+          []
+        );
+        return null;
+      }
+      await React.act(async () => {
+        root.render(React.createElement(Child));
+        await flush();
+      });
+
+      unmountAtNode(getRootElement(root));
+      await React.act(flush);
+
+      expect(order).toEqual([
+        'layout cleanup, deckgl set',
+        'passive cleanup, deckgl set',
+        'finalize'
+      ]);
+    });
+
     it('should handle unmounting non-existent node gracefully', () => {
       // Arrange
       const node = createTestRootElement();
