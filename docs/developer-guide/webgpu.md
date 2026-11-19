@@ -70,12 +70,12 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/carto` | `ClusterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `H3TileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `HeatmapTileLayer` | ✅ | ❌ |
-| `@deck.gl/carto` | `PointLabelLayer` | ✅ | ❌ |
+| `@deck.gl/carto` | `PointLabelLayer` | ✅ | 🚧 |
 | `@deck.gl/carto` | `QuadbinTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `RasterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `VectorTileLayer` | ✅ | ❌ |
 
-`GeoJsonLayer` supports polygon, line, and text point rendering on WebGPU. `TextLayer` supports glyph rendering; text backgrounds and collision filtering still require WebGL.
+`GeoJsonLayer` supports polygon, line, and text point rendering on WebGPU. `TextLayer` supports glyph rendering and text backgrounds. The `PointLabelLayer` render suite covers label backgrounds and collision filtering on WebGPU.
 
 - `S2Layer`, `QuadkeyLayer`, and `GeohashLayer` inherit their WebGPU rendering from `PolygonLayer`, including extruded, stroked, and wireframe cells.
 - `H3HexagonLayer` supports both its high-precision `PolygonLayer` path and its instanced `ColumnLayer` path on WebGPU. 
