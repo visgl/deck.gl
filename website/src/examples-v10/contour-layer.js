@@ -119,7 +119,8 @@ class ContourDemo extends Component {
 
     return (
       <App
-        {...this.props}
+        mapStyle={this.props.mapStyle}
+        device={this.props.device}
         key={this.props.device?.type}
         contours={style === 'Isoband' ? BANDS : LINES}
         cellSize={cellSize}
