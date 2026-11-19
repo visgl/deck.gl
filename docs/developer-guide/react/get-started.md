@@ -1,16 +1,16 @@
 # Get started
 
-`@deck.gl-community/react-fiber` renders deck.gl in a React client tree. The root exports `DeckGL`, and subpaths named after deck.gl's modules export a component for each built-in layer, view, widget and effect.
+`@deck.gl/react` renders deck.gl in a React client tree. The root exports `DeckGL`, and subpaths named after deck.gl's modules export a component for each built-in layer, view, widget and effect.
 
 ## 1. Install the packages you use
 
 Install React, the renderer, and the deck.gl packages used by the application:
 
 ```bash
-npm install react react-dom @deck.gl-community/react-fiber @deck.gl/core @deck.gl/layers
+npm install react react-dom @deck.gl/react @deck.gl/core @deck.gl/layers
 ```
 
-The renderer requires React 19 or later, and TypeScript 5.3 or later for its types. It is built for the deck.gl 10 prerelease packages, `10.0.0-alpha.1`. Each component subpath needs its deck.gl package, such as `@deck.gl/layers` for `/layers`. The standalone root imports no provider package. Add the matching deck.gl provider and host-map SDK only when using a provider root:
+The renderer requires React 19.2 or later, and TypeScript 5.3 or later for its types. Each component subpath needs its deck.gl package, such as `@deck.gl/layers` for `/layers`. The standalone root imports no provider package. Add the matching deck.gl provider and host-map SDK only when using a provider root:
 
 ```bash
 # Mapbox provider root
@@ -20,7 +20,7 @@ yarn add @deck.gl/mapbox mapbox-gl
 yarn add @deck.gl/maplibre maplibre-gl
 ```
 
-The application owns the Mapbox or MapLibre map; keep map creation in browser-only code. A bundled MapLibre GL JS 6 application calls `setWorkerUrl` before it creates the first map. See [Using with maps](./using-with-maps.md) for safe overlay attachment and [Configure the MapLibre worker](./base-maps/using-with-maplibre.md#configure-the-maplibre-worker) for worker and CSP guidance.
+The application owns the Mapbox or MapLibre map; keep map creation in browser-only code. A bundled MapLibre GL JS 6 application calls `setWorkerUrl` before it creates the first map. See [Using with maps](using-with-maps.md) for safe overlay attachment and [Configure the MapLibre worker](base-maps/using-with-maplibre.md#configure-the-maplibre-worker) for worker and CSP guidance.
 
 ## 2. Render on the client
 
@@ -28,7 +28,7 @@ The native root creates a browser renderer. In an application that uses React Se
 
 ## 3. Size a standalone root
 
-Without a `canvas` prop, `DeckGL` renders a wrapper and canvas like `@deck.gl/react`: the wrapper is absolutely positioned with `width` and `height` of `100%` by default, so it fills the nearest positioned ancestor. Give that container a size in application CSS, or set `width`, `height`, or `style` on `DeckGL`. See [Root DOM and sizing](../api-reference/deckgl.md#root-dom-and-sizing). Supplying `canvas` tells the component to use a canvas you render and size yourself; it then renders no wrapper or canvas.
+Without a `canvas` prop, `DeckGL` renders a wrapper and canvas like `@deck.gl/react/legacy`: the wrapper is absolutely positioned with `width` and `height` of `100%` by default, so it fills the nearest positioned ancestor. Give that container a size in application CSS, or set `width`, `height`, or `style` on `DeckGL`. See [Root DOM and sizing](../../api-reference/react/deckgl.md#root-dom-and-sizing). Supplying `canvas` tells the component to use a canvas you render and size yourself; it then renders no wrapper or canvas.
 
 ## 4. Add layers
 
@@ -36,8 +36,8 @@ Import a layer component from the subpath named after its deck.gl module, and pa
 props. deck.gl matches layers by `id`, so give each one a stable, unique ID.
 
 ```tsx
-import {DeckGL} from '@deck.gl-community/react-fiber';
-import {ScatterplotLayer} from '@deck.gl-community/react-fiber/layers';
+import {DeckGL} from '@deck.gl/react';
+import {ScatterplotLayer} from '@deck.gl/react/layers';
 
 type Point = {coordinates: [number, number]};
 
@@ -73,8 +73,8 @@ function Airports() {
 Views and effects come from `/core`, and widgets from `/widgets`:
 
 ```tsx
-import {LightingEffect, MapView} from '@deck.gl-community/react-fiber/core';
-import {ZoomWidget} from '@deck.gl-community/react-fiber/widgets';
+import {LightingEffect, MapView} from '@deck.gl/react/core';
+import {ZoomWidget} from '@deck.gl/react/widgets';
 
 <DeckGL initialViewState={INITIAL_VIEW_STATE} controller>
   <MapView id="main-map" />
@@ -96,7 +96,7 @@ For a custom layer, view, widget or effect, make a component once with `createLa
 needed:
 
 ```tsx
-import {createLayerComponent} from '@deck.gl-community/react-fiber';
+import {createLayerComponent} from '@deck.gl/react';
 import {FlowLayer as DeckFlowLayer} from './flow-layer';
 
 export const FlowLayer = createLayerComponent(DeckFlowLayer);
@@ -104,11 +104,11 @@ export const FlowLayer = createLayerComponent(DeckFlowLayer);
 
 When you already have an instance, for example from `useMemo`, pass it to a native element:
 `<deckLayer layer={layer} />`, `<deckView>`, `<deckWidget>` or `<deckEffect>`. See
-[Native elements](../api-reference/native-elements.md).
+[Native elements](../../api-reference/react/native-elements.md).
 
 ## 7. Combine JSX and `layers` only when needed
 
-`DeckGL` accepts the normal deck.gl `layers` prop as well as JSX layers. As in `@deck.gl/react`, the renderer appends the `layers` prop after the layers produced by JSX, so prop layers draw on top. This is useful while incrementally moving an existing deck.gl configuration to React, but all layers across both sources must have unique IDs.
+`DeckGL` accepts the normal deck.gl `layers` prop as well as JSX layers. As in `@deck.gl/react/legacy`, the renderer appends the `layers` prop after the layers produced by JSX, so prop layers draw on top. This is useful while incrementally moving an existing deck.gl configuration to React, but all layers across both sources must have unique IDs.
 
 ```tsx
 import {ScatterplotLayer as DeckScatterplotLayer} from '@deck.gl/layers';
@@ -128,7 +128,7 @@ Use `onDeckChange` to receive the root-specific `Deck` instance. Store it in Rea
 ```tsx
 import {useEffect, useState} from 'react';
 import type {Deck} from '@deck.gl/core';
-import {DeckGL} from '@deck.gl-community/react-fiber';
+import {DeckGL} from '@deck.gl/react';
 
 function Map() {
   const [deck, setDeck] = useState<Deck | null>(null);
@@ -153,14 +153,14 @@ The notification receives `null` when its root is cleaned up. It is not a callba
 
 ## Add a provider overlay
 
-Provider selection is an import-path decision. Use `/mapbox` for `MapboxOverlay` or `/maplibre` for `MapLibreOverlay`; install the matching `@deck.gl` package and create/configure the host map in your application. Store the overlay from `onDeckChange` in state and attach it to the map in an effect, so it is attached once per instance and detached during cleanup. See [Attach the overlay to the host map](./using-with-maps.md#attach-the-overlay-to-the-host-map) for the lifecycle, and the [Mapbox](./base-maps/using-with-mapbox.md) and [MapLibre](./base-maps/using-with-maplibre.md) guides for complete examples.
+Provider selection is an import-path decision. Use `/mapbox` for `MapboxOverlay` or `/maplibre` for `MapLibreOverlay`; install the matching `@deck.gl` package and create/configure the host map in your application. Store the overlay from `onDeckChange` in state and attach it to the map in an effect, so it is attached once per instance and detached during cleanup. See [Attach the overlay to the host map](using-with-maps.md#attach-the-overlay-to-the-host-map) for the lifecycle, and the [Mapbox](base-maps/using-with-mapbox.md) and [MapLibre](base-maps/using-with-maplibre.md) guides for complete examples.
 
 Deck callbacks such as `onClick` are deck.gl event handlers, passed to the root or a layer, not React synthetic events.
 
 ## Next steps
 
-Read the [DeckGL API](../api-reference/deckgl.md) for standalone and interleaved ownership details, [Using with maps](./using-with-maps.md) for host-map lifecycle and provider guides, [Components](../api-reference/components.md) for every component subpath, and [Native elements](../api-reference/native-elements.md) for the `<deckLayer>`, `<deckView>`, `<deckWidget>` and `<deckEffect>` contract.
+Read the [DeckGL API](../../api-reference/react/deckgl.md) for standalone and interleaved ownership details, [Using with maps](using-with-maps.md) for host-map lifecycle and provider guides, [Components](../../api-reference/react/components.md) for every component subpath, and [Native elements](../../api-reference/react/native-elements.md) for the `<deckLayer>`, `<deckView>`, `<deckWidget>` and `<deckEffect>` contract.
 
-If you are upgrading from `@deck.gl/react`, see the [upgrade guide](./migrate-from-deckgl-react.md).
+If you are upgrading from `@deck.gl/react/legacy`, see the [upgrade guide](migrate-from-deckgl-react.md).
 
-For framework-specific project layouts, see the [React Fiber examples](/examples/react-fiber/overview).
+For framework-specific project layouts, see the [React Fiber examples](https://visgl.github.io/deck.gl-community/examples/react-fiber/overview).

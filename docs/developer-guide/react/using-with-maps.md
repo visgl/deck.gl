@@ -1,9 +1,9 @@
 # Using with maps
 
 deck.gl works without a base map, but a base map gives geospatial layers context. This page
-describes what is shared by every base-map integration of `@deck.gl-community/react-fiber`. Each
+describes what is shared by every base-map integration of `@deck.gl/react`. Each
 provider guide then covers installation, examples, and provider-specific options. For the
-underlying deck.gl concepts, see deck.gl's [Using with map](https://deck.gl/docs/get-started/using-with-map)
+underlying deck.gl concepts, see deck.gl's [Using with map](../../get-started/using-with-map.md)
 guide.
 
 ## Overlaid and interleaved rendering
@@ -16,17 +16,17 @@ deck.gl integrates with a base map in one of two ways:
   such as labels or 3D buildings can occlude each other.
 
 deck.gl's guide describes both modes in detail:
-[overlaid](https://deck.gl/docs/get-started/using-with-map#overlaid) and
-[interleaved](https://deck.gl/docs/get-started/using-with-map#interleaved).
+[overlaid](../../get-started/using-with-map.md#overlaid) and
+[interleaved](../../get-started/using-with-map.md#interleaved).
 
 ## Supported base maps
 
 | Base map | Import path | deck.gl package | Host SDK | Overlaid | Interleaved | React Map GL | Guide | deck.gl guide |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Mapbox GL JS | `@deck.gl-community/react-fiber/mapbox` | [`@deck.gl/mapbox`](https://deck.gl/docs/api-reference/mapbox/overview) | `mapbox-gl` | ✓ | ✓ | ✓ | [Using with Mapbox](./base-maps/using-with-mapbox.md) | [Using with Mapbox](https://deck.gl/docs/developer-guide/base-maps/using-with-mapbox) |
-| MapLibre GL JS | `@deck.gl-community/react-fiber/maplibre` | [`@deck.gl/maplibre`](https://deck.gl/docs/api-reference/maplibre/overview) | `maplibre-gl` | ✓ | ✓ | ✓ | [Using with MapLibre](./base-maps/using-with-maplibre.md) | [Using with MapLibre](https://deck.gl/docs/developer-guide/base-maps/using-with-maplibre) |
-| Google Maps | `@deck.gl-community/react-fiber/google-maps` | [`@deck.gl/google-maps`](https://deck.gl/docs/api-reference/google-maps/overview) | Maps JavaScript API | ✓ | ✓ (vector maps) | [React Google Maps](https://visgl.github.io/react-google-maps/) | [Using with Google Maps](./base-maps/using-with-google-maps.md) | [Using with Google Maps](https://deck.gl/docs/developer-guide/base-maps/using-with-google-maps) |
-| Custom overlay | `createDeckGL` from `@deck.gl-community/react-fiber` | The overlay's package | The host's SDK | Overlay-specific | Overlay-specific | Overlay-specific | [Using with custom overlays](./base-maps/using-with-custom-overlays.md) | None |
+| Mapbox GL JS | `@deck.gl/react/mapbox` | [`@deck.gl/mapbox`](../../api-reference/mapbox/overview.md) | `mapbox-gl` | ✓ | ✓ | ✓ | [Using with Mapbox](base-maps/using-with-mapbox.md) | [Using with Mapbox](../base-maps/using-with-mapbox.md) |
+| MapLibre GL JS | `@deck.gl/react/maplibre` | [`@deck.gl/maplibre`](../../api-reference/maplibre/overview.md) | `maplibre-gl` | ✓ | ✓ | ✓ | [Using with MapLibre](base-maps/using-with-maplibre.md) | [Using with MapLibre](../base-maps/using-with-maplibre.md) |
+| Google Maps | `@deck.gl/react/google-maps` | [`@deck.gl/google-maps`](../../api-reference/google-maps/overview.md) | Maps JavaScript API | ✓ | ✓ (vector maps) | [React Google Maps](https://visgl.github.io/react-google-maps/) | [Using with Google Maps](base-maps/using-with-google-maps.md) | [Using with Google Maps](../base-maps/using-with-google-maps.md) |
+| Custom overlay | `createDeckGL` from `@deck.gl/react` | The overlay's package | The host's SDK | Overlay-specific | Overlay-specific | Overlay-specific | [Using with custom overlays](base-maps/using-with-custom-overlays.md) | None |
 
 ## Choose a provider root
 
@@ -34,9 +34,9 @@ Use a provider root when the application owns a Mapbox, MapLibre or Google map a
 as a map overlay:
 
 ```tsx
-import {DeckGL as MapboxDeckGL} from '@deck.gl-community/react-fiber/mapbox';
-import {DeckGL as MapLibreDeckGL} from '@deck.gl-community/react-fiber/maplibre';
-import {DeckGL as GoogleMapsDeckGL} from '@deck.gl-community/react-fiber/google-maps';
+import {DeckGL as MapboxDeckGL} from '@deck.gl/react/mapbox';
+import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/maplibre';
+import {DeckGL as GoogleMapsDeckGL} from '@deck.gl/react/google-maps';
 ```
 
 A provider root creates the deck.gl overlay only. The application creates, configures, and removes
@@ -49,10 +49,10 @@ Provider roots pass `interleaved?: boolean` to the overlay unchanged, so each ov
 applies:
 
 - Pass `false` for a dedicated deck canvas. This is the default of
-  [`MapboxOverlay`](https://deck.gl/docs/api-reference/mapbox/mapbox-overlay#constructor) and
-  [`MapLibreOverlay`](https://deck.gl/docs/api-reference/maplibre/overview).
+  [`MapboxOverlay`](../../api-reference/mapbox/mapbox-overlay.md#constructor) and
+  [`MapLibreOverlay`](../../api-reference/maplibre/overview.md).
 - Pass `true` to share the map's WebGL context. This is the default of
-  [`GoogleMapsOverlay`](https://deck.gl/docs/api-reference/google-maps/google-maps-overlay), on
+  [`GoogleMapsOverlay`](../../api-reference/google-maps/google-maps-overlay.md), on
   vector maps.
 
 The Mapbox and MapLibre overlays read `interleaved` only in their constructors, and the Google Maps
@@ -70,19 +70,19 @@ a manual `new Map({container})` integration without adding a child to the map co
 ## Views beside the map
 
 The Mapbox and MapLibre roots send JSX views, merged with the `views` prop, to the overlay,
-which supports deck.gl's [multi-view usage](https://deck.gl/docs/api-reference/mapbox/mapbox-overlay#multi-view-usage).
+which supports deck.gl's [multi-view usage](../../api-reference/mapbox/mapbox-overlay.md#multi-view-usage).
 Only one view follows the map camera and receives map interaction: the view with id `mapbox` on
 the `/mapbox` root and `maplibre` on the `/maplibre` root. The overlay adds it first when the list
 has none. Give a JSX view that id to set the map view's position in the list. Keep it the full size
 of the map, or its layers drift off the basemap.
 
 The Google Maps root does not send JSX views: `GoogleMapsOverlay` draws one view, which follows the
-map camera. See [Using with Google Maps](./base-maps/using-with-google-maps.md#views).
+map camera. See [Using with Google Maps](base-maps/using-with-google-maps.md#views).
 
 ```tsx
-import {OrthographicView} from '@deck.gl-community/react-fiber/core';
-import {ScatterplotLayer} from '@deck.gl-community/react-fiber/layers';
-import {DeckGL} from '@deck.gl-community/react-fiber/maplibre';
+import {OrthographicView} from '@deck.gl/react/core';
+import {ScatterplotLayer} from '@deck.gl/react/layers';
+import {DeckGL} from '@deck.gl/react/maplibre';
 
 <DeckGL
   layerFilter={({layer, viewport}) => (viewport.id === 'inset') === layer.id.startsWith('inset')}
@@ -137,16 +137,16 @@ the host map. Some providers exclude more props; see the provider guide.
 
 Use a standalone root when the application needs `Deck` and its canvas. For a compatible custom
 overlay, use the native `createDeckGL` factory instead of trying to select a provider at render
-time. See [Using with custom overlays](./base-maps/using-with-custom-overlays.md).
+time. See [Using with custom overlays](base-maps/using-with-custom-overlays.md).
 
 ## Reverse-controlled maps
 
-deck.gl's guides describe a third mode, reverse controlled, in which the `@deck.gl/react` `DeckGL`
+deck.gl's guides describe a third mode, reverse controlled, in which the `@deck.gl/react/legacy` `DeckGL`
 component is the root, a React Map GL `<Map>` is its child, and deck.gl owns the camera. Provider
 roots do not support this mode. `DeckGL` renders its children with the deck.gl reconciler, which
 accepts only `<deckLayer>` and `<deckView>` elements, so it cannot render a `<Map>` child. An application
 that needs reverse-controlled rendering should keep using
-[`@deck.gl/react`](https://deck.gl/docs/api-reference/react/deckgl) for that map.
+[`@deck.gl/react/legacy`](../../api-reference/react/legacy/deckgl.md) for that map.
 
 ## Base map renderer and data provider
 

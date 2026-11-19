@@ -7,12 +7,12 @@ subpath matches a deck.gl module, and each component has the deck.gl class's nam
 
 | Import | Components | Install |
 | --- | --- | --- |
-| `@deck.gl-community/react-fiber/core` | `MapView`, `OrbitView`, `OrthographicView`, `FirstPersonView`, `_GlobeView`, `_CustomProjectionView`, `LightingEffect`, `PostProcessEffect` | `@deck.gl/core` |
-| `@deck.gl-community/react-fiber/layers` | Every layer in `@deck.gl/layers` | `@deck.gl/layers` |
-| `@deck.gl-community/react-fiber/geo-layers` | Every layer in `@deck.gl/geo-layers`, including `_WMSLayer` | `@deck.gl/geo-layers` |
-| `@deck.gl-community/react-fiber/aggregation-layers` | Every layer in `@deck.gl/aggregation-layers` | `@deck.gl/aggregation-layers` |
-| `@deck.gl-community/react-fiber/mesh-layers` | `ScenegraphLayer`, `SimpleMeshLayer` | `@deck.gl/mesh-layers` |
-| `@deck.gl-community/react-fiber/widgets` | Every widget in `@deck.gl/widgets`, including the `_`-prefixed ones | `@deck.gl/widgets` |
+| `@deck.gl/react/core` | `MapView`, `OrbitView`, `OrthographicView`, `FirstPersonView`, `_GlobeView`, `_CustomProjectionView`, `LightingEffect`, `PostProcessEffect` | `@deck.gl/core` |
+| `@deck.gl/react/layers` | Every layer in `@deck.gl/layers` | `@deck.gl/layers` |
+| `@deck.gl/react/geo-layers` | Every layer in `@deck.gl/geo-layers`, including `_WMSLayer` | `@deck.gl/geo-layers` |
+| `@deck.gl/react/aggregation-layers` | Every layer in `@deck.gl/aggregation-layers` | `@deck.gl/aggregation-layers` |
+| `@deck.gl/react/mesh-layers` | `ScenegraphLayer`, `SimpleMeshLayer` | `@deck.gl/mesh-layers` |
+| `@deck.gl/react/widgets` | Every widget in `@deck.gl/widgets`, including the `_`-prefixed ones | `@deck.gl/widgets` |
 
 Install the deck.gl package behind each subpath you import. The root import loads none of them,
 and bundlers keep only the components you import.
@@ -20,7 +20,7 @@ and bundlers keep only the components you import.
 ## Props and rendering
 
 A component takes the props of the class's constructor and builds a new instance on every render.
-It renders that instance as a [native element](./native-elements.md). deck.gl matches the new
+It renders that instance as a [native element](native-elements.md). deck.gl matches the new
 layer with the previous one by `id` and updates only what changed. For widgets and effects,
 deck.gl keeps the first instance with a given id and passes it the props of each new one, so a
 widget keeps its DOM and state across renders.
@@ -29,9 +29,9 @@ View components pass their children through, as `<deckView>` does. Nesting a lay
 does not assign the layer to that view.
 
 ```tsx
-import {MapView} from '@deck.gl-community/react-fiber/core';
-import {ScatterplotLayer} from '@deck.gl-community/react-fiber/layers';
-import {ZoomWidget} from '@deck.gl-community/react-fiber/widgets';
+import {MapView} from '@deck.gl/react/core';
+import {ScatterplotLayer} from '@deck.gl/react/layers';
+import {ZoomWidget} from '@deck.gl/react/widgets';
 
 <DeckGL initialViewState={INITIAL_VIEW_STATE} controller>
   <MapView id="main" />
@@ -87,7 +87,7 @@ import {
   createLayerComponent,
   createViewComponent,
   createWidgetComponent
-} from '@deck.gl-community/react-fiber';
+} from '@deck.gl/react';
 
 export const FlowLayer = createLayerComponent(DeckFlowLayer);
 export const MinimapView = createViewComponent(DeckMinimapView);
@@ -103,4 +103,4 @@ export const OutlineEffect = createEffectComponent(DeckOutlineEffect);
 | `createEffectComponent(EffectClass)` | An effect class whose constructor takes a props object | |
 
 React DevTools shows each component under the class's `layerName`, or its class name. For a class
-with another constructor signature, render the instance with a [native element](./native-elements.md).
+with another constructor signature, render the instance with a [native element](native-elements.md).

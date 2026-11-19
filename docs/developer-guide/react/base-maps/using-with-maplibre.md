@@ -2,27 +2,27 @@
 
 | Import path | deck.gl overlay | Overlaid | Interleaved | React Map GL |
 | --- | --- | --- | --- | --- |
-| `@deck.gl-community/react-fiber/maplibre` | [`MapLibreOverlay`](https://deck.gl/docs/api-reference/maplibre/overview) | ✓ | ✓ | ✓ |
+| `@deck.gl/react/maplibre` | [`MapLibreOverlay`](../../../api-reference/maplibre/overview.md) | ✓ | ✓ | ✓ |
 
 [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) is an open-source library that renders
 interactive maps from vector tiles. The `/maplibre` provider root creates a
-[`MapLibreOverlay`](https://deck.gl/docs/api-reference/maplibre/overview) from
-[`@deck.gl/maplibre`](https://deck.gl/docs/api-reference/maplibre/overview) and renders its JSX
+[`MapLibreOverlay`](../../../api-reference/maplibre/overview.md) from
+[`@deck.gl/maplibre`](../../../api-reference/maplibre/overview.md) and renders its JSX
 layers into it. The application owns the MapLibre map and attaches the overlay to it.
 [Using with maps](../using-with-maps.md) describes the shared provider-root behavior and lifecycle.
 
-deck.gl's [Using with MapLibre](https://deck.gl/docs/developer-guide/base-maps/using-with-maplibre)
+deck.gl's [Using with MapLibre](../../base-maps/using-with-maplibre.md)
 guide covers the same integration without React Fiber.
 
 ## Integration modes
 
 - **Interleaved:** pass `interleaved` to render deck.gl layers into the MapLibre WebGL2 context.
   See deck.gl's
-  [interleaved mode](https://deck.gl/docs/developer-guide/base-maps/using-with-maplibre#interleaved)
+  [interleaved mode](../../base-maps/using-with-maplibre.md#interleaved)
   description.
 - **Overlaid:** omit `interleaved`, or pass `false`, to render deck.gl into its own canvas inside
   the MapLibre controls container. See deck.gl's
-  [overlaid mode](https://deck.gl/docs/developer-guide/base-maps/using-with-maplibre#overlaid)
+  [overlaid mode](../../base-maps/using-with-maplibre.md#overlaid)
   description.
 - **Reverse controlled:** provider roots do not support this mode. See
   [Using with maps](../using-with-maps.md#reverse-controlled-maps).
@@ -96,7 +96,7 @@ because that component does not render a host child. Its callback ref stores the
 ```tsx
 import {useState} from 'react';
 import {Map, type MapRef} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl-community/react-fiber/maplibre';
+import {DeckGL} from '@deck.gl/react/maplibre';
 
 export function MapLibreMap() {
   const [map, setMap] = useState<MapRef | null>(null);
@@ -124,7 +124,7 @@ container must have no children before `new Map({container})`; provider `DeckGL`
 ```tsx
 import {useEffect, useRef, useState} from 'react';
 import {Map as MapLibreMap} from 'maplibre-gl';
-import {DeckGL} from '@deck.gl-community/react-fiber/maplibre';
+import {DeckGL} from '@deck.gl/react/maplibre';
 
 export function ManualMapLibreMap() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -171,4 +171,4 @@ hold the wrong instance. Pass the map in `map` instead.
 ### Choosing a map tile service
 
 MapLibre GL JS renders tiles from any compatible service or from tiles you host. deck.gl's guide
-lists [tile services and self-hosting resources](https://deck.gl/docs/developer-guide/base-maps/using-with-maplibre#choosing-a-map-tile-service).
+lists [tile services and self-hosting resources](../../base-maps/using-with-maplibre.md#choosing-a-map-tile-service).

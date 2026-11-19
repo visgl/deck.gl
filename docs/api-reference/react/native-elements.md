@@ -2,10 +2,10 @@
 
 ![From v10.0](https://img.shields.io/badge/from-v10.0-green.svg?style=flat-square)
 
-The native renderer accepts four deck.gl JSX elements: `<deckLayer>`, `<deckView>`, `<deckWidget>` and `<deckEffect>`. Each takes an instance you build. For deck.gl's own classes, the [components](./components.md) build the instance from props and render these elements for you; use the elements when you already have an instance, or for a class with no component. The elements are available after importing the root package:
+The native renderer accepts four deck.gl JSX elements: `<deckLayer>`, `<deckView>`, `<deckWidget>` and `<deckEffect>`. Each takes an instance you build. For deck.gl's own classes, the [components](components.md) build the instance from props and render these elements for you; use the elements when you already have an instance, or for a class with no component. The elements are available after importing the root package:
 
 ```tsx
-import {DeckGL} from '@deck.gl-community/react-fiber';
+import {DeckGL} from '@deck.gl/react';
 ```
 
 The `deck` prefix keeps the element names clear of DOM and SVG elements, such as SVG's `view`, and of other renderers' elements.
@@ -23,7 +23,7 @@ rules: {
 }
 ```
 
-The [built-in components](./components.md), such as `<ScatterplotLayer>`, and components made with the [factories](./components.md#custom-classes) have capitalized tags, so the rule does not check them.
+The [built-in components](components.md), such as `<ScatterplotLayer>`, and components made with the [factories](components.md#custom-classes) have capitalized tags, so the rule does not check them.
 
 ## `<deckLayer>`
 
@@ -97,7 +97,7 @@ function App() {
 }
 ```
 
-In TypeScript, the view state props are typed from the `views` prop, as in `@deck.gl/react`. For views from `<deckView>` children or a widget, name their type to pass one view state per view: `<DeckGL<MapView[]> initialViewState={{left: LEFT_VIEW_STATE, right: RIGHT_VIEW_STATE}}>`.
+In TypeScript, the view state props are typed from the `views` prop, as in `@deck.gl/react/legacy`. For views from `<deckView>` children or a widget, name their type to pass one view state per view: `<DeckGL<MapView[]> initialViewState={{left: LEFT_VIEW_STATE, right: RIGHT_VIEW_STATE}}>`.
 
 ## `<deckEffect>`
 
@@ -127,13 +127,13 @@ This means that nesting is useful for React composition but does not create a pa
 </deckView>;
 ```
 
-Use deck.gl's normal view and layer configuration when an application needs view-specific rendering behavior. On the Mapbox and MapLibre roots, the overlay keeps its map's view and renders JSX views beside it; see [Views beside the map](../developer-guide/using-with-maps.md#views-beside-the-map).
+Use deck.gl's normal view and layer configuration when an application needs view-specific rendering behavior. On the Mapbox and MapLibre roots, the overlay keeps its map's view and renders JSX views beside it; see [Views beside the map](../../developer-guide/react/using-with-maps.md#views-beside-the-map).
 
 Refs on these intrinsic elements resolve to their deck.gl instance, not an internal renderer wrapper. Use this low-level escape hatch sparingly; normal React data flow and deck.gl props are easier to keep in sync.
 
 ## Mixing elements and props
 
-Each element has a matching `DeckGL` prop: `layers`, `views`, `widgets` and `effects`. The root combines the two, as `@deck.gl/react` does:
+Each element has a matching `DeckGL` prop: `layers`, `views`, `widgets` and `effects`. The root combines the two, as `@deck.gl/react/legacy` does:
 
 - **Layers.** `<deckLayer>` layers come first and `layers` prop layers after them, so prop layers draw on top. IDs must be unique across both lists.
 - **Views, widgets and effects.** The root merges them by ID. A prop entry replaces the element with the same ID, and other prop entries follow the elements.
@@ -153,4 +153,4 @@ Here deck.gl receives `react-layer` then `existing-layer`, and the prop's `main-
 
 Removing the last element of a kind leaves only the prop's entries; removing the last `<deckView>` with no `views` prop brings back deck.gl's default view. A root with neither leaves deck.gl's views alone, so a widget such as `SplitterWidget` can set them.
 
-The Mapbox and MapLibre roots merge views the same way; a custom overlay root does only with [`forwardViews`](./deckgl.md#custom-compatible-overlays). Widgets and effects are sent to every external-overlay root.
+The Mapbox and MapLibre roots merge views the same way; a custom overlay root does only with [`forwardViews`](deckgl.md#custom-compatible-overlays). Widgets and effects are sent to every external-overlay root.

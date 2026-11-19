@@ -2,16 +2,16 @@
 
 | Import path | deck.gl overlay | Overlaid | Interleaved | React Google Maps |
 | --- | --- | --- | --- | --- |
-| `@deck.gl-community/react-fiber/google-maps` | [`GoogleMapsOverlay`](https://deck.gl/docs/api-reference/google-maps/google-maps-overlay) | ✓ | ✓ (vector maps) | ✓ |
+| `@deck.gl/react/google-maps` | [`GoogleMapsOverlay`](../../../api-reference/google-maps/google-maps-overlay.md) | ✓ | ✓ (vector maps) | ✓ |
 
 The [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript)
 renders Google's base maps in the browser. The `/google-maps` provider root creates a
-[`GoogleMapsOverlay`](https://deck.gl/docs/api-reference/google-maps/google-maps-overlay) from
-[`@deck.gl/google-maps`](https://deck.gl/docs/api-reference/google-maps/overview) and renders its
+[`GoogleMapsOverlay`](../../../api-reference/google-maps/google-maps-overlay.md) from
+[`@deck.gl/google-maps`](../../../api-reference/google-maps/overview.md) and renders its
 JSX layers into it. The application owns the Google map and attaches the overlay to it.
 [Using with maps](../using-with-maps.md) describes the shared provider-root behavior and lifecycle.
 
-deck.gl's [Using with Google Maps](https://deck.gl/docs/developer-guide/base-maps/using-with-google-maps)
+deck.gl's [Using with Google Maps](../../base-maps/using-with-google-maps.md)
 guide covers the same integration without React Fiber.
 
 ## Integration modes
@@ -69,7 +69,7 @@ returns `null` until the map exists, and `DeckGL` attaches the overlay once it d
 
 ```tsx
 import {APIProvider, Map, useMap} from '@vis.gl/react-google-maps';
-import {DeckGL} from '@deck.gl-community/react-fiber/google-maps';
+import {DeckGL} from '@deck.gl/react/google-maps';
 
 function DeckOverlay() {
   const map = useMap();
@@ -105,7 +105,7 @@ create the map once in an effect, and set it in state.
 
 ```tsx
 import {useEffect, useRef, useState} from 'react';
-import {DeckGL} from '@deck.gl-community/react-fiber/google-maps';
+import {DeckGL} from '@deck.gl/react/google-maps';
 
 export function ManualGoogleMap({mapId}: {mapId: string}) {
   const containerRef = useRef<HTMLDivElement>(null);
