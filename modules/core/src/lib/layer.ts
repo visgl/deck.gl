@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable react/no-direct-mutation-state */
+import type {ResolvedScale} from '@math.gl/core/color';
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/core/webgl';
 import {unwrapLoaderArrowResult} from '../utils/loader-utils';
@@ -690,6 +691,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       expressions,
       parseExpression,
       functions,
+      scales: previous?.scales,
       pending: true
     };
     state.accessorQueries = request;
@@ -704,10 +706,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         evaluateAccessorQueries(source, expressions, parseExpression, previous, functions)
       )
       .then(
-        table => {
+        ({table, scales}) => {
           const layer = currentLayer();
           if (layer) {
             request.table = table;
+            request.scales = Object.keys(scales).length ? scales : undefined;
             request.pending = false;
             request.columns = Object.fromEntries(
               Object.keys(expressions).map(name => [name, table.getChild(name)!])
@@ -720,6 +723,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         error => {
           const layer = currentLayer();
           if (layer) {
+            request.scales = undefined;
             request.pending = false;
             layer.setNeedsUpdate();
             layer.raiseError(error, 'evaluating SQL accessors');
@@ -728,11 +732,24 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       );
   }
 
+  /**
+   * Experimental. Returns resolved SQL color scales keyed by accessor. The result is undefined
+   * until the first evaluation completes. While updating, it describes the previously applied
+   * colors.
+   * Color samples use normalized RGBA channels in [0, 1].
+   */
+  _getResolvedColorScales(): Readonly<Record<string, ResolvedScale>> | undefined {
+    return this.internalState?.accessorQueries?.scales;
+  }
+
   /** Called once to set up the initial state. Layers can create WebGL resources here. */
   abstract initializeState(context: LayerContext): void;
 
-  /** Returns shader options and the deck.gl assembler used by layer models. */
-  getShaders(shaders: any): any {
+  /**
+   * Returns shader options and the deck.gl assembler used by layer models.
+   * Supply a subset of extensions when assembling a dedicated render pass.
+   */
+  getShaders(shaders: any, extensions = this.props.extensions): any {
     // Preprojection capability is stable for the lifetime of a layer instance.
     shaders = mergeShaders(
       {
@@ -752,7 +769,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       modules: this.context.defaultShaderModules,
       plugins: this.context.defaultShaderPlugins
     });
-    for (const extension of this.props.extensions) {
+    for (const extension of extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
     return {...shaders, shaderAssembler: this.context.shaderAssembler};

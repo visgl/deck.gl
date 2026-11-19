@@ -7,6 +7,7 @@ import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {
   Layer,
   LayerContext,
+  type UpdateParameters,
   color,
   project32,
   _GPUVectorModel as GPUVectorModel
@@ -43,6 +44,15 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
 
   initializeState({device}: LayerContext): void {
     this.setState({model: this._getModel(device)});
+  }
+
+  /** Rebuild the display shader when clipping or other extensions change. */
+  override updateState(params: UpdateParameters<this>): void {
+    super.updateState(params);
+    if (params.changeFlags.extensionsChanged) {
+      this.state.model.destroy();
+      this.setState({model: this._getModel(this.context.device)});
+    }
   }
 
   _getModel(device: Device): GPUVectorModel {

@@ -204,8 +204,8 @@ export default abstract class AggregationLayer<
   } & CompositeLayer['state'];
 
   /** Extension hooks affect input points; rendering effects only affect the cells. */
-  protected getAggregationShaders() {
-    const shaders = super.getShaders({modules: [project32]});
+  protected getAggregationShaders(extensions = this.props.extensions) {
+    const shaders = super.getShaders({modules: [project32]}, extensions);
     return {
       ...shaders,
       plugins: shaders.plugins?.filter(

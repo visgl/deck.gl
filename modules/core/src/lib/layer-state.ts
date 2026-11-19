@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 // deck.gl, MIT license
+import type {ResolvedScale} from '@math.gl/core/color';
 import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import {compareLoaderOptions} from '@loaders.gl/core';
 import ComponentState from '../lifecycle/component-state';
@@ -42,6 +43,8 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     pending: boolean;
     table?: Table;
     columns?: Record<string, Vector>;
+    /** Resolved scales for the colors currently applied to the layer. */
+    scales?: Readonly<Record<string, ResolvedScale>>;
   };
   /** Options and parser used by the current data request. */
   private dataRequest?: {

@@ -244,6 +244,10 @@ available. Both backends use an 8-bit target if they lack a suitable floating-po
 
 - iOS Safari: WebGL context does not support rendering to a float texture. The layer therefore falls back to an 8-bit low-precision mode, where weights must be integers and the accumulated weights in any pixel cannot exceed 255.
 
+On WebGPU, [ClipExtension](../extensions/clip-extension.md) filters the points
+that contribute to the heatmap. Set `clipByInstance: false` to clip the displayed
+heatmap instead.
+
 ## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
 
 > GPU buffer layouts are internal to layer implementations and can change in future releases.
@@ -258,7 +262,12 @@ Notes:
 - Buffers must support vertex binding.
 - Offsets and strides are preserved.
 - The position vector supplies the input count. `numInstances` can select a prefix.
-- This path requires WebGPU and a configuration without extensions or CPU position preprojection.
+- Borrowed columns require WebGPU and positions that do not need CPU preprojection.
+- [ClipExtension](../extensions/clip-extension.md) reads the position column.
+- For numeric [DataFilterExtension](../extensions/data-filter-extension.md), pass
+  `extensionAttributes.filterValues` as a single-chunk float32 vector with one row per
+  position and a component count matching `filterSize`. Category filtering, `fp64`,
+  and item counting require accessor inputs.
 
 ## Source
 
