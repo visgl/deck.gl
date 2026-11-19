@@ -72,9 +72,13 @@ export function createProps<PropsT extends {}>(
     const type = propTypes[name];
     const value = propsInstance[name];
     /** Row consumers read a callback; typed column consumers retain the vector. */
-    const rowMode = type?.type === 'accessor' && typeof type.arrow === 'string';
+    const arrowMode =
+      type?.type === 'accessor'
+        ? (extensions?.length && type.arrowWithExtensions) || type.arrow
+        : false;
+    const rowMode = typeof arrowMode === 'string';
     /** Byte-encoded color callbacks share the Arrow color convention. */
-    const rowColor = rowMode && type.arrow === 'row-color';
+    const rowColor = arrowMode === 'row-color';
     if (type?.type === 'accessor' && type.arrow && typeof value?.sql === 'string') {
       const queries = (propsInstance[ACCESSOR_QUERIES_SYMBOL] ??= Object.create(null));
       /** SQL expression and its eventual result column. */
