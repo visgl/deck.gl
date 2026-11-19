@@ -11,10 +11,11 @@ import type {Device} from '@luma.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {animate} from 'popmotion';
+import {tableFromArrays} from 'apache-arrow';
 
-import type {Position, Color, Material, MapViewState} from '@deck.gl/core';
+import type {Position, Color, LayerData, Material, MapViewState} from '@deck.gl/core';
 
-// Source data CSV
+// Standalone JSON datasets
 const DATA_URL = {
   BUILDINGS:
     'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/trips/buildings.json', // eslint-disable-line
@@ -85,6 +86,16 @@ type Trip = {
   timestamps: number[];
 };
 
+/** Preserves one Arrow row per trip for both JSON loading and the website decoder. */
+function toTripTable<LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT {
+  const trips = source as Trip[];
+  return tableFromArrays({
+    vendor: Int32Array.from(trips, trip => trip.vendor),
+    path: trips.map(trip => trip.path),
+    timestamps: trips.map(trip => trip.timestamps)
+  }) as LayerDataT;
+}
+
 export default function App({
   device,
   buildings = DATA_URL.BUILDINGS,
@@ -130,9 +141,11 @@ export default function App({
     }),
     new TripsLayer<Trip>({
       id: 'trips',
+      // Sample row: {vendor: 0, path: [[-74.21, 40.82], ...], timestamps: [1191, ...]}
       data: trips,
-      getPath: d => d.path,
-      getTimestamps: d => d.timestamps,
+      dataTransform: toTripTable,
+      getPath: {sql: 'path'},
+      getTimestamps: {sql: 'timestamps'},
       getColor: d => (d.vendor === 0 ? theme.trailColor0 : theme.trailColor1),
       opacity: 0.3,
       widthMinPixels: 2,
