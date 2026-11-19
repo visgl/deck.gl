@@ -237,6 +237,7 @@ test.for([false, true])(
 );
 
 test('DataFilterExtension#WebGPU composes with a custom layer shader plugin', async () => {
+  /** Halves the red channel to make the custom hook observable. */
   const customColor: ShaderPlugin = {
     name: 'customColor',
     injections: {
@@ -244,9 +245,12 @@ test('DataFilterExtension#WebGPU composes with a custom layer shader plugin', as
       'wgsl:fs:DECKGL_FILTER_COLOR': '(*color).r *= 0.5;'
     }
   };
+  /** Scatterplot fixture that contributes its own shader plugin. */
   class CustomScatterplotLayer extends ScatterplotLayer {
+    /** Name used to identify this fixture in shader diagnostics. */
     static layerName = 'CustomScatterplotLayer';
 
+    /** Adds the custom plugin alongside the extension plugins. */
     getShaders() {
       const shaders = super.getShaders();
       return {...shaders, plugins: [...(shaders.plugins || []), customColor]};
