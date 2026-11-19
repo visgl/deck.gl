@@ -239,9 +239,6 @@ const testCases = [
   },
   {
     name: 'heatmap-lnglat-offset',
-    // TODO: Re-enable when WebGPU produces consistent results for equivalent
-    // LNGLAT and LNGLAT_OFFSETS positions.
-    skip: ['webgpu'],
     viewState: {
       latitude: 37.75,
       longitude: -122.44,
