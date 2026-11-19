@@ -84,7 +84,7 @@ const sidebars = {
       items: [
         'brushing-extension',
         'collision-filter-extension',
-        'data-filter-extension',
+        withStatus('data-filter-extension', 'started'),
         'mask-extension',
         'path-style-extension',
         'terrain-extension'
