@@ -20,6 +20,10 @@ v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, S
 
 * [`MaskExtension`](https://deck.gl/next/docs/api-reference/extensions/mask-extension.md) limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
 
+### ContourLayer[​](#contourlayer "Direct link to ContourLayer")
+
+* The experimental [`gpuGeometry` option](https://deck.gl/next/docs/api-reference/aggregation-layers/contour-layer.md#compute-aggregation) generates and renders isolines on WebGPU without reading back the bins.
+
 ### GPU[​](#gpu "Direct link to GPU")
 
 * [**WebGPU**](https://deck.gl/next/docs/developer-guide/webgpu.md) 🚧 — WebGPU is now the default renderer with full feature support.
@@ -1459,7 +1463,7 @@ A new experimental module `@deck.gl/json` provides a set of classes that allows 
 
 deck.gl's multiview support has been significantly enhanced. New `View` properties give applications more control over rendering, making it possible to implement e.g. overlapping views, partially synchronized views (share some but not all view state props), views with different background colors etc.
 
-### ContourLayer[​](#contourlayer "Direct link to ContourLayer")
+### ContourLayer[​](#contourlayer-1 "Direct link to ContourLayer")
 
 deck.gl's layer catalog is extended by adding new `ContourLayer`, this layer can be used to render contours, also called iso-lines for given set of threshold values. `ContourLayer` supports both WebMercator projection (geospatial applications) and Orthographic projection (infovis applications).
 
