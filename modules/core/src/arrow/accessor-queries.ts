@@ -115,6 +115,7 @@ export function evaluateAccessorQueries(
     Object.keys(previous.expressions).length === entries.length &&
     entries.every(([name, expression]) => previous.expressions[name] === expression) &&
     isArrowTableAppend(priorSource, data);
+  /** Evaluates one batch and reuses ordinary accessor columns from unchanged input. */
   const evaluateBatch = (input: Table, index: number) => {
     const previousBatch =
       canAppend && index < priorSource.batches.length ? priorTable.batches[index] : undefined;
