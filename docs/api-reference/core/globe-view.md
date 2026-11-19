@@ -1,6 +1,4 @@
-# GlobeView (Experimental)
-
-> This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other `View` classes. Use with caution and report any issues that you find on GitHub.
+# GlobeView
 
 The `GlobeView` class is a subclass of [View](./view.md). This view projects the earth into a 3D globe.
 
@@ -43,7 +41,7 @@ When GeoJson paths and polygons are rendered with this view, the straight lines 
 ## Constructor
 
 ```js
-import {_GlobeView as GlobeView} from '@deck.gl/core';
+import {GlobeView} from '@deck.gl/core';
 const view = new GlobeView({id, ...});
 ```
 

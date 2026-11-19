@@ -12,6 +12,10 @@ _v10.0 should be thought of as a pre-release. We wanted to get the new capabilit
 
 *These highlights describe goals for v10. Some features are still in development.*
 
+### GlobeView
+
+[`GlobeView`](./api-reference/core/globe-view.md), [`GlobeViewport`](./api-reference/core/globe-viewport.md) and [`GlobeController`](./api-reference/core/globe-controller.md) are no longer experimental and are exported without the underscore.
+
 ### Heatmap filtering
 
 - [`ClipExtension`](./api-reference/extensions/clip-extension.md) filters HeatmapLayer source points on WebGPU, including borrowed GPUVectors.
