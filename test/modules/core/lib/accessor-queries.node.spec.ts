@@ -425,14 +425,14 @@ test('resolved color scales remain available while SQL accessors refresh', async
   });
   try {
     manager.setLayers([layer]);
-    await vi.waitFor(() => expect(layer.getResolvedColorScales()?.getColor).toBeDefined());
-    const scales = layer.getResolvedColorScales();
+    await vi.waitFor(() => expect(layer._getResolvedColorScales()?.getColor).toBeDefined());
+    const scales = layer._getResolvedColorScales();
     const next = layer.clone({data: tableFromArrays({value: [0, 20]})});
     manager.setLayers([next]);
     expect(next.isLoaded).toBe(false);
-    expect(next.getResolvedColorScales()).toBe(scales);
+    expect(next._getResolvedColorScales()).toBe(scales);
     await vi.waitFor(() =>
-      expect(next.getResolvedColorScales()?.getColor.descriptor.domain).toEqual([0, 20])
+      expect(next._getResolvedColorScales()?.getColor.descriptor.domain).toEqual([0, 20])
     );
   } finally {
     manager.finalize();

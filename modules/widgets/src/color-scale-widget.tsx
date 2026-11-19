@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Widget, type ResolvedScale, type WidgetPlacement, type WidgetProps} from '@deck.gl/core';
+import {
+  Widget,
+  type Layer,
+  type ResolvedScale,
+  type WidgetPlacement,
+  type WidgetProps
+} from '@deck.gl/core';
 import {render} from 'preact';
 
 /** Options for the automatic SQL color legend. */
@@ -121,11 +127,21 @@ export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
 
   /** Discovers scales in the screen views associated with the widget. */
   override onRedraw({viewports, renderedLayers}: Parameters<Widget['onRedraw']>[0]): void {
-    const layers = new Set(
-      viewports.flatMap(viewport => [...(renderedLayers?.get(viewport) ?? [])])
-    );
+    const layers = new Set<Layer>();
+    for (const viewport of viewports) {
+      for (const layer of renderedLayers?.get(viewport) ?? []) {
+        // A composite may declare a scale that its drawable children inherit.
+        for (
+          let source: Layer | null = layer;
+          source && !layers.has(source);
+          source = source.parent
+        ) {
+          layers.add(source);
+        }
+      }
+    }
     const entries = [...layers].flatMap(layer =>
-      Object.entries(layer.getResolvedColorScales() ?? {}).map(([accessor, scale]) => ({
+      Object.entries(layer._getResolvedColorScales() ?? {}).map(([accessor, scale]) => ({
         layerId: layer.id,
         accessor,
         scale

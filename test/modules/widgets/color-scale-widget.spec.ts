@@ -5,7 +5,7 @@
 import {expect, test, vi} from 'vitest';
 import {CompositeLayer, OrthographicView} from '@deck.gl/core';
 import {tableFromArrays} from 'apache-arrow';
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {_ColorScaleWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
 
@@ -45,7 +45,7 @@ test('_ColorScaleWidget respects screen filters and its attached viewport', asyn
   });
   const legend = () => tester.findElements('.deck-widget-color-scale section')[0];
   try {
-    await vi.waitFor(() => expect(layer.getResolvedColorScales()).toBeDefined());
+    await vi.waitFor(() => expect(layer._getResolvedColorScales()).toBeDefined());
     await tester.idle();
     expect(legend()).toBeUndefined();
     tester.setProps({layerFilter: () => true});
@@ -66,6 +66,32 @@ test('_ColorScaleWidget respects screen filters and its attached viewport', asyn
 
     tester.setProps({layerFilter: () => false});
     await vi.waitFor(() => expect(legend()).toBeUndefined());
+  } finally {
+    tester.destroy();
+  }
+});
+
+test('_ColorScaleWidget includes a composite scale when one of its children is drawable', async () => {
+  const layer = new PolygonLayer({
+    id: 'counties',
+    data: tableFromArrays({
+      value: [0, 10],
+      path: [
+        [0, 0, 1, 0, 0, 1],
+        [1, 1, 2, 1, 1, 2]
+      ]
+    }),
+    getPolygon: {sql: 'path'},
+    getFillColor: {sql: "SCALE_COLOR(value, DOMAIN(value), PALETTE('#000000', '#ffffff'))"},
+    positionFormat: 'XY',
+    stroked: false
+  });
+  const tester = new WidgetTester({layers: [layer], widgets: [new _ColorScaleWidget()]});
+  const legends = () => tester.findElements('.deck-widget-color-scale section');
+  try {
+    await vi.waitFor(() => expect(legends()[0]?.textContent).toContain('counties · getFillColor'));
+    tester.setProps({layerFilter: () => false});
+    await vi.waitFor(() => expect(legends()).toHaveLength(0));
   } finally {
     tester.destroy();
   }
