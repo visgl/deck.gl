@@ -3,7 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import {Field, FixedSizeList, Table, Uint8, vectorFromArray, type Vector} from 'apache-arrow';
-import {compileArrowScales, parseSQLScaleAST, type ResolvedScale} from '@math.gl/sql/scales';
+import {
+  compileArrowScale,
+  compileArrowScales,
+  parseSQLScaleAST,
+  type ResolvedScale
+} from '@math.gl/sql/scales';
 import type {SQLFunctions, SQLParser} from '../types/layer-props';
 import {evaluateColumnExpression} from './column-constructors';
 import {isArrowTableAppend} from './column-query-append';
@@ -69,6 +74,9 @@ export function evaluateAccessorQueries(
             scale: {domain}
           }
         ]) => {
+          if (domain.type === 'expression-extent') {
+            return false;
+          }
           if (!('column' in domain)) {
             return true;
           }
@@ -79,6 +87,21 @@ export function evaluateAccessorQueries(
     ),
     functions
   );
+  for (const [name, parsedScale] of scaleExpressions) {
+    if (parsedScale.scale.domain.type === 'expression-extent') {
+      try {
+        compiled[name] = compileArrowScale(data, parsedScale, undefined, functions);
+      } catch (error) {
+        // The upstream resolver signals an extent with no non-null samples with this error.
+        if (
+          !(error instanceof Error) ||
+          error.message !== 'Empty numeric scale expression domain'
+        ) {
+          throw error;
+        }
+      }
+    }
+  }
   const scales = Object.fromEntries(
     Object.entries(compiled).map(([name, {scale}]) => [name, scale])
   );
@@ -92,12 +115,11 @@ export function evaluateAccessorQueries(
     Object.keys(previous.expressions).length === entries.length &&
     entries.every(([name, expression]) => previous.expressions[name] === expression) &&
     isArrowTableAppend(priorSource, data);
-  const batches = data.batches.length ? data.batches : [undefined];
-  const result = batches.flatMap((batch, index) => {
+  const evaluateBatch = (input: Table, index: number) => {
     const previousBatch =
       canAppend && index < priorSource.batches.length ? priorTable.batches[index] : undefined;
-    if (previousBatch && !scaleExpressions.length) return [previousBatch];
-    const input = batch ? new Table(data.schema, [batch]) : data;
+    if (previousBatch && !scaleExpressions.length)
+      return new Table(priorTable!.schema, [previousBatch]);
     const columns: Record<string, Vector> = Object.create(null);
     for (const {name, expression, isColorScale} of parsed) {
       // A new domain can change the color of previously evaluated rows.
@@ -109,7 +131,15 @@ export function evaluateAccessorQueries(
           ))
         : (previousBatch?.getChild(name) ?? evaluateColumnExpression(expression, input, functions));
     }
-    return new Table(columns).batches;
-  });
-  return {table: new Table(result), scales};
+    return new Table(columns);
+  };
+  const table =
+    data.batches.length <= 1
+      ? evaluateBatch(data, 0)
+      : new Table(
+          data.batches.flatMap(
+            (batch, index) => evaluateBatch(new Table(data.schema, [batch]), index).batches
+          )
+        );
+  return {table, scales};
 }

@@ -374,3 +374,39 @@ test('an all-null scale domain leaves other SQL accessors usable', () => {
   expect(Array.from(table.getChild('getFillColor')!.get(0))).toEqual([0, 0, 0, 0]);
   expect(scales.getFillColor).toBeUndefined();
 });
+
+test('an empty Arrow table retains the SQL accessor schema', () => {
+  const data = new Table(tableFromArrays({value: [1]}).schema);
+  const {table} = evaluateAccessorQueries(
+    data,
+    {
+      getRadius: 'value',
+      getFillColor: "SCALE_COLOR(value, DOMAIN(value), PALETTE('#000000', '#ffffff'))"
+    },
+    undefined
+  );
+  expect(table.numRows).toBe(0);
+  expect(table.getChild('getRadius')).not.toBeNull();
+  expect(table.getChild('getFillColor')).not.toBeNull();
+});
+
+test('an all-null expression domain leaves other SQL accessors usable', () => {
+  const data = tableFromArrays({
+    coordinates: [
+      [1, null],
+      [2, null]
+    ],
+    radius: [1, 2]
+  });
+  const {table, scales} = evaluateAccessorQueries(
+    data,
+    {
+      getFillColor: "SCALE_QUANTILE(coordinates[2], 2, PALETTE('#000000', '#ffffff'))",
+      getRadius: 'radius + 1'
+    },
+    undefined
+  );
+  expect(Array.from(table.getChild('getRadius')!)).toEqual([2, 3]);
+  expect(Array.from(table.getChild('getFillColor')!.get(0))).toEqual([0, 0, 0, 0]);
+  expect(scales.getFillColor).toBeUndefined();
+});
