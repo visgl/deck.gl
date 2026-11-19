@@ -21,12 +21,24 @@ export type CreatedDevice = {
   ownsCanvas: boolean;
 };
 
+/**
+ * The canvas a device renders to, or `null` if it has none.
+ * @param device A luma.gl device.
+ */
+export function getDeviceCanvas(device: Device): DeviceCanvas | null {
+  try {
+    return device.getDefaultCanvasContext().canvas;
+  } catch {
+    return null;
+  }
+}
+
 /** Number of live Decks rendering to each canvas. */
 const liveDecks = new WeakMap<DeviceCanvas, number>();
 
 /**
- * Records that a Deck renders to `canvas`. Call {@link releaseCanvas} when it is finalized.
- * @param canvas The canvas of a device the Deck created.
+ * Records that a Deck renders to `canvas`. Call {@link releaseCanvas} once when it stops.
+ * @param canvas The canvas of the Deck's device.
  */
 export function retainCanvas(canvas: DeviceCanvas): void {
   liveDecks.set(canvas, (liveDecks.get(canvas) ?? 0) + 1);

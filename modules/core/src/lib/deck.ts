@@ -17,6 +17,8 @@ import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
 import {
   type CreatedDevice,
+  type DeviceCanvas,
+  getDeviceCanvas,
   loseCreatedDevice,
   releaseCanvas,
   retainCanvas
@@ -424,6 +426,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
    * @internal
    */
   _createdDevice: CreatedDevice | null = null;
+  /** The canvas this Deck renders to, counted so its context isn't released while in use. */
+  private _usedCanvas: DeviceCanvas | null = null;
   private _pickRequest: {
     mode: string;
     event: MjolnirPointerEvent | null;
@@ -468,6 +472,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     if (props.device) {
       this.device = props.device;
       this._setDeviceCanvasContext(props.device);
+      this._useCanvas(getDeviceCanvas(props.device));
     }
 
     let deviceOrPromise: Device | Promise<Device> | null = this.device;
@@ -477,6 +482,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       if (props.gl instanceof WebGLRenderingContext) {
         log.error('WebGL1 context not supported.')();
       }
+      this._useCanvas(props.gl.canvas);
       deviceOrPromise = webgl2Adapter.attach(props.gl, {
         // Enable shader and pipeline caching for attached devices (matches _createDevice defaults)
         // Without this, interleaved mode (e.g., MapboxOverlay) creates new pipelines every frame
@@ -554,12 +560,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // Free the WebGL context of a device Deck created. Deck removed its own canvas above, so
     // nothing can render to it again. A canvas the app passed is the app's to release, with
     // `_releaseCanvasContext`.
-    if (this._createdDevice) {
-      releaseCanvas(this._createdDevice.canvas);
-      if (this._createdDevice.ownsCanvas) {
-        loseCreatedDevice(this._createdDevice);
-        this._createdDevice = null;
-      }
+    this._useCanvas(null);
+    if (this._createdDevice?.ownsCanvas) {
+      loseCreatedDevice(this._createdDevice);
+      this._createdDevice = null;
     }
   }
 
@@ -613,6 +617,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     });
 
     if (props.device && props.device.id !== this.device?.id) {
+      this._useCanvas(getDeviceCanvas(props.device));
       const canvasContext = props.device.getDefaultCanvasContext();
       this.animationLoop?.stop();
       if (!this._isMultiCanvasMode() && this.canvas !== canvasContext.canvas) {
@@ -1511,6 +1516,24 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     });
   }
 
+  /**
+   * Counts `canvas` as the one this Deck renders to, uncounting the previous one. Every Deck
+   * counts its canvas, whether it created its device or was passed `device` or `gl`, so a context
+   * is never released while another Deck renders with it. `finalize()` passes `null`.
+   */
+  private _useCanvas(canvas: DeviceCanvas | null): void {
+    if (canvas === this._usedCanvas) {
+      return;
+    }
+    if (this._usedCanvas) {
+      releaseCanvas(this._usedCanvas);
+    }
+    if (canvas) {
+      retainCanvas(canvas);
+    }
+    this._usedCanvas = canvas;
+  }
+
   // Create a device from the deviceProps, assigning required defaults
   private _createDevice(props: DeckProps<ViewsT>): Promise<Device> {
     const canvasContextUserProps = this.props.deviceProps?.createCanvasContext;
@@ -1555,7 +1578,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         autoResize: true
       }
     });
-    retainCanvas(canvas);
+    this._useCanvas(canvas);
     this._createdDevice = {
       canvas,
       device,
