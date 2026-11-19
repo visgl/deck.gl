@@ -30,7 +30,7 @@ const maskBoundary = [
   ]
 ];
 
-// The first outlier is rejected by the mask and the second by the numeric filter.
+/** The first outlier is rejected by the mask and the second by the numeric filter. */
 const binaryPoints = [
   ...points,
   {COORDINATES: outlier, SPACES: 1000000},
