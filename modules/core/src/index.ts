@@ -179,3 +179,6 @@ export {
   pathUniforms as _pathUniforms,
   type PathProps as _PathProps
 } from './shaderlib/path/path-uniforms';
+
+export type {TemporalProps, TemporalFrame} from './lib/temporal';
+export {default as _VelocityPass} from './passes/velocity-pass';

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {TemporalProps} from './temporal';
 import LayerManager from './layer-manager';
 import ViewManager, {DEFAULT_CANVAS_ID} from './view-manager';
 import MapView from '../views/map-view';
@@ -256,6 +257,11 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
    * Requires importing `@luma.gl/core/webgl-debug` for WebGL debugging tools.
    */
   debug?: boolean;
+  /**
+   * Experimental temporal scene inputs. Requires a post-process effect. Default null.
+   * Supply a new object to invalidate history after a camera cut.
+   */
+  _temporal?: TemporalProps | null;
   /** (Debug) Render the picking buffer to screen. */
   drawPickingColors?: boolean;
 };
@@ -311,6 +317,7 @@ const defaultProps: DeckProps = {
   getTooltip: null,
 
   debug: false,
+  _temporal: null,
   drawPickingColors: false
 };
 

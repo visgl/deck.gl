@@ -3,7 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 import type {CanvasContext, Device, PresentationContext} from '@luma.gl/core';
-import {Framebuffer} from '@luma.gl/core';
+import {Framebuffer, Texture} from '@luma.gl/core';
+import type {TemporalProps, TemporalFrame} from './temporal';
+import VelocityPass from '../passes/velocity-pass';
+import {getTemporalJitter, getJitterPhaseCount} from '../passes/temporal-utils';
 import debug from '../debug/index';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
@@ -27,6 +30,12 @@ export default class DeckRenderer {
   pickLayersPass: PickLayersPass;
   stats?: Stats;
 
+  private temporalProps: TemporalProps | null = null;
+  private temporalPropsSource: TemporalProps | null = null;
+  private temporalFrameIndex = 0;
+  private temporalKey = '';
+  private temporalBuffers = false;
+  private velocityPass: VelocityPass | null = null;
   private renderCount: number;
   private _needsRedraw: string | false;
   private renderBuffers: Framebuffer[];
@@ -45,7 +54,25 @@ export default class DeckRenderer {
     this.lastPostProcessEffect = null;
   }
 
-  setProps(props: {layerFilter: LayerFilter; drawPickingColors: boolean}) {
+  setProps(props: {
+    layerFilter: LayerFilter;
+    drawPickingColors: boolean;
+    _temporal?: TemporalProps | null;
+  }) {
+    const temporal = props._temporal ?? null;
+    if (
+      temporal !== this.temporalPropsSource ||
+      temporal?.jitter !== this.temporalProps?.jitter ||
+      temporal?.velocity !== this.temporalProps?.velocity ||
+      temporal?.renderScale !== this.temporalProps?.renderScale
+    ) {
+      this.temporalPropsSource = temporal;
+      this.temporalProps = temporal && {...temporal};
+      this.temporalFrameIndex = 0;
+      this.temporalKey = '';
+      this.velocityPass?.reset();
+      this._needsRedraw = '_temporal changed';
+    }
     if (this.layerFilter !== props.layerFilter) {
       this.layerFilter = props.layerFilter;
       this._needsRedraw = 'layerFilter changed';
@@ -67,6 +94,8 @@ export default class DeckRenderer {
     target?: Framebuffer | null;
     canvasContext?: CanvasContext | PresentationContext;
     layerFilter?: LayerFilter;
+    isPicking?: boolean;
+    shaderModuleProps?: LayersPassRenderOptions['shaderModuleProps'];
     clearStack?: boolean;
     clearCanvas?: boolean;
   }) {
@@ -77,6 +106,20 @@ export default class DeckRenderer {
       isPicking: this.drawPickingColors,
       ...opts
     };
+
+    this.lastPostProcessEffect =
+      opts.effects?.filter(effect => effect.postRender).at(-1)?.id ?? null;
+    if (
+      this.temporalProps &&
+      !this.drawPickingColors &&
+      !renderOpts.isPicking &&
+      this.lastPostProcessEffect &&
+      opts.viewports.length
+    ) {
+      this._prepareTemporalFrame(renderOpts);
+    } else {
+      this.temporalKey = '';
+    }
 
     if (!opts.viewports.length) {
       const renderResult = layerPass.render(renderOpts);
@@ -97,6 +140,20 @@ export default class DeckRenderer {
     }
     const renderResult = layerPass.render({...renderOpts, target: outputBuffer});
     const renderStats = 'stats' in renderResult ? renderResult.stats : renderResult;
+
+    if (renderOpts.temporal) {
+      renderOpts.temporal.depthTexture = outputBuffer?.depthStencilAttachment?.texture ?? null;
+      if (this.temporalProps?.velocity !== false) {
+        this.velocityPass ||= new VelocityPass(this.device);
+        renderOpts.temporal.velocityTexture = this.velocityPass.render(
+          renderOpts.temporal,
+          opts.viewports,
+          (opts.canvasContext || this.device.canvasContext!).cssToDeviceRatio() *
+            renderOpts.temporal.renderScale
+        );
+      }
+      this.temporalFrameIndex++;
+    }
 
     if (renderOpts.effects) {
       if (this.lastPostProcessEffect) {
@@ -122,6 +179,7 @@ export default class DeckRenderer {
   }
 
   finalize() {
+    this.velocityPass?.delete();
     const {renderBuffers} = this;
     for (const buffer of renderBuffers) {
       buffer.delete();
@@ -139,7 +197,6 @@ export default class DeckRenderer {
   }
 
   private _preRender(effects: Effect[], opts: LayersPassRenderOptions) {
-    this.lastPostProcessEffect = null;
     opts.preRenderStats = opts.preRenderStats || {};
 
     for (const effect of effects) {
@@ -150,13 +207,109 @@ export default class DeckRenderer {
     }
 
     if (this.lastPostProcessEffect) {
-      this._resizeRenderBuffers(opts.canvasContext);
+      this._resizeRenderBuffers(opts.canvasContext, opts.temporal);
     }
   }
 
-  private _resizeRenderBuffers(canvasContext = this.device.canvasContext!) {
+  private _prepareTemporalFrame(opts: LayersPassRenderOptions) {
+    const canvasContext = opts.canvasContext || this.device.canvasContext!;
+    // An explicit target (the `_framebuffer` prop or a presentation target) sets the output size.
+    const outputSize: [number, number] = opts.target
+      ? [opts.target.width, opts.target.height]
+      : canvasContext.getDrawingBufferSize();
+    const requestedScale = this.temporalProps?.renderScale ?? 1;
+    const renderScale =
+      Number.isFinite(requestedScale) && requestedScale > 0 ? Math.min(1, requestedScale) : 1;
+    const renderSize: [number, number] = [
+      // Rounded up, so that a viewport that fills the canvas stays inside the target.
+      Math.max(1, Math.ceil(outputSize[0] * renderScale)),
+      Math.max(1, Math.ceil(outputSize[1] * renderScale))
+    ];
+    const key = JSON.stringify([
+      outputSize,
+      renderSize,
+      renderScale,
+      opts.viewports.map(({id, x, y, width, height}) => [id, x, y, width, height])
+    ]);
+    const phaseCount = getJitterPhaseCount(outputSize[0], renderSize[0]);
+    const jitter: [number, number] =
+      this.temporalProps?.jitter === false
+        ? [0, 0]
+        : getTemporalJitter(this.temporalFrameIndex, phaseCount);
+    const jitterClip: [number, number] = [
+      (2 * jitter[0]) / renderSize[0],
+      (-2 * jitter[1]) / renderSize[1]
+    ];
+    opts.temporal = {
+      frameIndex: this.temporalFrameIndex,
+      renderScale,
+      renderSize,
+      outputSize,
+      jitter,
+      jitterClip,
+      phaseCount,
+      depthTexture: null,
+      velocityTexture: null,
+      reset: key !== this.temporalKey
+    };
+    this.temporalKey = key;
+    // The layers passes read `opts.temporal`. Each scene pass applies the jitter and the render
+    // scale itself, so auxiliary passes (shadow, mask, terrain, collision, picking) stay as before.
+  }
+
+  private _resizeRenderBuffers(
+    canvasContext = this.device.canvasContext!,
+    temporal?: TemporalFrame
+  ) {
     const {renderBuffers} = this;
-    const size = canvasContext.getDrawingBufferSize();
+    const size = temporal?.renderSize ?? canvasContext.getDrawingBufferSize();
+    if (temporal) {
+      const reusable =
+        renderBuffers.length === 2 &&
+        renderBuffers.every(buffer => {
+          const depth = buffer.depthStencilAttachment?.texture;
+          return (
+            depth instanceof Texture &&
+            depth.samples === 1 &&
+            Boolean(depth.props.usage & Texture.SAMPLE)
+          );
+        });
+      if (!reusable) {
+        for (const buffer of renderBuffers) buffer.destroy();
+        renderBuffers.length = 0;
+        for (let i = 0; i < 2; i++) {
+          const depth = this.device.createTexture({
+            width: size[0],
+            height: size[1],
+            format:
+              this.device.preferredDepthFormat === 'depth16'
+                ? 'depth16unorm'
+                : this.device.preferredDepthFormat,
+            usage: Texture.SAMPLE | Texture.RENDER
+          });
+          const color = this.device.createTexture({
+            width: size[0],
+            height: size[1],
+            sampler: {minFilter: 'linear', magFilter: 'linear'}
+          });
+          const buffer = this.device.createFramebuffer({
+            id: `deck-renderbuffer-${i}`,
+            width: size[0],
+            height: size[1],
+            colorAttachments: [color],
+            depthStencilAttachment: depth
+          });
+          buffer.attachResource(color);
+          buffer.attachResource(depth);
+          renderBuffers.push(buffer);
+        }
+      }
+      this.temporalBuffers = true;
+    } else if (this.temporalBuffers) {
+      for (const buffer of renderBuffers) buffer.destroy();
+      renderBuffers.length = 0;
+      this.temporalBuffers = false;
+    }
     const [width, height] = size;
     if (renderBuffers.length === 0) {
       [0, 1].map(i => {

@@ -905,3 +905,49 @@ new Deck({
 ## Source
 
 [modules/core/src/lib/deck.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/lib/deck.ts)
+
+### `_temporal` (object, optional) {#_temporal}
+
+Experimental scene inputs for temporal post-processing. Default: `null` (disabled).
+Requires at least one effect with a `postRender` method and at least one viewport.
+Picking does not use temporal inputs.
+
+- `jitter` (boolean, default `true`): Halton(2,3) sub-pixel projection jitter
+- `velocity` (boolean, default `true`): camera-motion velocity texture on WebGPU
+- `renderScale` (number, default `1`): scene target scale in `(0, 1]`
+
+```typescript
+new Deck({
+  _temporal: {renderScale: 0.5},
+  effects: [temporalEffect]
+});
+```
+
+The two scene buffers use rounded drawing-buffer dimensions, with a minimum of one
+pixel per axis, and sampleable depth. The last post-process effect receives the
+full-size output target and is responsible for temporal reconstruction and upscaling.
+Invalid scales fall back to `1`; values above `1` are clamped to `1`.
+
+Effects receive `options.temporal`, typed as `TemporalFrame`, in `preRender` and
+`postRender`. It contains `frameIndex`, `renderScale`, `renderSize`, `outputSize`,
+`jitter` (render pixels), `jitterClip` (NDC), `phaseCount`, and `reset`.
+`depthTexture` and `velocityTexture` are initially `null` in `preRender`, and populated
+before `postRender`. Treat these textures as renderer-owned, valid for the current
+frame only. `velocityTexture` remains `null` when disabled or unsupported (including
+WebGL).
+
+UV coordinates start at the top left, with positive X right and positive Y down.
+Depth is non-reversed device depth: near = 0, far = 1. The render-size `rgba16float`
+velocity texture stores unjittered `previousUV - currentUV` in XY, one minus the expected
+previous device depth in Z, and validity in W. Background pixels and pixels without history
+have W = 0. Camera motion is supported for static geometry; animated objects are
+not tracked. Changing the projection coordinate system also requires a history reset.
+
+History resets on activation, target resize, viewport set or rectangle changes, and
+changes to `_temporal`. Supply a new `_temporal` object after a camera cut, even if
+its settings are unchanged. Jitter affects shader projection only; viewport
+projection/unprojection and picking remain unjittered. The jitter sequence uses the
+FSR 2 phase-count rule, based on the actual rounded render width.
+
+`TemporalProps`, `TemporalFrame`, and the experimental `_VelocityPass` are exported
+from `@deck.gl/core`.

@@ -15,6 +15,8 @@ import type {WebGLDevice} from '@luma.gl/core/webgl';
 import type {NumberArray4} from '@math.gl/core';
 
 import Pass from './pass';
+import {getTemporalViewportRect} from './temporal-utils';
+import type {TemporalFrame} from '../lib/temporal';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type Layer from '../lib/layer';
@@ -44,6 +46,8 @@ export type LayersPassRenderOptions = {
   target?: Framebuffer | null;
   /** Canvas context that provides framebuffer dimensions and pixel conversion. */
   canvasContext?: CanvasContext | PresentationContext;
+  /** Experimental temporal inputs, present only for active scene frames. */
+  temporal?: TemporalFrame;
   isPicking?: boolean;
   pass: string;
   layers: Layer[];
@@ -108,11 +112,24 @@ export default class LayersPass extends Pass {
     return this._renderLayers(options);
   }
 
+  /**
+   * Whether this pass applies the experimental temporal inputs of `options.temporal`: the
+   * projection jitter and the render scale. Scene passes do. A pass that draws into its own
+   * auxiliary map (shadow, mask, terrain, collision, picking) must not, because its result
+   * is not a jittered scene image. Such a pass overrides this and returns false.
+   */
+  protected get usesTemporalInputs(): boolean {
+    return true;
+  }
+
   private _renderLayers(options: LayersPassRenderOptions): RenderStats[] {
     this._activatedLayers.clear();
+    const temporal = this.usesTemporalInputs && !options.isPicking ? options.temporal : undefined;
     const {canvasContext = this.device.canvasContext!} = options;
     const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
-    const [width, height] = canvasContext.getDrawingBufferSize();
+    const [width, height] = options.target
+      ? [options.target.width, options.target.height]
+      : canvasContext.getDrawingBufferSize();
 
     // Explicitly specify clearColor and clearDepth, overriding render pass defaults.
     const clearCanvas = options.clearCanvas ?? true;
@@ -174,6 +191,7 @@ export default class LayersPass extends Pass {
               const stats = this._drawLayersInViewport(
                 renderPass,
                 {
+                  temporal,
                   target: framebuffer,
                   canvasContext,
                   shaderModuleProps,
@@ -221,7 +239,8 @@ export default class LayersPass extends Pass {
       effects,
       canvasContext = this.device.canvasContext!,
       colorMask,
-      shaderModuleProps
+      shaderModuleProps,
+      temporal
     }: LayersPassRenderOptions,
     /** Internal flag, true if only used to determine whether each layer should be drawn */
     evaluateShouldDrawOnly: boolean = false
@@ -261,7 +280,8 @@ export default class LayersPass extends Pass {
           effects,
           pass,
           canvasContext,
-          shaderModuleProps
+          shaderModuleProps,
+          this.usesTemporalInputs && !isPicking ? (temporal?.renderScale ?? 1) : 1
         );
         const defaultParams =
           layer.context.device.type === 'webgpu' ? WEBGPU_DEFAULT_DRAW_PARAMETERS : null;
@@ -295,7 +315,8 @@ export default class LayersPass extends Pass {
       canvasContext,
       viewport,
       view,
-      isPicking
+      isPicking,
+      temporal
     }: {
       layers: Layer[];
       shaderModuleProps: Record<string, any>;
@@ -305,15 +326,26 @@ export default class LayersPass extends Pass {
       viewport: Viewport;
       view?: View;
       isPicking?: boolean;
+      temporal?: TemporalFrame;
     },
     drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
-    const glViewport = getGLViewport(this.device, {
+    let glViewport = getGLViewport(this.device, {
       canvasContext,
       shaderModuleProps: globalModuleParameters,
       target,
       viewport
     });
+
+    if (temporal) {
+      glViewport = getTemporalViewportRect(
+        viewport,
+        canvasContext.cssToDeviceRatio() * temporal.renderScale
+      );
+      if (this.device.type !== 'webgpu') {
+        glViewport[1] = (target?.height ?? temporal.renderSize[1]) - glViewport[1] - glViewport[3];
+      }
+    }
 
     if (view) {
       const {clear, clearColor, clearDepth, clearStencil} = view.props;
@@ -389,6 +421,15 @@ export default class LayersPass extends Pass {
         // overwrite layer.context.viewport with the sub viewport
         if (shaderModuleProps.project) {
           shaderModuleProps.project.viewport = viewport;
+          if (isPicking) {
+            shaderModuleProps.project.jitter = undefined;
+          } else if (temporal) {
+            // Each viewport receives the same displacement in render pixels.
+            shaderModuleProps.project.jitter = [
+              (2 * temporal.jitter[0]) / glViewport[2],
+              (-2 * temporal.jitter[1]) / glViewport[3]
+            ];
+          }
         }
 
         // TODO v9 - we are sending renderPass both as a parameter and through the context.
@@ -484,9 +525,12 @@ export default class LayersPass extends Pass {
     effects: Effect[] | undefined,
     pass: string,
     canvasContext: CanvasContext | PresentationContext,
-    overrides: any
+    overrides: any,
+    renderScale: number = 1
   ): any {
-    const devicePixelRatio = canvasContext.cssToDeviceRatio();
+    // With temporal inputs, the scene target is smaller than the drawing buffer. Pixel sizes
+    // (line widths, icon sizes) follow the target.
+    const devicePixelRatio = canvasContext.cssToDeviceRatio() * renderScale;
     const layerProps = layer.internalState?.propsInTransition || layer.props;
 
     const shaderModuleProps = {

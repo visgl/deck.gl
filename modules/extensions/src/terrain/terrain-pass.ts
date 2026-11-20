@@ -20,6 +20,11 @@ const TERRAIN_BLENDING: RenderPipelineParameters = {
 
 /** Renders textures used by the TerrainEffect render pass */
 export class TerrainPass extends LayersPass {
+  /** This pass draws into its own map, so it ignores the temporal jitter and render scale. */
+  protected get usesTemporalInputs(): boolean {
+    return false;
+  }
+
   getRenderableLayers(viewport: Viewport, opts: TerrainPassRenderOptions): Layer[] {
     const {layers} = opts;
     const result: Layer[] = [];

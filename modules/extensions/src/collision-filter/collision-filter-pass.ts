@@ -8,6 +8,11 @@ import {Layer, _LayersPass as LayersPass, LayersPassRenderOptions, Viewport} fro
 type CollisionFilterPassRenderOptions = LayersPassRenderOptions & {};
 
 export default class CollisionFilterPass extends LayersPass {
+  /** This pass draws into its own map, so it ignores the temporal jitter and render scale. */
+  protected get usesTemporalInputs(): boolean {
+    return false;
+  }
+
   renderCollisionMap(target: Framebuffer, options: CollisionFilterPassRenderOptions) {
     const padding = 1;
     const clearColor = [0, 0, 0, 0];

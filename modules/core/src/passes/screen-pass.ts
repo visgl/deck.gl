@@ -19,6 +19,8 @@ type ScreenPassProps = {
 
 type ScreenPassRenderOptions = {
   clearCanvas?: boolean;
+  /** Explicit destination size for temporal upscaling. */
+  outputSize?: [number, number];
   inputBuffer: Framebuffer;
   outputBuffer: Framebuffer | null;
   moduleProps: ShaderModule['props'];
@@ -74,9 +76,10 @@ export default class ScreenPass extends Pass {
       screen: screenProps,
       ...options.moduleProps
     });
+    const outputSize = options.outputSize ?? texSize;
     const renderPass = this.device.beginRenderPass({
       framebuffer: outputBuffer,
-      parameters: {viewport: [0, 0, ...texSize]},
+      parameters: {viewport: [0, 0, ...outputSize]},
       clearColor: clearCanvas ? [0, 0, 0, 0] : false,
       clearDepth: 1,
       clearStencil: false
