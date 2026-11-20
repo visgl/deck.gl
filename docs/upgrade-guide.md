@@ -6,6 +6,10 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
+### GlobeView
+
+`GlobeView`, `GlobeViewport` and `GlobeController` are no longer experimental. Import them without the underscore. `_GlobeView`, `_GlobeViewport` and `_GlobeController` remain as deprecated aliases of the same classes and will be removed in a future major release.
+
 ### SQL accessor functions
 
 math.gl now provides `LIST_EXTRACT` and `STRUCT_EXTRACT`. Rename custom declarations

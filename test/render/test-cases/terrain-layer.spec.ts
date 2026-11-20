@@ -6,7 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {_GlobeView as GlobeView} from '@deck.gl/core';
+import {GlobeView} from '@deck.gl/core';
 import {GeoJsonLayer, IconLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';

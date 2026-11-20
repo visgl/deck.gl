@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
+import {GlobeView, MapView} from '@deck.gl/core';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {testInitializeLayerAsync} from '@deck.gl/test-utils/vitest';
 import {TruncatedConeGeometry} from '@luma.gl/engine';

@@ -5,7 +5,7 @@
 import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect, vi} from 'vitest';
 
-import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {GlobeViewport} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import {device, testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
 import {Timeline} from '@luma.gl/engine';

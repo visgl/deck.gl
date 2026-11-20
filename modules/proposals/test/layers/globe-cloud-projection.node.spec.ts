@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {_GlobeViewport} from '@deck.gl/core';
+import {GlobeViewport} from '@deck.gl/core';
 import {expect, test} from 'vitest';
 import {getGlobeCloudViewUniforms} from '../../src/layers/globe-cloud-layer';
 
@@ -14,7 +14,7 @@ test.each([
   [0, 89],
   [0, -89]
 ])('globe cloud camera and rays align with the surface at %s, %s', (longitude, latitude) => {
-  const viewport = new _GlobeViewport({width: 1000, height: 720, longitude, latitude, zoom: 1.4});
+  const viewport = new GlobeViewport({width: 1000, height: 720, longitude, latitude, zoom: 1.4});
   const view = getGlobeCloudViewUniforms(viewport);
   const radius = Math.hypot(...viewport.projectPosition([0, 0, 0]));
   const surface = viewport.projectPosition([longitude, latitude, 0]).map(value => value / radius);
