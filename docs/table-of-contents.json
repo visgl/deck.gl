@@ -358,7 +358,6 @@
         "items": [
           "api-reference/react/overview",
           "api-reference/react/deckgl",
-          "api-reference/react/deck-canvas",
           "api-reference/react/components",
           "api-reference/react/native-elements",
           {
