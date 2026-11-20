@@ -6,6 +6,17 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
+### SQL accessor functions
+
+math.gl now provides `LIST_EXTRACT` and `STRUCT_EXTRACT`. Rename custom declarations
+that use either reserved name and update their SQL call sites.
+
+### View clear color alpha
+
+A View's [`clearColor`](./api-reference/core/view.md#clearcolor) with an explicit zero alpha,
+such as `[0, 0, 0, 0]`, now clears to transparent. Previously a zero alpha cleared to
+opaque. To keep an opaque clear, pass alpha `255` or omit it.
+
 ### WebGLAggregator outputs
 
 `WebGLAggregator.getBins()` and `getResult(channel)` now return borrowed `GPUVector`
@@ -81,10 +92,16 @@ layer and extension draws.
 
 ### loaders.gl and math.gl v5 beta
 
-Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.8`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.12`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
 | Previous import | Replacement import |
 | --- | --- |
+| `@math.gl/web-mercator` | `@math.gl/geospatial/web-mercator` |
+| `@math.gl/arrow` | `@math.gl/core/arrow` |
+| `@math.gl/expressions` | `@math.gl/sql/expressions` |
+| `@math.gl/expressions/sql` | `@math.gl/sql/parser` |
+| `@math.gl/expressions/arrow` | `@math.gl/sql/arrow` |
+| `@loaders.gl/arrow` | `@loaders.gl/tables/arrow` |
 | `@loaders.gl/loader-utils`, `@loaders.gl/schema`, `@loaders.gl/polyfills` | Corresponding subpaths of `@loaders.gl/core` |
 | `@loaders.gl/csv`, `@loaders.gl/json` | `@loaders.gl/tables/csv`, `@loaders.gl/tables/json` |
 | `@loaders.gl/gltf`, `@loaders.gl/obj` | `@loaders.gl/scene/gltf`, `@loaders.gl/scene/obj` |
@@ -178,6 +195,27 @@ const commonPosition2 = layer.projectPosition(lnglat, {
   modelMatrix: null
 });
 ```
+
+### Deck props set to `undefined`
+
+A [`Deck`](./api-reference/core/deck.md) prop set to `undefined`, in the constructor or in
+`setProps`, now uses its default value. In the constructor this is the same as leaving the prop
+out. In `setProps`, leaving a prop out still keeps its current value. Previously an explicit
+`undefined` replaced the default. For some props this threw an error or stopped
+rendering, such as a callback like `onAfterRender: debug ? callback : undefined`.
+
+A few props behaved differently with `undefined`. To keep that behavior, pass these instead:
+
+| Prop | `undefined` now | To get the previous behavior |
+| --- | --- | --- |
+| `width`, `height` | `'100%'` | `null`, to leave the canvas size to your CSS |
+| `onError` | Logs the error (the default) | `null`, to ignore errors |
+| `debug` | `false` | `true`, to enable GPU debug mode |
+| `layers`, `widgets` in `setProps` | Removes them | Leave the prop out of `setProps` to keep the current ones |
+| `useDevicePixels` | `true` | `false`, to render one canvas pixel per CSS pixel |
+| `touchAction` | `'none'` | The `touch-action` value you want, such as `'manipulation'` |
+
+`null` is unchanged. Props without a default are also unchanged.
 
 ## Upgrading to v9.4
 
@@ -919,7 +957,7 @@ const layer = new Tile3DLayer({
 
 ##### React
 
-- `DeckGL` no longer injects its children with view props (`width`, `height`, `viewState` etc.). If your custom component needs these props, consider using the [ContextProvider](./api-reference/react/deckgl.md#react-context) or a render callback:
+- `DeckGL` no longer injects its children with view props (`width`, `height`, `viewState` etc.). If your custom component needs these props, consider using the [ContextProvider](./api-reference/react/legacy/deckgl.md#react-context) or a render callback:
 
   ```jsx
   <DeckGL>

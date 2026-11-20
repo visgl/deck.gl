@@ -3,6 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {_velocity as velocity, _MotionVectors as MotionVectors} from '@deck.gl/core';
+import type {FixedSizeList, Float, Int} from 'apache-arrow';
+
 import {
   Layer,
   project32,
@@ -29,7 +31,7 @@ import {
   prepareMeshColumnTransforms,
   TRANSFORM_ACCESSORS
 } from '../utils/mesh-columns';
-import type {ColumnSource} from '@deck.gl/core/arrow';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
 import {scenegraphUniforms, ScenegraphProps} from './scenegraph-layer-uniforms';
@@ -47,6 +49,7 @@ import {
   Position,
   Color,
   Accessor,
+  ArrowAccessor,
   DefaultProps
 } from '@deck.gl/core';
 
@@ -109,36 +112,37 @@ type _ScenegraphLayerProps<DataT> = {
         layer: ScenegraphLayer<DataT>;
       }) => PBREnvironment);
 
-  /** Anchor position accessor. */
-  /** Arrow column or GPUVector of instance positions. */
-  positions?: ColumnSource | null;
-  /** Arrow column or GPUVector of instance colors. */
-  colors?: ColumnSource | null;
-  getPosition?: Accessor<DataT, Position>;
+  /** @experimental GPU-resident column. */
+  positions?: GPUVector | null;
+  /** @experimental GPU-resident column. */
+  colors?: GPUVector | null;
+  /** Anchor position constant, callback, or Arrow XY/XYZ column. */
+  getPosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
   /** Color value or accessor.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [255, 255, 255, 255]
    */
-  getColor?: Accessor<DataT, Color>;
+  getColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
   /**
    * Orientation in [pitch, yaw, roll] in degrees.
    * @see https://en.wikipedia.org/wiki/Euler_angles
    * @default [0, 0, 0]
    */
-  getOrientation?: Accessor<DataT, Readonly<[number, number, number]>>;
+  getOrientation?: ArrowAccessor<DataT, Readonly<[number, number, number]>>;
   /**
    * Scaling factor of the model along each axis.
    * @default [1, 1, 1]
    */
-  getScale?: Accessor<DataT, Readonly<[number, number, number]>>;
+  getScale?: ArrowAccessor<DataT, Readonly<[number, number, number]>>;
   /**
    * Translation from the anchor point, [x, y, z] in meters.
    * @default [0, 0, 0]
    */
-  getTranslation?: Accessor<DataT, Readonly<[number, number, number]>>;
+  getTranslation?: ArrowAccessor<DataT, Readonly<[number, number, number]>>;
   /**
    * TransformMatrix. If specified, `getOrientation`, `getScale` and `getTranslation` are ignored.
    */
-  getTransformMatrix?: Accessor<DataT, number[]>;
+  getTransformMatrix?: ArrowAccessor<DataT, number[]>;
   /**
    * Called after the layer has rendered for the first time.
    * Used by Tile3DLayer to signal that a tile's sublayer is visible,
@@ -182,8 +186,13 @@ const defaultProps: DefaultProps<ScenegraphLayerProps> = {
 
   positions: {type: 'object', value: null, optional: true},
   colors: {type: 'object', value: null, optional: true},
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
-  getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getPosition: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['array'],
+    value: (x: any) => x.position
+  },
+  getColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
 
   // flat or pbr
   _lighting: 'flat',
@@ -193,11 +202,11 @@ const defaultProps: DefaultProps<ScenegraphLayerProps> = {
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
   // [pitch, yaw, roll]
-  getOrientation: {type: 'accessor', value: [0, 0, 0]},
-  getScale: {type: 'accessor', value: [1, 1, 1]},
-  getTranslation: {type: 'accessor', value: [0, 0, 0]},
+  getOrientation: {type: 'accessor', arrow: 'row', value: [0, 0, 0]},
+  getScale: {type: 'accessor', arrow: 'row', value: [1, 1, 1]},
+  getTranslation: {type: 'accessor', arrow: 'row', value: [0, 0, 0]},
   // 4x4 matrix
-  getTransformMatrix: {type: 'accessor', value: []},
+  getTransformMatrix: {type: 'accessor', arrow: 'row', value: []},
 
   loaders: [GLTFLoader]
 };
@@ -287,6 +296,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         type: 'unorm8',
         size: this.props.colorFormat.length,
         accessor: 'getColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR,
         transition: supportsTransitions
       },
@@ -339,7 +349,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
   /** Converts instance columns independently of glTF assets and animation. */
   private updateColumns(params: UpdateParameters<this>): void {
-    if (!this.props.positions && !this.props.colors) {
+    if (!Object.keys(this.resolveColumns(COLUMN_DEFINITIONS)).length) {
       if (!this.state.columns) return;
       this.state.columns.destroy();
       this.state.columns = undefined;
@@ -353,7 +363,14 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (!this.state.columns) {
       this.internalState!.attributeManager?.finalize();
       this.internalState!.attributeManager = null;
-      this.state.columns = new LayerColumns(this.context.device, COLUMN_DEFINITIONS, 'Scenegraph');
+      this.state.columns = new LayerColumns(
+        this.context.device,
+        {
+          ...COLUMN_DEFINITIONS,
+          colors: {...COLUMN_DEFINITIONS.colors, defaultColor: DEFAULT_COLOR}
+        },
+        'Scenegraph'
+      );
     }
     const transformsChanged = TRANSFORM_ACCESSORS.some(
       name =>
@@ -370,6 +387,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         }
       },
       {
+        normalizedColors: this.usesNormalizedColors(),
         dataLoading: this.internalState!.isAsyncPropLoading('data'),
         changed: () => {
           this.setState({});

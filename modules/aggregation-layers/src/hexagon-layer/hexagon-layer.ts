@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor} from '@deck.gl/core';
 import {WebGPUHexagonAggregator} from './webgpu-hexagon-aggregator';
 import {project} from '@deck.gl/core';
 
@@ -43,7 +44,7 @@ const defaultProps: DefaultProps<HexagonLayerProps> = {
   colorDomain: null,
   colorRange: defaultColorRange,
   getColorValue: {type: 'accessor', value: null}, // default value is calculated from `getColorWeight` and `colorAggregation`
-  getColorWeight: {type: 'accessor', value: 1},
+  getColorWeight: {type: 'accessor', arrow: 'row', value: 1},
   colorAggregation: 'SUM',
   lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   upperPercentile: {type: 'number', min: 0, max: 100, value: 100},
@@ -54,7 +55,7 @@ const defaultProps: DefaultProps<HexagonLayerProps> = {
   elevationDomain: null,
   elevationRange: [0, 1000],
   getElevationValue: {type: 'accessor', value: null}, // default value is calculated from `getElevationWeight` and `elevationAggregation`
-  getElevationWeight: {type: 'accessor', value: 1},
+  getElevationWeight: {type: 'accessor', arrow: 'row', value: 1},
   elevationAggregation: 'SUM',
   elevationScale: {type: 'number', min: 0, value: 1},
   elevationLowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
@@ -65,7 +66,7 @@ const defaultProps: DefaultProps<HexagonLayerProps> = {
   // hexbin
   radius: {type: 'number', min: 1, value: 1000},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
+  getPosition: {type: 'accessor', arrow: 'row', value: (x: any) => x.position},
   hexagonAggregator: {type: 'function', optional: true, value: null},
   extruded: false,
 
@@ -102,6 +103,7 @@ type _HexagonLayerProps<DataT> = {
 
   /**
    * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`
+   * Custom plain-array entries are 0–1 when Deck normalizedColors is enabled.
    */
   colorRange?: Color[];
 
@@ -205,13 +207,13 @@ type _HexagonLayerProps<DataT> = {
    * Method called to retrieve the position of each object.
    * @default object => object.position
    */
-  getPosition?: Accessor<DataT, Position>;
+  getPosition?: ArrowAccessor<DataT, Position>;
 
   /**
    * The weight of a data object used to calculate the color value for a cell.
    * @default 1
    */
-  getColorWeight?: Accessor<DataT, number>;
+  getColorWeight?: ArrowAccessor<DataT, number>;
 
   /**
    * After data objects are aggregated into cells, this accessor is called on each cell to get the value that its color is based on.
@@ -224,7 +226,7 @@ type _HexagonLayerProps<DataT> = {
    * The weight of a data object used to calculate the elevation value for a cell.
    * @default 1
    */
-  getElevationWeight?: Accessor<DataT, number>;
+  getElevationWeight?: ArrowAccessor<DataT, number>;
 
   /**
    * After data objects are aggregated into cells, this accessor is called on each cell to get the value that its elevation is based on.
@@ -287,6 +289,8 @@ export default class HexagonLayer<
       colors?: AttributeWithScale;
       elevations?: AttributeWithScale;
 
+      /** Whether domains, scales, callbacks or picking require a CPU result snapshot. */
+      metadataRequired?: boolean;
       binIdRange: [number, number][];
       aggregatorViewport: Viewport;
     } & AggregationLayer<any>['state'];
@@ -303,25 +307,7 @@ export default class HexagonLayer<
       return 'cpu';
     }
 
-    // Feature guards are temporary until metadata, scales, and extension filtering
-    // are connected to this adapter. Input formats and device limits still need validation.
-    if (
-      gpuAggregation &&
-      this.context.device.type === 'webgpu' &&
-      this.props.colorDomain &&
-      this.props.elevationDomain &&
-      !this.props.pickable &&
-      !this.props.extensions.length &&
-      this.props.onSetColorDomain === noop &&
-      this.props.onSetElevationDomain === noop &&
-      this.props.colorScaleType !== 'quantile' &&
-      this.props.colorScaleType !== 'ordinal' &&
-      this.props.elevationScaleType !== 'quantile' &&
-      this.props.lowerPercentile === 0 &&
-      this.props.upperPercentile === 100 &&
-      this.props.elevationLowerPercentile === 0 &&
-      this.props.elevationUpperPercentile === 100
-    ) {
+    if (gpuAggregation && this.context.device.type === 'webgpu') {
       if (
         (!this.props.positions &&
           !WebGPUHexagonAggregator.supportsData(this.props.data, [
@@ -377,7 +363,8 @@ export default class HexagonLayer<
   }
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUHexagonAggregator {
-    if (type === 'webgpu') return new WebGPUHexagonAggregator(this.context.device);
+    if (type === 'webgpu')
+      return new WebGPUHexagonAggregator(this.context.device, this.getComputeAggregatorOptions());
     if (type === 'cpu') {
       const {hexagonAggregator, radius} = this.props;
       return new CPUAggregator({
@@ -452,6 +439,8 @@ export default class HexagonLayer<
 
     const {props, oldProps, changeFlags} = params;
     const {aggregator} = this.state;
+    this.state.metadataRequired = this.needsAggregationMetadata(props, noop);
+    aggregator.setProps({readback: this.state.metadataRequired});
     if (
       (changeFlags.dataChanged || !this.state.dataAsArray) &&
       (props.getColorValue || props.getElevationValue)
@@ -594,7 +583,11 @@ export default class HexagonLayer<
     if (channel === 0) {
       const result = aggregator.getResult(0)!;
       this.setState({
-        colors: new AttributeWithScale(result, aggregator.binCount)
+        colors: new AttributeWithScale(
+          result,
+          aggregator.binCount,
+          aggregator.getResultValues?.(channel)
+        )
       });
       if (props.onSetColorDomain !== noop) {
         props.onSetColorDomain(aggregator.getResultDomain(0));
@@ -602,7 +595,11 @@ export default class HexagonLayer<
     } else if (channel === 1) {
       const result = aggregator.getResult(1)!;
       this.setState({
-        elevations: new AttributeWithScale(result, aggregator.binCount)
+        elevations: new AttributeWithScale(
+          result,
+          aggregator.binCount,
+          aggregator.getResultValues?.(channel)
+        )
       });
       if (props.onSetElevationDomain !== noop) {
         props.onSetElevationDomain(aggregator.getResultDomain(1));
@@ -692,6 +689,14 @@ export default class HexagonLayer<
       elevationUpperPercentile,
       elevationDomain
     } = this.props;
+    const pendingMetadata = aggregator.getResultValues && !aggregator.getResultValues(0);
+    if (
+      pendingMetadata &&
+      (!colorDomain || !elevationDomain || this.needsAggregationScaleValues())
+    ) {
+      return this.getRetainedAggregationLayer()?.clone({pickable: false}) || null;
+    }
+    if (pendingMetadata && !this.needsAggregationScaleValues()) this.prepareRawAggregationScales();
     const CellLayerClass = this.getSubLayerClass('cells', HexagonCellLayer);
     const binAttribute = aggregator.getBins();
 
@@ -719,11 +724,12 @@ export default class HexagonLayer<
       return null;
     }
 
-    return new CellLayerClass(
+    const cellLayer = new CellLayerClass(
       this.getSubLayerProps({
         id: 'cells'
       }),
       {
+        ...(pendingMetadata ? {pickable: false} : {}),
         numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,
@@ -746,6 +752,7 @@ export default class HexagonLayer<
         hexOriginCommon,
         elevationScale,
         colorRange,
+        normalizedColorRange: this.usesNormalizedColors() && colorRange !== defaultColorRange,
         colorScaleType,
         elevationRange,
         extruded,
@@ -763,6 +770,8 @@ export default class HexagonLayer<
         extensions: []
       }
     );
+    this.retainAggregationLayer(cellLayer, this.state.binIdRange);
+    return cellLayer;
   }
 
   getPickingInfo(params: GetPickingInfoParams): HexagonLayerPickingInfo<DataT> {

@@ -9,7 +9,8 @@ import {vec3} from '@math.gl/core';
 
 import type Layer from '../../lib/layer';
 
-const DEFAULT_LIGHT_COLOR = [255, 255, 255] as [number, number, number];
+/** Built-in white light in byte RGB. */
+export const DEFAULT_POINT_LIGHT_COLOR = [255, 255, 255] as [number, number, number];
 const DEFAULT_LIGHT_INTENSITY = 1.0;
 const DEFAULT_ATTENUATION = [1, 0, 0] as [number, number, number];
 const DEFAULT_LIGHT_POSITION = [0.0, 0.0, 1.0] as [number, number, number];
@@ -18,7 +19,7 @@ let idCount = 0;
 
 export type PointLightOptions = {
   id?: string;
-  /** Light color, [r, g, b] in the 0-255 range
+  /** Light color as RGB. Channels are 0–1 with Deck normalizedColors and 0–255 otherwise.
    * @default [255, 255, 255]
    */
   color?: [number, number, number];
@@ -47,7 +48,7 @@ export class PointLight {
   protected projectedLight: PointLight;
 
   constructor(props: PointLightOptions = {}) {
-    const {color = DEFAULT_LIGHT_COLOR} = props;
+    const {color = DEFAULT_POINT_LIGHT_COLOR} = props;
     const {intensity = DEFAULT_LIGHT_INTENSITY} = props;
     const {position = DEFAULT_LIGHT_POSITION} = props;
 

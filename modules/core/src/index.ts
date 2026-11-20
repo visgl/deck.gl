@@ -92,6 +92,7 @@ export {default as Tesselator} from './utils/tesselator'; // Export? move to lum
 
 // Experimental utilities
 export {fillArray as _fillArray, flatten as _flatten} from './utils/flatten'; // Export? move to luma.gl or math.gl?
+export {packNormalizedColor as _packNormalizedColor} from './utils/color';
 export {count as _count} from './utils/count';
 export {deepEqual as _deepEqual} from './utils/deep-equal';
 export {default as _memoize} from './utils/memoize';
@@ -114,8 +115,12 @@ export type {UpdateParameters} from './lib/layer';
 export type {DeckProps} from './lib/deck';
 export type {
   LayerProps,
+  SQLParser,
+  SQLFunctions,
   CompositeLayerProps,
   Accessor,
+  ArrowAccessor,
+  ArrowAccessorFunction,
   AccessorContext,
   AccessorFunction,
   LayerData,
@@ -169,6 +174,7 @@ export {
   LayerColumns as _LayerColumns,
   type ColumnDefinition as _ColumnDefinition
 } from './lib/layer-columns';
+export {resolveColumns as _resolveColumns} from './lib/resolve-columns';
 
 export {
   makePathShaderWGSL as _makePathShaderWGSL,
@@ -185,3 +191,7 @@ export {default as _VelocityPass} from './passes/velocity-pass';
 
 export {velocity as _velocity} from './shaderlib/velocity/velocity';
 export {default as _MotionVectors} from './lib/motion-vectors';
+export {isArrowVector as _isArrowVector} from './arrow/upstream-math/is-arrow-vector';
+
+/** Scale metadata types exposed by the experimental color scale accessor. */
+export type {ResolvedScale, ResolvedScaleDescriptor} from '@math.gl/core/color';

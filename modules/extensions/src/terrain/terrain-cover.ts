@@ -190,7 +190,11 @@ export class TerrainCover {
   }
 
   getPickingFramebuffer(): Framebuffer | null {
-    if (!this.renderViewport || (this.layers.length === 0 && !this.targetLayer.props.pickable)) {
+    if (
+      !this.renderViewport ||
+      (this.layers.length === 0 &&
+        (!this.targetLayer.props.pickable || this.targetLayer.context.device.type === 'webgpu'))
+    ) {
       return null;
     }
     if (!this.pickingFbo) {

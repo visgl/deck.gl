@@ -97,7 +97,8 @@ export {
   HeatmapLayer,
   WebGLAggregator,
   CPUAggregator,
-  ReadbackAggregator
+  ReadbackAggregator,
+  _GraphScreenGridAggregator
 } from '@deck.gl/aggregation-layers';
 
 export {
@@ -133,7 +134,7 @@ export type {MapLibreOverlayProps} from '@deck.gl/maplibre';
 // REACT BINDINGS PACKAGE
 //
 
-export {default, DeckGL} from '@deck.gl/react';
+export {default, DeckGL} from '@deck.gl/react/legacy';
 
 //
 // WIDGETS PACKAGE
@@ -240,7 +241,7 @@ export type {
   TileLayerProps
 } from '@deck.gl/geo-layers';
 
-export type {DeckGLProps, DeckGLRef, DeckGLContextValue} from '@deck.gl/react';
+export type {DeckGLProps, DeckGLRef, DeckGLContextValue} from '@deck.gl/react/legacy';
 
 export type {
   FullscreenWidgetProps,

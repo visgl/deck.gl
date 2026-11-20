@@ -4,15 +4,15 @@
 
 import {expect, test, vi} from 'vitest';
 import {MapView, _GlobeView} from '@deck.gl/core';
-import {createWeatherScene} from '../../../../examples/proposals/weather/app';
-import {createRiverfrontSoftShadowScene} from '../../../../examples/proposals/soft-shadows/app';
-import {createGlobeCloudScene} from '../../../../examples/proposals/globe-clouds/app';
-import {createCityScene} from '../../../../examples/proposals/city-scene/app';
-import {createRiverfrontLightingScene} from '../../../../examples/proposals/riverfront-lighting-scene';
+import {createWeatherScene} from '../../../../examples-v10/proposals/weather/app';
+import {createRiverfrontSoftShadowScene} from '../../../../examples-v10/proposals/soft-shadows/app';
+import {createGlobeCloudScene} from '../../../../examples-v10/proposals/globe-clouds/app';
+import {createCityScene} from '../../../../examples-v10/proposals/city-scene/app';
+import {createRiverfrontLightingScene} from '../../../../examples-v10/proposals/riverfront-lighting-scene';
 import {
   getSkyCameraState,
   SKY_FIELD_OF_VIEW
-} from '../../../../examples/proposals/soft-shadows/sky-camera';
+} from '../../../../examples-v10/proposals/soft-shadows/sky-camera';
 
 vi.mock('@deck.gl/core', async importOriginal => ({
   ...(await importOriginal<object>()),

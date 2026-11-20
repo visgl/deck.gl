@@ -495,8 +495,6 @@ const testCases = [
   },
   {
     name: 'point-label-layer-collision',
-    // CollisionFilterExtension render tests are WebGL only, see collision-filter-extension.spec.ts
-    skip: ['webgpu'],
     viewState: {
       target: [0, 0, 0],
       zoom: 0

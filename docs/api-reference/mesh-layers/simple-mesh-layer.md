@@ -10,6 +10,9 @@ The `SimpleMeshLayer` renders a number of instances of an arbitrary 3D geometry.
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -126,6 +129,28 @@ function App() {
   />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {CubeGeometry} from '@luma.gl/engine';
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+
+const layer = new SimpleMeshLayer({
+  getPosition: positions,
+  mesh: new CubeGeometry()
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
 </Tabs>
@@ -251,24 +276,33 @@ Check [the lighting guide](../../developer-guide/using-effects.md#material-setti
 
 ### Data Accessors
 
+Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
 
-#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+
+#### `getPosition` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 - Default: `object => object.position`
 
 Method called to retrieve the center position for each object in the `data` stream.
 
+An Arrow vector supplies one value per object. See [position columns](../../developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
 
-#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
+
+Deck’s [`normalizedColors`](../core/deck.md#normalizedcolors) lets top-level layers accept 0–1 plain-array instance colors. Byte defaults, typed arrays, and binary inputs retain their encoding.
+
+#### `getColor` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 - Default: `[0, 0, 0, 255]`
 
 If `mesh` does not contain vertex colors, use this color to render each object. If `mesh` contains vertex colors, then the two colors are mixed together. Use `[255, 255, 255]` to use the original mesh colors. If `texture` is assigned, then both colors will be ignored.
 
-The color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+The color is in the format of `[r, g, b, [a]]`. Plain arrays use 0–255 channels by default and 0–1 when Deck enables `normalizedColors`. Omitted alpha is opaque (255 or 1, respectively).
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
+
+An Arrow vector supplies one value per object. See [color columns](../../developer-guide/using-with-arrow.md#colors) for requirements.
+
 
 #### `getOrientation` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getorientation}
 
@@ -307,27 +341,26 @@ Explicitly define a 4x4 column-major model matrix for the mesh. If provided, wil
 * If an array is provided, it is used as the transform matrix for all objects.
 * If a function is provided, it is called on each object to retrieve its transform matrix.
 
-### Arrow Columns
-
-See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
-
-#### `positions` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric XY or XYZ fixed-size lists specifying instance anchors. Overrides [`getPosition`](#getposition).
-
-#### `colors` (Arrow Vector, optional)
-
-* Default: `null`
-
-RGB or RGBA fixed-size lists specifying instance colors. Overrides [`getColor`](#getcolor).
 
 ## Remarks
 
 - GPU mesh vertex attributes and indices must each fit in one chunk.
   Keep the geometry alive while the layer uses it and release it yourself.
 - With `_instanced: false`, GPU-only meshes do not report bounds.
+
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
+
+- `positions` – `float32x3` – Positions in XYZ order.
+- `colors` – `unorm8x4` – Packed RGBA colors.
+
+Notes:
+
+- Supply one value per rendered instance, in instance order.
+- See [Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs) for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source
 

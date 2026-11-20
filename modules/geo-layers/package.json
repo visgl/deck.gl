@@ -47,31 +47,31 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "5.0.0-beta.8",
-    "@loaders.gl/ogc": "5.0.0-beta.8",
-    "@loaders.gl/raster": "5.0.0-beta.8",
-    "@loaders.gl/tiles": "5.0.0-beta.8",
-    "@loaders.gl/tiles-3d": "5.0.0-beta.8",
-    "@luma.gl/engine": "10.0.0-alpha.14",
-    "@luma.gl/shaders": "10.0.0-alpha.14",
-    "@math.gl/core": "5.0.0-beta.8",
-    "@math.gl/geometry": "5.0.0-beta.8",
-    "@math.gl/web-mercator": "5.0.0-beta.8",
-    "@probe.gl/stats": "^4.1.1",
+    "@loaders.gl/core": "5.0.0-beta.12",
+    "@loaders.gl/ogc": "5.0.0-beta.12",
+    "@loaders.gl/raster": "5.0.0-beta.12",
+    "@loaders.gl/tiles": "5.0.0-beta.12",
+    "@loaders.gl/tiles-3d": "5.0.0-beta.12",
+    "@luma.gl/engine": "10.0.0-alpha.17",
+    "@luma.gl/shaders": "10.0.0-alpha.17",
+    "@math.gl/core": "5.0.0-beta.12",
+    "@math.gl/geometry": "5.0.0-beta.12",
+    "probe.gl": "^5.0.0",
     "@types/geojson": "^7946.0.8",
     "a5-js": "^1.0.0",
     "geotiff": "^2.1.0",
     "h3-js": "^4.4.0",
-    "long": "^3.2.0"
+    "long": "^3.2.0",
+    "@math.gl/geospatial": "5.0.0-beta.12"
   },
   "peerDependencies": {
     "@deck.gl/core": "~10.0.0-alpha",
     "@deck.gl/extensions": "~10.0.0-alpha",
     "@deck.gl/layers": "~10.0.0-alpha",
     "@deck.gl/mesh-layers": "~10.0.0-alpha",
-    "@loaders.gl/core": "5.0.0-beta.8",
-    "@luma.gl/core": "10.0.0-alpha.14",
-    "@luma.gl/engine": "10.0.0-alpha.14"
+    "@loaders.gl/core": "5.0.0-beta.12",
+    "@luma.gl/core": "10.0.0-alpha.17",
+    "@luma.gl/engine": "10.0.0-alpha.17"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

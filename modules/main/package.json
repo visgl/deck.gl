@@ -57,9 +57,9 @@
     "@deck.gl/mesh-layers": "10.0.0-alpha.1",
     "@deck.gl/react": "10.0.0-alpha.1",
     "@deck.gl/widgets": "10.0.0-alpha.1",
-    "@loaders.gl/core": "5.0.0-beta.8",
-    "@luma.gl/core": "10.0.0-alpha.14",
-    "@luma.gl/engine": "10.0.0-alpha.14"
+    "@loaders.gl/core": "5.0.0-beta.12",
+    "@luma.gl/core": "10.0.0-alpha.17",
+    "@luma.gl/engine": "10.0.0-alpha.17"
   },
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",

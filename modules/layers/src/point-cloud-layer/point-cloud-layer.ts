@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {FixedSizeList, Float, Int} from 'apache-arrow';
+
 import {
   Layer,
   color,
@@ -12,9 +14,8 @@ import {
   LayerDataSource,
   UpdateParameters,
   Unit,
-  AccessorFunction,
   Position,
-  Accessor,
+  ArrowAccessor,
   Color,
   Material,
   DefaultProps,
@@ -27,6 +28,7 @@ import {
   hasPointCloudColumns,
   type PointCloudColumnProps
 } from './point-cloud-layer-columns';
+import {DEFAULT_COLOR} from './point-cloud-layer-columns';
 
 import {pointCloudUniforms, PointCloudProps} from './point-cloud-layer-uniforms';
 import vs from './point-cloud-layer-vertex.glsl';
@@ -35,7 +37,6 @@ import {shaderWGSL} from './point-cloud-layer.wgsl';
 
 const defaultPosition = (x: any) => x.position;
 
-const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 const DEFAULT_NORMAL = [0, 0, 1] as const;
 
 const defaultProps: DefaultProps<PointCloudLayerProps> = {
@@ -43,9 +44,9 @@ const defaultProps: DefaultProps<PointCloudLayerProps> = {
   pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
   antialiasing: false,
 
-  getPosition: {type: 'accessor', value: defaultPosition},
-  getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
-  getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
+  getNormal: {type: 'accessor', arrow: true, value: DEFAULT_NORMAL},
+  getColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   positions: {type: 'object', value: null, optional: true},
   normals: {type: 'object', value: null, optional: true},
   colors: {type: 'object', value: null, optional: true},
@@ -118,21 +119,24 @@ type _PointCloudLayerProps<DataT> = PointCloudColumnProps & {
 
   /**
    * Method called to retrieve the position of each object.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default object => object.position
    */
-  getPosition?: AccessorFunction<DataT, Position>;
+  getPosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
 
   /**
    * The normal of each object, in `[nx, ny, nz]`.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 1]
    */
-  getNormal?: Accessor<DataT, Readonly<[number, number, number]>>;
+  getNormal?: ArrowAccessor<DataT, Readonly<[number, number, number]>, FixedSizeList<Int | Float>>;
 
   /**
    * The rgba color is in the format of `[r, g, b, [a]]`
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 0, 255]
    */
-  getColor?: Accessor<DataT, Color>;
+  getColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
 };
 
 /** Render a point cloud with 3D positions, normals and colors. */
@@ -214,6 +218,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
         type: 'unorm8',
         transition: true,
         accessor: 'getColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR
       }
     });
@@ -265,6 +270,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     }
     const binary = (this.props.data as any)?.attributes;
     void this.state.columns!.updateIfNeeded(params, {
+      normalizedColors: this.usesNormalizedColors(),
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});
