@@ -336,9 +336,15 @@
         "type": "category",
         "label": "@deck.gl/react",
         "items": [
-          "api-reference/react/overview",
-          "api-reference/react/deckgl",
-          "api-reference/react/use-widget"
+          {
+            "type": "category",
+            "label": "@deck.gl/react/legacy",
+            "items": [
+              "api-reference/react/legacy/overview",
+              "api-reference/react/legacy/deckgl",
+              "api-reference/react/legacy/use-widget"
+            ]
+          }
         ]
       },
       {

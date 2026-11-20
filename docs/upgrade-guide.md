@@ -957,7 +957,7 @@ const layer = new Tile3DLayer({
 
 ##### React
 
-- `DeckGL` no longer injects its children with view props (`width`, `height`, `viewState` etc.). If your custom component needs these props, consider using the [ContextProvider](./api-reference/react/deckgl.md#react-context) or a render callback:
+- `DeckGL` no longer injects its children with view props (`width`, `height`, `viewState` etc.). If your custom component needs these props, consider using the [ContextProvider](./api-reference/react/legacy/deckgl.md#react-context) or a render callback:
 
   ```jsx
   <DeckGL>
