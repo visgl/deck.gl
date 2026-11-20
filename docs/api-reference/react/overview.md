@@ -74,7 +74,7 @@ TypeScript users need TypeScript 5.3 or later.
 
 ## Standalone layout
 
-Without `canvas`, a standalone root renders an unstyled wrapper and canvas. Give its container a size in application CSS; otherwise the browser's canvas default is only 300 × 150 pixels. Alternatively, provide and size the canvas in your own DOM tree with the `canvas` prop. In that case, `DeckGL` renders no wrapper or canvas itself.
+Without `canvas`, a standalone root renders an absolutely positioned wrapper that fills its nearest positioned ancestor, with `width` and `height` of `100%` by default. Give that ancestor a position and a size in application CSS, or set `width`, `height` or `style` on `DeckGL`. See [Root DOM and sizing](./deckgl.md#root-dom-and-sizing). Alternatively, provide and size the canvas in your own DOM tree with the `canvas` prop. In that case, `DeckGL` renders no wrapper or canvas itself.
 
 ## Guides and API reference
 
