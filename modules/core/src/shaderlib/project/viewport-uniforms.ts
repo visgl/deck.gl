@@ -302,6 +302,8 @@ export type ProjectProps = {
   sizeScale?: Buffer | Texture;
   /** Mapping associated with the bound scale field, when using a separate aggregation viewport. */
   sizeScaleTransform?: [number, number, number, number];
+  /** Clip-space XY shear, applied only to shader uniforms. */
+  jitter?: [number, number];
   devicePixelRatio?: number;
   modelMatrix?: Matrix4Like | null;
   coordinateSystem?: CoordinateSystem;
@@ -328,7 +330,8 @@ export function getUniformsFromViewport({
   coordinateSystem = 'default',
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
   autoWrapLongitude = false,
-  sourceCrs
+  sourceCrs,
+  jitter
 }: ProjectProps): ProjectUniforms {
   const packed = getPackedCoordinateSystem(coordinateSystem, viewport, sourceCrs);
   coordinateSystem = packed.coordinateSystem;
@@ -372,6 +375,17 @@ export function getUniformsFromViewport({
   uniforms.wrapLongitude = autoWrapLongitude;
   uniforms.modelMatrix = modelMatrix || IDENTITY_MATRIX;
 
+  if (jitter && (jitter[0] || jitter[1])) {
+    // Transform both terms of clip = matrix * position + center. Never mutate memoized uniforms.
+    const shear = Array.from(IDENTITY_MATRIX);
+    shear[12] = jitter[0];
+    shear[13] = jitter[1];
+    return {
+      ...uniforms,
+      viewProjectionMatrix: mat4.multiply([], shear, uniforms.viewProjectionMatrix),
+      center: vec4.transformMat4([], uniforms.center, shear)
+    };
+  }
   return uniforms;
 }
 

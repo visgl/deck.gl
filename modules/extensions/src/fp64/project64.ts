@@ -3,6 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable camelcase */
+import {Matrix4} from '@math.gl/core';
+import type {NumberArray16} from '@math.gl/core';
 import {fp64} from '@luma.gl/shaders';
 import type {ShaderModule} from '@luma.gl/shaders';
 const {fp64ify, fp64ifyMatrix4} = fp64;
@@ -14,6 +16,8 @@ import source from './project64.wgsl';
 
 type Project64ModuleProps = {
   viewport: Viewport;
+  /** Clip-space jitter inherited from the scene pass. */
+  jitter?: [number, number];
 };
 
 export default {
@@ -28,7 +32,14 @@ export default {
     viewProjectionMatrix: 'mat4x4<f32>',
     viewProjectionMatrix64Low: 'mat4x4<f32>'
   }
-} as ShaderModule<Project64ModuleProps>;
+} as ShaderModule<
+  Project64ModuleProps,
+  {
+    scale: [number, number];
+    viewProjectionMatrix: NumberArray16;
+    viewProjectionMatrix64Low: NumberArray16;
+  }
+>;
 
 // TODO - this module should calculate the 64 bit uniforms
 // It is currently done by project to minimize duplicated work
@@ -37,7 +48,14 @@ const getMemoizedUniforms = memoize(calculateUniforms);
 
 function getUniforms(opts?: Project64ModuleProps | {}): Record<string, any> {
   if (opts && 'viewport' in opts) {
-    const {viewProjectionMatrix, scale} = opts.viewport;
+    let {viewProjectionMatrix} = opts.viewport;
+    const {scale} = opts.viewport;
+    if (opts.jitter) {
+      const shear = new Matrix4();
+      shear[12] = opts.jitter[0];
+      shear[13] = opts.jitter[1];
+      viewProjectionMatrix = shear.multiplyRight(viewProjectionMatrix);
+    }
     // We only need to update fp64 uniforms if fp32 projection is being updated
     return getMemoizedUniforms({viewProjectionMatrix, scale});
   }

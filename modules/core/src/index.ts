@@ -186,6 +186,10 @@ export {
   type PathProps as _PathProps
 } from './shaderlib/path/path-uniforms';
 
+export type {TemporalProps, TemporalFrame} from './lib/temporal';
+
+export {velocity as _velocity} from './shaderlib/velocity/velocity';
+export {default as _MotionVectors} from './lib/motion-vectors';
 export {isArrowVector as _isArrowVector} from './arrow/upstream-math/is-arrow-vector';
 
 /** Scale metadata types exposed by the experimental color scale accessor. */

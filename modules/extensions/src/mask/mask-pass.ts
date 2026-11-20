@@ -28,6 +28,11 @@ const MASK_BLENDING: RenderPipelineParameters = {
 };
 
 export default class MaskPass extends LayersPass {
+  /** This pass draws into its own map, so it ignores the temporal jitter and render scale. */
+  protected get usesTemporalInputs(): boolean {
+    return false;
+  }
+
   maskMap: Texture;
   fbo: Framebuffer;
   private channelClear?: MaskedColorClear;

@@ -40,6 +40,11 @@ export type PickingColorDecoder = (pickedColor: number[] | Uint8Array) =>
   | undefined;
 
 export default class PickLayersPass extends LayersPass {
+  /** This pass draws into its own map, so it ignores the temporal jitter and render scale. */
+  protected get usesTemporalInputs(): boolean {
+    return false;
+  }
+
   private pickZ?: boolean;
   private _colorEncoderState: {
     byLayer: Map<Layer, EncodedPickingColors>;

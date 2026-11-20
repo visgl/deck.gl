@@ -8,6 +8,11 @@ import type Viewport from '../viewports/viewport';
 import LayersPass from './layers-pass';
 
 export default class ShadowPass extends LayersPass {
+  /** This pass draws into its own map, so it ignores the temporal jitter and render scale. */
+  protected get usesTemporalInputs(): boolean {
+    return false;
+  }
+
   fbo: Framebuffer;
 
   constructor(

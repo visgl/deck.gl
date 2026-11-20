@@ -8,6 +8,8 @@ import type {FixedSizeList, Float, Int} from 'apache-arrow';
 // Copyright (c) vis.gl contributors
 
 import {
+  _velocity as velocity,
+  _MotionVectors as MotionVectors,
   Layer,
   _deepEqual as deepEqual,
   _LayerColumns as LayerColumns,
@@ -36,6 +38,7 @@ import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 import {simpleMeshUniforms, SimpleMeshProps} from './simple-mesh-layer-uniforms';
 import vs from './simple-mesh-layer-vertex.glsl';
 import fs from './simple-mesh-layer-fragment.glsl';
+import {withMotionVectors, withMotionVectorLayout} from '../utils/motion-vectors';
 import source from './simple-mesh-layer.wgsl';
 
 import type {
@@ -155,6 +158,8 @@ function hasMeshNormals(mesh: Mesh): boolean {
 }
 
 type _SimpleMeshLayerProps<DataT> = {
+  /** Experimental WebGPU translation motion vectors. Default false. */
+  _motionVectors?: boolean;
   data: LayerDataSource<DataT>;
   /** @experimental GPU-resident column. */
   positions?: GPUVector | null;
@@ -227,6 +232,7 @@ type _SimpleMeshLayerProps<DataT> = {
 export type SimpleMeshLayerProps<DataT = unknown> = _SimpleMeshLayerProps<DataT> & LayerProps;
 
 const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
+  _motionVectors: false,
   mesh: {type: 'object', value: null, async: true},
   texture: {type: 'image', value: null, async: true},
   positions: {type: 'object', value: null, optional: true},
@@ -265,6 +271,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   static layerName = 'SimpleMeshLayer';
 
   state!: {
+    motionVectors?: MotionVectors | null;
     parsedPBRMaterial?: ParsedPBRMaterial;
     model?: Model;
     arrowModel?: ArrowModel;
@@ -275,13 +282,30 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     positionBounds?: [number[], number[]] | null;
   } & Layer['state'];
 
+  private get motionVectorsEnabled(): boolean {
+    return Boolean(
+      this.props._motionVectors &&
+        this.context.device.type === 'webgpu' &&
+        !this.state?.columns &&
+        !this.props.positions &&
+        !this.props.colors
+    );
+  }
+
   getShaders() {
     return super.getShaders({
       vs,
       fs,
-      source,
+      source: this.motionVectorsEnabled ? withMotionVectors(source, false) : source,
       defines: {TERRAIN_COVER_BEFORE_LIGHTING: true},
-      modules: [project32, color, phongMaterial, picking, simpleMeshUniforms]
+      modules: [
+        project32,
+        color,
+        phongMaterial,
+        picking,
+        simpleMeshUniforms,
+        ...(this.motionVectorsEnabled ? [velocity] : [])
+      ]
     });
   }
 
@@ -391,6 +415,10 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   updateState(params: UpdateParameters<this>) {
+    if (!params.props._motionVectors || params.props.positions || params.props.colors) {
+      this.state.motionVectors?.destroy();
+      this.state.motionVectors = null;
+    }
     const {mesh} = params.props;
     if (mesh instanceof GPUVectorGeometry && mesh !== params.oldProps.mesh) {
       validateMeshChunks(mesh);
@@ -406,7 +434,12 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (changeFlags.propsOrDataChanged) {
       this.state.positionBounds = null;
     }
-    if (restored || props.mesh !== oldProps.mesh || changeFlags.extensionsChanged) {
+    if (
+      restored ||
+      props.mesh !== oldProps.mesh ||
+      props._motionVectors !== oldProps._motionVectors ||
+      changeFlags.extensionsChanged
+    ) {
       this.state.positionBounds = null;
       this.state.model?.destroy();
       this.state.model = undefined;
@@ -559,6 +592,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   finalizeState(context: LayerContext) {
+    this.state.motionVectors?.destroy();
     super.finalizeState(context);
     this.state.columns?.destroy();
     this.state.ownedArrowGeometry?.destroy();
@@ -597,6 +631,14 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
         model.shaderInputs.setProps({simpleMesh: {rowIndexOffset}});
       });
     } else {
+      if (this.motionVectorsEnabled) {
+        this.state.motionVectors ||= new MotionVectors();
+        this.state.motionVectors.bind(
+          model,
+          this.getAttributeManager()!.getAttributes().instancePositions,
+          this.getNumInstances()
+        );
+      }
       model.draw(renderPass);
     }
   }
@@ -613,7 +655,9 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const model = new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bufferLayout: this.motionVectorsEnabled
+        ? withMotionVectorLayout(this.getAttributeManager()!.getBufferLayouts())
+        : this.getAttributeManager()!.getBufferLayouts(),
       geometry: mesh instanceof GPUVectorGeometry ? mesh : getGeometry(mesh),
       isInstanced: true
     });
