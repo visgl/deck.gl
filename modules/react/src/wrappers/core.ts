@@ -6,7 +6,7 @@
 import {
   _CustomProjectionView as DeckCustomProjectionView,
   FirstPersonView as DeckFirstPersonView,
-  _GlobeView as DeckGlobeView,
+  GlobeView as DeckGlobeView,
   LightingEffect as DeckLightingEffect,
   MapView as DeckMapView,
   OrbitView as DeckOrbitView,
@@ -42,13 +42,16 @@ export function FirstPersonView({
   return renderView(new DeckFirstPersonView(props), children);
 }
 
-/** Renders `_GlobeView` from `@deck.gl/core`; takes the view's props. Elements nested in it are not assigned to the view. */
-export function _GlobeView({
+/** Renders a globe with the supplied view props. */
+export function GlobeView({
   children,
   ...props
 }: GlobeViewProps & {children?: ReactNode}): ReactElement {
   return renderView(new DeckGlobeView(props), children);
 }
+
+/** @deprecated Use GlobeView. */
+export const _GlobeView = GlobeView;
 
 /** Renders `MapView` from `@deck.gl/core`; takes the view's props. Elements nested in it are not assigned to the view. */
 export function MapView({children, ...props}: MapViewProps & {children?: ReactNode}): ReactElement {
