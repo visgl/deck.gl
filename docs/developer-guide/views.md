@@ -972,7 +972,7 @@ const layerFilter: DeckProps["layerFilter"] = useCallback(({layer, viewport, isP
 
 ### Auto-Positioning UI Components Behind Views
 
-When the deck.gl project first started, one of our major use cases was to build complex Web apps with perfectly synchronized WebGL visualizations and other UI components (HTML markers, charts, lists, etc.). Given the scale of these applications, some reactive, virtual-DOM framework is expected to be in use. At the moment, these features are only implemented for React. Visit the [DeckGL React component](../api-reference/react/legacy/deckgl.md) docs for examples.
+When the deck.gl project first started, one of our major use cases was to build complex Web apps with perfectly synchronized WebGL visualizations and other UI components (HTML markers, charts, lists, etc.). Given the scale of these applications, some reactive, virtual-DOM framework is expected to be in use. At the moment, these features are only implemented for React. Visit the [DeckGL React component](../api-reference/react/deckgl.md) docs for examples.
 
 
 ## Performance Notes
