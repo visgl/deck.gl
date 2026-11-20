@@ -80,7 +80,7 @@ Without `canvas`, a standalone root renders an unstyled wrapper and canvas. Give
 
 - [Get started](../../developer-guide/react/get-started.md) explains the root, client boundaries, layer and view components, and instance access.
 - [Using with maps](../../developer-guide/react/using-with-maps.md) explains provider roots and links the [Mapbox](../../developer-guide/react/base-maps/using-with-mapbox.md) and [MapLibre](../../developer-guide/react/base-maps/using-with-maplibre.md) and [Google Maps](../../developer-guide/react/base-maps/using-with-google-maps.md) guides.
-- [Upgrade guide](../../developer-guide/react/migrate-from-deckgl-react.md) lists the changes to make when coming from `@deck.gl/react/legacy`.
+- [Migrating from the previous API](../../developer-guide/react/migrate-from-deckgl-react.md) lists the changes to make when coming from `@deck.gl/react/legacy`.
 - [Debugging](../../developer-guide/react/debugging.md) explains how to trace a problem through the renderer, with logs, React DevTools and error boundaries.
 - [DeckGL API](deckgl.md) documents root ownership and lifecycle behavior.
 - [Components](components.md) lists the component subpaths and the factories for custom classes.

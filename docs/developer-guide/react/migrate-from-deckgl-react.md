@@ -1,4 +1,4 @@
-# Upgrade guide
+# Migrating from the previous API
 
 This page lists the changes to make when you move an app from the deck.gl 9 React API to the React
 renderer. deck.gl 10 publishes the previous API as `@deck.gl/react/legacy`, and the renderer as
