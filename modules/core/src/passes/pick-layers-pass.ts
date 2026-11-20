@@ -118,11 +118,9 @@ export default class PickLayersPass extends LayersPass {
 
   shouldDrawLayer(layer: Layer): boolean {
     const {pickable, operation} = layer.props;
-    return (
-      (pickable && operation.includes('draw')) ||
-      operation.includes('terrain') ||
-      operation.includes('mask')
-    );
+    // A layer that only writes a mask has no picking colors.
+    // MaskEffect skips the picking pass and keeps the mask from the last render.
+    return (pickable && operation.includes('draw')) || operation.includes('terrain');
   }
 
   protected getShaderModuleProps(
