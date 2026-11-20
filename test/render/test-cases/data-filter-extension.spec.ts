@@ -6,6 +6,8 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {describe, expect} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
+import {expandViewMatrix} from '../view-presets';
+import type {ViewPresetName} from '../view-presets';
 import {defaultOnAfterRender, type TestCase} from '../deck-test-utils';
 
 const VIEWSTATE = {latitude: 37, longitude: -122, zoom: 10.2, pitch: 0, bearing: 0};
@@ -22,10 +24,15 @@ for (let y = 0; y < 20; y++) {
   }
 }
 
+// Attribute filtering is projection independent, so one range and one category variant also
+// render under GlobeView; the other variants stay map-only to limit golden images
+const MAP_AND_GLOBE: ViewPresetName[] = ['map', 'globe'];
+
 // Golden: only matching grid points remain large; counting must not change rendering.
 const testCases = [
   {
     name: 'filter-1d',
+    presets: MAP_AND_GLOBE,
     expectedCount: 120,
     props: {
       extensions: [new DataFilterExtension({countItems: true, filterSize: 1})],
@@ -47,6 +54,7 @@ const testCases = [
   },
   {
     name: 'single-category',
+    presets: MAP_AND_GLOBE,
     expectedCount: 25,
     props: {
       extensions: [new DataFilterExtension({countItems: true, categorySize: 1})],
@@ -101,39 +109,55 @@ const testCases = [
 ];
 
 describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
-  const renderCases = testCases.map(({name, props, expectedCount}) => {
+  // One case per view preset, each with its own count closure so the globe variants assert the
+  // count of their own render
+  const buildCase = (
+    {name, props, expectedCount}: {name: string; props: any; expectedCount: number},
+    preset: ViewPresetName
+  ): TestCase[] => {
     let filteredCount: number | undefined;
-    return {
-      name: `data-filter-effect-${name}`,
-      viewState: VIEWSTATE,
-      layers: [
-        new ScatterplotLayer({
-          id: name,
-          data: DATA,
-          onFilteredItemsChange: ({count}) => {
-            filteredCount = count;
-          },
-          getRadius: 8,
-          radiusUnits: 'pixels',
-          ...props
-        }),
-        new ScatterplotLayer({
-          id: `${name}-background`,
-          data: DATA,
-          getRadius: 2,
-          radiusUnits: 'pixels'
-        })
-      ],
-      onAfterRender: params => {
-        if (filteredCount === undefined) {
-          params.layers[0].setNeedsRedraw();
-          return;
-        }
-        expect(filteredCount).toBe(expectedCount);
-        defaultOnAfterRender(params);
+    return expandViewMatrix(
+      {
+        name: `data-filter-effect-${name}`,
+        // The spec's own view; passed explicitly so the existing map goldens are reused unchanged
+        viewState: VIEWSTATE,
+        layers: [
+          new ScatterplotLayer({
+            id: name,
+            data: DATA,
+            onFilteredItemsChange: ({count}) => {
+              filteredCount = count;
+            },
+            getRadius: 8,
+            radiusUnits: 'pixels',
+            ...props
+          }),
+          new ScatterplotLayer({
+            id: `${name}-background`,
+            data: DATA,
+            getRadius: 2,
+            radiusUnits: 'pixels'
+          })
+        ],
+        onAfterRender: params => {
+          if (filteredCount === undefined) {
+            params.layers[0].setNeedsRedraw();
+            return;
+          }
+          expect(filteredCount).toBe(expectedCount);
+          defaultOnAfterRender(params);
+        },
+        // Tight enough that losing a third of the 25 `single-category` dots fails the globe diff.
+        // The globe variants are WebGL only until they are validated on WebGPU
+        overrides: {globe: {skip: ['webgpu'], imageDiffOptions: {threshold: 0.995}}}
       },
-      goldenImage: `./test/render/golden-images/data-filter-effect-${name}.png`
-    };
-  });
-  runRenderTestSuite(renderCases as TestCase[], deviceType);
+      [preset]
+    );
+  };
+  const renderCases = testCases.flatMap(testCase =>
+    ((testCase as {presets?: ViewPresetName[]}).presets ?? ['map']).flatMap(preset =>
+      buildCase(testCase, preset)
+    )
+  );
+  runRenderTestSuite(renderCases, deviceType);
 });
