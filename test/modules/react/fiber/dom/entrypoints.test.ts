@@ -13,7 +13,6 @@ describe('native entrypoint export matrix', () => {
   it('exports standalone APIs from the package root entrypoint', () => {
     // package.json maps `.` to this module.
     expect(Object.keys(dom).sort()).toEqual([
-      'DeckCanvas',
       'DeckGL',
       'createDeckGL',
       'createEffectComponent',
