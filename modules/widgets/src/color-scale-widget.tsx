@@ -45,6 +45,7 @@ const SCALE_TYPE_LABELS: Record<ResolvedScale['descriptor']['type'], string> = {
   sqrt: 'Square root',
   log: 'Logarithmic',
   symlog: 'Symmetric log',
+  cyclic: 'Cyclic',
   sequential: 'continuous',
   diverging: 'Diverging',
   ordinal: 'Categorical',

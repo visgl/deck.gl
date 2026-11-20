@@ -355,7 +355,9 @@ an explicit `FROM data`, for example
 math.gl executes the grouped query across the whole table. Nullish data and empty
 row arrays render as empty layers until data arrives.
 
-For URL inputs, provide a source-capable loader. Loaders that support query pushdown
+For URL inputs, provide a source-capable loader. To group a URL-backed table, use
+`FROM data GROUP BY` with one grouping column selected first, followed by named
+`COUNT`, `SUM`, `AVG`, `MIN`, or `MAX` aggregates. Loaders that support query pushdown
 can optimize loading based on the supplied query. When the layer has a custom
 `fetch`, SQL runs on the Arrow table returned by that function. Deck loads the SQL
 parser on first use.
