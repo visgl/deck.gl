@@ -7,26 +7,21 @@ subpath matches a deck.gl module, and each component has the deck.gl class's nam
 
 | Import | Components | Install |
 | --- | --- | --- |
-| `@deck.gl/react/core` | `MapView`, `OrbitView`, `OrthographicView`, `FirstPersonView`, `_GlobeView`, `_CustomProjectionView`, `LightingEffect`, `PostProcessEffect` | `@deck.gl/core` |
-| `@deck.gl/react/layers` | Every layer in `@deck.gl/layers` | `@deck.gl/layers` |
-| `@deck.gl/react/geo-layers` | Every layer in `@deck.gl/geo-layers`, including `_WMSLayer` | `@deck.gl/geo-layers` |
-| `@deck.gl/react/aggregation-layers` | Every layer in `@deck.gl/aggregation-layers` | `@deck.gl/aggregation-layers` |
-| `@deck.gl/react/mesh-layers` | `ScenegraphLayer`, `SimpleMeshLayer` | `@deck.gl/mesh-layers` |
-| `@deck.gl/react/widgets` | Every widget in `@deck.gl/widgets`, including the `_`-prefixed ones | `@deck.gl/widgets` |
+| `@deck.gl/react/core` | Every view | `@deck.gl/core` |
+| `@deck.gl/react/core` | `LightingEffect`, `PostProcessEffect` | `@deck.gl/core` |
+| `@deck.gl/react/layers` | Every layer | `@deck.gl/layers` |
+| `@deck.gl/react/geo-layers` | Every layer | `@deck.gl/geo-layers` |
+| `@deck.gl/react/aggregation-layers` | Every layer | `@deck.gl/aggregation-layers` |
+| `@deck.gl/react/mesh-layers` | Every layer | `@deck.gl/mesh-layers` |
+| `@deck.gl/react/widgets` | Every widget | `@deck.gl/widgets` |
 
-Install the deck.gl package behind each subpath you import. The root import loads none of them,
-and bundlers keep only the components you import.
+Install the deck.gl package behind each subpath you use.
 
 ## Props and rendering
 
 A component takes the props of the class's constructor and builds a new instance on every render.
 It renders that instance as a [native element](native-elements.md). deck.gl matches the new
-layer with the previous one by `id` and updates only what changed. For widgets and effects,
-deck.gl keeps the first instance with a given id and passes it the props of each new one, so a
-widget keeps its DOM and state across renders.
-
-View components pass their children through, as `<deckView>` does. Nesting a layer inside a view
-does not assign the layer to that view.
+layer with the previous one by `id` and updates only what changed.
 
 ```tsx
 import {MapView} from '@deck.gl/react/core';
@@ -62,7 +57,7 @@ The types need TypeScript 5.3 or later.
 
 ## Effects
 
-`LightingEffect` takes its lights as props, keyed by name, as its constructor does:
+`LightingEffect` takes its lights as props, keyed by name:
 
 ```tsx
 <LightingEffect ambient={new AmbientLight({intensity: 1})} sun={new DirectionalLight({direction: [-1, -3, -1]})} />
@@ -78,8 +73,7 @@ import {vignette} from '@luma.gl/effects';
 
 ## Custom classes
 
-The root exports a factory for each kind of class. Call it once, at module level, to make a
-component for a custom or community class. No registration is needed:
+Make JSX components for custom classes using one of the provided factories:
 
 ```tsx
 import {
@@ -102,5 +96,12 @@ export const OutlineEffect = createEffectComponent(DeckOutlineEffect);
 | `createWidgetComponent(WidgetClass)` | A widget class whose constructor takes a props object | |
 | `createEffectComponent(EffectClass)` | An effect class whose constructor takes a props object | |
 
-React DevTools shows each component under the class's `layerName`, or its class name. For a class
-with another constructor signature, render the instance with a [native element](native-elements.md).
+React DevTools shows each component under the class's `layerName`, or its class name.
+
+The factories call `new Class(props)`. A class whose constructor takes other arguments, as
+`new PostProcessEffect(module, props)` does, has no factory: create the instance yourself and
+render it with a [native element](native-elements.md).
+
+## Source
+
+[modules/react/src/wrappers](https://github.com/visgl/deck.gl/tree/master/modules/react/src/wrappers)
