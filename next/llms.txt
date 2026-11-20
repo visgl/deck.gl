@@ -253,9 +253,9 @@ Map styles often change what is drawn as the camera zooms: coarse summaries at l
 - [FirstPersonController](https://deck.gl/next/docs/api-reference/core/first-person-controller.md): Inherits from Base Controller.
 - [FirstPersonView](https://deck.gl/next/docs/api-reference/core/first-person-view.md): The FirstPersonView class is a subclass of View that describes a camera placed at a provided location, looking towards the direction and orientation specified by viewState. The behavior is similar to that of a first-person game).
 - [FlyToInterpolator](https://deck.gl/next/docs/api-reference/core/fly-to-interpolator.md): Performs "fly to" style interpolation between two geospatial view states. Implements TransitionInterpolator.
-- [GlobeController (Experimental)](https://deck.gl/next/docs/api-reference/core/globe-controller.md): Inherits from Base Controller.
-- [GlobeView (Experimental)](https://deck.gl/next/docs/api-reference/core/globe-view.md): This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other View classes. Use with caution and report any issues that you find on GitHub.
-- [GlobeViewport (Experimental)](https://deck.gl/next/docs/api-reference/core/globe-viewport.md): The GlobeViewport class takes globe view states (latitude, longitude, zoom, bearing, and pitch), and performs projections between world and screen coordinates. It is a helper class for visualizing the earth as a 3D globe.
+- [GlobeController](https://deck.gl/next/docs/api-reference/core/globe-controller.md): Inherits from Base Controller.
+- [GlobeView](https://deck.gl/next/docs/api-reference/core/globe-view.md): The GlobeView class is a subclass of View. This view projects the earth into a 3D globe.
+- [GlobeViewport](https://deck.gl/next/docs/api-reference/core/globe-viewport.md): The GlobeViewport class takes globe view states (latitude, longitude, zoom, bearing, and pitch), and performs projections between world and screen coordinates. It is a helper class for visualizing the earth as a 3D globe.
 - [Layer Class](https://deck.gl/next/docs/api-reference/core/layer.md): The Layer class is the base class of all deck.gl layers, and it provides a number of base properties available in all layers.
 - [LayerManager Class (Internal)](https://deck.gl/next/docs/api-reference/core/layer-manager.md): The LayerManager class is gradually being refactor into a ComponentManager class and will be made part of the lifecycle directory. It is now an internal class, use the Deck class (or the DeckGL React Component) which creates a LayerManager under the hood.
 - [LightingEffect](https://deck.gl/next/docs/api-reference/core/lighting-effect.md): The LightingEffect applies ambient, point and directional lighting to layers which support material property.
@@ -367,9 +367,9 @@ For first-time deck.gl developers, it is helpful to read the following pages bef
 
 #### react
 
-- [DeckGL (React Component)](https://deck.gl/next/docs/api-reference/react/deckgl.md): DeckGL is the main interface to deck.gl for React applications. DeckGL is a React component that takes a list of deck.gl layer instances and a view state, and renders those layers on a transparent canvas that can be used as an overlay over other components like maps.
-- [@deck.gl/react](https://deck.gl/next/docs/api-reference/react/overview.md): This module integrates deck.gl with React. First-time deck.gl developers may find it helpful to read Using deck.gl with React before getting started.
-- [useWidget](https://deck.gl/next/docs/api-reference/react/use-widget.md): The useWidget hook is used to create React wrappers for normal (non-React) deck.gl widgets, or to create custom widgets with UI rendered by React.
+- [DeckGL (React Component)](https://deck.gl/next/docs/api-reference/react/legacy/deckgl.md): DeckGL is the main interface to deck.gl for React applications. DeckGL is a React component that takes a list of deck.gl layer instances and a view state, and renders those layers on a transparent canvas that can be used as an overlay over other components like maps.
+- [@deck.gl/react](https://deck.gl/next/docs/api-reference/react/legacy/overview.md): This module integrates deck.gl with React. First-time deck.gl developers may find it helpful to read Using deck.gl with React before getting started.
+- [useWidget](https://deck.gl/next/docs/api-reference/react/legacy/use-widget.md): The useWidget hook is used to create React wrappers for normal (non-React) deck.gl widgets, or to create custom widgets with UI rendered by React.
 
 #### test-utils
 

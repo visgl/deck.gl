@@ -8,21 +8,9 @@ Target release date: EOY 2026. Alpha releases available.
 
 v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, SQL expression powered big data library. It brings support for non-mercator projection and initial hooks for advanced GPU compute integration.
 
-*v10.0 should be thought of as a pre-release. We wanted to get the new capabilities into the hands of users as soon as possible, which means that some APIs have not yet settled and may change in v10.1.*
+> v10.0 is intended as a pre-release of the new v10 API for early adopters. We wanted to get the new capabilities into the hands of users as soon as possible, which means that some APIs have not yet settled and may change in v10.1.
 
-*These highlights describe goals for v10. Some features are still in development.*
-
-### Heatmap filtering[​](#heatmap-filtering "Direct link to Heatmap filtering")
-
-* [`ClipExtension`](https://deck.gl/next/docs/api-reference/extensions/clip-extension.md) filters HeatmapLayer source points on WebGPU, including borrowed GPUVectors.
-
-* [`DataFilterExtension`](https://deck.gl/next/docs/api-reference/extensions/data-filter-extension.md) filters the points that contribute to `HeatmapLayer` on WebGPU.
-
-* [`MaskExtension`](https://deck.gl/next/docs/api-reference/extensions/mask-extension.md) limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
-
-### ContourLayer[​](#contourlayer "Direct link to ContourLayer")
-
-* The experimental [`gpuGeometry` option](https://deck.gl/next/docs/api-reference/aggregation-layers/contour-layer.md#compute-aggregation) generates and renders isolines on WebGPU without reading back the bins.
+*The highlights below describe goals for v10. Some features are still in development.*
 
 ### GPU[​](#gpu "Direct link to GPU")
 
@@ -59,9 +47,18 @@ v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, S
 
 The `@deck.gl/react` module is now a deep React Fiber integration.
 
-* [**React components**](https://deck.gl/next/docs/api-reference/react/overview.md) 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
+* **React components** 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
 * **Map integrations** 🚧 — Use dedicated React entry points for [Mapbox](https://deck.gl/next/docs/developer-guide/base-maps/using-with-mapbox.md), [MapLibre](https://deck.gl/next/docs/developer-guide/base-maps/using-with-maplibre.md), and [Google Maps](https://deck.gl/next/docs/developer-guide/base-maps/using-with-google-maps.md).
-* **Migration** — The previous React API is available from [`@deck.gl/react/legacy`](https://deck.gl/next/docs/api-reference/react/overview.md#deckglreactlegacy), so apps can move to it before the package root changes.
+* **Migration** — The previous React API is available from [`@deck.gl/react/legacy`](https://deck.gl/next/docs/api-reference/react/legacy/overview.md), so apps can move to it before the package root changes.
+
+### Views[​](#views "Direct link to Views")
+
+* [`GlobeView`](https://deck.gl/next/docs/api-reference/core/globe-view.md), [`GlobeViewport`](https://deck.gl/next/docs/api-reference/core/globe-viewport.md) and [`GlobeController`](https://deck.gl/next/docs/api-reference/core/globe-controller.md) are now officially supported and no longer experimental.
+
+### Extensions[​](#extensions "Direct link to Extensions")
+
+* [MaskExtension](https://deck.gl/next/docs/api-reference/extensions/mask-extension.md) now supports [GlobeView](https://deck.gl/next/docs/api-reference/core/globe-view.md).
+* [`MaskExtension`](https://deck.gl/next/docs/api-reference/extensions/mask-extension.md) now limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
 
 ### Layers[​](#layers "Direct link to Layers")
 
@@ -74,15 +71,13 @@ The `@deck.gl/react` module is now a deep React Fiber integration.
 ### Aggregation Layers[​](#aggregation-layers "Direct link to Aggregation Layers")
 
 * [GridLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/grid-layer.md), [HexagonLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/hexagon-layer.md), [ScreenGridLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/screen-grid-layer.md), and [ContourLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/contour-layer.md) now accept [custom aggregators](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md) with GPUVector results.
-* These layers now support clipping, brushing, and numeric filtering with [GPUVector inputs](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md#gpu-column-extensions).
-
-### Extensions[​](#extensions "Direct link to Extensions")
-
-* [MaskExtension](https://deck.gl/next/docs/api-reference/extensions/mask-extension.md) now supports [GlobeView](https://deck.gl/next/docs/api-reference/core/globe-view.md).
+* The aggregation layers support clipping, brushing, and numeric filtering extensions with [GPUVector inputs](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md#gpu-column-extensions).
 
 ### Examples[​](#examples "Direct link to Examples")
 
 * [Examples v10](https://deck.gl/next/examples-v10) have been updated to use Arrow loading and SQL accessors.
+
+***
 
 ## deck.gl v9.4[​](#deckgl-v94 "Direct link to deck.gl v9.4")
 
@@ -327,7 +322,7 @@ Release date: October 7, 2025
   * [TimelineWidget](https://deck.gl/next/docs/api-reference/widgets/timeline-widget.md)
   * ViewSelectorWidget
 
-* Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](https://deck.gl/next/docs/api-reference/react/overview.md) package
+* Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](https://deck.gl/next/docs/api-reference/react/legacy/overview.md) package
 
 * Custom widgets in pydeck - via the `custom_libraries` parameter, Python users can integrate custom deck.gl widgets seamlessly
 
@@ -382,8 +377,8 @@ deck.gl now works seamlessly with the MapLibre v5 [globe view](https://maplibre.
 
 deck.gl v9.0 added support for widgets, with v9.1 users can now create React components with the same level of deep deck.gl integration.
 
-* All the official deck.gl widgets can now be easily wrapped into React components with the new [`useWidget`](https://deck.gl/next/docs/api-reference/react/use-widget.md) hook.
-* Pre-wrapped React components for existing widget are available from the [`@deck.gl/react`](https://deck.gl/next/docs/api-reference/react/overview.md) package.
+* All the official deck.gl widgets can now be easily wrapped into React components with the new [`useWidget`](https://deck.gl/next/docs/api-reference/react/legacy/use-widget.md) hook.
+* Pre-wrapped React components for existing widget are available from the [`@deck.gl/react`](https://deck.gl/next/docs/api-reference/react/legacy/overview.md) package.
 * To try it out, check out our [React getting started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/basic) for using widgets in React.
 
 ##### Widgets Developer Guide[​](#widgets-developer-guide "Direct link to Widgets Developer Guide")
@@ -1463,7 +1458,7 @@ A new experimental module `@deck.gl/json` provides a set of classes that allows 
 
 deck.gl's multiview support has been significantly enhanced. New `View` properties give applications more control over rendering, making it possible to implement e.g. overlapping views, partially synchronized views (share some but not all view state props), views with different background colors etc.
 
-### ContourLayer[​](#contourlayer-1 "Direct link to ContourLayer")
+### ContourLayer[​](#contourlayer "Direct link to ContourLayer")
 
 deck.gl's layer catalog is extended by adding new `ContourLayer`, this layer can be used to render contours, also called iso-lines for given set of threshold values. `ContourLayer` supports both WebMercator projection (geospatial applications) and Orthographic projection (infovis applications).
 

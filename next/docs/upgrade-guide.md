@@ -2,6 +2,10 @@
 
 ## Upgrading to v10[​](#upgrading-to-v10 "Direct link to Upgrading to v10")
 
+### GlobeView[​](#globeview "Direct link to GlobeView")
+
+`GlobeView`, `GlobeViewport` and `GlobeController` are no longer experimental. Import them without the underscore. `_GlobeView`, `_GlobeViewport` and `_GlobeController` remain as deprecated aliases of the same classes and will be removed in a future major release.
+
 ### SQL accessor functions[​](#sql-accessor-functions "Direct link to SQL accessor functions")
 
 math.gl now provides `LIST_EXTRACT` and `STRUCT_EXTRACT`. Rename custom declarations that use either reserved name and update their SQL call sites.
@@ -1210,7 +1214,7 @@ const layer = new Tile3DLayer({
 
 ##### React[​](#react "Direct link to React")
 
-* `DeckGL` no longer injects its children with view props (`width`, `height`, `viewState` etc.). If your custom component needs these props, consider using the [ContextProvider](https://deck.gl/next/docs/api-reference/react/deckgl.md#react-context) or a render callback:
+* `DeckGL` no longer injects its children with view props (`width`, `height`, `viewState` etc.). If your custom component needs these props, consider using the [ContextProvider](https://deck.gl/next/docs/api-reference/react/legacy/deckgl.md#react-context) or a render callback:
 
   ```
   <DeckGL>

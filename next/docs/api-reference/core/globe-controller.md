@@ -1,4 +1,4 @@
-# GlobeController (Experimental)
+# GlobeController
 
 Inherits from [Base Controller](https://deck.gl/next/docs/api-reference/core/controller.md).
 
@@ -11,7 +11,7 @@ The `GlobeController` class can be passed to either the `Deck` class's [controll
 Use with the default view:
 
 ```
-import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Deck, GlobeView} from '@deck.gl/core';
 
 
 
@@ -29,7 +29,7 @@ new Deck({
 is equivalent to:
 
 ```
-import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Deck, GlobeView} from '@deck.gl/core';
 
 
 
@@ -63,7 +63,7 @@ Supports all [Controller options](https://deck.gl/next/docs/api-reference/core/c
 You can further customize the `GlobeController`'s behavior by extending the class:
 
 ```
-import {Deck, _GlobeView as GlobeView, _GlobeController as GlobeController} from '@deck.gl/core';
+import {Deck, GlobeView, GlobeController} from '@deck.gl/core';
 
 
 

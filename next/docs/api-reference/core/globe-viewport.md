@@ -1,4 +1,4 @@
-# GlobeViewport (Experimental)
+# GlobeViewport
 
 The `GlobeViewport` class takes globe view states (`latitude`, `longitude`, `zoom`, `bearing`, and `pitch`), and performs projections between world and screen coordinates. It is a helper class for visualizing the earth as a 3D globe.
 
@@ -7,7 +7,7 @@ The `GlobeViewport` class takes globe view states (`latitude`, `longitude`, `zoo
 A `GlobeViewport` instance is created under the hood by a [GlobeView](https://deck.gl/next/docs/api-reference/core/globe-view.md).
 
 ```
-import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {GlobeViewport} from '@deck.gl/core';
 
 
 
