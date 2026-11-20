@@ -13,7 +13,7 @@ export {createDeckGL, DeckGL} from './components';
  * ```
  */
 export type {DeckGLRootProps, DeckGLProps, OnDeckChange} from '../types/index';
-export {DeckCanvas} from './deck-canvas';
+export {DeckCanvas as _DeckCanvas} from './deck-canvas';
 export {
   createEffectComponent,
   createLayerComponent,
