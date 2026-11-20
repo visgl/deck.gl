@@ -3,13 +3,18 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
+import {testLayer, testLayerAsync, generateLayerTests, device} from '@deck.gl/test-utils/vitest';
 
 import {project32} from '@deck.gl/core';
-import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {ScenegraphLayer, type ScenegraphLayerProps} from '@deck.gl/mesh-layers';
 import source from '@deck.gl/mesh-layers/scenegraph-layer/scenegraph-layer.wgsl';
 import {CubeGeometry, Model, GroupNode, ModelNode} from '@luma.gl/engine';
-import {GLTFAnimator} from '@luma.gl/engine/gltf';
+import {GLTFAnimator, type PBREnvironment} from '@luma.gl/engine/gltf';
+import {createPrefilteredEnvironment} from '@luma.gl/engine/lighting';
+import {DynamicTexture} from '@luma.gl/core/dynamic';
+import {pbrScene} from '@luma.gl/shaders';
+import {load} from '@loaders.gl/core';
+import {GLTFLoader} from '@loaders.gl/scene/gltf';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -134,3 +139,174 @@ test('ScenegraphLayer#tests', () => {
 
   testLayer({Layer: ScenegraphLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
+
+function createEnvironment() {
+  const source = device.createTexture({
+    width: 8,
+    height: 4,
+    format: 'rgba8unorm',
+    data: new Uint8Array(8 * 4 * 4).fill(255)
+  });
+  const environment = createPrefilteredEnvironment(device, {
+    source,
+    sourceEncoding: 'srgb',
+    format: 'rgba8unorm',
+    size: 16,
+    irradianceSize: 4,
+    brdfLUTSize: 8,
+    sampleCount: 4
+  });
+  source.destroy();
+  return environment;
+}
+
+function getEnvironmentState(layer: ScenegraphLayer) {
+  const model = layer.state.models[0];
+  const {pbr_diffuseEnvSampler, pbr_specularEnvSampler, pbr_brdfLUT} =
+    model.shaderInputs.getBindingValues();
+  const {environmentIntensity, environmentRotation, environmentMipCount} =
+    model.shaderInputs.getUniformValues().pbrScene!;
+  return {
+    define: model['props'].defines?.USE_SCENE_ENVIRONMENT,
+    bindings: {pbr_diffuseEnvSampler, pbr_specularEnvSampler, pbr_brdfLUT},
+    uniforms: {environmentIntensity, environmentRotation, environmentMipCount}
+  };
+}
+
+test('ScenegraphLayer#prefiltered environment', async () => {
+  const gltf = await load('/test/data/BoxAnimated.glb', GLTFLoader);
+  const environment = createEnvironment();
+  const {textures} = environment;
+  const bindings = {
+    pbr_diffuseEnvSampler: textures.diffuseTexture,
+    pbr_specularEnvSampler: textures.specularTexture,
+    pbr_brdfLUT: textures.brdfLUTTexture
+  };
+  const environmentMipCount = textures.specularTexture.mipLevels;
+  expect(environmentMipCount).toBeGreaterThan(1);
+
+  // These props must compile without a cast.
+  const props: ScenegraphLayerProps = {
+    id: 'scenegraph-prefiltered-environment',
+    data: [{position: [0, 0]}],
+    scenegraph: gltf,
+    _lighting: 'pbr',
+    _imageBasedLightingEnvironment: {...textures, intensity: 2, rotation: 0.5}
+  };
+  const functionProps: ScenegraphLayerProps = {
+    ...props,
+    scenegraph: {...gltf},
+    _imageBasedLightingEnvironment: () => textures
+  };
+
+  let models: unknown[] = [];
+  let checks = 0;
+  await testLayerAsync({
+    Layer: ScenegraphLayer,
+    onError: err => expect(err).toBeFalsy(),
+    testCases: [
+      {
+        title: 'environment with intensity and rotation',
+        props,
+        onAfterUpdate: ({layer}) => {
+          if (!layer.isLoaded) return;
+          checks++;
+          models = layer.state.models;
+          expect(getEnvironmentState(layer)).toEqual({
+            define: 1,
+            bindings,
+            uniforms: {environmentIntensity: 2, environmentRotation: 0.5, environmentMipCount}
+          });
+        }
+      },
+      {
+        title: 'new intensity and rotation, same scenegraph',
+        updateProps: {_imageBasedLightingEnvironment: {...textures, intensity: 0.25, rotation: 1}},
+        onAfterUpdate: ({layer}) => {
+          checks++;
+          expect(layer.state.models, 'the layer keeps its models').toBe(models);
+          expect(getEnvironmentState(layer).uniforms).toEqual({
+            environmentIntensity: 0.25,
+            environmentRotation: 1,
+            environmentMipCount
+          });
+        }
+      },
+      {
+        title: 'function that returns the textures',
+        props: functionProps,
+        onAfterUpdate: ({layer}) => {
+          if (!layer.isLoaded) return;
+          checks++;
+          expect(getEnvironmentState(layer)).toEqual({
+            define: 1,
+            bindings,
+            uniforms: {environmentIntensity: 1, environmentRotation: 0, environmentMipCount}
+          });
+        }
+      }
+    ]
+  });
+
+  expect(checks, 'each test case made its checks').toBeGreaterThanOrEqual(3);
+  expect(textures.diffuseTexture.destroyed, 'the caller owns the textures').toBe(false);
+  expect(textures.specularTexture.destroyed, 'the caller owns the textures').toBe(false);
+  expect(textures.brdfLUTTexture.destroyed, 'the caller owns the textures').toBe(false);
+  environment.destroy();
+});
+
+test('ScenegraphLayer#PBREnvironment', async () => {
+  const gltf = await load('/test/data/BoxAnimated.glb', GLTFLoader);
+  const face = {
+    width: 2,
+    height: 2,
+    format: 'rgba8unorm' as const,
+    data: new Uint8Array(16).fill(255)
+  };
+  const cube = {'+X': face, '-X': face, '+Y': face, '-Y': face, '+Z': face, '-Z': face};
+  const environment: PBREnvironment = {
+    brdfLutTexture: new DynamicTexture(device, {data: face}),
+    diffuseEnvSampler: new DynamicTexture(device, {dimension: 'cube', data: cube}),
+    specularEnvSampler: new DynamicTexture(device, {dimension: 'cube', data: cube})
+  };
+  await Promise.all(Object.values(environment).map(texture => texture.ready));
+
+  const props: ScenegraphLayerProps = {
+    id: 'scenegraph-pbr-environment',
+    data: [{position: [0, 0]}],
+    scenegraph: gltf,
+    _lighting: 'pbr',
+    _imageBasedLightingEnvironment: environment
+  };
+
+  let checks = 0;
+  await testLayerAsync({
+    Layer: ScenegraphLayer,
+    onError: err => expect(err).toBeFalsy(),
+    testCases: [
+      {
+        props,
+        onAfterUpdate: ({layer}) => {
+          if (!layer.isLoaded) return;
+          checks++;
+          expect(getEnvironmentState(layer)).toEqual({
+            define: undefined,
+            bindings: {
+              pbr_diffuseEnvSampler: environment.diffuseEnvSampler.texture,
+              pbr_specularEnvSampler: environment.specularEnvSampler.texture,
+              pbr_brdfLUT: environment.brdfLutTexture.texture
+            },
+            uniforms: pick(pbrScene.defaultUniforms)
+          });
+        }
+      }
+    ]
+  });
+
+  expect(checks, 'the test case made its checks').toBeGreaterThanOrEqual(1);
+  Object.values(environment).forEach(texture => texture.destroy());
+});
+
+function pick({environmentIntensity, environmentRotation, environmentMipCount}) {
+  return {environmentIntensity, environmentRotation, environmentMipCount};
+}
