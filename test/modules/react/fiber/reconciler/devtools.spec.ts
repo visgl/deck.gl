@@ -15,16 +15,17 @@ const scope = globalThis as typeof globalThis & {__REACT_DEVTOOLS_GLOBAL_HOOK__?
 describe('React DevTools', () => {
   afterEach(() => {
     delete scope.__REACT_DEVTOOLS_GLOBAL_HOOK__;
-    vi.resetModules();
   });
 
-  // Skipped until the follow-up to the copy adapts it: the headless project shares one page, so an earlier file has already loaded the renderer.
-  it.skip('registers the renderer with the DevTools hook when the reconciler loads', async () => {
+  it('registers the renderer with the DevTools hook', async () => {
     const inject = vi.fn((_internals: Record<string, unknown>) => 1);
     scope.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {isDisabled: false, supportsFiber: true, inject};
 
-    vi.resetModules();
-    await import('@deck.gl/react/reconciler/renderer');
+    // The module registers itself when it first loads. Other test files in this project may have
+    // loaded it already, so call the registration directly instead of relying on a fresh import.
+    const {registerWithDevTools} = await import('@deck.gl/react/reconciler/renderer');
+    inject.mockClear();
+    registerWithDevTools();
 
     expect(inject).toHaveBeenCalledTimes(1);
     expect(inject.mock.calls[0][0]).toMatchObject({

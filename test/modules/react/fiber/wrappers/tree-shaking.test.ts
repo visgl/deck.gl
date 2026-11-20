@@ -8,8 +8,12 @@ import {build} from 'esbuild';
 import {fileURLToPath} from 'node:url';
 import {describe, expect, it} from 'vitest';
 
-const WRAPPERS = fileURLToPath(
-  new URL('../../../../../modules/react/src/wrappers/', import.meta.url)
+const ROOT = fileURLToPath(new URL('../../../../../', import.meta.url));
+const WRAPPERS = `${ROOT}modules/react/src/wrappers`;
+
+// Resolve the deck.gl modules from source, as the test projects do.
+const SOURCE_ALIASES = Object.fromEntries(
+  ['layers', 'widgets'].map(name => [`@deck.gl/${name}`, `${ROOT}modules/${name}/src/index.ts`])
 );
 
 // Everything a deck.gl app already ships, so the sizes count only the layer module and the wrappers.
@@ -19,6 +23,7 @@ const EXTERNAL = ['react', 'react/*', '@deck.gl/core', '@luma.gl/*', '@loaders.g
 async function bundle(source: string): Promise<string> {
   const result = await build({
     stdin: {contents: source, loader: 'ts', resolveDir: WRAPPERS},
+    alias: SOURCE_ALIASES,
     bundle: true,
     external: EXTERNAL,
     format: 'esm',

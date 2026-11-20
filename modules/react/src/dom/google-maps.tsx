@@ -6,7 +6,7 @@ import 'client-only';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import type {GoogleMapsOverlayProps} from '@deck.gl/google-maps';
 import {attachGoogleMap, type GoogleMap} from './attach-google-map';
-import {createDeckGL} from './components';
+import {createDeckGL} from '../index';
 import type {DeckGLRootProps} from '../types/index';
 
 /** Props accepted by the Google Maps-overlay React Fiber root. */

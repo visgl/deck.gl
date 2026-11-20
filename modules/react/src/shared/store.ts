@@ -5,14 +5,15 @@
 
 import type {Deck, DeckProps, LayersList, View} from '@deck.gl/core';
 
+/** The part of a `Deck` instance the reconciler calls: `setProps` and `finalize`. */
+export type DeckGLRenderer = Pick<Deck<View | View[] | null>, 'finalize' | 'setProps'>;
+
 /**
  * Global state shape for deckgl-fiber internal state management
  *
  * Manages the deck.gl instance reference and layers passed via props.
  * Used internally by the reconciler to coordinate between React and deck.gl.
  */
-export type DeckGLRenderer = Pick<Deck<View | View[] | null>, 'finalize' | 'setProps'>;
-
 export interface State {
   /**
    * Current deck.gl renderer instance.
@@ -109,6 +110,7 @@ export function createStore(isExternalOverlay = false, forwardViews = false): St
     }
   };
 
+  /** Merges `partial` into the current state. */
   function setState(partial: Partial<State>): void {
     state = {...state, ...partial};
   }

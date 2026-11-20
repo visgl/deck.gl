@@ -9,7 +9,7 @@ import {createElement} from 'react';
 import type {ComponentType} from 'react';
 import {renderToString} from 'react-dom/server';
 import {describe, expect, it, vi} from 'vitest';
-import {createDeckGL, DeckGL} from '@deck.gl/react/dom';
+import {createDeckGL, DeckGL} from '@deck.gl/react/dom/index';
 import {DeckGL as GoogleMapsDeckGL} from '@deck.gl/react/dom/google-maps';
 import {DeckGL as MapboxDeckGL} from '@deck.gl/react/dom/mapbox';
 import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/dom/maplibre';

@@ -5,8 +5,11 @@
 
 import 'client-only';
 import {assert, type Deck, type View} from '@deck.gl/core';
-import {createRoot, unmountAtNode} from '../reconciler/index';
-import {RootErrorBoundary} from '../reconciler/error-boundary';
+import {
+  createRoot,
+  unmountAtNode,
+  _RootErrorBoundary as RootErrorBoundary
+} from '../reconciler/index';
 import type {
   DeckGLConfiguration,
   ReconcilerRoot,
@@ -260,15 +263,21 @@ function createDeckGLComponent<Props, Instance extends DeckGLRenderer, MapT = ne
       const rootElement = isExternalOverlay
         ? getDetachedRoot(detachedRoot, rootOptions)
         : getCanvasRoot(config.canvas, canvas, resolvedCanvas);
-
+      // Only the <canvas> this component rendered is known to be unused after unmount. A canvas
+      // the app passed as `canvas` stays under the app's control, so it may be reused later.
       if (rootElement) {
         return () => {
-          // Detach first: unmounting the root finalizes the overlay, and an overlay may need its
-          // resources to leave its host map.
-          detachOverlay();
-          notifyDeckChange(null);
-          overlay.current = null;
-          unmountAtNode(rootElement);
+          try {
+            // Detach first: unmounting the root finalizes the overlay, and an overlay may need its
+            // resources to leave its host map.
+            detachOverlay();
+            notifyDeckChange(null);
+          } finally {
+            // An app callback that throws (`onDeckChange`, a ref cleanup or a custom detach) must
+            // not leave the root mounted and Deck running.
+            overlay.current = null;
+            unmountAtNode(rootElement);
+          }
         };
       }
     }, [config.canvas]);

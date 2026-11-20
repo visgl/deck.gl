@@ -8,7 +8,7 @@ import {_SplitterWidget as SplitterWidget, ZoomWidget} from '@deck.gl/widgets';
 import {createRef} from 'react';
 import {describe, expect, it} from 'vitest';
 
-import {DeckGL} from '@deck.gl/react/dom';
+import {DeckGL} from '@deck.gl/react/dom/index';
 
 describe('view-layout widgets and multi-view props', () => {
   it('accepts a widget typed for several views', () => {

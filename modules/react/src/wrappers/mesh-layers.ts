@@ -13,12 +13,14 @@ import type {ScenegraphLayerProps, SimpleMeshLayerProps} from '@deck.gl/mesh-lay
 
 import {type LayerProps, type NoInferProps, renderLayer} from './factories';
 
+/** Renders `ScenegraphLayer` from `@deck.gl/mesh-layers`; takes the layer's props. */
 export function ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}>(
   props: Partial<ScenegraphLayerProps<DataT>> & NoInferProps<Partial<ExtraPropsT>>
 ): ReactElement {
   return renderLayer(new DeckScenegraphLayer(props as LayerProps<typeof DeckScenegraphLayer>));
 }
 
+/** Renders `SimpleMeshLayer` from `@deck.gl/mesh-layers`; takes the layer's props. */
 export function SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}>(
   props: Partial<SimpleMeshLayerProps<DataT>> & NoInferProps<Partial<ExtraPropsT>>
 ): ReactElement {

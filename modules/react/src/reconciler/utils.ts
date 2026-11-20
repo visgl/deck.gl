@@ -66,7 +66,7 @@ export function isLayer(instance: unknown): instance is Layer {
  * reconciler tree structure. Optimized using accumulator pattern to avoid
  * O(N*D) allocations from recursive spreading.
  *
- * @param arr - Array of root Instance nodes to flatten
+ * @param roots - Array of root Instance nodes to flatten
  * @returns Flat array of all Layer and View nodes in depth-first order
  *
  * @example
@@ -83,22 +83,26 @@ export function isLayer(instance: unknown): instance is Layer {
  * // [layer1, layer2] - depth-first order
  * ```
  */
-export function flattenTree(arr: Instance[]): Instance['node'][] {
+export function flattenTree(roots: Instance[]): Instance['node'][] {
   // PERF: avoid-allocations.md - accumulator pattern instead of recursive spread
   // Issue: Recursive spread creates O(N*D) allocations for N nodes at depth D
   // Gain: 5-20x speedup for trees with 100+ nodes
   const result: Instance['node'][] = [];
 
+  /** Appends each instance's node, then its children's, skipping hidden subtrees. */
   function flatten(instances: Instance[]): void {
-    for (const val of instances) {
-      result.push(val.node);
-      if (val.children.length > 0) {
-        flatten(val.children);
+    for (const instance of instances) {
+      if (instance.hidden) {
+        continue;
+      }
+      result.push(instance.node);
+      if (instance.children.length > 0) {
+        flatten(instance.children);
       }
     }
   }
 
-  flatten(arr);
+  flatten(roots);
   return result;
 }
 
@@ -123,17 +127,17 @@ export function flattenTree(arr: Instance[]): Instance['node'][] {
 export function organizeList(list: Instance['node'][]) {
   // oxlint-disable-next-line unicorn/no-array-reduce
   return list.reduce<JsxDescriptors>(
-    (acc, curr) => {
-      if (isView(curr)) {
-        acc.views.push(curr);
-      } else if (isWidget(curr)) {
-        acc.widgets.push(curr);
-      } else if (isEffect(curr)) {
-        acc.effects.push(curr);
+    (descriptors, node) => {
+      if (isView(node)) {
+        descriptors.views.push(node);
+      } else if (isWidget(node)) {
+        descriptors.widgets.push(node);
+      } else if (isEffect(node)) {
+        descriptors.effects.push(node);
       } else {
-        acc.layers.push(curr);
+        descriptors.layers.push(node);
       }
-      return acc;
+      return descriptors;
     },
     {effects: [], layers: [], views: [], widgets: []}
   );
@@ -144,11 +148,17 @@ type RootWidgets = DeckProps<ViewOrViews>['widgets'];
 
 /** The root props that are combined with committed JSX descriptors. */
 interface RootDescriptorProps {
+  /** The root's `effects` prop. */
   _passedEffects?: Effect[];
+  /** The root's `layers` prop. */
   _passedLayers: LayersList;
+  /** The root's `views` prop. */
   _passedViews?: ViewOrViews;
+  /** The root's `widgets` prop. */
   _passedWidgets?: RootWidgets;
+  /** True when the root drives a map overlay instead of a standalone `Deck`. */
   isExternalOverlay?: boolean;
+  /** Sends JSX views to the external overlay. */
   forwardViews?: boolean;
 }
 
