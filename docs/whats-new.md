@@ -84,6 +84,10 @@ The `@deck.gl/react` module is now a deep React Fiber integration.
 
 - [Examples v10](/examples-v10) have been updated to use Arrow loading and SQL accessors.
 
+### @deck.gl/google-maps
+
+- `GoogleMapsOverlay` supports CSS `scale()` transforms on the map or its ancestors, including different horizontal and vertical scales. On raster maps the overlay stays aligned with the base map, and on raster and vector maps hover and click pick the object under the pointer.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
