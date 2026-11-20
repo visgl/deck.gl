@@ -30,4 +30,4 @@ This example loads the full website dataset with `GeoParquetLoader` from `@loade
 
 The 3,220 counties retain source order: migration map keys reference county row indices. Properties include `name`, `centroid`, and signed net `flows`.
 
-Standalone installations use deck.gl v10 and loaders.gl 5.0.0-beta.12; the package overrides keep the loader runtime aligned.
+Standalone installations use deck.gl v10 and loaders.gl 5.0.0-rc.1; the package overrides keep the loader runtime aligned.
