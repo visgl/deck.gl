@@ -59,9 +59,9 @@ _v10.0 should be thought of as a pre-release. We wanted to get the new capabilit
 
 The `@deck.gl/react` module is now a deep React Fiber integration.
 
-- [**React components**](./api-reference/react/overview.md) 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
+- **React components** 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
 - **Map integrations** 🚧 — Use dedicated React entry points for [Mapbox](./developer-guide/base-maps/using-with-mapbox.md), [MapLibre](./developer-guide/base-maps/using-with-maplibre.md), and [Google Maps](./developer-guide/base-maps/using-with-google-maps.md).
-- **Migration** — The previous React API is available from [`@deck.gl/react/legacy`](./api-reference/react/overview.md#deckglreactlegacy), so apps can move to it before the package root changes.
+- **Migration** — The previous React API is available from [`@deck.gl/react/legacy`](./api-reference/react/legacy/overview.md), so apps can move to it before the package root changes.
 
 ### Layers
 
@@ -367,7 +367,7 @@ Release date: October 7, 2025
   - [ThemeWidget](./api-reference/widgets/theme-widget.md)
   - [TimelineWidget](./api-reference/widgets/timeline-widget.md)
   - ViewSelectorWidget
-- Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package
+- Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/legacy/overview.md) package
 - Custom widgets in pydeck - via the `custom_libraries` parameter, Python users can integrate custom deck.gl widgets seamlessly
 - Documentation for styling and custom themes - see [Styling Widgets](./api-reference/widgets/styling)
 
@@ -439,8 +439,8 @@ deck.gl now works seamlessly with the MapLibre v5 [globe view](https://maplibre.
 ### React Widgets
 
 deck.gl v9.0 added support for widgets, with v9.1 users can now create React components with the same level of deep deck.gl integration. 
-- All the official deck.gl widgets can now be easily wrapped into React components with the new [`useWidget`](./api-reference/react/use-widget.md) hook.
-- Pre-wrapped React components for existing widget are available from the [`@deck.gl/react`](./api-reference/react/overview.md) package. 
+- All the official deck.gl widgets can now be easily wrapped into React components with the new [`useWidget`](./api-reference/react/legacy/use-widget.md) hook.
+- Pre-wrapped React components for existing widget are available from the [`@deck.gl/react`](./api-reference/react/legacy/overview.md) package. 
 - To try it out, check out our [React getting started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/basic) for using widgets in React.
 
 ##### Widgets Developer Guide
