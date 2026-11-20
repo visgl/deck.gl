@@ -130,6 +130,25 @@ test('first frame and changed coordinate system use identity; meter translation 
 });
 
 for (const LayerClass of [SimpleMeshLayer, ScenegraphLayer]) {
+  test(`${LayerClass.layerName} column inputs keep the original WGSL`, () => {
+    const device = new NullDevice({});
+    Object.defineProperty(device, 'type', {value: 'webgpu'});
+    Object.defineProperty(device.info, 'shadingLanguage', {value: 'wgsl'});
+    const layer = new LayerClass({_motionVectors: true} as never);
+    layer.context = {
+      device,
+      viewport: new Viewport({width: 64, height: 64}),
+      defaultShaderModules: [],
+      defaultShaderPlugins: [],
+      shaderAssembler: getShaderAssembler('wgsl')
+    } as never;
+    layer.state = {columns: {}} as never;
+    expect(layer.getShaders().source).toBe(
+      LayerClass === SimpleMeshLayer ? simpleSource : sceneSource
+    );
+    device.destroy();
+  });
+
   for (const enabled of [false, true]) {
     test(`${LayerClass.layerName} WGSL motion variant ${enabled}`, () => {
       const device = new NullDevice({});

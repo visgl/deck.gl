@@ -232,6 +232,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return Boolean(
       this.props._motionVectors &&
         this.context.device.type === 'webgpu' &&
+        !this.state?.columns &&
         !this.props.positions &&
         !this.props.colors &&
         !(this.props.scenegraph instanceof GroupNode)

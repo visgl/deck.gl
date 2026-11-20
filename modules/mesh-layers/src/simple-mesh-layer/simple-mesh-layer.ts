@@ -286,6 +286,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return Boolean(
       this.props._motionVectors &&
         this.context.device.type === 'webgpu' &&
+        !this.state?.columns &&
         !this.props.positions &&
         !this.props.colors
     );
@@ -414,6 +415,10 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   updateState(params: UpdateParameters<this>) {
+    if (!params.props._motionVectors || params.props.positions || params.props.colors) {
+      this.state.motionVectors?.destroy();
+      this.state.motionVectors = null;
+    }
     const {mesh} = params.props;
     if (mesh instanceof GPUVectorGeometry && mesh !== params.oldProps.mesh) {
       validateMeshChunks(mesh);
@@ -423,10 +428,6 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       return;
     }
     const restored = this.restoreAccessorState();
-    if (!params.props._motionVectors || params.props.positions || params.props.colors) {
-      this.state.motionVectors?.destroy();
-      this.state.motionVectors = null;
-    }
     super.updateState(params);
 
     const {props, oldProps, changeFlags} = params;

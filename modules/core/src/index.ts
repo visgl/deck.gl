@@ -187,7 +187,6 @@ export {
 } from './shaderlib/path/path-uniforms';
 
 export type {TemporalProps, TemporalFrame} from './lib/temporal';
-export {default as _VelocityPass} from './passes/velocity-pass';
 
 export {velocity as _velocity} from './shaderlib/velocity/velocity';
 export {default as _MotionVectors} from './lib/motion-vectors';

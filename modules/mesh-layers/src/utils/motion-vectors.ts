@@ -30,7 +30,7 @@ export function withMotionVectors(source: string, scenegraph: boolean): string {
   @location(${varyingLocation + 1}) currentClip: vec4<f32>,
   @invariant @builtin(position) position:`
   );
-  // Reuse the current mesh offset. Instance rotation/scale and glTF animation are not tracked.
+  // Reuse the current mesh offset. Instance rotation, scale and scenegraph animation are not tracked.
   const previous = `
   var previousCommon: vec4<f32>;
   if (${module}.composeModelMatrix > 0.5) {

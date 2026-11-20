@@ -979,8 +979,7 @@ its settings are unchanged. Jitter affects shader projection only; viewport
 projection/unprojection and picking remain unjittered. The jitter sequence uses the
 FSR 2 phase-count rule, based on the actual rounded render width.
 
-`TemporalProps`, `TemporalFrame`, and the experimental `_VelocityPass` are exported
-from `@deck.gl/core`.
+`TemporalProps` and `TemporalFrame` are exported from `@deck.gl/core`.
 
 Set `_motionVectors: true` on `SimpleMeshLayer` or `ScenegraphLayer` to track
 instance position changes on WebGPU. The default is `false`. Unset props leave
@@ -1007,7 +1006,7 @@ orientation, scale, mesh deformation, and scenegraph animation. It copies previo
 positions on the GPU after all object views draw. Reallocation or layout changes
 reset previous positions to current positions. Constant attributes use their
 one-row GPU buffer. External buffers require `COPY_SRC` and a byte length divisible by four; otherwise previous
-equals current. Arrow column inputs and prebuilt `GroupNode` scenegraphs do not opt into this prototype.
+equals current. Column inputs and prebuilt `GroupNode` scenegraphs do not use object velocity.
 Layers with any extensions or `opacity < 1` are skipped and use camera-only velocity.
 Alpha-cutout materials are not tracked. Pixels with previous or current clip `w <= 0`
 produce no object result and fall back to camera-only velocity.
