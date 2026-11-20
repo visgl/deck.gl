@@ -913,7 +913,8 @@ Requires at least one effect with a `postRender` method and at least one viewpor
 Picking does not use temporal inputs.
 
 - `jitter` (boolean, default `true`): Halton(2,3) sub-pixel projection jitter
-- `velocity` (boolean, default `true`): camera-motion velocity texture on WebGPU
+- `velocity` (boolean, default `true`): velocity texture on WebGPU
+- `objectVelocity` (boolean, default `true`): include opted-in object motion
 - `renderScale` (number, default `1`): scene target scale in `(0, 1]`
 
 ```typescript
@@ -930,7 +931,8 @@ Invalid scales fall back to `1`; values above `1` are clamped to `1`.
 
 Effects receive `options.temporal`, typed as `TemporalFrame`, in `preRender` and
 `postRender`. It contains `frameIndex`, `renderScale`, `renderSize`, `outputSize`,
-`jitter` (render pixels), `jitterClip` (NDC), `phaseCount`, and `reset`.
+`jitter` (render pixels), `jitterClip` (NDC), `phaseCount`, `targetId`, `objectVelocity`, and `reset`.
+`objectVelocity` reports whether the object pass ran.
 `depthTexture` and `velocityTexture` are initially `null` in `preRender`, and populated
 before `postRender`. Treat these textures as renderer-owned, valid for the current
 frame only. `velocityTexture` remains `null` when disabled or unsupported (including
@@ -940,8 +942,7 @@ UV coordinates start at the top left, with positive X right and positive Y down.
 Depth is non-reversed device depth: near = 0, far = 1. The render-size `rgba16float`
 velocity texture stores unjittered `previousUV - currentUV` in XY, one minus the expected
 previous device depth in Z, and validity in W. Background pixels and pixels without history
-have W = 0. Camera motion is supported for static geometry; animated objects are
-not tracked. Changing the projection coordinate system also requires a history reset.
+have W = 0. Changing the projection coordinate system also requires a history reset.
 
 History resets on activation, target resize, viewport set or rectangle changes, and
 changes to `_temporal`. Supply a new `_temporal` object after a camera cut, even if
@@ -951,3 +952,52 @@ FSR 2 phase-count rule, based on the actual rounded render width.
 
 `TemporalProps`, `TemporalFrame`, and the experimental `_VelocityPass` are exported
 from `@deck.gl/core`.
+
+Set `_motionVectors: true` on `SimpleMeshLayer` or `ScenegraphLayer` to track
+instance position changes on WebGPU. The default is `false`. Unset props leave
+layer shader sources and scene draws unchanged. Set `objectVelocity: false` to
+compare against camera-only motion. TripsLayer fades static path geometry; its
+geometry has no object motion, so it does not offer this opt-in.
+
+The object pass draws opted-in visible layers again with the scene jitter and scale.
+It shares scene depth, tests less-or-equal, disables blending, and does not write depth.
+The shader variant marks its position output invariant and preserves the scene
+position expression. Separate unjittered matrices compute motion.
+A separate pass avoids MRT: WebGPU pipelines must declare every render-pass colour
+target, and every fragment shader must write it. MRT would change all layer shaders
+and require luma.gl per-target write-mask support.
+
+The intermediate target uses the device's preferred `rgba8unorm` or `bgra8unorm`
+format. It packs each component into 16 bits, reserving zero X for empty pixels.
+Motion clamps to ±0.5 viewport UV per frame, with a step of `0.5 / 32767`.
+The merge converts viewport UV to texture UV. Object pixels store
+`1 - current device depth` in Z as an approximation of previous depth.
+
+This prototype tracks instance translation only. It reuses current instance
+orientation, scale, mesh deformation, and scenegraph animation. It copies previous
+positions on the GPU after all object views draw. Reallocation or layout changes
+reset previous positions to current positions. Constant attributes use their
+one-row GPU buffer. External buffers require `COPY_SRC` and a byte length divisible by four; otherwise previous
+equals current. Arrow column inputs and prebuilt `GroupNode` scenegraphs do not opt into this prototype.
+Layers with any extensions or `opacity < 1` are skipped and use camera-only velocity.
+Alpha-cutout materials are not tracked. Pixels with previous or current clip `w <= 0`
+produce no object result and fall back to camera-only velocity.
+
+Rigid layer transforms use an affine delta. METER_OFFSETS and CARTESIAN in Mercator
+use the local linear distance scale; the second-order latitude term is ignored,
+so this is an approximation. Longitude/latitude and longitude/latitude-offset
+`modelMatrix` changes use identity delta. Globe and custom projections use camera-only velocity. A first observation or coordinate-system change also
+uses identity delta. Transparent surfaces cannot be represented by one velocity
+per pixel.
+
+Each explicit framebuffer or canvas context has independent temporal history and
+two scene buffers. Effects can key history by `targetId`. Resize resets only that
+target. The renderer releases states after 120 unused render calls and releases all
+states on finalization. Position history supports **one temporal target per layer**:
+the first object target owns it; other targets use camera-only velocity for that layer.
+Ownership is released when the target stops drawing the layer with object velocity.
+
+Overlapping viewport rectangles disable temporal inputs for that target. The
+renderer warns once per target and names the views. It renders without jitter,
+scaling, or velocity and passes no `options.temporal` to effects. Touching edges
+do not overlap. Removing overlap re-enables temporal inputs with `reset: true`.

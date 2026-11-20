@@ -69,6 +69,8 @@ async function runVelocityPassTest(device: Device): Promise<void> {
   device.submit();
   const velocityPass = new VelocityPass(device);
   const frame: TemporalFrame = {
+    targetId: 'test',
+    objectVelocity: false,
     frameIndex: 0,
     renderScale: 1,
     renderSize: [8, 8],

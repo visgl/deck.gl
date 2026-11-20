@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {_velocity as velocity, _MotionVectors as MotionVectors} from '@deck.gl/core';
 import {
   Layer,
   project32,
@@ -34,6 +35,7 @@ import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 import {scenegraphUniforms, ScenegraphProps} from './scenegraph-layer-uniforms';
 import vs from './scenegraph-layer-vertex.glsl';
 import fs from './scenegraph-layer-fragment.glsl';
+import {withMotionVectors, withMotionVectorLayout} from '../utils/motion-vectors';
 import source from './scenegraph-layer.wgsl';
 import {scenegraphPbrMaterial} from './scenegraph-pbr-material';
 
@@ -55,6 +57,8 @@ const DEFAULT_COLOR = [255, 255, 255, 255] as const;
 export type ScenegraphLayerProps<DataT = unknown> = _ScenegraphLayerProps<DataT> & LayerProps;
 
 type _ScenegraphLayerProps<DataT> = {
+  /** Experimental WebGPU translation motion vectors. Default false. */
+  _motionVectors?: boolean;
   data: LayerDataSource<DataT>;
   // TODO - define in luma.gl
   /**
@@ -159,6 +163,7 @@ type _ScenegraphLayerProps<DataT> = {
 };
 
 const defaultProps: DefaultProps<ScenegraphLayerProps> = {
+  _motionVectors: false,
   scenegraph: {type: 'object', value: null, async: true},
   getScene: gltf => {
     if (gltf && gltf.scenes) {
@@ -205,6 +210,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   static layerName = 'ScenegraphLayer';
 
   state!: {
+    motionVectors?: MotionVectors | null;
     columns?: LayerColumns;
     scenegraph: GroupNode | null;
     animator: GLTFAnimator | null;
@@ -212,6 +218,16 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     models: Model[];
     firstDrawSignaled: boolean;
   } & Layer['state'];
+
+  private get motionVectorsEnabled(): boolean {
+    return Boolean(
+      this.props._motionVectors &&
+        this.context.device.type === 'webgpu' &&
+        !this.props.positions &&
+        !this.props.colors &&
+        !(this.props.scenegraph instanceof GroupNode)
+    );
+  }
 
   getShaders() {
     const defines: {LIGHTING_PBR?: 1} = {};
@@ -237,8 +253,21 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       pbr = {name: 'pbrMaterial'};
     }
 
-    const modules = [project32, color, picking, scenegraphUniforms, pbr];
-    return super.getShaders({defines, vs, fs, source, modules});
+    const modules = [
+      project32,
+      color,
+      picking,
+      scenegraphUniforms,
+      pbr,
+      ...(this.motionVectorsEnabled ? [velocity] : [])
+    ];
+    return super.getShaders({
+      defines,
+      vs,
+      fs,
+      source: this.motionVectorsEnabled ? withMotionVectors(source, true) : source,
+      modules
+    });
   }
 
   initializeState() {
@@ -266,12 +295,19 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   updateState(params: UpdateParameters<this>) {
+    if (!params.props._motionVectors || params.props.positions || params.props.colors) {
+      this.state.motionVectors?.destroy();
+      this.state.motionVectors = null;
+    }
     super.updateState(params);
     const {props, oldProps} = params;
 
     this.updateColumns(params);
 
-    if (props.scenegraph !== oldProps.scenegraph) {
+    if (
+      props.scenegraph !== oldProps.scenegraph ||
+      (props._motionVectors !== oldProps._motionVectors && !(props.scenegraph instanceof GroupNode))
+    ) {
       this._updateScenegraph();
     } else if (props._animations !== oldProps._animations) {
       this._applyAnimationsProp(this.state.animator, props._animations);
@@ -279,6 +315,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   finalizeState(context: LayerContext) {
+    this.state.motionVectors?.destroy();
     this.state.columns?.destroy();
     super.finalizeState(context);
     this._destroyScenegraphAssets();
@@ -480,7 +517,10 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         id: this.props.id,
         isInstanced: true,
         bufferLayout:
-          this.state.columns?.getBufferLayouts() ?? this.getAttributeManager()!.getBufferLayouts(),
+          this.state.columns?.getBufferLayouts() ??
+          (this.motionVectorsEnabled
+            ? withMotionVectorLayout(this.getAttributeManager()!.getBufferLayouts())
+            : this.getAttributeManager()!.getBufferLayouts()),
         parameters,
         ...this.getShaders()
       },
@@ -535,6 +575,14 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
             model.shaderInputs.setProps({scenegraph: {rowIndexOffset: offset}});
           });
         } else {
+          if (this.motionVectorsEnabled) {
+            this.state.motionVectors ||= new MotionVectors();
+            this.state.motionVectors.bind(
+              model,
+              this.getAttributeManager()!.getAttributes().instancePositions,
+              this.getNumInstances()
+            );
+          }
           model.draw(renderPass);
         }
       }

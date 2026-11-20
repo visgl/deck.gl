@@ -6,7 +6,7 @@ import {test, expect, vi} from 'vitest';
 import {NullDevice} from '@luma.gl/core/test-utils';
 import {Texture} from '@luma.gl/core';
 import type {CanvasContext} from '@luma.gl/core';
-import {Viewport} from '@deck.gl/core';
+import {Viewport, log} from '@deck.gl/core';
 import DeckRenderer from '@deck.gl/core/lib/deck-renderer';
 import type {Effect} from '@deck.gl/core/lib/effect';
 import type {LayersPassRenderOptions} from '@deck.gl/core/passes/layers-pass';
@@ -239,5 +239,146 @@ test('DeckRenderer temporal sizes follow an explicit target and round up', () =>
   expect(frames[1].temporal!.outputSize).toEqual([200, 100]);
   expect(frames[1].temporal!.renderSize).toEqual([150, 75]);
   renderer.finalize();
+  device.destroy();
+});
+
+test('temporal targets retain independent counters, buffers, resize and overlap recovery', () => {
+  const device = new NullDevice({});
+  const renderer = new DeckRenderer(device);
+  vi.spyOn(renderer.drawLayersPass, 'render').mockReturnValue([]);
+  const createFramebuffer = device.createFramebuffer.bind(device);
+  vi.spyOn(device, 'createFramebuffer').mockImplementation(props => {
+    const buffer = createFramebuffer(props);
+    (buffer as any).autoCreateAttachmentTextures();
+    return buffer;
+  });
+  let width = 80;
+  const context = () =>
+    ({
+      getDrawingBufferSize: () => [width, 40],
+      cssToDeviceRatio: () => 1,
+      getCurrentFramebuffer: () => null
+    }) as unknown as CanvasContext;
+  const a = context();
+  const b = {...context(), getDrawingBufferSize: () => [120, 60]} as CanvasContext;
+  const frames: any[] = [];
+  const options = {
+    pass: 'screen',
+    layers: [],
+    views: {},
+    viewports: [new Viewport({id: 'main', width: 40, height: 20})],
+    onViewportActive() {},
+    effects: [
+      {
+        id: 'test',
+        props: {},
+        setup() {},
+        cleanup() {},
+        preRender() {},
+        postRender(opts) {
+          frames.push(opts);
+          return opts.inputBuffer;
+        }
+      } as Effect
+    ]
+  };
+  renderer.setProps({layerFilter: null, drawPickingColors: false, _temporal: {}});
+  for (const canvasContext of [a, b, a, b]) renderer.renderLayers({...options, canvasContext});
+  expect(frames.map(f => f.temporal.frameIndex)).toEqual([0, 0, 1, 1]);
+  expect(frames.map(f => f.temporal.reset)).toEqual([true, true, false, false]);
+  expect(frames[0].temporal.targetId).toBe(frames[2].temporal.targetId);
+  expect(frames[0].temporal.targetId).not.toBe(frames[1].temporal.targetId);
+  expect(frames[0].inputBuffer).toBe(frames[2].inputBuffer);
+  expect(frames[0].inputBuffer).not.toBe(frames[1].inputBuffer);
+  width = 100;
+  renderer.renderLayers({...options, canvasContext: a});
+  renderer.renderLayers({...options, canvasContext: b});
+  expect(frames[4].temporal.reset).toBe(true);
+  expect(frames[5].temporal.reset).toBe(false);
+  const warn = vi.spyOn(log, 'warn');
+  renderer.renderLayers({
+    ...options,
+    canvasContext: a,
+    viewports: [...options.viewports, new Viewport({id: 'inset', x: 1, y: 1, width: 5, height: 5})]
+  });
+  expect(frames[6].temporal).toBeUndefined();
+  // The same overlap in the next frame gives no second warning.
+  renderer.renderLayers({
+    ...options,
+    canvasContext: a,
+    viewports: [...options.viewports, new Viewport({id: 'inset', x: 1, y: 1, width: 5, height: 5})]
+  });
+  expect(frames[7].temporal).toBeUndefined();
+  expect(warn).toHaveBeenCalledTimes(1);
+  expect(warn.mock.calls[0][0]).toContain('main');
+  expect(warn.mock.calls[0][0]).toContain('inset');
+  warn.mockRestore();
+  renderer.renderLayers({...options, canvasContext: a});
+  expect(frames[8].temporal.reset).toBe(true);
+  expect(frames[8].temporal.frameIndex).toBe(0);
+  renderer.finalize();
+  device.destroy();
+});
+
+test('default targets share canvas-sized buffers; picking never creates temporal state', () => {
+  const device = new NullDevice({});
+  const renderer = new DeckRenderer(device);
+  vi.spyOn(renderer.drawLayersPass, 'render').mockReturnValue([]);
+  vi.spyOn(renderer.pickLayersPass, 'render').mockReturnValue({
+    stats: [],
+    decodePickingColor: null
+  });
+  let width = 80;
+  const pairs: any[] = [];
+  const options = {
+    pass: 'screen',
+    layers: [],
+    views: {},
+    viewports: [new Viewport({width: 40, height: 20})],
+    onViewportActive() {},
+    canvasContext: {
+      getDrawingBufferSize: () => [width, 40],
+      cssToDeviceRatio: () => 1,
+      getCurrentFramebuffer: () => null
+    } as unknown as CanvasContext,
+    effects: [
+      {
+        id: 'test',
+        props: {},
+        setup() {},
+        cleanup() {},
+        preRender() {},
+        postRender(opts) {
+          pairs.push([opts.inputBuffer, opts.swapBuffer]);
+          expect([opts.inputBuffer.width, opts.inputBuffer.height]).toEqual([width, 40]);
+          return opts.inputBuffer;
+        }
+      } as Effect
+    ]
+  };
+  const targets = [20, 30].map(size =>
+    device.createFramebuffer({
+      width: size,
+      height: size,
+      colorAttachments: ['rgba8unorm']
+    })
+  );
+  for (const target of [targets[0], targets[1], undefined, targets[0], undefined]) {
+    renderer.renderLayers({...options, target});
+    width += 10;
+  }
+  for (const pair of pairs) {
+    expect(pair[0]).toBe(pairs[0][0]);
+    expect(pair[1]).toBe(pairs[0][1]);
+  }
+  expect((renderer as any).targetStates.size).toBe(0);
+  renderer.setProps({layerFilter: null, drawPickingColors: false, _temporal: {}});
+  renderer.renderLayers({...options, target: targets[0], isPicking: true});
+  expect((renderer as any).targetStates.size).toBe(0);
+  renderer.setProps({layerFilter: null, drawPickingColors: true, _temporal: {}});
+  renderer.renderLayers({...options, target: targets[1]});
+  expect((renderer as any).targetStates.size).toBe(0);
+  renderer.finalize();
+  targets.forEach(target => target.destroy());
   device.destroy();
 });

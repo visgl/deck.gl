@@ -534,6 +534,7 @@ export default class LayersPass extends Pass {
     const layerProps = layer.internalState?.propsInTransition || layer.props;
 
     const shaderModuleProps = {
+      ...(layer.state?.motionVectors ? {velocity: {isActive: 0}} : {}),
       layer: layerProps,
       picking: {
         isActive: false

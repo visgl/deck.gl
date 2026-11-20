@@ -22,6 +22,7 @@ struct VelocityUniforms {
 };
 @group(0) @binding(auto) var<uniform> velocity: VelocityUniforms;
 @group(0) @binding(auto) var sceneDepth: texture_depth_2d;
+@group(0) @binding(auto) var objectVelocity: texture_2d<f32>;
 `,
   uniformTypes: {
     reprojection: 'mat4x4<f32>',
@@ -35,6 +36,16 @@ const source = /* wgsl */ `
 @fragment
 fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
   let depth = textureLoad(sceneDepth, vec2<i32>(inputs.Position.xy), 0);
+  let objectSize = vec2<i32>(textureDimensions(objectVelocity));
+  let packed = vec4<u32>(round(textureLoad(objectVelocity,
+    min(vec2<i32>(inputs.Position.xy), objectSize - vec2<i32>(1)), 0) * 255.0));
+  let x = packed.r * 256u + packed.g;
+  if (x != 0u) {
+    let y = packed.b * 256u + packed.a;
+    let displacement = (vec2<f32>(f32(x), f32(y)) - 32768.0) / 32767.0 * 0.5;
+    return vec4<f32>(displacement * velocity.rect.zw / vec2<f32>(textureDimensions(sceneDepth)),
+                     1.0 - depth, 1.0);
+  }
   if (velocity.valid == 0.0 || depth >= 1.0) {
     return vec4<f32>(0.0);
   }
@@ -58,13 +69,14 @@ fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
 type History = {matrix: Matrix4; width: number; height: number};
 
 /**
- * WebGPU camera-motion velocity for a static scene. Animated objects and changing
- * projection coordinate systems are not tracked. WebGL returns no velocity texture.
+ * WebGPU camera-motion velocity with an optional packed object-motion override.
+ * WebGL returns no velocity texture.
  */
 export default class VelocityPass {
   private device: Device;
   private model: ClipSpace | null = null;
   private framebuffer: Framebuffer | null = null;
+  private zeroTexture: Texture | null = null;
   private history = new Map<string, History>();
 
   /** Creates resources lazily on the first supported render. */
@@ -78,13 +90,24 @@ export default class VelocityPass {
   }
 
   /** Writes render-size velocity; pixels outside the viewports remain invalid. */
-  render(frame: TemporalFrame, viewports: Viewport[], devicePixelRatio: number): Texture | null {
+  render(
+    frame: TemporalFrame,
+    viewports: Viewport[],
+    devicePixelRatio: number,
+    objectTexture: Texture | null = null
+  ): Texture | null {
     if (
       this.device.type !== 'webgpu' ||
       !this.device.isTextureFormatRenderable('rgba16float') ||
       !frame.depthTexture
     )
       return null;
+    this.zeroTexture ||= this.device.createTexture({
+      width: 1,
+      height: 1,
+      format: 'rgba8unorm',
+      data: new Uint8Array(4)
+    });
     const [width, height] = frame.renderSize;
     if (!this.model) {
       this.model = new ClipSpace(this.device, {
@@ -138,7 +161,10 @@ export default class VelocityPass {
           valid: valid ? 1 : 0
         }
       });
-      this.model.setBindings({sceneDepth: frame.depthTexture});
+      this.model.setBindings({
+        sceneDepth: frame.depthTexture,
+        objectVelocity: objectTexture || this.zeroTexture
+      });
       // Include pixels whose centers fall inside the scene viewport.
       const left = Math.max(0, Math.ceil(rect[0] - 0.5));
       const top = Math.max(0, Math.ceil(rect[1] - 0.5));
@@ -172,6 +198,8 @@ export default class VelocityPass {
 
   /** Destroys all owned GPU resources and history. */
   delete(): void {
+    this.zeroTexture?.destroy();
+    this.zeroTexture = null;
     this.model?.destroy();
     this.framebuffer?.destroy();
     this.model = null;

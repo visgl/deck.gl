@@ -4,6 +4,8 @@
 
 import {Matrix4} from '@math.gl/core';
 import type {Matrix4Like} from '@math.gl/core';
+import {PROJECTION_MODE} from '../shaderlib/project/constants';
+import {getUniformsFromViewport} from '../shaderlib/project/viewport-uniforms';
 
 /** Radical inverse used by the temporal jitter sequence. */
 export function halton(index: number, base: number): number {
@@ -55,4 +57,88 @@ export function getTemporalViewportRect(
     viewport.width * pixelRatio,
     viewport.height * pixelRatio
   ];
+}
+
+/** Returns the first overlapping pair after clipping viewport rectangles to the render target. */
+export function findTemporalViewportOverlap(
+  viewports: {id: string; x: number; y: number; width: number; height: number}[],
+  pixelRatio: number,
+  size: [number, number]
+): [string, string] | null {
+  const rectangles = viewports.map(viewport => {
+    const [x, y, width, height] = getTemporalViewportRect(viewport, pixelRatio);
+    return [
+      Math.max(0, x),
+      Math.max(0, y),
+      Math.min(size[0], x + width),
+      Math.min(size[1], y + height)
+    ];
+  });
+  for (let i = 0; i < rectangles.length; i++) {
+    for (let j = i + 1; j < rectangles.length; j++) {
+      const a = rectangles[i];
+      const b = rectangles[j];
+      if (
+        Math.max(a[0], b[0]) < Math.min(a[2], b[2]) &&
+        Math.max(a[1], b[1]) < Math.min(a[3], b[3])
+      ) {
+        return [viewports[i].id, viewports[j].id];
+      }
+    }
+  }
+  return null;
+}
+
+/** Converts relative common coordinates to unjittered clip space, composing in float64. */
+export function getClipFromCommon(
+  viewProjection: Matrix4Like | number[],
+  commonOrigin: readonly number[],
+  layerDelta: Matrix4 = new Matrix4()
+): Matrix4 {
+  return new Matrix4(viewProjection).multiplyRight(layerDelta).translate(commonOrigin);
+}
+
+/** Snapshot of a layer's rigid transform, copied after drawing an object pass. */
+export type LayerTransform = {
+  coordinateSystem: import('../lib/constants').CoordinateSystem;
+  coordinateOrigin: [number, number, number];
+  modelMatrix: Matrix4;
+};
+
+/**
+ * Affine rigid motion. METER_OFFSETS and CARTESIAN in Mercator use the local linear
+ * distance scale; the second-order latitude term is ignored.
+ */
+export function getLayerMotionDelta(
+  viewport: import('../viewports/viewport').default,
+  current: LayerTransform,
+  previous?: LayerTransform
+): Matrix4 {
+  if (!previous || current.coordinateSystem !== previous.coordinateSystem) return new Matrix4();
+  const system = current.coordinateSystem;
+  if (
+    system !== 'cartesian' &&
+    system !== 'meter-offsets' &&
+    !(system === 'default' && !viewport.isGeospatial)
+  )
+    return new Matrix4();
+  const affine = (transform: LayerTransform): Matrix4 => {
+    if (system === 'meter-offsets') {
+      return new Matrix4()
+        .translate(viewport.projectPosition(transform.coordinateOrigin))
+        .scale(viewport.getDistanceScales(transform.coordinateOrigin).unitsPerMeter)
+        .multiplyRight(transform.modelMatrix);
+    }
+    const uniforms = getUniformsFromViewport({viewport, ...transform});
+    // Recover the affine translation from the shader's origin convention.
+    const scale = uniforms.commonUnitsPerWorldUnit;
+    const offset = uniforms.commonOrigin.map(
+      (value, i) => value - uniforms.coordinateOrigin[i] * scale[i]
+    );
+    if (viewport.projectionMode === PROJECTION_MODE.WEB_MERCATOR) {
+      for (let i = 0; i < 3; i++) offset[i] = uniforms.coordinateOrigin[i] * scale[i];
+    }
+    return new Matrix4().translate(offset).scale(scale).multiplyRight(transform.modelMatrix);
+  };
+  return affine(previous).multiplyRight(affine(current).invert());
 }

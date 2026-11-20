@@ -6,8 +6,14 @@ import type {CanvasContext, Device, PresentationContext} from '@luma.gl/core';
 import {Framebuffer, Texture} from '@luma.gl/core';
 import type {TemporalProps, TemporalFrame} from './temporal';
 import VelocityPass from '../passes/velocity-pass';
-import {getTemporalJitter, getJitterPhaseCount} from '../passes/temporal-utils';
+import ObjectVelocityPass from '../passes/object-velocity-pass';
+import {
+  getTemporalJitter,
+  getJitterPhaseCount,
+  findTemporalViewportOverlap
+} from '../passes/temporal-utils';
 import debug from '../debug/index';
+import log from '../utils/log';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
 import type {RenderStats} from '../passes/layers-pass';
@@ -22,6 +28,18 @@ const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 
 type LayerFilter = ((context: FilterContext) => boolean) | null;
 
+type TargetState = {
+  id: string;
+  frameIndex: number;
+  key: string;
+  buffers: Framebuffer[];
+  temporalBuffers: boolean;
+  velocityPass: VelocityPass | null;
+  objectVelocityPass: ObjectVelocityPass | null;
+  lastUsed: number;
+  overlapWarned: boolean;
+};
+
 export default class DeckRenderer {
   device: Device;
   layerFilter: LayerFilter;
@@ -32,10 +50,9 @@ export default class DeckRenderer {
 
   private temporalProps: TemporalProps | null = null;
   private temporalPropsSource: TemporalProps | null = null;
-  private temporalFrameIndex = 0;
-  private temporalKey = '';
-  private temporalBuffers = false;
-  private velocityPass: VelocityPass | null = null;
+  private targetStates = new Map<object, TargetState>();
+  private nextTargetId = 0;
+  private targetState!: TargetState;
   private renderCount: number;
   private _needsRedraw: string | false;
   private renderBuffers: Framebuffer[];
@@ -64,13 +81,24 @@ export default class DeckRenderer {
       temporal !== this.temporalPropsSource ||
       temporal?.jitter !== this.temporalProps?.jitter ||
       temporal?.velocity !== this.temporalProps?.velocity ||
+      temporal?.objectVelocity !== this.temporalProps?.objectVelocity ||
       temporal?.renderScale !== this.temporalProps?.renderScale
     ) {
       this.temporalPropsSource = temporal;
       this.temporalProps = temporal && {...temporal};
-      this.temporalFrameIndex = 0;
-      this.temporalKey = '';
-      this.velocityPass?.reset();
+      for (const state of this.targetStates.values()) {
+        state.frameIndex = 0;
+        state.key = '';
+        state.velocityPass?.reset();
+        state.objectVelocityPass?.reset();
+        if (!temporal || temporal.velocity === false || temporal.objectVelocity === false) {
+          state.objectVelocityPass?.release();
+        }
+      }
+      if (!temporal) {
+        for (const state of this.targetStates.values()) this._deleteTarget(state);
+        this.targetStates.clear();
+      }
       this._needsRedraw = '_temporal changed';
     }
     if (this.layerFilter !== props.layerFilter) {
@@ -99,6 +127,7 @@ export default class DeckRenderer {
     clearStack?: boolean;
     clearCanvas?: boolean;
   }) {
+    this.targetState = undefined!;
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
 
     const renderOpts: LayersPassRenderOptions = {
@@ -116,9 +145,22 @@ export default class DeckRenderer {
       this.lastPostProcessEffect &&
       opts.viewports.length
     ) {
+      this._selectTarget(
+        opts.target || opts.canvasContext || this.device.canvasContext || this.device
+      );
       this._prepareTemporalFrame(renderOpts);
     } else {
-      this.temporalKey = '';
+      const state =
+        this.temporalProps &&
+        this.targetStates.get(
+          opts.target || opts.canvasContext || this.device.canvasContext || this.device
+        );
+      if (state) {
+        state.key = '';
+        if (!this.drawPickingColors && !renderOpts.isPicking) {
+          state.objectVelocityPass?.release();
+        }
+      }
     }
 
     if (!opts.viewports.length) {
@@ -132,7 +174,9 @@ export default class DeckRenderer {
       this._preRender(renderOpts.effects, renderOpts);
     }
 
-    const outputBuffer = this.lastPostProcessEffect ? this.renderBuffers[0] : renderOpts.target;
+    const outputBuffer = this.lastPostProcessEffect
+      ? (this.targetState?.buffers || this.renderBuffers)[0]
+      : renderOpts.target;
 
     if (this.lastPostProcessEffect) {
       renderOpts.clearColor = [0, 0, 0, 0];
@@ -144,15 +188,22 @@ export default class DeckRenderer {
     if (renderOpts.temporal) {
       renderOpts.temporal.depthTexture = outputBuffer?.depthStencilAttachment?.texture ?? null;
       if (this.temporalProps?.velocity !== false) {
-        this.velocityPass ||= new VelocityPass(this.device);
-        renderOpts.temporal.velocityTexture = this.velocityPass.render(
+        let objectTexture: Texture | null = null;
+        if (this.temporalProps?.objectVelocity !== false && this.device.type === 'webgpu') {
+          this.targetState.objectVelocityPass ||= new ObjectVelocityPass(this.device);
+          objectTexture = this.targetState.objectVelocityPass.renderVelocity(renderOpts);
+        }
+        renderOpts.temporal.objectVelocity = Boolean(objectTexture);
+        this.targetState.velocityPass ||= new VelocityPass(this.device);
+        renderOpts.temporal.velocityTexture = this.targetState.velocityPass.render(
           renderOpts.temporal,
           opts.viewports,
           (opts.canvasContext || this.device.canvasContext!).cssToDeviceRatio() *
-            renderOpts.temporal.renderScale
+            renderOpts.temporal.renderScale,
+          objectTexture
         );
       }
-      this.temporalFrameIndex++;
+      this.targetState.frameIndex++;
     }
 
     if (renderOpts.effects) {
@@ -179,12 +230,47 @@ export default class DeckRenderer {
   }
 
   finalize() {
-    this.velocityPass?.delete();
+    for (const state of this.targetStates.values()) this._deleteTarget(state);
+    this.targetStates.clear();
     const {renderBuffers} = this;
     for (const buffer of renderBuffers) {
       buffer.delete();
     }
     renderBuffers.length = 0;
+  }
+
+  private _deleteTarget(state: TargetState): void {
+    state.velocityPass?.delete();
+    state.objectVelocityPass?.delete();
+    for (const buffer of state.buffers) buffer.destroy();
+    state.buffers.length = 0;
+  }
+
+  private _selectTarget(target: object): void {
+    for (const [key, state] of this.targetStates) {
+      if (this.renderCount - state.lastUsed > 120) {
+        this._deleteTarget(state);
+        this.targetStates.delete(key);
+      }
+    }
+    let state = this.targetStates.get(target);
+    if (!state) {
+      state = {
+        id: `temporal-target-${this.nextTargetId++}`,
+        frameIndex: 0,
+        key: '',
+        buffers: this.targetStates.size ? [] : this.renderBuffers,
+        temporalBuffers: false,
+        velocityPass: null,
+        objectVelocityPass: null,
+        lastUsed: this.renderCount,
+        overlapWarned: false
+      };
+      if (!this.targetStates.size) this.renderBuffers = [];
+      this.targetStates.set(target, state);
+    }
+    state.lastUsed = this.renderCount;
+    this.targetState = state;
   }
 
   private _updateStats(source: RenderStats[]) {
@@ -225,23 +311,42 @@ export default class DeckRenderer {
       Math.max(1, Math.ceil(outputSize[0] * renderScale)),
       Math.max(1, Math.ceil(outputSize[1] * renderScale))
     ];
+    const overlap = findTemporalViewportOverlap(
+      opts.viewports,
+      canvasContext.cssToDeviceRatio() * renderScale,
+      renderSize
+    );
+    if (overlap) {
+      if (!this.targetState.overlapWarned) {
+        log.warn(`Temporal views overlap: ${overlap[0]}, ${overlap[1]}`)();
+        this.targetState.overlapWarned = true;
+      }
+      this.targetState.key = '';
+      this.targetState.frameIndex = 0;
+      this.targetState.objectVelocityPass?.release();
+      opts.temporal = undefined;
+      return;
+    }
     const key = JSON.stringify([
       outputSize,
       renderSize,
       renderScale,
       opts.viewports.map(({id, x, y, width, height}) => [id, x, y, width, height])
     ]);
+    if (key !== this.targetState.key) this.targetState.frameIndex = 0;
     const phaseCount = getJitterPhaseCount(outputSize[0], renderSize[0]);
     const jitter: [number, number] =
       this.temporalProps?.jitter === false
         ? [0, 0]
-        : getTemporalJitter(this.temporalFrameIndex, phaseCount);
+        : getTemporalJitter(this.targetState.frameIndex, phaseCount);
     const jitterClip: [number, number] = [
       (2 * jitter[0]) / renderSize[0],
       (-2 * jitter[1]) / renderSize[1]
     ];
     opts.temporal = {
-      frameIndex: this.temporalFrameIndex,
+      targetId: this.targetState.id,
+      objectVelocity: false,
+      frameIndex: this.targetState.frameIndex,
       renderScale,
       renderSize,
       outputSize,
@@ -250,9 +355,9 @@ export default class DeckRenderer {
       phaseCount,
       depthTexture: null,
       velocityTexture: null,
-      reset: key !== this.temporalKey
+      reset: key !== this.targetState.key
     };
-    this.temporalKey = key;
+    this.targetState.key = key;
     // The layers passes read `opts.temporal`. Each scene pass applies the jitter and the render
     // scale itself, so auxiliary passes (shadow, mask, terrain, collision, picking) stay as before.
   }
@@ -261,7 +366,7 @@ export default class DeckRenderer {
     canvasContext = this.device.canvasContext!,
     temporal?: TemporalFrame
   ) {
-    const {renderBuffers} = this;
+    const renderBuffers = this.targetState?.buffers || this.renderBuffers;
     const size = temporal?.renderSize ?? canvasContext.getDrawingBufferSize();
     if (temporal) {
       const reusable =
@@ -304,11 +409,11 @@ export default class DeckRenderer {
           renderBuffers.push(buffer);
         }
       }
-      this.temporalBuffers = true;
-    } else if (this.temporalBuffers) {
+      this.targetState.temporalBuffers = true;
+    } else if (this.targetState?.temporalBuffers) {
       for (const buffer of renderBuffers) buffer.destroy();
       renderBuffers.length = 0;
-      this.temporalBuffers = false;
+      this.targetState.temporalBuffers = false;
     }
     const [width, height] = size;
     if (renderBuffers.length === 0) {
@@ -332,7 +437,7 @@ export default class DeckRenderer {
   }
 
   private _postRender(effects: Effect[], opts: LayersPassRenderOptions) {
-    const {renderBuffers} = this;
+    const renderBuffers = this.targetState?.buffers || this.renderBuffers;
     const target = opts.target ?? opts.canvasContext?.getCurrentFramebuffer() ?? opts.target;
     const params: PostRenderOptions = {
       ...opts,
