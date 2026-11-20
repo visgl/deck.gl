@@ -30,7 +30,7 @@ The goal of `GlobeView` is to provide a generic solution to rendering and naviga
 - Above zoom 12, `GlobeView` renders with a [WebMercatorViewport](./web-mercator-viewport.md), at the same precision as `MapView`. Below zoom 12, positions are projected with 32-bit floats; software renderers such as SwiftShader can place them hundreds of meters off.
 - Supports layers in `'lnglat'` (the default value of the `coordinateSystem` prop) and `'meter-offsets'` coordinates.
 - Polygons, paths and tiles follow the curve of the globe only when the view's `resolution` is set, e.g. `new GlobeView({resolution: 36})` for 10° steps. With the default `0`, their edges are straight.
-- Subdivided geometry is prepared for one viewport, so a `GlobeView` with `resolution` next to a `MapView` in the same `Deck` draws polygons and paths without subdivision.
+- A layer shared across views prepares one set of geometry using the first viewport in which it is eligible to draw during a non-picking pass. To prepare geometry separately for a map and a globe, use separate layer instances with distinct IDs and filter each to its own viewport using [`layerFilter`](./deck.md#layerfilter).
 - These layers currently do not work in this view:
   + Aggregation layers: `HeatmapLayer`, `ContourLayer`, `GridLayer`, `HexagonLayer`, `ScreenGridLayer`
   + `MVTLayer` polygon fills
