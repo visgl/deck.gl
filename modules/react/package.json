@@ -1,6 +1,6 @@
 {
   "name": "@deck.gl/react",
-  "description": "React Components for deck.gl",
+  "description": "React renderer for deck.gl",
   "license": "MIT",
   "type": "module",
   "version": "10.0.0-alpha.1",
@@ -26,6 +26,36 @@
     "*": {
       "legacy": [
         "dist/legacy/index.d.ts"
+      ],
+      "mapbox": [
+        "dist/dom/mapbox.d.ts"
+      ],
+      "maplibre": [
+        "dist/dom/maplibre.d.ts"
+      ],
+      "google-maps": [
+        "dist/dom/google-maps.d.ts"
+      ],
+      "core": [
+        "dist/wrappers/core.d.ts"
+      ],
+      "layers": [
+        "dist/wrappers/layers.d.ts"
+      ],
+      "geo-layers": [
+        "dist/wrappers/geo-layers.d.ts"
+      ],
+      "aggregation-layers": [
+        "dist/wrappers/aggregation-layers.d.ts"
+      ],
+      "mesh-layers": [
+        "dist/wrappers/mesh-layers.d.ts"
+      ],
+      "widgets": [
+        "dist/wrappers/widgets.d.ts"
+      ],
+      "reconciler": [
+        "dist/reconciler/index.d.ts"
       ]
     }
   },
@@ -41,25 +71,115 @@
       "types": "./dist/legacy/index.d.ts",
       "import": "./dist/legacy/index.js",
       "require": "./dist/legacy/index.cjs"
-    }
+    },
+    "./mapbox": {
+      "types": "./dist/dom/mapbox.d.ts",
+      "import": "./dist/dom/mapbox.js",
+      "require": "./dist/dom/mapbox.cjs"
+    },
+    "./maplibre": {
+      "types": "./dist/dom/maplibre.d.ts",
+      "import": "./dist/dom/maplibre.js",
+      "require": "./dist/dom/maplibre.cjs"
+    },
+    "./google-maps": {
+      "types": "./dist/dom/google-maps.d.ts",
+      "import": "./dist/dom/google-maps.js",
+      "require": "./dist/dom/google-maps.cjs"
+    },
+    "./core": {
+      "types": "./dist/wrappers/core.d.ts",
+      "import": "./dist/wrappers/core.js",
+      "require": "./dist/wrappers/core.cjs"
+    },
+    "./layers": {
+      "types": "./dist/wrappers/layers.d.ts",
+      "import": "./dist/wrappers/layers.js",
+      "require": "./dist/wrappers/layers.cjs"
+    },
+    "./geo-layers": {
+      "types": "./dist/wrappers/geo-layers.d.ts",
+      "import": "./dist/wrappers/geo-layers.js",
+      "require": "./dist/wrappers/geo-layers.cjs"
+    },
+    "./aggregation-layers": {
+      "types": "./dist/wrappers/aggregation-layers.d.ts",
+      "import": "./dist/wrappers/aggregation-layers.js",
+      "require": "./dist/wrappers/aggregation-layers.cjs"
+    },
+    "./mesh-layers": {
+      "types": "./dist/wrappers/mesh-layers.d.ts",
+      "import": "./dist/wrappers/mesh-layers.js",
+      "require": "./dist/wrappers/mesh-layers.cjs"
+    },
+    "./widgets": {
+      "types": "./dist/wrappers/widgets.d.ts",
+      "import": "./dist/wrappers/widgets.js",
+      "require": "./dist/wrappers/widgets.cjs"
+    },
+    "./reconciler": {
+      "types": "./dist/reconciler/index.d.ts",
+      "import": "./dist/reconciler/index.js",
+      "require": "./dist/reconciler/index.cjs"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
     "src"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/types/jsx.*",
+    "./src/types/jsx.*"
+  ],
   "scripts": {
     "build": "node build-cjs.mjs"
   },
+  "dependencies": {
+    "client-only": "^0.0.1",
+    "its-fine": "^2.0.0",
+    "react-reconciler": "0.33.0"
+  },
   "peerDependencies": {
+    "@deck.gl/aggregation-layers": "~10.0.0-alpha",
     "@deck.gl/core": "~10.0.0-alpha",
+    "@deck.gl/geo-layers": "~10.0.0-alpha",
+    "@deck.gl/google-maps": "~10.0.0-alpha",
+    "@deck.gl/layers": "~10.0.0-alpha",
+    "@deck.gl/mapbox": "~10.0.0-alpha",
+    "@deck.gl/maplibre": "~10.0.0-alpha",
+    "@deck.gl/mesh-layers": "~10.0.0-alpha",
     "@deck.gl/widgets": "~10.0.0-alpha",
-    "react": ">=16.3.0",
-    "react-dom": ">=16.3.0"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@deck.gl/aggregation-layers": {
+      "optional": true
+    },
+    "@deck.gl/geo-layers": {
+      "optional": true
+    },
+    "@deck.gl/google-maps": {
+      "optional": true
+    },
+    "@deck.gl/layers": {
+      "optional": true
+    },
+    "@deck.gl/mapbox": {
+      "optional": true
+    },
+    "@deck.gl/maplibre": {
+      "optional": true
+    },
+    "@deck.gl/mesh-layers": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.3",
+    "@types/react-reconciler": "0.33.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.5"
   },
