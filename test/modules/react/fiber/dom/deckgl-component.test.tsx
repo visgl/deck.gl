@@ -27,7 +27,8 @@ import {DeckGL as MapboxDeckGL} from '@deck.gl/react/dom/mapbox';
 import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/dom/maplibre';
 
 // Mock the reconciler module
-vi.mock(import('@deck.gl/react/reconciler'), () => {
+vi.mock(import('@deck.gl/react/reconciler/index'), async importOriginal => {
+  const {_RootErrorBoundary} = await importOriginal();
   const mockRender = vi.fn<() => void>();
   const mockConfigure = vi.fn<() => void>();
   const mockDeckGL = {};
@@ -65,6 +66,7 @@ vi.mock(import('@deck.gl/react/reconciler'), () => {
   });
 
   return {
+    _RootErrorBoundary,
     createRoot: mockCreateRoot,
     mockConfigure,
     mockCreateRoot,
@@ -79,7 +81,7 @@ vi.mock(import('@deck.gl/react/reconciler'), () => {
 
 // Get the mocks after they've been set up
 const {mockRender, mockConfigure, mockCreateRoot, mockDeckGL, mockUnmountAtNode, mockRoots} =
-  (await import('@deck.gl/react/reconciler')) as unknown as {
+  (await import('@deck.gl/react/reconciler/index')) as unknown as {
     mockRender: ReturnType<typeof vi.fn>;
     mockConfigure: ReturnType<typeof vi.fn>;
     mockCreateRoot: ReturnType<typeof vi.fn>;
@@ -440,6 +442,27 @@ describe('DeckGL Component Tests', () => {
       expect(mockConfigure).toHaveBeenCalledWith(
         expect.not.objectContaining({onDeckChange: expect.anything()})
       );
+    });
+
+    it('still unmounts the root when onDeckChange throws during teardown', () => {
+      // React reports the error from the cleanup; jsdom has no `reportError`.
+      vi.stubGlobal('reportError', vi.fn());
+      const onDeckChange = vi.fn((deck: unknown) => {
+        if (deck === null) {
+          throw new Error('app cleanup failed');
+        }
+      });
+      const {unmount} = render(<DeckGL onDeckChange={onDeckChange} />);
+
+      try {
+        unmount();
+      } catch {
+        // React may rethrow the cleanup error; the root must be unmounted either way.
+      }
+
+      expect(onDeckChange).toHaveBeenLastCalledWith(null);
+      expect(mockUnmountAtNode).toHaveBeenCalledOnce();
+      vi.unstubAllGlobals();
     });
 
     it('should notify config updates with the root-specific instance', () => {

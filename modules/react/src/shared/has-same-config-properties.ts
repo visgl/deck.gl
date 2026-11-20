@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/** `Object.prototype.hasOwnProperty`, called with an explicit receiver. */
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 /**

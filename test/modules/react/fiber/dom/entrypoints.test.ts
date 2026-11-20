@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {describe, expect, it} from 'vitest';
-import * as dom from '@deck.gl/react/dom';
+import * as dom from '@deck.gl/react/dom/index';
 import * as googleMaps from '@deck.gl/react/dom/google-maps';
 import * as mapbox from '@deck.gl/react/dom/mapbox';
 import * as maplibre from '@deck.gl/react/dom/maplibre';
@@ -33,10 +33,10 @@ describe('native entrypoint export matrix', () => {
     expect(googleMaps.DeckGL).not.toBe(dom.DeckGL);
   });
 
-  // Skipped until the follow-up to the copy adapts it: deck.gl's package also exports `./legacy` and requires `@deck.gl/widgets` for it.
-  it.skip('publishes only the public entry points and requires only deck.gl core and React', () => {
+  it('publishes only the public entry points and requires only deck.gl core, widgets and React', () => {
     expect(Object.keys(packageJson.exports)).toEqual([
       '.',
+      './legacy',
       './mapbox',
       './maplibre',
       './google-maps',
@@ -54,6 +54,7 @@ describe('native entrypoint export matrix', () => {
     const requiredPeers = Object.keys(packageJson.peerDependencies).filter(
       name => !optionalPeers.includes(name)
     );
-    expect(requiredPeers).toEqual(['@deck.gl/core', 'react', 'react-dom']);
+    // `@deck.gl/widgets` stays required for `@deck.gl/react/legacy`.
+    expect(requiredPeers).toEqual(['@deck.gl/core', '@deck.gl/widgets', 'react', 'react-dom']);
   });
 });

@@ -5,7 +5,7 @@
 
 import {describe, expect, expectTypeOf, it} from 'vitest';
 
-import * as reconcilerModule from '@deck.gl/react/reconciler';
+import * as reconcilerModule from '@deck.gl/react/reconciler/index';
 
 describe('index', () => {
   it('should export createRoot', () => {
@@ -23,7 +23,12 @@ describe('index', () => {
     expect(reconcilerModule.roots).toBeInstanceOf(Map);
   });
 
-  it('should export only root lifecycle APIs', () => {
-    expect(Object.keys(reconcilerModule).sort()).toEqual(['createRoot', 'roots', 'unmountAtNode']);
+  it('should export only root lifecycle APIs and the internal error boundary', () => {
+    expect(Object.keys(reconcilerModule).sort()).toEqual([
+      '_RootErrorBoundary',
+      'createRoot',
+      'roots',
+      'unmountAtNode'
+    ]);
   });
 });

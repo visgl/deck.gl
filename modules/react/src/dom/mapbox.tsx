@@ -6,7 +6,7 @@ import 'client-only';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import type {MapboxOverlayProps} from '@deck.gl/mapbox';
 import {attachControl, type ControlHostLike} from './attach-control';
-import {createDeckGL} from './components';
+import {createDeckGL} from '../index';
 import type {DeckGLRootProps} from '../types/index';
 
 /** Props accepted by the Mapbox-overlay React Fiber root. */

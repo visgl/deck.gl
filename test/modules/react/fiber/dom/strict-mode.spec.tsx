@@ -12,7 +12,7 @@ import {act, StrictMode, useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {afterEach, beforeEach, expect, test, vi} from 'vitest';
 
-import {DeckGL} from '@deck.gl/react/dom';
+import {DeckGL} from '@deck.gl/react/dom/index';
 import {DeckGL as MapboxDeckGL} from '@deck.gl/react/dom/mapbox';
 import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/dom/maplibre';
 import {ScatterplotLayer} from '@deck.gl/react/wrappers/layers';

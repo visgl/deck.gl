@@ -83,13 +83,22 @@ export const renderer: ReturnType<typeof reactReconciler> = reactReconciler(
   >
 );
 
-// Lets React DevTools show the tree inside each `DeckGL` root. react-reconciler@0.33 reads the
-// name and version from the host config; the argument only satisfies older typings.
-renderer.injectIntoDevTools({
-  bundleType: process.env.NODE_ENV === 'production' ? 0 : 1,
-  rendererPackageName: RENDERER_PACKAGE_NAME,
-  version: RENDERER_VERSION
-});
+/**
+ * Registers the renderer with React DevTools, which then shows the tree inside each `DeckGL`
+ * root. Called once when this module loads. react-reconciler@0.33 reads the name and version
+ * from the host config; the argument only satisfies older typings.
+ *
+ * @internal
+ */
+export function registerWithDevTools(): void {
+  renderer.injectIntoDevTools({
+    bundleType: process.env.NODE_ENV === 'production' ? 0 : 1,
+    rendererPackageName: RENDERER_PACKAGE_NAME,
+    version: RENDERER_VERSION
+  });
+}
+
+registerWithDevTools();
 
 /**
  * Active reconciler roots registry
@@ -110,12 +119,18 @@ renderer.injectIntoDevTools({
  */
 export const roots = new Map<RootElement, ReconcilerRoot>();
 
+/** Descriptors for a tree with no JSX layers, views, widgets or effects. */
 const EMPTY_JSX_DESCRIPTORS: JsxDescriptors = {effects: [], layers: [], views: [], widgets: []};
 
+/** Logs an error that React reports from the renderer's tree. */
 function reportError(error: unknown): void {
   log.error('DeckGL error', error)();
 }
 
+/**
+ * Logs an error caught by an error boundary, unless the root's own boundary caught it and
+ * rethrows it to the host tree.
+ */
 function reportCaughtError(error: unknown, info: object): void {
   // `DeckGL` rethrows what its own boundary catches, so React reports that error in the host tree.
   // React passes the catching boundary in `info`, although @types/react-reconciler omits it.
@@ -161,7 +176,10 @@ export function unmountAtNode(node: RootElement) {
 
   if (root?.container) {
     log.log(3, 'DeckGL root unmounted')();
-    renderer.updateContainer(null, root.container, null, noop);
+    // Commit the unmount now, so the tree's layout and passive effect cleanups run while Deck is
+    // still live. On a concurrent root, `updateContainer` would only schedule it.
+    renderer.updateContainerSync(null, root.container, null, noop);
+    renderer.flushSyncWork();
 
     const state = root.store.getState();
     const deckgl = state.deckgl;
@@ -261,6 +279,7 @@ export function createRoot(node: RootElement, options: RootOptions = {}): Reconc
 
   let configured = false;
 
+  /** Creates the deck.gl instance on the first call, then forwards new props to it. */
   function configure(props: DeckGLConfiguration) {
     log.log(4, 'DeckGL configure', props)();
 
@@ -301,6 +320,7 @@ export function createRoot(node: RootElement, options: RootOptions = {}): Reconc
     configured = true;
   }
 
+  /** Renders `children` into the root. */
   function render(children: ReactNode) {
     renderer.updateContainer(children, container, null, noop);
   }

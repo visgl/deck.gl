@@ -35,7 +35,7 @@ describe('plain entrypoint isolation', () => {
   it('loads the native root and the factories without any optional peer', async () => {
     blockImports(OPTIONAL_PEERS);
 
-    const dom = await import('@deck.gl/react/dom');
+    const dom = await import('@deck.gl/react/dom/index');
 
     expect(dom.DeckGL).toBeDefined();
     expect(dom.createLayerComponent).toBeDefined();

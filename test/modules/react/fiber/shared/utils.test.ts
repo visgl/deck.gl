@@ -137,9 +137,8 @@ describe('Utility Functions Tests', () => {
       expectTypeOf(isBrowserEnvironment).toBeBoolean();
     });
 
-    // Skipped until the follow-up to the copy adapts it: the headless project runs in Chromium, where `document` exists.
-    it.skip('should be false in Node.js test environment', () => {
-      // vitest.config.ts uses environment: 'node', so no document exists
+    it('should be false in Node.js test environment', () => {
+      // This file runs with `@vitest-environment node`, so no document exists
       expect(isBrowserEnvironment).toBeFalsy();
     });
   });
