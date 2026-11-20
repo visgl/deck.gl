@@ -384,7 +384,10 @@ in the range 0–1, this packs them into an 8-bit RGBA color with full opacity.
 getFillColor: {sql: 'RGBA8(red, green, blue, 1)'}
 ```
 
-A color accessor can also use a top-level SQL color scale:
+Accessors can use top-level SQL scales. Numeric accessors accept linear, square-root,
+logarithmic, power, and symmetric-log scales with a numeric `RANGE`. Color
+accessors accept sequential, cyclic, diverging, ordinal, quantile, quantize, and
+threshold scales.
 
 ```ts
 getFillColor: {sql: "SCALE_COLOR(temperature, DOMAIN(temperature), PALETTE('viridis'))"}

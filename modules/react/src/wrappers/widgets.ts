@@ -5,7 +5,7 @@
 // Every widget class that @deck.gl/widgets exports, as a component that takes the widget's props.
 import type {View} from '@deck.gl/core';
 import {
-  _ColorScaleWidget as DeckColorScaleWidget,
+  _LegendWidget as DeckColorScaleWidget,
   CompassWidget as DeckCompassWidget,
   ContextMenuWidget as DeckContextMenuWidget,
   FullscreenWidget as DeckFullscreenWidget,
@@ -54,8 +54,8 @@ import type {ReactElement} from 'react';
 
 import {renderWidget} from './factories';
 
-/** Renders `_ColorScaleWidget` from `@deck.gl/widgets`; takes the widget's props. */
-export function _ColorScaleWidget(props: ColorScaleWidgetProps): ReactElement {
+/** Renders `_LegendWidget` from `@deck.gl/widgets`; takes the widget's props. */
+export function _LegendWidget(props: ColorScaleWidgetProps): ReactElement {
   return renderWidget(new DeckColorScaleWidget(props));
 }
 
@@ -162,3 +162,5 @@ export function ToggleWidget(props: ToggleWidgetProps): ReactElement {
 export function ZoomWidget(props: ZoomWidgetProps): ReactElement {
   return renderWidget(new DeckZoomWidget(props));
 }
+
+export {_LegendWidget as _ColorScaleWidget};
