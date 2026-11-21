@@ -45,6 +45,7 @@ new PathStyleExtension({dash, dashMode, offset});
 * `dashMode` (string) - where the dash pattern starts over. `'segment'` restarts it at every vertex; `'path'` runs it continuously along the whole path. Setting `dashMode` also enables `dash`. Default `'segment'`. See [Choosing a dash mode](#choosing-a-dash-mode).
 * `offset` (boolean) - add the ability to offset lines from their path. Default `false`.
 * `highPrecisionDash` (boolean) - **deprecated**, use `dashMode: 'path'` instead.
+* `_dashSourceDistance` (boolean) - **experimental**, use cumulative source distances for dash phase and spacing. Requires `dashMode: 'path'`. Default `false`. See [`_getDashSourceDistances`](#_getdashsourcedistances).
 
 ## Layer Properties
 
@@ -57,6 +58,12 @@ The dash pattern to draw each path with: `[dashSize, gapSize]`, measured in [`da
 * If an array is provided, it is used as the dash pattern for all paths.
 * If a function is provided, it is called on each path to retrieve its dash pattern. Return `[0, 0]` to draw a solid line.
 * If not specified, all paths are drawn as solid lines.
+
+#### `_getDashSourceDistances` ([Accessor&lt;NumericArray&gt;](../../developer-guide/using-layers.md#accessors)) {#_getdashsourcedistances}
+
+**Experimental.** With `_dashSourceDistance` enabled, supply one cumulative distance in metres along the original source path per path vertex. Use the same cumulative distance at both sides of a projection cut to preserve dash phase. For binary data, provide the distances in `data.attributes._getDashSourceDistances`, aligned with `data.startIndices`.
+
+Source distances use the `'meters'` scale. Set `dashUnits: 'meters'` to specify dash and gap spacing in source metres. With `dashJustified` enabled, each row fits the pattern to its own end distance, so justified dashes can lose continuity across cuts. A distance count that differs from the tessellated vertex count for a row throws an error. Supply rows that already account for projection cuts and require no further splitting, subdivision, or loop padding.
 
 #### `dashUnits` (string, optional) {#dashunits}
 

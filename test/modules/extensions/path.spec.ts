@@ -9,7 +9,8 @@ import {
   OrthographicViewport,
   WebMercatorViewport,
   project,
-  _GlobeViewport as GlobeViewport
+  _GlobeViewport as GlobeViewport,
+  _pathShaderPlugin as pathShaderPlugin
 } from '@deck.gl/core';
 import type {ProjectUniforms} from '@deck.gl/core';
 import {PathStyleExtension} from '@deck.gl/extensions';
@@ -21,7 +22,7 @@ import {
   _TextBackgroundLayer as TextBackgroundLayer
 } from '@deck.gl/layers';
 import {device, getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
-import {preprocess} from '@luma.gl/shaders';
+import {preprocess, resolveShaderPlugins, WGSLShaderAssembler} from '@luma.gl/shaders';
 import {
   dashInjections,
   offsetInjections,
@@ -31,7 +32,11 @@ import {vec3} from '@math.gl/core';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-import type {DashUnits, PathStyleExtensionOptions} from '@deck.gl/extensions';
+import type {
+  DashUnits,
+  PathStyleExtensionOptions,
+  PathStyleExtensionProps
+} from '@deck.gl/extensions';
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
@@ -217,6 +222,7 @@ test('PathStyleExtension#constructor options', () => {
     dash: false,
     offset: false,
     dashMode: 'segment',
+    _dashSourceDistance: false,
     highPrecisionDash: false
   });
 
@@ -227,8 +233,16 @@ test('PathStyleExtension#constructor options', () => {
     dash: true,
     offset: false,
     dashMode: 'path',
+    _dashSourceDistance: false,
     highPrecisionDash: true
   });
+
+  expect(() => new PathStyleExtension({_dashSourceDistance: true})).toThrow(
+    "_dashSourceDistance requires dashMode: 'path'"
+  );
+  expect(() => new PathStyleExtension({dashMode: 'segment', _dashSourceDistance: true})).toThrow(
+    "_dashSourceDistance requires dashMode: 'path'"
+  );
 });
 
 test('PathStyleExtension#PathLayer', () => {
@@ -1589,6 +1603,242 @@ test('PathStyleExtension#dash phase reads strided binary paths', () => {
     ],
     onError: error => expect(error, error?.message).toBeFalsy()
   });
+});
+
+const sourceDistanceBase = 2 ** 24;
+const sourceDistanceRows = [
+  {
+    path: [
+      [0, 0],
+      [1, 0],
+      [2, 0]
+    ],
+    distances: [0, 3, 7]
+  },
+  {
+    path: [
+      [2, 0],
+      [3, 0]
+    ],
+    distances: [sourceDistanceBase, sourceDistanceBase + 1]
+  }
+];
+// The last one-metre segment survives even though its end rounds to its start in float32.
+const sourceDistanceMetrics = [
+  0,
+  7,
+  3,
+  3,
+  7,
+  4,
+  0,
+  0,
+  0,
+  sourceDistanceBase,
+  sourceDistanceBase,
+  1,
+  0,
+  0,
+  0
+];
+
+test('PathStyleExtension#source distances drive object metrics and shader variants', () => {
+  type Row = (typeof sourceDistanceRows)[number];
+  const pathExtension = new PathStyleExtension({dashMode: 'path'});
+  const sourceExtension = new PathStyleExtension({dashMode: 'path', _dashSourceDistance: true});
+  let distanceScale = 1;
+  const getDistances: PathStyleExtensionProps<Row>['_getDashSourceDistances'] = (
+    {distances},
+    {index}
+  ) => {
+    expect(distances).toBe(sourceDistanceRows[index].distances);
+    return distances.map(distance => distance * distanceScale);
+  };
+  const expectShaderVariant = (layer: PathLayer, enabled: boolean) => {
+    const shaders = layer.getShaders();
+    const {defines} = shaders;
+    expect(defines.DASH_MODE_PATH).toBe(true);
+    expect(defines.DASH_SOURCE_DISTANCE).toBe(enabled ? true : undefined);
+    const plugins = resolveShaderPlugins([pathShaderPlugin, ...shaders.plugins], 'wgsl');
+    const {source: wgsl} = new WGSLShaderAssembler().assembleWGSLShader({
+      ...shaders,
+      platformInfo: {
+        type: 'webgpu',
+        shaderLanguage: 'wgsl',
+        shaderLanguageVersion: 300,
+        gpu: 'test',
+        features: new Set()
+      },
+      modules: [...shaders.modules, ...plugins.modules],
+      pluginInjectionTargets: plugins.injectionTargets,
+      pluginInjections: plugins.injections,
+      pluginVertexInputs: plugins.vertexInputs,
+      pluginInterStageVariables: plugins.interStageVariables
+    });
+    const glsl = preprocess(layer.getModels()[0].vs, {defines});
+    const size = enabled ? 3 : 2;
+    expect(glsl).toContain(`in vec${size} instanceDashOffsets;`);
+    expect(wgsl).toContain(`@location(14) _luma_instanceDashOffsets: vec${size}<f32>`);
+    for (const [shader, rescale, newLength, renderedLength] of [
+      [
+        glsl,
+        'vDashSegment.x *= sourceLen / vDashSegment.y;',
+        'vDashSegment.y = sourceLen;',
+        'vec2 dashOffsetAndLength = (instanceDashOffsets * project.scale) / dashWidthPixels;'
+      ],
+      [
+        wgsl,
+        '(*dashSegment).x *= sourceLen / (*dashSegment).y;',
+        '(*dashSegment).y = sourceLen;',
+        'let offsetAndLength = instanceDashOffsets * project.scale / dashWidthPixels;'
+      ]
+    ]) {
+      if (enabled) {
+        expect(shader).toContain(rescale);
+        expect(shader).toContain(newLength);
+        expect(shader).not.toContain(renderedLength);
+      } else {
+        expect(shader).not.toContain(rescale);
+        expect(shader).not.toContain(newLength);
+        expect(shader).toContain(renderedLength);
+      }
+    }
+  };
+
+  testLayer({
+    Layer: PathLayer,
+    testCases: [
+      {
+        props: {
+          data: sourceDistanceRows,
+          getPath: (row: Row) => row.path,
+          _getDashSourceDistances: getDistances,
+          coordinateSystem: 'cartesian',
+          positionFormat: 'XY',
+          extensions: [pathExtension]
+        },
+        onAfterUpdate: ({layer}) => {
+          expect(layer.getAttributeManager().getAttributes().instanceDashOffsets.size).toBe(2);
+          expectShaderVariant(layer, false);
+        }
+      },
+      {
+        updateProps: {extensions: [sourceExtension]},
+        onAfterUpdate: ({layer}) => {
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets;
+          expect(metrics.size).toBe(3);
+          expect(Array.from(metrics.value.slice(0, 15))).toEqual(sourceDistanceMetrics);
+          expectShaderVariant(layer, true);
+          distanceScale = 2;
+        }
+      },
+      {
+        updateProps: {updateTriggers: {_getDashSourceDistances: 1}},
+        onAfterUpdate: ({layer}) => {
+          const {value} = layer.getAttributeManager().getAttributes().instanceDashOffsets;
+          expect(Array.from(value.slice(0, 15))).toEqual(
+            sourceDistanceMetrics.map(distance => distance * 2)
+          );
+        }
+      },
+      {
+        updateProps: {extensions: [pathExtension]},
+        onAfterUpdate: ({layer}) => {
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets;
+          expect(metrics.size).toBe(2);
+          expect(Array.from(metrics.value.slice(0, 10))).toEqual([0, 2, 1, 2, 0, 2, 0, 1, 0, 1]);
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
+});
+
+test.each(['typed array', 'value object', 'metrics override'])(
+  'PathStyleExtension#source distance binary input with %s',
+  format => {
+    const distances = new Float64Array(sourceDistanceRows.flatMap(row => row.distances));
+    const override = new Float32Array(sourceDistanceMetrics.map(distance => distance * 3));
+    const data = {
+      length: 2,
+      startIndices: new Uint32Array(format === 'typed array' ? [0, 3] : [0, 3, 5]),
+      attributes: {
+        getPath: {
+          value: new Float64Array(sourceDistanceRows.flatMap(row => row.path.flat())),
+          size: 2
+        },
+        ...(format === 'metrics override'
+          ? {instanceDashOffsets: override}
+          : {_getDashSourceDistances: format === 'value object' ? {value: distances} : distances})
+      }
+    };
+
+    testLayer({
+      Layer: PathLayer,
+      testCases: [
+        {
+          props: {
+            data,
+            _pathType: 'open',
+            positionFormat: 'XY',
+            coordinateSystem: 'cartesian',
+            extensions: [new PathStyleExtension({dashMode: 'path', _dashSourceDistance: true})]
+          },
+          onAfterUpdate: ({layer}) => {
+            const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets;
+            expect(metrics.size).toBe(3);
+            expect(Array.from(metrics.value.slice(0, 15))).toEqual(
+              format === 'metrics override' ? Array.from(override) : sourceDistanceMetrics
+            );
+          }
+        }
+      ],
+      onError: error => expect(error, error?.message).toBeFalsy()
+    });
+  }
+);
+
+test.each([
+  {
+    path: [
+      [0, 0],
+      [1, 0],
+      [2, 0]
+    ],
+    distances: [0, 1],
+    counts: '2 distances, 3 vertices'
+  },
+  {
+    path: [
+      [0, 0],
+      [1, 0],
+      [2, 0],
+      [0, 0]
+    ],
+    distances: [0, 1, 2, 4],
+    counts: '4 distances, 6 vertices'
+  }
+])('PathStyleExtension#rejects mismatched source distance counts ($counts)', row => {
+  const errors: Error[] = [];
+  testLayer({
+    Layer: PathLayer,
+    testCases: [
+      {
+        props: {
+          data: [row],
+          getPath: object => object.path,
+          _getDashSourceDistances: object => object.distances,
+          positionFormat: 'XY',
+          coordinateSystem: 'cartesian',
+          extensions: [new PathStyleExtension({dashMode: 'path', _dashSourceDistance: true})]
+        }
+      }
+    ],
+    onError: error => errors.push(error)
+  });
+  expect(errors.map(error => error.message).join('\n')).toMatch(
+    new RegExp(`_getDashSourceDistances.*row 0.*${row.counts}`)
+  );
 });
 
 test('PathStyleExtension#dash phase supports partial path updates', () => {

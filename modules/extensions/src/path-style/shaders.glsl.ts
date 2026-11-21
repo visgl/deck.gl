@@ -8,7 +8,8 @@
  * PathLayer dash math crosses three coordinate spaces:
  *
  * 1. **Common space** — the private metric updater accumulates distance over normalized
- *    PathTessellator geometry, and `instanceDashOffsets` carries it to the shader. The public
+ *    PathTessellator geometry, and `instanceDashOffsets` carries it to the shader. In source
+ *    distance mode the attribute instead carries source distances in metres. The public
  *    scalar `getDashOffsets` helper remains available for compatibility but does not back the
  *    managed attribute.
  * 2. **Screen pixels** — the common basis for reconciling flat and billboard extrusion.
@@ -27,6 +28,8 @@ export type Defines = {
    * Continue dash phase across the complete path.
    */
   DASH_MODE_PATH?: boolean;
+  /** Use source distances in metres for whole-path dash phase and segment length. */
+  DASH_SOURCE_DISTANCE?: boolean;
   /**
    * Set whenever the dash shaders are injected. It guards PathLayer's additional arclength
    * varyings and the dash stage of the shared PathStyle pipeline.
@@ -90,9 +93,19 @@ if (pathStyle.dashUnits == 1) {
 pathStyle_dashArray = instanceDashArrays * (dashUnitPixels / dashWidthPixels);
 
 #ifdef DASH_MODE_PATH
+#ifdef DASH_SOURCE_DISTANCE
+vec3 sourceDistances = instanceDashOffsets * (project_size_to_pixel(1.0) / dashWidthPixels);
+vec2 dashOffsetAndLength = sourceDistances.xy;
+float sourceLen = sourceDistances.z;
+if (vDashSegment.y > 0.0) {
+  vDashSegment.x *= sourceLen / vDashSegment.y;
+}
+vDashSegment.y = sourceLen;
+#else
 // instanceDashOffsets accumulates common-space distance on the CPU. Convert it to pixels, then
 // divide by the pixel half-width so both extrusion branches use the same dash coordinate.
 vec2 dashOffsetAndLength = (instanceDashOffsets * project.scale) / dashWidthPixels;
+#endif
 pathStyle_dashPathLength = dashOffsetAndLength.y;
 
 // Reduce the phase into the first period here rather than in the fragment shader. On a long
