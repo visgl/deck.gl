@@ -8,7 +8,7 @@ import {
   CompositeLayerProps,
   DefaultProps,
   _CustomProjectionViewport as CustomProjectionViewport,
-  _GlobeViewport as GlobeViewport,
+  GlobeViewport,
   Layer,
   LayersList,
   log,
@@ -17,7 +17,7 @@ import {
   UpdateParameters
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {lngLatToWorld, worldToLngLat} from '@math.gl/web-mercator';
+import {lngLatToWorld, worldToLngLat} from '@math.gl/geospatial/web-mercator';
 import type {MeshAttributes} from '@loaders.gl/core/schema';
 import {TerrainWorkerLoader} from '@loaders.gl/raster/terrain/index';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
@@ -30,11 +30,16 @@ import type {
 } from '../tileset-2d/index';
 import {getURLFromTemplate, Tile2DHeader, URLTemplate, urlType} from '../tileset-2d/index';
 
+import {toByteColor} from '../utils/normalized-color';
+
 const DUMMY_DATA = [1];
 const TILE_OVERLAP_PIXELS = 1;
 const MIN_TERRAIN_MESH_MAX_ERROR = 1;
 const MAX_LATITUDE = 90;
 const MAX_LONGITUDE = 180;
+
+/** Byte RGB used for terrain with no texture or application color. */
+const DEFAULT_TERRAIN_COLOR: Color = [255, 255, 255];
 
 const defaultProps: DefaultProps<TerrainLayerProps> = {
   ...TileLayer.defaultProps,
@@ -47,7 +52,7 @@ const defaultProps: DefaultProps<TerrainLayerProps> = {
   // Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates
   bounds: {type: 'array', value: null, optional: true, compare: true},
   // Color to use if texture is unavailable
-  color: {type: 'color', value: [255, 255, 255]},
+  color: {type: 'color', value: DEFAULT_TERRAIN_COLOR},
   // Object to decode height data, from (r, g, b) to height in meters
   elevationDecoder: {
     type: 'object',
@@ -182,7 +187,7 @@ type _TerrainLayerProps = {
   /** Bounding box of the terrain image, [minX, minY, maxX, maxY] in world coordinates. **/
   bounds?: Bounds | null;
 
-  /** Color to use if texture is unavailable. **/
+  /** Color to use if texture is unavailable. Plain arrays use 0–1 with Deck normalizedColors. */
   color?: Color;
 
   /** Object to decode height data, from (r, g, b) to height in meters. **/
@@ -336,7 +341,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
   ) {
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
 
-    const {color, wireframe, material} = this.props;
+    const {wireframe, material} = this.props;
     const {data} = props;
 
     if (!data) {
@@ -367,7 +372,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       _instanced: false,
       coordinateSystem,
       getPosition: d => [0, 0, 0],
-      getColor: color,
+      getColor: this.getTerrainColor(),
       wireframe,
       material
     });
@@ -404,9 +409,16 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     }
   }
 
+  /** Prepare the fallback terrain color for the byte-encoded mesh accessor. */
+  private getTerrainColor(): Color {
+    const {color} = this.props;
+    return this.usesNormalizedColors() && color !== DEFAULT_TERRAIN_COLOR
+      ? toByteColor(color)
+      : color;
+  }
+
   renderLayers(): Layer | null | LayersList {
     const {
-      color,
       material,
       elevationData,
       texture,
@@ -436,6 +448,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
           getTileData: this.getTiledTerrainData.bind(this),
           renderSubLayers: this.renderSubLayers.bind(this),
           updateTriggers: {
+            renderSubLayers: [this.props.color, this.usesNormalizedColors()],
             getTileData: {
               elevationData: urlTemplateToUpdateTrigger(elevationData),
               texture: urlTemplateToUpdateTrigger(texture),
@@ -484,7 +497,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
         // The mesh of a custom projection is in its CRS
         ...(this.state.crs && {coordinateSystem: 'cartesian'}),
         getPosition: d => [0, 0, 0],
-        getColor: color,
+        getColor: this.getTerrainColor(),
         material,
         wireframe
       }

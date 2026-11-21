@@ -8,7 +8,7 @@ import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {BASEMAP} from '@deck.gl/carto';
-import DeckGL from '@deck.gl/react';
+import DeckGL from '@deck.gl/react/legacy';
 import {BitmapLayer} from '@deck.gl/layers';
 import {H3HexagonLayer, QuadkeyLayer, TileLayer} from '@deck.gl/geo-layers';
 import H3Tileset2D from './h3-tileset-2d';

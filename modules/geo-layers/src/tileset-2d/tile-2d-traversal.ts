@@ -5,7 +5,7 @@
 import {
   Viewport,
   WebMercatorViewport,
-  _GlobeViewport,
+  GlobeViewport,
   _CustomProjectionViewport
 } from '@deck.gl/core';
 
@@ -16,7 +16,7 @@ import {
   OrientedBoundingBox,
   makeOrientedBoundingBoxFromPoints
 } from '@math.gl/geometry/culling';
-import {lngLatToWorld, MAX_LATITUDE} from '@math.gl/web-mercator';
+import {lngLatToWorld, MAX_LATITUDE} from '@math.gl/geospatial/web-mercator';
 import {Bounds, TileIndex, ZRange} from './types';
 import {osmTile2lngLat} from './utils';
 
@@ -570,7 +570,7 @@ export function getOSMTileIndices(
   zRange: ZRange | null,
   extent?: Bounds
 ): TileIndex[] {
-  const isGlobe = viewport instanceof _GlobeViewport;
+  const isGlobe = viewport instanceof GlobeViewport;
   const isCustomProjection = viewport instanceof _CustomProjectionViewport;
   // These viewports do not have the common space of Web Mercator.
   // Project the tile to get its bounding volume.

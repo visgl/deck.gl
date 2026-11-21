@@ -22,5 +22,8 @@ void main()
   gl_Position.xy = (commonPosition.xy - weight.commonBounds.xy) / (weight.commonBounds.zw - weight.commonBounds.xy) ;
   gl_Position.xy = (gl_Position.xy * 2.) - (1.);
   gl_Position.w = 1.0;
+  geometry.worldPosition = positions;
+  geometry.position = vec4(commonPosition, 1.0);
+  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 }
 `;

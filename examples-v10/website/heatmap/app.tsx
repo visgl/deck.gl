@@ -1,0 +1,79 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import {Map} from 'react-map-gl/maplibre';
+import {DeckGL} from '@deck.gl/react/legacy';
+import {ParquetLoader} from '@loaders.gl/tables/parquet';
+import parquetWorkerUrl from '@loaders.gl/tables/parquet/parquet-worker.js?url';
+import {isArrowTable} from '@math.gl/core/arrow';
+import type {Device} from '@luma.gl/core';
+import {HeatmapLayer} from '@deck.gl/aggregation-layers';
+
+import type {MapViewState} from '@deck.gl/core';
+
+const DATA_URL =
+  'https://media.githubusercontent.com/media/visgl/deck.gl-data/ea4a0a0a3fa71ee94ed381ce2691431cca864f88/website/uber-pickups-nyc.parquet';
+
+const INITIAL_VIEW_STATE: MapViewState = {
+  longitude: -73.75,
+  latitude: 40.73,
+  zoom: 9,
+  maxZoom: 16,
+  pitch: 0,
+  bearing: 0
+};
+
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/dark';
+
+export default function App({
+  device,
+  data = DATA_URL,
+  onDataLoad,
+  intensity = 1,
+  threshold = 0.03,
+  radiusPixels = 30,
+  mapStyle = MAP_STYLE
+}: {
+  device?: Device;
+  data?: string;
+  /** Called with the number of rows after the Arrow table loads. */
+  onDataLoad?: (count: number) => void;
+  intensity?: number;
+  threshold?: number;
+  radiusPixels?: number;
+  mapStyle?: string;
+}) {
+  const layers = [
+    new HeatmapLayer({
+      // Sample row: {longitude: -72.0666, latitude: 42.1166, count: 1}
+      data,
+      loaders: [ParquetLoader],
+      loadOptions: {parquet: {workerUrl: parquetWorkerUrl}},
+      onDataLoad: table => {
+        if (isArrowTable(table)) {
+          onDataLoad?.(table.numRows);
+        }
+      },
+      id: 'heatmap-layer',
+      pickable: false,
+      getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
+      getWeight: {sql: 'count'},
+      radiusPixels,
+      intensity,
+      threshold
+    })
+  ];
+
+  return (
+    <DeckGL device={device} initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
+      <Map reuseMaps mapStyle={mapStyle} />
+    </DeckGL>
+  );
+}
+
+export function renderToDOM(container: HTMLDivElement) {
+  createRoot(container).render(<App />);
+}

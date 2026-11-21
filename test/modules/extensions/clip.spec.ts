@@ -9,7 +9,7 @@ import {
   MapView,
   _CustomProjectionView as CustomProjectionView,
   WebMercatorViewport,
-  _GlobeViewport as GlobeViewport
+  GlobeViewport
 } from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {CLIP_POLYGON_SIZE} from '@deck.gl/extensions/clip/shader-module';

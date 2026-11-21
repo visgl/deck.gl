@@ -42,6 +42,7 @@ import {EVENT_HANDLERS, RECOGNIZERS, RecognizerOptions} from './constants';
 import type {Effect} from './effect';
 import type {FilterContext} from '../passes/layers-pass';
 import type Layer from './layer';
+import type {SQLFunctions, SQLParser} from '../types/layer-props';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
 import type {EventManagerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
@@ -102,6 +103,10 @@ type PointPickResult = {
 };
 
 export type DeckProps<ViewsT extends ViewOrViews = null> = {
+  /** Overrides the default parser for layer queries and SQL accessors. */
+  sqlParser?: SQLParser;
+  /** Additional Arrow functions shared by all layer SQL accessors. */
+  sqlFunctions?: SQLFunctions;
   /** Id of this Deck instance */
   id?: string;
   /** Width of the canvas, a number in pixels or a valid CSS string.
@@ -130,6 +135,14 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
 
   /** WebGL parameters to be set before each frame is rendered. */
   parameters?: Parameters;
+  /**
+   * Interpret plain-array color constants and callbacks as 0–1 in top-level ScatterplotLayer,
+   * LineLayer, ArcLayer, PathLayer, PolygonLayer, SolidPolygonLayer, and GeoJsonLayer. View clear colors
+   * and top-level highlights also use 0–1. Built-in layer defaults
+   * and typed or binary inputs retain their encoding.
+   * @default false
+   */
+  normalizedColors?: boolean;
   /** If supplied, will be called before a layer is drawn to determine whether it should be rendered. */
   layerFilter?: ((context: FilterContext) => boolean) | null;
 
@@ -261,6 +274,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
 };
 
 const defaultProps: DeckProps = {
+  sqlFunctions: [],
   id: '',
   width: '100%',
   height: '100%',
@@ -270,6 +284,7 @@ const defaultProps: DeckProps = {
   pickingRadius: 0,
   pickAsync: 'auto',
   layerFilter: null,
+  normalizedColors: false,
   parameters: {},
   parent: null,
   device: null,
@@ -313,6 +328,17 @@ const defaultProps: DeckProps = {
   debug: false,
   drawPickingColors: false
 };
+
+/** Replace explicitly `undefined` props with their defaults, so `undefined` behaves like omitting the prop */
+function resolveUndefinedProps<PropsT extends DeckProps<any>>(props: PropsT): PropsT {
+  const resolvedProps: Record<string, unknown> = {...props};
+  for (const key in resolvedProps) {
+    if (resolvedProps[key] === undefined && key in defaultProps) {
+      resolvedProps[key] = defaultProps[key as keyof DeckProps];
+    }
+  }
+  return resolvedProps as PropsT;
+}
 
 /* eslint-disable max-statements */
 export default class Deck<ViewsT extends ViewOrViews = null> {
@@ -414,7 +440,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   constructor(props: DeckProps<ViewsT>) {
     const initialProps = props;
     // @ts-ignore views
-    this.props = {...defaultProps, ...props};
+    this.props = {...defaultProps, ...resolveUndefinedProps(props)};
     props = this.props;
 
     this._validateCanvasConfiguration(props);
@@ -517,6 +543,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /** Partially update props */
   setProps(props: DeckProps<ViewsT>): void {
     this.stats.get('setProps Time').timeStart();
+    props = resolveUndefinedProps(props);
 
     if ('onLayerHover' in props) {
       log.removed('onLayerHover', 'onHover')();
@@ -1470,10 +1497,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // In deck.gl v9, Deck always bundles and adds a webgl2Adapter.
     // This behavior is expected to change in deck.gl v10 to support WebGPU only builds.
     const deviceProps = {
-      adapters: [],
       _cacheShaders: true,
       _cachePipelines: true,
       ...props.deviceProps,
+      adapters: [...(props.deviceProps?.adapters ?? [])],
       debug: getDeviceDebug(props)
     };
     if (!deviceProps.adapters.includes(webgl2Adapter)) {
@@ -1755,6 +1782,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.props.onBeforeRender({device, gl});
 
+    // Reuse the renderer's visibility decisions without invoking user filters again.
+    const renderedLayers = new Map<Viewport, Set<Layer>>();
     const opts = {
       target: this.props._framebuffer,
       layers: this.layerManager!.getLayers(),
@@ -1763,7 +1792,16 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       views: this.viewManager!.getViews(),
       pass: 'screen',
       effects: this.effectManager!.getEffects(),
-      ...renderOptions
+      ...renderOptions,
+      /** Records one eligible layer for the screen widgets in each viewport. */
+      onLayerEligible: (layer: Layer, viewport: Viewport) => {
+        let layers = renderedLayers.get(viewport);
+        if (!layers) {
+          layers = new Set();
+          renderedLayers.set(viewport, layers);
+        }
+        layers.add(layer);
+      }
     };
 
     if (
@@ -1810,7 +1848,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // Only when drawing to screen, update all widgets (UI components)
       this.widgetManager!.onRedraw({
         viewports: opts.viewports,
-        layers: opts.layers
+        layers: opts.layers,
+        renderedLayers
       });
     }
 

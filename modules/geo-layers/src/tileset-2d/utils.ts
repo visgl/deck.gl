@@ -4,7 +4,7 @@
 
 import {Viewport, _CustomProjectionViewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
-import {MAX_LATITUDE} from '@math.gl/web-mercator';
+import {MAX_LATITUDE} from '@math.gl/geospatial/web-mercator';
 import {getGeographicBounds, getGroundPositions, getOSMTileIndices} from './tile-2d-traversal';
 import {Bounds, GeoBoundingBox, TileBoundingBox, TileIndex, ZRange} from './types';
 

@@ -12,6 +12,9 @@ The `A5Layer` renders filled and/or stroked polygons based on the [A5](https://a
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -131,6 +134,26 @@ function App() {
   </TabItem>
 </Tabs>
 
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Utf8, vectorFromArray} from 'apache-arrow';
+import {A5Layer} from '@deck.gl/geo-layers';
+
+const cells = vectorFromArray(['2e80000000000000'], new Utf8());
+
+const layer = new A5Layer({
+  getPentagon: cells,
+  getFillColor: [255, 140, 0]
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
+  </TabItem>
+</Tabs>
+
 
 ## Installation
 
@@ -170,7 +193,7 @@ Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/compo
 
 ### Data Accessors
 
-#### `getPentagon` ([Accessor&lt;bigint | string&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpentagon}
+#### `getPentagon` (Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpentagon}
 
 Called for each data object to retrieve the identifier of the A5 pentagon cell.  May return one of the following:
 
@@ -182,51 +205,32 @@ For more information on representing the A5 cell, see [A5 Cell Representation](h
 
 * default: `object => object.pentagon`
 
+Each Arrow row supplies one identifier or a list of identifiers for one source feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for supported encodings and picking behavior.
 
-### Column Inputs
 
-#### `cells` (object, optional) {#cells}
+#### `getFillColor` (constant | Accessor | arrow.Vector, optional) {#getfillcolor}
 
-* Default: `null`
+* Default: `[0, 0, 0, 255]`
 
-A CPU-readable Arrow column of cell identifiers. Each row contains one cell or a list of cells
-belonging to one feature. String and dictionary-encoded string columns are accepted.
-Arrow `Int64` and `Uint64` identifiers are accepted without losing precision. Signed values
-are interpreted as unsigned 64-bit cell identifiers.
+The fill color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
-When `data` is supplied, its row count must match `cells`. Omitted styling columns use accessors
-with the original feature and source row index. Null cells and GPU-only columns are unsupported.
-`highlightedObjectIndex` selects an expanded cell row in column mode. Picking reports
-the source feature index.
-See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates) for updates.
+#### `getLineColor` (constant | Accessor | arrow.Vector, optional) {#getlinecolor}
 
-#### `fillColors` (object, optional) {#fillcolors}
+* Default: `[0, 0, 0, 255]`
 
-* Default: `null`
+The outline color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
-RGBA fill colors as a CPU-readable Arrow column in source feature order. Requires `cells`
-and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+#### `getLineWidth` (constant | Accessor | arrow.Vector, optional) {#getlinewidth}
 
-#### `lineColors` (object, optional) {#linecolors}
+* Default: `1`
 
-* Default: `null`
+The outline width of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
-RGBA outline colors as a CPU-readable Arrow column in source feature order. Requires `cells`
-and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+#### `getElevation` (constant | Accessor | arrow.Vector, optional) {#getelevation}
 
-#### `lineWidths` (object, optional) {#linewidths}
+* Default: `1000`
 
-* Default: `null`
-
-Outline widths as a CPU-readable Arrow column in source feature order. Requires `cells`
-and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
-
-#### `elevations` (object, optional) {#elevations}
-
-* Default: `null`
-
-Elevations as a CPU-readable Arrow column in source feature order. Requires `cells`
-and the same row count. Each value applies to all cells in that feature. Null values are unsupported.
+The elevation of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
 
 ## Sub Layers

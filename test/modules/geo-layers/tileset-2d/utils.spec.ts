@@ -16,7 +16,7 @@ import {createTestViewport} from '../../core/viewports/test-crs';
 import {
   WebMercatorViewport,
   OrthographicView,
-  _GlobeView as GlobeView,
+  GlobeView,
   _CustomProjectionView as CustomProjectionView
 } from '@deck.gl/core';
 

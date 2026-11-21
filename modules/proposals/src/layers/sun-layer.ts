@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {_GlobeViewport, type DefaultProps} from '@deck.gl/core';
+import {GlobeViewport, type DefaultProps} from '@deck.gl/core';
 import type {NumberArray3} from '@math.gl/core';
 import {getSunPosition, getSkyDirection, getSunLight} from '@math.gl/earth/sun';
 import {SkyBodyLayer, type SkyBodyLayerProps} from './sky-body-layer';
@@ -34,7 +34,7 @@ export class SunLayer extends SkyBodyLayer<SunLayerProps> {
   }
   protected override getBodyColor(): NumberArray3 {
     const altitude =
-      this.context.viewport instanceof _GlobeViewport
+      this.context.viewport instanceof GlobeViewport
         ? Math.PI / 2
         : Math.asin(this.getBodyDirection()[2]);
     const light = getSunLight(altitude);

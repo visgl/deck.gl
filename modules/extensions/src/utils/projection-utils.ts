@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {WebMercatorViewport, OrthographicViewport, _GlobeViewport} from '@deck.gl/core';
+import {WebMercatorViewport, OrthographicViewport, GlobeViewport} from '@deck.gl/core';
 import type {Layer, ProjectUniforms, Viewport} from '@deck.gl/core';
 import {vec3} from '@math.gl/core';
 import {vec4} from '@math.gl/core';
@@ -42,7 +42,7 @@ export function getMercatorReferenceViewport(viewport: Viewport): Viewport {
 
 /** False only for GlobeViewport, whose common space is a sphere. The single globe check in this module. */
 export function isFlatViewport(viewport: Viewport): boolean {
-  return !(viewport instanceof _GlobeViewport);
+  return !(viewport instanceof GlobeViewport);
 }
 
 /** Per-call overrides of the layer's coordinateSystem, coordinateOrigin and modelMatrix */
