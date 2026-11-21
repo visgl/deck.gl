@@ -65,9 +65,14 @@ describe('optional GPU Graph deck.gl integration package isolation', () => {
       peerDependencies?: Record<string, string>;
     };
 
+    // Track the luma.gl version that @deck.gl/core pins, so luma.gl upgrades need no edit here
+    const lumaVersion = JSON.parse(
+      readFileSync(new URL('../../../core/package.json', import.meta.url), 'utf8')
+    ).dependencies['@luma.gl/core'];
+
     expect(packageJson.private).toBe(true);
     expect(packageJson.dependencies?.['@deck.gl/core']).toContain('9.4.0');
-    expect(packageJson.dependencies?.['@luma.gl/graph']).toContain('10.0.0-beta.1');
+    expect(packageJson.dependencies?.['@luma.gl/graph']).toBe(lumaVersion);
     expect(packageJson.dependencies?.['@luma.gl/gpgpu']).toBeUndefined();
     expect(packageJson.dependencies?.['@luma.gl/tables']).toBeUndefined();
   });
