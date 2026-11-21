@@ -5,7 +5,7 @@
 import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect, vi} from 'vitest';
 
-import {GlobeViewport} from '@deck.gl/core';
+import {GlobeViewport, LayerExtension} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import {device, testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
 import {Timeline} from '@luma.gl/engine';
@@ -359,6 +359,99 @@ test('adaptive bitmap rebuilds on modelMatrix changes and disabling refinement',
           expect(layer.state.mesh.projectedPositions).toBeUndefined();
           expect(layer.state.mesh.positions.length).toBe(12);
           expect(layer.getAttributeManager()!.attributes.positions.value[0]).toBe(2);
+        }
+      }
+    ]
+  });
+});
+
+test('BitmapLayer keeps its projected mesh when bounds are equal by value', () => {
+  let forward = 0;
+  const viewport = createTestViewport({
+    converter: {
+      forward: ([x, y, z = 0]) => {
+        forward++;
+        return [x, y + x * x, z];
+      },
+      inverse: ([x, y, z = 0]) => [x, y - x * x, z]
+    }
+  });
+  const corners = () => [
+    [0, 0],
+    [0, 2],
+    [3, 3],
+    [2, 0]
+  ];
+  let initialCalls = 0;
+  testLayer({
+    Layer: BitmapLayer,
+    viewport,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {bounds: corners(), _projectionTolerance: 0.05},
+        onAfterUpdate() {
+          initialCalls = forward;
+          expect(initialCalls).toBeGreaterThan(0);
+        }
+      },
+      {
+        // Tile layers render sublayers with a new bounds array on each update.
+        updateProps: {bounds: corners(), opacity: 0.5},
+        onAfterUpdate({layer, oldState}) {
+          expect(layer.state.mesh).toBe(oldState.mesh);
+          expect(forward).toBe(initialCalls);
+        }
+      },
+      {
+        updateProps: {bounds: [0, 0, 1, 1]},
+        onAfterUpdate({layer, oldState}) {
+          expect(layer.state.mesh).not.toBe(oldState.mesh);
+        }
+      },
+      {
+        updateProps: {bounds: [0, 0, 1, 1]},
+        onAfterUpdate({layer, oldState}) {
+          expect(layer.state.mesh).toBe(oldState.mesh);
+        }
+      },
+      {
+        updateProps: {bounds: [0, 0, 1, 2]},
+        onAfterUpdate({layer, oldState}) {
+          expect(layer.state.mesh).not.toBe(oldState.mesh);
+          expect(Math.max(...layer.state.mesh.positions)).toBe(2);
+        }
+      }
+    ]
+  });
+});
+
+test('BitmapLayer keeps its draw count when extensions change and bounds are equal by value', () => {
+  class TestExtension extends LayerExtension {
+    static extensionName = 'TestExtension';
+  }
+  const bounds = () => [0, 0, 1, 1];
+  testLayer({
+    Layer: BitmapLayer,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {bounds: bounds()},
+        onAfterUpdate({layer}) {
+          expect(layer.state.model.vertexCount).toBe(layer.state.mesh.vertexCount);
+        }
+      },
+      {
+        updateProps: {bounds: bounds(), extensions: [new TestExtension()]},
+        onAfterUpdate({layer, oldState}) {
+          expect(layer.state.mesh).toBe(oldState.mesh);
+          expect(layer.state.model).not.toBe(oldState.model);
+          expect(layer.state.model.vertexCount).toBe(layer.state.mesh.vertexCount);
+          expect(layer.state.model.vertexCount).toBeGreaterThan(0);
         }
       }
     ]
