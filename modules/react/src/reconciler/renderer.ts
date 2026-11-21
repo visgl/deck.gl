@@ -133,6 +133,14 @@ const DESCRIPTOR_PROPS = new Set(['effects', 'layers', 'views', 'widgets']);
 const ROOT_MANAGED_PROPS = new Set(['canvas', 'id', 'interleaved', 'parent']);
 
 /**
+ * Props whose default a live Deck can't take, so the root keeps them when they are removed.
+ * `Deck.setProps` only swaps in a new `device`, so a `null` one would leave Deck rendering with its
+ * device while its props said otherwise. `_canvases` chose single- or multi-canvas mode, and
+ * `Deck.setProps` asserts that the mode never changes.
+ */
+const KEPT_ON_REMOVAL_PROPS = new Set(['_canvases', 'device']);
+
+/**
  * Props that deck.gl reads only when it creates its device, canvas or event manager. Changing
  * them later has no effect, so the root leaves them alone and warns in development builds. See
  * the "Props that only apply at creation" section of the `DeckGL` docs.
@@ -157,7 +165,10 @@ const CREATION_ONLY_DOCS =
 
 function isResetOnRemoval(key: string): boolean {
   return (
-    !DESCRIPTOR_PROPS.has(key) && !ROOT_MANAGED_PROPS.has(key) && !CREATION_ONLY_PROPS.has(key)
+    !DESCRIPTOR_PROPS.has(key) &&
+    !ROOT_MANAGED_PROPS.has(key) &&
+    !CREATION_ONLY_PROPS.has(key) &&
+    !KEPT_ON_REMOVAL_PROPS.has(key)
   );
 }
 

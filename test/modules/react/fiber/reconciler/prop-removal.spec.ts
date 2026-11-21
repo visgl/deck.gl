@@ -157,17 +157,17 @@ describe('removing a prop', () => {
     }
   });
 
-  it('resets device and _canvases, which deck.gl applies after creation', () => {
+  it('keeps device and _canvases, whose defaults a live Deck cannot take', () => {
+    // `Deck.setProps` ignores a `null` device and asserts that `_canvases` never changes between
+    // single- and multi-canvas mode.
     const device = {id: 'device'};
     const {deck, root} = setup({_canvases: [], device: device as never});
 
     root.configure({});
 
     const props = lastSetProps(deck);
-    expect(Object.hasOwn(props, 'device')).toBe(true);
-    expect(props.device).toBe(Deck.defaultProps.device);
-    expect(Object.hasOwn(props, '_canvases')).toBe(true);
-    expect(props._canvases).toBe(Deck.defaultProps._canvases);
+    expect(Object.hasOwn(props, 'device')).toBe(false);
+    expect(Object.hasOwn(props, '_canvases')).toBe(false);
   });
 
   it('does not reset the layers, views, widgets or effects props, which the root merges with JSX', () => {
