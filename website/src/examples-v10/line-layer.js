@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, {Component} from 'react';
-import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
+import {_ColorScaleWidget, _StatsWidget as StatsWidget} from '@deck.gl/widgets';
 import {readableInteger} from '../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
 import App from 'v10-website-examples/line/app';
@@ -61,7 +61,10 @@ class LineDemo extends Component {
     /** Provides params, data, ...other props for the example. */
     const {params, onStateChange, ...otherProps} = this.props;
     /** Provides widgets for the example. */
-    const widgets = [new StatsWidget({type: 'device'})];
+    const widgets = [
+      new StatsWidget({type: 'device'}),
+      new _ColorScaleWidget({label: 'Flight altitude', placement: 'bottom-right'})
+    ];
 
     return (
       <App
