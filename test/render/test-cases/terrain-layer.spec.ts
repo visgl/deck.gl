@@ -24,7 +24,7 @@ const DECODER = {
   offset: -32768 * 4
 };
 
-function waitAfterDefaultCompletion(waitMs = 0) {
+function waitAfterDefaultCompletion(waitMs = 0, {untilSettled = false} = {}) {
   let doneScheduled = false;
 
   return ({deck, layers, done}) => {
@@ -33,8 +33,11 @@ function waitAfterDefaultCompletion(waitMs = 0) {
     // @ts-expect-error Accessing protected layerManager in test code
     const needsUpdate = deck.layerManager?.needsUpdate();
     const allLoaded = layers.every(layer => layer.isLoaded);
+    // Optionally also wait for a frame that requests no further redraw, so a layer that
+    // re-updates on every frame times out instead of being captured mid-loop
+    const settled = !untilSettled || !deck.needsRedraw();
 
-    if (!needsUpdate && allLoaded && !doneScheduled) {
+    if (!needsUpdate && allLoaded && settled && !doneScheduled) {
       doneScheduled = true;
       if (waitMs > 0) {
         setTimeout(done, waitMs);
@@ -92,8 +95,7 @@ const testCases = [
   {
     // terrain-extension-drape in GlobeView, without outlines.
     // Golden: the same choropleth fills draped over the terrain, on the globe.
-    // No stroke: a draped PathLayer on GlobeView re-tessellates every frame, so the screenshot
-    // never settles.
+    // Fills only, so the case also runs on WebGPU; terrain-extension-drape-globe adds strokes.
     name: 'terrain-extension-drape-fill-globe',
     views: new GlobeView({resolution: 36}),
     viewState: {
@@ -120,6 +122,37 @@ const testCases = [
     onAfterRender: waitAfterDefaultCompletion(500),
     imageDiffOptions: {threshold: 0.985},
     goldenImage: './test/render/golden-images/terrain-extension-drape-fill-globe.png'
+  },
+  {
+    // Golden: choropleth fills and strokes draped over terrain in GlobeView.
+    // Wait for redraws to stop so repeated terrain cover updates fail the test.
+    name: 'terrain-extension-drape-globe',
+    skip: ['webgpu'],
+    views: new GlobeView({resolution: 36}),
+    viewState: {
+      longitude: -122.45,
+      latitude: 37.75,
+      zoom: 11.5,
+      pitch: 60,
+      bearing: 0
+    },
+    layers: [
+      new TerrainLayer({
+        elevationData: ELEVATION_DATA,
+        texture: TEXTURE,
+        elevationDecoder: DECODER,
+        operation: 'draw+terrain'
+      }),
+      new GeoJsonLayer({
+        data: choropleths,
+        getLineWidth: 50,
+        getFillColor: (_, {index}) => [(index % 3) * 80, (index % 2) * 128, 128, 200],
+        extensions: [new TerrainExtension()]
+      })
+    ],
+    onAfterRender: waitAfterDefaultCompletion(500, {untilSettled: true}),
+    imageDiffOptions: {threshold: 0.985},
+    goldenImage: './test/render/golden-images/terrain-extension-drape-globe.png'
   },
   {
     name: 'terrain-extension-offset',

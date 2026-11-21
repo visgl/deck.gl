@@ -5,7 +5,7 @@
 import {clipInstancePlugin, clipGeometryPlugin} from './shader-module';
 import {LayerExtension, project} from '@deck.gl/core';
 
-import type {Layer} from '@deck.gl/core';
+import type {Layer, Viewport} from '@deck.gl/core';
 import {projectBoundsToFlatCommon, TILE_SIZE} from '../utils/projection-utils';
 
 const defaultProps = {
@@ -51,10 +51,17 @@ export default class ClipExtension extends LayerExtension {
     return {plugins: [clipByInstance ? clipInstancePlugin : clipGeometryPlugin]};
   }
 
-  /** Supply the same clip bounds to render and accumulation passes. */
-  getAggregationShaderProps(this: Layer<Required<ClipExtensionProps>>): {clip: ClipModuleProps} {
+  /**
+   * Supply the same clip bounds to render and accumulation passes. Bounds are projected with the
+   * viewport being drawn, which differs from the context's in auxiliary passes such as terrain covers.
+   */
+  getAggregationShaderProps(
+    this: Layer<Required<ClipExtensionProps>>,
+    extension: this,
+    shaderModuleProps?: any
+  ): {clip: ClipModuleProps} {
     const {clipBounds} = this.props;
-    const {viewport} = this.context;
+    const viewport: Viewport = shaderModuleProps?.project?.viewport ?? this.context.viewport;
     const clipProps = {worldWidth: 0} as ClipModuleProps;
     if (this.state.clipByInstance) {
       // Instance shaders see packed attributes. Match their CPU conversion when
@@ -74,7 +81,7 @@ export default class ClipExtension extends LayerExtension {
       }
     } else {
       // Pairs with project_common_position_to_flat_continuous() in the vertex shader
-      clipProps.bounds = projectBoundsToFlatCommon(this, clipBounds);
+      clipProps.bounds = projectBoundsToFlatCommon(this, clipBounds, {viewport});
       if (viewport.isGeospatial && !project.isCustomProjection(viewport)) {
         clipProps.worldWidth = TILE_SIZE;
       }
@@ -84,7 +91,9 @@ export default class ClipExtension extends LayerExtension {
   }
 
   /** Update the clip uniforms for ordinary layer draws. */
-  draw(this: Layer<Required<ClipExtensionProps>>, params: unknown, extension: this): void {
-    this.setShaderModuleProps(extension.getAggregationShaderProps.call(this));
+  draw(this: Layer<Required<ClipExtensionProps>>, {shaderModuleProps}: any, extension: this): void {
+    this.setShaderModuleProps(
+      extension.getAggregationShaderProps.call(this, extension, shaderModuleProps)
+    );
   }
 }

@@ -30,6 +30,23 @@ export function supportsSourceCRS(
   }
 }
 
+/** Identify the source-to-packed conversion, the only part of a viewport that affects attributes.
+ * Camera precision, target common space and subdivision are handled separately from packing. */
+export function getPreprojectionSignature(
+  viewport: Viewport,
+  sourceCrs: CRSDescriptor | null
+): string {
+  const needsPreprojection = !supportsSourceCRS(viewport.projectionMode, sourceCrs, viewport.crs);
+  return JSON.stringify([
+    sourceCrs?.signature,
+    needsPreprojection
+      ? viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL
+        ? viewport.crs?.signature
+        : 'WGS84'
+      : null
+  ]);
+}
+
 /** Resolve the absolute input CRS of a project operation after default/offset aliases. */
 export function getSourceCRS(
   coordinateSystem: CoordinateSystem,

@@ -51,6 +51,7 @@ export class TerrainPass extends LayersPass {
       pass: 'terrain-height-map',
       layers: opts.layers!,
       viewports: [viewport],
+      isAuxiliaryPass: true,
       effects: [],
       clearColor: [0, 0, 0, 0]
     });
@@ -74,6 +75,7 @@ export class TerrainPass extends LayersPass {
       pass: `terrain-cover-${terrainCover.id}`,
       layers,
       viewports: [viewport],
+      isAuxiliaryPass: true,
       clearColor: [0, 0, 0, 0]
     });
   }
