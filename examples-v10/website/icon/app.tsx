@@ -8,7 +8,7 @@ import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
 import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
-import {tableFromArrays} from 'apache-arrow';
+import {tableFromJSON, type Table} from 'apache-arrow';
 import {ParquetLoader} from '@loaders.gl/tables/parquet';
 import parquetWorkerUrl from '@loaders.gl/tables/parquet/parquet-worker.js?url';
 import {isArrowTable} from '@math.gl/core/arrow';
@@ -90,7 +90,7 @@ export default function App({
 }: {
   device?: Device;
   showCluster?: boolean;
-  data?: string | Meteorite[];
+  data?: string | Meteorite[] | Table;
   /** Called after data loads with the total row count, before visibility or filtering. */
   onDataLoad?: (count: number) => void;
   iconMapping?: string;
@@ -138,19 +138,14 @@ export default function App({
     : new IconLayer({
         ...layerProps,
         id: 'icon',
-        dataTransform: <LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT => {
-          if (!Array.isArray(source)) {
-            return source as LayerDataT;
-          }
-          return tableFromArrays({
-            coordinates: source.map(meteorite => meteorite.coordinates),
-            name: source.map(meteorite => meteorite.name),
-            class: source.map(meteorite => meteorite.class),
-            mass: source.map(meteorite => meteorite.mass),
-            year: source.map(meteorite => meteorite.year)
-          }) as LayerDataT;
-        },
-        getPosition: {sql: 'ARRAY_FLOAT64(coordinates[1], coordinates[2])'},
+        // JSON URLs can load row arrays. Parquet and direct Arrow tables pass through.
+        dataTransform: <LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT =>
+          (typeof data === 'string' && Array.isArray(source) && source.length > 0
+            ? tableFromJSON(source)
+            : source) as LayerDataT,
+        getPosition: Array.isArray(data)
+          ? layerProps.getPosition
+          : {sql: 'ARRAY_FLOAT64(coordinates[1], coordinates[2])'},
         getIcon: () => 'marker',
         sizeUnits: 'meters',
         sizeScale: 2000,
