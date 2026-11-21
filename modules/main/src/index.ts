@@ -21,9 +21,11 @@ export {
   OrbitView,
   OrthographicView,
   _CustomProjectionView,
+  GlobeView,
   _GlobeView,
   Viewport,
   WebMercatorViewport,
+  GlobeViewport,
   _GlobeViewport,
   OrbitViewport,
   OrthographicViewport,
@@ -36,6 +38,7 @@ export {
   FirstPersonController,
   OrthographicController,
   _CustomProjectionController,
+  GlobeController,
   _GlobeController,
   Attribute,
   AttributeManager,
@@ -97,7 +100,8 @@ export {
   HeatmapLayer,
   WebGLAggregator,
   CPUAggregator,
-  ReadbackAggregator
+  ReadbackAggregator,
+  _GraphScreenGridAggregator
 } from '@deck.gl/aggregation-layers';
 
 export {
@@ -133,7 +137,7 @@ export type {MapLibreOverlayProps} from '@deck.gl/maplibre';
 // REACT BINDINGS PACKAGE
 //
 
-export {default, DeckGL} from '@deck.gl/react';
+export {default, DeckGL} from '@deck.gl/react/legacy';
 
 //
 // WIDGETS PACKAGE
@@ -240,7 +244,7 @@ export type {
   TileLayerProps
 } from '@deck.gl/geo-layers';
 
-export type {DeckGLProps, DeckGLRef, DeckGLContextValue} from '@deck.gl/react';
+export type {DeckGLProps, DeckGLRef, DeckGLContextValue} from '@deck.gl/react/legacy';
 
 export type {
   FullscreenWidgetProps,

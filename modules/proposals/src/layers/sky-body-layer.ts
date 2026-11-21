@@ -5,7 +5,7 @@
 import {
   Layer,
   picking,
-  _GlobeViewport,
+  GlobeViewport,
   type DefaultProps,
   type LayerContext,
   type LayerProps,
@@ -189,7 +189,7 @@ export function getSkyBodyClipPosition(
   observer?: SkyObserver
 ): NumberArray4 | null {
   if (
-    (!(viewport instanceof _GlobeViewport) && direction[2] <= 0) ||
+    (!(viewport instanceof GlobeViewport) && direction[2] <= 0) ||
     viewport.projectionMatrix[15] !== 0
   )
     return null;

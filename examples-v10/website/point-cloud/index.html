@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='UTF-8' />
+    <title>point-cloud-example</title>
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 13px;
+        -webkit-font-smoothing: antialiased;
+        margin:0;
+        padding:0;
+        overflow:hidden;
+        background:#ecdbce;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+  <script type="module">
+    import {renderToDOM} from './app.tsx';
+    renderToDOM(document.getElementById('app'));
+  </script>
+</html>
