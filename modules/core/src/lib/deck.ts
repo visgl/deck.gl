@@ -378,7 +378,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   protected widgetManager: WidgetManager | null = null;
   protected tooltip: TooltipWidget | null = null;
   protected animationLoop: AnimationLoop | null = null;
+  /** Frame source for the animation loop, stops requesting frames while idle */
   private _frameProvider: OnDemandFrameProvider | null = null;
+  /** `true` if the transition timeline was paused when the loop went idle */
   private _isTimelinePausedWhileIdle: boolean = false;
   private _canvasContext: CanvasContext | null = null;
   private _deviceResizeHandler: {
@@ -2046,11 +2048,13 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   private _onInteractionStateChange(interactionState: InteractionState) {
     const isDragging = interactionState.isDragging || false;
-    if (this.cursorState.isDragging !== isDragging) {
-      this.cursorState.isDragging = isDragging;
+    const dragStateChanged = this.cursorState.isDragging !== isDragging;
+    this.cursorState.isDragging = isDragging;
+    this.props.onInteractionStateChange(interactionState);
+    // After the callback, so `getCursor` sees state it set. A drag can end without a redraw.
+    if (dragStateChanged) {
       this._updateCursor();
     }
-    this.props.onInteractionStateChange(interactionState);
   }
 
   /** Internal use only: event handler for click & drag */

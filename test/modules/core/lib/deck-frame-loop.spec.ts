@@ -144,6 +144,27 @@ test('Hover updates the cursor after the hover callbacks', async () => {
   deck.finalize();
 });
 
+test('Drag state changes update the cursor after onInteractionStateChange', async () => {
+  let dragging = false;
+  const {deck, frames} = await createIdleDeck({
+    onInteractionStateChange: state => {
+      dragging = Boolean(state.isDragging);
+    },
+    getCursor: () => (dragging ? 'grabbing' : 'grab')
+  });
+
+  // @ts-expect-error testing private method
+  deck._onInteractionStateChange({isDragging: true});
+  expect(deck.getCanvas()!.style.cursor, 'cursor reflects the new drag state').toBe('grabbing');
+
+  // @ts-expect-error testing private method
+  deck._onInteractionStateChange({isDragging: false});
+  expect(deck.getCanvas()!.style.cursor, 'cursor reflects the ended drag').toBe('grab');
+
+  await expectIdle(frames);
+  deck.finalize();
+});
+
 test('Default effect and shader changes wake the idle loop', async () => {
   const {deck, draws, frames} = await createIdleDeck();
   const module = {name: 'idle-test-module'};
