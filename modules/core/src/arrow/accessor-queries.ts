@@ -11,12 +11,9 @@ import {
   vectorFromArray,
   type Vector
 } from 'apache-arrow';
-import {
-  compileArrowScale,
-  compileArrowScales,
-  parseSQLScaleAST,
-  type ResolvedScale
-} from '@math.gl/sql/scales';
+import {compileArrowScale, compileArrowScales} from '@math.gl/sql/scales';
+import {parseSQLScaleAST} from '@math.gl/sql/parser';
+import type {ResolvedScale} from '@math.gl/core/color';
 import type {SQLFunctions, SQLParser} from '../types/layer-props';
 import {evaluateColumnExpression} from './column-constructors';
 import {isArrowTableAppend} from './column-query-append';

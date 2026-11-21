@@ -5,7 +5,7 @@
 import type {Device, RenderPass} from '@luma.gl/core';
 import {ClipSpace} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shaders';
-import type {NumberArray4} from '@math.gl/core';
+import type {NumberArray4} from '@math.gl/core/matrix';
 
 const maskedClear = {
   name: 'maskedClear',

@@ -10,7 +10,7 @@ import {TextLayer, PathLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {scaleLinear} from 'd3-scale';
 import {minIndex, maxIndex} from 'd3-array';
 import {sortData} from './sort-data';

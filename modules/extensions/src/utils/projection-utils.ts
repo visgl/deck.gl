@@ -4,9 +4,9 @@
 
 import {WebMercatorViewport, OrthographicViewport, GlobeViewport} from '@deck.gl/core';
 import type {Layer, ProjectUniforms, Viewport} from '@deck.gl/core';
-import {vec3} from '@math.gl/core';
-import {vec4} from '@math.gl/core';
-import type {NumericArray} from '@math.gl/core';
+import {vec3} from '@math.gl/core/matrix';
+import {vec4} from '@math.gl/core/matrix';
+import type {NumericArray} from '@math.gl/core/matrix';
 
 /** TILE_SIZE in the project shader module: the width of one world copy in flat common space */
 export const TILE_SIZE = 512;
@@ -47,7 +47,7 @@ export function isFlatViewport(viewport: Viewport): boolean {
 
 /** Per-call overrides of the layer's coordinateSystem, coordinateOrigin and modelMatrix */
 export type FlatProjectOptions = {
-  sourceCrs?: import('@math.gl/geospatial/projection/core').CRSDescriptor;
+  sourceCrs?: import('@math.gl/geospatial/projection-core').CRSDescriptor;
   coordinateSystem?: 'cartesian' | 'meter-offsets';
   coordinateOrigin?: [number, number, number];
   modelMatrix?: NumericArray | null;

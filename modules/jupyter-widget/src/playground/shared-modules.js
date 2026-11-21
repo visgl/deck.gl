@@ -22,7 +22,7 @@ import * as lumaShadertoolsWgsl from '@luma.gl/shaders/wgsl';
 import * as lumaWebgl from '@luma.gl/core/webgl';
 import * as lumaWebglConstants from '@luma.gl/core/webgl-constants';
 import * as loadersCore from '@loaders.gl/core';
-import * as mathCore from '@math.gl/core';
+import * as mathCore from '@math.gl/core/matrix';
 
 export const SHARED_MODULES = {
   '@deck.gl/core': deckCore,
@@ -39,7 +39,7 @@ export const SHARED_MODULES = {
   '@luma.gl/core/webgl': lumaWebgl,
   '@luma.gl/core/webgl-constants': lumaWebglConstants,
   '@loaders.gl/core': loadersCore,
-  '@math.gl/core': mathCore
+  '@math.gl/core/matrix': mathCore
 };
 
 // The re-exporting modules are blob URLs, so they read the namespaces from a global
