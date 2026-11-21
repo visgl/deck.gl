@@ -54,7 +54,6 @@ test('WebGPU Float32-backed fp64 transition uses a split buffer layout', async (
   expect(transition.attributeInTransition.getValue().instancePositions64Low).toBe(transitionBuffer);
 
   transition.delete();
-  transition.attributeInTransition.delete();
   transitionBuffer.destroy();
   clonedAttribute.delete();
   attribute.delete();
