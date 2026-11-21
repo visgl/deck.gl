@@ -68,7 +68,8 @@ export class WebGLBinSorter {
 
   setDimensions(binCount: number, binIdRange: [number, number][]) {
     const width = TEXTURE_WIDTH;
-    const height = Math.ceil(binCount / width);
+    // Framebuffer attachments must have a nonzero extent, even with no bins.
+    const height = Math.max(1, Math.ceil(binCount / width));
 
     // Only destroy existing texture if it is not large enough
     if (!this.binsFBO) {

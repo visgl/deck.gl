@@ -60,9 +60,6 @@ ${fragment}
 `;
 
 const inject = {
-  'glsl:vs:#decl': /* glsl */ `
-out vec2 mask_texCoords;
-`,
   'glsl:vs:#main-end': /* glsl */ `
    // Anchor (instance) or vertex position in common space, then flattened to the space the
    // mask texture was rendered in (Mercator for geospatial views, identity otherwise)
@@ -70,9 +67,6 @@ out vec2 mask_texCoords;
      ? project_position(vec4(geometry.worldPosition, 1.0))
      : geometry.position;
    mask_texCoords = mask_getCoords(project_common_position_to_flat(mask_common_position));
-`,
-  'glsl:fs:#decl': /* glsl */ `
-in vec2 mask_texCoords;
 `,
   'glsl:fs:#main-start': /* glsl */ `
   if (mask.enabled) {
@@ -111,11 +105,25 @@ const getMaskUniforms = (opts?: MaskProps | {}): Record<string, any> => {
   return opts || {};
 };
 
+const source = /* wgsl */ `
+struct MaskUniforms {
+  bounds: vec4<f32>,
+  channel: i32,
+  enabled: i32,
+  inverted: i32,
+  maskByInstance: i32,
+};
+@group(0) @binding(auto) var<uniform> mask: MaskUniforms;
+@group(0) @binding(auto) var mask_texture: texture_2d<f32>;
+@group(0) @binding(auto) var mask_textureSampler: sampler;
+`;
+
 const maskModule = {
   name: 'mask',
   dependencies: [project],
   vs,
   fs,
+  source,
   getUniforms: getMaskUniforms,
   uniformTypes: {
     bounds: 'vec4<f32>',
@@ -126,6 +134,56 @@ const maskModule = {
   }
 } as const satisfies ShaderModule<MaskProps>;
 
-export const maskPlugin: ShaderPlugin = {name: 'mask', module: maskModule, injections: inject};
+export const maskPlugin: ShaderPlugin = {
+  name: 'mask',
+  module: maskModule,
+  interStageVariables: {
+    mask_texCoords: {type: 'vec2<f32>'},
+    mask_commonPosition: {type: 'vec3<f32>'}
+  },
+  injections: {
+    ...inject,
+    'wgsl:vs:DECKGL_FILTER_GL_POSITION': /* wgsl */ `
+if (mask.enabled != 0) {
+  var commonPosition = geometry.position;
+  if (mask.maskByInstance != 0) {
+    commonPosition = vec4<f32>(project_position_vec3_f64(geometry.worldPosition, vec3<f32>(0.0)), 1.0);
+  } else {
+    // Billboard corners may only offset clip space; recover their common-space position.
+    let matrix = project.viewProjectionMatrix;
+    let rowX = vec3<f32>(matrix[0].x, matrix[1].x, matrix[2].x);
+    let rowY = vec3<f32>(matrix[0].y, matrix[1].y, matrix[2].y);
+    let rowZ = vec3<f32>(matrix[0].z, matrix[1].z, matrix[2].z);
+    let rowW = vec3<f32>(matrix[0].w, matrix[1].w, matrix[2].w);
+    let perspective = dot(rowW, rowW) > 0.0;
+    let depthRow = select(rowZ, rowW, perspective);
+    let projected = project_common_position_to_clipspace(geometry.position);
+    let delta = (*position).xy - projected.xy;
+    let depthDelta = select(2.0 * ((*position).z - projected.z),
+      (*position).w - projected.w, perspective);
+    let determinant = dot(rowX, cross(rowY, depthRow));
+    if (abs(determinant) > 0.0) {
+      commonPosition = vec4<f32>(commonPosition.xyz +
+        (cross(rowY, depthRow) * delta.x + cross(depthRow, rowX) * delta.y +
+          cross(rowX, rowY) * depthDelta) / determinant, commonPosition.w);
+    }
+  }
+  mask_commonPosition = commonPosition.xyz;
+}
+`,
+    'wgsl:fs:DECKGL_FILTER_COLOR': /* wgsl */ `
+if (mask.enabled != 0) {
+  // Wrap after interpolation so no triangle interpolates across a longitude seam.
+  let flatPosition = project_common_position_to_flat_continuous(
+    mask_commonPosition, 0.5 * (mask.bounds.x + mask.bounds.z)
+  );
+  let coords = (flatPosition - mask.bounds.xy) / (mask.bounds.zw - mask.bounds.xy);
+  let maskColor = textureSampleLevel(mask_texture, mask_textureSampler, vec2<f32>(coords.x, 1.0 - coords.y), 0.0);
+  let inside = maskColor[u32(mask.channel)] < 0.5;
+  if (inside == (mask.inverted != 0)) { discard; }
+}
+`
+  }
+};
 
 export default maskModule;

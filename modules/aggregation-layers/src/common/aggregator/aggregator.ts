@@ -3,8 +3,20 @@
 // Copyright (c) vis.gl contributors
 
 import type {Attribute, BinaryAttribute} from '@deck.gl/core';
-import type {Device} from '@luma.gl/core';
-import type {GPUVector} from '@luma.gl/graph/gpu-data';
+import type {BufferLayout, Device} from '@luma.gl/core';
+import type {GPUConstant, GPUVector} from '@luma.gl/graph/gpu-data';
+import type {ModelProps} from '@luma.gl/engine';
+
+/** Layer-owned shader hooks and current attribute bindings for an aggregator. */
+export type AggregationShaderContext = {
+  /** Input shader plugins and their module dependencies. */
+  shaders: Pick<ModelProps, 'plugins' | 'shaderAssembler' | 'modules' | 'defines'>;
+  /** Resolve bindings from the current layer after attribute updates. */
+  getAttributeBindings: () => {
+    attributes: Record<string, GPUVector | GPUConstant>;
+    bufferLayouts: BufferLayout[];
+  };
+};
 
 /** Borrowed aggregation output; vectors use single-chunk float32 scalar/XY storage. */
 export type AggregationResult = BinaryAttribute | GPUVector;
@@ -14,6 +26,8 @@ export type AggregationOperation = 'SUM' | 'MEAN' | 'MIN' | 'MAX' | 'COUNT';
 
 /** Baseline inputs to an Aggregator */
 export type AggregationProps = {
+  /** Request asynchronous CPU metadata for domains, picking, and distribution scales. */
+  readback?: boolean;
   /** Number of data points */
   pointCount: number;
   /** Dense bin ranges, with inclusive starts and exclusive ends. */
@@ -30,6 +44,10 @@ export type AggregationProps = {
   operations: AggregationOperation[];
   /** Additional options to control bin sorting, e.g. bin size */
   binOptions: Record<string, number | number[]>;
+  /** Report an asynchronous backend failure to the owning layer. */
+  onError?: (error: Error) => void;
+  /** Request another draw, for example after a transient asynchronous failure. */
+  onNeedsRedraw?: () => void;
   /** Callback after a channel is updated */
   onUpdate?: (event: {channel: number}) => void;
 };
@@ -67,8 +85,16 @@ export type AggregatedBin = {
  *
  */
 export interface Aggregator {
+  /** Set to false to reject layer shader extensions. Unspecified preserves existing behavior. */
+  readonly supportsExtensions?: boolean;
+  /** Set to true if borrowed position vectors must already use the view coordinate system. */
+  readonly requiresProjectedPositions?: boolean;
+  /** Whether output and requested asynchronous metadata are ready. */
+  readonly isLoaded?: boolean;
   /** Called once when the layer adopts this instance, before setProps. */
   initialize?(device: Device): void;
+  /** Called after initialization and when layer extensions change. Bindings remain layer-owned. */
+  setShaderContext?(context: AggregationShaderContext): void;
 
   /** Update aggregation props */
   setProps(props: Partial<AggregationProps>): void;
@@ -95,6 +121,9 @@ export interface Aggregator {
 
   /** Returns an accessor to the output for a given channel. */
   getResult(channel: number): AggregationResult | null;
+
+  /** Optional completed CPU snapshot for distribution scales; GPU outputs stay borrowed. */
+  getResultValues?(channel: number): Float32Array | null;
 
   /** Returns the [min, max] of aggregated values for a given channel. */
   getResultDomain(channel: number): [min: number, max: number];

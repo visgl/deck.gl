@@ -8,7 +8,7 @@ import debug from '../debug/index';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
 import type {RenderStats} from '../passes/layers-pass';
-import type {Stats} from '@probe.gl/stats';
+import type {Stats} from 'probe.gl/stats';
 import type Layer from './layer';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
@@ -27,6 +27,8 @@ export default class DeckRenderer {
   pickLayersPass: PickLayersPass;
   stats?: Stats;
 
+  /** Whether view clear colors use 0–1 channels. */
+  private normalizedColors = false;
   private renderCount: number;
   private _needsRedraw: string | false;
   private renderBuffers: Framebuffer[];
@@ -45,7 +47,17 @@ export default class DeckRenderer {
     this.lastPostProcessEffect = null;
   }
 
-  setProps(props: {layerFilter: LayerFilter; drawPickingColors: boolean}) {
+  setProps(props: {
+    layerFilter: LayerFilter;
+    drawPickingColors: boolean;
+    normalizedColors?: boolean;
+  }) {
+    const normalizedColors = props.normalizedColors ?? false;
+    if (this.normalizedColors !== normalizedColors) {
+      this.normalizedColors = normalizedColors;
+      this._needsRedraw = 'normalizedColors changed';
+    }
+
     if (this.layerFilter !== props.layerFilter) {
       this.layerFilter = props.layerFilter;
       this._needsRedraw = 'layerFilter changed';
@@ -63,6 +75,8 @@ export default class DeckRenderer {
     viewports: Viewport[];
     views: {[viewId: string]: View};
     onViewportActive: (viewport: Viewport) => void;
+    /** Reports screen-layer eligibility to the caller. */
+    onLayerEligible?: LayersPassRenderOptions['onLayerEligible'];
     effects: Effect[];
     target?: Framebuffer | null;
     canvasContext?: CanvasContext | PresentationContext;
@@ -75,6 +89,7 @@ export default class DeckRenderer {
     const renderOpts: LayersPassRenderOptions = {
       layerFilter: this.layerFilter,
       isPicking: this.drawPickingColors,
+      normalizedColors: this.normalizedColors,
       ...opts
     };
 

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {afterEach, test, expect, vi} from 'vitest';
-import {Stats} from '@probe.gl/stats';
+import {Stats} from 'probe.gl/stats';
 import {luma} from '@luma.gl/core';
 import {_StatsWidget as StatsWidget} from '@deck.gl/widgets';
 import {DEFAULT_FORMATTERS} from '../../../modules/widgets/src/stats-widget';

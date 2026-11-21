@@ -3,16 +3,16 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {MapView, _GlobeView} from '@deck.gl/core';
-import {createWeatherScene} from '../../../../examples/proposals/weather/app';
-import {createRiverfrontSoftShadowScene} from '../../../../examples/proposals/soft-shadows/app';
-import {createGlobeCloudScene} from '../../../../examples/proposals/globe-clouds/app';
-import {createCityScene} from '../../../../examples/proposals/city-scene/app';
-import {createRiverfrontLightingScene} from '../../../../examples/proposals/riverfront-lighting-scene';
+import {MapView, GlobeView} from '@deck.gl/core';
+import {createWeatherScene} from '../../../../examples-v10/proposals/weather/app';
+import {createRiverfrontSoftShadowScene} from '../../../../examples-v10/proposals/soft-shadows/app';
+import {createGlobeCloudScene} from '../../../../examples-v10/proposals/globe-clouds/app';
+import {createCityScene} from '../../../../examples-v10/proposals/city-scene/app';
+import {createRiverfrontLightingScene} from '../../../../examples-v10/proposals/riverfront-lighting-scene';
 import {
   getSkyCameraState,
   SKY_FIELD_OF_VIEW
-} from '../../../../examples/proposals/soft-shadows/sky-camera';
+} from '../../../../examples-v10/proposals/soft-shadows/sky-camera';
 
 vi.mock('@deck.gl/core', async importOriginal => ({
   ...(await importOriginal<object>()),
@@ -36,7 +36,7 @@ test('weather preserves its sky field of view after a globe round trip', () => {
     const initial = scene.deck.props.views as MapView;
     expect(initial.props.fovy).toBe(SKY_FIELD_OF_VIEW);
     scene.setProjection('globe');
-    expect(scene.deck.props.views).toBeInstanceOf(_GlobeView);
+    expect(scene.deck.props.views).toBeInstanceOf(GlobeView);
     scene.setProjection('map');
     const restored = scene.deck.props.views as MapView;
     expect(restored).toBeInstanceOf(MapView);

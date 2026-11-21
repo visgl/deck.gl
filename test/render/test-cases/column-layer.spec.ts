@@ -187,7 +187,7 @@ for (const name of ['column-lnglat-extruded-wireframe', 'column-lnglat-flat-stro
     name: name + '-arrow',
     layers: [
       original.layers[0].clone({
-        positions: column(hexagons.slice(0, midpoint)).concat(column(hexagons.slice(midpoint)))
+        getPosition: column(hexagons.slice(0, midpoint)).concat(column(hexagons.slice(midpoint)))
       })
     ]
   });

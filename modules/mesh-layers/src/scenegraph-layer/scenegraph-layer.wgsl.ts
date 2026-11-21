@@ -38,7 +38,7 @@ fn vertexMain(
   var outputs: FragmentInputs;
 
   geometry.worldPosition = inputs.instancePositions;
-  geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex);
+  geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex + u32(scenegraph.rowIndexOffset));
 
   var vertexPosition = inputs.positions;
   var texCoord = vec2<f32>(0.0, 0.0);
