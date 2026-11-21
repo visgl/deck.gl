@@ -5,7 +5,7 @@
 import Viewport, {type ViewportOptions} from './viewport';
 import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import {OSM_TILE_CRS, getMercatorScales} from './web-mercator-util';
-import {getMeterZoom} from '@math.gl/web-mercator';
+import {getMeterZoom} from '@math.gl/geospatial/web-mercator';
 import {Matrix4, Vector3, SphericalCoordinates} from '@math.gl/core';
 
 export type FirstPersonViewportOptions = {

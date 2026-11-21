@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {picking, type ShaderModule, type ShaderPlugin} from '@luma.gl/shaders';
+import {picking, normalizeByteColor4, type ShaderModule, type ShaderPlugin} from '@luma.gl/shaders';
 import log from '../../utils/log';
 
 export const PICKING_MAX_DISABLED_INDICES = 10;
@@ -142,6 +142,12 @@ fn picking_getPickingColorFromIndex(objectIndex: u32) -> vec3<f32> {
 }
 `;
 
+/** Picking inputs with a separate convention for semantic highlight colors. */
+export type PickingProps = import('@luma.gl/shaders').PickingProps & {
+  /** Interpret highlightColor as normalized without changing picking ID decoding. */
+  normalizedHighlightColor?: boolean;
+};
+
 const pickingModule: ShaderModule = {
   ...picking,
   vs: `${addPickingUniformsGLSL(picking.vs)}\n${pickingHelpersGLSL}`,
@@ -163,7 +169,21 @@ const pickingModule: ShaderModule = {
     disabledPickingIndices2: [0, 0, 0, 0]
   },
   getUniforms(props, prevUniforms) {
-    const uniforms = picking.getUniforms(props, prevUniforms) as any;
+    // Decode semantic highlight colors separately from byte-encoded picking IDs.
+    const {highlightColor, normalizedHighlightColor, ...pickingProps} = props;
+    const uniforms = picking.getUniforms(pickingProps, prevUniforms) as any;
+    if (highlightColor) {
+      const useByteColors = !normalizedHighlightColor && (props.useByteColors ?? true);
+      uniforms.highlightColor = normalizeByteColor4(
+        [
+          highlightColor[0],
+          highlightColor[1],
+          highlightColor[2],
+          highlightColor[3] ?? (useByteColors ? 255 : 1)
+        ],
+        useByteColors
+      );
+    }
     const disabledPickingIndices = props.disabledPickingIndices || [];
     uniforms.disabledPickingIndexCount = disabledPickingIndices.length;
     uniforms.disabledPickingIndices0 = packDisabledPickingIndices(disabledPickingIndices, 0);

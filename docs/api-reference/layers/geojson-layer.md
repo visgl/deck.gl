@@ -222,6 +222,12 @@ only the area between the outer polygon and any holes will be filled. This
 prop is effective only when the polygon is NOT extruded.
 
 
+With Deck's [`normalizedColors`](../core/deck.md#normalizedcolors), plain-array color
+accessors on a top-level GeoJsonLayer use 0–1 channels. This includes constants and
+callback results for fills, strokes, icons, and text colors. Omitted alpha is opaque.
+The layer converts these colors to bytes before forwarding them to its sublayers.
+Built-in defaults, typed arrays, and binary attributes keep their existing encoding.
+
 #### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`

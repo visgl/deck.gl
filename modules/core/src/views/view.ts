@@ -44,7 +44,7 @@ export type CommonViewProps<ViewState> = {
   } | null;
   /** When using multiple views, set this flag to wipe the pixels drawn by other overlapping views. Default `false` */
   clear?: boolean;
-  /** Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0-255. Default `[0, 0, 0, 0]` (transparent). */
+  /** Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0–255 by default or 0–1 with Deck's normalizedColors. Default `[0, 0, 0, 0]` (transparent). */
   clearColor?: number[] | false;
   /** Depth buffer value to clear the viewport with, between 0.0 - 1.0. Default `1.0` (far plane). */
   clearDepth?: number | false;

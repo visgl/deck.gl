@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, it} from 'vitest';
-import {WebMercatorViewport, _GlobeViewport, project32} from '@deck.gl/core';
+import {WebMercatorViewport, GlobeViewport, project32} from '@deck.gl/core';
 import {Buffer, Texture} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import {getTestDevice} from '@luma.gl/core/test-utils';
@@ -61,8 +61,8 @@ for (const backend of ['webgpu', 'webgl'] as const) {
       usage: Buffer.COPY_DST | Buffer.MAP_READ
     });
     try {
-      for (const ViewportType of [WebMercatorViewport, _GlobeViewport]) {
-        for (const latitude of ViewportType === _GlobeViewport
+      for (const ViewportType of [WebMercatorViewport, GlobeViewport]) {
+        for (const latitude of ViewportType === GlobeViewport
           ? [-90, -70, 0, 40.7, 70, 90]
           : [-70, 0, 40.7, 70]) {
           const coordinateOrigin: [number, number, number] = [20, latitude, 100];
@@ -105,7 +105,7 @@ for (const backend of ['webgpu', 'webgl'] as const) {
           const common = new Float32Array(bytes.buffer, bytes.byteOffset, 4);
           const origin = viewport.projectPosition(coordinateOrigin);
           viewport.cameraPosition.forEach((value, index) => {
-            const expected = viewport instanceof _GlobeViewport ? value : value - origin[index];
+            const expected = viewport instanceof GlobeViewport ? value : value - origin[index];
             expect(common[index]).toBeCloseTo(expected, 4);
           });
           expect(

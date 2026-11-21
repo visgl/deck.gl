@@ -6,7 +6,30 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
-### luma.gl v10 alpha.10
+### GlobeView
+
+`GlobeView`, `GlobeViewport` and `GlobeController` are no longer experimental. Import them without the underscore. `_GlobeView`, `_GlobeViewport` and `_GlobeController` remain as deprecated aliases of the same classes and will be removed in a future major release.
+
+### SQL accessor functions
+
+math.gl now provides `LIST_EXTRACT` and `STRUCT_EXTRACT`. Rename custom declarations
+that use either reserved name and update their SQL call sites.
+
+### View clear color alpha
+
+A View's [`clearColor`](./api-reference/core/view.md#clearcolor) with an explicit zero alpha,
+such as `[0, 0, 0, 0]`, now clears to transparent. Previously a zero alpha cleared to
+opaque. To keep an opaque clear, pass alpha `255` or omit it.
+
+### WebGLAggregator outputs
+
+`WebGLAggregator.getBins()` and `getResult(channel)` now return borrowed `GPUVector`
+views instead of binary attribute descriptors. They can still be passed directly
+as layer binary attributes. For direct buffer access, use `getGPUVectorData(vector)`
+from `@luma.gl/graph/gpu-data` and read its `buffer`, `byteOffset`, and `byteStride`
+instead of the former descriptor's `buffer`, `offset`, and `stride` fields.
+
+### luma.gl v10 alpha.11
 
 The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from
 `@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and
@@ -66,12 +89,23 @@ of both rendering model classes. Narrow to `Model` when accessing material-speci
 or model pipeline parameters instead. `LayersPassRenderOptions.colorMask` still
 applies to layer draws and preserves masked WebGL attachment clears.
 
+`RenderPass.withParameters` is removed in alpha.11. For custom render-pass state
+overrides, save `renderPass.getParameters()`, apply overrides with `setParameters`,
+and restore the saved parameters in a `finally` block. Deck.gl handles this for
+layer and extension draws.
+
 ### loaders.gl and math.gl v5 beta
 
-Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.4`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+Update direct loaders.gl dependencies to `5.0.0-rc.1` and math.gl dependencies to `5.0.0-rc.2`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
 | Previous import | Replacement import |
 | --- | --- |
+| `@math.gl/web-mercator` | `@math.gl/geospatial/web-mercator` |
+| `@math.gl/arrow` | `@math.gl/core/arrow` |
+| `@math.gl/expressions` | `@math.gl/sql/expressions` |
+| `@math.gl/expressions/sql` | `@math.gl/sql/parser` |
+| `@math.gl/expressions/arrow` | `@math.gl/sql/arrow` |
+| `@loaders.gl/arrow` | `@loaders.gl/tables/arrow` |
 | `@loaders.gl/loader-utils`, `@loaders.gl/schema`, `@loaders.gl/polyfills` | Corresponding subpaths of `@loaders.gl/core` |
 | `@loaders.gl/csv`, `@loaders.gl/json` | `@loaders.gl/tables/csv`, `@loaders.gl/tables/json` |
 | `@loaders.gl/gltf`, `@loaders.gl/obj` | `@loaders.gl/scene/gltf`, `@loaders.gl/scene/obj` |
@@ -111,10 +145,6 @@ Distance scales now describe world units for any CRS, so the same API supports g
 `viewport.resolution` now controls subdivision detail across CRSs with different units. Higher values generate finer geometry. It defaults to `0` (subdivision disabled), including for `GlobeView`, so applications can opt into the additional processing and memory overhead.
 
 To retain an old degree step `d`, set `resolution: 360 / d`; for example, the former `GlobeView` default of 10 degrees becomes `resolution: 36`. Custom layers should use `viewport.getSubdivisionStep(sourceCrs)` for a step in their source CRS units instead of interpreting `viewport.resolution` directly.
-
-#### GlobeView position
-
-`GlobeView` now applies `viewState.position` as meter offsets to the east, north and up at every zoom, matching `MapView`. Camera offsets follow the local directions consistently across locations and the zoom-12 projection transition. If your application compensated for the former globe-axis interpretation below zoom 12, update those offsets to use local east, north and up.
 
 ### Layer
 
@@ -170,7 +200,32 @@ const commonPosition2 = layer.projectPosition(lnglat, {
 });
 ```
 
+### Deck props set to `undefined`
+
+A [`Deck`](./api-reference/core/deck.md) prop set to `undefined`, in the constructor or in
+`setProps`, now uses its default value. In the constructor this is the same as leaving the prop
+out. In `setProps`, leaving a prop out still keeps its current value. Previously an explicit
+`undefined` replaced the default. For some props this threw an error or stopped
+rendering, such as a callback like `onAfterRender: debug ? callback : undefined`.
+
+A few props behaved differently with `undefined`. To keep that behavior, pass these instead:
+
+| Prop | `undefined` now | To get the previous behavior |
+| --- | --- | --- |
+| `width`, `height` | `'100%'` | `null`, to leave the canvas size to your CSS |
+| `onError` | Logs the error (the default) | `null`, to ignore errors |
+| `debug` | `false` | `true`, to enable GPU debug mode |
+| `layers`, `widgets` in `setProps` | Removes them | Leave the prop out of `setProps` to keep the current ones |
+| `useDevicePixels` | `true` | `false`, to render one canvas pixel per CSS pixel |
+| `touchAction` | `'none'` | The `touch-action` value you want, such as `'manipulation'` |
+
+`null` is unchanged. Props without a default are also unchanged.
+
 ## Upgrading to v9.4
+
+### GlobeView meter offsets
+
+Below zoom 12, `GlobeView` now applies camera and layer meter offsets east, north and up, matching `MapView`. If your application compensated for the previous orientation, update its offsets or remove the compensating rotation.
 
 ### pydeck lighting
 
@@ -906,7 +961,7 @@ const layer = new Tile3DLayer({
 
 ##### React
 
-- `DeckGL` no longer injects its children with view props (`width`, `height`, `viewState` etc.). If your custom component needs these props, consider using the [ContextProvider](./api-reference/react/deckgl.md#react-context) or a render callback:
+- `DeckGL` no longer injects its children with view props (`width`, `height`, `viewState` etc.). If your custom component needs these props, consider using the [ContextProvider](./api-reference/react/legacy/deckgl.md#react-context) or a render callback:
 
   ```jsx
   <DeckGL>

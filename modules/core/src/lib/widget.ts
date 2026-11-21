@@ -171,7 +171,12 @@ export abstract class Widget<
   /** Called when the containing view is changed */
   onViewportChange(viewport: Viewport): void {}
   /** Called when the containing view is redrawn */
-  onRedraw(params: {viewports: Viewport[]; layers: Layer[]}): void {}
+  onRedraw(params: {
+    viewports: Viewport[];
+    layers: Layer[];
+    /** Drawable layers that passed the screen filters in each viewport. */
+    renderedLayers?: ReadonlyMap<Viewport, ReadonlySet<Layer>>;
+  }): void {}
   /** Called when a hover event occurs */
   onHover(info: PickingInfo, event: MjolnirPointerEvent): void {}
   /** Called when a click event occurs */

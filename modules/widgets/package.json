@@ -3,7 +3,7 @@
   "description": "UI widgets for deck.gl",
   "license": "MIT",
   "type": "module",
-  "version": "9.4.0-beta.4",
+  "version": "10.0.0-alpha.1",
   "publishConfig": {
     "access": "public"
   },
@@ -47,11 +47,12 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.5",
-    "preact": "^10.17.0"
+    "preact": "^10.17.0",
+    "probe.gl": "^5.0.0"
   },
   "peerDependencies": {
-    "@deck.gl/core": "~9.4.0",
-    "@luma.gl/core": "10.0.0-alpha.10"
+    "@deck.gl/core": "~10.0.0-alpha",
+    "@luma.gl/core": "10.0.0-beta.1"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

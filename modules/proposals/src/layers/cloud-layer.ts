@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Layer, picking, _GlobeViewport, type LayerContext, type LayerProps} from '@deck.gl/core';
+import {Layer, picking, GlobeViewport, type LayerContext, type LayerProps} from '@deck.gl/core';
 import type {RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import {clouds, type CloudProps} from '@luma.gl/shaders';
@@ -64,7 +64,7 @@ export class CloudLayer extends Layer<CloudLayerProps> {
   override draw({renderPass}: {renderPass: RenderPass}): void {
     const viewport = this.context.viewport;
     if (
-      viewport instanceof _GlobeViewport ||
+      viewport instanceof GlobeViewport ||
       viewport.projectionMatrix[15] !== 0 ||
       !this.props.cover
     )

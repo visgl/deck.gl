@@ -14,6 +14,8 @@ struct VertexGeometry {
   normal: vec3<f32>,
   uv: vec2<f32>,
   pickingColor: vec3<f32>,
+  // Offset in normalized device coordinates, multiplied by clip w when applied.
+  screenSpaceOffset: vec3<f32>,
 };
 
 var<private> geometry_: VertexGeometry = VertexGeometry(
@@ -22,6 +24,7 @@ var<private> geometry_: VertexGeometry = VertexGeometry(
   vec3<f32>(0.0, 0.0, 0.0),
   vec3<f32>(0.0, 0.0, 0.0),
   vec2<f32>(0.0, 0.0),
+  vec3<f32>(0.0, 0.0, 0.0),
   vec3<f32>(0.0, 0.0, 0.0)
 );
 
@@ -48,12 +51,15 @@ struct VertexGeometry {
   vec3 normal;
   vec2 uv;
   vec3 pickingColor;
+  // Offset in normalized device coordinates, multiplied by clip w when applied.
+  vec3 screenSpaceOffset;
 } geometry = VertexGeometry(
   vec4(0.0, 0.0, 1.0, 0.0),
   vec3(0.0),
   vec3(0.0),
   vec3(0.0),
   vec2(0.0),
+  vec3(0.0),
   vec3(0.0)
 );
 `;
