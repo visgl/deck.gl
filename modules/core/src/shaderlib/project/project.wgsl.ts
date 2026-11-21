@@ -66,16 +66,7 @@ var<storage, read> project_sizeScaleBuffer: array<vec4<f32>>;
 // state before calling the project functions below.
 // -----------------------------------------------------------------------------
 
-// Structure to carry additional geometry data used by deck.gl filters.
-struct Geometry {
-  worldPosition: vec3<f32>,
-  worldPositionAlt: vec3<f32>,
-  position: vec4<f32>,
-  normal: vec3<f32>,
-  uv: vec2<f32>,
-  pickingColor: vec3<f32>,
-};
-
+alias Geometry = VertexGeometry;
 var<private> geometry: Geometry;
 `;
 
@@ -178,13 +169,17 @@ fn project_size_vec4(meters: vec4<f32>) -> vec4<f32> {
 }
 
 // Returns a rotation matrix aligning the z‑axis with the given up vector.
+// On the globe, ux points east and uy north. Longitude 0 lies on -y and the north pole on +z.
+// At a pole, ux is the limit of east along the longitude that up retains; it is +x only when up
+// lies exactly on the polar axis.
 fn project_get_orientation_matrix(up: vec3<f32>) -> mat3x3<f32> {
   let uz = normalize(up);
-  let ux = select(
-    vec3<f32>(1.0, 0.0, 0.0),
-    normalize(vec3<f32>(uz.y, -uz.x, 0.0)),
-    abs(uz.z) == 1.0
-  );
+  // Tangent on XY plane
+  let horizontalLength = length(uz.xy);
+  var ux = vec3<f32>(1.0, 0.0, 0.0);
+  if (horizontalLength > 0.0) {
+    ux = vec3<f32>(-uz.y, uz.x, 0.0) / horizontalLength;
+  }
   let uy = cross(uz, ux);
   return mat3x3<f32>(ux, uy, uz);
 }
@@ -238,7 +233,9 @@ fn project_mercator_(lnglat: vec2<f32>) -> vec2<f32> {
 fn project_globe_(lnglatz: vec3<f32>) -> vec3<f32> {
   let lambda = radians(lnglatz.x);
   let phi = radians(lnglatz.y);
-  let cosPhi = cos(phi);
+  // Preserve longitude at the poles despite GPU cosine rounding to zero or negative.
+  var cosPhi = cos(phi);
+  if (abs(lnglatz.y) == 90.0) { cosPhi = max(abs(cosPhi), 1e-7); }
   let D = (lnglatz.z / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
   return vec3<f32>(
     sin(lambda) * cosPhi,
@@ -328,7 +325,7 @@ fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> v
     }
     if (project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS) {
       let enuMatrix = project_get_orientation_matrix(project.commonOrigin);
-      let offsetCommon = (enuMatrix * vec3<f32>(-position_world.x, -position_world.y, position_world.z)) * project.commonUnitsPerMeter;
+      let offsetCommon = (enuMatrix * position_world.xyz) * project.commonUnitsPerMeter;
       return vec4<f32>(project.commonOrigin + offsetCommon, position_world.w);
     }
   }
@@ -414,5 +411,72 @@ fn project_pixel_size_float(pixels: f32) -> f32 {
 
 fn project_pixel_size_vec2(pixels: vec2<f32>) -> vec2<f32> {
   return pixels / project.scale;
+}
+
+// True when the globe hides commonPosition from the camera: the segment from the camera to the
+// position passes through the sphere. Exact at any altitude. Always false for flat projections.
+fn project_globe_is_occluded(commonPosition: vec3<f32>) -> bool {
+  if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+    return false;
+  }
+  let eye = project.cameraPosition;
+  let ray = commonPosition - eye;
+  let rayLength2 = dot(ray, ray);
+  if (rayLength2 == 0.0) {
+    return false;
+  }
+  let t = clamp(-dot(eye, ray) / rayLength2, 0.0, 1.0);
+  let closest = eye + ray * t;
+  return t < 1.0 && dot(closest, closest) < GLOBE_RADIUS * GLOBE_RADIUS;
+}
+
+// Distance from eye along the unit direction to the first globe surface point, or fallback
+fn project_globe_ray_distance_(eye: vec3<f32>, direction: vec3<f32>, fallback: f32) -> f32 {
+  let b = dot(eye, direction);
+  let discriminant = b * b - dot(eye, eye) + GLOBE_RADIUS * GLOBE_RADIUS;
+  if (discriminant < 0.0) {
+    return fallback;
+  }
+  let distance = -b - sqrt(discriminant);
+  return select(fallback, distance, distance > 0.0);
+}
+
+// Screen-space radius, in pixels, that a billboard is assumed to cover around its anchor
+const GLOBE_BILLBOARD_FOOTPRINT_PIXELS: f32 = 64.0;
+
+// Clip-space position for a billboard anchored at commonPosition. Under GLOBE the billboard is
+// moved toward the camera by the amount the globe surface rises within its footprint, so the
+// curve of the globe does not clip a sprite whose anchor is visible. The shift is zero where the
+// surface faces the camera and grows with the grazing angle, about 1.8 km at zoom 12 with pitch
+// 60, so other 3D geometry that is in front of the anchor by less than the shift no longer hides
+// the sprite. Pair with project_globe_is_occluded. Identity for flat projections.
+fn project_globe_billboard_clipspace(clipPosition: vec4<f32>, commonPosition: vec3<f32>) -> vec4<f32> {
+  if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+    return clipPosition;
+  }
+  let eye = project.cameraPosition;
+  let ray = commonPosition - eye;
+  let anchorDistance = length(ray);
+  if (anchorDistance == 0.0) {
+    return clipPosition;
+  }
+  let direction = ray / anchorDistance;
+  // On screen, the surface is nearest toward the point of the globe below the camera
+  let inward = -eye - dot(-eye, direction) * direction;
+  let inwardLength = length(inward);
+  if (inwardLength == 0.0) {
+    return clipPosition;
+  }
+  // Ray through the inward edge of the footprint
+  let footprint = project_pixel_size_float(GLOBE_BILLBOARD_FOOTPRINT_PIXELS);
+  let edgeDirection = normalize(ray + inward / inwardLength * footprint);
+  let surfaceDistance = project_globe_ray_distance_(eye, direction, anchorDistance);
+  let edgeDistance = project_globe_ray_distance_(eye, edgeDirection, surfaceDistance);
+  let shift = surfaceDistance - edgeDistance;
+  if (shift <= 0.0) {
+    return clipPosition;
+  }
+  let shiftedClip = project_common_position_to_clipspace(vec4<f32>(commonPosition - direction * shift, 1.0));
+  return vec4<f32>(clipPosition.xy, shiftedClip.z / shiftedClip.w * clipPosition.w, clipPosition.w);
 }
 `;

@@ -17,7 +17,7 @@ import {GL as GLConstants} from '@luma.gl/core/webgl-constants';
 
 import {registerLoaders} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {DracoWorkerLoader} from '@loaders.gl/draco';
+import {DracoWorkerLoader} from '@loaders.gl/scene';
 import {Tiles3DLoader, CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 
 // Note: deck already registers JSONLoader...

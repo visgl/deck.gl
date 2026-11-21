@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {getDistanceScales, lngLatToWorld, worldToLngLat, MAX_LATITUDE} from '@math.gl/web-mercator';
+import {
+  getDistanceScales,
+  lngLatToWorld,
+  worldToLngLat,
+  MAX_LATITUDE
+} from '@math.gl/geospatial/web-mercator';
 import type {DistanceScales} from './viewport';
 import type {
   CRSConversion,

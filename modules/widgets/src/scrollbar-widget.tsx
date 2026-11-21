@@ -78,6 +78,7 @@ type ScrollbarWidgetRequiredProps = Required<ScrollbarWidgetProps>;
 export class ScrollbarWidget extends Widget<ScrollbarWidgetProps> {
   static override defaultProps: ScrollbarWidgetRequiredProps = {
     ...Widget.defaultProps,
+    id: 'scrollbar',
     contentBounds: null,
     contentBoundsPadding: null,
     placement: 'top-right',
@@ -101,12 +102,9 @@ export class ScrollbarWidget extends Widget<ScrollbarWidgetProps> {
   private scrollOffset = 0;
 
   constructor(props: ScrollbarWidgetProps) {
-    const resolved = {
-      ...ScrollbarWidget.defaultProps,
-      ...props
-    } as ScrollbarWidgetRequiredProps;
-    super(resolved);
-    this.viewId = resolved.viewId ?? null;
+    // `Widget` applies `defaultProps`
+    super(props);
+    this.viewId = this.props.viewId ?? null;
   }
 
   override onViewportChange(viewport: Viewport) {

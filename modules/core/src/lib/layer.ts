@@ -3,13 +3,25 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable react/no-direct-mutation-state */
+import type {ResolvedScale} from '@math.gl/core/color';
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/core/webgl';
+import {unwrapLoaderArrowResult} from '../utils/loader-utils';
+import {isArrowTable} from '../arrow/upstream-math/is-arrow-table';
+import {resolveColumns} from './resolve-columns';
+import type {ColumnDefinitions} from './layer-columns';
 import AttributeManager from './attribute/attribute-manager';
 import GPUVectorModel from './luma-upstream/gpu-vector-model';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
-import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
+import {
+  ACCESSOR_QUERIES_SYMBOL,
+  COMPONENT_SYMBOL,
+  LIFECYCLE,
+  Lifecycle,
+  PROP_TYPES_SYMBOL,
+  ROW_ACCESSOR_COLUMNS_SYMBOL
+} from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import debug from '../debug/index';
@@ -19,7 +31,11 @@ import {deepEqual} from '../utils/deep-equal';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
-import {disablePickingIndex, PICKING_INVALID_INDEX} from '../shaderlib/picking/picking';
+import pickingModule, {
+  pickingPlugin,
+  disablePickingIndex,
+  PICKING_INVALID_INDEX
+} from '../shaderlib/picking/picking';
 
 import Component from '../lifecycle/component';
 import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
@@ -27,10 +43,10 @@ import {areCRSEqual, resolveCRS} from '../utils/crs';
 import {supportsSourceCRS} from '../shaderlib/project/coordinate-systems';
 import LayerState, {ChangeFlags} from './layer-state';
 
-import {worldToPixels} from '@math.gl/web-mercator';
+import {worldToPixels} from '@math.gl/geospatial/web-mercator';
 import {vec3TransformMat4 as transformMat4} from '@math.gl/core';
 
-import {load} from '@loaders.gl/core';
+import {load, loadInBatches} from '@loaders.gl/core';
 
 import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {CoordinateSystem} from './constants';
@@ -45,7 +61,7 @@ import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {AttributeOptions, BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
-import {PickingProps} from '@luma.gl/shaders';
+import type {PickingProps} from '../shaderlib/picking/picking';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -78,6 +94,9 @@ function getPickingColorAttribute(attributes: Record<string, Attribute>): Attrib
   return attributes.pickingColors || attributes.instancePickingColors;
 }
 
+/** Built-in highlight color, expressed in bytes. */
+const DEFAULT_HIGHLIGHT_COLOR = [0, 0, 128, 128];
+
 const defaultProps: DefaultProps<LayerProps> = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
@@ -88,7 +107,11 @@ const defaultProps: DefaultProps<LayerProps> = {
     value: data => data && data.__diff,
     optional: true
   },
+  query: null,
+  sqlFunctions: {type: 'array', value: [], compare: true},
   dataTransform: {type: 'function', value: null, optional: true},
+  _dataLoadOptions: 'auto',
+  onDataProgress: {type: 'function', value: null, optional: true},
   onDataLoad: {type: 'function', value: null, optional: true},
   onError: {type: 'function', value: null, optional: true},
   fetch: {
@@ -123,6 +146,11 @@ const defaultProps: DefaultProps<LayerProps> = {
             }
           }
         };
+      }
+
+      if (propName === 'data' && layer.props._dataLoadOptions !== 'auto') {
+        resourceManager.unsubscribe({consumerId: layer.id, requestId: propName});
+        return loadInBatches(url, loaders, loadOptions);
       }
 
       let inResourceManager = resourceManager.contains(url);
@@ -186,7 +214,7 @@ const defaultProps: DefaultProps<LayerProps> = {
   // Selection/Highlighting
   highlightedObjectIndex: null,
   autoHighlight: false,
-  highlightColor: {type: 'accessor', value: [0, 0, 128, 128]}
+  highlightColor: {type: 'accessor', value: DEFAULT_HIGHLIGHT_COLOR}
 };
 
 export type UpdateParameters<LayerT extends Layer> = {
@@ -345,7 +373,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Returns true if all async resources are loaded */
   get isLoaded(): boolean {
     return this.internalState
-      ? !this._coordinateSystemLoading && !this.internalState.isAsyncPropLoading()
+      ? !this._coordinateSystemLoading &&
+          !this.internalState.isAsyncPropLoading() &&
+          !this.internalState.accessorQueries?.pending
       : false;
   }
 
@@ -548,7 +578,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
 
     // Use container library to get a count for any ES6 container or object
-    return count(this.props.data);
+    return count(this.getColumnData());
   }
 
   /** Buffer layout describes how many attribute values are packed for each data object
@@ -576,11 +606,170 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   // / LIFECYCLE METHODS - overridden by the layer subclasses
 
+  /**
+   * Returns selected column inputs, optionally including compatible fields from loaded Arrow data.
+   * Explicit props take precedence. Unselected columns use binary attributes or accessors.
+   * Selected inputs are returned without conversion or ownership changes.
+   */
+  protected resolveColumns(
+    definitions: ColumnDefinitions,
+    useTable = false
+  ): Record<string, unknown> {
+    const data = useTable ? this.getColumnData() : this.props.data;
+    const props =
+      data === this.props.data ? this.props : Object.create(this.props, {data: {value: data}});
+    return resolveColumns(props, definitions, useTable);
+  }
+
+  /** Returns the table used by column-aware layers while leaving the loaded prop intact. */
+  protected getColumnData(): LayerData<unknown> {
+    const data = unwrapLoaderArrowResult(this.props.data) as LayerData<unknown>;
+    if (
+      Array.isArray(data) &&
+      data.length === 0 &&
+      !this.internalState?.isAsyncPropLoading('data')
+    ) {
+      const columns = this.props[ROW_ACCESSOR_COLUMNS_SYMBOL];
+      for (const [name, column] of Object.entries(columns ?? {})) {
+        const type = this.props[PROP_TYPES_SYMBOL][name];
+        if (
+          type?.type === 'accessor' &&
+          'arrowWithExtensions' in type &&
+          type.arrowWithExtensions
+        ) {
+          return {length: column.length};
+        }
+      }
+    }
+    return data;
+  }
+
+  /** Merges Deck and layer declarations by SQL name, with the layer taking precedence. */
+  private getSQLFunctions() {
+    return Array.from(
+      new Map(
+        [...(this.context.sqlFunctions ?? []), ...(this.props.sqlFunctions ?? [])].map(fn => [
+          fn.name.toUpperCase(),
+          fn
+        ])
+      ).values()
+    );
+  }
+
+  /** Evaluates opted-in SQL accessors against the loaded data, preserving source row order. */
+  private updateAccessorQueries(): void {
+    const state = this.internalState!;
+    const queries = this.props[ACCESSOR_QUERIES_SYMBOL];
+    if (!queries) {
+      state.accessorQueries = undefined;
+      return;
+    }
+    const source = this.props.data;
+    if (
+      source == null ||
+      (Array.isArray(source) && source.length === 0) ||
+      (state.isAsyncPropLoading('data') && !isArrowTable(unwrapLoaderArrowResult(source)))
+    ) {
+      state.accessorQueries = undefined;
+      return;
+    }
+    const parseExpression = this.context.sqlParser?.parseExpression;
+    const functions = this.getSQLFunctions();
+    const expressions = Object.fromEntries(
+      Object.entries(queries).map(([name, query]) => [name, query.sql])
+    );
+    const previous = state.accessorQueries;
+    const matches = (layer: Layer) => {
+      const inputs = layer.props[ACCESSOR_QUERIES_SYMBOL];
+      return (
+        inputs &&
+        layer.props.data === source &&
+        layer.context.sqlParser?.parseExpression === parseExpression &&
+        deepEqual(layer.getSQLFunctions(), functions, 1) &&
+        Object.keys(inputs).length === Object.keys(expressions).length &&
+        Object.entries(expressions).every(([name, sql]) => inputs[name]?.sql === sql)
+      );
+    };
+    const apply = (layer: Layer, columns: NonNullable<typeof previous>['columns']) => {
+      for (const [name, input] of Object.entries(layer.props[ACCESSOR_QUERIES_SYMBOL]!)) {
+        input.column = columns?.[name];
+      }
+    };
+    if (
+      previous &&
+      previous.source === source &&
+      previous.parseExpression === parseExpression &&
+      deepEqual(previous.functions, functions, 1) &&
+      deepEqual(previous.expressions, expressions, 1)
+    ) {
+      apply(this, previous.columns);
+      return;
+    }
+
+    const request: NonNullable<typeof state.accessorQueries> = {
+      source,
+      expressions,
+      parseExpression,
+      functions,
+      scales: previous?.scales,
+      pending: true
+    };
+    state.accessorQueries = request;
+    apply(this, undefined);
+
+    const currentLayer = () => {
+      const layer = state.layer;
+      return state.accessorQueries === request && layer && matches(layer) ? layer : null;
+    };
+    void import('../arrow/accessor-queries')
+      .then(({evaluateAccessorQueries}) =>
+        evaluateAccessorQueries(source, expressions, parseExpression, previous, functions)
+      )
+      .then(
+        ({table, scales}) => {
+          const layer = currentLayer();
+          if (layer) {
+            request.table = table;
+            request.scales = Object.keys(scales).length ? scales : undefined;
+            request.pending = false;
+            request.columns = Object.fromEntries(
+              Object.keys(expressions).map(name => [name, table.getChild(name)!])
+            );
+            apply(layer, request.columns);
+            layer.setChangeFlags({dataChanged: 'SQL accessors resolved'});
+            layer.setNeedsUpdate();
+          }
+        },
+        error => {
+          const layer = currentLayer();
+          if (layer) {
+            request.scales = undefined;
+            request.pending = false;
+            layer.setNeedsUpdate();
+            layer.raiseError(error, 'evaluating SQL accessors');
+          }
+        }
+      );
+  }
+
+  /**
+   * Experimental. Returns resolved SQL color scales keyed by accessor. The result is undefined
+   * until the first evaluation completes. While updating, it describes the previously applied
+   * colors.
+   * Color samples use normalized RGBA channels in [0, 1].
+   */
+  _getResolvedColorScales(): Readonly<Record<string, ResolvedScale>> | undefined {
+    return this.internalState?.accessorQueries?.scales;
+  }
+
   /** Called once to set up the initial state. Layers can create WebGL resources here. */
   abstract initializeState(context: LayerContext): void;
 
-  /** Returns shader options and the deck.gl assembler used by layer models. */
-  getShaders(shaders: any): any {
+  /**
+   * Returns shader options and the deck.gl assembler used by layer models.
+   * Supply a subset of extensions when assembling a dedicated render pass.
+   */
+  getShaders(shaders: any, extensions = this.props.extensions): any {
     // Preprojection capability is stable for the lifetime of a layer instance.
     shaders = mergeShaders(
       {
@@ -591,11 +780,16 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       },
       shaders
     );
+    // Preserve the public picking module contract while installing its injection target contributions.
+    if (shaders.modules?.includes(pickingModule) && !shaders.plugins?.includes(pickingPlugin)) {
+      shaders = mergeShaders(shaders, {plugins: [pickingPlugin]});
+    }
     shaders = mergeShaders(shaders, {
       disableWarnings: true,
-      modules: this.context.defaultShaderModules
+      modules: this.context.defaultShaderModules,
+      plugins: this.context.defaultShaderPlugins
     });
-    for (const extension of this.props.extensions) {
+    for (const extension of extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
     return {...shaders, shaderAssembler: this.context.shaderAssembler};
@@ -682,9 +876,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const {index} = info;
 
     if (index >= 0) {
-      // If props.data is an indexable array, get the object
-      if (Array.isArray(this.props.data)) {
-        info.object = this.props.data[index];
+      const data = this.getColumnData();
+      if (Array.isArray(data)) {
+        info.object = data[index];
+      } else if (isArrowTable(data)) {
+        info.object = data.get(index);
       }
     }
 
@@ -804,6 +1000,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
   }
 
+  /** Returns the Deck input convention for a top-level layer. Composite children keep byte colors. */
+  protected usesNormalizedColors(): boolean {
+    return !this.parent && Boolean(this.context.normalizedColors);
+  }
+
   /** Recalculate any attributes if needed */
   protected _updateAttributes(): void {
     const attributeManager = this.getAttributeManager();
@@ -812,18 +1013,31 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
     const props = this.props;
 
+    const normalizedColorInput = this.usesNormalizedColors();
+    for (const attribute of Object.values(attributeManager.attributes)) {
+      const {settings} = attribute;
+      if (
+        settings.semanticType === 'color' &&
+        settings.normalizedColorInput !== normalizedColorInput
+      ) {
+        settings.normalizedColorInput = normalizedColorInput;
+        attribute.setNeedsUpdate();
+      }
+    }
+
     // Figure out data length
     const numInstances = this.getNumInstances();
     const startIndices = this.getStartIndices();
 
+    const data = this.getColumnData();
     attributeManager.update({
-      data: props.data,
+      data,
       numInstances,
       startIndices,
       props,
       transitions: props.transitions,
       // @ts-ignore (TS2339) property attribute is not present on some acceptable data types
-      buffers: props.data.attributes,
+      buffers: data.attributes,
       context: this
     });
 
@@ -837,6 +1051,16 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     if (attributeManager) {
       attributeManager.updateTransition();
     }
+  }
+
+  /** Converts a prop to its interpolation representation before a uniform transition starts. */
+  protected getUniformTransitionValue(_propName: string, value: unknown): unknown {
+    return value;
+  }
+
+  /** Returns whether the current prop value is an interpolated uniform transition value. */
+  protected isUniformTransitionValue(propName: string): boolean {
+    return !Object.hasOwn(this.props, COMPONENT_SYMBOL) && Object.hasOwn(this.props, propName);
   }
 
   /** Update uniform (prop) transitions. This is called in updateState, may result in model updates. */
@@ -907,8 +1131,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     attributeManager: AttributeManager,
     changedAttributes: Record<string, Attribute>
   ): void {
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const excludeAttributes = (model.userData?.excludeAttributes || {}) as Record<string, boolean>;
     const bindings = attributeManager.getBufferGroupBindings(
       changedAttributes,
       model,
@@ -967,8 +1190,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       changedAttributes = manager.getAttributes();
     }
 
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const excludeAttributes = (model.userData?.excludeAttributes || {}) as Record<string, boolean>;
     const attributeBuffers: Record<string, Buffer> = {};
     const constantAttributes: Record<string, TypedArray> = {};
 
@@ -1001,8 +1223,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     attributeManager: AttributeManager,
     changedAttributes: {[id: string]: Attribute}
   ) {
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const excludeAttributes = (model.userData?.excludeAttributes || {}) as Record<string, boolean>;
     const bindings = attributeManager.getBufferGroupBindings(
       changedAttributes,
       model,
@@ -1045,13 +1266,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
      This method may be overriden by layer implementations */
   disablePickingIndex(objectIndex: number) {
     const data = this.props.data as LayerData<any>;
-    if (!('attributes' in data)) {
+    if (!('attributes' in data) || isArrowTable(data)) {
       this._disablePickingIndex(objectIndex);
       return;
     }
 
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const attributes = this.getAttributeManager().attributes;
+    const attributes = this.getAttributeManager()?.getAttributes() || {};
     const indexes = getPickingIndexAttribute(attributes);
     const colors = getPickingColorAttribute(attributes);
 
@@ -1090,8 +1310,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   // TODO - simplify subclassing interface
   protected _disablePickingIndex(objectIndex: number): void {
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const attributes = this.getAttributeManager().attributes;
+    const attributes = this.getAttributeManager()?.getAttributes() || {};
     const indexes = getPickingIndexAttribute(attributes);
     if (indexes) {
       const start = indexes.getVertexOffset(objectIndex);
@@ -1119,8 +1338,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** (Internal) Re-enable all picking indices after multi-depth picking */
   restorePickingColors(): void {
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const attributes = this.getAttributeManager().attributes;
+    const attributes = this.getAttributeManager()?.getAttributes() || {};
     const pickingAttribute = getPickingAttribute(attributes);
     if (!pickingAttribute) {
       if (this.internalState) {
@@ -1222,6 +1440,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const {state, internalState} = oldLayer;
 
     if (this === oldLayer) {
+      this.internalState?.refreshQueryParser();
       return;
     }
 
@@ -1236,6 +1455,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // Ensure any async props are updated
     this.internalState.setAsyncProps(this.props);
 
+    this.updateAccessorQueries();
     this._diffProps(this.props, this.internalState.getOldProps() as Layer<PropsT>['props']);
   }
 
@@ -1248,6 +1468,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     )
       return;
     this._updatePreprojection(this.internalState?.viewport || this.context.viewport);
+    this.updateAccessorQueries();
+    // Keep the current attributes until the new rows and SQL columns can be applied together.
+    if (this.internalState.accessorQueries?.pending) {
+      return;
+    }
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.needsUpdate();
     // End lifecycle method
@@ -1365,6 +1590,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     uniforms: any;
     parameters: LumaParameters;
   }): void {
+    // SQL accessors can defer the first update that creates the layer models.
+    if (this.props[ACCESSOR_QUERIES_SYMBOL] && !this.internalState?.propsInTransition) {
+      return;
+    }
     this._updateAttributeTransition();
 
     const currentProps = this.props;
@@ -1392,11 +1621,24 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const webGPUDrawParameters =
         context.device instanceof WebGLDevice ? null : splitWebGPUDrawParameters(parameters);
 
-      applyModelParameters(this.getModels(), renderPass, parameters, webGPUDrawParameters);
+      applyModelParameters(this.getModels(), parameters, webGPUDrawParameters, offsets);
 
       // Call subclass lifecycle method
       if (context.device instanceof WebGLDevice) {
-        context.device.withParametersWebGL(parameters, () => {
+        const {colorMask, ...webGLParameters} = parameters;
+        if (typeof colorMask === 'number') {
+          Object.assign(webGLParameters, {
+            colorMask: [
+              Boolean(colorMask & 1),
+              Boolean(colorMask & 2),
+              Boolean(colorMask & 4),
+              Boolean(colorMask & 8)
+            ]
+          });
+        } else if (colorMask) {
+          Object.assign(webGLParameters, {colorMask});
+        }
+        context.device.withParametersWebGL(webGLParameters, () => {
           const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
           // extensions
@@ -1407,17 +1649,19 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           this.draw(opts);
         });
       } else {
-        if (webGPUDrawParameters?.renderPassParameters) {
-          renderPass.setParameters(webGPUDrawParameters.renderPassParameters);
-        }
-        const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
+        const previousParameters = renderPass.getParameters();
+        try {
+          renderPass.setParameters(webGPUDrawParameters?.renderPassParameters || {});
+          const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
-        // extensions
-        for (const extension of this.props.extensions) {
-          extension.draw.call(this, opts, extension);
-        }
+          for (const extension of this.props.extensions) {
+            extension.draw.call(this, opts, extension);
+          }
 
-        this.draw(opts);
+          this.draw(opts);
+        } finally {
+          renderPass.setParameters(previousParameters);
+        }
       }
     } finally {
       this.props = currentProps;
@@ -1527,8 +1771,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         // @ts-ignore (TS2531) internalState is always defined when this method is called
         this.internalState.uniformTransitions.add(
           key,
-          oldProps[key],
-          newProps[key],
+          this.getUniformTransitionValue(key, oldProps[key]),
+          this.getUniformTransitionValue(key, newProps[key]),
           newProps.transitions?.[key]
         );
       }
@@ -1559,9 +1803,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       highlightedObjectColor: info.picked ? info.color : null
     };
     const {highlightColor} = this.props;
+    const state = this.internalState!;
+    state.hoverHighlightInfo = info.picked ? {...info} : null;
     if (info.picked && typeof highlightColor === 'function') {
-      // @ts-ignore
-      picking.highlightColor = highlightColor(info);
+      const color = highlightColor(info);
+      picking.highlightColor = color as PickingProps['highlightColor'];
+      picking.normalizedHighlightColor = this.usesNormalizedColors() && Array.isArray(color);
     }
     this.setShaderModuleProps({picking});
     // setShaderModuleProps does not trigger redraw
@@ -1583,7 +1830,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Called after updateState to perform common tasks */
   // eslint-disable-next-line complexity
   protected _postUpdate(updateParams: UpdateParameters<Layer<PropsT>>, forceUpdate: boolean) {
-    const {props, oldProps} = updateParams;
+    const {props, oldProps, changeFlags} = updateParams;
 
     // Note: Automatic instance count update only works for single layers
     const model = this.state.model as LumaGPUVectorModel | undefined;
@@ -1593,16 +1840,45 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     // Set picking module parameters to match props
     const {autoHighlight, highlightedObjectIndex, highlightColor} = props;
+    const state = this.internalState!;
+    const normalizedHighlightColor = this.usesNormalizedColors();
+    const colorConventionChanged = state.normalizedHighlightColor !== normalizedHighlightColor;
+    state.normalizedHighlightColor = normalizedHighlightColor;
+    const hoverDataChanged = Boolean(changeFlags.dataChanged && state.hoverHighlightInfo);
+    if (
+      forceUpdate ||
+      !autoHighlight ||
+      Number.isInteger(highlightedObjectIndex) ||
+      hoverDataChanged
+    ) {
+      state.hoverHighlightInfo = null;
+    }
     if (
       forceUpdate ||
       oldProps.autoHighlight !== autoHighlight ||
       oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
-      oldProps.highlightColor !== highlightColor
+      oldProps.highlightColor !== highlightColor ||
+      colorConventionChanged ||
+      hoverDataChanged
     ) {
       const picking: PickingProps = {};
 
-      if (Array.isArray(highlightColor)) {
-        picking.highlightColor = highlightColor as [number, number, number];
+      const hoverInfo = state.hoverHighlightInfo;
+      const color =
+        typeof highlightColor === 'function'
+          ? hoverInfo &&
+            highlightColor({
+              ...hoverInfo,
+              layer: hoverInfo.layer?.id === this.id ? this : hoverInfo.layer,
+              sourceLayer: hoverInfo.sourceLayer?.id === this.id ? this : hoverInfo.sourceLayer
+            })
+          : Array.isArray(highlightColor) && highlightColor;
+      if (color) {
+        picking.highlightColor = color as PickingProps['highlightColor'];
+        picking.normalizedHighlightColor =
+          normalizedHighlightColor &&
+          Array.isArray(color) &&
+          (typeof highlightColor === 'function' || color !== DEFAULT_HIGHLIGHT_COLOR);
       }
 
       // highlightedObjectIndex will overwrite any settings from auto highlighting.
@@ -1610,7 +1886,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       if (
         forceUpdate ||
         oldProps.autoHighlight !== autoHighlight ||
-        highlightedObjectIndex !== oldProps.highlightedObjectIndex
+        highlightedObjectIndex !== oldProps.highlightedObjectIndex ||
+        hoverDataChanged
       ) {
         picking.highlightedObjectColor =
           Number.isFinite(highlightedObjectIndex) && (highlightedObjectIndex as number) >= 0
@@ -1687,16 +1964,20 @@ function splitWebGPUDrawParameters(parameters: LumaParameters): {
 
 function applyModelParameters(
   models: LumaGPUVectorModel[],
-  renderPass: RenderPass,
   parameters: LumaParameters,
-  webGPUDrawParameters: ReturnType<typeof splitWebGPUDrawParameters> | null
+  webGPUDrawParameters: ReturnType<typeof splitWebGPUDrawParameters> | null,
+  polygonOffset: number[]
 ): void {
   for (const model of models) {
     if (model.device.type === 'webgpu') {
-      syncModelAttachmentFormats(model, renderPass);
       // TODO(ibgreen): model.setParameters currently wipes parameters. Semantics TBD.
       model.setParameters({
         ...model.parameters,
+        // WebGPU depth bias, like WebGL polygon offset, applies only to triangles.
+        ...(model.topology.startsWith('triangle') && {
+          depthBias: Math.round(polygonOffset[1]),
+          depthBiasSlopeScale: polygonOffset[0]
+        }),
         ...webGPUDrawParameters?.pipelineParameters
       });
     } else {
@@ -1704,62 +1985,6 @@ function applyModelParameters(
     }
   }
 }
-
-function syncModelAttachmentFormats(model: LumaGPUVectorModel, renderPass: RenderPass): void {
-  const framebuffer =
-    renderPass.props.framebuffer ||
-    ((
-      renderPass as RenderPass & {
-        framebuffer?: {
-          colorAttachments: Array<{texture: {format: string}}>;
-          depthStencilAttachment: {texture: {format: string}} | null;
-        };
-      }
-    ).framebuffer ??
-      null);
-
-  if (!framebuffer) {
-    return;
-  }
-
-  const colorAttachmentFormats = framebuffer.colorAttachments.map(
-    attachment => attachment?.texture?.format ?? null
-  );
-  const depthStencilAttachmentFormat = framebuffer.depthStencilAttachment?.texture?.format;
-
-  const modelWithProps = model as unknown as {
-    props: {
-      colorAttachmentFormats?: (string | null)[];
-      depthStencilAttachmentFormat?: string;
-    };
-    _setPipelineNeedsUpdate(reason: string): void;
-  };
-
-  if (
-    !equalAttachmentFormats(modelWithProps.props.colorAttachmentFormats, colorAttachmentFormats) ||
-    modelWithProps.props.depthStencilAttachmentFormat !== depthStencilAttachmentFormat
-  ) {
-    modelWithProps.props.colorAttachmentFormats = colorAttachmentFormats;
-    modelWithProps.props.depthStencilAttachmentFormat = depthStencilAttachmentFormat;
-    modelWithProps._setPipelineNeedsUpdate('attachment formats');
-  }
-}
-
-function equalAttachmentFormats(left?: (string | null)[], right?: (string | null)[]): boolean {
-  if (left === right) {
-    return true;
-  }
-  if (!left || !right || left.length !== right.length) {
-    return false;
-  }
-  for (let i = 0; i < left.length; i++) {
-    if (left[i] !== right[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
 // Resolve the current layer at invocation: layer instances are replaced while attributes survive.
 function transformPosition(this: Layer, input: number[]): [number, number, number] {
   const position: [number, number, number] = [input[0], input[1], input[2] ?? 0];

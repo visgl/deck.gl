@@ -14,7 +14,8 @@ export type Contour = {
   threshold: number | number[];
 
   /**
-   * RGBA color array to be used to render the contour.
+   * RGBA color used to render the contour. Plain arrays use 0–1 channels when Deck's
+   * `normalizedColors` is enabled and byte channels otherwise.
    * @default [255, 255, 255, 255]
    */
   color?: Color;

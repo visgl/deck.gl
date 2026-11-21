@@ -1,11 +1,14 @@
 name: test
 
-# On every pull request, but only on push to master
+# Validate pull requests and merge groups; validate pushes only on master.
 on:
   push:
     branches:
     - master
   pull_request:
+  merge_group:
+    types: [checks_requested]
+    branches: [master]
 
 permissions:
   contents: read

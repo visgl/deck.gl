@@ -21,6 +21,7 @@ registerLoaders(GLTFLoader);
 import {meshSampleData} from 'deck.gl-test/data';
 
 const testCases = [
+  // Golden: Animated boxes at frame 1 with directional PBR lighting.
   {
     name: 'scenegraph-layer-frame-1',
     viewState: {
@@ -52,6 +53,7 @@ const testCases = [
     ],
     goldenImage: './test/render/golden-images/scenegraph-layer-frame-1.png'
   },
+  // Golden: Animated boxes at frame 2 with directional PBR lighting.
   {
     name: 'scenegraph-layer-frame-2',
     viewState: {
@@ -83,6 +85,7 @@ const testCases = [
     ],
     goldenImage: './test/render/golden-images/scenegraph-layer-frame-2.png'
   },
+  // Golden: Animated boxes at frame 3 with directional PBR lighting.
   {
     name: 'scenegraph-layer-frame-3',
     viewState: {
@@ -114,6 +117,7 @@ const testCases = [
     ],
     goldenImage: './test/render/golden-images/scenegraph-layer-frame-3.png'
   },
+  // Golden: Rotated duck models with flat or directional PBR lighting.
   ...['flat', 'pbr'].map(lighting => ({
     name: `scenegraph-layer-duck-${lighting}`,
     viewState: {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Viewport, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
+import {Viewport, WebMercatorViewport, GlobeViewport} from '@deck.gl/core';
 
 import {
   CullingVolume,
@@ -10,7 +10,7 @@ import {
   AxisAlignedBoundingBox,
   makeOrientedBoundingBoxFromPoints
 } from '@math.gl/geometry/culling';
-import {lngLatToWorld} from '@math.gl/web-mercator';
+import {lngLatToWorld} from '@math.gl/geospatial/web-mercator';
 import {Bounds, TileIndex, ZRange} from './types';
 import {osmTile2lngLat} from './utils';
 
@@ -223,7 +223,7 @@ export function getOSMTileIndices(
   bounds?: Bounds
 ): TileIndex[] {
   const project: ((xyz: number[]) => number[]) | null =
-    viewport instanceof _GlobeViewport
+    viewport instanceof GlobeViewport
       ? // eslint-disable-next-line @typescript-eslint/unbound-method
         viewport.projectPosition
       : null;

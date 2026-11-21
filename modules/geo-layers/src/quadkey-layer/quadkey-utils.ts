@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {worldToLngLat} from '@math.gl/web-mercator';
+import {worldToLngLat} from '@math.gl/geospatial/web-mercator';
 
 const TILE_SIZE = 512;
 

@@ -4,7 +4,14 @@
 
 import {createTestViewport} from '../viewports/test-crs';
 import {test, expect, vi} from 'vitest';
-import {Layer, LayerExtension, AttributeManager, MapView, OrbitView, picking} from '@deck.gl/core';
+import {
+  Layer,
+  LayerExtension,
+  AttributeManager,
+  MapView,
+  OrbitView,
+  pickingPlugin
+} from '@deck.gl/core';
 import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {equals, Matrix4} from '@math.gl/core';
 import {Timeline, Model} from '@luma.gl/engine';
@@ -600,12 +607,13 @@ test('Layer#updateModules', async () => {
     fragColor = vec4(1.0);
   }
         `,
-        modules: [picking]
+        plugins: [pickingPlugin]
       });
     }
   }
 
   const HALF_BYTE = 128 / 255;
+  let callbackLayer: Layer | null = null;
 
   await testLayerAsync({
     Layer: LayerWithModel,
@@ -648,9 +656,95 @@ test('Layer#updateModules', async () => {
         }
       },
       {
-        title: 'only highlightedObjectIndex',
+        title: 'Normalized highlights preserve the default color',
+
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.highlightColor).toEqual([0, 0, HALF_BYTE, HALF_BYTE]);
+        }
+      },
+      {
+        title: 'Normalized highlight constant does not change byte picking IDs',
+
+        updateProps: {highlightColor: [1, 0.5, 0, 0], highlightedObjectIndex: 1},
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.highlightColor).toEqual([1, 0.5, 0, 0]);
+          expect(picking.highlightedObjectColor).toEqual([2, 0, 0]);
+          expect(picking.useByteColors).toBe(true);
+        }
+      },
+      {
+        title: 'Normalized hover callback supplies opaque alpha',
 
         updateProps: {
+          autoHighlight: true,
+          highlightedObjectIndex: null,
+          highlightColor: () => [1, 0.5, 0]
+        },
+        onAfterUpdate: ({layer}) => {
+          layer.updateAutoHighlight({picked: true, color: [3, 0, 0], layer});
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.highlightColor).toEqual([1, 0.5, 0, 1]);
+          expect(picking.highlightedObjectColor).toEqual([3, 0, 0]);
+        }
+      },
+      {
+        title: 'Deck convention changes update a stationary hover',
+
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: false});
+        },
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.highlightColor).toEqual([1 / 255, 0.5 / 255, 0, 1]);
+          expect(picking.highlightedObjectColor).toEqual([3, 0, 0]);
+        }
+      },
+      {
+        title: 'Deck convention changes update a replacement hover callback',
+
+        updateProps: {
+          highlightColor: ({layer}) => {
+            callbackLayer = layer;
+            return [0, 0.5, 1, 0];
+          }
+        },
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(callbackLayer).toBe(layer);
+          expect(picking.highlightColor).toEqual([0, 0.5, 1, 0]);
+          expect(picking.highlightedObjectColor).toEqual([3, 0, 0]);
+        }
+      },
+      {
+        title: 'Data replacement discards the stale hover',
+
+        updateProps: {
+          data: [{}],
+          highlightColor: () => {
+            throw new Error('stale highlight callback');
+          }
+        },
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.isHighlightActive).toBe(false);
+        }
+      },
+      {
+        title: 'only highlightedObjectIndex',
+
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: false});
+        },
+        updateProps: {
+          autoHighlight: false,
           highlightColor: [255, 0, 0, 128],
           highlightedObjectIndex: 1
         },
@@ -756,7 +850,7 @@ test('Layer#updateModules', async () => {
         }
       },
       {
-        title: 'Other props update',
+        title: 'Data replacement clears constant hover highlights',
 
         updateProps: {
           data: []
@@ -764,14 +858,7 @@ test('Layer#updateModules', async () => {
 
         onAfterUpdate: ({layer}) => {
           const modelUniforms = layer.state.model.shaderInputs.getUniformValues();
-          expect(
-            modelUniforms.picking.isHighlightActive,
-            'model selectedColor uniform is enabled'
-          ).toBe(true);
-          expect(
-            modelUniforms.picking.highlightedObjectColor,
-            'model selectedColor uniform is set from hovered object index'
-          ).toEqual([3, 0, 0]);
+          expect(modelUniforms.picking.isHighlightActive).toBe(false);
         }
       },
       {

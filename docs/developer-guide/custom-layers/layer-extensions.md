@@ -22,17 +22,20 @@ uniform highlightUniforms {
 type HighlightProps = {enabled: boolean};
 
 const highlightUniforms = {
-  name: 'trips',
+  name: 'highlight',
   fs: uniformBlock, // Only need to add block to fragment stage in this example
   uniformTypes: {enabled: 'f32'}
-} as const satisfies ShaderModule<TripsProps>;
+} as const satisfies ShaderModule<HighlightProps>;
 
 class FilteredScatterplotLayer extends ScatterplotLayer {
   getShaders() {
     const shaders = super.getShaders();
-    shaders.inject = {
-      // Standard injection hook - see "Writing Shaders"
-      'fs:DECKGL_FILTER_COLOR': `
+    shaders.plugins = [...(shaders.plugins || []), {
+      name: 'highlight',
+      module: highlightUniforms,
+      injections: {
+        // Standard injection injection target - see "Writing Shaders"
+        'glsl:fs:DECKGL_FILTER_COLOR': `
         if (highlight.enabled) {
           if (color.r / max(color.g, 0.001) > 2. && color.r / max(color.b, 0.001) > 2.) {
             // is red
@@ -42,12 +45,9 @@ class FilteredScatterplotLayer extends ScatterplotLayer {
           }
         }
       `
-    };
-
-    // Add uniform binding to shader modules
-    shaders.modules = [...shaders.modules, highlightUniforms];
+      }
+    }];
     return shaders;
-    };
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -56,7 +56,7 @@ class FilteredScatterplotLayer extends ScatterplotLayer {
     if (props.highlightRed !== oldProps.highlightRed) {
       // Set the custom uniform
       const highlightProps: HighlightProps = {enabled: props.highlightRed};
-      model.shaderInputs.setProps({highlight: highlightProps});
+      this.setShaderModuleProps({highlight: highlightProps});
     }
   }
 }
@@ -96,6 +96,7 @@ The same functionality can be achieved by creating a layer extension. When we gi
 
 ```js
 import {LayerExtension} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 class RedFilter extends LayerExtension {
   // TODO - This is our reusable code
@@ -132,7 +133,7 @@ When a layer extension is used, it injects itself into a layer. This means that 
 
 ##### `getShaders` {#getshaders}
 
-Called to retrieve the *additional* shader parameters. Returns an object that will be merged with the layer's own `getShaders` result before sending to luma.gl's [shader assembly](https://github.com/visgl/luma.gl/blob/8.5-release/modules/shadertools/docs/api-reference/assemble-shaders.md). See [writing shaders](./writing-shaders.md) for deck.gl-specific modules and hooks.
+Called to retrieve the *additional* shader parameters. Returns an object that will be merged with the layer's own `getShaders` result before sending to luma.gl's [shader assembly](https://github.com/visgl/luma.gl/blob/8.5-release/modules/shadertools/docs/api-reference/assemble-shaders.md). See [writing shaders](./writing-shaders.md) for deck.gl-specific modules and injection targets.
 
 When this method is executed, `this` points to the layer.
 
@@ -200,6 +201,7 @@ Back to our example use case. We can implement the red filter with the following
 
 ```js
 import {LayerExtension} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 // Declare uniform block & custom shader module
 const uniformBlock = `\
@@ -211,18 +213,21 @@ uniform highlightUniforms {
 type HighlightProps = {enabled: boolean};
 
 const highlightUniforms = {
-  name: 'trips',
+  name: 'highlight',
   fs: uniformBlock, // Only need to add block to fragment stage in this example
   uniformTypes: {enabled: 'f32'}
-} as const satisfies ShaderModule<TripsProps>;
+} as const satisfies ShaderModule<HighlightProps>;
 
 
 class RedFilter extends LayerExtension {
   getShaders() {
     const shaders = super.getShaders();
-    shaders.inject = {
-      // Standard injection hook - see "Writing Shaders"
-      'fs:DECKGL_FILTER_COLOR': `
+    shaders.plugins = [...(shaders.plugins || []), {
+      name: 'highlight',
+      module: highlightUniforms,
+      injections: {
+        // Standard injection injection target - see "Writing Shaders"
+        'glsl:fs:DECKGL_FILTER_COLOR': `
         if (highlight.enabled) {
           if (color.r / max(color.g, 0.001) > 2. && color.r / max(color.b, 0.001) > 2.) {
             // is red
@@ -232,23 +237,18 @@ class RedFilter extends LayerExtension {
           }
         }
       `
-    };
-
-    // Add uniform binding to shader modules
-    shaders.modules = [...shaders.modules, highlightUniforms];
+      }
+    }];
     return shaders;
   }
 
   updateState(params) {
     const {highlightRed = true} = params.props;
-    for (const model of this.getModels()) {
-      const highlightProps: HighlightProps = {enabled: props.highlightRed};
-      model.shaderInputs.setProps({highlight: highlightProps});
-    }
+    this.setShaderModuleProps({highlight: {enabled: highlightRed}});
   }
 
   getSubLayerProps() {
-    const {highlightRed = true} = params.props;
+    const {highlightRed = true} = this.props;
     return {
       highlightRed
     };
@@ -262,3 +262,43 @@ new GeoJsonLayer({
 ```
 
 This example is on [codepen](https://codepen.io/vis-gl/pen/bXpNpK).
+
+## WebGPU shader plugins
+
+Extensions can return `{plugins: [plugin]}` from `getShaders`. deck.gl preserves
+plugins contributed by the layer and other extensions, in order. Declare shader
+inputs in `ShaderPlugin.vertexInputs` and cross-stage values in `ShaderPlugin.interStageVariables`;
+luma.gl allocates locations and rewrites the WGSL entry-point interfaces. Keep
+accessors, attribute buffers, invalidation, and resource lifecycle in the extension.
+
+Injections use explicit stages and language-specific source. For example:
+
+```typescript
+const plugin: ShaderPlugin = {
+  name: 'fade',
+  injections: {
+    'glsl:fs:DECKGL_FILTER_COLOR': 'color.a *= 0.5;',
+    'wgsl:fs:DECKGL_FILTER_COLOR': '(*color).a *= 0.5;'
+  }
+};
+```
+
+The built-in rendering primitives expose these WGSL injection targets:
+
+```wgsl
+DECKGL_FILTER_SIZE(&size, geometry);
+DECKGL_FILTER_GL_POSITION(&output.position, geometry);
+DECKGL_FILTER_COLOR(&color, fragmentGeometry);
+```
+
+Call the position target after populating `geometry.worldPosition` and, when relevant,
+`geometry.worldPositionAlt`. Call the fragment color target on visible and picking
+return paths, after derivative-dependent calculations and before premultiplying color. Custom layer shaders should
+return a named vertex-output struct and accept a named fragment-input struct so
+luma.gl can transport plugin varyings. Do not add extension-specific attributes or
+varyings to those structs yourself.
+
+GLSL and WGSL share injection target names, with language-specific signatures in one descriptor.
+Plugins select the shader language and stage through qualified injection keys.
+Luma.gl alpha.10 resolves vertex and fragment targets with the same name by
+stage. The WGSL layer call sites shown above apply color filters in the fragment stage.

@@ -18,7 +18,7 @@ import {
   GLOBE_INERTIA_EASING,
   GlobeInertiaInterpolator
 } from '../viewports/globe-util';
-import {MAX_LATITUDE} from '@math.gl/web-mercator';
+import {MAX_LATITUDE} from '@math.gl/geospatial/web-mercator';
 
 import type {MjolnirGestureEvent} from 'mjolnir.js';
 
