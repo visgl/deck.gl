@@ -182,6 +182,8 @@ test('PathLayer#GLSL assembles join outputs once after selecting the raster enve
     antialiasingDashVertexShader
   ]) {
     expect(shader.match(/vPathLength = L;/g)).toHaveLength(1);
+    expect(shader.match(/vCornerOffset = renderOffsetVec;/g)).toHaveLength(1);
+    expect(shader).toContain('offsetFromStartOfPath = renderOffsetVec + deltaA');
     expect(shader.match(/vPathPosition = vec2\(/g)).toHaveLength(1);
     expect(shader.match(/geometry\.uv = vPathPosition;/g)).toHaveLength(1);
     expect(
