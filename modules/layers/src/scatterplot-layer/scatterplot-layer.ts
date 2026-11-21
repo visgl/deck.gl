@@ -18,6 +18,7 @@ import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 import {getShaderWGSL} from './scatterplot-layer.wgsl';
 import {
+  DEFAULT_COLOR,
   ScatterplotLayerColumns,
   hasScatterplotColumns,
   type ScatterplotColumnProps
@@ -37,7 +38,8 @@ import type {
 
 const defaultPosition = (row: any) => row.position;
 
-const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+/** Byte RGB(A) constant or row callback, or a numeric RGB(A) Arrow or SQL source. */
+type ScatterplotColorAccessor<DataT> = ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
 
 /** All props supported by the ScatterplotLayer */
 export type ScatterplotLayerProps<DataT = unknown> = _ScatterplotLayerProps<DataT> & LayerProps;
@@ -119,15 +121,17 @@ type _ScatterplotLayerProps<DataT> = ScatterplotColumnProps & {
    */
   getRadius?: ArrowAccessor<DataT, number, Int | Float>;
   /**
-   * Fill color constant, row accessor, or numeric RGB/RGBA Arrow column converted to RGBA8.
+   * Fill color as byte RGB(A), a row callback, a numeric RGB(A) Arrow column, or a SQL expression.
+   * Omitted alpha is opaque.
    * @default [0, 0, 0, 255]
    */
-  getFillColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
+  getFillColor?: ScatterplotColorAccessor<DataT>;
   /**
-   * Stroke color constant, row accessor, or numeric RGB/RGBA Arrow column converted to RGBA8.
+   * Stroke color as byte RGB(A), a row callback, a numeric RGB(A) Arrow column, or a SQL expression.
+   * Omitted alpha is opaque.
    * @default [0, 0, 0, 255]
    */
-  getLineColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
+  getLineColor?: ScatterplotColorAccessor<DataT>;
   /**
    * Stroke width constant, row accessor, or numeric Arrow vector converted to Float32.
    * @default 1
@@ -168,11 +172,27 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   billboard: false,
   antialiasing: true,
 
-  getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
-  getRadius: {type: 'accessor', arrow: true, value: 1},
-  getFillColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
-  getLineColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
-  getLineWidth: {type: 'accessor', arrow: true, value: 1},
+  getPosition: {
+    type: 'accessor',
+    arrow: true,
+    arrowWithExtensions: 'row',
+    constantTypes: ['array'],
+    value: defaultPosition
+  },
+  getRadius: {type: 'accessor', arrow: true, arrowWithExtensions: 'row', value: 1},
+  getFillColor: {
+    type: 'accessor',
+    arrow: true,
+    arrowWithExtensions: 'row-color',
+    value: DEFAULT_COLOR
+  },
+  getLineColor: {
+    type: 'accessor',
+    arrow: true,
+    arrowWithExtensions: 'row-color',
+    value: DEFAULT_COLOR
+  },
+  getLineWidth: {type: 'accessor', arrow: true, arrowWithExtensions: 'row', value: 1},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
   positions: {type: 'object', value: null, optional: true},
   radii: {type: 'object', value: null, optional: true},
@@ -284,7 +304,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         transition: true,
         type: 'unorm8',
         accessor: 'getFillColor',
-        defaultValue: [0, 0, 0, 255],
+        semanticType: 'color',
+        defaultValue: DEFAULT_COLOR,
         bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineColors: {
@@ -292,7 +313,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         transition: true,
         type: 'unorm8',
         accessor: 'getLineColor',
-        defaultValue: [0, 0, 0, 255],
+        semanticType: 'color',
+        defaultValue: DEFAULT_COLOR,
         bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineWidths: {
@@ -334,6 +356,9 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       this.state.columns = undefined;
       this.internalState!.attributeManager = super._getAttributeManager();
       this.initializeAccessorAttributes();
+      for (const extension of this.props.extensions) {
+        extension.initializeState.call(this, this.context, extension);
+      }
       this.state.model?.destroy();
       this.state.model = this._getModel();
     }
@@ -345,6 +370,11 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       throw new Error('Scatterplot Arrow columns do not support extensions');
     const enteringColumns = !this.state.columns;
     if (enteringColumns) {
+      if (params.changeFlags.extensionsChanged) {
+        for (const extension of params.oldProps.extensions ?? []) {
+          extension.finalizeState.call(this, this.context, extension);
+        }
+      }
       this.internalState!.attributeManager?.finalize();
       this.internalState!.attributeManager = null;
       this.state.columns = new ScatterplotLayerColumns(this.context.device);
@@ -359,6 +389,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       this.state.model = this._getModel();
     }
     void this.state.columns!.updateIfNeeded(params, {
+      normalizedColors: this.usesNormalizedColors(),
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

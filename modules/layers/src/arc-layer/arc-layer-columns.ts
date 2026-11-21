@@ -10,6 +10,9 @@ import {
   type _ColumnDefinition as ColumnDefinition
 } from '@deck.gl/core';
 
+/** Shared byte-color default, recognized by reference in both rendering paths. */
+export const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+
 const DEFINITIONS: Record<string, ColumnDefinition> = {
   sourcePositions: {
     attribute: 'instanceSourcePositions',
@@ -30,6 +33,7 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     accessor: 'getSourceColor',
     arrowAccessor: true,
     semantic: 'color',
+    defaultColor: DEFAULT_COLOR,
     size: 4
   },
   targetColors: {
@@ -37,6 +41,7 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     accessor: 'getTargetColor',
     arrowAccessor: true,
     semantic: 'color',
+    defaultColor: DEFAULT_COLOR,
     size: 4
   },
   widths: {
@@ -83,13 +88,19 @@ export type ArcColumnProps = {
 };
 
 /** Returns whether a column prop selects the column path. */
-export function hasArcColumns(props: Readonly<Record<string, unknown>>): boolean {
-  return Object.keys(resolveColumns(props, DEFINITIONS)).length > 0;
+export function hasArcColumns(
+  props: Readonly<Record<string, unknown>>,
+  extraColumns?: Readonly<Record<string, ColumnDefinition>>
+): boolean {
+  /** Combined definitions used to discover a column declared by the base layer or a subclass. */
+  const definitions = extraColumns ? {...DEFINITIONS, ...extraColumns} : DEFINITIONS;
+  return Object.keys(resolveColumns(props, definitions)).length > 0;
 }
 
 /** Prepares ArcLayer columns and accessor fallbacks. */
 export class ArcLayerColumns extends LayerColumns {
-  constructor(device: Device) {
-    super(device, DEFINITIONS, 'Arc');
+  /** Prepares columns for the Arc shaders and any additional inputs from a subclass. */
+  constructor(device: Device, extraColumns: Readonly<Record<string, ColumnDefinition>> = {}) {
+    super(device, {...DEFINITIONS, ...extraColumns}, 'Arc');
   }
 }

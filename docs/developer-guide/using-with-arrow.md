@@ -122,7 +122,7 @@ replaces the data or is removed.
 ## Limitations
 
 Rendering columns must have equal lengths and matching chunk structures, and must not contain nulls.
-Arrow rendering accessors do not support attribute transitions or layer extensions. Use row accessors when you need those features.
+Direct column bindings do not support attribute transitions or layer extensions. ScatterplotLayer uses row-based attributes for Arrow and SQL accessors when extensions are active.
 
 See each layer's prop descriptions for supported inputs and the [loading data guide](./loading-data.md)
 for other ways to provide data.
@@ -148,3 +148,60 @@ contract when building those buffers.
 
 Keep the vectors and their buffers alive while the layer uses them. The layer
 borrows those buffers and releases its own conversion allocations.
+
+## Streaming Arrow data
+
+Layers can consume an async iterable of Apache Arrow `RecordBatch` objects or
+Arrow `Table` objects. Promises resolving to these iterables are also
+supported. Arrow remains an optional dependency and is loaded only when an Arrow chunk arrives.
+
+```ts
+new ScatterplotLayer({
+  id: 'streamed-points',
+  data: recordBatchStream,
+  _dataLoadOptions: 'batched',
+  getPosition: row => [row.longitude, row.latitude],
+  getRadius: row => row.radius,
+  onDataProgress: table => console.log(table.numRows)
+});
+```
+
+The experimental `_dataLoadOptions` prop controls loading and accumulation:
+
+- `'auto'` (default) loads URLs completely and appends chunks from application-supplied streams.
+- `'batched'` loads URLs with loaders.gl `loadInBatches` and appends each batch to the current table.
+- `'snapshots'` also loads URLs in batches, but replaces the entire table with each Arrow result.
+  Each yield contains all rows to display at that point. It can be one record batch or a
+  table containing multiple record batches.
+
+Set `loaders` and `loadOptions` as usual when streaming a URL. The selected loader must produce
+supported batches. Deck discards loader metadata and exposes Arrow tables to apps. Arrow batches
+retain their columnar storage; they are not converted to row objects. Do not mix Arrow and row
+chunks in one stream. An empty Arrow snapshot clears the table while retaining its schema.
+
+Arrow columns retain their GPU buffers when new batches extend the existing chunk sequence.
+Only new chunks are converted and uploaded, including float64 position residuals. Picking rows
+are read lazily. Replaced chunks, changed conversion settings, and snapshot loading rebuild the
+GPU columns. CPU-preprojected positions and ordinary accessor fallbacks use full conversion.
+
+`onDataProgress` receives the current accumulated or replacement table after each accepted batch.
+`onDataLoad` runs once when the stream finishes. An empty stream completes with an empty array
+and no progress callback. Replaced or finalized streams cannot publish further callbacks.
+
+`dataTransform` retains its existing behavior for row-array streams; it is not applied to Arrow
+chunks. Transform Arrow data in the producer before yielding it. This loading feature does not
+select fields or execute SQL; use accessors or explicit column props as with other Arrow inputs.
+
+## Arrow accessors that use row processing
+
+Path, Trips, Polygon, SolidPolygon, Text, and the aggregation layers accept
+Arrow vectors and SQL expressions on their row accessors. Supply a nested list
+for paths and polygons, a list of numbers for trip timestamps, and a string
+column for text or icon selection. GeoJsonLayer accepts an Arrow table with a
+GeoArrow geometry field and uses the source feature order for styling.
+SimpleMeshLayer and ScenegraphLayer accept Arrow and SQL instance transforms.
+
+These accessors use the same shapes and units as row callbacks. Supply the
+source table alongside the accessors so the layer has a row count. Passing
+`data: null` clears the layer and defers SQL evaluation. A zero-row Arrow
+table retains its schema and draws no features.

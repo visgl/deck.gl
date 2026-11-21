@@ -10,6 +10,9 @@ import {
   type _ColumnDefinition as ColumnDefinition
 } from '@deck.gl/core';
 
+/** Shared byte-color default, recognized by reference in both rendering paths. */
+export const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+
 /** Column semantics shared by Scatterplot selection and preparation. */
 export const SCATTERPLOT_COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = {
   positions: {
@@ -32,6 +35,7 @@ export const SCATTERPLOT_COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = 
     accessor: 'getFillColor',
     arrowAccessor: true,
     semantic: 'color',
+    defaultColor: DEFAULT_COLOR,
     size: 4
   },
   lineColors: {
@@ -39,6 +43,7 @@ export const SCATTERPLOT_COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = 
     accessor: 'getLineColor',
     arrowAccessor: true,
     semantic: 'color',
+    defaultColor: DEFAULT_COLOR,
     size: 4
   },
   lineWidths: {

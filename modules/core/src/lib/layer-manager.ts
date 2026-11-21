@@ -23,6 +23,8 @@ import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
 import type Deck from './deck';
 
+import type {SQLFunctions, SQLParser} from '../types/layer-props';
+
 const TRACE_SET_LAYERS = 'layerManager.setLayers';
 const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
 
@@ -30,6 +32,11 @@ export type LayerContext = {
   layerManager: LayerManager;
   resourceManager: ResourceManager;
   deck?: Deck<any>;
+  sqlParser?: SQLParser;
+  /** Effective Deck color convention for participating layers. */
+  normalizedColors?: boolean;
+  /** Additional Arrow functions shared by all layer SQL accessors. */
+  sqlFunctions?: SQLFunctions;
   device: Device;
   shaderAssembler: ShaderAssembler;
   defaultShaderModules: ShaderModule[];
@@ -196,6 +203,21 @@ export default class LayerManager {
     if ('layerFilter' in props && props.layerFilter !== this._layerFilter) {
       this._layerFilter = props.layerFilter;
       this.setNeedsUpdate('layerFilter changed');
+    }
+    if ('normalizedColors' in props && props.normalizedColors !== this.context.normalizedColors) {
+      this.context.normalizedColors = props.normalizedColors;
+      for (const layer of this.layers) {
+        layer.setNeedsUpdate();
+      }
+      this.setNeedsUpdate('normalizedColors changed');
+    }
+    if ('sqlParser' in props && props.sqlParser !== this.context.sqlParser) {
+      this.context.sqlParser = props.sqlParser;
+      this.setNeedsUpdate('SQL parser changed');
+    }
+    if ('sqlFunctions' in props && props.sqlFunctions !== this.context.sqlFunctions) {
+      this.context.sqlFunctions = props.sqlFunctions;
+      this.setNeedsUpdate('SQL functions changed');
     }
     if ('debug' in props) {
       this._debug = props.debug;

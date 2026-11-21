@@ -25,7 +25,7 @@ import {
   type MapViewState
 } from '@deck.gl/core';
 import {TooltipWidget} from '@deck.gl/core/lib/tooltip-widget';
-import DeckGL, {type DeckGLRef} from '@deck.gl/react';
+import DeckGL, {type DeckGLRef} from '@deck.gl/react/legacy';
 import {type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 

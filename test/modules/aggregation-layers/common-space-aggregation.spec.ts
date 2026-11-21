@@ -10,7 +10,7 @@ import {
   LayerManager,
   Viewport,
   WebMercatorViewport,
-  _GlobeViewport as GlobeViewport,
+  GlobeViewport,
   _CustomProjectionViewport as CustomProjectionViewport
 } from '@deck.gl/core';
 import {
@@ -912,7 +912,13 @@ test('HeatmapLayer ground-density color domain uses the Jacobian scalar', () => 
     });
     try {
       manager.setLayers([layer]);
-      domains.push(layer.state.colorDomain.slice());
+      const domain = layer.getSubLayers()[0].props.getColorDomain() as [number, number];
+      domains.push(domain.slice());
+      const updated = layer.clone({colorDomain: [2, 20]});
+      manager.setLayers([updated]);
+      expect(updated.getSubLayers()[0].props.getColorDomain()).toEqual(
+        domain.map(value => value * 2)
+      );
     } finally {
       manager.finalize();
     }

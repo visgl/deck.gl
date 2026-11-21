@@ -8,7 +8,7 @@ import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {Texture} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {GPUVectorModel} from '@luma.gl/engine';
-import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+import {Field, FixedSizeList, Float32, Table, vectorFromArray} from 'apache-arrow';
 
 function positions(rows: number[][]) {
   return vectorFromArray(rows, new FixedSizeList(2, new Field('values', new Float32(), false)));
@@ -401,5 +401,48 @@ for (const kind of ['line', 'point'] as const) {
       }
     });
     expect(checked).toBe(true);
+  });
+}
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`PointCloudLayer retains GPU chunks while Arrow tables append on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) return skip();
+    const first = positions([
+      [0, 0],
+      [1, 1]
+    ]);
+    const appended = first.concat(positions([[2, 2]]));
+    let retained: any;
+    await testLayerAsync({
+      Layer: PointCloudLayer,
+      device: testDevice,
+      testCases: [first, appended].map((column, index) => ({
+        props: {data: new Table({positions: column}), getPosition: {sql: 'positions'}},
+        onAfterUpdate: ({layer}) => {
+          if (!layer.isLoaded) return;
+          const prepared = (layer.state.columns as any).prepared;
+          const vector = prepared.columns.instancePositions;
+          if (!index) {
+            retained = vector.data[0].buffer;
+          } else {
+            expect(vector.data[0].buffer).toBe(retained);
+            expect(retained.destroyed).toBe(false);
+            expect(vector.data.map(chunk => chunk.length)).toEqual([2, 1]);
+            expect(layer.getNumInstances()).toBe(3);
+            expect(layer.getBounds()).toEqual([
+              [0, 0, 0],
+              [2, 2, 0]
+            ]);
+          }
+        }
+      })),
+      onError: error => {
+        throw error;
+      }
+    });
+    expect(retained.destroyed).toBe(true);
   });
 }
