@@ -70,6 +70,36 @@ test('TypedArrayManager#initialize', () => {
   expect(array.every(Number.isFinite), 'The array is initialized').toBeTruthy();
 });
 
+test('TypedArrayManager#allocate initializes the newly exposed part of a reused buffer', () => {
+  const typedArrayManager = new TypedArrayManager({overAlloc: 1, poolSize: 1});
+  const dirty = typedArrayManager.allocate(null, 32, {type: Uint8Array});
+  dirty.fill(255);
+  typedArrayManager.release(dirty);
+
+  const array = typedArrayManager.allocate<Float32Array>(null, 1, {
+    size: 2,
+    padding: 2,
+    type: Float32Array,
+    initialize: true
+  });
+  expect(array.buffer).toBe(dirty.buffer);
+  array.set([1, 2, 3, 4]);
+
+  const grown = typedArrayManager.allocate(array, 2, {
+    size: 2,
+    padding: 2,
+    initialize: true,
+    copy: true
+  });
+  expect(grown.buffer).toBe(array.buffer);
+  expect(Array.from(grown)).toEqual([1, 2, 3, 4, 0, 0]);
+  expect(dirty[24]).toBe(255);
+
+  const grownWithoutInitialization = typedArrayManager.allocate(grown, 8, {});
+  expect(grownWithoutInitialization.buffer).toBe(array.buffer);
+  expect(Number.isNaN(grownWithoutInitialization[6])).toBe(true);
+});
+
 test('TypedArrayManager#release', () => {
   const typedArrayManager = new TypedArrayManager({overAlloc: 1, poolSize: 2});
 
