@@ -23,6 +23,7 @@ copy-bundle:
 
 init:
 	. $(BIN)/activate && \
+	yarn install && \
 	yarn bootstrap && \
 	yarn build
 	$(MAKE) copy-bundle

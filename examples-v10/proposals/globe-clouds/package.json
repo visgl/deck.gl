@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "vite",
-    "build": "tsc && vite build",
+    "start": "../../../node_modules/.bin/vite",
+    "build": "../../../node_modules/.bin/tsc && ../../../node_modules/.bin/vite build",
     "test:visual": "node visual-test.mjs",
     "generate:thumbnail": "node visual-test.mjs --thumbnail"
   }
