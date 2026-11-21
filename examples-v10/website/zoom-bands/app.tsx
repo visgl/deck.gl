@@ -258,7 +258,7 @@ export default function App({
             LIBELLEFRANCAIS
           WHERE LONGITUDE <> '' AND LATITUDE <> ''
         `,
-      getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
+      getPosition: {sql: 'ARRAY[longitude, latitude]'},
       onDataLoad: onTreesLoaded,
       radiusUnits: 'pixels',
       getRadius: 1,

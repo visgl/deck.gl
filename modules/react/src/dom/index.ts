@@ -13,11 +13,9 @@ export {createDeckGL, DeckGL} from './components';
  * ```
  */
 export type {DeckGLRootProps, DeckGLProps, OnDeckChange} from '../types/index';
-export {DeckCanvas} from './deck-canvas';
 export {
   createEffectComponent,
   createLayerComponent,
   createViewComponent,
   createWidgetComponent
 } from '../wrappers/factories';
-export type {DeckCanvasProps} from './deck-canvas';

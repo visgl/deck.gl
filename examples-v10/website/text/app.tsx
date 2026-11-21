@@ -86,7 +86,7 @@ export default function App({
 
     // TextLayer options
     getText: {sql: 'name'},
-    getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
+    getPosition: {sql: 'ARRAY[longitude, latitude]'},
     sqlFunctions: [LOG10],
     getColor: {
       sql: `\

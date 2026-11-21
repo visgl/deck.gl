@@ -4,7 +4,7 @@
 
 import {Framebuffer} from '@luma.gl/core';
 
-import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {GlobeViewport} from '@deck.gl/core';
 import type {Layer, Viewport} from '@deck.gl/core';
 
 import {createRenderTarget} from './utils';

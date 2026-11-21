@@ -10,7 +10,7 @@ import {
   LayerManager,
   Viewport,
   WebMercatorViewport,
-  _GlobeViewport as GlobeViewport,
+  GlobeViewport,
   _CustomProjectionViewport as CustomProjectionViewport
 } from '@deck.gl/core';
 import {

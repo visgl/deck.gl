@@ -13,6 +13,10 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 - To keep the previous API, change the imports from `@deck.gl/react` to [`@deck.gl/react/legacy`](./api-reference/react/legacy/overview.md). It also requires React 19.2.
 - To move to the renderer, follow [Migrating from the previous API](./developer-guide/react/migrate-from-deckgl-react.md).
 
+### GlobeView
+
+`GlobeView`, `GlobeViewport` and `GlobeController` are no longer experimental. Import them without the underscore. `_GlobeView`, `_GlobeViewport` and `_GlobeController` remain as deprecated aliases of the same classes and will be removed in a future major release.
+
 ### SQL accessor functions
 
 math.gl now provides `LIST_EXTRACT` and `STRUCT_EXTRACT`. Rename custom declarations
@@ -99,7 +103,7 @@ layer and extension draws.
 
 ### loaders.gl and math.gl v5 beta
 
-Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.12`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+Update direct loaders.gl dependencies to `5.0.0-rc.1` and math.gl dependencies to `5.0.0-rc.2`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
 | Previous import | Replacement import |
 | --- | --- |

@@ -11,7 +11,7 @@ import {
 } from '@deck.gl/geo-layers/tileset-2d';
 import {Matrix4} from '@math.gl/core';
 
-import {WebMercatorViewport, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {WebMercatorViewport, OrthographicView, GlobeView} from '@deck.gl/core';
 
 const TEST_CASES = [
   {

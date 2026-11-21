@@ -13,7 +13,7 @@ import {
 } from '../utils/projection-utils';
 import {createRenderTarget} from './utils';
 
-import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {GlobeViewport} from '@deck.gl/core';
 import type {Viewport, Layer} from '@deck.gl/core';
 
 const MAP_MAX_SIZE = 2048;

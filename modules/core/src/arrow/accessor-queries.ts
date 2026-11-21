@@ -2,7 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Field, FixedSizeList, Table, Uint8, vectorFromArray, type Vector} from 'apache-arrow';
+import {
+  Field,
+  FixedSizeList,
+  Float64,
+  Table,
+  Uint8,
+  vectorFromArray,
+  type Vector
+} from 'apache-arrow';
 import {
   compileArrowScale,
   compileArrowScales,
@@ -17,8 +25,15 @@ import {isArrowTable} from './upstream-math/is-arrow-table';
 import {sqlParser} from './upstream-math/sql-parser';
 import {deepEqual} from '../utils/deep-equal';
 
-/** SQL functions that produce SDR color accessor columns. */
-const COLOR_SCALE_FUNCTIONS = new Set([
+/** SQL scale functions exposed by the math.gl parser. */
+const SCALE_FUNCTIONS = new Set([
+  'SCALE_LINEAR',
+  'SCALE_SQRT',
+  'SCALE_LOG',
+  'SCALE_POWER',
+  'SCALE_SYMLOG',
+  'SCALE_CYCLIC',
+  'SCALE_THRESHOLD',
   'SCALE_COLOR',
   'SCALE_DIVERGING',
   'SCALE_ORDINAL',
@@ -54,7 +69,7 @@ export function evaluateAccessorQueries(
       expression.type === 'CallExpression' &&
       expression.callee?.type === 'Identifier' &&
       typeof expression.callee.name === 'string' &&
-      COLOR_SCALE_FUNCTIONS.has(expression.callee.name.toUpperCase()) &&
+      SCALE_FUNCTIONS.has(expression.callee.name.toUpperCase()) &&
       !customFunctions.has(expression.callee.name.toUpperCase());
     return {name, expression, isColorScale};
   });
@@ -62,8 +77,16 @@ export function evaluateAccessorQueries(
     .filter(({isColorScale}) => isColorScale)
     .map(({name, expression}) => {
       const {value, scale} = parseSQLScaleAST(expression);
-      return [name, {value, scale: {...scale, nullColor: [0, 0, 0, 0] as const}}] as const;
+      return [
+        name,
+        {
+          value,
+          scale:
+            scale.range.type === 'numeric' ? scale : {...scale, nullColor: [0, 0, 0, 0] as const}
+        }
+      ] as const;
     });
+  const parsedScales = new Map(scaleExpressions);
   const compiled = compileArrowScales(
     data,
     Object.fromEntries(
@@ -126,10 +149,12 @@ export function evaluateAccessorQueries(
       // A new domain can change the color of previously evaluated rows.
       columns[name] = isColorScale
         ? (compiled[name]?.evaluate(input) ??
-          vectorFromArray(
-            Array.from({length: input.numRows}, () => [0, 0, 0, 0]),
-            new FixedSizeList(4, new Field('item', new Uint8(), false))
-          ))
+          (parsedScales.get(name)?.scale.range.type === 'numeric'
+            ? vectorFromArray(new Array(input.numRows).fill(null), new Float64())
+            : vectorFromArray(
+                Array.from({length: input.numRows}, () => [0, 0, 0, 0]),
+                new FixedSizeList(4, new Field('item', new Uint8(), false))
+              )))
         : (previousBatch?.getChild(name) ?? evaluateColumnExpression(expression, input, functions));
     }
     return new Table(columns);

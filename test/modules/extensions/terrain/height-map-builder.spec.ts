@@ -4,7 +4,7 @@
 
 import {test, expect, vi} from 'vitest';
 import {HeightMapBuilder} from '@deck.gl/extensions/terrain/height-map-builder';
-import {WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {WebMercatorViewport, GlobeViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {LifecycleTester} from '../utils';
 import type {Device} from '@luma.gl/core';

@@ -9,7 +9,7 @@ import {
   Viewport,
   MapView,
   WebMercatorViewport,
-  _GlobeViewport as GlobeViewport
+  GlobeViewport
 } from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 import {projectionEngine} from '@math.gl/geospatial/projection';

@@ -11,6 +11,7 @@ const darkCodeTheme = prismThemes.nightOwl;
 
 const {getSwcLoaderOptions, rspack} = require('@docusaurus/faster');
 const {resolve} = require('path');
+const {createRequire} = require('node:module');
 const exampleCatalogs = require('./scripts/example-catalogs.cjs');
 const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/';
 const websiteBasePathSegments = websiteBaseUrl.split('/').filter(Boolean);
@@ -147,6 +148,10 @@ const config = {
           // Resolve dependencies through their package export maps, including subpaths.
           modules: [resolve('node_modules'), resolve('../node_modules')],
           alias: {
+            // concaveman imports a UMD file from its nested robust-predicates 2.x dependency.
+            'robust-predicates/umd/orient2d.min.js$': createRequire(
+              require.resolve('concaveman')
+            ).resolve('robust-predicates/umd/orient2d.min.js'),
             '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers/dist'),
             '@deck.gl/arcgis': resolve('../modules/arcgis/dist'),
             '@deck.gl/carto': resolve('../modules/carto/dist'),

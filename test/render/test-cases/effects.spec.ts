@@ -7,7 +7,7 @@ import {
   LightingEffect,
   AmbientLight,
   DirectionalLight,
-  _GlobeView as GlobeView
+  GlobeView
 } from '@deck.gl/core';
 import {zoomBlur, vignette} from '@luma.gl/engine/effects';
 import {hexagons, points} from 'deck.gl-test/data';
