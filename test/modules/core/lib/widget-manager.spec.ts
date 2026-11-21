@@ -170,8 +170,10 @@ test('WidgetManager#onRedraw#without viewId', () => {
   const container = widgetManager.containers['root'];
   expect(container.style.left, 'container left is set').toBe('0px');
   expect(container.style.top, 'container top is set').toBe('0px');
-  expect(container.style.width, 'container width is set').toBe('600px');
-  expect(container.style.height, 'container height is set').toBe('400px');
+  expect(container.style.width, 'container width is set').toBe('100%');
+  expect(container.style.height, 'container height is set').toBe('100%');
+  expect(container.style.minWidth, 'container min width is set').toBe('600px');
+  expect(container.style.minHeight, 'container min height is set').toBe('400px');
 
   widgetManager.onRedraw({
     viewports: [
@@ -220,24 +222,76 @@ test('WidgetManager#onRedraw#without viewId', () => {
   widgetManager.finalize();
 });
 
-test('WidgetManager#onRedraw#without viewId uses parent size', () => {
+test('WidgetManager#onRedraw#without viewId does not read parent size', () => {
   const parentElement = document.createElement('div');
-  Object.defineProperty(parentElement, 'clientWidth', {value: 1200});
-  Object.defineProperty(parentElement, 'clientHeight', {value: 800});
-  const widgetManager = new WidgetManager({
-    deck: mockDeckInstance,
-    parentElement
-  });
+  let parentSizeReads = 0;
+  for (const key of ['clientWidth', 'clientHeight']) {
+    Object.defineProperty(parentElement, key, {
+      get: () => {
+        parentSizeReads++;
+        return 0;
+      }
+    });
+  }
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement});
 
-  const widget = new TestWidget({id: 'A'});
-  widgetManager.addDefault(widget);
+  widgetManager.addDefault(new TestWidget({id: 'A'}));
   widgetManager.onRedraw({viewports: [], layers: []});
-
-  const container = widgetManager.containers['root'];
-  expect(container.style.width, 'root container width uses parent size').toBe('1200px');
-  expect(container.style.height, 'root container height uses parent size').toBe('800px');
+  widgetManager.onRedraw({viewports: [], layers: []});
+  expect(parentSizeReads, 'parent size is not read').toBe(0);
 
   widgetManager.finalize();
+});
+
+test('WidgetManager#onRedraw#without viewId follows parent size', () => {
+  const parentElement = document.createElement('div');
+  Object.assign(parentElement.style, {position: 'relative', width: '300px', height: '200px'});
+  document.body.append(parentElement);
+  const widgetManager = new WidgetManager({deck: {width: 100, height: 50}, parentElement});
+
+  widgetManager.addDefault(new TestWidget({id: 'A'}));
+  widgetManager.onRedraw({viewports: [], layers: []});
+  const container = widgetManager.containers['root'];
+  let bounds = container.getBoundingClientRect();
+  expect(bounds.width, 'root container uses parent width').toBe(300);
+  expect(bounds.height, 'root container uses parent height').toBe(200);
+
+  // Resize and pad the parent without a redraw
+  Object.assign(parentElement.style, {width: '500px', padding: '20px'});
+  bounds = container.getBoundingClientRect();
+  expect(bounds.width, 'root container follows parent width').toBe(540);
+  expect(bounds.height, 'root container follows parent padding').toBe(240);
+  expect(bounds.right, 'root container is aligned with parent').toBe(
+    parentElement.getBoundingClientRect().right
+  );
+
+  widgetManager.finalize();
+  parentElement.remove();
+});
+
+test('WidgetManager#onRedraw#without viewId falls back to deck size', () => {
+  const parentElement = document.createElement('div');
+  parentElement.style.position = 'absolute';
+  document.body.append(parentElement);
+  const deck = {width: 600, height: 400};
+  const widgetManager = new WidgetManager({deck, parentElement});
+
+  widgetManager.addDefault(new TestWidget({id: 'A'}));
+  widgetManager.onRedraw({viewports: [], layers: []});
+  const container = widgetManager.containers['root'];
+  let bounds = container.getBoundingClientRect();
+  expect(bounds.width, 'root container uses deck width').toBe(600);
+  expect(bounds.height, 'root container uses deck height').toBe(400);
+
+  deck.width = 700;
+  deck.height = 500;
+  widgetManager.onRedraw({viewports: [], layers: []});
+  bounds = container.getBoundingClientRect();
+  expect(bounds.width, 'root container follows deck width').toBe(700);
+  expect(bounds.height, 'root container follows deck height').toBe(500);
+
+  widgetManager.finalize();
+  parentElement.remove();
 });
 
 test('WidgetManager#onRedraw#viewId uses canvas offset', () => {
@@ -426,8 +480,10 @@ test('WidgetManager#onRedraw#container', () => {
   const container = widgetManager.containers['root'];
   expect(container.style.left, 'container left is set').toBe('0px');
   expect(container.style.top, 'container top is set').toBe('0px');
-  expect(container.style.width, 'container width is set').toBe('600px');
-  expect(container.style.height, 'container height is set').toBe('400px');
+  expect(container.style.width, 'container width is set').toBe('100%');
+  expect(container.style.height, 'container height is set').toBe('100%');
+  expect(container.style.minWidth, 'container min width is set').toBe('600px');
+  expect(container.style.minHeight, 'container min height is set').toBe('400px');
 
   widgetManager.finalize();
 });
