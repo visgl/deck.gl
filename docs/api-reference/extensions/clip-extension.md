@@ -64,6 +64,8 @@ Supported format: `[left, bottom, right, top]`
 
 To clip across the antimeridian, use a `left` more than 180° greater than `right`, e.g. `[170, -20, -170, 20]`. Other reversed edges are re-ordered. Crossing regions 180° or wider, and clipping with `clipByInstance: true`, need two layers.
 
+In a [CustomProjectionView](../core/custom-projection-view.md), the bounds are in the layer's source coordinates. The projection can rotate the bounds and bend their edges, so the layer clips to a polygon of up to 64 projected positions on the outline of the bounds. The layer halves the edges until the polygon is within half a pixel of the projected outline at the view center. Each half of a tile edge is an edge of a child tile, so tiles of different levels have the same vertices on a shared edge. If a tile needs more than 64 positions, its outline can be more than half a pixel from the outline of a neighbor tile.
+
 #### `clipByInstance` (boolean, optional) {#clipbyinstance}
 
 `clipByInstance` controls whether an object is clipped by its anchor (e.g. icon, point) or by its geometry (e.g. path, polygon). If not specified, it is deduced from whether there is an attribute called `instancePositions`. This behavior can be overridden if:
