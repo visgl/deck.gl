@@ -155,7 +155,7 @@ export default function App({
     _animations: ANIMATIONS,
     sizeMinPixels: 0.1,
     sizeMaxPixels: 1.5,
-    getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude, altitude)'},
+    getPosition: {sql: 'ARRAY[longitude, latitude, altitude]'},
     getOrientation: ({verticalRate, velocity, trueTrack}) => {
       // -90 looking up, +90 looking down
       const pitch = (-Math.atan2(verticalRate ?? 0, velocity ?? 0) * 180) / Math.PI;
