@@ -287,12 +287,7 @@ const projects = [
             ...excludedTests,
             'test/modules/**/*.node.spec.ts',
             'modules/proposals/test/effects/**/*.node.spec.ts',
-            'modules/proposals/test/layers/**/*.node.spec.ts',
-            // Temporarily excluded until #11221 merges: finalized Decks don't release their WebGL
-            // context yet, and the renderer's specs push the shared page past Chromium's context
-            // limit, which loses the test device for every later file. They still run in the
-            // `browser` project.
-            'test/modules/react/fiber/**/*.spec.{ts,tsx}'
+            'modules/proposals/test/layers/**/*.node.spec.ts'
           ],
           globals: false,
           testTimeout: 30000,
