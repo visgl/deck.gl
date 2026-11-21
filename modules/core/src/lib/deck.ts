@@ -94,6 +94,14 @@ type CursorState = {
   isHovering: boolean;
   /** Whether the cursor is down */
   isDragging: boolean;
+  /** Whether the Shift key was pressed during the last pointer event */
+  shiftKey: boolean;
+  /** Whether the Control key was pressed during the last pointer event */
+  ctrlKey: boolean;
+  /** Whether the Alt (Option) key was pressed during the last pointer event */
+  altKey: boolean;
+  /** Whether the Meta (Command / Windows) key was pressed during the last pointer event */
+  metaKey: boolean;
 };
 
 type InternalPickingMode = 'sync' | 'async';
@@ -377,7 +385,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   protected viewState: ViewStateObject<ViewsT> | null;
   protected cursorState: CursorState = {
     isHovering: false,
-    isDragging: false
+    isDragging: false,
+    shiftKey: false,
+    ctrlKey: false,
+    altKey: false,
+    metaKey: false
   };
 
   protected stats = new Stats({id: 'deck.gl'});
@@ -1567,6 +1579,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   // request and only do it once on the next animation frame.
   /** Internal use only: event handler for pointerdown */
   _onPointerMove = (event: MjolnirPointerEvent) => {
+    this._updateModifierKeys(event);
     const {_pickRequest} = this;
     const canvasId = this._getCanvasIdFromEvent(event);
     if (event.type === 'pointerleave') {
@@ -1637,6 +1650,19 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         })
         .catch(error => this.props.onError?.(error));
     }
+  }
+
+  /** Copies the modifier key states of a pointer event into the cursor state passed to `getCursor` */
+  private _updateModifierKeys(event: MjolnirPointerEvent): void {
+    // Basemap integrations forward their own event objects as `srcEvent`, which wrap the DOM event
+    // in `originalEvent` (Mapbox, MapLibre) or `domEvent` (Google Maps).
+    const srcEvent = event.srcEvent as any;
+    const domEvent = srcEvent?.originalEvent ?? srcEvent?.domEvent ?? srcEvent;
+
+    this.cursorState.shiftKey = Boolean(domEvent?.shiftKey);
+    this.cursorState.ctrlKey = Boolean(domEvent?.ctrlKey);
+    this.cursorState.altKey = Boolean(domEvent?.altKey);
+    this.cursorState.metaKey = Boolean(domEvent?.metaKey);
   }
 
   private _updateCursor(): void {
@@ -1965,6 +1991,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Internal use only: evnet handler for pointerdown */
   _onPointerDown = (event: MjolnirPointerEvent) => {
+    this._updateModifierKeys(event);
     const pos = event.offsetCenter;
     const canvasId = this._getCanvasIdFromEvent(event);
     if (!pos) {
