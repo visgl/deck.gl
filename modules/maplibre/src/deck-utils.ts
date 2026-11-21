@@ -302,9 +302,13 @@ function afterMapLibreRender(deck: Deck, map: MapLibreMap): void {
     const gl = device?.gl;
     deck.props.onBeforeRender?.({device, gl});
     deck.props.onAfterRender?.({device, gl});
+
+    // Without layers no pass draws, but widgets still need the empty frame
+    const mapLibreViewport =
+      (deck.userData as UserData).currentViewport || getMapLibreViewport(deck, map);
+    deck._redrawWidgets(mapLibreViewport ? [mapLibreViewport] : []);
   }
 
-  deck._redrawWidgets();
   (deck.userData as UserData).currentViewport = null;
 }
 

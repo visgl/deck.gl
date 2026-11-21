@@ -358,9 +358,11 @@ function afterRender(deck: Deck, map: Map): void {
     const gl = device?.gl;
     deck.props.onBeforeRender?.({device, gl});
     deck.props.onAfterRender?.({device, gl});
-  }
 
-  deck._redrawWidgets();
+    // Without layers no pass draws, but widgets still need the empty frame
+    const mapboxViewport = (deck.userData as UserData).currentViewport || getViewport(deck, map);
+    deck._redrawWidgets(mapboxViewport ? [mapboxViewport] : []);
+  }
 
   // End of render cycle, clear generated viewport
   (deck.userData as UserData).currentViewport = null;

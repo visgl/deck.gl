@@ -330,6 +330,17 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
           expect(widget.redraws, 'one widget redraw with both layer groups').toEqual([
             {viewportIds: ['maplibre'], layerIds: ['above-labels', 'under-labels']}
           ]);
+
+          // Removing the last layer leaves no pass to draw, but widgets still get the empty frame
+          overlay.setProps({layers: []});
+          widget.redraws.length = 0;
+          await new Promise<void>(resolve => {
+            map.once('render', () => resolve());
+            map.triggerRepaint();
+          });
+          expect(widget.redraws, 'one widget redraw without layers').toEqual([
+            {viewportIds: ['maplibre'], layerIds: []}
+          ]);
         }
 
         expect(centerPixel).toEqual([255, 0, 0, 255]);

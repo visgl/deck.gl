@@ -1867,10 +1867,19 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /**
    * Redraws widgets once with every screen pass drawn since they were last redrawn.
    * Integrations that draw a frame in several deferred passes call this at the end of the frame.
+   * @param emptyFrameViewports Viewports to redraw widgets with, with no rendered layers, when no
+   * screen pass was drawn since the last redraw
    */
-  _redrawWidgets(): void {
+  _redrawWidgets(emptyFrameViewports?: Viewport[]): void {
     const pending = this._pendingWidgetRedraw;
     if (!pending) {
+      if (emptyFrameViewports) {
+        this.widgetManager?.onRedraw({
+          viewports: emptyFrameViewports,
+          layers: this.layerManager?.getLayers() ?? [],
+          renderedLayers: new Map()
+        });
+      }
       return;
     }
     this._pendingWidgetRedraw = null;

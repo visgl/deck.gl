@@ -448,6 +448,14 @@ webglTest('MapboxOverlay#interleaved redraws widgets once per frame', async () =
       {viewportIds: ['mapbox'], layerIds: ['below-water', 'top']}
     ]);
 
+    // Removing the last layer leaves no pass to draw, but widgets still get the empty frame
+    overlay.setProps({layers: []});
+    widget.redraws.length = 0;
+    map._render();
+    expect(widget.redraws, 'one widget redraw without layers').toEqual([
+      {viewportIds: ['mapbox'], layerIds: []}
+    ]);
+
     map.removeControl(overlay);
   });
   map.addControl(overlay);
