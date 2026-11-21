@@ -4,7 +4,7 @@
 
 import Viewport from '../viewports/viewport';
 import {parsePosition, getPosition, LayoutExpression} from '../utils/positions';
-import {deepEqualExcept} from '../utils/deep-equal';
+import {deepEqual} from '../utils/deep-equal';
 import {createPropsWithDefaultId} from '../utils/props-with-default-id';
 import {deepMergeViewState} from '../utils/deep-merge';
 import type Controller from '../controllers/controller';
@@ -13,8 +13,6 @@ import type {TransitionProps} from '../controllers/transition-manager';
 import type {Padding} from '../viewports/viewport';
 import type {ConstructorOf} from '../types/types';
 import type {Parameters} from '@luma.gl/core';
-
-const ID_KEY = ['id'] as const;
 
 export type CommonViewState = TransitionProps;
 
@@ -129,12 +127,11 @@ export default abstract class View<
       return true;
     }
 
-    // To correctly compare padding use depth=2
-    // `id` is an own prop only when it was passed, so compare the resolved ids instead
+    // To correctly compare padding use depth=2. `id` is an own prop only when it was passed, so
+    // compare props with their resolved ids.
     return (
       this.constructor === view.constructor &&
-      this.id === view.id &&
-      deepEqualExcept(this.props, view.props, 2, ID_KEY)
+      deepEqual({...this.props, id: this.id}, {...view.props, id: view.id}, 2)
     );
   }
 

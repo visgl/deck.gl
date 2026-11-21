@@ -4,14 +4,12 @@
 
 import View from './view';
 import {resolveCRS} from '../utils/crs';
-import {deepEqual, deepEqualExcept} from '../utils/deep-equal';
+import {deepEqual} from '../utils/deep-equal';
 import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/geospatial/projection/core';
 import type {CommonViewProps, CommonViewState} from './view';
 import CustomProjectionViewport from '../viewports/custom-projection-viewport';
 import type {CustomProjectionViewportOptions} from '../viewports/custom-projection-viewport';
 import CustomProjectionController from '../controllers/custom-projection-controller';
-
-const ID_AND_CRS_KEYS = ['id', 'crs'] as const;
 
 /** World-coordinate center and zoom with MapView-style pitch and bearing. */
 export type CustomProjectionViewState = {
@@ -58,12 +56,10 @@ export default class CustomProjectionView extends View<
     if (this === view) return true;
     if (this.constructor !== view.constructor) return false;
     // Structured CRS definitions can nest more deeply than View's layout and controller props.
-    // `id` is an own prop only when it was passed, so compare the resolved ids instead.
-    return (
-      this.id === view.id &&
-      deepEqual(this.props.crs, view.props.crs, -1) &&
-      deepEqualExcept(this.props, view.props, 2, ID_AND_CRS_KEYS)
-    );
+    // `id` is an own prop only when it was passed, so compare props with their resolved ids.
+    const {crs, ...props} = {...this.props, id: this.id};
+    const {crs: otherCrs, ...otherProps} = {...view.props, id: view.id};
+    return deepEqual(crs, otherCrs, -1) && deepEqual(props, otherProps, 2);
   }
   /** Resolve the target CRS once for this view before creating its synchronous viewport. */
   initialize(): void | Promise<void> {
