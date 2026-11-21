@@ -288,6 +288,67 @@ for (const {title, crs, viewState, span} of [
   });
 }
 
+test('TerrainLayer#CustomProjectionView keeps the precision of large CRS coordinates', async () => {
+  // The northings of UTM zone 15N are approximately 5e6 meters at this latitude.
+  // A float32 value has a spacing of 0.5 meters there.
+  const crs = 'EPSG:32615';
+  const view = new CustomProjectionView({crs});
+  await view.initialize();
+  const viewport = view.makeViewport({
+    width: 400,
+    height: 300,
+    viewState: {center: [-93.2, 45, 0], zoom: 10}
+  })!;
+  const converter = viewport.crs.converter.WGS84;
+  const [west, south, east, north] = [-93.3, 44.9, -93.1, 45.1];
+  const corners = [
+    [west, south],
+    [east, south],
+    [east, north],
+    [west, north]
+  ];
+  let checkedVertices = 0;
+
+  await testLayerAsync({
+    Layer: BoundsTerrainLayer,
+    viewport,
+    testCases: [
+      {
+        props: {
+          elevationData: 'terrain.png',
+          bounds: [west, south, east, north],
+          fetch: fetchTerrainFixture
+        },
+        onAfterUpdate: ({layer}) => {
+          const meshLayer = layer.getSubLayers()[0] as SimpleMeshLayer;
+          const mesh = meshLayer?.props.mesh as any;
+          if (!layer.isLoaded || !mesh?.attributes) return;
+          // The layer uploads these values to the GPU
+          const positions = mesh.attributes.POSITION.value;
+          expect(positions, 'positions in float32').toBeInstanceOf(Float32Array);
+          const origin = meshLayer.props.coordinateOrigin;
+          for (const [i, [lng, lat]] of corners.entries()) {
+            // The mesh of the loader has float32 longitudes and latitudes
+            const expected = converter.from(
+              converter.normalize([Math.fround(lng), Math.fround(lat), ELEVATION])
+            );
+            for (let axis = 0; axis < 3; axis++) {
+              const value = positions[i * 3 + axis] + origin[axis];
+              expect(
+                Math.abs(value - expected[axis]),
+                `vertex ${i} axis ${axis}: ${value} is ${expected[axis]}`
+              ).toBeLessThan(0.001);
+            }
+            checkedVertices++;
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+  expect(checkedVertices, 'checked the vertices').toBe(corners.length);
+});
+
 test('TerrainLayer#CustomProjectionView keeps the height range in meters', async () => {
   // Heights in feet
   const view = new CustomProjectionView({

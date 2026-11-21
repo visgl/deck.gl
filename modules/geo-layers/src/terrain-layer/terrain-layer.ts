@@ -103,14 +103,35 @@ function getOverlappedBounds(bounds: Bounds, tileSize: number, clampLngLat: bool
 }
 
 /**
+ * Returns the origin of a mesh in the CRS of a custom projection: the center of its WGS84 bounds,
+ * in whole CRS units. The mesh positions are offsets from this origin. Its height is 0, so the
+ * heights of the mesh stay absolute.
+ */
+function getMeshOrigin(
+  viewport: CustomProjectionViewport,
+  bounds: Bounds | null
+): [number, number, number] {
+  if (!bounds) {
+    return [0, 0, 0];
+  }
+  const converter = viewport.crs.converter.WGS84;
+  const [west, south, east, north] = bounds;
+  const [x, y] = converter.from(converter.normalize([(west + east) / 2, (south + north) / 2, 0]));
+  return [Math.round(x), Math.round(y), 0];
+}
+
+/**
  * Converts the positions of a mesh to the CRS of a custom projection. `toLngLat` converts the
  * horizontal mesh coordinates to WGS84. The sublayer draws the result with
  * `coordinateSystem: 'cartesian'`, because the view does not convert the vertices of a mesh.
+ * The positions are offsets from `origin`: the GPU receives positions in float32, which cannot
+ * keep the precision of large CRS coordinates.
  */
 function convertMeshToCRS(
   mesh: MeshAttributes,
   viewport: CustomProjectionViewport,
-  toLngLat: (xy: number[]) => number[]
+  toLngLat: (xy: number[]) => number[],
+  origin: number[]
 ): MeshAttributes {
   // The loader returns a mesh with a header and attributes, not the attributes alone
   const {header, attributes} = mesh as unknown as TerrainMesh;
@@ -124,7 +145,7 @@ function convertMeshToCRS(
     const [lng, lat] = toLngLat([source[i], source[i + 1]]);
     const position = converter.from(converter.normalize([lng, lat, source[i + 2]]));
     for (let axis = 0; axis < 3; axis++) {
-      const value = position[axis] ?? 0;
+      const value = (position[axis] ?? 0) - origin[axis];
       positions[i + axis] = value;
       min[axis] = Math.min(min[axis], value);
       max[axis] = Math.max(max[axis], value);
@@ -136,6 +157,12 @@ function convertMeshToCRS(
     attributes: {...attributes, [name]: {...attributes[name], value: positions}}
   };
   return result as unknown as MeshAttributes;
+}
+
+/** Returns the WGS84 bounds of a tile of a geospatial view */
+function getTileBounds({bbox}: {bbox: TileBoundingBox}): Bounds {
+  const {west, south, east, north} = bbox as GeoBoundingBox;
+  return [west, south, east, north];
 }
 
 function getEffectiveMeshMaxError(meshMaxError: number): number {
@@ -244,7 +271,10 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       let terrain = this.loadTerrain(props as TerrainLoadProps);
       if (viewport instanceof CustomProjectionViewport && terrain) {
         // The mesh positions are WGS84 longitudes and latitudes
-        terrain = terrain.then(mesh => mesh && convertMeshToCRS(mesh, viewport, lngLat => lngLat));
+        const origin = getMeshOrigin(viewport, props.bounds);
+        terrain = terrain.then(
+          mesh => mesh && convertMeshToCRS(mesh, viewport, lngLat => lngLat, origin)
+        );
       }
       this.setState({terrain, crs});
     }
@@ -322,7 +352,10 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       signal
     });
     if (isCustomProjection && terrain) {
-      terrain = terrain.then(mesh => mesh && convertMeshToCRS(mesh, viewport, worldToLngLat));
+      const origin = getMeshOrigin(viewport, getTileBounds(tile));
+      terrain = terrain.then(
+        mesh => mesh && convertMeshToCRS(mesh, viewport, worldToLngLat, origin)
+      );
     }
     const surface = textureUrl
       ? // If surface image fails to load, the tile should still be displayed
@@ -371,6 +404,9 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       texture,
       _instanced: false,
       coordinateSystem,
+      ...(viewport instanceof CustomProjectionViewport && {
+        coordinateOrigin: getMeshOrigin(viewport, getTileBounds(props.tile))
+      }),
       getPosition: d => [0, 0, 0],
       getColor: this.getTerrainColor(),
       wireframe,
@@ -485,6 +521,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     }
 
     const SubLayerClass = this.getSubLayerClass('mesh', SimpleMeshLayer);
+    const {viewport} = this.context;
     return new SubLayerClass(
       this.getSubLayerProps({
         id: 'mesh'
@@ -495,7 +532,11 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
         texture,
         _instanced: false,
         // The mesh of a custom projection is in its CRS
-        ...(this.state.crs && {coordinateSystem: 'cartesian'}),
+        ...(viewport instanceof CustomProjectionViewport &&
+          this.state.crs && {
+            coordinateSystem: 'cartesian',
+            coordinateOrigin: getMeshOrigin(viewport, this.props.bounds)
+          }),
         getPosition: d => [0, 0, 0],
         getColor: this.getTerrainColor(),
         material,
