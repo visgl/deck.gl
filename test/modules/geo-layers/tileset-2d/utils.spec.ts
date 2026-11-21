@@ -10,6 +10,8 @@ import {
   getURLFromTemplate
 } from '@deck.gl/geo-layers/tileset-2d';
 import {Matrix4} from '@math.gl/core';
+import {MAX_LATITUDE} from '@math.gl/geospatial/web-mercator';
+import {getGeographicBounds} from '../../../../modules/geo-layers/src/tileset-2d/tile-2d-traversal';
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
 import {createTestViewport} from '../../core/viewports/test-crs';
 
@@ -768,6 +770,46 @@ test('getTileIndices#CustomProjectionView respects extent and maxZoom', async ()
     getTileIndices({viewport, zRange: null, extent: [10, 45, 11, 46]}),
     'extent outside the view'
   ).toEqual([]);
+});
+
+test('getGeographicBounds#CustomProjectionView uses a pole only in front of the camera', async () => {
+  const viewport = await makeCustomProjectionViewport(SOUTH_POLAR_STEREOGRAPHIC, {
+    center: [0, -70, 0],
+    zoom: 4
+  });
+  // The samples span 20 degrees. The bounds add half of the sample interval at each side.
+  const groundPositions = [
+    [-10, -70],
+    [10, -70]
+  ];
+  const getLngSpan = () => {
+    const bounds = getGeographicBounds(viewport, groundPositions);
+    return bounds.reduce((sum, [west, , east]) => sum + east - west, 0);
+  };
+  const project = viewport.project.bind(viewport);
+  for (const [depth, expected] of [
+    [0.5, 360],
+    [1.2, 22.5]
+  ]) {
+    // The pole projects into the screen rectangle, at this clip-space depth
+    const spy = vi
+      .spyOn(viewport, 'project')
+      .mockImplementation((position, options) =>
+        Math.abs(position[1]) === 90 ? [400, 200, depth] : project(position, options)
+      );
+    expect(getLngSpan(), `depth ${depth}`).toBeCloseTo(expected, 6);
+    spy.mockRestore();
+  }
+
+  // The view shows the south pole
+  const poleViewport = await makeCustomProjectionViewport(SOUTH_POLAR_STEREOGRAPHIC, {
+    center: [0, -88, 0],
+    zoom: 4
+  });
+  expect(
+    getGeographicBounds(poleViewport, groundPositions),
+    'a visible pole adds all longitudes'
+  ).toEqual([[-180, -MAX_LATITUDE, 180, -70]]);
 });
 
 test('tileToBoundingBox', () => {

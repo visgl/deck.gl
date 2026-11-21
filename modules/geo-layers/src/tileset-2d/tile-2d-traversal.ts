@@ -534,10 +534,18 @@ export function getGeographicBounds(
 
   // All meridians meet at a pole
   for (const poleLat of [-90, 90]) {
-    const pole = [centerLng, poleLat];
+    const pole = [centerLng, poleLat, 0];
     if (isInAreaOfUse(viewport, pole)) {
-      const [x, y] = tryConvert(() => viewport.project(pole));
-      if (x >= left && x <= left + width && y >= top && y <= top + height) {
+      // A position without an altitude projects to x and y only
+      const [x, y, depth] = tryConvert(() => viewport.project(pole));
+      if (
+        x >= left &&
+        x <= left + width &&
+        y >= top &&
+        y <= top + height &&
+        depth >= 0 &&
+        depth <= 1
+      ) {
         minLng = centerLng - 180;
         maxLng = centerLng + 180;
         minLat = Math.min(minLat, poleLat);
