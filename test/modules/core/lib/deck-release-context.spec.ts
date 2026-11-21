@@ -4,6 +4,8 @@
 
 import {test, expect} from 'vitest';
 import {Deck, _releaseCanvasContext as releaseCanvasContext} from '@deck.gl/core';
+import {luma} from '@luma.gl/core';
+import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {device as testDevice} from '@deck.gl/test-utils/vitest';
 
 /** Size of every canvas in these tests. */
@@ -102,7 +104,27 @@ test('_releaseCanvasContext waits for a device that is still initializing', asyn
   releaseCanvasContext(deck);
   const device = await deck._createdDevice!.device;
   await nextTask();
-  expect(device.isLost).toBe(true);
+  expect(device!.isLost).toBe(true);
+});
+
+test('_releaseCanvasContext leaves an app device that Deck reused for a passed canvas', async () => {
+  const canvas = attachCanvas();
+  const appDevice = await luma.createDevice({
+    type: 'webgl',
+    adapters: [webgl2Adapter],
+    ownsHandle: true,
+    createCanvasContext: {canvas}
+  });
+  const deck = await createDeck({canvas});
+  expect(deck.device, 'luma.gl reuses the device already on the canvas').toBe(appDevice);
+  expect(await deck._createdDevice!.device, 'Deck only borrowed it').toBe(null);
+
+  canvas.remove();
+  deck.finalize();
+  releaseCanvasContext(deck);
+  await nextTask();
+  expect(appDevice.isLost, 'the app still owns its device').toBe(false);
+  appDevice.destroy();
 });
 
 test('_releaseCanvasContext never releases a device the app passed', async () => {

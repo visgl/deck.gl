@@ -17,8 +17,8 @@ export type DeviceCanvas = HTMLCanvasElement | OffscreenCanvas;
 export type CreatedDevice = {
   /** The canvas the device renders to. */
   canvas: DeviceCanvas;
-  /** The device, which may still be initializing. */
-  device: Promise<Device>;
+  /** The device, which may still be initializing. `null` if Deck reused a device it didn't create. */
+  device: Promise<Device | null>;
   /** Whether Deck created the canvas too, and so removes it when it is finalized. */
   ownsCanvas: boolean;
 };
@@ -71,28 +71,28 @@ function isInDocument(canvas: DeviceCanvas): boolean {
 }
 
 /**
- * Destroys a created device, releasing its context, once it has initialized. If a Deck still renders to its canvas, for
- * example one that was passed the device, the release waits until the last such Deck stops.
+ * Destroys a created device, releasing its context, once it has initialized. If a Deck still
+ * renders to its canvas, for example one that was passed the device, the release waits until the
+ * last such Deck stops.
  * @param created The device to release.
- * @param canRelease Checked again just before the device is lost.
+ * @param canRelease Checked again just before the device is destroyed.
  */
 export function loseCreatedDevice(
   created: CreatedDevice,
   canRelease: () => boolean = () => true
 ): void {
   const release = () => {
-    created.device.then(
-      device => {
-        if (liveDecks.has(created.canvas)) {
-          pendingReleases.set(created.canvas, release);
-        } else if (!device.isLost && canRelease()) {
-          device.destroy();
-        }
-      },
-      () => {
-        // Device creation failed, so there is no context to release.
+    created.device.then(device => {
+      if (!device) {
+        // Deck borrowed this device, or creating it failed: Deck has no context to release.
+        return;
       }
-    );
+      if (liveDecks.has(created.canvas)) {
+        pendingReleases.set(created.canvas, release);
+      } else if (!device.isLost && canRelease()) {
+        device.destroy();
+      }
+    });
   };
   release();
 }
@@ -103,8 +103,8 @@ export function loseCreatedDevice(
  * For components that render their own `<canvas>` and pass it to Deck, such as the React
  * `DeckGL` components. Call it right after `deck.finalize()` when the component unmounts. After
  * the current task, if the canvas is no longer in the document and no other Deck has started on
- * it, the device is destroyed and its context released. A remount that keeps the canvas in the document, such as React
- * StrictMode or `<Activity mode="hidden">`, is unaffected.
+ * it, the device is destroyed and its context released. A remount that keeps the canvas in the
+ * document, such as React StrictMode or `<Activity mode="hidden">`, is unaffected.
  *
  * Does nothing when the app passed its own `device` or `gl`, or when Deck created the canvas
  * (`finalize()` already releases those).

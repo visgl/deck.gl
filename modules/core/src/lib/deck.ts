@@ -25,6 +25,9 @@ import {
 } from './release-device-context';
 import {VERSION} from './init';
 
+/** Device prop that marks a device a Deck created, as opposed to one the app created. */
+const CREATED_BY_DECK = '_createdByDeck';
+
 import {luma} from '@luma.gl/core';
 import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {GL} from '@luma.gl/core/webgl-constants';
@@ -1579,12 +1582,20 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         canvas,
         useDevicePixels: this.props.useDevicePixels,
         autoResize: true
-      }
-    });
+      },
+      // Marks the device as Deck's. luma.gl keeps a device's props, so the mark survives when another
+      // Deck reuses the device, and a device the app created never has it.
+      [CREATED_BY_DECK]: true
+    } as CreateDeviceProps);
     this._useCanvas(canvas);
     this._createdDevice = {
       canvas,
-      device,
+      // With `_reuseDevices`, luma.gl returns the device already on this canvas, which may be one the
+      // app created. Deck only owns a device that a Deck created.
+      device: device.then(
+        created => ((created.props as Record<string, unknown>)[CREATED_BY_DECK] ? created : null),
+        () => null
+      ),
       // Decided by where the canvas came from, not by its class: a canvas from another window
       // (an iframe) fails `instanceof HTMLCanvasElement` in this one. Multi-canvas mode always
       // renders to an OffscreenCanvas that Deck created.
