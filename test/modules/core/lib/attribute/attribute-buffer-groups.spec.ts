@@ -6,6 +6,7 @@ import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import {Layer, Viewport} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
+import {GPUDataEvaluator} from '@luma.gl/gpgpu';
 import {beforeAll, test, expect, vi} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
 
@@ -198,9 +199,7 @@ test('AttributeManager buffer groups pack IconLayer-style shader attributes', as
   expect(dataView.getFloat32(0, true)).toBe(3);
   expect(dataView.getFloat32(4, true), 'untouched column is repacked').toBe(10);
 
-  const packedEvaluator = (attributeManager as any).attributeBufferGroups.packedBuffers['group-a']
-    .packed;
-  const destroySpy = vi.spyOn(packedEvaluator, 'destroy');
+  const destroySpy = vi.spyOn(packedBuffer, 'destroy');
   attributeManager.finalize();
   expect(destroySpy).toHaveBeenCalled();
   expect(deleteSpy).not.toHaveBeenCalled();
@@ -310,6 +309,52 @@ test('AttributeManager buffer groups are shared across model step modes', () => 
   expect(vertexBindings.buffers['group-a']).toBe(packedBuffer);
   expect(deleteSpy).not.toHaveBeenCalled();
 
+  attributeManager.finalize();
+});
+
+test('AttributeManager buffer groups keep earlier model bindings valid', async () => {
+  if (!webgpuDevice) return;
+
+  // Leave two buffers of the packed size in the shared gpgpu buffer pool, as earlier layers on
+  // the same device do. The pool returns the first buffer that fits.
+  const pooledEvaluators = [0, 1].map(() => GPUDataEvaluator.fromArray(new Float32Array(4), {}));
+  pooledEvaluators.forEach(evaluator => evaluator.evaluateSync(webgpuDevice));
+  pooledEvaluators.forEach(evaluator => evaluator.destroy());
+
+  const attributeManager = new AttributeManager(webgpuDevice);
+  addSimpleGroup(attributeManager);
+  updateSimpleGroup(attributeManager, [
+    {a: 1, b: 2},
+    {a: 3, b: 4}
+  ]);
+
+  // Layer.updateAttributes passes the same changed attributes to every model of the layer
+  const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
+  const firstModelBuffer = attributeManager.getBufferGroupBindings(changedAttributes, {
+    isInstanced: true
+  }).buffers['group-a'];
+  const secondModelBuffer = attributeManager.getBufferGroupBindings(changedAttributes, {
+    isInstanced: false
+  }).buffers['group-a'];
+  expect(secondModelBuffer, 'models share one packed buffer').toBe(firstModelBuffer);
+
+  // Another allocation from the pool must not receive the buffer the first model still binds
+  const otherAttributeManager = new AttributeManager(webgpuDevice);
+  addSimpleGroup(otherAttributeManager);
+  updateSimpleGroup(otherAttributeManager, [
+    {a: 5, b: 6},
+    {a: 7, b: 8}
+  ]);
+  otherAttributeManager.getBufferGroupBindings(otherAttributeManager.getAttributes(), {
+    isInstanced: true
+  });
+
+  const packedBytes = await firstModelBuffer.readAsync(0, 16);
+  expect(Array.from(new Float32Array(packedBytes.buffer, packedBytes.byteOffset, 4))).toEqual([
+    1, 2, 3, 4
+  ]);
+
+  otherAttributeManager.finalize();
   attributeManager.finalize();
 });
 
