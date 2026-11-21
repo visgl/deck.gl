@@ -46,3 +46,27 @@ test('Widget#id', () => {
   expect(implicit.props.id, 'an undefined id falls back to the default').toBe('test-widget');
   expect(Object.hasOwn(implicit.props, 'id'), 'and stays implicit').toBe(false);
 });
+
+test('Widget#id falsy values use the default, as for views', () => {
+  for (const id of [undefined, null, ''] as (string | undefined)[]) {
+    const widget = new TestWidget({id});
+    expect(widget.id, `id ${JSON.stringify(id)} uses the default`).toBe('test-widget');
+    expect(widget.props.id, `props.id for ${JSON.stringify(id)} reads the default`).toBe(
+      'test-widget'
+    );
+    expect(Object.hasOwn(widget.props, 'id'), `id ${JSON.stringify(id)} is not own`).toBe(false);
+  }
+
+  const explicit = new TestWidget({id: 'zoom-left'});
+  expect(explicit.id, 'passed id is kept').toBe('zoom-left');
+  expect(Object.hasOwn(explicit.props, 'id'), 'passed id is own').toBe(true);
+
+  const implicit = new TestWidget({});
+  const copy = new TestWidget(implicit.props);
+  expect(copy.id, 'props from another widget reuse its default id').toBe('test-widget');
+  expect(Object.hasOwn(copy.props, 'id'), 'a reused default id stays implicit').toBe(false);
+  expect(
+    Object.hasOwn(new TestWidget(explicit.props).props, 'id'),
+    'a reused passed id stays own'
+  ).toBe(true);
+});
