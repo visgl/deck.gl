@@ -11,7 +11,7 @@ import {Matrix4} from '@math.gl/core';
 import {getEmptyPickingInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {getUniformsFromViewport} from '@deck.gl/core/shaderlib/project/viewport-uniforms';
 import {PROJECTION_MODE} from '@deck.gl/core/shaderlib/project/constants';
-import {worldToPixels} from '@math.gl/web-mercator';
+import {worldToPixels} from '@math.gl/geospatial/web-mercator';
 
 class ProjectionViewport extends Viewport {
   constructor(

@@ -1,11 +1,14 @@
 name: test
 
-# On every pull request, but only on push to master
+# Validate pull requests and merge groups; validate pushes only on master.
 on:
   push:
     branches:
     - master
   pull_request:
+  merge_group:
+    types: [checks_requested]
+    branches: [master]
 
 permissions:
   contents: read
@@ -101,6 +104,34 @@ jobs:
             test/render/golden-images/**/*-diff.png
           if-no-files-found: ignore
           retention-days: 7
+
+  test-react-renderer:
+    # The renderer's browser specs are excluded from the shared headless page until #11221
+    # releases WebGL contexts. This job runs them in their own Chromium instead.
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+
+      - name: Enable Corepack
+        run: corepack enable yarn
+
+      - name: Install dependencies
+        run: yarn bootstrap
+
+      - name: Build packages
+        run: yarn build
+
+      - name: Run the React renderer's browser specs
+        run: xvfb-run -a --server-args="-screen 0 1280x1024x24" npx vitest run --project browser test/modules/react/fiber
 
   test-website:
     runs-on: ubuntu-22.04

@@ -6,8 +6,8 @@ import {
   MapView,
   OrthographicView,
   WebMercatorViewport,
-  _GlobeView as GlobeView,
-  _GlobeViewport as GlobeViewport
+  GlobeView,
+  GlobeViewport
 } from '@deck.gl/core';
 import {WIDTH, HEIGHT} from './constants';
 import type {TestCase} from './deck-test-utils';

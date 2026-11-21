@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {FixedSizeList, Float, Int} from 'apache-arrow';
+
 import {
   Layer,
   _GPUVectorModel as DeckGPUVectorModel,
@@ -13,9 +15,9 @@ import {
   LayerDataSource,
   UpdateParameters,
   Unit,
-  AccessorFunction,
   Position,
   Accessor,
+  ArrowAccessor,
   Color,
   Material,
   DefaultProps,
@@ -35,6 +37,7 @@ import {
   hasColumnLayerColumns,
   type ColumnLayerColumnProps
 } from './column-layer-columns';
+import {DEFAULT_COLOR} from './column-layer-columns';
 import ColumnGeometry from './column-geometry';
 
 import {columnUniforms, ColumnProps} from './column-layer-uniforms';
@@ -43,8 +46,6 @@ import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
 const defaultPosition = (x: any) => x.position;
-
-const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const GEOMETRY_BUFFER_LAYOUT: BufferLayout = {
   name: 'geometry',
@@ -81,11 +82,11 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   stroked: false,
   flatShading: false,
 
-  getPosition: {type: 'accessor', value: defaultPosition},
-  getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getLineWidth: {type: 'accessor', value: 1},
-  getElevation: {type: 'accessor', value: 1000},
+  getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
+  getFillColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getLineColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getLineWidth: {type: 'accessor', arrow: true, value: 1},
+  getElevation: {type: 'accessor', arrow: true, value: 1000},
   material: true,
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
@@ -208,9 +209,10 @@ type _ColumnLayerProps<DataT> = ColumnLayerColumnProps & {
 
   /**
    * Method called to retrieve the position of each column.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default object => object.position
    */
-  getPosition?: AccessorFunction<DataT, Position>;
+  getPosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
 
   /**
    * @deprecated Use getFilledColor and getLineColor instead
@@ -219,29 +221,33 @@ type _ColumnLayerProps<DataT> = ColumnLayerColumnProps & {
 
   /**
    * Fill collor value or accessor.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 0, 255]
    */
-  getFillColor?: Accessor<DataT, Color>;
+  getFillColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
 
   /**
    * Line color value or accessor.
    *
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 0, 255]
    */
-  getLineColor?: Accessor<DataT, Color>;
+  getLineColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
 
   /**
    * The elevation of each cell in meters.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default 1000
    */
-  getElevation?: Accessor<DataT, number>;
+  getElevation?: ArrowAccessor<DataT, number, Int | Float>;
 
   /**
    * The width of the outline of the column, in units specified by `lineWidthUnits`.
    *
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default 1
    */
-  getLineWidth?: Accessor<DataT, number>;
+  getLineWidth?: ArrowAccessor<DataT, number, Int | Float>;
 };
 
 /** Render extruded cylinders (tessellated regular polygons) at given coordinates. */
@@ -343,6 +349,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         type: 'unorm8',
         transition: true,
         accessor: 'getFillColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR
       },
       instanceLineColors: {
@@ -350,6 +357,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         type: 'unorm8',
         transition: true,
         accessor: 'getLineColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR
       },
       instanceStrokeWidths: {
@@ -414,6 +422,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       this.state.columns = new ColumnLayerColumns(this.context.device);
     }
     void this.state.columns.updateIfNeeded(params, {
+      normalizedColors: this.usesNormalizedColors(),
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

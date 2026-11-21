@@ -2,12 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {
-  CompositeLayer,
-  _GlobeViewport,
-  type LayerProps,
-  type UpdateParameters
-} from '@deck.gl/core';
+import {CompositeLayer, GlobeViewport, type LayerProps, type UpdateParameters} from '@deck.gl/core';
 import type {NumberArray3} from '@math.gl/core';
 import {
   getSunPosition,
@@ -70,7 +65,7 @@ export class SkyLayer extends CompositeLayer<SkyLayerProps> {
       typeof sun === 'object' && sun.direction
         ? [...sun.direction]
         : getSkyDirection(position.altitude, position.azimuth);
-    const globe = this.context.viewport instanceof _GlobeViewport;
+    const globe = this.context.viewport instanceof GlobeViewport;
     const sunDirection = globe ? skyDirectionToGlobe(direction, observer) : direction;
     const shared = {timestamp, observer};
     return [

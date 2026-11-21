@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Color} from '@deck.gl/core';
+import {type Color, _packNormalizedColor as packNormalizedColor} from '@deck.gl/core';
 import type {Device, Texture} from '@luma.gl/core';
+import {normalizeByteColor4} from '@luma.gl/shaders';
 import type {NumericArray, TypedArray, TypedArrayConstructor} from '@math.gl/core';
 import type {ScaleType} from '../types';
 
@@ -42,8 +43,16 @@ export function colorRangeToFlatArray(
   }
 
   if (normalize) {
-    for (let i = 0; i < flatArray.length; i++) {
-      flatArray[i] /= 255;
+    for (let i = 0; i < flatArray.length; i += 4) {
+      const color = normalizeByteColor4([
+        flatArray[i],
+        flatArray[i + 1],
+        flatArray[i + 2],
+        flatArray[i + 3]
+      ]);
+      for (let channel = 0; channel < Math.min(4, flatArray.length - i); channel++) {
+        flatArray[i + channel] = color[channel];
+      }
     }
   }
   return flatArray;
@@ -63,12 +72,53 @@ export function updateColorRangeTexture(texture: Texture, type: ScaleType) {
   });
 }
 
+/** Pack a normalized plain-array color while preserving byte typed inputs. */
+export function toByteColor(color: Color): Color {
+  if (!Array.isArray(color)) {
+    return color;
+  }
+  /** Mutable RGBA output for the byte-encoded rendering path. */
+  const result: [number, number, number, number] = [0, 0, 0, 255];
+  packNormalizedColor(color, result, 0, 4);
+  return result;
+}
+
+/** Pack palette bytes for an rgba8unorm texture. Flat input retains its explicit byte layout. */
+export function packColorRange(
+  colorRange: Color[] | NumericArray,
+  normalized: boolean
+): Uint8Array {
+  const first = colorRange[0];
+  if (!normalized || (!Array.isArray(first) && !ArrayBuffer.isView(first))) {
+    return colorRangeToFlatArray(colorRange, false, Uint8Array) as Uint8Array;
+  }
+  const entries = colorRange as Color[];
+  const packed = new Uint8Array(entries.length * 4);
+  for (let index = 0; index < entries.length; index++) {
+    const color = entries[index];
+    const offset = index * 4;
+    if (Array.isArray(color)) {
+      packNormalizedColor(color, packed, offset, 4);
+    } else {
+      packed[offset] = color[0];
+      packed[offset + 1] = color[1];
+      packed[offset + 2] = color[2];
+      const alpha = color[3];
+      packed[offset + 3] = alpha !== undefined && Number.isFinite(alpha) ? alpha : 255;
+    }
+  }
+  return packed;
+}
+
+/** Create a byte palette texture with the sampler appropriate to the scale. */
 export function createColorRangeTexture(
   device: Device,
   colorRange: Color[] | NumericArray,
-  type: ScaleType = 'linear'
+  type: ScaleType = 'linear',
+  normalized = false
 ): Texture {
-  const colors = colorRangeToFlatArray(colorRange, false, Uint8Array);
+  // Byte packing is a storage boundary: rgba8unorm sampling produces normalized colors.
+  const colors = packColorRange(colorRange, normalized);
 
   return device.createTexture({
     format: 'rgba8unorm',

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {LayerManager, WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {LayerManager, WebMercatorViewport, GlobeViewport} from '@deck.gl/core';
 import {projectBoundsToFlatCommon} from '@deck.gl/extensions/utils/projection-utils';
 import {PathLayer, SolidPolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
