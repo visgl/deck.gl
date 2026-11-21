@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Model} from '@luma.gl/engine';
-import type {TypedArray} from '@math.gl/core';
+import type {TypedArray} from '@math.gl/core/matrix';
 
 /**
  * Marks models that receive AttributeManager's typed GPU vectors.

@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import {GlobeView} from '@deck.gl/core';
 import GlobeViewport from '@deck.gl/core/viewports/globe-viewport';
-import {equals, config} from '@math.gl/core';
+import {equals, config} from '@math.gl/core/matrix';
 
 const TEST_VIEWPORTS = [
   {

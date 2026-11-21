@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {CoordPair, H3IndexInput, cellToBoundary, cellToLatLng} from 'h3-js';
-import {lerp} from '@math.gl/core';
+import {lerp} from '@math.gl/core/matrix';
 
 // normalize longitudes w.r.t center (refLng), when not provided first vertex
 export function normalizeLongitudes(vertices: CoordPair[], refLng?: number): void {

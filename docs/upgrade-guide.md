@@ -94,7 +94,7 @@ overrides, save `renderPass.getParameters()`, apply overrides with `setParameter
 and restore the saved parameters in a `finally` block. Deck.gl handles this for
 layer and extension draws.
 
-### loaders.gl and math.gl v5 beta
+### loaders.gl and math.gl v5
 
 Update direct loaders.gl dependencies to `5.0.0-rc.2` and math.gl dependencies to `5.0.0`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
@@ -113,13 +113,17 @@ Update direct loaders.gl dependencies to `5.0.0-rc.2` and math.gl dependencies t
 | `@loaders.gl/mvt` | `@loaders.gl/tiles/mvt` |
 | `@loaders.gl/tiles` (3D tiles types and sources) | `@loaders.gl/tiles-3d` |
 | `@loaders.gl/3d-tiles`, `@loaders.gl/i3s` | Corresponding subpaths of `@loaders.gl/tiles-3d` |
-| `@loaders.gl/terrain`, `@loaders.gl/wms` | `@loaders.gl/raster/terrain/index`, `@loaders.gl/ogc/wms` |
-| `@math.gl/types` | `@math.gl/core` |
-| `@math.gl/polygon`, `@math.gl/culling` | `@math.gl/geometry`, `@math.gl/geometry/culling` |
+| `@loaders.gl/terrain`, `@loaders.gl/wms` | `@loaders.gl/raster/terrain`, `@loaders.gl/ogc/wms` |
+| `@math.gl/types` | `@math.gl/core/types` |
+| `@math.gl/core` (matrix and vector APIs) | `@math.gl/core/matrix` |
+| `@math.gl/sql` | `@math.gl/sql/query` |
+| `@loaders.gl/core/scan` | `@loaders.gl/core/query` |
+| `@math.gl/geospatial/projection/core` | `@math.gl/geospatial/projection-core` |
+| `@math.gl/polygon`, `@math.gl/culling` | `@math.gl/geometry/polygon`, `@math.gl/geometry/culling` |
 | `@math.gl/projection` | `@math.gl/geospatial/projection` |
 | `@math.gl/sun` | `@math.gl/earth/sun` |
 
-Import vector and matrix namespaces such as `vec3` and `mat4` from `@math.gl/core`; their old subpaths are removed. Replace `WINDING.CLOCKWISE` and `WINDING.COUNTER_CLOCKWISE` with `'clockwise'` and `'counter-clockwise'`.
+Import vector and matrix namespaces such as `vec3` and `mat4` from `@math.gl/core/matrix`; their old subpaths are removed. Replace `WINDING.CLOCKWISE` and `WINDING.COUNTER_CLOCKWISE` with `'clockwise'` and `'counter-clockwise'`.
 
 The `@loaders.gl/gis` helpers move to `@loaders.gl/core/geoarrow`: use `convertGeojsonToBinaryFeatureCollection` and `convertBinaryFeatureCollectionToGeojson` instead of `geojsonToBinary` and `binaryToGeojson`.
 

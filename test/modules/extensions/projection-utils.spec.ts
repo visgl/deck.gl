@@ -14,7 +14,7 @@ import type {ProjectUniforms} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {testLayer, device} from '@deck.gl/test-utils/vitest';
 import {resolveCRS} from '@deck.gl/core/utils/crs';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {createTestViewport} from '../core/viewports/test-crs';
 import {
   joinLayerBounds,

@@ -193,7 +193,7 @@ describe('@deck.gl/proposals/layers package boundary', () => {
       '@luma.gl/engine',
       '@luma.gl/graph',
       '@luma.gl/shaders',
-      '@math.gl/core',
+      '@math.gl/core/matrix',
       '@math.gl/earth',
       'apache-arrow'
     ]);

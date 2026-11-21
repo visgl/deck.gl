@@ -17,7 +17,7 @@ import {
 } from '@deck.gl/aggregation-layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {GPUVector} from '@luma.gl/graph/gpu-data';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
 function createViewport(signature: string, projected: boolean, scale = 2, resolution = 1) {
   return projected
