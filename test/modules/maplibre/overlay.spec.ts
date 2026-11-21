@@ -5,7 +5,7 @@
 import {BitmapLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {device} from '@deck.gl/test-utils';
-import {addMetersToLngLat} from '@math.gl/web-mercator';
+import {addMetersToLngLat} from '@math.gl/geospatial/web-mercator';
 import {
   Map as MapLibreV4Map,
   addProtocol as addProtocolV4,
@@ -22,6 +22,7 @@ import {
   removeProtocol as removeProtocolV6
 } from 'maplibre-gl-v6';
 import {test, expect, vi} from 'vitest';
+import 'maplibre-gl-v5/dist/maplibre-gl.css';
 
 import {getMapLibreElevation} from '../../../modules/maplibre/src/compatibility';
 import {getMapLibreViewState} from '../../../modules/maplibre/src/deck-utils';
@@ -193,7 +194,12 @@ test('MapLibreOverlay overlaid uses only public MapLibre APIs', () => {
   } as unknown as Parameters<MapLibreOverlay['onAdd']>[0];
   const overlay = new MapLibreOverlay({device, layers: []});
 
-  overlay.onAdd(map);
+  const control = overlay.onAdd(map);
+  const canvasContainer = overlay._deck!.props.parent as HTMLElement;
+  expect(canvasContainer.parentElement).toBe(container);
+  expect(control.contains(canvasContainer)).toBe(false);
+  expect(canvasContainer.style.zIndex).toBe('1');
+  container.appendChild(control);
 
   expect(overlay._deck).toBeTruthy();
   expect(overlay._deck!.props.viewState.position).toEqual([0, 0, 125]);
@@ -201,6 +207,7 @@ test('MapLibreOverlay overlaid uses only public MapLibre APIs', () => {
 
   overlay.onRemove(map);
   expect(overlay._deck).toBeFalsy();
+  expect(container.childElementCount).toBe(0);
 });
 
 test('MapLibreOverlay targets the terrain elevation like the MapLibre camera', () => {
@@ -658,3 +665,46 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS.slice(1)) {
     }
   );
 }
+
+test('MapLibreOverlay keeps controls above overlaid rendering in every control slot', async () => {
+  const container = document.createElement('div');
+  Object.assign(container.style, {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    zIndex: 1000,
+    width: '400px',
+    height: '300px'
+  });
+  document.body.append(container);
+  const map = new MapLibreV5Map({
+    container,
+    style: {version: 8, sources: {}, layers: []},
+    attributionControl: {compact: false, customAttribution: 'Overlay attribution test'}
+  });
+  try {
+    await new Promise<void>(resolve => map.once('load', () => resolve()));
+    for (const position of ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const) {
+      const overlay = new MapLibreOverlay({device, interleaved: false, layers: []});
+      map.addControl(overlay, position);
+      await waitForRender(() => Boolean(overlay._deck?.isInitialized));
+      const canvasContainer = overlay._deck!.props.parent as HTMLElement;
+      expect(canvasContainer.parentElement).toBe(container);
+      const attribution = container.querySelector('.maplibregl-ctrl-attrib')!;
+      const corner = attribution.parentElement!;
+      expect(Number(getComputedStyle(corner).zIndex)).toBeGreaterThan(
+        Number(getComputedStyle(canvasContainer).zIndex)
+      );
+      const rect = attribution.getBoundingClientRect();
+      expect(attribution.contains(document.elementFromPoint(rect.x + 5, rect.y + 5))).toBe(true);
+      map.removeControl(overlay);
+      expect(canvasContainer.isConnected).toBe(false);
+      expect(
+        container.querySelector(`.maplibregl-ctrl-${position}`)?.contains(canvasContainer)
+      ).toBe(false);
+    }
+  } finally {
+    map.remove();
+    container.remove();
+  }
+});

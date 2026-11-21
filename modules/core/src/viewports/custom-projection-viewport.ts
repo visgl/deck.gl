@@ -10,7 +10,7 @@ import {
   getProjectionParameters,
   altitudeToFovy,
   pixelsToWorld
-} from '@math.gl/web-mercator';
+} from '@math.gl/geospatial/web-mercator';
 import {PROJECTION_MODE} from '../shaderlib/project/constants';
 
 const NORMALIZATION_SCALE = 512 / 40075016.6855;

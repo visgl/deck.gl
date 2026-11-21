@@ -2,7 +2,7 @@
 
 `Deck` is a class that takes deck.gl layer instances and viewport parameters, renders those layers as a transparent overlay, and handles events.
 
-If you are using React, you should not use this class directly. Instead you should be rendering the [DeckGL](../react/deckgl.md) React component.
+If you are using React, you should not use this class directly. Instead you should be rendering the [DeckGL](../react/legacy/deckgl.md) React component.
 
 
 ## Usage
@@ -218,7 +218,7 @@ layer can override a function by name through its own
 
 SQL accessors can use `LIST_EXTRACT(column, index)` and
 `STRUCT_EXTRACT(column, 'field')` by default. List indices start at 1, negative
-indices count from the end, and an out-of-range index returns null.
+indices count from the end, and a non-integer or out-of-range index returns null.
 
 #### `layers` (LayersList) {#layers}
 
@@ -243,11 +243,13 @@ new Deck({
 
 Default: `false`.
 
-When enabled, top-level ScatterplotLayer, LineLayer, and ArcLayer interpret plain JavaScript arrays
-passed to their color accessors, including arrays returned by callbacks, as 0–1 channels.
-Channels are clamped and rounded to bytes for GPU storage. Omitted alpha is opaque.
-Built-in defaults, typed arrays, Arrow columns, and binary inputs keep their existing encoding.
-Composite sublayers, other layers, and other color properties continue to use their documented conventions.
+When enabled, supported color props interpret plain JavaScript arrays as 0–1 channels,
+including arrays returned by accessor functions. Missing alpha is opaque. Color attributes and
+palette textures pack channels into bytes. Built-in defaults, byte typed arrays, Arrow columns,
+and binary or GPU inputs retain their existing encodings.
+
+See [Normalized colors](../../developer-guide/using-layers.md#normalized-colors) for the list of
+supported props and migration examples.
 
 #### `layerFilter` (Function) {#layerfilter}
 

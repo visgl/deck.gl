@@ -5,9 +5,10 @@
 import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect, vi} from 'vitest';
 
-import {_GlobeViewport as GlobeViewport, LayerExtension} from '@deck.gl/core';
+import {GlobeViewport, LayerExtension} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
-import {testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
+import {device, testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
+import {Timeline} from '@luma.gl/engine';
 import createMesh from '@deck.gl/layers/bitmap-layer/create-mesh';
 
 import {testPickingLayer} from './test-picking-layer';
@@ -462,11 +463,15 @@ test('BitmapLayer#typed byte colors retain fractional shader components', () => 
   const tintColor = new Uint8Array([128, 64, 32]);
   const transparentColor = new Uint8Array([32, 64, 128, 192]);
   BitmapLayer.prototype.draw.call(
-    {
-      props: {image: {}, desaturate: 0, tintColor, transparentColor},
+    Object.assign(Object.create(BitmapLayer.prototype), {
+      props: new BitmapLayer({
+        image: {width: 1, height: 1, data: new Uint8Array(4)},
+        tintColor,
+        transparentColor
+      }).props,
       state: {model: {shaderInputs: {setProps}, draw: vi.fn()}},
-      context: {renderPass: {}}
-    } as unknown as BitmapLayer,
+      context: {renderPass: {}, normalizedColors: true}
+    }),
     {shaderModuleProps: {picking: {isActive: false}}}
   );
   const {bitmap} = setProps.mock.calls[0][0];
@@ -474,4 +479,63 @@ test('BitmapLayer#typed byte colors retain fractional shader components', () => 
   expect(bitmap.transparentColor).toEqual([32 / 255, 64 / 255, 128 / 255, 192 / 255]);
   expect(Array.from(tintColor)).toEqual([128, 64, 32]);
   expect(Array.from(transparentColor)).toEqual([32, 64, 128, 192]);
+});
+
+test('BitmapLayer#normalizes plain colors and preserves the default tint', () => {
+  const setProps = vi.fn();
+  const {tintColor} = new BitmapLayer().props;
+  const layer = Object.assign(Object.create(BitmapLayer.prototype), {
+    props: new BitmapLayer({
+      image: {width: 1, height: 1, data: new Uint8Array(4)},
+      tintColor,
+      transparentColor: [0.5, 0.25, 0, 0]
+    }).props,
+    state: {model: {shaderInputs: {setProps}, draw: vi.fn()}},
+    context: {renderPass: {}, normalizedColors: true}
+  });
+  layer.draw({shaderModuleProps: {picking: {isActive: false}}});
+  expect(setProps.mock.calls[0][0].bitmap.tintColor).toEqual([1, 1, 1]);
+  expect(setProps.mock.calls[0][0].bitmap.transparentColor).toEqual([0.5, 0.25, 0, 0]);
+
+  layer.props = new BitmapLayer({image: layer.props.image, tintColor: [1, 0.5, 0]}).props;
+  layer.draw({shaderModuleProps: {picking: {isActive: false}}});
+  expect(setProps.mock.calls[1][0].bitmap.tintColor).toEqual([1, 0.5, 0]);
+});
+
+test('BitmapLayer interpolates byte defaults and typed colors with normalized arrays', () => {
+  const image = device.createTexture({width: 1, height: 1, data: new Uint8Array(4)});
+  const timeline = new Timeline();
+  try {
+    testLayer({
+      Layer: BitmapLayer,
+      timeline,
+      onError: error => {
+        throw error;
+      },
+      testCases: [
+        {props: {image, transparentColor: new Uint8Array([0, 255, 0, 255])}},
+        {
+          updateProps: {
+            tintColor: [1, 0, 0],
+            transparentColor: [1, 0, 0, 0],
+            transitions: {tintColor: 100, transparentColor: 100}
+          },
+          onBeforeUpdate: ({layer}) => {
+            layer.context.layerManager.setProps({normalizedColors: true});
+            timeline.setTime(0);
+          }
+        },
+        {
+          onBeforeUpdate: () => timeline.setTime(50),
+          onAfterUpdate: ({layer}) => {
+            const {bitmap} = layer.state.model!.shaderInputs.getUniformValues();
+            expect(bitmap.tintColor).toEqual([1, 0.5, 0.5]);
+            expect(bitmap.transparentColor).toEqual([0.5, 0.5, 0, 0.5]);
+          }
+        }
+      ]
+    });
+  } finally {
+    image.destroy();
+  }
 });

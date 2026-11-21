@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {query, type Query, type QueryOptions} from '@loaders.gl/core/scan';
+import {query, queryGroupedSQL, type Query, type QueryOptions} from '@loaders.gl/core/scan';
+import {parseSQLSelectStatement} from '@math.gl/sql/parser';
 import {unwrapLoaderArrowResult} from '../utils/loader-utils';
 import {isArrowTable} from './upstream-math/is-arrow-table';
 import {sqlParser as defaultSQLParser} from './upstream-math/sql-parser';
@@ -26,11 +27,40 @@ export async function queryLayerData(
     if (!loaders?.length) {
       throw new Error('query requires a source-capable loader');
     }
-    return query(sql, {...(options as QueryOptions), source: input, loaders, sqlParser});
+    const scanOptions = {...(options as QueryOptions), source: input, loaders};
+    let scanQuery: Query;
+    try {
+      scanQuery = sqlParser(sql);
+    } catch (error) {
+      if (parse !== defaultSQLParser.parseQuery || !isGroupedQuery(sql)) throw error;
+      return queryGroupedSQL(sql, scanOptions);
+    }
+    return query(scanQuery, scanOptions);
+  }
+  if (input == null || (Array.isArray(input) && input.length === 0)) {
+    return input ?? [];
   }
   const data = unwrapLoaderArrowResult(input);
   if (!isArrowTable(data)) {
     throw new Error('query requires a URL or Arrow table data');
   }
-  return query(sql, {source: data, sqlParser});
+  let scanQuery: Query;
+  try {
+    scanQuery = sqlParser(sql);
+  } catch (error) {
+    // Custom parsers own their grammar and diagnostics.
+    if (parse !== defaultSQLParser.parseQuery) throw error;
+    const {queryArrowSQL} = await import('@math.gl/sql');
+    return queryArrowSQL(sql, new Map([['data', data]]));
+  }
+  return query(scanQuery, {source: data});
+}
+
+/** Recognizes grouped SELECT statements without changing ordinary parser errors. */
+function isGroupedQuery(sql: string): boolean {
+  try {
+    return Boolean(parseSQLSelectStatement(sql).groupBy?.length);
+  } catch {
+    return false;
+  }
 }

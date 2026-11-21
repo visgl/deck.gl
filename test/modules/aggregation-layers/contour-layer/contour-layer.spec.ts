@@ -2,15 +2,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
 import {testLayer, testLayerAsync, generateLayerTests, device} from '@deck.gl/test-utils/vitest';
 
 import {LayerManager, MapView} from '@deck.gl/core';
-import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {ContourLayer, CPUAggregator} from '@deck.gl/aggregation-layers';
+import {LineLayer, PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
+import {ContourLayer} from '@deck.gl/aggregation-layers';
+import {PathStyleExtension} from '@deck.gl/extensions';
+import {getGPUVectorData} from '@luma.gl/graph/gpu-data';
+import {generateContours} from '../../../../modules/aggregation-layers/src/contour-layer/contour-utils';
+import {WebGPUAggregator} from '../../../../modules/aggregation-layers/src/common/aggregator/webgpu-aggregator/webgpu-aggregator';
 import type {ContourLayerProps} from '@deck.gl/aggregation-layers';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 const webglTest = device.type === 'webgl' ? test : test.skip;
@@ -22,7 +26,9 @@ const CONTOURS: ContourLayerProps['contours'] = [
   {threshold: [6, 10], color: [0, 0, 255]} // => Isoband for threshold range [6, 10)
 ];
 
-test('ContourLayer#WebGPU renders isolines and isobands with CPU aggregation', async ({skip}) => {
+test('ContourLayer#WebGPU renders isolines and isobands with compute aggregation', async ({
+  skip
+}) => {
   const webgpuDevice = await getWebGPUTestDevice();
 
   if (!webgpuDevice) {
@@ -45,6 +51,7 @@ test('ContourLayer#WebGPU renders isolines and isobands with CPU aggregation', a
     getPosition,
     gpuAggregation: true,
     contours: CONTOURS,
+    extensions: [new PathStyleExtension({dash: true})],
     cellSize: 200
   });
 
@@ -52,10 +59,28 @@ test('ContourLayer#WebGPU renders isolines and isobands with CPU aggregation', a
   layerManager.setLayers([layer]);
 
   expect(errors).toEqual([]);
-  expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+  expect(layer.state.aggregator).toBeInstanceOf(WebGPUAggregator);
+  await vi.waitFor(
+    () => {
+      layer.draw({
+        shaderModuleProps: {
+          project: {
+            viewport,
+            coordinateSystem: 'lnglat',
+            coordinateOrigin: [0, 0, 0],
+            devicePixelRatio: 1
+          }
+        }
+      } as any);
+      expect(layer.state.aggregator.isLoaded).toBe(true);
+    },
+    {timeout: 10000}
+  );
+  layerManager.updateLayers();
 
   const renderedLayers = layerManager.getLayers();
-  expect(renderedLayers.some(renderedLayer => renderedLayer instanceof PathLayer)).toBe(true);
+  const paths = renderedLayers.find(renderedLayer => renderedLayer instanceof PathLayer);
+  expect(paths?.props.extensions[0]).toBeInstanceOf(PathStyleExtension);
   expect(renderedLayers.some(renderedLayer => renderedLayer instanceof SolidPolygonLayer)).toBe(
     true
   );
@@ -64,6 +89,109 @@ test('ContourLayer#WebGPU renders isolines and isobands with CPU aggregation', a
   expect(await webgpuDevice.handle.popErrorScope()).toBeNull();
 
   layerManager.finalize();
+});
+
+test('ContourLayer generates WebGPU isolines without reading bins to the CPU', async ({skip}) => {
+  const gpu = await getWebGPUTestDevice();
+  if (!gpu) return skip();
+  const viewport = new MapView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: -122, latitude: 38, zoom: 10}
+  });
+  const manager = new LayerManager(gpu, {viewport});
+  const errors: Error[] = [];
+  manager.setProps({onError: error => errors.push(error)});
+  const layer = new ContourLayer({
+    gpuGeometry: true,
+    data: [{position: [-122, 38]}],
+    cellSize: 200,
+    contours: [{threshold: 1, strokeWidth: 2}]
+  });
+  /** Dispatch binning and isoline generation for the current layer. */
+  const draw = (current: ContourLayer) =>
+    current.draw({
+      shaderModuleProps: {
+        project: {
+          viewport,
+          coordinateSystem: 'lnglat',
+          coordinateOrigin: [0, 0, 0],
+          devicePixelRatio: 1
+        }
+      }
+    } as any);
+  /** Read the endpoints of the slots that have nonzero stroke width. */
+  const readSegments = async () => {
+    const line = manager.getLayers().find(item => item instanceof LineLayer) as LineLayer;
+    expect(line).toBeDefined();
+    await vi.waitFor(() => {
+      expect(line.isLoaded).toBe(true);
+      expect(line.getNumInstances()).toBe(line.props.sourcePositions!.length);
+    });
+    const {buffer} = getGPUVectorData(line.props.sourcePositions!);
+    const output = new Float32Array((await buffer.readAsync()).buffer);
+    const segments: string[] = [];
+    for (let start = 0; start < output.length; start += 7) {
+      if (output[start + 6]) segments.push(output.slice(start, start + 6).join(','));
+    }
+    return segments.sort();
+  };
+
+  gpu.handle.pushErrorScope('validation');
+  try {
+    manager.setLayers([layer]);
+    draw(layer);
+    const aggregator = layer.state.aggregator as WebGPUAggregator;
+    expect(aggregator.isLoaded).toBe(true);
+    expect(aggregator.getResultValues(0)).toBeNull();
+    const [xRange, yRange] = layer.state.binIdRange;
+    const expected = generateContours({
+      contours: layer.props.contours,
+      getValue: (x, y) => (x === xRange[0] && y === yRange[0] ? 1 : NaN),
+      xRange,
+      yRange
+    });
+    expect(expected.lines).toHaveLength(4);
+    expect(await readSegments()).toEqual(
+      expected.lines.map(line => line.vertices.flat().join(',')).sort()
+    );
+
+    const higherThreshold = layer.clone({contours: [{threshold: 2}]});
+    manager.setLayers([higherThreshold]);
+    draw(higherThreshold);
+    expect(await readSegments()).toEqual([]);
+
+    const cpuGeometry = higherThreshold.clone({gpuGeometry: false, contours: [{threshold: 1}]});
+    manager.setLayers([cpuGeometry]);
+    draw(cpuGeometry);
+    await vi.waitFor(() => expect(aggregator.isLoaded).toBe(true));
+    manager.updateLayers();
+    expect(manager.getLayers().some(item => item instanceof PathLayer)).toBe(true);
+    expect(cpuGeometry.state.aggregator).toBe(aggregator);
+
+    const gpuGeometry = cpuGeometry.clone({gpuGeometry: true});
+    manager.setLayers([gpuGeometry]);
+    draw(gpuGeometry);
+    expect(await readSegments()).toHaveLength(4);
+
+    const originalLines = manager.getLayers().find(item => item instanceof LineLayer)!;
+    const resized = gpuGeometry.clone({contours: [{threshold: 1}, {threshold: 2}]});
+    manager.setLayers([resized]);
+    draw(resized);
+    const resizedLines = manager.getLayers().filter(item => item instanceof LineLayer);
+    expect(resizedLines).toHaveLength(2);
+    expect(resizedLines.map(line => line.id)).not.toContain(originalLines.id);
+    expect(await readSegments()).toHaveLength(4);
+
+    const cpu = resized.clone({gpuAggregation: false});
+    manager.setLayers([cpu]);
+    expect(manager.getLayers().some(item => item instanceof PathLayer)).toBe(true);
+    expect(manager.getLayers().some(item => item instanceof LineLayer)).toBe(false);
+    expect(errors).toEqual([]);
+  } finally {
+    manager.finalize();
+    expect(await gpu.handle.popErrorScope()).toBeNull();
+  }
 });
 
 test('ContourLayer', () => {

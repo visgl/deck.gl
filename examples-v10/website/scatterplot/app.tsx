@@ -5,8 +5,8 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
-import {isArrowTable} from '@math.gl/arrow';
+import {DeckGL} from '@deck.gl/react/legacy';
+import {isArrowTable} from '@math.gl/core/arrow';
 import {JSONTableLoader} from '@loaders.gl/tables/json';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
@@ -65,7 +65,7 @@ export default function App({
       },
       radiusScale: radius,
       radiusMinPixels: 0.25,
-      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+      getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
       getFillColor: {
         sql: `\
           RGBA8(

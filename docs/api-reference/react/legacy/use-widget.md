@@ -60,7 +60,7 @@ useWidget<T extends Widget, PropsT extends {}>(
 ): T
 ```
 
-The hook creates an [`Widget`](../core/widget.md) instance, adds it to deck.gl, and removes it upon unmount.
+The hook creates an [`Widget`](../../core/widget.md) instance, adds it to deck.gl, and removes it upon unmount.
 
 Parameters:
 
@@ -69,8 +69,8 @@ Parameters:
 
 Returns:
 
-[`Widget`](../core/widget.md) - the widget instance of `WidgetClass`.
+[`Widget`](../../core/widget.md) - the widget instance of `WidgetClass`.
 
 ## Source
 
-[modules/react/src/utils/use-widget.ts](https://github.com/visgl/deck.gl/blob/master/modules/react/src/utils/use-widget.ts)
+[modules/react/src/legacy/utils/use-widget.ts](https://github.com/visgl/deck.gl/blob/master/modules/react/src/legacy/utils/use-widget.ts)

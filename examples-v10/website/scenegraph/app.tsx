@@ -6,7 +6,7 @@
 import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {log} from '@deck.gl/core';
@@ -155,14 +155,18 @@ export default function App({
     _animations: ANIMATIONS,
     sizeMinPixels: 0.1,
     sizeMaxPixels: 1.5,
-    getPosition: {sql: 'FLOAT64x3(longitude, latitude, altitude)'},
+    getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude, altitude)'},
     getOrientation: ({verticalRate, velocity, trueTrack}) => {
       // -90 looking up, +90 looking down
       const pitch = (-Math.atan2(verticalRate ?? 0, velocity ?? 0) * 180) / Math.PI;
       return [pitch, -(trueTrack ?? 0), 90];
     },
-    getScale: ({lastContact}) => {
-      return lastContact < -DROP_IF_OLDER_THAN_SECONDS ? [0, 0, 0] : [1, 1, 1];
+    getScale: {
+      sql: `\
+        CASE WHEN lastContact < -${DROP_IF_OLDER_THAN_SECONDS}
+          THEN ARRAY_FLOAT32(0, 0, 0)
+          ELSE ARRAY_FLOAT32(1, 1, 1)
+        END`
     }
   });
 

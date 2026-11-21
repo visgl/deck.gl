@@ -6,7 +6,7 @@ import {test, expect} from 'vitest';
 import {equals, config, Vector3} from '@math.gl/core';
 import {WebMercatorViewport} from 'deck.gl';
 import {Matrix4} from '@math.gl/core';
-import {getDistanceScales} from '@math.gl/web-mercator';
+import {getDistanceScales} from '@math.gl/geospatial/web-mercator';
 
 // Adjust sensitivity of math.gl's equals
 const LNGLAT_TOLERANCE = 1e-6;

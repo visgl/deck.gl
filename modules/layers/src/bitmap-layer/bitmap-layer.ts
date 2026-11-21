@@ -22,7 +22,7 @@ import {
 import type {Model} from '@luma.gl/engine';
 import type {SamplerProps, Texture} from '@luma.gl/core';
 import {normalizeByteColor3, normalizeByteColor4} from '@luma.gl/shaders';
-import {lngLatToWorld} from '@math.gl/web-mercator';
+import {lngLatToWorld} from '@math.gl/geospatial/web-mercator';
 
 import createMesh from './create-mesh';
 import {getMetersPerUnit} from '../utils';
@@ -31,6 +31,12 @@ import {bitmapUniforms, BitmapProps} from './bitmap-layer-uniforms';
 import source from './bitmap-layer.wgsl';
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
+
+/** White tint in the legacy byte convention. */
+const DEFAULT_TINT_COLOR = [255, 255, 255] as const;
+
+/** Transparent replacement color in the legacy byte convention. */
+const DEFAULT_TRANSPARENT_COLOR = [0, 0, 0, 0] as const;
 
 const defaultProps: DefaultProps<BitmapLayerProps> = {
   image: {type: 'image', value: null, async: true},
@@ -42,8 +48,8 @@ const defaultProps: DefaultProps<BitmapLayerProps> = {
   // More context: because of the blending mode we're using for ground imagery,
   // alpha is not effective when blending the bitmap layers with the base map.
   // Instead we need to manually dim/blend rgb values with a background color.
-  transparentColor: {type: 'color', value: [0, 0, 0, 0]},
-  tintColor: {type: 'color', value: [255, 255, 255]},
+  transparentColor: {type: 'color', value: DEFAULT_TRANSPARENT_COLOR},
+  tintColor: {type: 'color', value: DEFAULT_TINT_COLOR},
 
   textureParameters: {type: 'object', ignore: true, value: null}
 };
@@ -341,6 +347,29 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
+  /** Interpolates bitmap colors in the same 0–1 representation used by the shader. */
+  protected getUniformTransitionValue(propName: string, value: unknown): unknown {
+    if (propName === 'tintColor') return this.decodeTintColor(value as Color);
+    if (propName === 'transparentColor') return this.decodeTransparentColor(value as Color);
+    return super.getUniformTransitionValue(propName, value);
+  }
+
+  /** Converts an authored tint to RGB shader channels. */
+  private decodeTintColor(color: Color): BitmapProps['tintColor'] {
+    return normalizeByteColor3(
+      color,
+      !this.usesNormalizedColors() || color === DEFAULT_TINT_COLOR
+    ) as BitmapProps['tintColor'];
+  }
+
+  /** Converts an authored transparent replacement color to RGBA shader channels. */
+  private decodeTransparentColor(color: Color): BitmapProps['transparentColor'] {
+    return normalizeByteColor4(
+      color,
+      !this.usesNormalizedColors() || color === DEFAULT_TRANSPARENT_COLOR
+    );
+  }
+
   draw(opts) {
     const {shaderModuleProps} = opts;
     const {model, coordinateConversion, bounds, disablePicking} = this.state;
@@ -358,14 +387,12 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         bounds,
         coordinateConversion,
         desaturate,
-        // Decode public byte colors at the boundary; shader inputs are normalized.
-        tintColor: normalizeByteColor3([tintColor[0], tintColor[1], tintColor[2]]),
-        transparentColor: normalizeByteColor4([
-          transparentColor[0],
-          transparentColor[1],
-          transparentColor[2],
-          transparentColor[3] ?? 255
-        ])
+        tintColor: this.isUniformTransitionValue('tintColor')
+          ? (tintColor as BitmapProps['tintColor'])
+          : this.decodeTintColor(tintColor),
+        transparentColor: this.isUniformTransitionValue('transparentColor')
+          ? (transparentColor as BitmapProps['transparentColor'])
+          : this.decodeTransparentColor(transparentColor)
       };
       model.shaderInputs.setProps({bitmap: bitmapProps});
       model.draw(this.context.renderPass);

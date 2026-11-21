@@ -5,7 +5,7 @@
 import {clamp, Quaternion} from '@math.gl/core';
 import {vec3} from '@math.gl/core';
 import TransitionInterpolator from '../transitions/transition-interpolator';
-import {MAX_LATITUDE} from '@math.gl/web-mercator';
+import {MAX_LATITUDE} from '@math.gl/geospatial/web-mercator';
 import {geocentric} from '@math.gl/geospatial/projection/projections/geocent';
 import type {
   CRSConversion,
