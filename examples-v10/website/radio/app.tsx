@@ -12,6 +12,7 @@ import {MVTLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
 import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
+import {SQRT} from '@math.gl/sql/math-functions';
 import {scaleLinear} from 'd3-scale';
 import {isArrowTable} from '@math.gl/core/arrow';
 import SearchBar from './search-bar';
@@ -244,16 +245,15 @@ export default function App({
       getHexagon: {sql: 'hex'},
       stroked: false,
       extruded: false,
-      // Interpolate the original coverage palette in square-root-count space.
+      sqlFunctions: [SQRT],
+      // Interpolate the coverage palette in square-root-count space.
       getFillColor: {
         sql: `\
-          RGBA8(
-            (CASE WHEN count < 10 THEN 237 - 110 * (SQRT(count) - 1) / (SQRT(10) - 1)
-              ELSE 127 - 83 * (SQRT(count) - SQRT(10)) / (10 - SQRT(10)) END) / 255,
-            (CASE WHEN count < 10 THEN 248 - 43 * (SQRT(count) - 1) / (SQRT(10) - 1)
-              ELSE 205 - 78 * (SQRT(count) - SQRT(10)) / (10 - SQRT(10)) END) / 255,
-            (CASE WHEN count < 10 THEN 177 + 10 * (SQRT(count) - 1) / (SQRT(10) - 1)
-              ELSE 187 - 3 * (SQRT(count) - SQRT(10)) / (10 - SQRT(10)) END) / 255, 1)`
+          SCALE_COLOR(
+            SQRT(count),
+            DOMAIN(1, 3.1622776601683795, 10),
+            PALETTE('#edf8b1', '#7fcdbb', '#2c7fb8')
+          )`
       }
     }),
 
