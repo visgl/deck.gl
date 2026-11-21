@@ -19,7 +19,7 @@ import {
   type CreatedDevice,
   type DeviceCanvas,
   getDeviceCanvas,
-  loseCreatedDevice,
+  destroyCreatedDevice,
   releaseCanvas,
   retainCanvas
 } from './release-device-context';
@@ -560,13 +560,18 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
     this._canvasContext = null;
 
-    // Free the WebGL context of a device Deck created. Deck removed its own canvas above, so
-    // nothing can render to it again. A canvas the app passed is the app's to release, with
-    // `_releaseCanvasContext`.
+    // Tear down Deck's wrapper when it can be destroyed without losing a reusable canvas.
+    // Owners of externally supplied canvases that opt into context loss release them separately.
     this._useCanvas(null);
-    if (this._createdDevice?.ownsCanvas) {
-      loseCreatedDevice(this._createdDevice);
-      this._createdDevice = null;
+    const created = this._createdDevice;
+    if (created) {
+      destroyCreatedDevice(
+        created,
+        device => created.ownsCanvas || !device.ownsHandle || device.type !== 'webgl'
+      );
+      if (created.ownsCanvas) {
+        this._createdDevice = null;
+      }
     }
   }
 
@@ -1562,6 +1567,13 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     };
 
     const canvas = this._createDeviceCanvas(props);
+    // Track who created the canvas directly, including canvases in a different document.
+    const ownsCanvas = this._isMultiCanvasMode() || canvas === this._ownedCanvas;
+    const requestedType = deviceProps.type ?? 'webgl';
+    const deviceType =
+      requestedType === 'best-available'
+        ? luma.getBestAvailableAdapterType(deviceProps.adapters)
+        : requestedType;
 
     // Create the "best" device supported from the registered adapters
     const device = luma.createDevice({
@@ -1569,9 +1581,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // asynchronous device creation could happen after finalize() is called
       // TODO - createDevice should support AbortController?
       _reuseDevices: true,
-      // Deck owns the context of a device it creates, so `destroy()` releases it once no Deck
-      // renders to the canvas (see release-device-context). An app's `deviceProps` can override it.
-      ownsHandle: true,
+      // A supplied WebGL canvas can outlive Deck. Destroy only its luma wrapper by default.
+      ownsHandle: ownsCanvas || deviceType !== 'webgl',
       // tests can't handle WebGPU devices yet so we force WebGL2 unless overridden
       type: 'webgl',
       ...deviceProps,
@@ -1596,10 +1607,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         created => ((created.props as Record<string, unknown>)[CREATED_BY_DECK] ? created : null),
         () => null
       ),
-      // Decided by where the canvas came from, not by its class: a canvas from another window
-      // (an iframe) fails `instanceof HTMLCanvasElement` in this one. Multi-canvas mode always
-      // renders to an OffscreenCanvas that Deck created.
-      ownsCanvas: this._isMultiCanvasMode() || canvas === this._ownedCanvas
+      ownsCanvas
     };
     return device;
   }

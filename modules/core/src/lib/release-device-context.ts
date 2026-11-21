@@ -2,12 +2,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-// Browsers cap the number of live WebGL contexts per page and drop the oldest one first, so a
-// finalized Deck must free its context instead of leaving it to garbage collection. Deck creates
-// its device with `ownsHandle: true`, so `device.destroy()` releases the context. These helpers
-// call it once nothing can render to the canvas again: a device reused by another Deck on the
-// same canvas shares the same context.
-
 import type {Device} from '@luma.gl/core';
 
 /** A canvas that a Deck created a device for. */
@@ -71,25 +65,24 @@ function isInDocument(canvas: DeviceCanvas): boolean {
 }
 
 /**
- * Destroys a created device, releasing its context, once it has initialized. If a Deck still
+ * Destroys a created device once it has initialized. If a Deck still
  * renders to its canvas, for example one that was passed the device, the release waits until the
  * last such Deck stops.
  * @param created The device to release.
  * @param canRelease Checked again just before the device is destroyed.
  */
-export function loseCreatedDevice(
+export function destroyCreatedDevice(
   created: CreatedDevice,
-  canRelease: () => boolean = () => true
+  canRelease: (device: Device) => boolean
 ): void {
   const release = () => {
     created.device.then(device => {
-      if (!device) {
-        // Deck borrowed this device, or creating it failed: Deck has no context to release.
+      if (!device || device.isLost || !canRelease(device)) {
         return;
       }
       if (liveDecks.has(created.canvas)) {
         pendingReleases.set(created.canvas, release);
-      } else if (!device.isLost && canRelease()) {
+      } else {
         device.destroy();
       }
     });
@@ -121,7 +114,7 @@ export function releaseCanvasContext(deck: {readonly _createdDevice: CreatedDevi
   const {canvas} = created;
   setTimeout(() => {
     if (!isInDocument(canvas)) {
-      loseCreatedDevice(created, () => !isInDocument(canvas));
+      destroyCreatedDevice(created, () => !isInDocument(canvas));
     }
   }, 0);
 }

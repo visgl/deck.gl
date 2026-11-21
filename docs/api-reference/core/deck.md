@@ -48,6 +48,8 @@ The following properties are used to initialize a `Deck` instance. Any custom va
 
 The canvas to render into. It can be either a HTMLCanvasElement or the element id, and will be auto-created if not supplied.
 
+When Deck creates a WebGL device for a supplied canvas, finalizing the last Deck using it disposes of the device wrapper and its resize observers. The WebGL context remains available so the application can render to the canvas again.
+
 #### `_canvases` ((HTMLCanvasElement | String)[], optional) {#_canvases}
 
 Experimental: presentation canvases for multi-canvas mode. Deck renders into an offscreen default context and presents the result into one `PresentationContext` per canvas entry. String entries are resolved as DOM element ids. Views without an explicit [`canvasId`](./view.md#canvasid) render into the first configured canvas.

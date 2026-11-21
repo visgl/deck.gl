@@ -240,7 +240,12 @@ function createDeckGLComponent<Props, Instance extends DeckGLRenderer, MapT = ne
             config.parent ||
             (config.canvas ? (canvasElement.parentElement as HTMLDivElement) : wrapper.current),
           // The wrapper takes the size and style of an owned canvas, which fills it.
-          ...(config.canvas ? null : OWNED_CANVAS_PROPS)
+          ...(config.canvas
+            ? null
+            : {
+                ...OWNED_CANVAS_PROPS,
+                deviceProps: {ownsHandle: true, ...config.deviceProps}
+              })
         };
       }
 
