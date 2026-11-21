@@ -56,32 +56,36 @@ Register `ShaderInjectionTarget` descriptors with `addShaderInjectionTarget`, us
 
 `RenderPass.withParameters` is removed in alpha.11. For custom render-pass state overrides, save `renderPass.getParameters()`, apply overrides with `setParameters`, and restore the saved parameters in a `finally` block. Deck.gl handles this for layer and extension draws.
 
-### loaders.gl and math.gl v5 beta[​](#loadersgl-and-mathgl-v5-beta "Direct link to loaders.gl and math.gl v5 beta")
+### loaders.gl and math.gl v5[​](#loadersgl-and-mathgl-v5 "Direct link to loaders.gl and math.gl v5")
 
-Update direct loaders.gl dependencies to `5.0.0-rc.1` and math.gl dependencies to `5.0.0-rc.2`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+Update direct loaders.gl dependencies to `5.0.0-rc.2` and math.gl dependencies to `5.0.0`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
-| Previous import                                                           | Replacement import                                        |
-| ------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `@math.gl/web-mercator`                                                   | `@math.gl/geospatial/web-mercator`                        |
-| `@math.gl/arrow`                                                          | `@math.gl/core/arrow`                                     |
-| `@math.gl/expressions`                                                    | `@math.gl/sql/expressions`                                |
-| `@math.gl/expressions/sql`                                                | `@math.gl/sql/parser`                                     |
-| `@math.gl/expressions/arrow`                                              | `@math.gl/sql/arrow`                                      |
-| `@loaders.gl/arrow`                                                       | `@loaders.gl/tables/arrow`                                |
-| `@loaders.gl/loader-utils`, `@loaders.gl/schema`, `@loaders.gl/polyfills` | Corresponding subpaths of `@loaders.gl/core`              |
-| `@loaders.gl/csv`, `@loaders.gl/json`                                     | `@loaders.gl/tables/csv`, `@loaders.gl/tables/json`       |
-| `@loaders.gl/gltf`, `@loaders.gl/obj`                                     | `@loaders.gl/scene/gltf`, `@loaders.gl/scene/obj`         |
-| `@loaders.gl/las`, `@loaders.gl/ply`                                      | Corresponding subpaths of `@loaders.gl/pointclouds`       |
-| `@loaders.gl/mvt`                                                         | `@loaders.gl/tiles/mvt`                                   |
-| `@loaders.gl/tiles` (3D tiles types and sources)                          | `@loaders.gl/tiles-3d`                                    |
-| `@loaders.gl/3d-tiles`, `@loaders.gl/i3s`                                 | Corresponding subpaths of `@loaders.gl/tiles-3d`          |
-| `@loaders.gl/terrain`, `@loaders.gl/wms`                                  | `@loaders.gl/raster/terrain/index`, `@loaders.gl/ogc/wms` |
-| `@math.gl/types`                                                          | `@math.gl/core`                                           |
-| `@math.gl/polygon`, `@math.gl/culling`                                    | `@math.gl/geometry`, `@math.gl/geometry/culling`          |
-| `@math.gl/projection`                                                     | `@math.gl/geospatial/projection`                          |
-| `@math.gl/sun`                                                            | `@math.gl/earth/sun`                                      |
+| Previous import                                                           | Replacement import                                       |
+| ------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `@math.gl/web-mercator`                                                   | `@math.gl/geospatial/web-mercator`                       |
+| `@math.gl/arrow`                                                          | `@math.gl/core/arrow`                                    |
+| `@math.gl/expressions`                                                    | `@math.gl/sql/expressions`                               |
+| `@math.gl/expressions/sql`                                                | `@math.gl/sql/parser`                                    |
+| `@math.gl/expressions/arrow`                                              | `@math.gl/sql/arrow`                                     |
+| `@loaders.gl/arrow`                                                       | `@loaders.gl/tables/arrow`                               |
+| `@loaders.gl/loader-utils`, `@loaders.gl/schema`, `@loaders.gl/polyfills` | Corresponding subpaths of `@loaders.gl/core`             |
+| `@loaders.gl/csv`, `@loaders.gl/json`                                     | `@loaders.gl/tables/csv`, `@loaders.gl/tables/json`      |
+| `@loaders.gl/gltf`, `@loaders.gl/obj`                                     | `@loaders.gl/scene/gltf`, `@loaders.gl/scene/obj`        |
+| `@loaders.gl/las`, `@loaders.gl/ply`                                      | Corresponding subpaths of `@loaders.gl/pointclouds`      |
+| `@loaders.gl/mvt`                                                         | `@loaders.gl/tiles/mvt`                                  |
+| `@loaders.gl/tiles` (3D tiles types and sources)                          | `@loaders.gl/tiles-3d`                                   |
+| `@loaders.gl/3d-tiles`, `@loaders.gl/i3s`                                 | Corresponding subpaths of `@loaders.gl/tiles-3d`         |
+| `@loaders.gl/terrain`, `@loaders.gl/wms`                                  | `@loaders.gl/raster/terrain`, `@loaders.gl/ogc/wms`      |
+| `@math.gl/types`                                                          | `@math.gl/core/types`                                    |
+| `@math.gl/core` (matrix and vector APIs)                                  | `@math.gl/core/matrix`                                   |
+| `@math.gl/sql`                                                            | `@math.gl/sql/query`                                     |
+| `@loaders.gl/core/scan`                                                   | `@loaders.gl/core/query`                                 |
+| `@math.gl/geospatial/projection/core`                                     | `@math.gl/geospatial/projection-core`                    |
+| `@math.gl/polygon`, `@math.gl/culling`                                    | `@math.gl/geometry/polygon`, `@math.gl/geometry/culling` |
+| `@math.gl/projection`                                                     | `@math.gl/geospatial/projection`                         |
+| `@math.gl/sun`                                                            | `@math.gl/earth/sun`                                     |
 
-Import vector and matrix namespaces such as `vec3` and `mat4` from `@math.gl/core`; their old subpaths are removed. Replace `WINDING.CLOCKWISE` and `WINDING.COUNTER_CLOCKWISE` with `'clockwise'` and `'counter-clockwise'`.
+Import vector and matrix namespaces such as `vec3` and `mat4` from `@math.gl/core/matrix`; their old subpaths are removed. Replace `WINDING.CLOCKWISE` and `WINDING.COUNTER_CLOCKWISE` with `'clockwise'` and `'counter-clockwise'`.
 
 The `@loaders.gl/gis` helpers move to `@loaders.gl/core/geoarrow`: use `convertGeojsonToBinaryFeatureCollection` and `convertBinaryFeatureCollectionToGeojson` instead of `geojsonToBinary` and `binaryToGeojson`.
 
