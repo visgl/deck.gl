@@ -65,7 +65,7 @@
     "moment-timezone": "^0.6.0",
     "pbf": "^3.2.1",
     "quadbin": "^0.4.0",
-    "@math.gl/geospatial": "5.0.0"
+    "@math.gl/geospatial": "^5.0.0"
   },
   "peerDependencies": {
     "@deck.gl/aggregation-layers": "~10.0.0-alpha",

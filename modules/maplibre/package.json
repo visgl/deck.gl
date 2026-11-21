@@ -37,7 +37,7 @@
   ],
   "sideEffects": false,
   "dependencies": {
-    "@math.gl/core": "5.0.0"
+    "@math.gl/core": "^5.0.0"
   },
   "peerDependencies": {
     "@deck.gl/core": "~10.0.0-alpha",

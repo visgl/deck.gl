@@ -59,7 +59,7 @@
     "@loaders.gl/tables": "5.0.0-rc.2",
     "@luma.gl/core": "10.0.0-beta.2",
     "@luma.gl/engine": "10.0.0-beta.2",
-    "@math.gl/geospatial": "5.0.0",
+    "@math.gl/geospatial": "^5.0.0",
     "@probe.gl/test-utils": "^4.1.1",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.3.2",

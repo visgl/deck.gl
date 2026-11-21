@@ -1938,7 +1938,7 @@
     h3-js "^4.5.0"
     open-location-code "^1.0.3"
 
-"@math.gl/earth@5.0.0", "@math.gl/earth@^5.0.0":
+"@math.gl/earth@^5.0.0":
   version "5.0.0"
   resolved "https://registry.npmjs.org/@math.gl/earth/-/earth-5.0.0.tgz#b1307bb57b6919db50cf09c4962af96e2e3cd037"
   integrity sha512-uDkklpuUeol/9nz07Du8o6OlmRE6c83QCvmmbnexrl21XwIbBN3T2e4HIcZL311P9sPz6ZOpTDVicOpTSfFpTA==
@@ -1953,7 +1953,7 @@
   dependencies:
     "@math.gl/core" "5.0.0"
 
-"@math.gl/geospatial@5.0.0", "@math.gl/geospatial@^5.0.0":
+"@math.gl/geospatial@^5.0.0":
   version "5.0.0"
   resolved "https://registry.npmjs.org/@math.gl/geospatial/-/geospatial-5.0.0.tgz#927309eb0e9cc9f369a84721f40a356423998489"
   integrity sha512-RTtjeX0czHWkWM9l4cLEvvUOUjcvyoh7o52W7CPdZ/0SX+8h6cX13kR0H3wfxEQyFezhMz8FwifVMKi1Wtc5bQ==
