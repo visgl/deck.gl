@@ -8,8 +8,14 @@ import * as widgets from '@deck.gl/widgets';
 
 test('Widgets have unique default ids', () => {
   const idsByClass: Record<string, string> = {};
+  const constructors = new Set<unknown>();
   for (const [name, value] of Object.entries(widgets)) {
-    if (typeof value === 'function' && value.prototype instanceof Widget) {
+    if (
+      typeof value === 'function' &&
+      value.prototype instanceof Widget &&
+      !constructors.has(value)
+    ) {
+      constructors.add(value);
       idsByClass[name] = (value as unknown as typeof Widget).defaultProps.id;
     }
   }

@@ -41,7 +41,7 @@ v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, S
 
 - [**Normalized colors**](./developer-guide/using-layers.md#normalized-colors) — Set `normalizedColors` to use RGB values from 0 to 1.
 - [**Color scales**](./api-reference/core/layer.md#sql-accessor-inputs) — Map Arrow values to colors with SQL.
-- [`_ColorScaleWidget`](./api-reference/widgets/color-scale-widget.md) 🧪 displays legends for SQL color scales on visible layers.
+- [`_LegendWidget`](./api-reference/widgets/color-scale-widget.md) 🧪 displays legends for SQL color scales on visible layers.
 
 ### React
 
