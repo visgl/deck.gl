@@ -200,9 +200,9 @@ const commonPosition2 = layer.projectPosition(lnglat, {
 });
 ```
 
-#### PathStyleExtension dash coordinate
+### PathStyleExtension
 
-With `PathStyleExtension({dash: true})`, `geometry.uv.y` in `PathLayer` shaders is now the geometric distance along the segment, the same as without dashes. Custom shader injections that need the dash arclength, which also counts Z movement and the parts of the segment removed by camera clipping, should read `vDashSegment.x` (position) and `vDashSegment.y` (segment length) under `#ifdef DASH_ENABLED`.
+With [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) dashes on, `geometry.uv.y` in `PathLayer` shaders is now the geometric distance along the segment, the same as without dashes. Custom shader injections that need the dash coordinate, which also counts Z movement and the parts of the segment removed by camera clipping, should read `vDashSegment.x` (position) and `vDashSegment.y` (segment length) under `#ifdef DASH_ENABLED`.
 
 ### Deck props set to `undefined`
 
