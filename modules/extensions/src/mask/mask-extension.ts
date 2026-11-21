@@ -57,8 +57,21 @@ export default class MaskExtension extends LayerExtension {
     };
   }
 
-  /* eslint-disable camelcase */
-  draw(this: Layer<Required<MaskExtensionProps>>, {context, shaderModuleProps}: any) {
+  /** Applies mask uniforms for a normal layer draw. */
+  draw(this: Layer<Required<MaskExtensionProps>>, {shaderModuleProps}: any, extension: this) {
+    this.setShaderModuleProps(
+      extension.getAggregationShaderProps.call(this, extension, shaderModuleProps)
+    );
+  }
+
+  /** Resolves the mask's bounds and channel in the drawing viewport. */
+  getAggregationShaderProps(
+    this: Layer<Required<MaskExtensionProps>>,
+    extension: this,
+    shaderModuleProps?: any
+  ) {
+    if (!shaderModuleProps?.mask) return {mask: {enabled: false}};
+    const {context} = this;
     const maskProps = {} as MaskProps;
     maskProps.maskByInstance = Boolean(this.state.maskByInstance);
     const {maskId, maskInverted} = this.props;
@@ -87,6 +100,6 @@ export default class MaskExtension extends LayerExtension {
       maskProps.enabled = false;
     }
 
-    this.setShaderModuleProps({mask: maskProps});
+    return {mask: maskProps};
   }
 }

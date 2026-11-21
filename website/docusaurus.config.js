@@ -11,6 +11,8 @@ const darkCodeTheme = prismThemes.nightOwl;
 
 const {getSwcLoaderOptions, rspack} = require('@docusaurus/faster');
 const {resolve} = require('path');
+const {createRequire} = require('node:module');
+const exampleCatalogs = require('./scripts/example-catalogs.cjs');
 const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/';
 const websiteBasePathSegments = websiteBaseUrl.split('/').filter(Boolean);
 const websiteBasePath =
@@ -131,8 +133,10 @@ const config = {
           includeDocs: true,
           includeVersionedDocs: false,
           includeGeneratedIndex: true,
-          // /examples is the only other docs instance; TEST-STATUS is an internal tracker.
-          excludeRoutes: ['/examples/**', '/docs/TEST-STATUS'].map(prefixWebsiteRoute)
+          // Exclude the example catalogs and internal test tracker.
+          excludeRoutes: [...exampleCatalogs.map(({id}) => `/${id}/**`), '/docs/TEST-STATUS'].map(
+            prefixWebsiteRoute
+          )
         }
       }
     ],
@@ -144,10 +148,15 @@ const config = {
           // Resolve dependencies through their package export maps, including subpaths.
           modules: [resolve('node_modules'), resolve('../node_modules')],
           alias: {
+            // concaveman imports a UMD file from its nested robust-predicates 2.x dependency.
+            'robust-predicates/umd/orient2d.min.js$': createRequire(
+              require.resolve('concaveman')
+            ).resolve('robust-predicates/umd/orient2d.min.js'),
             '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers/dist'),
             '@deck.gl/arcgis': resolve('../modules/arcgis/dist'),
             '@deck.gl/carto': resolve('../modules/carto/dist'),
-            '@deck.gl/core/arrow': resolve('../modules/core/dist/lib/luma-upstream/arrow-converter.js'),
+            '@deck.gl/core/sql': resolve('../modules/core/dist/arrow/upstream-math/sql-parser.js'),
+            '@deck.gl/core/arrow': resolve('../modules/core/dist/arrow/upstream-luma/arrow-converter.js'),
             '@deck.gl/core': resolve('../modules/core/dist'),
             '@deck.gl/extensions': resolve('../modules/extensions/dist'),
             '@deck.gl/geo-layers': resolve('../modules/geo-layers/dist'),
@@ -158,10 +167,18 @@ const config = {
             '@deck.gl/mapbox': resolve('../modules/mapbox/dist'),
             '@deck.gl/maplibre': resolve('../modules/maplibre/dist'),
             '@deck.gl/mesh-layers': resolve('../modules/mesh-layers/dist'),
+            // `examples/` imports the package root, which is the React 19 renderer in v10. The
+            // website runs React 18 and shows the current API, so the bare root resolves to
+            // `/legacy` until the v10 examples replace those apps.
+            '@deck.gl/react$': resolve('../modules/react/dist/legacy'),
             '@deck.gl/react': resolve('../modules/react/dist'),
             '@deck.gl/widgets': resolve('../modules/widgets/dist'),
-            'proposal-examples': resolve('../examples/proposals'),
+            'proposal-examples': resolve('../examples-v10/proposals'),
+            'examples-root': resolve('../examples'),
             'website-examples': resolve('../examples/website'),
+            'v10-website-examples': resolve('../examples-v10/website'),
+            // Use the same Arrow runtime for website loaders and workspace layer queries.
+            'apache-arrow$': resolve('../node_modules/apache-arrow/Arrow.dom.mjs'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom')
           }
@@ -179,6 +196,8 @@ const config = {
         ],
         module: {
           rules: [
+            // Match Vite asset imports used by standalone examples.
+            {resourceQuery: /\?url$/, type: 'asset/resource'},
             // https://github.com/Esri/calcite-components/issues/2865
             {
               test: /\.m?js/,
@@ -190,17 +209,17 @@ const config = {
         }
       }
     ],
-    [
+    ...exampleCatalogs.map(({id}) => [
       '@docusaurus/plugin-content-docs',
       {
-        id: 'examples',
-        path: './src/examples',
-        routeBasePath: 'examples',
-        sidebarPath: resolve('./src/examples-sidebar.js'),
+        id,
+        path: `./src/${id}`,
+        routeBasePath: id,
+        sidebarPath: resolve(`./src/${id}-sidebar.js`),
         breadcrumbs: false,
         docItemComponent: resolve('./src/components/example/doc-item-component.jsx')
       }
-    ]
+    ])
   ],
 
   themeConfig:
@@ -214,11 +233,11 @@ const config = {
           srcDark: 'images/visgl-logo-light.png'
         },
         items: [
-          {
-            to: '/examples',
+          ...exampleCatalogs.map(({id, label}) => ({
+            to: `/${id}`,
             position: 'left',
-            label: 'Examples'
-          },
+            label
+          })),
           {
             to: '/docs',
             position: 'left',

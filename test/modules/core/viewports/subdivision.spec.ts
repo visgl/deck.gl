@@ -6,7 +6,7 @@ import {test, expect} from 'vitest';
 import {
   Viewport,
   WebMercatorViewport,
-  _GlobeViewport as GlobeViewport,
+  GlobeViewport,
   _SunLight as SunLight,
   LayerManager
 } from '@deck.gl/core';

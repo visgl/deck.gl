@@ -9,7 +9,7 @@ import {
   OrthographicViewport,
   WebMercatorViewport,
   project,
-  _GlobeViewport as GlobeViewport
+  GlobeViewport
 } from '@deck.gl/core';
 import type {ProjectUniforms} from '@deck.gl/core';
 import {PathStyleExtension} from '@deck.gl/extensions';

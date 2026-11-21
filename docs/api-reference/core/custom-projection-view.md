@@ -70,10 +70,24 @@ Use a new layer ID when switching a layer between `MapView` and `CustomProjectio
 
 When displaying multiple views with different projections, create a separate layer instance with a unique ID for each view, and use `layerFilter` to restrict each instance to its intended view.
 
+## Adaptive refinement {#adaptive-refinement}
+
+`PathLayer`, `SolidPolygonLayer`, `PolygonLayer` and `BitmapLayer` accept an experimental
+`_projectionTolerance` prop. A positive value adds vertices to approximate curved projections
+within that many meters. It runs after `resolution` grid cutting and again when geometry,
+projection or model transforms change. Camera moves do not rerun it.
+
+Limitations:
+
+- Error is sampled, so the tolerance is an estimate.
+- Paths and polygons refine ring edges only; interiors and extruded sides are not refined.
+- Split geometry at projection seams first. Invalid samples throw.
+- Refinement throws when it reaches math.gl's vertex limits.
+
 ## Limitations
 
 - Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
-- `BitmapLayer` approximates the projection with a triangle mesh. A positive `resolution` creates an interior grid in the source CRS and projects every grid vertex; higher values improve the approximation at a higher processing cost. Image coordinates are linearly interpolated within each triangle. Subdivision cannot correct an image's pixel-to-coordinate mapping when it differs from the declared source CRS.
+- `BitmapLayer` approximates the projection with a triangle mesh. A positive `resolution` creates an interior grid in the source CRS and projects every grid vertex; higher values improve the approximation at a higher processing cost. [`_projectionTolerance`](../layers/bitmap-layer.md#_projectiontolerance) adds adaptive refinement. Image coordinates are linearly interpolated within each triangle. Subdivision cannot correct an image's pixel-to-coordinate mapping when it differs from the declared source CRS.
 - Great-circle paths are not supported by `GreatCircleLayer` or `ArcLayer` with `greatCircle: true`. They fall back to ordinary arcs between projected endpoints, as with `greatCircle: false`. To preserve a great-circle path, sample it in geographic coordinates and render the samples with `PathLayer`.
 - `LineLayer`, `ArcLayer`, `PathLayer` and `SolidPolygonLayer` ignore `wrapLongitude` when the layer uses CPU preprojection or its source coordinates are not WGS84. Split geometry at the desired longitude boundary before passing it to these layers.
 - With `coordinateSystem: 'default'`, layer positions are interpreted as coordinates in WGS84. `modelMatrix` and then `coordinateOrigin` are applied in the source CRS before conversion. Use a CRS identifier or PROJ string to declare another source CRS. Positions whose CRS signature matches the view's descriptor bypass CPU conversion. Legacy `coordinateSystem: 'cartesian'` also bypasses conversion. Cartesian positions are in target CRS units in `crs`, and `modelMatrix` and `coordinateOrigin` both apply.

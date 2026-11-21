@@ -4,7 +4,7 @@ import {
   WebMercatorViewport,
   OrthographicViewport,
   OrbitViewport,
-  _GlobeViewport as GlobeViewport,
+  GlobeViewport,
   FirstPersonViewport
 } from '@deck.gl/core';
 

@@ -5,10 +5,11 @@
 /* eslint-disable max-statements */
 import AttributeTransitionManager from '@deck.gl/core/lib/attribute/attribute-transition-manager';
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {test, expect} from 'vitest';
 import type {Buffer} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
-import {device} from '@deck.gl/test-utils/vitest';
+import {device, testLayer} from '@deck.gl/test-utils/vitest';
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const TEST_ATTRIBUTES = (function () {
@@ -115,6 +116,86 @@ webglTest('AttributeTransitionManager#update', async () => {
   manager.finalize();
   expect(transitioningBuffer._handle, 'transform buffer is deleted').toBeFalsy();
   expect(manager.transitions.instanceSizes, 'transition is deleted').toBeFalsy();
+});
+
+webglTest('AttributeTransitionManager#remove transition', () => {
+  const timeline = new Timeline();
+  const manager = new AttributeTransitionManager(device, {id: 'attribute-transition', timeline});
+  const instanceColors = new Attribute(device, {
+    id: 'instanceColors',
+    size: 4,
+    type: 'unorm8',
+    accessor: 'getColor',
+    transition: true
+  });
+  instanceColors.setData({value: new Uint8Array(16).fill(255)});
+  instanceColors.setNeedsRedraw('initial');
+  const attributes = {instanceColors};
+
+  manager.update({attributes, transitions: {getColor: 1000}, numInstances: 4});
+  const transitionAttribute = manager.getAttributes().instanceColors;
+  expect(transitionAttribute.getAccessor().type, 'transition buffer is float32').toBe('float32');
+
+  instanceColors.needsRedraw({clearChangedFlags: true});
+  instanceColors.getBufferLayout();
+  manager.update({attributes, transitions: {}, numInstances: 4});
+  expect(manager.hasAttribute('instanceColors'), 'removed transition').toBeFalsy();
+  expect(
+    instanceColors.needsRedraw(),
+    'instanceColors is bound again in place of the deleted transition buffer'
+  ).toBeTruthy();
+  expect(
+    instanceColors.layoutChanged(),
+    'instanceColors requests its unorm8 buffer layout'
+  ).toBeTruthy();
+
+  manager.finalize();
+  instanceColors.delete();
+});
+
+webglTest('AttributeTransitionManager#remove transition rebinds the layer model', () => {
+  const timeline = new Timeline();
+  const getFillColorFormat = (layer: ScatterplotLayer) =>
+    layer.state
+      .model!.bufferLayout.flatMap(layout => layout.attributes ?? [])
+      .find(attribute => attribute.attribute === 'instanceFillColors')?.format;
+  const hasDestroyedBuffer = (layer: ScatterplotLayer) =>
+    layer.state.model!.vertexArray.attributes.some(buffer => (buffer as Buffer)?.destroyed);
+
+  testLayer({
+    Layer: ScatterplotLayer,
+    timeline,
+    testCases: [
+      {
+        props: {
+          data: [{position: [0, 0]}, {position: [1, 1]}],
+          getPosition: d => d.position,
+          getFillColor: [255, 0, 0],
+          transitions: {getFillColor: 1000}
+        },
+        onAfterUpdate: ({layer}) => {
+          expect(getFillColorFormat(layer), 'transition buffer is bound').toBe('float32x4');
+        }
+      },
+      {
+        updateProps: {transitions: null, opacity: 0.7},
+        onAfterUpdate: ({layer}) => {
+          expect(getFillColorFormat(layer), 'instanceFillColors is bound again').toBe('unorm8x4');
+          expect(hasDestroyedBuffer(layer), 'no destroyed buffer is bound').toBe(false);
+        }
+      }
+    ],
+    onError: (error, title) => {
+      // GPUTransitionBase.delete() does not delete attributeInTransition, which leaks one buffer
+      if (
+        title === 'ScatterplotLayer should delete all resources' &&
+        error.message === '1 Buffers'
+      ) {
+        return;
+      }
+      throw error;
+    }
+  });
 });
 
 webglTest('AttributeTransitionManager#transition', async () => {
