@@ -3,20 +3,23 @@ on [deck.gl](http://deck.gl) website.
 
 ### Usage
 
-Copy the content of this folder to your project. 
+Run these commands in the example directory.
 
 ```bash
 # install dependencies
 npm install
 # or
 yarn
-# bundle and serve the app with vite
-npm start
+# serve the app against the local deck.gl source
+yarn start-local
 ```
 
 ### Data format
 
-Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/trips), showing taxi trips in Manhattan. [Source](http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml)
+The example loads the full Manhattan taxi trip dataset from a single Parquet file.
+The first row group stores shared route segments. The second stores trips with ordered
+segment IDs and start and end times. The app reconstructs the paths and timestamps
+and carries trails across the animation loop. [Original data source](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
 
 To use your own data, check out
 the [documentation of TripsLayer](../../../docs/api-reference/geo-layers/trips-layer.md).
