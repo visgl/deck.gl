@@ -117,7 +117,7 @@ export default function App({
       wrapLongitude: true,
 
       sqlFunctions: [POWER],
-      getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude, -1000 * depth)'},
+      getPosition: {sql: 'ARRAY[longitude, latitude, -1000 * depth]'},
       getRadius: {sql: 'POWER(2, magnitude)'},
       getFillColor: {
         sql: `\

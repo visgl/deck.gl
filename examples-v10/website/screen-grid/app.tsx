@@ -68,7 +68,7 @@ export default function App({
         }
       },
       opacity: 0.8,
-      getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
+      getPosition: {sql: 'ARRAY[longitude, latitude]'},
       getWeight: {sql: 'count'},
       cellSizePixels: cellSize,
       colorRange,

@@ -166,8 +166,8 @@ export default function App({
       new ArcLayer<MigrationFlow>({
         id: 'arc',
         data: arcs,
-        getSourcePosition: {sql: 'ARRAY_FLOAT64(source_longitude, source_latitude)'},
-        getTargetPosition: {sql: 'ARRAY_FLOAT64(target_longitude, target_latitude)'},
+        getSourcePosition: {sql: 'ARRAY[source_longitude, source_latitude]'},
+        getTargetPosition: {sql: 'ARRAY[target_longitude, target_latitude]'},
         getSourceColor: d => (d.value > 0 ? inFlowColors : outFlowColors)[d.quantile],
         getTargetColor: d => (d.value > 0 ? outFlowColors : inFlowColors)[d.quantile],
         getWidth: strokeWidth

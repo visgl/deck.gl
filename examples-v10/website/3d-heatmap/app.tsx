@@ -110,7 +110,7 @@ export default function App({
         }
       },
       extruded: true,
-      getPosition: {sql: 'ARRAY_FLOAT64(lng, lat)'},
+      getPosition: {sql: 'ARRAY[lng, lat]'},
       pickable: true,
       radius,
       upperPercentile,
