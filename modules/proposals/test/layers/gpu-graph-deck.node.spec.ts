@@ -67,7 +67,7 @@ describe('optional GPU Graph deck.gl integration package isolation', () => {
 
     // Track the luma.gl version that @deck.gl/core pins, so luma.gl upgrades need no edit here
     const lumaVersion = JSON.parse(
-      readFileSync(new URL('../../core/package.json', import.meta.url), 'utf8')
+      readFileSync(new URL('../../../core/package.json', import.meta.url), 'utf8')
     ).dependencies['@luma.gl/core'];
 
     expect(packageJson.private).toBe(true);
