@@ -188,13 +188,19 @@ describe('@deck.gl/proposals/layers package boundary', () => {
       Object.keys({...packageJson.dependencies, ...packageJson.peerDependencies}).sort()
     ).toEqual([
       '@deck.gl/core',
+      '@deck.gl/extensions',
+      '@deck.gl/geo-layers',
+      '@deck.gl/layers',
+      '@loaders.gl/core',
+      '@loaders.gl/tiles',
       '@luma.gl/anari',
       '@luma.gl/core',
       '@luma.gl/engine',
       '@luma.gl/graph',
       '@luma.gl/shaders',
-      '@math.gl/core/matrix',
+      '@math.gl/core',
       '@math.gl/earth',
+      '@math.gl/geospatial',
       'apache-arrow'
     ]);
   });
