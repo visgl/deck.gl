@@ -3,11 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 import {SphereGeometry} from '@luma.gl/engine';
-import {_GlobeView as GlobeView, OrthographicView, MapView, FirstPersonView} from '@deck.gl/core';
+import {GlobeView, OrthographicView, MapView, FirstPersonView} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
-import {MVTLoader} from '@loaders.gl/mvt';
+import {MVTLoader} from '@loaders.gl/tiles/mvt';
 import {parseColor} from '../../../examples/layer-browser/src/utils/color';
 
 import * as dataSamples from 'deck.gl-test/data';

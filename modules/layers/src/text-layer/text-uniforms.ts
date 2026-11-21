@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 import type {Viewport, OrthographicViewport} from '@deck.gl/core';
 
 export type ContentAlignModes = keyof typeof CONTENT_ALIGN;

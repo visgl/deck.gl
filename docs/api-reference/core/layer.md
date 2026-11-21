@@ -60,7 +60,7 @@ deck.gl layers typically expect `data` to be one of the following types:
 - Any non-iterable object that contains a `length` field. deck.gl will not attempt to interpret its format, but simply call each accessor `length` times. (See remark below)
 - `String`: an URL pointing to the data source. deck.gl will attempt to fetch the remote content and parse it as JSON. The resulting object is then used as the value of the `data` prop.
 - `Promise`: the resolved value will be used as the value of the `data` prop.
-- `AsyncIterable`: an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object that yields data in batches. The default implementation expects each batch to be an array of data objects; one may change this behavior by supplying a custom `dataTransform` callback.
+- `AsyncIterable`: an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object that yields data in batches. Batches may be row arrays, Arrow record batches, or Arrow tables. Promises resolving to an async iterable are also supported. Row-array processing can be customized with `dataTransform`.
 
 ##### data.attributes
 
@@ -211,7 +211,7 @@ Requires `pickable` to be true.
 
 * Default: `[0, 0, 128, 128]`
 
-RGBA color to blend with the highlighted object (either the hovered over object if `autoHighlight: true`, or the object at the index specified by `highlightedObjectIndex`). When the value is a 3 component (RGB) array, a default alpha of 255 is applied.
+RGBA color to blend with the highlighted object (either the hovered over object if `autoHighlight: true`, or the object at the index specified by `highlightedObjectIndex`). Channels use 0–255 by default. With Deck’s [`normalizedColors`](./deck.md#normalizedcolors), plain-array constants and callback results on top-level layers use 0–1 channels. Omitted alpha is opaque in either mode. The built-in highlight and composite sublayer colors retain their byte interpretation.
 
 - If an array is supplied, it is used for the object that is currently highlighted.
 - If a function is supplied, it is called with a [pickingInfo](../../developer-guide/interactivity.md#the-pickinginfo-object) object when the hovered object changes. The return value is used as the highlight color for the picked object. Only works with `autoHighlight: true`.
@@ -249,7 +249,7 @@ Specifies the CRS of layer positions after `modelMatrix` and `coordinateOrigin` 
 - `'meter-offsets'`
 - `'lnglat-offsets'`
 
-`'lnglat'`, `'WGS84'`, `'EPSG:4326'`, and `'EPSG:4979'` identify WGS84 longitude/latitude/elevation. `'globe'` identifies geocentric meter coordinates on deck.gl's existing sphere; `'EPSG:4978'` identifies WGS84 ellipsoid geocentric coordinates. Other CRS identifiers and PROJ strings are resolved by `@math.gl/projection`. While resolution is pending, the layer waits before initialization or updates; failures are reported through the layer's error handler.
+`'lnglat'`, `'WGS84'`, `'EPSG:4326'`, and `'EPSG:4979'` identify WGS84 longitude/latitude/elevation. `'globe'` identifies geocentric meter coordinates on deck.gl's existing sphere; `'EPSG:4978'` identifies WGS84 ellipsoid geocentric coordinates. Other CRS identifiers and PROJ strings are resolved by `@math.gl/geospatial/projection`. While resolution is pending, the layer waits before initialization or updates; failures are reported through the layer's error handler.
 
 In [multi-view applications](../../developer-guide/views.md), the first viewport allowed by the layer filter determines the layer's CPU coordinate conversion. Use separate layer instances when views require different packed coordinate systems.
 
@@ -311,13 +311,98 @@ The function receives two arguments:
 And should return `true` if the two values are considered equal (no update needed), or `false` if the data has changed.
 
 
+#### `_dataLoadOptions` (string, optional) **Experimental** {#_dataloadoptions}
+
+* Default: `'auto'`
+
+Controls how URL data is loaded and how streamed data is consumed:
+
+| Mode | URL loading | Stream consumption |
+| --- | --- | --- |
+| `'auto'` | Load completely using loaders.gl `load` | Append application-supplied chunks |
+| `'batched'` | Stream using loaders.gl `loadInBatches` | Append chunks |
+| `'snapshots'` | Stream using loaders.gl `loadInBatches` | Replace all data with each Arrow result |
+
+Streams can yield row arrays, Arrow `RecordBatch` objects, or Arrow tables.
+Each snapshot replaces the previous table with the entire current result. A snapshot can be one
+Arrow record batch or an Arrow table containing multiple record batches. Do not
+mix Arrow and row chunks in one stream. Deck discards loader metadata and passes plain row arrays or Arrow tables to layer props and callbacks.
+
+`loaders` and `loadOptions` are forwarded to loaders.gl. Changing the mode, or changing loaders
+or load options while batch loading is active, reloads the same URL. A custom `fetch` retains
+control over URL loading and may return an iterable or a promise resolving to one.
+
+Arrow is an optional dependency, imported only when an Arrow chunk arrives. `dataTransform`
+applies to row chunks; transform Arrow chunks in the producer instead. See
+[Streaming Arrow data](../../developer-guide/using-with-arrow.md#streaming-arrow-data).
+
+
+#### `sqlFunctions` (SQLFunctions, optional) {#sqlfunctions}
+
+Additional math.gl Arrow functions for this layer's SQL accessors. Functions
+override matching [Deck functions](./deck.md#sqlfunctions) by name.
+
+#### `query` (string, optional) {#query}
+
+SQL to execute when `data` is an Arrow table, a promise resolving
+to an Arrow table, or a URL. The result becomes the layer's loaded data and is
+available to accessor queries, accessors, and picking. The layer's data is the
+implicit source. `FROM data` is optional. Omit `query` to use the loaded data as-is.
+
+For an in-memory Arrow table, the default parser also supports relational SQL with
+an explicit `FROM data`, for example
+`SELECT hex, SUM(count) AS visits FROM data GROUP BY hex`.
+math.gl executes the grouped query across the whole table. Nullish data and empty
+row arrays render as empty layers until data arrives.
+
+For URL inputs, provide a source-capable loader. To group a URL-backed table, use
+`FROM data GROUP BY` with one grouping column selected first, followed by named
+`COUNT`, `SUM`, `AVG`, `MIN`, or `MAX` aggregates. Loaders that support query pushdown
+can optimize loading based on the supplied query. When the layer has a custom
+`fetch`, SQL runs on the Arrow table returned by that function. Deck loads the SQL
+parser on first use.
+
+#### SQL accessor inputs
+
+Accessors that accept Arrow columns also accept `{sql: string}`. The expression
+evaluates against the loaded Arrow table after `query` and `dataTransform`. It returns
+one value per row, in source order. Use `query` for filtering or other operations
+that change the rows.
+
+An Arrow-enabled position accessor can reference columns by name. If the
+loaded `data` table has separate `longitude` and `latitude` columns, this packs
+them into a two-component 64-bit position for each row.
+
+```ts
+getPosition: {sql: 'FLOAT64x2(longitude, latitude)'}
+```
+
+If the table has `red`, `green`, and `blue` columns with floating-point values
+in the range 0–1, this packs them into an 8-bit RGBA color with full opacity.
+
+```ts
+getFillColor: {sql: 'RGBA8(red, green, blue, 1)'}
+```
+
+Accessors can use top-level SQL scales. Numeric accessors accept linear, square-root,
+logarithmic, power, and symmetric-log scales with a numeric `RANGE`. Color
+accessors accept sequential, cyclic, diverging, ordinal, quantile, quantize, and
+threshold scales.
+
+```ts
+getFillColor: {sql: "SCALE_COLOR(temperature, DOMAIN(temperature), PALETTE('viridis'))"}
+```
+
+The domain resolves against the complete loaded table. When data changes, existing
+rows can receive new colors. Missing values are transparent.
+
 #### `dataTransform` (Function, optional) {#datatransform}
 
 Executed to manipulate remote data when it's fetched. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.
 
 The function receives two arguments:
 
-- `data` - the newly fetched data
+- `data` - the newly fetched data. A complete Arrow load supplies an Apache Arrow `Table`.
 - `previousData` - (only available when `data` is an async iterable) the previously loaded data. If `dataTransform` is not supplied, the new data chunk is appended to the previous data array.
 
 And must return a valid `data` object: an array, an iterable or a non-iterable object that contains a `length` field. See documentation of the `data` prop for details.
@@ -523,7 +608,7 @@ Out of the box, deck.gl supports loading JSON and image files (with [ImageLoader
 Support for addtional formats can be added by adding loaders to the `loaders` prop. For example, to load data from CSV files:
 
 ```js
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 
 const layer = new HexagonLayer({
   data: './data.csv',
@@ -563,9 +648,25 @@ The function is expected to return a Promise that resolves to loaded data.
 * Default: `load(url, loaders, loadOptions)`
 
 
+#### `onDataProgress` (Function, optional) **Experimental** {#ondataprogress}
+
+Called after each accepted streamed data batch is applied. Receives `(value, context)`, where
+`value` is the accumulated row array or Arrow table (the replacement table in snapshot mode),
+and `context` contains `layer` and `propName` (`'data'`). Metadata batches do not trigger this
+callback. It also applies to application-supplied streams in `'auto'` mode.
+
+`onDataLoad` runs once at successful stream completion. An empty stream completes with `[]`
+and no progress callback. Iterator errors use the layer's error handler. Replaced or finalized
+streams do not publish subsequent progress, completion, or error callbacks.
+
+
 #### `onDataLoad` (Function, optional) {#ondataload}
 
-Called when remote data is fully loaded. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.
+Called when a new `data` input resolves. Direct inputs are reported after any
+`dataTransform` is applied. URL and promise inputs are reported after loading,
+query evaluation, and transformation. Async iterables report completion after
+the stream ends. The callback receives the same resolved value as `layer.props.data`
+and can pass it to the application UI.
 
 The function receives two arguments:
 
@@ -587,11 +688,11 @@ Please refer to the luma.gl [GPU Parameters](https://luma.gl/docs/api-reference/
 
 * Default: `({layerIndex}) => [0, -layerIndex * 100]`
 
-When multiple layers are rendered on the same plane, [z-fighting](https://en.wikipedia.org/wiki/Z-fighting) may create undesirable artifacts. To improve the visual quality of composition, deck.gl allows layers to use `gl.polygonOffset` to apply an offset to its depth. By default, each layer is offset a small amount by its index so that layers are cleanly stacked from bottom to top.
+When multiple layers are rendered on the same plane, [z-fighting](https://en.wikipedia.org/wiki/Z-fighting) may create undesirable artifacts. To improve the visual quality of composition, deck.gl applies a depth offset. By default, each layer is offset a small amount by its index so that layers are cleanly stacked from bottom to top.
 
 This accessor takes a single parameter `uniform` - an object that contains the current render uniforms, and returns an array of two numbers `factor` and `units`. Negative values pull layer towards the camera, and positive values push layer away from the camera. For more information, refer to the [documentation](https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glPolygonOffset.xml) and [FAQ](https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm).
 
-If the accessor is assigned a falsy value, polygon offset will be set to `[0, 0]`.
+If the accessor is assigned a falsy value, polygon offset will be set to `[0, 0]`. On WebGPU, `units` is rounded to an integer and the offset applies only to triangle geometry. Explicit `parameters.depthBias` and `parameters.depthBiasSlopeScale` override the accessor.
 
 Remarks:
 
@@ -714,6 +815,15 @@ Used to propagate errors thrown in layers to the deck.gl error handling system. 
 
 - `error` (Error) - a JavaScript Error object
 - `message` (string, optional) - additional contextual description to amend the error message with
+
+#### `_getResolvedColorScales()` 🧪
+
+Returns a read-only map of accessor names to `ResolvedScale` objects. The type is
+available from `@deck.gl/core`. A scale descriptor provides the domain and color
+range, and `sample(value)` returns RGBA channels in `[0, 1]`. The method returns
+`undefined` before the first evaluation completes or on layers without SQL
+color accessors. During replacement, the method returns the scales for the
+previously applied colors. Call it after a deck redraw to read the latest scales.
 
 ### Layer Lifecycle Methods
 

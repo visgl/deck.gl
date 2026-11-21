@@ -4,7 +4,7 @@
 
 import {test, expect, vi} from 'vitest';
 import {testLayer, generateLayerTests, getLayerUniforms, device} from '@deck.gl/test-utils/vitest';
-import {geojsonToBinary} from '@loaders.gl/gis';
+import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
 
 import {GeoJsonLayer} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';
@@ -82,10 +82,10 @@ webglTest('GeoJsonLayer#tests', () => {
     }
   });
 
-  // TODO: @loaders.gl binaryToGeojson should no modify input data
-  // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
+  // TODO: @loaders.gl convertBinaryFeatureCollectionToGeojson should no modify input data
+  // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with convertGeojsonToBinaryFeatureCollection
   const geojsonData = JSON.parse(JSON.stringify(FIXTURES.geojson.features)).slice(0, 7);
-  const binaryData = geojsonToBinary(geojsonData);
+  const binaryData = convertGeojsonToBinaryFeatureCollection(geojsonData);
 
   testCases.push({
     title: 'GeoJsonLayer#binary',
@@ -105,7 +105,7 @@ webglTest('GeoJsonLayer#tests', () => {
       );
     },
     props: {
-      // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
+      // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with convertGeojsonToBinaryFeatureCollection
       data: binaryData
     }
   });
@@ -167,7 +167,7 @@ webglTest('GeoJsonLayer#tests', () => {
       ).toBeTruthy();
     },
     props: {
-      // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with geojsonToBinary
+      // TODO: Set a right geojson example as the provided from 'deck.gl-data' contains 'GeometryCollection' types that are not compatible with convertGeojsonToBinaryFeatureCollection
       data: binaryDataWithAttributes
     }
   });
@@ -361,4 +361,136 @@ webglTest('GeoJsonLayer forwards geometry transitions to each sublayer accessor'
   } finally {
     updateTransitions.mockRestore();
   }
+});
+
+test('GeoJsonLayer forwards normalized color inputs as bytes through its sublayers', () => {
+  const data = [
+    {type: 'Feature', geometry: {type: 'Point', coordinates: [0, 0]}, properties: {}},
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [0, 0],
+          [1, 1]
+        ]
+      },
+      properties: {}
+    },
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 0]
+          ]
+        ]
+      },
+      properties: {}
+    }
+  ];
+  const getLineColor = () => [1, 0.5, 0, 0];
+  const color = [0, 0.5, 1];
+  const pointFill = subLayers =>
+    subLayers.find(layer => layer.id.endsWith('points-circle')).props.getFillColor;
+  const lineBytes = subLayers =>
+    Array.from(
+      subLayers
+        .find(layer => layer.id.endsWith('linestrings'))
+        .getAttributeManager()
+        .attributes.instanceColors.value.slice(0, 4)
+    );
+
+  testLayer({
+    Layer: GeoJsonLayer,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {props: {data, getLineColor}},
+      {
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({subLayers}) => {
+          expect(pointFill(subLayers)).toEqual([0, 0, 0, 255]);
+          expect(lineBytes(subLayers)).toEqual([255, 128, 0, 0]);
+        }
+      },
+      {
+        updateProps: {getFillColor: color},
+        onAfterUpdate: ({subLayers}) => {
+          expect(pointFill(subLayers)).toEqual([0, 128, 255, 255]);
+          expect(
+            subLayers.find(layer => layer.id.endsWith('polygons-fill')).props.getFillColor
+          ).toEqual([0, 128, 255, 255]);
+          expect(color).toEqual([0, 0.5, 1]);
+        }
+      },
+      {
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: false});
+        },
+        onAfterUpdate: ({subLayers}) => {
+          expect(lineBytes(subLayers)).toEqual([1, 0, 0, 0]);
+        }
+      }
+    ]
+  });
+});
+
+test('GeoJsonLayer carries normalized icon and text colors through nested sublayers', () => {
+  const data = [{type: 'Feature', geometry: {type: 'Point', coordinates: [0, 0]}, properties: {}}];
+  const getIconColor = () => [1, 0.5, 0, 0];
+
+  testLayer({
+    Layer: GeoJsonLayer,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          data,
+          pointType: 'icon+text',
+          iconAtlas: {data: new Uint8ClampedArray(4), width: 1, height: 1},
+          iconMapping: {marker: {x: 0, y: 0, width: 1, height: 1}},
+          getIcon: () => 'marker',
+          getIconColor,
+          getText: () => 'A',
+          getTextColor: [0, 1, 0],
+          textBackground: true,
+          getTextBackgroundColor: [0.5, 0, 1, 0],
+          getTextBorderColor: [0, 0, 1]
+        }
+      },
+      {
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({subLayers}) => {
+          const icon = subLayers.find(layer => layer.id.endsWith('points-icon'));
+          const text = subLayers.find(layer => layer.id.endsWith('points-text'));
+          const characters = text.getSubLayers().find(layer => layer.id.endsWith('characters'));
+          const background = text.getSubLayers().find(layer => layer.id.endsWith('background'));
+          const color = (layer, name) =>
+            Array.from(layer.getAttributeManager().attributes[name].value.slice(0, 4));
+
+          expect(color(icon, 'instanceColors')).toEqual([255, 128, 0, 0]);
+          expect(color(characters, 'instanceColors')).toEqual([0, 1, 0, 1]);
+          expect(color(background, 'instanceFillColors')).toEqual([
+            Math.fround(128 / 255),
+            0,
+            1,
+            0
+          ]);
+          expect(color(background, 'instanceLineColors')).toEqual([0, 0, 1, 1]);
+        }
+      }
+    ]
+  });
 });

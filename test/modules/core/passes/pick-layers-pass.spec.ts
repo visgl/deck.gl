@@ -99,7 +99,7 @@ test('PickLayersPass#view clearColor does not corrupt the picking buffer', () =>
   const pickingFBO = device.createFramebuffer({colorAttachments: ['rgba8unorm']});
   pickingFBO.resize({width: 100, height: 100});
 
-  const view = new MapView({clear: true, clearColor: [255, 255, 255, 255]});
+  const view = new MapView({clear: true, clearColor: [1, 1, 1, 1]});
   const viewport = view.makeViewport({
     width: 100,
     height: 100,
@@ -118,6 +118,7 @@ test('PickLayersPass#view clearColor does not corrupt the picking buffer', () =>
 
   layerManager.setLayers([layer]);
   const {decodePickingColor} = pickLayersPass.render({
+    normalizedColors: true,
     viewports: [viewport],
     views: {[view.id]: view},
     layers: layerManager.getLayers(),

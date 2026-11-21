@@ -21,9 +21,11 @@ export {
   OrbitView,
   OrthographicView,
   _CustomProjectionView,
+  GlobeView,
   _GlobeView,
   Viewport,
   WebMercatorViewport,
+  GlobeViewport,
   _GlobeViewport,
   OrbitViewport,
   OrthographicViewport,
@@ -36,16 +38,19 @@ export {
   FirstPersonController,
   OrthographicController,
   _CustomProjectionController,
+  GlobeController,
   _GlobeController,
   Attribute,
   AttributeManager,
   color,
   picking,
+  pickingPlugin,
   project,
   project32,
   gouraudMaterial,
   phongMaterial,
   shadow,
+  shadowPlugin,
   LayerManager,
   DeckRenderer,
   log,
@@ -94,7 +99,9 @@ export {
   GridLayer,
   HeatmapLayer,
   WebGLAggregator,
-  CPUAggregator
+  CPUAggregator,
+  ReadbackAggregator,
+  _GraphScreenGridAggregator
 } from '@deck.gl/aggregation-layers';
 
 export {
@@ -105,6 +112,10 @@ export {
   H3ClusterLayer,
   H3HexagonLayer,
   TileLayer,
+  Tileset2D,
+  Tile2DHeader,
+  tile2DDeckAdapter,
+  /** @deprecated Use Tileset2D. */
   _Tileset2D,
   TripsLayer,
   Tile3DLayer,
@@ -126,7 +137,7 @@ export type {MapLibreOverlayProps} from '@deck.gl/maplibre';
 // REACT BINDINGS PACKAGE
 //
 
-export {default, DeckGL} from '@deck.gl/react';
+export {default, DeckGL} from '@deck.gl/react/legacy';
 
 //
 // WIDGETS PACKAGE
@@ -220,9 +231,20 @@ export type {
   ScreenGridLayerProps
 } from '@deck.gl/aggregation-layers';
 
-export type {MVTLayerProps, QuadkeyLayerProps, TileLayerProps} from '@deck.gl/geo-layers';
+export type {
+  MVTLayerProps,
+  QuadkeyLayerProps,
+  RefinementStrategy,
+  TileLoadProps,
+  Tileset2DAdapter,
+  Tileset2DListener,
+  Tileset2DProps,
+  Tileset2DTileContext,
+  Tileset2DTraversalContext,
+  TileLayerProps
+} from '@deck.gl/geo-layers';
 
-export type {DeckGLProps, DeckGLRef, DeckGLContextValue} from '@deck.gl/react';
+export type {DeckGLProps, DeckGLRef, DeckGLContextValue} from '@deck.gl/react/legacy';
 
 export type {
   FullscreenWidgetProps,

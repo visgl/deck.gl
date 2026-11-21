@@ -7,8 +7,8 @@
 import type {Device, Texture, Framebuffer} from '@luma.gl/core';
 import {Deck} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {GL} from '@luma.gl/webgl/constants';
-import {WebGLDevice} from '@luma.gl/webgl';
+import {GL} from '@luma.gl/core/webgl-constants';
+import {WebGLDevice} from '@luma.gl/core/webgl';
 
 interface Renderer {
   redraw: () => void;

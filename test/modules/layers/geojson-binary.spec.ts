@@ -3,11 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {geojsonToBinary} from '@loaders.gl/gis';
+import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
 import {calculatePickingIndexes} from '@deck.gl/layers/geojson-layer/geojson-binary';
 import {geoJSONData, pickingIndexesSample} from './data/fixtures';
 
-const geoJSONBinaryData = geojsonToBinary(geoJSONData);
+const geoJSONBinaryData = convertGeojsonToBinaryFeatureCollection(geoJSONData);
 
 test('calculatePickingIndexes', () => {
   const customPickingIndexes = calculatePickingIndexes(geoJSONBinaryData);

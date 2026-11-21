@@ -4,24 +4,26 @@
 
 import type {Device, RenderPass} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
-import type {ShaderAssembler, ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderAssembler, ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import {getShaderAssembler, layerUniforms} from '../shaderlib/index';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import debug from '../debug/index';
 import {flatten} from '../utils/flatten';
-import {Stats} from '@probe.gl/stats';
+import {Stats} from 'probe.gl/stats';
 import ResourceManager from './resource/resource-manager';
 import ProjectionScaleResources from './projection-scale-resources';
 
 import {resolveCRS, areCRSEqual} from '../utils/crs';
-import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/projection/core';
+import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/geospatial/projection/core';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 
 import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
 import type Deck from './deck';
+
+import type {SQLFunctions, SQLParser} from '../types/layer-props';
 
 const TRACE_SET_LAYERS = 'layerManager.setLayers';
 const TRACE_ACTIVATE_VIEWPORT = 'layerManager.activateViewport';
@@ -30,9 +32,16 @@ export type LayerContext = {
   layerManager: LayerManager;
   resourceManager: ResourceManager;
   deck?: Deck<any>;
+  sqlParser?: SQLParser;
+  /** Effective Deck color convention for participating layers. */
+  normalizedColors?: boolean;
+  /** Additional Arrow functions shared by all layer SQL accessors. */
+  sqlFunctions?: SQLFunctions;
   device: Device;
   shaderAssembler: ShaderAssembler;
   defaultShaderModules: ShaderModule[];
+  /** Effect plugins applied to all layer models alongside default shader modules. */
+  defaultShaderPlugins: ShaderPlugin[];
   renderPass: RenderPass;
   stats: Stats;
   viewport: Viewport;
@@ -110,6 +119,7 @@ export default class LayerManager {
       deck,
       shaderAssembler: getShaderAssembler(device?.info?.shadingLanguage || 'glsl'),
       defaultShaderModules: [layerUniforms],
+      defaultShaderPlugins: [],
       renderPass: undefined!,
       stats: stats || new Stats({id: 'deck.gl'}),
       viewport: viewport || null,
@@ -192,6 +202,21 @@ export default class LayerManager {
       this._layerFilter = props.layerFilter;
       this.setNeedsUpdate('layerFilter changed');
     }
+    if ('normalizedColors' in props && props.normalizedColors !== this.context.normalizedColors) {
+      this.context.normalizedColors = props.normalizedColors;
+      for (const layer of this.layers) {
+        layer.setNeedsUpdate();
+      }
+      this.setNeedsUpdate('normalizedColors changed');
+    }
+    if ('sqlParser' in props && props.sqlParser !== this.context.sqlParser) {
+      this.context.sqlParser = props.sqlParser;
+      this.setNeedsUpdate('SQL parser changed');
+    }
+    if ('sqlFunctions' in props && props.sqlFunctions !== this.context.sqlFunctions) {
+      this.context.sqlFunctions = props.sqlFunctions;
+      this.setNeedsUpdate('SQL functions changed');
+    }
     if ('debug' in props) {
       this._debug = props.debug;
     }
@@ -255,6 +280,17 @@ export default class LayerManager {
   // INTERNAL METHODS
   //
 
+  /**
+   * Returns the complete active viewport set for layer traversal and consumer cleanup.
+   * Includes views excluded by render-time layerFilter callbacks. Without a Deck,
+   * returns the currently activated viewport.
+   */
+  getViewports(): Viewport[] {
+    return (
+      this.context.deck?.getViewports() || (this.context.viewport ? [this.context.viewport] : [])
+    );
+  }
+
   /** Refresh view availability without substituting another view for a pending CRS. */
   setViewports(viewports: Viewport[], views: View[]): void {
     this._viewports = new Map(views.map(view => [view.id, null]));
@@ -315,6 +351,25 @@ export default class LayerManager {
     const i = defaultShaderModules.findIndex(m => m.name === module.name);
     if (i >= 0) {
       defaultShaderModules.splice(i, 1);
+      this._defaultShaderModulesChanged = true;
+    }
+  }
+
+  /** Register a default plugin and its uniform module for all layers. */
+  addDefaultShaderPlugin(plugin: ShaderPlugin) {
+    if (!this.context.defaultShaderPlugins.some(p => p.name === plugin.name)) {
+      this.context.defaultShaderPlugins.push(plugin);
+      if (plugin.module) this.addDefaultShaderModule(plugin.module);
+      this._defaultShaderModulesChanged = true;
+    }
+  }
+
+  /** Deregister a default plugin and rebuild layer models. */
+  removeDefaultShaderPlugin(plugin: ShaderPlugin) {
+    const index = this.context.defaultShaderPlugins.findIndex(p => p.name === plugin.name);
+    if (index >= 0) {
+      this.context.defaultShaderPlugins.splice(index, 1);
+      if (plugin.module) this.removeDefaultShaderModule(plugin.module);
       this._defaultShaderModulesChanged = true;
     }
   }

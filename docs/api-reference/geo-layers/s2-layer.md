@@ -12,6 +12,9 @@ The `S2Layer` renders filled and/or stroked polygons based on the [S2](http://s2
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -122,6 +125,26 @@ function App() {
   </TabItem>
 </Tabs>
 
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Utf8, vectorFromArray} from 'apache-arrow';
+import {S2Layer} from '@deck.gl/geo-layers';
+
+const cells = vectorFromArray(['89c25'], new Utf8());
+
+const layer = new S2Layer({
+  getS2Token: cells,
+  getFillColor: [255, 140, 0]
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
+  </TabItem>
+</Tabs>
+
 
 ## Installation
 
@@ -161,7 +184,7 @@ Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/compo
 
 ### Data Accessors
 
-#### `getS2Token` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gets2token}
+#### `getS2Token` (Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gets2token}
 
 Called for each data object to retrieve the identifier of the S2 cell. May return one of the following:
 
@@ -172,6 +195,33 @@ Called for each data object to retrieve the identifier of the S2 cell. May retur
 Check [S2 Cell](http://s2geometry.io/devguide/s2cell_hierarchy) for more details.
 
 * default: `object => object.token`
+
+Each Arrow row supplies one identifier or a list of identifiers for one source feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for supported encodings and picking behavior.
+
+
+#### `getFillColor` (constant | Accessor | arrow.Vector, optional) {#getfillcolor}
+
+* Default: `[0, 0, 0, 255]`
+
+The fill color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getLineColor` (constant | Accessor | arrow.Vector, optional) {#getlinecolor}
+
+* Default: `[0, 0, 0, 255]`
+
+The outline color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getLineWidth` (constant | Accessor | arrow.Vector, optional) {#getlinewidth}
+
+* Default: `1`
+
+The outline width of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getElevation` (constant | Accessor | arrow.Vector, optional) {#getelevation}
+
+* Default: `1000`
+
+The elevation of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
 
 ## Sub Layers
@@ -184,4 +234,3 @@ The `S2Layer` renders the following sublayers:
 ## Source
 
 [modules/geo-layers/src/s2-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/s2-layer)
-

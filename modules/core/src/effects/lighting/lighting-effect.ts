@@ -4,30 +4,28 @@
 
 import type {Device} from '@luma.gl/core';
 import {Texture} from '@luma.gl/core';
-import {AmbientLight} from './ambient-light';
-import {DirectionalLight} from './directional-light';
-import {PointLight} from './point-light';
+import {AmbientLight, DEFAULT_AMBIENT_LIGHT_COLOR} from './ambient-light';
+import {DirectionalLight, DEFAULT_DIRECTIONAL_LIGHT_COLOR} from './directional-light';
+import {PointLight, DEFAULT_POINT_LIGHT_COLOR} from './point-light';
 import {Matrix4, Vector3} from '@math.gl/core';
 import ShadowPass from '../../passes/shadow-pass';
-import shadow from '../../shaderlib/shadow/shadow';
+import {shadowPlugin} from '../../shaderlib/shadow/shadow';
 
-import type {Light, LightingProps} from '@luma.gl/shadertools';
+import {normalizeByteColor3} from '@luma.gl/shaders';
+import type {Light, LightingProps} from '@luma.gl/shaders';
 import type {ShadowModuleProps} from '../../shaderlib/shadow/shadow';
 import type Layer from '../../lib/layer';
 import type {Effect, EffectContext, PreRenderOptions} from '../../lib/effect';
 
 const DEFAULT_AMBIENT_LIGHT_PROPS = {
-  color: [255, 255, 255] as [number, number, number],
   intensity: 1.0
 };
 const DEFAULT_DIRECTIONAL_LIGHT_PROPS = [
   {
-    color: [255, 255, 255] as [number, number, number],
     intensity: 1.0,
     direction: [-1, 3, -1] as [number, number, number]
   },
   {
-    color: [255, 255, 255] as [number, number, number],
     intensity: 0.9,
     direction: [1, -8, -2.5] as [number, number, number]
   }
@@ -40,6 +38,7 @@ export type LightingEffectProps = Record<string, PointLight | DirectionalLight |
 export default class LightingEffect implements Effect {
   id = 'lighting-effect';
   props!: LightingEffectProps;
+  /** Shadow tint supplied as normalized RGBA in either Deck color mode. */
   shadowColor: [number, number, number, number] = DEFAULT_SHADOW_COLOR;
   context?: EffectContext;
 
@@ -62,7 +61,7 @@ export default class LightingEffect implements Effect {
     if (this.shadow && !this.dummyShadowMap) {
       this._createShadowPasses(device);
 
-      deck._addDefaultShaderModule(shadow);
+      deck._addDefaultShaderPlugin(shadowPlugin);
 
       this.dummyShadowMap = device.createTexture({
         width: 1,
@@ -147,6 +146,7 @@ export default class LightingEffect implements Effect {
 
     const lightingProps: LightingProps = {
       enabled: true,
+      useByteColors: false,
       lights: this._getLights(layer)
     };
     // @ts-expect-error material is not a Layer prop
@@ -169,7 +169,7 @@ export default class LightingEffect implements Effect {
     if (this.dummyShadowMap) {
       this.dummyShadowMap.destroy();
       this.dummyShadowMap = null;
-      context.deck._removeDefaultShaderModule(shadow);
+      context.deck._removeDefaultShaderPlugin(shadowPlugin);
     }
   }
 
@@ -218,6 +218,18 @@ export default class LightingEffect implements Effect {
       lights.push(directionalLight.getProjectedLight({layer}));
     }
 
-    return lights;
+    /** Whether application-supplied light colors already use normalized channels. */
+    const normalized = layer.context?.normalizedColors;
+    return lights.map(light => ({
+      ...light,
+      color:
+        normalized &&
+        Array.isArray(light.color) &&
+        light.color !== DEFAULT_AMBIENT_LIGHT_COLOR &&
+        light.color !== DEFAULT_DIRECTIONAL_LIGHT_COLOR &&
+        light.color !== DEFAULT_POINT_LIGHT_COLOR
+          ? light.color
+          : normalizeByteColor3(light.color)
+    }));
   }
 }

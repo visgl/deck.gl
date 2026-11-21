@@ -6,7 +6,7 @@ import {expect, test} from 'vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {GeohashLayer, QuadkeyLayer, S2Layer} from '@deck.gl/geo-layers';
 import {PathLayer, PolygonLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {s2cells} from 'deck.gl-test/data';
 import {
   filterGridCells,

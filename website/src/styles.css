@@ -35,6 +35,28 @@ main .container {
 .menu__link {
   line-height: 1.5;
 }
+.example-sidebar-ready > .menu__link,
+.example-sidebar-started > .menu__link,
+.example-sidebar-experimental > .menu__link {
+  justify-content: flex-start;
+  gap: 0.25rem;
+}
+
+.example-sidebar-ready > .menu__link::after {
+  content: '✅';
+  content: '✅' / 'Arrow and SQL port ready';
+}
+
+.example-sidebar-started > .menu__link::after {
+  content: '🚧';
+  content: '🚧' / 'Arrow and SQL port started';
+}
+
+.example-sidebar-experimental > .menu__link::after {
+  content: '🧪';
+  content: '🧪' / 'Experimental example';
+}
+
 .menu__list {
   padding-bottom: 0.5rem;
 }

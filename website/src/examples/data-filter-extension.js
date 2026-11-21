@@ -12,6 +12,8 @@ import {makeExample} from '../components';
 class DataFilterDemo extends Component {
   static title = '40 Years of Earthquakes';
 
+  static hasDeviceTabs = true;
+
   static data = {
     url: `${DATA_URI}/earthquakes.txt`,
     worker: '/workers/earthquakes-decoder.js'

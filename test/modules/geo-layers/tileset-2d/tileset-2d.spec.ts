@@ -205,6 +205,50 @@ test('Tileset2D#finalize', async () => {
   expect(tile2._isCancelled, 'second tile should have been aborted').toBe(true);
 });
 
+test('Tileset2D#finalize unloads cached tiles', async () => {
+  const unloaded: string[] = [];
+  const tileset = new Tileset2D({
+    getTileData: () => Promise.resolve({byteLength: 1}),
+    onTileLoad: () => {},
+    onTileUnload: tile => unloaded.push(tile.id)
+  });
+
+  tileset.update(testViewport);
+  await sleep(10);
+  const tileIds = tileset.tiles.map(tile => tile.id);
+  expect(tileIds.length, 'tiles are cached').toBeGreaterThan(0);
+
+  tileset.finalize();
+  expect(unloaded, 'every cached tile is unloaded').toEqual(tileIds);
+});
+
+test('Tileset2D#finalize unloads tiles that finish loading later', async () => {
+  let tileLoadCalled = 0;
+  const unloaded: {id: string; content: unknown}[] = [];
+  // getTileData ignores the abort and returns data anyway
+  const tileDataPending = sleep(50).then(() => ({byteLength: 1}));
+  const tileset = new Tileset2D({
+    getTileData: () => tileDataPending,
+    onTileLoad: () => tileLoadCalled++,
+    onTileUnload: tile => unloaded.push({id: tile.id, content: tile.content})
+  });
+
+  tileset.update(testViewport);
+  const tile = tileset.selectedTiles![0];
+  await sleep(10);
+
+  tileset.finalize();
+  expect(unloaded, 'loading tile is unloaded').toEqual([{id: tile.id, content: null}]);
+
+  await tileDataPending;
+  await sleep(10);
+  expect(tileLoadCalled, 'onTileLoad is not called').toBe(0);
+  expect(unloaded[1], 'tile is unloaded again with its data').toEqual({
+    id: tile.id,
+    content: {byteLength: 1}
+  });
+});
+
 test('Tileset2D#maxCacheSize', () => {
   const tileset = new Tileset2D({
     getTileData,
@@ -266,6 +310,44 @@ test('Tileset2D#maxCacheByteSize', async () => {
 
   expect(tileset._cache.size, 'cache is resized after tile data is loaded').toBe(1);
   expect(tileset._cache.get('910-459-12'), 'expected tile is in cache').toBeTruthy();
+});
+
+test('Tileset2D#maxCacheSize unloads tiles evicted while loading', async () => {
+  const loaded: string[] = [];
+  const unloaded: {id: string; content: unknown}[] = [];
+  const tileDataPending = sleep(50).then(() => ({byteLength: 1}));
+  const tileset = new Tileset2D({
+    getTileData: () => tileDataPending,
+    maxCacheSize: 1,
+    maxCacheByteSize: 100,
+    onTileLoad: tile => loaded.push(tile.id),
+    onTileUnload: tile => unloaded.push({id: tile.id, content: tile.content})
+  });
+
+  tileset.update(testViewport);
+  const evicted = tileset.selectedTiles![0];
+  await sleep(10);
+
+  // Selecting another tile evicts the first, which is still loading
+  tileset.update(
+    new WebMercatorViewport(
+      Object.assign({}, testViewState, {
+        longitude: -100,
+        latitude: 80
+      })
+    )
+  );
+  const kept = tileset.selectedTiles![0];
+  expect(unloaded, 'evicted tile is unloaded').toEqual([{id: evicted.id, content: null}]);
+
+  await tileDataPending;
+  await sleep(10);
+  expect(loaded, 'only the cached tile is reported as loaded').toEqual([kept.id]);
+  expect(unloaded[1], 'evicted tile is unloaded again with its data').toEqual({
+    id: evicted.id,
+    content: {byteLength: 1}
+  });
+  expect(tileset._cacheByteSize, 'evicted tile does not count toward the cache size').toBe(1);
 });
 
 test('Tileset2D#debounceTime', async () => {

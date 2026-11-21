@@ -23,3 +23,7 @@ export const DEPRECATED_PROPS_SYMBOL: unique symbol = Symbol.for('deprecatedProp
 export const ASYNC_DEFAULTS_SYMBOL: unique symbol = Symbol.for('asyncPropDefaults');
 export const ASYNC_ORIGINAL_SYMBOL: unique symbol = Symbol.for('asyncPropOriginal');
 export const ASYNC_RESOLVED_SYMBOL: unique symbol = Symbol.for('asyncPropResolved');
+export const ACCESSOR_QUERIES_SYMBOL: unique symbol = Symbol('accessorQueries');
+
+/** Original vector inputs for row-oriented Arrow accessors. */
+export const ROW_ACCESSOR_COLUMNS_SYMBOL: unique symbol = Symbol('rowAccessorColumns');

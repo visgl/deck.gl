@@ -24,7 +24,7 @@ test('BrushingExtension', () => {
         const uniforms = getLayerUniforms(layer);
         expect(uniforms.radius, 'has correct uniforms').toBeTruthy();
         expect(uniforms.enabled, 'has correct uniforms').toBe(false);
-        expect(uniforms.target, 'has correct uniforms').toBe(0);
+        expect(uniforms.targetMode, 'has correct uniforms').toBe(0);
         expect(uniforms.mousePos[0], 'has correct uniforms').toBe(0);
       }
     },
@@ -42,7 +42,7 @@ test('BrushingExtension', () => {
         const uniforms = getLayerUniforms(layer);
         expect(uniforms.radius, 'has correct uniforms').toBe(5e6);
         expect(uniforms.enabled, 'has correct uniforms').toBe(true);
-        expect(uniforms.target, 'has correct uniforms').toBe(2);
+        expect(uniforms.targetMode, 'has correct uniforms').toBe(2);
         expect(uniforms.mousePos[0], 'has correct uniforms').not.toBe(0);
       }
     }
