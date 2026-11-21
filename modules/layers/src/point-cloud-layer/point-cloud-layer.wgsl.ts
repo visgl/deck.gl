@@ -6,6 +6,7 @@ export const shaderWGSL = /* wgsl */ `\
 struct PointCloudUniforms {
   radiusPixels: f32,
   sizeUnits: i32,
+  rowIndexOffset: u32,
 };
 
 @group(0) @binding(0)
@@ -45,7 +46,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   // Position on the enclosing triangle. Its edges are tangent to the unit circle.
   varyings.unitPosition = attributes.positions.xy;
   geometry.uv = varyings.unitPosition;
-  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex);
+  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex + pointCloudUniforms.rowIndexOffset);
 
   // Find the center of the point and add the current vertex
 #ifdef ANTIALIASING

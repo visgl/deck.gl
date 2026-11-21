@@ -20,7 +20,7 @@ import {
   InfoWidget,
   ThemeWidget,
   ZoomWidget
-} from '@deck.gl/react';
+} from '@deck.gl/react/legacy';
 import {DarkTheme, LightTheme} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 

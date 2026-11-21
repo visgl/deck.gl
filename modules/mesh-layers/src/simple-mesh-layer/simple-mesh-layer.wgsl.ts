@@ -33,7 +33,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   geometry.worldPosition = attributes.instancePositions;
   geometry.uv = attributes.texCoords;
-  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex);
+  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex + simpleMesh.rowIndexOffset);
 
   let instanceModelMatrix = mat3x3<f32>(
     attributes.instanceModelMatrixCol0,
@@ -106,6 +106,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     normal = normalize(cross(dpdy(varyings.positionCommon), dpdx(varyings.positionCommon)));
   }
 
+  DECKGL_FILTER_COLOR_BEFORE_LIGHTING(&color, fragmentGeometry);
   color = vec4<f32>(
     lighting_getLightColor2(color.rgb, project.cameraPosition, varyings.positionCommon, normal),
     color.a * layer.opacity

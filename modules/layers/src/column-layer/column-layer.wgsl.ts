@@ -53,7 +53,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   var varyings: Varyings;
 
   geometry.worldPosition = attributes.instancePositions;
-  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex);
+  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex + column.rowIndexOffset);
 
   let isStroke = column.isStroke > 0.5;
   let baseColor = select(attributes.instanceFillColors, attributes.instanceLineColors, isStroke);
@@ -142,7 +142,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   var varyings: Varyings;
 
   geometry.worldPosition = attributes.instancePositions;
-  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex);
+  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex + column.rowIndexOffset);
 
   let isStroke = column.isStroke > 0.5;
   let baseColor = select(attributes.instanceFillColors, attributes.instanceLineColors, isStroke);

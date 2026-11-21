@@ -15,6 +15,9 @@
   "references": [
     {
       "path": "../core"
-    }
+    },
+    {"path": "../extensions"},
+    {"path": "../layers"},
+    {"path": "../geo-layers"}
   ]
 }

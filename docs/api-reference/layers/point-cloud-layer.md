@@ -14,6 +14,9 @@ The `PointCloudLayer` renders a point cloud with 3D positions, normals and color
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -129,6 +132,26 @@ function App() {
   </TabItem>
 </Tabs>
 
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+import {PointCloudLayer} from '@deck.gl/layers';
+
+const positionType = new FixedSizeList(3, new Field('value', new Float32()));
+const positions = vectorFromArray([[0, 0, 0]], positionType);
+
+const layer = new PointCloudLayer({
+  getPosition: positions
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
+  </TabItem>
+</Tabs>
+
 
 `loaders.gl` offers a [category](https://loaders.gl/docs/specifications/category-mesh) of loaders for loading point clouds from standard formats. For example, the following code adds support for LAS/LAZ files:
 
@@ -205,15 +228,21 @@ Other antialiasing techniques have different trade-offs; see [Antialiasing and M
 This is an object that contains material props for [lighting effect](../core/lighting-effect.md) applied on extruded polygons.
 Check [the lighting guide](../../developer-guide/using-effects.md#material-settings) for configurable settings.
 
+
 ### Data Accessors
 
-#### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
+Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
+
+#### `getPosition` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-#### `getNormal` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getnormal}
+An Arrow vector supplies one value per object. See [position columns](../../developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
+
+
+#### `getNormal` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getnormal}
 
 * Default: `[0, 0, 1]`
 
@@ -222,15 +251,39 @@ The normal of each object, in `[nx, ny, nz]`.
 * If an array is provided, it is used as the normal for all objects.
 * If a function is provided, it is called on each object to retrieve its normal.
 
+An Arrow vector supplies one numeric fixed-size list with three (XYZ) components per object. See [vector columns](../../developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
 
-#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
+
+On top-level layers, Deck's [`normalizedColors`](../core/deck.md#normalizedcolors)
+option interprets plain-array color constants and callback results as 0–1 channels.
+Built-in defaults, typed arrays, binary inputs, and Arrow color columns retain their encoding.
+
+#### `getColor` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
+
+An Arrow vector supplies one value per object. See [color columns](../../developer-guide/using-with-arrow.md#colors) for requirements.
+
+
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
+
+- `positions` – `float32x3` – Positions in XYZ order.
+- `normals` – `float32x3` – Normal vectors in XYZ order.
+- `colors` – `unorm8x4` – Packed RGBA colors.
+
+Notes:
+
+- Supply one value per rendered instance, in instance order.
+- See [Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs) for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source
 

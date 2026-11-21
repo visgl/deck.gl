@@ -4,15 +4,16 @@
 
 import {test, expect} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
-import {LayerManager, MapView} from '@deck.gl/core';
+import {
+  LayerManager,
+  MapView,
+  _pathShaderWGSL as pathShaderWGSL,
+  _pathShaderPlugin as pathShaderPlugin
+} from '@deck.gl/core';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {WGSLShaderAssembler, resolveShaderPlugins} from '@luma.gl/shaders';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {trips} from 'deck.gl-test/data';
-import {
-  shaderWGSL as pathShaderWGSL,
-  pathShaderPlugin
-} from '@deck.gl/layers/path-layer/path-layer.wgsl';
 import {tripsUniforms} from '@deck.gl/geo-layers/trips-layer/trips-layer-uniforms';
 import {
   packTripTimestamps,

@@ -27,7 +27,7 @@ out vec4 position_commonspace;
 out vec4 vColor;
 
 vec2 applyUVRegion(vec2 uv) {
-  #ifdef HAS_UV_REGIONS
+  #if HAS_UV_REGIONS
     // https://github.com/Esri/i3s-spec/blob/master/docs/1.7/geometryUVRegion.cmn.md
     return fract(uv) * (uvRegions.zw - uvRegions.xy) + uvRegions.xy;
   #else

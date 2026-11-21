@@ -15,6 +15,7 @@ layout(std140) uniform iconUniforms {
   bool billboard;
   highp int sizeUnits;
   float alphaCutoff;
+  highp uint rowIndexOffset;
 } icon;
 `;
 
@@ -31,6 +32,7 @@ type IconUniformProps = {
   billboard: boolean;
   sizeUnits: number;
   alphaCutoff: number;
+  rowIndexOffset?: number;
 };
 
 export type IconProps = IconBindingProps & IconUniformProps;
@@ -47,6 +49,7 @@ export const iconUniforms = {
     sizeMaxPixels: 'f32',
     billboard: 'f32',
     sizeUnits: 'i32',
-    alphaCutoff: 'f32'
+    alphaCutoff: 'f32',
+    rowIndexOffset: 'u32'
   }
 } as const satisfies ShaderModule<IconProps>;

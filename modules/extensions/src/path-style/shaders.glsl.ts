@@ -47,9 +47,8 @@ export type Defines = {
  * avoids making their result depend on the order in which the capability shaders are merged.
  * It also owns their deferred fragment rejection, after PathLayer has evaluated derivatives.
  */
-export const pathStylePipelineShaders = {
-  inject: {
-    'glsl:vs:#main-end': `
+export const pathStylePipelineInjections = {
+  'glsl:vs:#main-end': `
 #ifdef PATH_STYLE_OFFSET
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
   float offsetDir = sign(instanceOffsets);
@@ -112,7 +111,7 @@ pathStyle_dashPathLength = 0.0;
 #endif
 #endif
 `,
-    'glsl:fs:#main-end': `
+  'glsl:fs:#main-end': `
 #ifdef DASH_ENABLED
   // PathLayer computes analytic-edge derivatives in its fragment body. A discard in
   // #main-start can remove helper invocations and make those derivatives undefined, so all
@@ -149,12 +148,10 @@ pathStyle_dashPathLength = 0.0;
 #endif
 #endif
 `
-  }
 };
 
-export const dashShaders = {
-  inject: {
-    'glsl:vs:#decl': `
+export const dashInjections = {
+  'glsl:vs:#decl': `
 // Also declared in the fragment stage. The vertex stage needs dashAlignMode so that it can
 // reduce the dash phase modulo the same period the fragment stage will test against, and
 // dashUnits to scale the dash array into that period's units.
@@ -165,7 +162,7 @@ layout(std140) uniform pathStyleUniforms {
 } pathStyle;
 `,
 
-    'glsl:fs:#decl': `
+  'glsl:fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
   float dashAlignMode;
   bool dashGapPickable;
@@ -205,15 +202,15 @@ float dashPatternCoverage(
 }
 `,
 
-    // if given position is in the gap part of the dashed line
-    // dashArray.x: solid stroke length, relative to width
-    // dashArray.y: gap length, relative to width
-    // alignMode:
-    // 0 - no adjustment
-    // o----     ----     ----     ---- o----     -o----     ----     o
-    // 1 - stretch to fit, draw half dash at each end for nicer joints
-    // o--    ----    ----    ----    --o--      --o--     ----     --o
-    'glsl:fs:#main-start': `
+  // if given position is in the gap part of the dashed line
+  // dashArray.x: solid stroke length, relative to width
+  // dashArray.y: gap length, relative to width
+  // alignMode:
+  // 0 - no adjustment
+  // o----     ----     ----     ---- o----     -o----     ----     o
+  // 1 - stretch to fit, draw half dash at each end for nicer joints
+  // o--    ----    ----    ----    --o--      --o--     ----     --o
+  'glsl:fs:#main-start': `
   float dashCoverage = 1.0;
   bool shouldDiscardDash = false;
   bool inRoundedDashGap = false;
@@ -314,16 +311,14 @@ float dashPatternCoverage(
     shouldDiscardDash = shouldDiscardDash || dashCoverage <= 0.0;
   }
 `
-  }
 };
 
-export const scatterplotDashShaders = {
-  inject: {
-    'glsl:vs:#main-end': `
+export const scatterplotDashInjections = {
+  'glsl:vs:#main-end': `
 pathStyle_dashArray = instanceDashArrays;
 `,
 
-    'glsl:fs:#decl': `
+  'glsl:fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
   bool dashGapPickable;
 } pathStyle;
@@ -331,7 +326,7 @@ layout(std140) uniform pathStyleUniforms {
 #define PI 3.141592653589793
 `,
 
-    'glsl:fs:#main-start': `
+  'glsl:fs:#main-start': `
   bool inDashGap = false;
   float dashUnitLength = pathStyle_dashArray.x + pathStyle_dashArray.y;
   if (dashUnitLength > 0.0 && scatterplot.stroked > 0.5) {
@@ -357,7 +352,7 @@ layout(std140) uniform pathStyleUniforms {
   }
 `,
 
-    'glsl:fs:#main-end': `
+  'glsl:fs:#main-end': `
   if (inDashGap) {
     float alphaFactor = fragColor.a / max(vLineColor.a, 0.001);
     fragColor = vec4(vFillColor.rgb, vFillColor.a * alphaFactor);
@@ -365,16 +360,14 @@ layout(std140) uniform pathStyleUniforms {
     fragColor = picking_filterHighlightColor(fragColor);
   }
 `
-  }
 };
 
-export const textBackgroundDashShaders = {
-  inject: {
-    'glsl:vs:#main-end': `
+export const textBackgroundDashInjections = {
+  'glsl:vs:#main-end': `
 pathStyle_dashArray = instanceDashArrays;
 `,
 
-    'glsl:fs:#decl': `
+  'glsl:fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
   bool dashGapPickable;
 } pathStyle;
@@ -472,7 +465,7 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
 }
 `,
 
-    'glsl:fs:#main-start': `
+  'glsl:fs:#main-start': `
   bool inDashGap = false;
   float dashUnitLength = pathStyle_dashArray.x + pathStyle_dashArray.y;
   if (dashUnitLength > 0.0 && textBackground.stroked) {
@@ -505,7 +498,7 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
   }
 `,
 
-    'glsl:fs:#main-end': `
+  'glsl:fs:#main-end': `
   if (inDashGap) {
     float alphaFactor = fragColor.a / max(vLineColor.a, 0.001);
     fragColor = vec4(vFillColor.rgb, vFillColor.a * alphaFactor);
@@ -513,14 +506,11 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
     fragColor = picking_filterHighlightColor(fragColor);
   }
 `
-  }
 };
 
-export const offsetShaders = {
-  inject: {
-    'glsl:vs:DECKGL_FILTER_SIZE': `
+export const offsetInjections = {
+  'glsl:vs:DECKGL_FILTER_SIZE': `
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
   size *= offsetWidth;
 `
-  }
 };

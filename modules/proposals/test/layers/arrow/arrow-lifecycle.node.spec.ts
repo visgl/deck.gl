@@ -9,13 +9,13 @@ import {
   ArrowIconLayer,
   ArrowLineLayer,
   ArrowPointCloudLayer,
-  ArrowScatterplotLayer,
-  ArrowPathLayer
+  ArrowScatterplotLayer
 } from '@deck.gl/proposals/layers';
 import {makeArrowFixedSizeListVector} from '@luma.gl/graph/arrow';
 import {NullDevice} from '@luma.gl/core/test-utils';
 import * as arrow from 'apache-arrow';
 import {expect, test, vi} from 'vitest';
+import {ArrowPathRendererLayer} from '../../../src/layers/path-layer/arrow-path-renderer-layer';
 
 const adapterCases = [
   [
@@ -77,7 +77,7 @@ for (const [LayerClass, props] of adapterCases) {
 
 for (const reason of ['replace', 'finalize', 'prepare-error'] as const) {
   test(`ArrowPathLayer closes its iterator on ${reason}`, async () => {
-    const layer = new ArrowPathLayer({id: 'path'});
+    const layer = new ArrowPathRendererLayer({id: 'path'});
     layer.state = {
       batches: [],
       loadVersion: 1,

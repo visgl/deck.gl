@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {WebMercatorViewport, OrthographicViewport, _GlobeViewport} from '@deck.gl/core';
+import {WebMercatorViewport, OrthographicViewport, GlobeViewport} from '@deck.gl/core';
 import type {Layer, ProjectUniforms, Viewport} from '@deck.gl/core';
 import {vec3} from '@math.gl/core';
 import {vec4} from '@math.gl/core';
@@ -42,7 +42,7 @@ export function getMercatorReferenceViewport(viewport: Viewport): Viewport {
 
 /** False only for GlobeViewport, whose common space is a sphere. The single globe check in this module. */
 export function isFlatViewport(viewport: Viewport): boolean {
-  return !(viewport instanceof _GlobeViewport);
+  return !(viewport instanceof GlobeViewport);
 }
 
 /** Per-call overrides of the layer's coordinateSystem, coordinateOrigin and modelMatrix */
@@ -97,13 +97,15 @@ function projectGlobeMeterOffsetsToFlatCommon(
   }
   // project.commonOrigin: sphere position of the coordinate origin
   const originCommon = viewport.projectPosition(origin);
-  // project_get_orientation_matrix(commonOrigin)
+  // project_get_orientation_matrix(commonOrigin): east, north and up
   const uz = vec3.normalize([] as number[], originCommon);
-  const ux = Math.abs(uz[2]) === 1 ? [1, 0, 0] : vec3.normalize([] as number[], [uz[1], -uz[0], 0]);
+  const horizontalLength = Math.hypot(uz[0], uz[1]);
+  const ux =
+    horizontalLength > 0 ? [-uz[1] / horizontalLength, uz[0] / horizontalLength, 0] : [1, 0, 0];
   const uy = vec3.cross([] as number[], uz, ux);
-  // enuMatrix * vec3(-x, -y, z) * metersToCommon
+  // enuMatrix * vec3(x, y, z) * metersToCommon
   const displaced = [0, 1, 2].map(
-    i => originCommon[i] + (ux[i] * -x + uy[i] * -y + uz[i] * z) * GLOBE_METERS_TO_COMMON
+    i => originCommon[i] + (ux[i] * x + uy[i] * y + uz[i] * z) * GLOBE_METERS_TO_COMMON
   );
   // project_globe_to_mercator_
   const lngLatZ = viewport.unprojectPosition(displaced);

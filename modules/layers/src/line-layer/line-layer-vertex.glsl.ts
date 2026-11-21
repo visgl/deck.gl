@@ -74,7 +74,7 @@ void main(void) {
   geometry.position = mix(source_commonspace, target_commonspace, segmentIndex);
   uv = positions.xy;
   geometry.uv = uv;
-  geometry.pickingColor = picking_getPickingColorFromInstanceID();
+  geometry.pickingColor = picking_getPickingColorFromIndex(uint(gl_InstanceID) + line.rowIndexOffset);
 
   // Multiply out width and clamp to limits
   float widthPixels = clamp(

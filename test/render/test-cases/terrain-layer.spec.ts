@@ -6,7 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {_GlobeView as GlobeView} from '@deck.gl/core';
+import {GlobeView} from '@deck.gl/core';
 import {GeoJsonLayer, IconLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -69,7 +69,6 @@ const testCases = [
   },
   {
     name: 'terrain-extension-drape',
-    skip: ['webgpu'],
     viewState: {
       longitude: -122.45,
       latitude: 37.75,
@@ -92,6 +91,37 @@ const testCases = [
       })
     ],
     goldenImage: './test/render/golden-images/terrain-extension-drape.png'
+  },
+  {
+    // terrain-extension-drape in GlobeView, without outlines.
+    // Golden: the same choropleth fills draped over the terrain, on the globe.
+    // Fills only, so the case also runs on WebGPU; terrain-extension-drape-globe adds strokes.
+    name: 'terrain-extension-drape-fill-globe',
+    views: new GlobeView({resolution: 36}),
+    viewState: {
+      longitude: -122.45,
+      latitude: 37.75,
+      zoom: 11.5,
+      pitch: 60,
+      bearing: 0
+    },
+    layers: [
+      new TerrainLayer({
+        elevationData: ELEVATION_DATA,
+        texture: TEXTURE,
+        elevationDecoder: DECODER,
+        operation: 'draw+terrain'
+      }),
+      new GeoJsonLayer({
+        data: choropleths,
+        stroked: false,
+        getFillColor: (_, {index}) => [(index % 3) * 80, (index % 2) * 128, 128, 200],
+        extensions: [new TerrainExtension()]
+      })
+    ],
+    onAfterRender: waitAfterDefaultCompletion(500),
+    imageDiffOptions: {threshold: 0.985},
+    goldenImage: './test/render/golden-images/terrain-extension-drape-fill-globe.png'
   },
   {
     // Golden: choropleth fills and strokes draped over terrain in GlobeView.

@@ -11,7 +11,8 @@ import {
   Viewport,
   MapView,
   WebMercatorViewport,
-  _GlobeViewport as GlobeViewport
+  GlobeViewport,
+  OrthographicView
 } from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
@@ -499,6 +500,86 @@ test('LayersPass#WebGPU renders and picks each repeated world in a separate pass
   }
 });
 
+test('LayersPass#WebGPU viewport uses a top-left origin', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+    return;
+  }
+
+  const size = 64;
+  // The view covers the top quarter of the framebuffer
+  const view = new OrthographicView({id: 'top', x: 0, y: 0, width: '100%', height: '25%'});
+  const viewport = view.makeViewport({
+    width: size,
+    height: size,
+    viewState: {target: [0, 0, 0], zoom: 0}
+  });
+  const colorTexture = webgpuDevice.createTexture({
+    format: 'rgba8unorm',
+    width: size,
+    height: size,
+    usage: Texture.RENDER | Texture.COPY_SRC
+  });
+  const framebuffer = webgpuDevice.createFramebuffer({
+    width: size,
+    height: size,
+    colorAttachments: [colorTexture],
+    depthStencilAttachment: 'depth24plus'
+  });
+  const readbackOptions = {x: size / 2, y: 0, width: 1, height: size};
+  const readbackLayout = colorTexture.computeMemoryLayout(readbackOptions);
+  const readbackBuffer = webgpuDevice.createBuffer({
+    byteLength: readbackLayout.byteLength,
+    usage: Buffer.COPY_DST | Buffer.MAP_READ
+  });
+  const layerManager = new LayerManager(webgpuDevice, {viewport});
+  const layersPass = new DrawLayersPass(webgpuDevice);
+
+  try {
+    layerManager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    layerManager.setLayers([
+      new ScatterplotLayer({
+        id: 'webgpu-viewport-origin',
+        data: [{position: [0, 0]}],
+        getPosition: point => point.position,
+        getFillColor: [255, 0, 0, 255],
+        radiusUnits: 'pixels',
+        getRadius: 4
+      })
+    ]);
+    layersPass.render({
+      target: framebuffer,
+      viewports: [viewport],
+      views: {[view.id]: view},
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport,
+      clearColor: [0, 0, 0, 0]
+    });
+
+    colorTexture.readBuffer(readbackOptions, readbackBuffer);
+    const pixels = await readbackBuffer.readAsync(0, readbackLayout.byteLength);
+    const getRowColor = (row: number) => {
+      const start = row * readbackLayout.bytesPerRow;
+      return Array.from(pixels.subarray(start, start + 4));
+    };
+
+    expect(getRowColor(size / 8), 'the view is drawn in the top quarter').toEqual([255, 0, 0, 255]);
+    expect(getRowColor(size - size / 8), 'nothing is drawn in the bottom quarter').toEqual([
+      0, 0, 0, 0
+    ]);
+  } finally {
+    readbackBuffer.destroy();
+    layerManager.finalize();
+    framebuffer.destroy();
+    colorTexture.destroy();
+  }
+});
+
 test('LayersPass#uses the supplied canvas context for viewport and clear passes', () => {
   const layer = new TestLayer({id: 'canvas-context-layer'});
   const viewport = new Viewport({id: 'canvas-context-view', x: 2, y: 3, width: 10, height: 8});
@@ -519,7 +600,9 @@ test('LayersPass#uses the supplied canvas context for viewport and clear passes'
   const beginRenderPass = vi.spyOn(device, 'beginRenderPass');
   layersPass.render({
     canvasContext,
-    views: {[viewport.id]: new MapView({id: viewport.id, clear: true})},
+    views: {
+      [viewport.id]: new MapView({id: viewport.id, clear: true, clearColor: [255, 128, 0, 0]})
+    },
     viewports: [viewport],
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport
@@ -532,7 +615,45 @@ test('LayersPass#uses the supplied canvas context for viewport and clear passes'
   ).toEqual([4, 18, 20, 16]);
   expect(beginRenderPass).toHaveBeenCalledTimes(2);
   expect(beginRenderPass.mock.calls[0][0].framebuffer).toBe(framebuffer);
+  expect(beginRenderPass.mock.calls[1][0].clearColor).toEqual([1, 128 / 255, 0, 0]);
   expect(beginRenderPass.mock.calls[1][0].framebuffer).toBe(framebuffer);
+
+  beginRenderPass.mockClear();
+  layersPass.render({
+    canvasContext,
+    views: {[viewport.id]: new MapView({id: viewport.id, clear: true, clearColor: [255, 128, 0]})},
+    viewports: [viewport],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport
+  });
+  expect(beginRenderPass.mock.calls[1][0].clearColor, 'omitted byte alpha is opaque').toEqual([
+    1,
+    128 / 255,
+    0,
+    1
+  ]);
+
+  for (const [clearColor, expected] of [
+    [
+      [1, 0.5, 0, 0],
+      [1, 0.5, 0, 0]
+    ],
+    [
+      [1, 0.5, 0],
+      [1, 0.5, 0, 1]
+    ]
+  ]) {
+    beginRenderPass.mockClear();
+    layersPass.render({
+      canvasContext,
+      normalizedColors: true,
+      views: {[viewport.id]: new MapView({id: viewport.id, clear: true, clearColor})},
+      viewports: [viewport],
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport
+    });
+    expect(beginRenderPass.mock.calls[1][0].clearColor).toEqual(expected);
+  }
 
   beginRenderPass.mockRestore();
   layerManager.finalize();

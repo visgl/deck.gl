@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessorFunction} from '@deck.gl/core';
 import type {NumericArray} from '@math.gl/core';
 import {createIterable} from '@deck.gl/core';
 import type {AccessorFunction, Attribute, DefaultProps} from '@deck.gl/core';
@@ -14,7 +15,7 @@ const defaultProps: DefaultProps<TripsLayerProps> = {
   fadeTrail: true,
   trailLength: {type: 'number', value: 120, min: 0},
   currentTime: {type: 'number', value: 0, min: 0},
-  getTimestamps: {type: 'accessor', value: (d: any) => d.timestamps}
+  getTimestamps: {type: 'accessor', arrow: 'row', value: (d: any) => d.timestamps}
 };
 
 const tripsShaderInjectionsGLSL = {
@@ -65,7 +66,7 @@ type _TripsLayerProps<DataT = unknown> = {
   /**
    * Timestamp accessor.
    */
-  getTimestamps?: AccessorFunction<DataT, NumericArray>;
+  getTimestamps?: ArrowAccessorFunction<DataT, NumericArray>;
 };
 
 /** Render animated paths that represent vehicle trips. */
@@ -138,7 +139,8 @@ export default class TripsLayer<DataT = any, ExtraProps extends {} = {}> extends
         continue;
       }
 
-      const timestamps = props.getTimestamps?.(object, objectInfo) ?? [];
+      const timestamps =
+        (props.getTimestamps as AccessorFunction<DataT, NumericArray>)?.(object, objectInfo) ?? [];
       packedTimestamps.set(
         packTripTimestamps(timestamps, vertexEnd - vertexStart, props._pathType === 'loop'),
         vertexStart * 2

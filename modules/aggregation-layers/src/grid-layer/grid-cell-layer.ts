@@ -27,7 +27,11 @@ type GridCellLayerProps = {
 
 export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
   null,
-  ExtraPropsT & Required<GridCellLayerProps>
+  ExtraPropsT &
+    Required<GridCellLayerProps> & {
+      /** Whether plain-array palette entries are normalized. */
+      normalizedColorRange?: boolean;
+    }
 > {
   static layerName = 'GridCellLayer';
 
@@ -76,12 +80,16 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
     const {props, oldProps} = params;
     const model = this.state.fillModel!;
 
-    if (oldProps.colorRange !== props.colorRange) {
+    if (
+      oldProps.colorRange !== props.colorRange ||
+      oldProps.normalizedColorRange !== props.normalizedColorRange
+    ) {
       this.state.colorTexture?.destroy();
       this.state.colorTexture = createColorRangeTexture(
         this.context.device,
         props.colorRange,
-        props.colorScaleType
+        props.colorScaleType,
+        props.normalizedColorRange
       );
       const gridProps: Partial<GridProps> = {colorRange: this.state.colorTexture};
       model.shaderInputs.setProps({grid: gridProps});

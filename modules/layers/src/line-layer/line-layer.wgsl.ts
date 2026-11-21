@@ -43,6 +43,7 @@ struct LineUniforms {
   widthMaxPixels: f32,
   useShortestPath: f32,
   widthUnits: i32,
+  rowIndexOffset: u32,
 };
 
 @group(0) @binding(0)
@@ -121,7 +122,7 @@ fn vertexMain(
   let uv: vec2<f32> = positions.xy;
 #endif
   geometry.uv = uv;
-  geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex);
+  geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex + line.rowIndexOffset);
 
   // Determine width in pixels.
   let widthPixels: f32 = clamp(

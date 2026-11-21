@@ -9,8 +9,7 @@ import {BufferTransform} from '@luma.gl/engine';
 import {preprocess} from '@luma.gl/shaders';
 import pathVertexShader from '@deck.gl/layers/path-layer/path-layer-vertex.glsl';
 import pathFragmentShader from '@deck.gl/layers/path-layer/path-layer-fragment.glsl';
-import {shaderWGSL} from '@deck.gl/layers/path-layer/path-layer.wgsl';
-import {pathUniforms} from '@deck.gl/layers/path-layer/path-layer-uniforms';
+import {_pathShaderWGSL as shaderWGSL, _pathUniforms as pathUniforms} from '@deck.gl/core';
 
 const PATH_DATA = [
   {

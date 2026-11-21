@@ -3,7 +3,7 @@
 
 The `FillStyleExtension` adds selected features to layers that render a "fill", such as the `PolygonLayer` and `ScatterplotLayer`.
 
-The WebGPU port covers texture atlas patterns and procedural hatches, cross-hatches, and dots.
+Choose texture atlas patterns or procedural hatches, cross-hatches, and dots.
 
 <div style={{position:'relative',height:450}}></div>
 <div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
@@ -279,7 +279,9 @@ The offset of the pattern, relative to the original size. Offset `[0.5, 0.5]` sh
 
 The color filled behind the pattern. The pattern is composited on top of it, so the background shows
 through wherever the pattern is transparent. Defaults to fully transparent, which leaves the area
-behind the pattern unfilled.
+behind the pattern unfilled. With Deck’s [`normalizedColors`](../core/deck.md#normalizedcolors)
+option, plain arrays use 0–1 channels. Omitted alpha is opaque. Use 0–255 channels in
+legacy mode or with byte typed arrays.
 
 This makes it possible to style a polygon's background independently from the pattern drawn over it
 within a single layer. The layer's own `getFillColor` (or, with

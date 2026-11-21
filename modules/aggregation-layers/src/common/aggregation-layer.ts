@@ -2,44 +2,426 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {project} from '@deck.gl/core';
+import {project, project32} from '@deck.gl/core';
 
 import {
   CompositeLayer,
+  Layer,
   LayerDataSource,
   LayerContext,
   LayerExtension,
   UpdateParameters,
   CompositeLayerProps,
+  DefaultProps,
   Attribute,
   AttributeManager,
   Viewport,
+  GlobeViewport,
   _deepEqual as deepEqual
 } from '@deck.gl/core';
 import {vec4TransformMat4 as transformMat4} from '@math.gl/core';
 import type {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
-import {Aggregator} from './aggregator/aggregator';
-import {WebGLAggregator} from './aggregator/gpu-aggregator/webgl-aggregator';
+import type {Aggregator} from './aggregator/aggregator';
+import type {WebGPUAggregatorOptions} from './aggregator/webgpu-aggregator/webgpu-aggregator';
+import {AttributeWithScale} from './utils/scale-utils';
+import {CPUAggregator} from './aggregator/cpu-aggregator/cpu-aggregator';
+import {GPUConstant, GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
+import {Buffer, type BufferLayout, type VertexFormat} from '@luma.gl/core';
+
+/** Low position components for directly bound float32 positions. */
+const ZERO_POSITION_LOW = new GPUConstant({format: 'float32x3', value: new Float32Array(3)});
+
+/** Satisfies the brushing shader input when the source position is used instead. */
+const ZERO_BRUSHING_TARGET = new GPUConstant({format: 'float32x2', value: new Float32Array(2)});
+
+/** Vertex columns consumed by the supported aggregation input extensions. */
+export type AggregationExtensionAttributes = {
+  /** Numeric DataFilter values, in the same row order as positions. */
+  filterValues?: GPUVector;
+  /** Custom brushing targets, in the same row order as positions. */
+  brushingTargets?: GPUVector<'float32x2'>;
+};
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
   data: LayerDataSource<DataT>;
+  /** Layer-owned aggregator instance. Omit to retain CPU/WebGL selection. */
+  aggregator?: Aggregator | null;
+  /** Borrowed GPU position column; requires a custom aggregator and bypasses accessors.
+   * @experimental
+   */
+  positions?: GPUVector | null;
+  /** Borrowed scalar columns in channel order; required with positions.
+   * @experimental
+   */
+  weights?: readonly GPUVector[] | null;
+  /** Borrowed per-point extension columns for native compute aggregation. @experimental */
+  extensionAttributes?: AggregationExtensionAttributes | null;
+  /** Bounds in input coordinates for GPU positions used by world-space binning. */
+  dataBounds?: [number[], number[]] | null;
 };
 
 export default abstract class AggregationLayer<
   DataT,
   ExtraPropsT extends {} = {}
-> extends CompositeLayer<Required<AggregationLayer<DataT>> & ExtraPropsT> {
+> extends CompositeLayer<Required<AggregationLayerProps<DataT>> & ExtraPropsT> {
   static layerName = 'AggregationLayer';
+  static defaultProps: DefaultProps<AggregationLayerProps<unknown>> = {
+    aggregator: {type: 'object', value: null, optional: true},
+    positions: {type: 'object', value: null, optional: true},
+    weights: {type: 'array', value: null, optional: true, compare: 1},
+    extensionAttributes: {type: 'object', value: null, optional: true, compare: 1},
+    dataBounds: {type: 'array', value: null, optional: true, compare: 2}
+  };
+
+  /** Uses the column row count when positions bypass accessor generation. */
+  override getNumInstances(): number {
+    return this.props.positions && !Number.isFinite(this.props.numInstances)
+      ? this.props.positions.length
+      : super.getNumInstances();
+  }
+
+  /** Validate and return the borrowed attributes consumed by the input filter pass. */
+  private getGPUColumnExtensionBindings(): Record<string, GPUVector | GPUConstant> {
+    const {positions, weights, aggregator, extensions, extensionAttributes} = this.props;
+    if (aggregator || this.state.aggregatorType !== 'webgpu' || positions?.format !== 'float32x3') {
+      throw new Error('GPU column extensions require native compute and float32x3 positions');
+    }
+
+    const names =
+      this.getAggregationChannelCount() === 1 ? ['counts'] : ['colorWeights', 'elevationWeights'];
+    const attributes: Record<string, GPUVector | GPUConstant> = {
+      positions,
+      positions64Low: ZERO_POSITION_LOW
+    };
+    /** Validate row alignment, format and vertex buffer usage before binding a column. */
+    const addColumn = (name: string, vector: GPUVector | undefined, format: string) => {
+      if (
+        vector?.format !== format ||
+        vector.length !== positions.length ||
+        !(getGPUVectorData(vector).buffer.usage & Buffer.VERTEX)
+      ) {
+        throw new Error(
+          `Invalid GPU column for ${name}: expected ${format}, one value per position and VERTEX usage`
+        );
+      }
+      attributes[name] = vector;
+    };
+    addColumn('positions', positions, 'float32x3');
+    for (const [index, name] of names.entries()) addColumn(name, weights?.[index], 'float32');
+
+    for (const extension of extensions) {
+      switch ((extension.constructor as typeof LayerExtension).extensionName) {
+        case 'ClipExtension':
+          break;
+        case 'BrushingExtension': {
+          const {brushingTarget} = this.props as {brushingTarget?: string};
+          if (brushingTarget === 'source') attributes.brushingTargets = ZERO_BRUSHING_TARGET;
+          else if (brushingTarget === 'custom') {
+            addColumn('brushingTargets', extensionAttributes?.brushingTargets, 'float32x2');
+          } else {
+            throw new Error('GPU column brushing requires a source or custom target');
+          }
+          break;
+        }
+        case 'DataFilterExtension': {
+          const {filterSize, categorySize, fp64, countItems} = extension.opts as {
+            filterSize?: number;
+            categorySize?: number;
+            fp64?: boolean;
+            countItems?: boolean;
+          };
+          if (!filterSize || categorySize || fp64 || countItems) {
+            throw new Error(
+              'GPU column filtering requires numeric DataFilter without fp64 or item counting'
+            );
+          }
+          addColumn(
+            'filterValues',
+            extensionAttributes?.filterValues,
+            filterSize === 1 ? 'float32' : `float32x${filterSize}`
+          );
+          break;
+        }
+        default:
+          throw new Error('Unsupported extension for GPU aggregation columns');
+      }
+    }
+    return attributes;
+  }
+
+  /** GPU columns are forwarded directly to the aggregator, like ArcLayer's column path. */
+  protected override _updateAttributes(): void {
+    if (!this.props.positions) {
+      super._updateAttributes();
+      return;
+    }
+    const {positions, weights, aggregator, extensions} = this.props;
+    if (aggregator?.requiresProjectedPositions && this.state.preproject) {
+      throw new Error('GPU aggregation positions must use the custom view coordinate system');
+    }
+    if ((!aggregator && this.state.aggregatorType !== 'webgpu') || !weights) {
+      throw new Error('GPU columns require a compatible aggregator and weights');
+    }
+    if (extensions.length) this.getGPUColumnExtensionBindings();
+    if (
+      this.getNumInstances() > positions.length ||
+      weights.length !== this.getAggregationChannelCount() ||
+      weights.some(weight => weight.length !== positions.length)
+    ) {
+      throw new Error('GPU aggregation weights must match the channels and position length');
+    }
+    this.state.aggregator.setProps({positions, weights, pointCount: this.getNumInstances()});
+    this.state.aggregator.update();
+  }
+
+  /** Include asynchronous aggregation metadata in the owning layer's loading state. */
+  override get isLoaded(): boolean {
+    return super.isLoaded && this.state?.aggregator?.isLoaded !== false;
+  }
+
+  /** Number of weight columns consumed by this layer. */
+  protected getAggregationChannelCount(): number {
+    return 1;
+  }
 
   state!: {
     aggregatorType: string;
     aggregator: Aggregator;
+    /** CPU-backed previous cells, prepared only while replacement metadata is pending. */
+    retainedAggregationLayer?: Layer;
+    /** GPU copies owned only while a frame without CPU metadata is retained. */
+    retainedAggregationBuffers?: Buffer[];
+
+    /** Completed geometry and immutable result arrays retained until the next completed frame. */
+    retainedAggregationFrame?: {
+      layer: Layer;
+      range: [number, number][];
+      values: (Float32Array | null | undefined)[];
+      binCount: number;
+    };
+    /** Projection frame used by world-space compute aggregation and extension uniforms. */
+    aggregatorViewport?: Viewport;
   } & CompositeLayer['state'];
+
+  /** Extension hooks affect input points; rendering effects only affect the cells. */
+  protected getAggregationShaders(extensions = this.props.extensions) {
+    const shaders = super.getShaders({modules: [project32]}, extensions);
+    return {
+      ...shaders,
+      plugins: shaders.plugins?.filter(
+        plugin => !this.context.defaultShaderPlugins.includes(plugin)
+      )
+    };
+  }
+
+  /** Shared compute shader setup for world-space aggregation adapters. */
+  protected getComputeAggregatorOptions(): Pick<
+    WebGPUAggregatorOptions,
+    'shaders' | 'requestRedraw' | 'bindAttributes'
+  > {
+    return {
+      shaders: this.getAggregationShaders(),
+      requestRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
+      bindAttributes: model => {
+        const layer = this.getCurrentLayer()! as this;
+        if (layer.props.positions) {
+          const attributes = layer.getGPUColumnExtensionBindings();
+          const layouts: BufferLayout[] = Object.entries(attributes).map(([name, column]) => ({
+            name,
+            stepMode: 'instance',
+            byteStride:
+              column instanceof GPUConstant
+                ? column.value.byteLength
+                : getGPUVectorData(column).byteStride,
+            attributes: [{attribute: name, format: column.format as VertexFormat, byteOffset: 0}]
+          }));
+          model.setGPUAttributes(attributes, layouts);
+          return;
+        }
+        const manager = layer.getAttributeManager()!;
+        model.setGPUAttributes(
+          manager.getGPUVectors(),
+          manager.getBufferLayouts().map(layout => ({...layout, stepMode: 'instance' as const}))
+        );
+      }
+    };
+  }
+
+  /** Whether rendering needs CPU distribution values rather than raw GPU results. */
+  protected needsAggregationScaleValues(props: Record<string, any> = this.props): boolean {
+    return (
+      props.colorScaleType === 'quantile' ||
+      props.colorScaleType === 'ordinal' ||
+      props.elevationScaleType === 'quantile' ||
+      props.lowerPercentile > 0 ||
+      props.upperPercentile < 100 ||
+      props.elevationLowerPercentile > 0 ||
+      props.elevationUpperPercentile < 100
+    );
+  }
+
+  /** Request metadata for domains, callbacks, picking, or CPU distribution scales. */
+  protected needsAggregationMetadata(props, noop): boolean {
+    return (
+      !props.colorDomain ||
+      !props.elevationDomain ||
+      Boolean(props._subLayerProps?.cells?.pickable ?? props.pickable) ||
+      props.onSetColorDomain !== noop ||
+      props.onSetElevationDomain !== noop ||
+      this.needsAggregationScaleValues(props)
+    );
+  }
+
+  /** Construct GPU-backed scales without waiting for picking-only metadata. */
+  protected prepareRawAggregationScales(): void {
+    const aggregator = this.state.aggregator;
+    this.state.colors = new AttributeWithScale(aggregator.getResult(0)!, aggregator.binCount);
+    this.state.elevations = new AttributeWithScale(aggregator.getResult(1)!, aggregator.binCount);
+  }
+
+  /** Keep completed cell geometry independent of buffers resized by the next aggregation. */
+  protected retainAggregationLayer(layer: Layer, range: [number, number][]): void {
+    const aggregator = this.state.aggregator;
+    const values = [aggregator.getResultValues?.(0), aggregator.getResultValues?.(1)];
+    for (const buffer of this.state.retainedAggregationBuffers || []) buffer.destroy();
+    this.state.retainedAggregationBuffers = undefined;
+    if (this.state.aggregatorType !== 'webgpu') {
+      this.state.retainedAggregationFrame = undefined;
+      this.state.retainedAggregationLayer = undefined;
+      return;
+    }
+
+    this.state.retainedAggregationFrame = {layer, range, values, binCount: aggregator.binCount};
+    this.state.retainedAggregationLayer = undefined;
+  }
+
+  /** Materialize CPU geometry only when a pending frame needs the previous cells. */
+  protected getRetainedAggregationLayer(): Layer | null {
+    if (this.state.retainedAggregationLayer) return this.state.retainedAggregationLayer ?? null;
+    const frame = this.state.retainedAggregationFrame;
+    if (!frame) return null;
+    const {layer, range, values, binCount} = frame;
+    if (!values[0] || !values[1]) return null;
+
+    const bins = new Float32Array(binCount * 2);
+    const width = range[0][1] - range[0][0];
+    for (let i = 0; i < binCount; i++) {
+      bins[i * 2] = range[0][0] + (i % width);
+      bins[i * 2 + 1] = range[1][0] + Math.floor(i / width);
+    }
+    const attributes: Record<string, any> = {
+      ...(layer.props.data as {attributes: Record<string, any>}).attributes,
+      getBin: {value: bins, size: 2}
+    };
+    for (const [channel, name] of ['getColorValue', 'getElevationValue'].entries()) {
+      if (!attributes[name]?.value) attributes[name] = {value: values[channel], size: 1};
+    }
+    this.state.retainedAggregationLayer = layer.clone({
+      data: {length: binCount, attributes},
+      updateTriggers: {
+        ...layer.props.updateTriggers,
+        getBin: [attributes.getBin],
+        getColorValue: [attributes.getColorValue],
+        getElevationValue: [attributes.getElevationValue]
+      }
+    });
+    return this.state.retainedAggregationLayer ?? null;
+  }
+
+  /** Preserve GPU-only cells before an update can overwrite or resize their output buffers. */
+  protected retainGPUAggregationLayer(): void {
+    const frame = this.state.retainedAggregationFrame;
+    if (!frame || frame.values[0] || this.state.retainedAggregationLayer) return;
+    const attributes = (frame.layer.props.data as {attributes: Record<string, any>}).attributes;
+    const copies = new Map<Buffer, Buffer>();
+    const encoder = this.context.device.createCommandEncoder();
+    const retainedAttributes = {...attributes};
+    for (const [name, attribute] of Object.entries(attributes)) {
+      if (!(attribute instanceof GPUVector)) continue;
+      const data = getGPUVectorData(attribute);
+      if (!(data.buffer instanceof Buffer))
+        throw new Error('Aggregation requires concrete buffers');
+      let buffer = copies.get(data.buffer);
+      if (!buffer) {
+        buffer = this.context.device.createBuffer({
+          byteLength: data.buffer.byteLength,
+          usage: Buffer.COPY_DST | Buffer.VERTEX | Buffer.STORAGE
+        });
+        encoder.copyBufferToBuffer({
+          sourceBuffer: data.buffer,
+          destinationBuffer: buffer,
+          size: data.buffer.byteLength
+        });
+        copies.set(data.buffer, buffer);
+      }
+      retainedAttributes[name] = new GPUVector({
+        type: 'buffer',
+        name: attribute.name,
+        format: attribute.format,
+        length: attribute.length,
+        byteOffset: data.byteOffset,
+        byteStride: data.byteStride,
+        buffer,
+        ownsBuffer: false
+      });
+    }
+    this.context.device.submit(encoder.finish());
+    this.state.retainedAggregationBuffers = [...copies.values()];
+    this.state.retainedAggregationLayer = frame.layer.clone({
+      data: {length: frame.binCount, attributes: retainedAttributes},
+      updateTriggers: {
+        ...frame.layer.props.updateTriggers,
+        getBin: [retainedAttributes.getBin],
+        getColorValue: [retainedAttributes.getColorValue],
+        getElevationValue: [retainedAttributes.getElevationValue]
+      }
+    });
+  }
 
   /** Forwards extension uniforms to the GPU aggregation model as well as rendering models. */
   setShaderModuleProps(props: Record<string, any>): void {
+    // Geometry clipping uses projected bounds, which must share the reduction viewport.
+    if (
+      props.clip &&
+      this.state?.aggregatorType === 'webgpu' &&
+      this.state.aggregatorViewport &&
+      !this.state.clipByInstance &&
+      // Globe clipping already uses camera-independent Mercator bounds from ClipExtension.
+      !(this.state.aggregatorViewport instanceof GlobeViewport)
+    ) {
+      const bounds = (this.props as this['props'] & {clipBounds: number[]}).clipBounds;
+      if (bounds) {
+        const viewport = this.state.aggregatorViewport;
+        const a = this.projectPosition([bounds[0], bounds[1], 0], {viewport});
+        const b = this.projectPosition([bounds[2], bounds[3], 0], {viewport});
+        const sourceCrs = this.internalState!.sourceCrs;
+        const longitudeCoordinates =
+          (typeof this.props.coordinateSystem !== 'string' ||
+            !['cartesian', 'meter-offsets', 'lnglat-offsets'].includes(
+              this.props.coordinateSystem
+            )) &&
+          sourceCrs?.coordinateFrame === 'geographic' &&
+          sourceCrs.axis.startsWith('en') &&
+          sourceCrs.xUnit.degreesPerUnit === 1 &&
+          sourceCrs.yUnit.degreesPerUnit === 1;
+        if (bounds[0] - bounds[2] > 180 && viewport.isGeospatial && longitudeCoordinates)
+          b[0] += 512;
+        props = {
+          ...props,
+          clip: {
+            ...props.clip,
+            bounds: [
+              Math.min(a[0], b[0]),
+              Math.min(a[1], b[1]),
+              Math.max(a[0], b[0]),
+              Math.max(a[1], b[1])
+            ]
+          }
+        };
+      }
+    }
     super.setShaderModuleProps(props);
-    if (this.state?.aggregator instanceof WebGLAggregator) {
+    if (this.state?.aggregator && !(this.state.aggregator instanceof CPUAggregator)) {
       this.state.aggregator.setProps({shaderModuleProps: props});
     }
   }
@@ -83,9 +465,11 @@ export default abstract class AggregationLayer<
 
   /** Bound transformed Cartesian geometry using its bounding-box corners, without rewriting positions. */
   getBounds(): [number[], number[]] | null {
-    const bounds = super.getBounds();
+    const bounds = this.props.dataBounds || super.getBounds();
     const {viewport} = this.context;
-    if (!bounds || !project.isCustomProjection(viewport) || this.state.preproject) return bounds;
+    if (!bounds || !project.isCustomProjection(viewport)) return bounds;
+    // Attribute-derived bounds are already packed; explicit bounds describe source coordinates.
+    if (this.state.preproject && !this.props.dataBounds) return bounds;
     // Both backends need bounds in packed coordinates, before viewport projection.
     // Transforming the box is conservative under rotation, but includes every transformed point.
     const result: [number[], number[]] = [Array(3).fill(Infinity), Array(3).fill(-Infinity)];
@@ -93,8 +477,10 @@ export default abstract class AggregationLayer<
       const position = [0, 1, 2].map(axis => bounds[(corner >> axis) & 1][axis] ?? 0);
       position.push(1);
       if (this.props.modelMatrix) transformMat4(position, position, this.props.modelMatrix);
+      for (let axis = 0; axis < 3; axis++) position[axis] += this.props.coordinateOrigin[axis];
+      const packedPosition = this.state.preproject ? this.state.preproject(position) : position;
       for (let axis = 0; axis < 3; axis++) {
-        const value = position[axis] + this.props.coordinateOrigin[axis];
+        const value = packedPosition[axis];
         result[0][axis] = Math.min(result[0][axis], value);
         result[1][axis] = Math.max(result[1][axis], value);
       }
@@ -105,19 +491,64 @@ export default abstract class AggregationLayer<
   // Extend Layer.updateState to update the Aggregator instance
   // returns true if aggregator is changed
   updateState(params: UpdateParameters<this>): boolean {
+    const props: Record<string, any> = params.props;
+    if (!props.colorDomain || !props.elevationDomain || this.needsAggregationScaleValues(props)) {
+      this.retainGPUAggregationLayer();
+    }
+    if (this.props.aggregator?.supportsExtensions === false && this.props.extensions.length) {
+      throw new Error('The supplied aggregator does not support shader extensions');
+    }
     super.updateState(params);
+    if (this.props.weights && !this.props.positions) {
+      throw new Error('GPU aggregation weights require positions');
+    }
+    if (
+      params.props.positions !== params.oldProps.positions ||
+      params.props.weights !== params.oldProps.weights ||
+      !deepEqual(params.props.extensionAttributes, params.oldProps.extensionAttributes, 1) ||
+      params.props.numInstances !== params.oldProps.numInstances
+    ) {
+      this.state.aggregator?.setNeedsUpdate();
+      if (!params.props.positions) this.getAttributeManager()?.invalidateAll();
+    }
 
-    const aggregatorType = this.getAggregatorType();
-    if (params.changeFlags.extensionsChanged || this.state.aggregatorType !== aggregatorType) {
-      this.state.aggregator?.destroy();
-      const aggregator = this.createAggregator(aggregatorType);
+    const aggregatorType = this.props.aggregator ? 'custom' : this.getAggregatorType();
+    if (
+      params.changeFlags.extensionsChanged ||
+      this.state.aggregatorType !== aggregatorType ||
+      params.props.aggregator !== params.oldProps.aggregator
+    ) {
+      const aggregator = this.props.aggregator || this.createAggregator(aggregatorType);
+      if (aggregator !== this.state.aggregator) {
+        this.state.aggregator?.destroy();
+        aggregator.initialize?.(this.context.device);
+      } else {
+        // Extension changes refresh the supplied instance without destroying it.
+        aggregator.setNeedsUpdate();
+      }
+      aggregator.setShaderContext?.({
+        shaders: this.getAggregationShaders(),
+        getAttributeBindings: () => {
+          const manager = this.getCurrentLayer()!.getAttributeManager()!;
+          return {
+            attributes: manager.getGPUVectors(),
+            bufferLayouts: manager
+              .getBufferLayouts()
+              .map(layout => ({...layout, stepMode: 'instance' as const}))
+          };
+        }
+      });
       aggregator.setProps({
-        attributes: this.getAttributeManager()?.attributes
+        onError: error => this.getCurrentLayer()?.raiseError(error, 'aggregation'),
+        onNeedsRedraw: () => this.getCurrentLayer()?.setNeedsRedraw(),
+        attributes: this.getAttributeManager()?.attributes,
+        positions: this.props.positions,
+        weights: this.props.weights
       });
       this.setState({aggregator, aggregatorType});
       return true;
     }
-    if (this.state.aggregator instanceof WebGLAggregator) {
+    if (this.state.aggregator && !(this.state.aggregator instanceof CPUAggregator)) {
       // Extension uniforms affect binning even when no input attributes change.
       for (const extension of params.props.extensions) {
         const {defaultProps} = extension.constructor as typeof LayerExtension;
@@ -141,11 +572,12 @@ export default abstract class AggregationLayer<
     }
     if (
       project.isCustomProjection(this.context.viewport) &&
-      !this.state.preproject &&
+      (this.props.positions || !this.state.preproject) &&
       (!deepEqual(params.props.modelMatrix, params.oldProps.modelMatrix, 1) ||
-        !deepEqual(params.props.coordinateOrigin, params.oldProps.coordinateOrigin, 1))
+        !deepEqual(params.props.coordinateOrigin, params.oldProps.coordinateOrigin, 1) ||
+        (this.props.positions && params.changeFlags.projectionChanged))
     ) {
-      // Projection props affect binning and bounds, but both backends retain the packed positions.
+      // GPU columns bypass the position attribute callback, including preprojection changes.
       this.onAttributeChange('positions');
     }
     return false;
@@ -154,19 +586,22 @@ export default abstract class AggregationLayer<
   // Override Layer.finalizeState to dispose the Aggregator instance
   finalizeState(context: LayerContext) {
     super.finalizeState(context);
-    this.state.aggregator.destroy();
+    this.state.aggregator?.destroy();
+    for (const buffer of this.state.retainedAggregationBuffers || []) buffer.destroy();
   }
 
   // Override Layer.updateAttributes to update the aggregator
   protected updateAttributes(changedAttributes: {[id: string]: Attribute}) {
     const {aggregator} = this.state;
     aggregator.setProps({
-      attributes: changedAttributes
+      attributes: changedAttributes,
+      positions: null,
+      weights: null
     });
 
     for (const id in changedAttributes) {
       this.onAttributeChange(id);
-      if (aggregator instanceof WebGLAggregator) {
+      if (!(aggregator instanceof CPUAggregator)) {
         const {accessor} = changedAttributes[id].settings;
         const accessors = Array.isArray(accessor) ? accessor : [accessor];
         // Extension inputs can affect every bin, beyond the layer's position/weight inputs.
@@ -214,6 +649,7 @@ export default abstract class AggregationLayer<
     if (
       project.isCustomProjection(this.context.viewport) &&
       this.state.preproject &&
+      !this.props.positions &&
       shaderModuleProps.project
     ) {
       // Grid/hexagon/contour aggregation uses a separate precision viewport.
@@ -229,7 +665,6 @@ export default abstract class AggregationLayer<
         }
       };
     }
-    // @ts-expect-error only used by GPU aggregators
     aggregator.setProps({shaderModuleProps});
     aggregator.preDraw();
   }
