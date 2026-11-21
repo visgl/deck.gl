@@ -5,6 +5,7 @@
 import Viewport from '../viewports/viewport';
 import {parsePosition, getPosition, LayoutExpression} from '../utils/positions';
 import {deepEqual} from '../utils/deep-equal';
+import {createPropsWithDefaultId} from '../utils/props-with-default-id';
 import {deepMergeViewState} from '../utils/deep-merge';
 import type Controller from '../controllers/controller';
 import type {ControllerOptions} from '../controllers/controller';
@@ -93,7 +94,10 @@ export default abstract class View<
     // @ts-ignore
     this.id = id || this.constructor.displayName || 'view';
 
-    this.props = {...props, id: this.id};
+    // A falsy id means the class default. Read only an own `id`: props from another view keep
+    // their default on the prototype, and copying it would make it look app-supplied.
+    const ownId = Object.prototype.hasOwnProperty.call(props, 'id') ? props.id : undefined;
+    this.props = createPropsWithDefaultId<ViewProps>(this.id, props, {id: ownId || undefined});
 
     // Extents
     this._x = parsePosition(x);
@@ -118,8 +122,12 @@ export default abstract class View<
       return true;
     }
 
-    // To correctly compare padding use depth=2
-    return this.constructor === view.constructor && deepEqual(this.props, view.props, 2);
+    // To correctly compare padding use depth=2. `id` is an own prop only when it was passed, so
+    // compare props with their resolved ids.
+    return (
+      this.constructor === view.constructor &&
+      deepEqual({...this.props, id: this.id}, {...view.props, id: view.id}, 2)
+    );
   }
 
   /** Clone this view with modified props */
@@ -138,7 +146,8 @@ export default abstract class View<
       return null;
     }
     const ViewportType = this.getViewportType(viewState);
-    return new ViewportType({...viewState, ...this.props, ...viewportDimensions});
+    // Spreading props drops the default `id`, which lives on the prototype
+    return new ViewportType({...viewState, ...this.props, id: this.id, ...viewportDimensions});
   }
 
   getViewStateId(): string {
