@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {BitmapLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
+import {Widget} from '@deck.gl/core';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {device} from '@deck.gl/test-utils';
 import {addMetersToLngLat} from '@math.gl/geospatial/web-mercator';
@@ -236,6 +237,24 @@ test('MapLibreOverlay targets the terrain elevation like the MapLibre camera', (
   }
 });
 
+/** Records the viewports and rendered layers of each widget redraw */
+class RedrawLogWidget extends Widget {
+  className = 'deck-redraw-log-widget';
+  placement = 'top-left' as const;
+  redraws: {viewportIds: string[]; layerIds: string[]}[] = [];
+
+  onRenderHTML(): void {}
+
+  onRedraw({viewports, renderedLayers}: Parameters<Widget['onRedraw']>[0]): void {
+    this.redraws.push({
+      viewportIds: viewports.map(viewport => viewport.id),
+      layerIds: viewports
+        .flatMap(viewport => [...(renderedLayers?.get(viewport) ?? [])].map(layer => layer.id))
+        .sort()
+    });
+  }
+}
+
 for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
   webglTest(`MapLibreOverlay renders with MapLibre ${version}`, async () => {
     const container = document.createElement('div');
@@ -261,9 +280,11 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
         let centerPixel: number[] = [];
         const image = new ImageData(new Uint8ClampedArray([255, 0, 0, 255]), 1, 1);
         const bounds: [number, number, number, number] = [-122.46, 37.77, -122.44, 37.79];
+        const widget = new RedrawLogWidget({id: 'redraw-log'});
         const overlay = new MapLibreOverlay({
           interleaved,
           device: interleaved ? undefined : device,
+          widgets: [widget],
           onAfterRender: ({gl}) => {
             if (!gl || interleaved) {
               return;
@@ -298,6 +319,16 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
             'deck-maplibre-layer-group-before:labels',
             'labels',
             'deck-maplibre-layer-group-last'
+          ]);
+
+          // One map frame draws each layer group in its own screen pass
+          widget.redraws.length = 0;
+          await new Promise<void>(resolve => {
+            map.once('render', () => resolve());
+            map.triggerRepaint();
+          });
+          expect(widget.redraws, 'one widget redraw with both layer groups').toEqual([
+            {viewportIds: ['maplibre'], layerIds: ['above-labels', 'under-labels']}
           ]);
         }
 

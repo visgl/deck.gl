@@ -158,7 +158,9 @@ export function drawLayerGroup(
       return false;
     },
     clearStack,
-    clearCanvas: false
+    clearCanvas: false,
+    // Widgets redraw once per frame in afterRender, with every layer group
+    deferWidgetRedraw: true
   });
 }
 
@@ -357,6 +359,8 @@ function afterRender(deck: Deck, map: Map): void {
     deck.props.onBeforeRender?.({device, gl});
     deck.props.onAfterRender?.({device, gl});
   }
+
+  deck._redrawWidgets();
 
   // End of render cycle, clear generated viewport
   (deck.userData as UserData).currentViewport = null;

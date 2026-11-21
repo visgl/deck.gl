@@ -219,7 +219,9 @@ export function drawMapLibreLayerGroup(
       return layer.props.beforeId === group.beforeId;
     },
     clearStack,
-    clearCanvas: false
+    clearCanvas: false,
+    // Widgets redraw once per frame in afterMapLibreRender, with every layer group
+    deferWidgetRedraw: true
   });
 }
 
@@ -302,6 +304,7 @@ function afterMapLibreRender(deck: Deck, map: MapLibreMap): void {
     deck.props.onAfterRender?.({device, gl});
   }
 
+  deck._redrawWidgets();
   (deck.userData as UserData).currentViewport = null;
 }
 
