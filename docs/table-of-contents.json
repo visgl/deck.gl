@@ -33,10 +33,12 @@
           "developer-guide/using-layers",
           "developer-guide/interactivity",
           "developer-guide/coordinate-systems",
+          "developer-guide/projection-domains",
           "developer-guide/views",
           "developer-guide/animations-and-transitions",
           "developer-guide/zoom-dependent-layers",
           "developer-guide/loading-data",
+          "developer-guide/using-with-arrow",
           "developer-guide/using-effects",
           "developer-guide/performance",
           "developer-guide/tips-and-tricks",
@@ -139,6 +141,21 @@
           "api-reference/geo-layers/tile-3d-layer",
           "api-reference/geo-layers/trips-layer",
           "api-reference/geo-layers/wms-layer"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Proposals",
+        "items": [
+          "api-reference/proposals/overview",
+          "api-reference/proposals/layers",
+          "api-reference/proposals/arrow-layers",
+          "api-reference/proposals/gpu-layers",
+          "api-reference/proposals/effects",
+          "api-reference/proposals/tile-2d-layer",
+          "api-reference/proposals/mvt-2d-layer",
+          "api-reference/proposals/tileset-2d",
+          "api-reference/proposals/tile-2d-header"
         ]
       },
       {
@@ -319,9 +336,15 @@
         "type": "category",
         "label": "@deck.gl/react",
         "items": [
-          "api-reference/react/overview",
-          "api-reference/react/deckgl",
-          "api-reference/react/use-widget"
+          {
+            "type": "category",
+            "label": "@deck.gl/react/legacy",
+            "items": [
+              "api-reference/react/legacy/overview",
+              "api-reference/react/legacy/deckgl",
+              "api-reference/react/legacy/use-widget"
+            ]
+          }
         ]
       },
       {
@@ -351,17 +374,18 @@
           "api-reference/widgets/loading-widget",
           "api-reference/widgets/popup-widget",
           "api-reference/widgets/reset-view-widget",
-          "api-reference/widgets/scale-widget",
           "api-reference/widgets/screenshot-widget",
           "api-reference/widgets/scrollbar-widget",
           "api-reference/widgets/selector-widget",
-          "api-reference/widgets/splitter-widget",
-          "api-reference/widgets/stats-widget",
           "api-reference/widgets/theme-widget",
-          "api-reference/widgets/timeline-widget",
           "api-reference/widgets/toggle-widget",
           "api-reference/widgets/view-layout",
-          "api-reference/widgets/zoom-widget"
+          "api-reference/widgets/zoom-widget",
+          "api-reference/widgets/color-scale-widget",
+          "api-reference/widgets/scale-widget",
+          "api-reference/widgets/splitter-widget",
+          "api-reference/widgets/stats-widget",
+          "api-reference/widgets/timeline-widget"
         ]
       }
     ]

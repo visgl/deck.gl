@@ -4,10 +4,18 @@
 
 /* eslint-disable camelcase */
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import {project, ProjectProps, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
+import {
+  terrainWGSLColorInjection,
+  terrainWGSLCoverInjection,
+  terrainWGSLSource,
+  terrainWGSLVertexInjection,
+  terrainWGSLFragmentInjection
+} from './shader-module.wgsl';
+import {isFlatViewport} from '../utils/projection-utils';
 import type {Bounds} from '../utils/projection-utils';
 import type {TerrainCover} from './terrain-cover';
 
@@ -15,8 +23,11 @@ import type {TerrainCover} from './terrain-cover';
 export type TerrainModuleProps = {
   project: ProjectProps;
   isPicking: boolean;
+  /** Whether this pass writes object IDs into the terrain cover. */
+  isPickingCover?: boolean;
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
+  heightMapRange?: [number, number];
   dummyHeightMap: Texture;
   terrainCover?: TerrainCover | null;
   drawToTerrainHeightMap?: boolean;
@@ -26,27 +37,18 @@ export type TerrainModuleProps = {
 
 type TerrainModuleUniforms = {
   mode: number;
+  /** Numeric flag enabled only while writing encoded object IDs to a cover. */
+  isPickingCover: number;
   bounds: [number, number, number, number];
+  heightRange: [number, number];
 };
 
 type TerrainModuleBindings = {
   terrain_map: Texture;
 };
 
-/** A model can have one of the following modes */
-export const TERRAIN_MODE = {
-  NONE: 0,
-  /** A terrain layer rendering encoded ground elevation into the height map */
-  WRITE_HEIGHT_MAP: 1,
-  /** An offset layer reading encoded ground elevation from the height map */
-  USE_HEIGHT_MAP: 2,
-  /** A terrain layer rendering to screen, using the cover fbo overlaid with its own texture */
-  USE_COVER: 3,
-  /** A terrain layer rendering to screen, using the cover fbo as texture */
-  USE_COVER_ONLY: 4,
-  /** Draped layer is rendered into a texture, and never to screen */
-  SKIP: 5
-};
+export {TERRAIN_MODE} from './terrain-mode';
+import {TERRAIN_MODE} from './terrain-mode';
 
 const TERRAIN_MODE_CONSTANTS = Object.keys(TERRAIN_MODE)
   .map(key => `const float TERRAIN_MODE_${key} = ${TERRAIN_MODE[key]}.0;`)
@@ -58,7 +60,9 @@ const uniformBlock =
   /* glsl */ `
 layout(std140) uniform terrainUniforms {
   float mode;
+  float isPickingCover;
   vec4 bounds;
+  vec2 heightRange;
 } terrain;
 
 uniform sampler2D terrain_map;
@@ -67,6 +71,7 @@ uniform sampler2D terrain_map;
 export const terrainModule = {
   name: 'terrain',
   dependencies: [project],
+  source: terrainWGSLSource,
   vs: `${uniformBlock}
 out vec3 commonPos;
 // In globe mode, absolute Mercator position for terrain FBO UV lookups
@@ -80,70 +85,13 @@ vec2 terrain_globe_to_mercator(vec3 globePosition) {
   float y = atanh(sinLat);
   return (vec2(x, y) + PI) * WORLD_SCALE;
 }
+
+float terrain_globe_latitude_scale(vec3 globePosition) {
+  return length(globePosition.xy) / length(globePosition);
+}
 `,
   fs: `${uniformBlock}in vec2 terrainMercPos;\nin float terrainHeight;`,
-  inject: {
-    'vs:#main-start': /* glsl */ `
-if (terrain.mode == TERRAIN_MODE_SKIP) {
-  gl_Position = vec4(0.0);
-  return;
-}
-`,
-    'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
-commonPos = geometry.position.xyz;
-terrainHeight = commonPos.z + project.commonOrigin.z;
-if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
-  terrainMercPos = terrain_globe_to_mercator(commonPos);
-  terrainHeight = length(commonPos) - GLOBE_RADIUS;
-} else {
-  terrainMercPos = commonPos.xy;
-}
-if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
-  vec2 texCoords = (terrainMercPos - terrain.bounds.xy) / terrain.bounds.zw;
-  position = vec4(texCoords * 2.0 - 1.0, 0.0, 1.0);
-}
-if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
-  vec3 anchor = geometry.worldPosition;
-  anchor.z = 0.0;
-  vec3 anchorCommon = project_position(anchor);
-  vec2 anchorMercPos = (project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)
-    ? terrain_globe_to_mercator(anchorCommon)
-    : anchorCommon.xy;
-  vec2 texCoords = (anchorMercPos - terrain.bounds.xy) / terrain.bounds.zw;
-  if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
-    float terrainZ = texture(terrain_map, texCoords).r;
-    if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
-      // Height map is written in Mercator common space (units = TILE_SIZE / EARTH_CIRCUMFERENCE / cos(lat))
-      // Convert to globe radial units (units = GLOBE_RADIUS / EARTH_RADIUS)
-      terrainZ *= cos(radians(geometry.worldPosition.y)) * PI;
-      geometry.position.xyz += normalize(geometry.position.xyz) * terrainZ;
-    } else {
-      geometry.position.z += terrainZ;
-    }
-    position = project_common_position_to_clipspace(geometry.position);
-  }
-}
-    `,
-    'fs:#main-start': /* glsl */ `
-if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
-  fragColor = vec4(terrainHeight, 0.0, 0.0, 1.0);
-  return;
-}
-    `,
-    'fs:DECKGL_FILTER_COLOR': /* glsl */ `
-if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY)) {
-  vec2 texCoords = (terrainMercPos - terrain.bounds.xy) / terrain.bounds.zw;
-  vec4 pixel = texture(terrain_map, texCoords);
-  if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY) {
-    color = pixel;
-  } else {
-    // pixel is premultiplied
-    color = pixel + color * (1.0 - pixel.a);
-  }
-  return;
-}
-    `
-  },
+
   // eslint-disable-next-line complexity
   getUniforms: (opts: Partial<TerrainModuleProps> = {}) => {
     if (!opts.dummyHeightMap) {
@@ -163,7 +111,10 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
         terrainSkipRender
       } = opts;
       const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
-      const {commonOrigin} = projectUniforms;
+      // Globe sampling uses absolute Mercator positions, not the sphere's common origin.
+      const commonOrigin = isFlatViewport(opts.project!.viewport)
+        ? projectUniforms.commonOrigin
+        : [0, 0, 0];
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
@@ -199,6 +150,8 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
       /* eslint-disable camelcase */
       return {
         mode,
+        isPickingCover: Number(Boolean(opts.isPickingCover)),
+        heightRange: opts.heightMapRange || [0, 1],
         terrain_map: sampler,
         // Convert bounds to common space, as [minX, minY, width, height]
         bounds: bounds
@@ -216,12 +169,94 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
     // Provide the dummy texture to satisfy the terrain_map binding.
     return {
       mode: TERRAIN_MODE.NONE,
+      isPickingCover: Number(Boolean(opts.isPickingCover)),
+      heightRange: opts.heightMapRange || [0, 1],
       terrain_map: opts.dummyHeightMap,
       bounds: [0, 0, 0, 0]
     };
   },
   uniformTypes: {
     mode: 'f32',
-    bounds: 'vec4<f32>'
+    isPickingCover: 'f32',
+    bounds: 'vec4<f32>',
+    heightRange: 'vec2<f32>'
   }
 } as const satisfies ShaderModule<TerrainModuleProps, TerrainModuleUniforms, TerrainModuleBindings>;
+
+export const terrainPlugin: ShaderPlugin = {
+  name: 'terrain',
+  module: terrainModule,
+  interStageVariables: {
+    terrainHeightWGSL: {type: 'f32'},
+    terrainMercPosWGSL: {type: 'vec2<f32>'},
+    terrainPickingColorWGSL: {type: 'vec3<f32>'}
+  },
+  injections: {
+    'wgsl:vs:DECKGL_FILTER_GL_POSITION': terrainWGSLVertexInjection,
+    'wgsl:fs:#main-start': terrainWGSLFragmentInjection,
+    'wgsl:fs:DECKGL_FILTER_COLOR': terrainWGSLColorInjection,
+    'wgsl:fs:DECKGL_FILTER_COLOR_BEFORE_LIGHTING': terrainWGSLCoverInjection,
+    'glsl:vs:#main-start': /* glsl */ `
+if (terrain.mode == TERRAIN_MODE_SKIP) {
+  gl_Position = vec4(0.0);
+  return;
+}
+`,
+    'glsl:vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
+commonPos = geometry.position.xyz;
+terrainHeight = commonPos.z + project.commonOrigin.z;
+if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+  terrainMercPos = terrain_globe_to_mercator(commonPos);
+  terrainHeight = length(commonPos) - GLOBE_RADIUS;
+} else {
+  terrainMercPos = commonPos.xy;
+}
+if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+  vec2 texCoords = (terrainMercPos - terrain.bounds.xy) / terrain.bounds.zw;
+  position = vec4(texCoords * 2.0 - 1.0, 0.0, 1.0);
+}
+if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
+  vec3 anchor = geometry.worldPosition;
+  anchor.z = 0.0;
+  vec3 anchorCommon = project_position(anchor);
+  vec2 anchorMercPos = (project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)
+    ? terrain_globe_to_mercator(anchorCommon)
+    : anchorCommon.xy;
+  vec2 texCoords = (anchorMercPos - terrain.bounds.xy) / terrain.bounds.zw;
+  if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
+    float terrainZ = texture(terrain_map, texCoords).r;
+    if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+      // Height map is written in Mercator common space (units = TILE_SIZE / EARTH_CIRCUMFERENCE / cos(lat))
+      // Convert to globe radial units (units = GLOBE_RADIUS / EARTH_RADIUS)
+      terrainZ *= terrain_globe_latitude_scale(anchorCommon) * PI;
+      geometry.position.xyz += normalize(geometry.position.xyz) * terrainZ;
+    } else {
+      geometry.position.z += terrainZ;
+    }
+    position = project_common_position_to_clipspace(geometry.position);
+  }
+}
+    `,
+    'glsl:fs:#main-start': /* glsl */ `
+if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+  fragColor = vec4(terrainHeight, 0.0, 0.0, 1.0);
+  return;
+}
+    `,
+    'glsl:fs:DECKGL_FILTER_COLOR': /* glsl */ `
+if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY)) {
+  vec2 texCoords = (terrainMercPos - terrain.bounds.xy) / terrain.bounds.zw;
+  vec4 pixel = texture(terrain_map, texCoords);
+  if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY) {
+    color = pixel;
+  } else {
+    // pixel is premultiplied
+    float alpha = pixel.a + color.a * (1.0 - pixel.a);
+    vec3 rgb = pixel.rgb + color.rgb * color.a * (1.0 - pixel.a);
+    color = vec4(alpha > 0.0 ? rgb / alpha : vec3(0.0), alpha);
+  }
+  return;
+}
+    `
+  }
+};

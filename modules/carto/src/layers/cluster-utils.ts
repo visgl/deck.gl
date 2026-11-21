@@ -6,7 +6,7 @@ import {cellToParent} from 'quadbin';
 import {cellToParent as h3CellToParent, getResolution as getH3Resolution} from 'h3-js';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 import {Accessor, log} from '@deck.gl/core';
-import {BinaryFeatureCollection} from '@loaders.gl/schema';
+import {BinaryFeatureCollection} from '@loaders.gl/core/schema';
 import {createBinaryPointFeature, createEmptyBinary} from '../utils';
 
 export type Aggregation = 'any' | 'average' | 'count' | 'min' | 'max' | 'sum';

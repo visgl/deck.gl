@@ -2,8 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {projectionEngine} from '@math.gl/projection';
-import type {CRSConversion, CRSDescriptor, TypeScriptCRSInput} from '@math.gl/projection/core';
+import {projectionEngine} from '@math.gl/geospatial/projection';
+import type {
+  CRSConversion,
+  CRSDescriptor,
+  TypeScriptCRSInput
+} from '@math.gl/geospatial/projection/core';
 import {GLOBE_CRS} from '../viewports/globe-util';
 import {OSM_TILE_CRS} from '../viewports/web-mercator-util';
 
@@ -40,6 +44,14 @@ const resolvedCRS = new Map<string, CRSDescriptor | Promise<CRSDescriptor>>([
   [GLOBE_CRS.signature, GLOBE_CRS],
   [OSM_TILE_CRS.signature, OSM_TILE_CRS]
 ]);
+
+/** Compare supplied CRS definitions synchronously, using the resolver's key convention. */
+export function areCRSEqual(a: TypeScriptCRSInput, b: TypeScriptCRSInput): boolean {
+  if (a === b) return true;
+  const keyA = typeof a === 'string' ? a : JSON.stringify(a);
+  const keyB = typeof b === 'string' ? b : JSON.stringify(b);
+  return keyA === keyB;
+}
 
 /** Resolve built-in attribute CRSs synchronously, sharing loading and loaded math.gl descriptors.
  * Accepts the same CRS definitions and spatial-reference objects as math.gl.

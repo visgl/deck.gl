@@ -9,6 +9,7 @@ import DataColumn, {
   BufferAccessor,
   DataColumnSettings
 } from './data-column';
+import {packNormalizedColor} from '../../utils/color';
 import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
@@ -16,9 +17,19 @@ import {toDoublePrecisionArray} from '../../utils/math-utils';
 import * as range from '../../utils/range';
 import {bufferLayoutEqual} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
-import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
+import {Buffer, getTypedArrayFromDataType} from '@luma.gl/core';
+import type {Device, BufferLayout} from '@luma.gl/core';
+import {
+  GPUConstant,
+  GPUVector,
+  getGPUVectorData,
+  getGPUVectorFormatInfo
+} from '@luma.gl/graph/gpu-data';
 
 import type {NumericArray, TypedArray} from '../../types/types';
+
+/** Scratch color components consumed synchronously by attribute writes. */
+const COLOR_SCRATCH: number[] = [];
 
 export type Accessor<DataType, ReturnType> = (
   object: DataType,
@@ -58,6 +69,10 @@ export type AttributeOptions = DataColumnOptions<{
   bufferGroup?: string;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
+  /** @internal Identifies RGB(A) byte color accessors independently of their vertex format. */
+  semanticType?: 'color';
+  /** @internal Interpret plain-array color accessor inputs as normalized values. */
+  normalizedColorInput?: boolean;
   /** Callback to map `accessor`'s return value to the attribute value. */
   transform?: ((value: any) => any) | null;
   /** Identifies the transform dependency; `projection` enables automatic position invalidation. */
@@ -74,7 +89,7 @@ type AttributeInternalState = {
   /** Legacy: external binary supplied via attribute name */
   lastExternalBuffer: TypedArray | Buffer | BinaryAttribute | null;
   /** External binary supplied via accessor name */
-  binaryValue: TypedArray | Buffer | BinaryAttribute | null;
+  binaryValue: TypedArray | Buffer | BinaryAttribute | GPUVector | null;
   binaryAccessor: Accessor<any, any> | null;
   needsUpdate: string | boolean;
   needsRedraw: string | boolean;
@@ -87,7 +102,12 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   constant: boolean = false;
 
   constructor(device: Device, opts: AttributeOptions) {
-    super(device, opts, {
+    // Constant and row accessors both use DataColumn's component writer and defaults.
+    const options =
+      opts.semanticType === 'color'
+        ? {...opts, normalizedColorInput: false, defaultValue: opts.defaultValue ?? [0, 0, 0, 255]}
+        : opts;
+    super(device, options, {
       startIndices: null,
       constantValue: null,
       lastExternalBuffer: null,
@@ -129,6 +149,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
   layoutChanged(): boolean {
     return this.state.layoutChanged;
+  }
+
+  /** Requests a new model buffer layout, e.g. when this attribute replaces a transition buffer */
+  setLayoutChanged(): void {
+    this.state.layoutChanged = true;
   }
 
   setAccessor(accessor: DataColumnSettings<AttributeOptions>) {
@@ -281,18 +306,47 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return false;
     }
 
-    const wasConstant = this.isConstant;
     const transformedValue =
       this.settings.transform && context ? this.settings.transform.call(context, value) : value;
+    let constant = transformedValue;
+    switch (this.settings.semanticType) {
+      case 'color':
+        if (
+          this.settings.normalizedColorInput &&
+          Array.isArray(constant) &&
+          value !== this.settings.defaultValue
+        ) {
+          packNormalizedColor(constant, COLOR_SCRATCH, 0, this.size);
+          constant = COLOR_SCRATCH;
+        }
+        break;
+      default:
+        break;
+    }
+    this.setData({constant: true, value: constant});
+    return true;
+  }
+
+  /** Updates storage, retaining raw constant bytes alongside shader-normalized values. */
+  override setData(
+    data: Parameters<DataColumn<AttributeOptions, AttributeInternalState>['setData']>[0]
+  ): boolean {
+    const wasConstant = this.isConstant;
+    if (ArrayBuffer.isView(data) || data instanceof Buffer || !data.constant) {
+      const hasChanged = super.setData(data);
+      this.state.constantValue = null;
+      this.state.layoutChanged ||= wasConstant && this.device.type === 'webgpu';
+      return hasChanged;
+    }
     const ArrayType = this.settings.defaultType;
     // DataColumn normalizes constants for shader consumption. Buffer grouping needs the original
     // vertex-format bytes so that interleaving preserves integer and normalized attribute formats.
     this.state.constantValue = this._normalizeValue(
-      transformedValue,
+      data.value,
       new ArrayType(this.size),
       0
     ) as TypedArray;
-    const hasChanged = this.setData({constant: true, value: transformedValue});
+    const hasChanged = super.setData(data);
     if (this.device.type === 'webgpu') {
       let bufferValue = this.state.constantValue;
       if (
@@ -320,7 +374,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       this.setNeedsRedraw();
     }
     this.clearNeedsUpdate();
-    return true;
+    return hasChanged;
   }
 
   /** Returns one row in its vertex-buffer representation for WebGPU buffer grouping. */
@@ -354,7 +408,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   // If the returned value from the accessor is the same as the attribute value, set it directly
   // Otherwise use the auto updater for transform/normalization
   setBinaryValue(
-    buffer?: TypedArray | Buffer | BinaryAttribute,
+    buffer?: TypedArray | Buffer | BinaryAttribute | GPUVector,
     startIndices: NumericArray | null = null
   ): boolean {
     const {state, settings} = this;
@@ -370,6 +424,13 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return false;
     }
 
+    if (buffer instanceof GPUVector) {
+      assert(
+        buffer.length >= this.numInstances,
+        'GPUVector attribute is shorter than the draw count'
+      );
+    }
+
     // The source buffer can be unchanged while its projection/model matrix is invalidated.
     if (state.binaryValue === buffer && !(settings.transform && this.needsUpdate())) {
       this.clearNeedsUpdate();
@@ -377,6 +438,26 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
     state.binaryValue = buffer;
     this.setNeedsRedraw();
+
+    if (buffer instanceof GPUVector) {
+      if (!buffer.format) throw new Error('GPUVector attributes require a format');
+      const info = getGPUVectorFormatInfo(buffer.format);
+      const type = info.type;
+      if (type === 'float16') throw new Error('GPUVector float16 attributes are not supported');
+      assert(
+        !info.vertexList && !info.valueList,
+        'GPUVector attributes require fixed-width values'
+      );
+      const chunk = getGPUVectorData(buffer);
+      assert(chunk.buffer instanceof Buffer, 'GPUVector attributes require a concrete Buffer');
+      buffer = {
+        buffer: chunk.buffer as Buffer,
+        type,
+        size: info.components,
+        offset: chunk.byteOffset,
+        stride: chunk.byteStride
+      };
+    }
 
     const needsUpdate = settings.transform || startIndices !== this.startIndices;
 
@@ -429,14 +510,74 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return result;
   }
 
+  /**
+   * Returns typed shader attributes without copying GPU storage. Vectors borrow this
+   * attribute's buffers and must be reacquired after updates that replace storage.
+   * Constants contain one raw, unnormalized row. Unallocated attributes are omitted.
+   */
+  getGPUVector(): Record<string, GPUVector | GPUConstant> {
+    if (!this.isConstant && !this.getBuffer()) {
+      return {};
+    }
+    const layout = this._getShaderBufferLayout();
+    const values = this.getValue();
+    const result: Record<string, GPUVector | GPUConstant> = {};
+    let constantValue = this.getConstantValue();
+    if (
+      this.doublePrecision &&
+      (constantValue instanceof Float32Array || constantValue instanceof Float64Array)
+    ) {
+      constantValue =
+        this.device.type === 'webgpu'
+          ? toDoublePrecisionArray(constantValue, {size: this.size})
+          : new Float32Array([...this.value!, ...new Float32Array(this.size)]);
+    }
+    for (const definition of layout.attributes || []) {
+      const name = definition.attribute;
+      const value = values[name];
+      const formatInfo = getGPUVectorFormatInfo(definition.format);
+      if (this.isConstant && constantValue) {
+        const ArrayType = getTypedArrayFromDataType(formatInfo.type);
+        const offset = (definition.byteOffset || 0) / constantValue.BYTES_PER_ELEMENT;
+        result[name] = new GPUConstant({
+          format: definition.format,
+          value: new ArrayType(constantValue.subarray(offset, offset + formatInfo.components))
+        });
+      } else if (value instanceof Buffer) {
+        result[name] = new GPUVector({
+          type: 'buffer',
+          name,
+          buffer: value,
+          format: definition.format,
+          length: this.numInstances,
+          byteOffset: definition.byteOffset || 0,
+          byteStride: layout.byteStride,
+          ownsBuffer: false
+        });
+      } else if (value) {
+        // Includes the synthetic fp64 low constant for float32 input on WebGL.
+        result[name] = new GPUConstant({
+          format: definition.format,
+          value: new (getTypedArrayFromDataType(formatInfo.type))(value).subarray(
+            0,
+            formatInfo.components
+          )
+        });
+      }
+    }
+    return result;
+  }
+
   /** Generate WebGPU-style buffer layout descriptor from this attribute */
   getBufferLayout(
     /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
     modelInfo?: {isInstanced?: boolean}
   ): BufferLayout {
-    // Clear change flag
     this.state.layoutChanged = false;
+    return this._getShaderBufferLayout(modelInfo);
+  }
 
+  private _getShaderBufferLayout(modelInfo?: {isInstanced?: boolean}): BufferLayout {
     const shaderAttributeDefs = this.settings.shaderAttributes;
     const result: BufferLayout = super._getBufferLayout();
     const {stepMode} = this.settings;
@@ -483,6 +624,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
+    const normalizeColor =
+      settings.semanticType === 'color' && settings.normalizedColorInput && !state.binaryAccessor;
     const accessorFunc: Accessor<any, any> =
       state.binaryAccessor ||
       // @ts-ignore
@@ -501,18 +644,47 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         objectValue = transform.call(this, objectValue);
       }
 
+      /** Whether this row contains plain-array colors to pack. */
+      const normalizeRow = normalizeColor && Array.isArray(objectValue);
+      /** Whether the row starts with a typed per-vertex color. */
+      const nestedColor = startIndices && ArrayBuffer.isView(objectValue?.[0]);
+      /** Whether the row contains flat per-vertex color channels. */
+      const flatColors = normalizeRow && startIndices && objectValue.length > 4;
+      if (
+        normalizeRow &&
+        !nestedColor &&
+        !flatColors &&
+        (!startIndices || !Array.isArray(objectValue[0]))
+      ) {
+        COLOR_SCRATCH.length = size;
+        packNormalizedColor(objectValue, COLOR_SCRATCH, 0, size);
+        objectValue = COLOR_SCRATCH;
+      }
+
       if (startIndices) {
         const numVertices =
           (objectInfo.index < startIndices.length - 1
             ? startIndices[objectInfo.index + 1]
             : numInstances) - startIndices[objectInfo.index];
-        if (objectValue && Array.isArray(objectValue[0])) {
+        if (objectValue && (Array.isArray(objectValue[0]) || nestedColor)) {
           let startIndex = i;
           for (const item of objectValue) {
-            attribute._normalizeValue(item, value as TypedArray, startIndex);
+            if (normalizeRow && Array.isArray(item)) {
+              packNormalizedColor(item, value as TypedArray, startIndex, size);
+            } else {
+              attribute._normalizeValue(item, value as TypedArray, startIndex);
+            }
             startIndex += size;
           }
-        } else if (objectValue && objectValue.length > size) {
+        } else if (flatColors) {
+          for (let offset = 0; offset < objectValue.length; offset += size) {
+            packNormalizedColor(objectValue, value as TypedArray, i + offset, size, offset);
+          }
+        } else if (
+          objectValue &&
+          objectValue.length > size &&
+          !(size === 3 && objectValue instanceof Uint8ClampedArray && objectValue.length === 4)
+        ) {
           (value as TypedArray).set(objectValue, i);
         } else {
           attribute._normalizeValue(objectValue, objectInfo.target, 0);

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {Device} from '@luma.gl/core';
-import {GL} from '@luma.gl/webgl/constants';
+import {GL} from '@luma.gl/core/webgl-constants';
 
 export function createRenderTarget(
   device: Device,
@@ -11,10 +11,16 @@ export function createRenderTarget(
     id: string;
     float?: boolean;
     interpolate?: boolean;
+    depth?: boolean;
   }
 ) {
   return device.createFramebuffer({
     id: opts.id,
+    depthStencilAttachment: opts.depth
+      ? 'depth32float'
+      : device.type === 'webgpu'
+        ? 'depth24plus'
+        : undefined,
     colorAttachments: [
       device.createTexture({
         id: opts.id,

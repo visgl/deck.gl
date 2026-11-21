@@ -4,8 +4,8 @@
 
 import type {Binding} from '@luma.gl/core';
 import {Computation} from '@luma.gl/engine';
-import type {GPUCommandGraph, GraphBufferUse, GraphDataView} from '@luma.gl/gpgpu/gpu-core';
-import type {GPUGraphForceLayout} from '@luma.gl/gpgpu/gpu-graph';
+import type {GPUCommandGraph, GraphBufferUse, GraphDataView} from '@luma.gl/graph/gpu-core';
+import type {GPUGraphAlgorithmsForceLayout} from '@luma.gl/graph/gpu-graph-algorithms';
 
 const WORKGROUP_SIZE = 256;
 const REPULSION_SAMPLE_COUNT = 4;
@@ -13,7 +13,7 @@ const REPULSION_SAMPLE_COUNT = 4;
 type SampledView = GraphDataView<'uint32'> | GraphDataView<'float32x2'>;
 type SampledBinding = {view: SampledView; usage: GraphBufferUse['usage']};
 type SampledState = {
-  layout: GPUGraphForceLayout;
+  layout: GPUGraphAlgorithmsForceLayout;
   vertexCount: number;
   positions: GraphDataView<'float32x2'>;
   velocities: GraphDataView<'float32x2'>;
@@ -36,7 +36,7 @@ type SampledState = {
  */
 export function addGraphExplorerSampledLayoutToGraph<Parameters>(
   commandGraph: GPUCommandGraph<Parameters>,
-  layout: GPUGraphForceLayout
+  layout: GPUGraphAlgorithmsForceLayout
 ): void {
   const graph = layout.topology.graph;
   const reverse = graph.directed ? layout.topology.reverse : undefined;

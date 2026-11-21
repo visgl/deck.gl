@@ -26,15 +26,17 @@ import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {default as MeshLayer} from '../mesh-layer/mesh-layer';
 
 import {coreApi} from '@loaders.gl/core';
-import {MeshAttributes} from '@loaders.gl/schema';
-import {Tileset3D, Tiles3DSource, I3SSource, Tile3D, TILE_TYPE} from '@loaders.gl/tiles';
-import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
+import {MeshAttributes} from '@loaders.gl/core/schema';
+import {Tileset3D, Tiles3DSource, I3SSource, Tile3D, TILE_TYPE} from '@loaders.gl/tiles-3d';
+import {Tiles3DLoader} from '@loaders.gl/tiles-3d/3d-tiles';
+
+import {toByteColor} from '../utils/normalized-color';
 
 const SINGLE_DATA = [0];
 
 /**
  * Numeric `COORDINATE_SYSTEM` values used by deck.gl before v9.3, still emitted on tile content by
- * released versions of loaders such as `@loaders.gl/i3s`. Mapped back to the string constants that
+ * released versions of loaders such as `@loaders.gl/tiles-3d/i3s`. Mapped back to the string constants that
  * the layers understand.
  */
 const LEGACY_COORDINATE_SYSTEMS: Record<number, CoordinateSystem> = {
@@ -56,8 +58,13 @@ export function normalizeCoordinateSystem(
   return coordinateSystem;
 }
 
+/** Byte RGBA for tiles with no point color. */
+const DEFAULT_POINT_COLOR: Color = [0, 0, 0, 255];
+/** Supplies the default byte RGB for mesh tiles. */
+const getDefaultMeshColor = (): Color => [255, 255, 255];
+
 const defaultProps: DefaultProps<Tile3DLayerProps> = {
-  getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
+  getPointColor: {type: 'accessor', value: DEFAULT_POINT_COLOR},
   pointSize: 1.0,
 
   // Disable async data loading (handling it in _loadTileSet)
@@ -68,7 +75,7 @@ const defaultProps: DefaultProps<Tile3DLayerProps> = {
   onTileLoad: {type: 'function', value: tileHeader => {}},
   onTileUnload: {type: 'function', value: tileHeader => {}},
   onTileError: {type: 'function', value: (tile, message, url) => {}},
-  _getMeshColor: {type: 'function', value: tileHeader => [255, 255, 255]}
+  _getMeshColor: {type: 'function', value: getDefaultMeshColor}
 };
 
 /** All properties supported by Tile3DLayer */
@@ -77,7 +84,7 @@ export type Tile3DLayerProps<DataT = unknown> = _Tile3DLayerProps<DataT> & Compo
 /** Props added by the Tile3DLayer */
 type _Tile3DLayerProps<DataT> = {
   data: string;
-  /** Color Accessor for point clouds. **/
+  /** Fallback point cloud color. Plain arrays use 0–1 with Deck normalizedColors. */
   getPointColor?: Accessor<DataT, Color>;
 
   /** Global radius of all points in pixels. **/
@@ -100,7 +107,7 @@ type _Tile3DLayerProps<DataT> = {
   /** Called when a tile fails to load. **/
   onTileError?: (tile: Tile3D, url: string, message: string) => void;
 
-  /** (Experimental) Accessor to change color of mesh based on properties. **/
+  /** (Experimental) Mesh color accessor. Plain arrays use 0–1 with Deck normalizedColors. */
   _getMeshColor?: (tile: Tile3D) => Color;
 };
 
@@ -116,6 +123,8 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     frameNumber?: number;
     lastUpdatedViewports: {[viewportId: string]: Viewport} | null;
     layerMap: {[layerId: string]: any};
+    /** Color convention applied to cached tile sublayers. */
+    normalizedColors?: boolean;
     tileset3d: Tileset3D | null;
   };
 
@@ -155,7 +164,13 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         this.state.activeViewports = {};
       }
     }
-    if (changeFlags.propsChanged) {
+    const normalizedColors = this.usesNormalizedColors();
+    if (
+      changeFlags.propsChanged ||
+      changeFlags.updateTriggersChanged ||
+      normalizedColors !== this.state.normalizedColors
+    ) {
+      this.state.normalizedColors = normalizedColors;
       const {layerMap} = this.state;
       for (const key in layerMap) {
         layerMap[key].needsUpdate = true;
@@ -343,13 +358,23 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     };
 
     const {pointSize, getPointColor} = this.props;
+    let color = getPointColor;
+    if (!constantRGBA && getPointColor !== DEFAULT_POINT_COLOR && this.usesNormalizedColors()) {
+      color =
+        typeof getPointColor === 'function'
+          ? (object, info) => toByteColor(getPointColor(object, info))
+          : toByteColor(getPointColor);
+    }
     const SubLayerClass = this.getSubLayerClass('pointcloud', PointCloudLayer);
     return new SubLayerClass(
       {
         pointSize
       },
       this.getSubLayerProps({
-        id: 'pointcloud'
+        id: 'pointcloud',
+        updateTriggers: {
+          getColor: [this.props.updateTriggers.getPointColor, this.state.normalizedColors]
+        }
       }),
       {
         id: `${this.id}-pointcloud-${tileHeader.id}`,
@@ -358,7 +383,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         coordinateSystem: 'meter-offsets',
         coordinateOrigin: cartographicOrigin,
         modelMatrix,
-        getColor: constantRGBA || getPointColor,
+        getColor: constantRGBA || color,
         _offset: 0
       }
     );
@@ -407,6 +432,8 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       featureIds
     } = content;
     const {_getMeshColor} = this.props;
+    const color = _getMeshColor(tileHeader);
+    const normalize = _getMeshColor !== getDefaultMeshColor && this.usesNormalizedColors();
 
     const geometry =
       (oldLayer && oldLayer.props.mesh) ||
@@ -427,7 +454,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         tile: tileHeader,
         mesh: geometry,
         data: SINGLE_DATA,
-        getColor: _getMeshColor(tileHeader),
+        getColor: normalize ? toByteColor(color) : color,
         pbrMaterial: material,
         modelMatrix,
         coordinateOrigin: cartographicOrigin,

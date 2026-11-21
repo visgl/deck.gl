@@ -5,7 +5,7 @@
 import TransitionInterpolator from './transition-interpolator';
 import {lerp} from '@math.gl/core';
 
-import {flyToViewport, getFlyToDuration} from '@math.gl/web-mercator';
+import {flyToViewport, getFlyToDuration} from '@math.gl/geospatial/web-mercator';
 
 const LINEARLY_INTERPOLATED_PROPS = {
   bearing: 0,

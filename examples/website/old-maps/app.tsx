@@ -237,6 +237,9 @@ export default function App({
       <Map
         ref={mapRef}
         reuseMaps
+        // The overlaid deck canvas sits in a MapLibre control slot, which is stacked above the tour
+        // controls and the website's info panel unless the map is a stacking context of its own
+        style={{isolation: 'isolate'}}
         initialViewState={OLD_MAPS[currentIndex].viewState}
         mapStyle={mapStyle}
         // Exploring the map pauses the tour. Only user input carries an original event.

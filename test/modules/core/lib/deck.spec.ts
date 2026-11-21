@@ -8,6 +8,9 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
 import type {CanvasContext, CanvasContextProps} from '@luma.gl/core';
+import {Device} from '@luma.gl/core';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {sleep} from './async-iterator-test-utils';
 
 function createDeferred<T>() {
@@ -73,6 +76,124 @@ function finalizeOwnedDeck(deck: Deck): void {
 }
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
+
+webglTest('Deck#creates an explicitly requested WebGL device', async () => {
+  const adapters = [webgpuAdapter];
+  Object.freeze(adapters);
+  const deck = new Deck({
+    width: 1,
+    height: 1,
+    deviceProps: {type: 'webgl', adapters},
+    initialViewState: {longitude: 0, latitude: 0, zoom: 0}
+  });
+  try {
+    await waitForRender(deck);
+    expect(deck.device?.type).toBe('webgl');
+  } finally {
+    finalizeOwnedDeck(deck);
+  }
+});
+
+test('Deck#creates an explicitly requested WebGPU device with premultiplied alpha', async context => {
+  if (!(await getWebGPUTestDevice())) return context.skip();
+  const deck = new Deck({
+    width: 1,
+    height: 1,
+    deviceProps: {type: 'webgpu', adapters: [webgpuAdapter]},
+    initialViewState: {longitude: 0, latitude: 0, zoom: 0}
+  });
+  try {
+    await waitForRender(deck);
+    expect(deck.device?.type).toBe('webgpu');
+    expect(deck.device?.getDefaultCanvasContext().props.alphaMode).toBe('premultiplied');
+  } finally {
+    const ownedDevice = deck.device;
+    deck.finalize();
+    ownedDevice?.destroy();
+  }
+});
+
+const gpuDebugTestCases = [
+  {name: 'default', props: {}, expected: false},
+  {name: 'enabled', props: {debug: true}, expected: true},
+  {name: 'device override off', props: {debug: true, deviceProps: {debug: false}}, expected: false},
+  {name: 'device override on', props: {debug: false, deviceProps: {debug: true}}, expected: true},
+  {
+    name: 'device override unset',
+    props: {debug: true, deviceProps: {debug: undefined}},
+    expected: true
+  }
+];
+
+webglTest.each(gpuDebugTestCases)('Deck#GPU debug $name', async ({props, expected}) => {
+  const defaultDebug = Device.defaultProps.debug;
+  let deck: Deck | undefined;
+  try {
+    Device.defaultProps.debug = !expected;
+    deck = new Deck({
+      width: 1,
+      height: 1,
+      viewState: {longitude: 0, latitude: 0, zoom: 0},
+      ...props
+    });
+    await waitForRender(deck);
+    expect(deck.device!.props.debug).toBe(expected);
+  } finally {
+    Device.defaultProps.debug = defaultDebug;
+    if (deck) finalizeOwnedDeck(deck);
+  }
+});
+
+webglTest.each(gpuDebugTestCases)(
+  'Deck#GPU debug $name forwards to attached context',
+  async ({props, expected}) => {
+    const defaultDebug = Device.defaultProps.debug;
+    let deck: Deck | undefined;
+    try {
+      Device.defaultProps.debug = !expected;
+      const canvas = document.createElement('canvas');
+      deck = new Deck({
+        gl: canvas.getContext('webgl2'),
+        width: 1,
+        height: 1,
+        viewState: {longitude: 0, latitude: 0, zoom: 0},
+        ...props
+      });
+      await waitForRender(deck);
+      expect(deck.device!.props.debug).toBe(expected);
+    } finally {
+      Device.defaultProps.debug = defaultDebug;
+      if (deck) finalizeOwnedDeck(deck);
+    }
+  }
+);
+
+webglTest('Deck#uses and preserves a caller-owned WebGL context', async () => {
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl2')!;
+  const onWebGLInitialized = vi.fn();
+  const deck = new Deck({
+    gl,
+    width: 1,
+    height: 1,
+    onWebGLInitialized,
+    initialViewState: {longitude: 0, latitude: 0, zoom: 0}
+  });
+  const loseContext = gl.getExtension('WEBGL_lose_context');
+  try {
+    try {
+      await waitForRender(deck);
+      expect(deck.device?.type).toBe('webgl');
+      expect(deck.device?.getDefaultCanvasContext().canvas).toBe(canvas);
+      expect(onWebGLInitialized).toHaveBeenCalledExactlyOnceWith(gl);
+    } finally {
+      deck.finalize();
+    }
+    expect(gl.isContextLost()).toBe(false);
+  } finally {
+    loseContext?.loseContext();
+  }
+});
 
 test('Deck#constructor', async () => {
   const callbacks = {
@@ -361,6 +482,10 @@ test('Deck#useDevicePixels forwards to canvas context', async () => {
     // Numeric overrides should flow through unchanged so luma can size the drawing buffer.
     deck.setProps({useDevicePixels: 2});
     expect(useDevicePixels, 'numeric DPR override is forwarded').toBe(2);
+
+    // Explicitly undefined resets the canvas context to the default.
+    deck.setProps({useDevicePixels: undefined});
+    expect(useDevicePixels, 'undefined resets to default').toBe(true);
   } finally {
     deck.finalize();
   }
@@ -1425,6 +1550,54 @@ test('Deck#props omitted are unchanged', async () => {
                   'Layers remain set'
                 ).toBe(1);
 
+                deck.finalize();
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            }
+          });
+        } catch (error) {
+          reject(error);
+        }
+      }
+    });
+  });
+});
+
+test('Deck#props explicitly undefined use defaults', async () => {
+  await new Promise<void>((resolve, reject) => {
+    const deck = new Deck({
+      device,
+      width: 1,
+      height: 1,
+
+      viewState: {
+        longitude: 0,
+        latitude: 0,
+        zoom: 0
+      },
+
+      layers: [],
+
+      // e.g. `onAfterRender: debug ? callback : undefined`
+      onAfterRender: undefined,
+      onBeforeRender: () => {},
+
+      onLoad: () => {
+        try {
+          expect(deck.props.onAfterRender, 'onAfterRender falls back to default').toBe(
+            Deck.defaultProps.onAfterRender
+          );
+
+          deck.setProps({
+            onBeforeRender: undefined,
+            // Only called if rendering did not stop after the first frame
+            onAfterRender: () => {
+              try {
+                expect(deck.props.onBeforeRender, 'onBeforeRender restored to default').toBe(
+                  Deck.defaultProps.onBeforeRender
+                );
                 deck.finalize();
                 resolve();
               } catch (error) {

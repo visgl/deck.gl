@@ -13,13 +13,14 @@ import {
 } from '@deck.gl/core';
 import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
+import type {ClipExtensionProps} from '@deck.gl/extensions';
 
-import {Matrix4} from '@math.gl/core';
-import {MVTWorkerLoader} from '@loaders.gl/mvt';
-import {binaryToGeojson} from '@loaders.gl/gis';
+import {Matrix4, equals} from '@math.gl/core';
+import {MVTWorkerLoader} from '@loaders.gl/tiles/mvt';
+import {convertBinaryFeatureCollectionToGeojson} from '@loaders.gl/core/geoarrow';
 
-import type {Loader} from '@loaders.gl/loader-utils';
-import type {BinaryFeatureCollection} from '@loaders.gl/schema';
+import type {Loader} from '@loaders.gl/core/loader-utils';
+import type {BinaryFeatureCollection} from '@loaders.gl/core/schema';
 import type {Feature, Geometry} from 'geojson';
 
 import {transform} from './coordinate-transform';
@@ -100,7 +101,7 @@ export type _MVTLayerProps<FeaturePropertiesT> = Omit<
   /**
    * Loaders used to transform tiles into `data` property passed to `renderSubLayers`.
    *
-   * @default [MVTWorkerLoader] from `@loaders.gl/mvt`
+   * @default [MVTWorkerLoader] from `@loaders.gl/tiles/mvt`
    */
   loaders?: Loader[];
 };
@@ -108,6 +109,10 @@ export type _MVTLayerProps<FeaturePropertiesT> = Omit<
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 
 /** Render data formatted as [Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/). */
+/**
+ * Compatibility MVT layer retaining binary data, TileJSON, and rendered-feature APIs.
+ * Remains supported while MVT2DLayer gains equivalent feature coverage.
+ */
 export default class MVTLayer<
   FeaturePropertiesT = any,
   ExtraProps extends {} = {}
@@ -261,12 +266,13 @@ export default class MVTLayer<
   }
 
   renderSubLayers(
-    props: TileLayer['props'] & {
-      id: string;
-      data: ParsedMvtTile;
-      _offset: number;
-      tile: Tile2DHeader<ParsedMvtTile>;
-    }
+    props: TileLayer['props'] &
+      ClipExtensionProps & {
+        id: string;
+        data: ParsedMvtTile;
+        _offset: number;
+        tile: Tile2DHeader<ParsedMvtTile>;
+      }
   ): Layer | null | LayersList {
     const {x, y, z} = props.tile.index;
     const worldScale = Math.pow(2, z);
@@ -286,8 +292,25 @@ export default class MVTLayer<
     props.modelMatrix = modelMatrix;
     props.coordinateOrigin = [xOffset, yOffset, 0];
     props.coordinateSystem = 'OSMTile512';
-    if (this.context.viewport.crs?.signature === 'OSMTile512') {
-      // Rectangular common-space clipping is only valid for the Mercator target.
+
+    // A tiler writes a feature into the buffer of every tile it touches, so each tile must paint
+    // only its own area or the shared geometry is drawn once per tile. This applies to the point
+    // sub layers too: a point inside a neighbor's buffer is emitted by both tiles. `ClipExtension`
+    // clips those by anchor rather than by geometry, so a label or icon still overhangs the edge.
+    // `clip_isInBounds` is half-open, so a feature exactly on a shared edge is drawn by one tile
+    // rather than both.
+    // The tile, in tile-local coordinates
+    const tileClipBounds: [number, number, number, number] = [0, 0, 1, 1];
+    // ClipExtension's default clipBounds is the same unit square, so only other bounds were set
+    // by the caller
+    if (props.clipBounds && !equals(props.clipBounds, tileClipBounds)) {
+      log.warn(
+        `${this.id}: clipBounds is reserved by MVTLayer, which clips each sub layer to its tile`
+      )();
+    }
+    props.clipBounds = tileClipBounds;
+    // A second ClipExtension would inject the same shader declarations twice and fail to compile
+    if (!props.extensions?.some(extension => extension instanceof ClipExtension)) {
       props.extensions = [...(props.extensions || []), new ClipExtension()];
     }
 
@@ -339,7 +362,7 @@ export default class MVTLayer<
 
     if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer!.props;
-      info.object = binaryToGeojson(data as BinaryFeatureCollection, {
+      info.object = convertBinaryFeatureCollectionToGeojson(data as BinaryFeatureCollection, {
         globalFeatureId: info.index
       }) as Feature;
     }
@@ -445,7 +468,7 @@ export default class MVTLayer<
             }
 
             if (this.state.binary && Array.isArray(tile.content) && !tile.content.length) {
-              // TODO: @loaders.gl/mvt returns [] when no content. It should return a valid empty binary.
+              // TODO: @loaders.gl/tiles/mvt returns [] when no content. It should return a valid empty binary.
               // https://github.com/visgl/loaders.gl/pull/1137
               return [];
             }
@@ -454,7 +477,9 @@ export default class MVTLayer<
             if (tile._contentWGS84 === undefined && isGeoBoundingBox(bbox)) {
               // Create a cache to transform only once
 
-              const content = this.state.binary ? binaryToGeojson(tile.content) : tile.content;
+              const content = this.state.binary
+                ? convertBinaryFeatureCollectionToGeojson(tile.content)
+                : tile.content;
               tile._contentWGS84 = content.map(feature =>
                 transformTileCoordsToWGS84(feature, bbox)
               );

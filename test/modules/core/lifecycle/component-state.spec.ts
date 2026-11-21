@@ -8,7 +8,7 @@ import {test, expect} from 'vitest';
 import {_ComponentState as ComponentState, _Component as Component} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 import {load} from '@loaders.gl/core';
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const EMPTY_ARRAY = Object.freeze([]);
@@ -189,6 +189,55 @@ test('ComponentState#asynchronous async props', async () => {
   expect(state.getAsyncProp('data'), 'ComponentState.getAsyncProp returned correct value').toEqual([
     3
   ]);
+});
+
+test('ComponentState#stale async prop load does not release the current value', async () => {
+  const released: unknown[] = [];
+  const transformed: unknown[] = [];
+
+  class ReleaseTestComponent extends Component<{resource?: any}> {
+    static componentName = 'ReleaseTestComponent';
+    static defaultProps = {
+      resource: {
+        type: 'object',
+        value: null,
+        async: true,
+        transform: value => {
+          transformed.push(value);
+          return {source: value};
+        },
+        release: value => {
+          if (value) {
+            released.push(value);
+          }
+        }
+      }
+    };
+  }
+
+  const component = new ReleaseTestComponent({});
+  // @ts-expect-error
+  component.internalState = new ComponentState(component);
+  // @ts-expect-error
+  const state = component.internalState;
+
+  const olderLoad = makePromise();
+  const newerLoad = makePromise();
+  state.setAsyncProps({resource: olderLoad});
+  state.setAsyncProps({resource: newerLoad});
+
+  // The newer request completes first
+  newerLoad.resolve('newer');
+  await delay(0);
+  const current = state.getAsyncProp('resource');
+  expect(current, 'newer value is resolved').toEqual({source: 'newer'});
+
+  // The older request completes afterwards and must be ignored entirely
+  olderLoad.resolve('older');
+  await delay(0);
+  expect(state.getAsyncProp('resource'), 'stale value is discarded').toBe(current);
+  expect(released, 'current value is not released by a stale load').not.toContain(current);
+  expect(transformed, 'stale value is not transformed').toEqual(['newer']);
 });
 
 webglTest('ComponentState#async props with transform', async () => {

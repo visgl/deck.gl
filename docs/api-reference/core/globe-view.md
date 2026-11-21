@@ -1,6 +1,4 @@
-# GlobeView (Experimental)
-
-> This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other `View` classes. Use with caution and report any issues that you find on GitHub.
+# GlobeView
 
 The `GlobeView` class is a subclass of [View](./view.md). This view projects the earth into a 3D globe.
 
@@ -29,14 +27,15 @@ coordinate validity or limits on altitude.
 
 The goal of `GlobeView` is to provide a generic solution to rendering and navigating data in the 3D space.
 
-- No high-precision rendering at high zoom levels (> 12). Features at the city-block scale may not be rendered accurately.
-- Only supports `'lnglat'` (the default value of the `coordinateSystem` prop).
-- Known rendering issues when using multiple views mixing `GlobeView` and `MapView`, or switching between the two.
-- Support for `TileLayer` and `MVTLayer` is experimental.
+- Above zoom 12, `GlobeView` renders with a [WebMercatorViewport](./web-mercator-viewport.md), at the same precision as `MapView`. Below zoom 12, positions are projected with 32-bit floats; software renderers such as SwiftShader can place them hundreds of meters off.
+- Supports layers in `'lnglat'` (the default value of the `coordinateSystem` prop) and `'meter-offsets'` coordinates.
+- Polygons, paths and tiles follow the curve of the globe only when the view's `resolution` is set, e.g. `new GlobeView({resolution: 36})` for 10° steps. With the default `0`, their edges are straight.
+- A layer shared across views prepares one set of geometry using the first viewport in which it is eligible to draw during a non-picking pass. To prepare geometry separately for a map and a globe, use separate layer instances with distinct IDs and filter each to its own viewport using [`layerFilter`](./deck.md#layerfilter).
 - These layers currently do not work in this view:
-  + Aggregation layers: `HeatmapLayer`, `ContourLayer`
+  + Aggregation layers: `HeatmapLayer`, `ContourLayer`, `GridLayer`, `HexagonLayer`, `ScreenGridLayer`
+  + `MVTLayer` polygon fills
 - Support for `TerrainLayer` and [TerrainExtension](../extensions/terrain-extension.md) is experimental.
-- [MaskExtension](../extensions/mask-extension.md) is not supported in this view.
+- In interleaved MapLibre globe mode, the depth test can hide deck.gl layers at some zoom levels. Use the overlaid mode (`interleaved: false`), or `parameters: {depthCompare: 'always'}` on the layer.
 
 When GeoJson paths and polygons are rendered with this view, the straight lines and flat surfaces are warped to the surface of the globe. Note that the warped edges still correspond to straight lines in the Mercator projection. To draw lines along the shortest distance on the globe, use the [GreatCircleLayer](../geo-layers/great-circle-layer.md).
 
@@ -44,7 +43,7 @@ When GeoJson paths and polygons are rendered with this view, the straight lines 
 ## Constructor
 
 ```js
-import {_GlobeView as GlobeView} from '@deck.gl/core';
+import {GlobeView} from '@deck.gl/core';
 const view = new GlobeView({id, ...});
 ```
 

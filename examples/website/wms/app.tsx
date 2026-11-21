@@ -9,7 +9,7 @@ import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 
 import type {MapViewState} from '@deck.gl/core';
 import type {BitmapLayerPickingInfo} from '@deck.gl/layers';
-import type {ImageSourceMetadata} from '@loaders.gl/loader-utils';
+import type {ImageSourceMetadata} from '@loaders.gl/core/loader-utils';
 import type {Device} from '@luma.gl/core';
 
 const INITIAL_VIEW_STATE: MapViewState = {

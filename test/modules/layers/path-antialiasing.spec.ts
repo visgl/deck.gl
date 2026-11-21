@@ -6,11 +6,10 @@ import {test, expect} from 'vitest';
 import {device, testLayer} from '@deck.gl/test-utils/vitest';
 import {PathLayer} from '@deck.gl/layers';
 import {BufferTransform} from '@luma.gl/engine';
-import {preprocess} from '@luma.gl/shadertools';
+import {preprocess} from '@luma.gl/shaders';
 import pathVertexShader from '@deck.gl/layers/path-layer/path-layer-vertex.glsl';
 import pathFragmentShader from '@deck.gl/layers/path-layer/path-layer-fragment.glsl';
-import {shaderWGSL} from '@deck.gl/layers/path-layer/path-layer.wgsl';
-import {pathUniforms} from '@deck.gl/layers/path-layer/path-layer-uniforms';
+import {_pathShaderWGSL as shaderWGSL, _pathUniforms as pathUniforms} from '@deck.gl/core';
 
 const PATH_DATA = [
   {
@@ -83,7 +82,9 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
   expect(defaultFragmentShader).not.toContain('fwidth');
   expect(defaultShaderWGSL).not.toContain('coverageScale');
   expect(defaultShaderWGSL).not.toContain('fwidth');
-  expect(defaultShaderWGSL).toContain('return deckgl_premultiplied_alpha(varyings.vColor);');
+  expect(defaultShaderWGSL).toContain('var color = varyings.vColor;');
+  expect(defaultShaderWGSL).toContain('DECKGL_FILTER_COLOR(&color, fragmentGeometry);');
+  expect(defaultShaderWGSL).toContain('return deckgl_premultiplied_alpha(color);');
   expect(pathUniforms.uniformTypes).not.toHaveProperty('antialiasing');
 
   for (const shader of [

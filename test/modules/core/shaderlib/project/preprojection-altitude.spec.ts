@@ -7,7 +7,7 @@ import {WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {test, expect} from 'vitest';
 import {_CustomProjectionViewport as CustomProjectionViewport, project} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
-import {getWorldPosition} from '@deck.gl/core/shaderlib/project/project-functions';
+import {getWorldPosition} from './project-glsl-test-utils';
 import {runOnGPU, testUniforms} from './project-glsl-test-utils';
 
 // Custom geospatial projection must not acquire a geospatial Cartesian scale override.
@@ -45,7 +45,7 @@ for (const geospatial of [false, true]) {
     expect(
       getWorldPosition([10, 20, 50], {
         viewport,
-        coordinateSystem: 'default',
+        coordinateSystem: 'lnglat',
         coordinateOrigin: [0, 0, 0]
       })
     ).toEqual([30 * normalizationScale, 80 * normalizationScale, 50 * normalizationScale]);

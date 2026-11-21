@@ -4,10 +4,11 @@
 
 import {test, expect} from 'vitest';
 
-import {LayerManager, MapView, PolygonLayer} from 'deck.gl';
+import {LayerManager, MapView, PolygonLayer, SimpleMeshLayer} from 'deck.gl';
 import ShadowPass from '@deck.gl/core/passes/shadow-pass';
+import {CubeGeometry} from '@luma.gl/engine';
 import * as FIXTURES from 'deck.gl-test/data';
-import {device} from '@deck.gl/test-utils/vitest';
+import {device, getLayerUniforms} from '@deck.gl/test-utils/vitest';
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
 test('ShadowPass#constructor and delete', () => {
@@ -68,5 +69,59 @@ test('ShadowPass#getShaderModuleProps', () => {
   });
 
   expect(shaderModuleProps.shadow.drawToShadowMap, `ShadowPass has module props`).toBe(true);
+  expect(shaderModuleProps.lighting.enabled, `ShadowPass disables lighting`).toBe(false);
+  shadowPass.delete();
+});
+
+webglTest('ShadowPass#render disables lighting', () => {
+  const viewport = new MapView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: 0, latitude: 0, zoom: 1}
+  });
+
+  // SimpleMeshLayer applies lighting after DECKGL_FILTER_COLOR, where the shadow module writes
+  // the packed depth. Lighting must be off in the shadow pass or the stored depth gets scaled.
+  const layer = new SimpleMeshLayer({
+    data: [0],
+    mesh: new CubeGeometry(),
+    getPosition: [0, 0, 0]
+  });
+
+  const layerManager = new LayerManager(device, {viewport});
+  layerManager.setLayers([layer]);
+
+  expect(getLayerUniforms(layer, 'lighting').enabled, `lighting is enabled by default`).toBe(1);
+
+  const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
+  shadowPass.render({
+    viewports: [viewport],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport,
+    deviceRect: {x: 0, y: 0, width: 100, height: 100},
+    pixelRatio: 1
+  });
+
+  expect(
+    getLayerUniforms(layer, 'lighting').enabled,
+    `ShadowPass lighting disabled correctly`
+  ).toBe(0);
+
+  shadowPass.delete();
+  layerManager.finalize();
+});
+
+test('ShadowPass#getLayerParameters', () => {
+  const layer = new PolygonLayer({
+    data: FIXTURES.polygons.slice(0, 3),
+    getPolygon: f => f,
+    parameters: {depthBias: 10}
+  });
+
+  const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
+  const parameters = shadowPass.getLayerParameters(layer, 3, null);
+
+  expect(parameters.depthBias, `ShadowPass draws without polygon offset`).toBe(0);
+  expect(parameters.blend, `ShadowPass disables blending`).toBe(false);
   shadowPass.delete();
 });

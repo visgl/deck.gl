@@ -11,7 +11,7 @@ import {Matrix4} from '@math.gl/core';
 import {getEmptyPickingInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {getUniformsFromViewport} from '@deck.gl/core/shaderlib/project/viewport-uniforms';
 import {PROJECTION_MODE} from '@deck.gl/core/shaderlib/project/constants';
-import {worldToPixels} from '@math.gl/web-mercator';
+import {worldToPixels} from '@math.gl/geospatial/web-mercator';
 
 class ProjectionViewport extends Viewport {
   constructor(
@@ -409,9 +409,14 @@ for (const projected of [false, true]) {
         });
 
       const override = new ProjectionViewport('override', !projected);
-      expect(layer.projectPosition(point, {viewport: override, autoOffset: false})).toEqual(
-        projected ? [12, 23, 34] : [224, 669, 1336]
-      );
+      // Changing the target no longer implicitly reinterprets the input's CRS.
+      expect(
+        layer.projectPosition(point, {
+          viewport: override,
+          ...(projected ? {coordinateSystem: 'cartesian' as const} : {sourceCrs: WGS84_CRS}),
+          autoOffset: false
+        })
+      ).toEqual(projected ? [12, 23, 34] : [224, 669, 1336]);
     } finally {
       manager.finalize();
       vi.restoreAllMocks();

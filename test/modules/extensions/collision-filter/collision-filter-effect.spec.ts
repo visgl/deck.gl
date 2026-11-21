@@ -206,6 +206,22 @@ test('CollisionFilterEffect#render', () => {
   });
   expect(spy, 'Should not render when mask effect does not render').toHaveBeenCalledTimes(5);
 
+  const [width, height] = device.canvasContext!.getDrawingBufferSize();
+  const sizeSpy = vi
+    .spyOn(device.canvasContext!, 'getDrawingBufferSize')
+    .mockReturnValue([width * 2, height * 2]);
+  preRenderWithLayers([TEST_LAYER], 'canvas resized', {viewports: [testViewport2]});
+  expect(spy, 'Should render when canvas size changes').toHaveBeenCalledTimes(6);
+  const collisionFBO = collisionFilterEffect.collisionFBOs['COLLISION_GROUP'];
+  expect(
+    [collisionFBO.width, collisionFBO.height],
+    'Collision FBO is sized from the drawing buffer'
+  ).toEqual([width, height]);
+
+  preRenderWithLayers([TEST_LAYER], 'canvas size unchanged', {viewports: [testViewport2]});
+  expect(spy, 'Should not render when canvas size is unchanged').toHaveBeenCalledTimes(6);
+  sizeSpy.mockRestore();
+
   collisionFilterEffect.cleanup();
   layerManager.finalize();
 });

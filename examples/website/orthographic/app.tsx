@@ -17,7 +17,7 @@ import {sortData} from './sort-data';
 import {ScrollbarWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
-import type {MeshAttributes} from '@loaders.gl/schema';
+import type {MeshAttributes} from '@loaders.gl/core/schema';
 import type {Color, Position, OrthographicViewState, PickingInfo} from '@deck.gl/core';
 
 // Data source

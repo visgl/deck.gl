@@ -9,8 +9,8 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {normalizeCoordinateSystem} from '@deck.gl/geo-layers/tile-3d-layer/tile-3d-layer';
 import {Deck, WebMercatorViewport} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
-import {TILE_TYPE} from '@loaders.gl/tiles';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
+import {TILE_TYPE} from '@loaders.gl/tiles-3d';
 
 test('Tile3DLayer#normalizeCoordinateSystem', () => {
   // Loaders that predate the v9.3 string constants report numeric values, see issue #10368
@@ -37,7 +37,7 @@ test('Tile3DLayer#mesh sub layer normalizes legacy numeric coordinateSystem', ()
       attributes: {positions: {value: new Float32Array([0, 0, 0]), size: 3}},
       indices: {value: new Uint16Array([0]), size: 1},
       cartographicOrigin: [0, 0, 0],
-      // `@loaders.gl/i3s` reports the pre-v9.3 numeric enum, see issue #10368
+      // `@loaders.gl/tiles-3d/i3s` reports the pre-v9.3 numeric enum, see issue #10368
       coordinateSystem: 2
     }
   };
@@ -46,6 +46,30 @@ test('Tile3DLayer#mesh sub layer normalizes legacy numeric coordinateSystem', ()
   const meshLayer = layer._makeSimpleMeshLayer(tileHeader);
 
   expect(meshLayer.props.coordinateSystem, 'Normalizes to a string constant').toBe('meter-offsets');
+});
+
+test('Tile3DLayer converts normalized mesh colors at the sublayer boundary', () => {
+  const layer = new Tile3DLayer({_getMeshColor: () => [1, 0.5, 0]});
+  layer.context = {normalizedColors: true} as typeof layer.context;
+  const tileHeader = {
+    id: 'normalized-mesh-tile',
+    type: TILE_TYPE.MESH,
+    content: {
+      attributes: {positions: {value: new Float32Array([0, 0, 0]), size: 3}},
+      indices: {value: new Uint16Array([0]), size: 1},
+      cartographicOrigin: [0, 0, 0],
+      coordinateSystem: 'lnglat'
+    }
+  };
+
+  // @ts-expect-error Calling the private sublayer factory for test-only validation.
+  const normalized = layer._makeSimpleMeshLayer(tileHeader);
+  expect(normalized.props.getColor).toEqual([255, 128, 0, 255]);
+
+  layer.context.normalizedColors = false;
+  // @ts-expect-error Calling the private sublayer factory for test-only validation.
+  const legacy = layer._makeSimpleMeshLayer(tileHeader);
+  expect(legacy.props.getColor).toEqual([1, 0.5, 0]);
 });
 
 test('Tile3DLayer', async () => {

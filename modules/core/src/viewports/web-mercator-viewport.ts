@@ -24,11 +24,11 @@ import {
   fovyToAltitude,
   fitBounds,
   getBounds
-} from '@math.gl/web-mercator';
+} from '@math.gl/geospatial/web-mercator';
 import {Padding} from './viewport';
 
 import {Matrix4, Vector3, clamp} from '@math.gl/core';
-import * as vec2 from '@math.gl/core/vec2';
+import {vec2} from '@math.gl/core';
 
 export type WebMercatorViewportOptions = {
   /** Subdivision intervals around the earth for nonlinear source CRS conversions. Default 0 disables subdivision. */

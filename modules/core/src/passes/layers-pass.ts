@@ -11,8 +11,10 @@ import type {
   RenderPipelineParameters
 } from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
+import type {WebGLDevice} from '@luma.gl/core/webgl';
 import type {NumberArray4} from '@math.gl/core';
 
+import {normalizeByteColor4} from '@luma.gl/shaders';
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
@@ -20,12 +22,14 @@ import type Layer from '../lib/layer';
 import type CompositeLayer from '../lib/composite-layer';
 import type {Effect} from '../lib/effect';
 import type {ProjectProps} from '../shaderlib/project/viewport-uniforms';
-import type {PickingProps} from '@luma.gl/shadertools';
+import type {PickingProps} from '@luma.gl/shaders';
 
 export type Rect = {x: number; y: number; width: number; height: number};
 
 // WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
 const WEBGPU_DEFAULT_DRAW_PARAMETERS: RenderPipelineParameters = {
+  // Models retain pipeline state across mask and screen passes.
+  colorMask: 0xf,
   depthWriteEnabled: true,
   depthCompare: 'less-equal',
   blendColorOperation: 'add',
@@ -46,6 +50,8 @@ export type LayersPassRenderOptions = {
   layers: Layer[];
   viewports: Viewport[];
   onViewportActive?: (viewport: Viewport) => void;
+  /** Reports layers eligible to draw in each logical screen viewport. */
+  onLayerEligible?: (layer: Layer, viewport: Viewport) => void;
   cullRect?: Rect;
   views?: Record<string, View>;
   effects?: Effect[];
@@ -53,6 +59,9 @@ export type LayersPassRenderOptions = {
   clearStack?: boolean;
   clearCanvas?: boolean;
   clearColor?: number[];
+  /** Interpret View clear colors as 0–1. */
+  normalizedColors?: boolean;
+  /** Color write channels for layer pipelines and WebGL attachment clears. */
   colorMask?: number;
   scissorRect?: number[];
   layerFilter?: ((context: FilterContext) => boolean) | null;
@@ -93,6 +102,18 @@ export default class LayersPass extends Pass {
   }
 
   protected _render(options: LayersPassRenderOptions): RenderStats[] {
+    if (this.device.type === 'webgl' && options.colorMask !== undefined) {
+      // WebGL clears honor the write mask; mask passes must preserve other channels.
+      const mask = options.colorMask;
+      return (this.device as WebGLDevice).withParametersWebGL(
+        {colorMask: [Boolean(mask & 1), Boolean(mask & 2), Boolean(mask & 4), Boolean(mask & 8)]},
+        () => this._renderLayers(options)
+      );
+    }
+    return this._renderLayers(options);
+  }
+
+  private _renderLayers(options: LayersPassRenderOptions): RenderStats[] {
     this._activatedLayers.clear();
     const {canvasContext = this.device.canvasContext!} = options;
     const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
@@ -103,12 +124,7 @@ export default class LayersPass extends Pass {
     let clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
     let clearDepth = clearCanvas ? 1 : false;
     let clearStencil = clearCanvas ? 0 : false;
-    const colorMask = options.colorMask ?? 0xf;
-
     const parameters: RenderPassParameters = {viewport: [0, 0, width, height]};
-    if (options.colorMask) {
-      parameters.colorMask = colorMask;
-    }
     if (options.scissorRect) {
       parameters.scissorRect = options.scissorRect as NumberArray4;
     }
@@ -170,7 +186,8 @@ export default class LayersPass extends Pass {
                   view,
                   pass,
                   layers: options.layers,
-                  isPicking: options.isPicking
+                  isPicking: options.isPicking,
+                  normalizedColors: options.normalizedColors
                 },
                 drawLayerParams
               );
@@ -205,10 +222,12 @@ export default class LayersPass extends Pass {
       pass,
       isPicking = false,
       layerFilter,
+      onLayerEligible,
       cullRect,
       views,
       effects,
       canvasContext = this.device.canvasContext!,
+      colorMask,
       shaderModuleProps
     }: LayersPassRenderOptions,
     /** Internal flag, true if only used to determine whether each layer should be drawn */
@@ -238,6 +257,9 @@ export default class LayersPass extends Pass {
 
       if (shouldDrawLayer && !evaluateShouldDrawOnly) {
         layerParam.shouldDrawLayer = true;
+        if (onLayerEligible && pass === 'screen' && !isPicking && layer.isDrawable) {
+          onLayerEligible(layer, viewport);
+        }
 
         // This is the "logical" index for ordering this layer in the stack
         // used to calculate polygon offsets
@@ -259,6 +281,9 @@ export default class LayersPass extends Pass {
           ...views?.[viewport.id]?.props.parameters,
           ...this.getLayerParameters(layer, layerIndex, viewport)
         };
+        if (colorMask !== undefined) {
+          layerParam.layerParameters.colorMask = colorMask;
+        }
       }
 
       drawLayerParams[layerIndex] = layerParam;
@@ -280,7 +305,8 @@ export default class LayersPass extends Pass {
       canvasContext,
       viewport,
       view,
-      isPicking
+      isPicking,
+      normalizedColors = false
     }: {
       layers: Layer[];
       shaderModuleProps: Record<string, any>;
@@ -290,6 +316,7 @@ export default class LayersPass extends Pass {
       viewport: Viewport;
       view?: View;
       isPicking?: boolean;
+      normalizedColors?: boolean;
     },
     drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
@@ -312,9 +339,16 @@ export default class LayersPass extends Pass {
         // references as colors and is already cleared to transparent black.
         // `clearColor: false` below still means "don't clear color" in both modes.
         if (Array.isArray(clearColor) && !isPicking) {
-          colorToUse = [...clearColor.slice(0, 3), clearColor[3] || 255].map(
-            c => c / 255
-          ) as NumberArray4;
+          // An omitted alpha is opaque. An explicit zero alpha clears to transparent.
+          colorToUse = normalizeByteColor4(
+            [
+              clearColor[0],
+              clearColor[1],
+              clearColor[2],
+              clearColor[3] ?? (normalizedColors ? 1 : 255)
+            ],
+            !normalizedColors
+          );
         } else if (clearColor === false) {
           colorToUse = false;
         }
@@ -485,6 +519,7 @@ export default class LayersPass extends Pass {
         devicePixelRatio,
         modelMatrix: layerProps.modelMatrix,
         coordinateSystem: layerProps.coordinateSystem,
+        sourceCrs: layer.internalState!.sourceCrs,
         coordinateOrigin: layerProps.coordinateOrigin,
         autoWrapLongitude: layer.wrapLongitude
       } satisfies ProjectProps
@@ -564,7 +599,7 @@ export function layerIndexResolver(
   return resolveLayerIndex;
 }
 
-// Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
+// Convert viewport top-left CSS coordinates to framebuffer pixel coordinates
 function getGLViewport(
   device: Device,
   {
@@ -586,11 +621,16 @@ function getGLViewport(
   const [, drawingBufferHeight] = canvasContext.getDrawingBufferSize();
   const height = target ? target.height : drawingBufferHeight;
 
-  // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
+  // Viewports are in top-left CSS coordinates. WebGPU framebuffers also have a top-left origin,
+  // WebGL framebuffers have a bottom-left origin.
   const dimensions = viewport;
+  const y =
+    device.type === 'webgpu'
+      ? dimensions.y * pixelRatio
+      : height - (dimensions.y + dimensions.height) * pixelRatio;
   return [
     dimensions.x * pixelRatio,
-    height - (dimensions.y + dimensions.height) * pixelRatio,
+    y,
     dimensions.width * pixelRatio,
     dimensions.height * pixelRatio
   ];

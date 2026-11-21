@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {WebMercatorViewport, OrthographicViewport, _GlobeViewport} from '@deck.gl/core';
-import type {CoordinateSystem, Layer, ProjectUniforms, Viewport} from '@deck.gl/core';
-import * as vec3 from '@math.gl/core/vec3';
-import * as vec4 from '@math.gl/core/vec4';
+import {WebMercatorViewport, OrthographicViewport, GlobeViewport} from '@deck.gl/core';
+import type {Layer, ProjectUniforms, Viewport} from '@deck.gl/core';
+import {vec3} from '@math.gl/core';
+import {vec4} from '@math.gl/core';
 import type {NumericArray} from '@math.gl/core';
 
-/** TILE_SIZE in the project shader module */
-const TILE_SIZE = 512;
+/** TILE_SIZE in the project shader module: the width of one world copy in flat common space */
+export const TILE_SIZE = 512;
 /** GLOBE_RADIUS / EARTH_RADIUS in the project shader module */
 const GLOBE_METERS_TO_COMMON = 256 / 6370972;
 
@@ -42,13 +42,14 @@ export function getMercatorReferenceViewport(viewport: Viewport): Viewport {
 
 /** False only for GlobeViewport, whose common space is a sphere. The single globe check in this module. */
 export function isFlatViewport(viewport: Viewport): boolean {
-  return !(viewport instanceof _GlobeViewport);
+  return !(viewport instanceof GlobeViewport);
 }
 
 /** Per-call overrides of the layer's coordinateSystem, coordinateOrigin and modelMatrix */
 export type FlatProjectOptions = {
-  fromCoordinateSystem?: CoordinateSystem;
-  fromCoordinateOrigin?: [number, number, number];
+  sourceCrs?: import('@math.gl/geospatial/projection/core').CRSDescriptor;
+  coordinateSystem?: 'cartesian' | 'meter-offsets';
+  coordinateOrigin?: [number, number, number];
   modelMatrix?: NumericArray | null;
 };
 
@@ -87,7 +88,7 @@ function projectGlobeMeterOffsetsToFlatCommon(
   position: number[],
   opts: FlatProjectOptions
 ): [number, number, number] {
-  const origin = opts.fromCoordinateOrigin ?? layer.props.coordinateOrigin;
+  const origin = opts.coordinateOrigin ?? layer.props.coordinateOrigin;
   const modelMatrix = opts.modelMatrix === undefined ? layer.props.modelMatrix : opts.modelMatrix;
   let [x, y, z = 0] = position;
   if (modelMatrix) {
@@ -95,13 +96,15 @@ function projectGlobeMeterOffsetsToFlatCommon(
   }
   // project.commonOrigin: sphere position of the coordinate origin
   const originCommon = viewport.projectPosition(origin);
-  // project_get_orientation_matrix(commonOrigin)
+  // project_get_orientation_matrix(commonOrigin): east, north and up
   const uz = vec3.normalize([] as number[], originCommon);
-  const ux = Math.abs(uz[2]) === 1 ? [1, 0, 0] : vec3.normalize([] as number[], [uz[1], -uz[0], 0]);
+  const horizontalLength = Math.hypot(uz[0], uz[1]);
+  const ux =
+    horizontalLength > 0 ? [-uz[1] / horizontalLength, uz[0] / horizontalLength, 0] : [1, 0, 0];
   const uy = vec3.cross([] as number[], uz, ux);
-  // enuMatrix * vec3(-x, -y, z) * metersToCommon
+  // enuMatrix * vec3(x, y, z) * metersToCommon
   const displaced = [0, 1, 2].map(
-    i => originCommon[i] + (ux[i] * -x + uy[i] * -y + uz[i] * z) * GLOBE_METERS_TO_COMMON
+    i => originCommon[i] + (ux[i] * x + uy[i] * y + uz[i] * z) * GLOBE_METERS_TO_COMMON
   );
   // project_globe_to_mercator_
   const lngLatZ = viewport.unprojectPosition(displaced);
@@ -135,13 +138,27 @@ function getLayerViewport(layer: Layer): Viewport {
   return layer.internalState?.viewport || layer.context.viewport;
 }
 
-/** The coordinate system `position` is expressed in, with `default` resolved */
-function getSourceCoordinateSystem(layer: Layer, opts: FlatProjectOptions = {}): CoordinateSystem {
-  const coordinateSystem = opts.fromCoordinateSystem ?? layer.props.coordinateSystem;
-  if (coordinateSystem === 'default') {
-    return getLayerViewport(layer).isGeospatial ? 'lnglat' : 'cartesian';
+/** Input coordinate frame used for flat projection and angular bounds. */
+function getSourceCoordinateSystem(layer: Layer, opts: FlatProjectOptions = {}): string {
+  const coordinateSystem =
+    opts.coordinateSystem ?? opts.sourceCrs?.signature ?? layer.props.coordinateSystem;
+  switch (coordinateSystem) {
+    case 'cartesian':
+    case 'meter-offsets':
+    case 'lnglat-offsets':
+      return coordinateSystem;
   }
-  return coordinateSystem;
+  const sourceCrs = opts.sourceCrs ?? layer.internalState!.sourceCrs;
+  // The antimeridian threshold is in degrees, with longitude on the first axis.
+  if (
+    sourceCrs?.coordinateFrame === 'geographic' &&
+    sourceCrs.axis.startsWith('en') &&
+    sourceCrs.xUnit.degreesPerUnit === 1 &&
+    sourceCrs.yUnit.degreesPerUnit === 1
+  ) {
+    return 'lnglat';
+  }
+  return sourceCrs?.signature ?? 'cartesian';
 }
 
 /**
@@ -177,7 +194,7 @@ export function joinLayerBounds(
         ? {
             viewport,
             autoOffset: false,
-            coordinateSystem: layer.state.packedCrs!.signature,
+            sourceCrs: layer.state.packedCrs!,
             coordinateOrigin: [0, 0, 0] as [number, number, number],
             modelMatrix: null
           }

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
-import type {CRSDescriptor} from '@math.gl/projection/core';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import {Ellipsoid} from '@math.gl/geospatial';
 import {Vector3} from '@math.gl/core';
 

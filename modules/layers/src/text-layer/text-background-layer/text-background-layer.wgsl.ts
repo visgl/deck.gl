@@ -106,13 +106,16 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   if (textBackground.billboard > 0.5) {
     let anchorCommon = project_position_vec3_f64(attributes.instancePositions, attributes.instancePositions64Low);
+    geometry.position = vec4<f32>(anchorCommon, 1.0);
     var position = project_position_to_clipspace(
       attributes.instancePositions,
       attributes.instancePositions64Low,
       vec3<f32>(0.0)
     );
     position = project_globe_billboard_clipspace(position, anchorCommon);
-    let clipOffset = project_pixel_size_to_clipspace(pixelOffset);
+    var size = vec3<f32>(pixelOffset, 0.0);
+    DECKGL_FILTER_SIZE(&size, geometry);
+    let clipOffset = project_pixel_size_to_clipspace(size.xy);
     position = vec4<f32>(
       position.x + clipOffset.x,
       position.y + clipOffset.y,
@@ -129,11 +132,14 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     if (text.flipY > 0.5) {
       offsetCommon.y = offsetCommon.y * -1.0;
     }
-    varyings.position = project_position_to_clipspace(
+    DECKGL_FILTER_SIZE(&offsetCommon, geometry);
+    let projected = project_position_to_clipspace_and_commonspace(
       attributes.instancePositions,
       attributes.instancePositions64Low,
       offsetCommon
     );
+    geometry.position = projected.commonPosition;
+    varyings.position = projected.clipPosition;
   }
 
   varyings.vFillColor = vec4<f32>(
@@ -145,6 +151,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     attributes.instanceLineColors.a * layer.opacity
   );
   varyings.pickingColor = geometry.pickingColor;
+  DECKGL_FILTER_GL_POSITION(&varyings.position, geometry);
   return varyings;
 }
 
@@ -181,6 +188,7 @@ fn get_stroked_frag_color(
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.uv;
+  fragmentGeometry.uv = geometry.uv;
   var fragColor: vec4<f32>;
 
   if (any(textBackground.borderRadius != vec4<f32>(0.0))) {
@@ -220,8 +228,13 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
+    var extensionColor = fragColor;
+    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(varyings.pickingColor, 1.0);
   }
+
+  DECKGL_FILTER_COLOR(&fragColor, fragmentGeometry);
 
   if (picking.isHighlightActive > 0.5) {
     let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
