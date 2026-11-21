@@ -313,3 +313,74 @@ test('IconManager#finalize with loads pending', async () => {
   expect(iconManager.getTexture(), 'texture is released').toBeNull();
   copyExternalImage.mockRestore();
 });
+
+test.each(['iconMapping', 'iconAtlas'] as const)(
+  'IconManager#ignore pending loads after %s replacement',
+  async replacement => {
+    let releaseLoads!: () => void;
+    const pendingLoads = new Promise<void>(resolve => {
+      releaseLoads = resolve;
+    });
+    const fetchIcon = vi.fn(async (url: string) => {
+      await pendingLoads;
+      if (url.endsWith('/failure')) {
+        throw new Error('Image failed');
+      }
+      return fetch(TEST_IMAGE);
+    });
+    const onUpdate = vi.fn();
+    const onError = vi.fn();
+    const iconManager = new IconManager(device, {onUpdate, onError});
+    const icons = ['success', 'missing', 'failure'].map(id => ({
+      id,
+      url: `/icon/${id}`,
+      width: 32,
+      height: 16
+    }));
+    iconManager.setProps({autoPacking: true, loadOptions: {fetch: fetchIcon}});
+    iconManager.packIcons(icons, d => d);
+    const texture = iconManager.getTexture();
+    const copyExternalImage = vi.spyOn(Object.getPrototypeOf(texture), 'copyExternalImage');
+    const iconAtlas =
+      replacement === 'iconAtlas'
+        ? device.createTexture({width: 128, height: 64, format: 'rgba8unorm'})
+        : null;
+    const iconDef =
+      replacement === 'iconMapping'
+        ? {x: 64, y: 0, width: 32, height: 16}
+        : iconManager.getIconMapping(icons[0]);
+    const expectedIconDef = {...iconDef};
+
+    try {
+      expect(iconManager.isLoaded).toBe(false);
+      if (iconAtlas) {
+        iconManager.setProps({autoPacking: false, iconAtlas});
+      } else {
+        iconManager.setProps({iconMapping: {success: iconDef}});
+      }
+      onUpdate.mockClear();
+      releaseLoads();
+      await vi.waitUntil(() => iconManager.isLoaded);
+
+      expect(fetchIcon).toHaveBeenCalledTimes(3);
+      expect(copyExternalImage.mock.contexts).not.toContain(texture);
+      if (iconAtlas) {
+        expect(copyExternalImage.mock.contexts).not.toContain(iconAtlas);
+      }
+      expect(onUpdate).not.toHaveBeenCalled();
+      expect(onError).not.toHaveBeenCalled();
+      expect(iconManager.getIconMapping(iconAtlas ? 'success' : icons[0])).toBe(iconDef);
+      expect(iconDef).toEqual(expectedIconDef);
+      expect(iconManager.getTexture()).toBe(iconAtlas || texture);
+    } finally {
+      releaseLoads();
+      iconManager.finalize();
+      try {
+        await vi.waitUntil(() => iconManager.isLoaded);
+      } finally {
+        iconAtlas?.delete();
+        copyExternalImage.mockRestore();
+      }
+    }
+  }
+);
