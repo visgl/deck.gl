@@ -1,17 +1,17 @@
-# \_ColorScaleWidget 🧪
+# \_LegendWidget 🧪
 
 <!-- -->
 
 Displays experimental legends for SQL color accessors on visible layers. The widget discovers scales from drawable layers and their composite parents in the widget's view. It updates after accessor evaluation completes. The legend appears when a scale resolves. It shows category swatches, numeric intervals, or a continuous ramp with labels beside the scales. Hover over a ramp or quantile bin to see its value or range, color, and scale type.
 
 ```
-import {_ColorScaleWidget} from '@deck.gl/widgets';
+import {_LegendWidget} from '@deck.gl/widgets';
 
 import '@deck.gl/widgets/stylesheet.css';
 
 
 
-const widgets = [new _ColorScaleWidget()];
+const widgets = [new _LegendWidget()];
 ```
 
 Pass `widgets` to Deck or DeckGL alongside layers using SQL color scales. The legend starts expanded. Select its heading to collapse or reopen it.
@@ -19,11 +19,11 @@ Pass `widgets` to Deck or DeckGL alongside layers using SQL color scales. The le
 ## Constructor[​](#constructor "Direct link to Constructor")
 
 ```
-import {_ColorScaleWidget, type ColorScaleWidgetProps} from '@deck.gl/widgets';
+import {_LegendWidget, type LegendWidgetProps} from '@deck.gl/widgets';
 
 
 
-new _ColorScaleWidget({categoricalLayout: 'wrap'} satisfies ColorScaleWidgetProps);
+new _LegendWidget({categoricalLayout: 'wrap'} satisfies LegendWidgetProps);
 ```
 
 ## Types[​](#types "Direct link to Types")

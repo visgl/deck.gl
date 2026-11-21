@@ -58,7 +58,7 @@ Register `ShaderInjectionTarget` descriptors with `addShaderInjectionTarget`, us
 
 ### loaders.gl and math.gl v5 beta[​](#loadersgl-and-mathgl-v5-beta "Direct link to loaders.gl and math.gl v5 beta")
 
-Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.12`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+Update direct loaders.gl dependencies to `5.0.0-rc.1` and math.gl dependencies to `5.0.0-rc.2`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
 | Previous import                                                           | Replacement import                                        |
 | ------------------------------------------------------------------------- | --------------------------------------------------------- |

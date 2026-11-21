@@ -336,7 +336,7 @@ SQL to execute when `data` is an Arrow table, a promise resolving to an Arrow ta
 
 For an in-memory Arrow table, the default parser also supports relational SQL with an explicit `FROM data`, for example `SELECT hex, SUM(count) AS visits FROM data GROUP BY hex`. math.gl executes the grouped query across the whole table. Nullish data and empty row arrays render as empty layers until data arrives.
 
-For URL inputs, provide a source-capable loader. Loaders that support query pushdown can optimize loading based on the supplied query. When the layer has a custom `fetch`, SQL runs on the Arrow table returned by that function. Deck loads the SQL parser on first use.
+For URL inputs, provide a source-capable loader. To group a URL-backed table, use `FROM data GROUP BY` with one grouping column selected first, followed by named `COUNT`, `SUM`, `AVG`, `MIN`, or `MAX` aggregates. Loaders that support query pushdown can optimize loading based on the supplied query. When the layer has a custom `fetch`, SQL runs on the Arrow table returned by that function. Deck loads the SQL parser on first use.
 
 #### SQL accessor inputs[​](#sql-accessor-inputs "Direct link to SQL accessor inputs")
 
@@ -354,7 +354,7 @@ If the table has `red`, `green`, and `blue` columns with floating-point values i
 getFillColor: {sql: 'RGBA8(red, green, blue, 1)'}
 ```
 
-A color accessor can also use a top-level SQL color scale:
+Accessors can use top-level SQL scales. Numeric accessors accept linear, square-root, logarithmic, power, and symmetric-log scales with a numeric `RANGE`. Color accessors accept sequential, cyclic, diverging, ordinal, quantile, quantize, and threshold scales.
 
 ```
 getFillColor: {sql: "SCALE_COLOR(temperature, DOMAIN(temperature), PALETTE('viridis'))"}

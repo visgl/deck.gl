@@ -381,7 +381,7 @@ For first-time deck.gl developers, it is helpful to read the following pages bef
 
 #### widgets
 
-- [_ColorScaleWidget 🧪](https://deck.gl/next/docs/api-reference/widgets/color-scale-widget.md): Displays experimental legends for SQL color accessors on visible layers. The widget discovers
+- [_LegendWidget 🧪](https://deck.gl/next/docs/api-reference/widgets/color-scale-widget.md): Displays experimental legends for SQL color accessors on visible layers. The widget discovers
 - [CompassWidget](https://deck.gl/next/docs/api-reference/widgets/compass-widget.md): This widget visualizes bearing and pitch. Click it once to reset bearing to 0, click it a second time to reset pitch to 0. Supports MapView and GlobeView.
 - [ContextMenuWidget](https://deck.gl/next/docs/api-reference/widgets/context-menu-widget.md): Displays a context menu on right-click events with customizable menu items based on picked objects.
 - [FullscreenWidget](https://deck.gl/next/docs/api-reference/widgets/fullscreen-widget.md): This widget enlarges deck.gl to fill the full screen. Click the widget to enter or exit full screen.
