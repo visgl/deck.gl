@@ -45,3 +45,16 @@ alive while a layer uses them, and release them after the layer is done.
 
 These proposals cover WebGPU strokes and flat fills. Extrusion, wireframe, and
 extension parity are outside this scope.
+
+### GeoArrowLayer
+
+`GeoArrowLayer` accepts an Arrow table or record batch. It finds a geometry
+column from GeoArrow extension metadata or uses the field named by
+`getGeometry`. Supply `geometryType` for a field without extension metadata.
+
+Native Point, LineString, Polygon, and MultiPolygon columns use the Arrow
+renderers. WKB, WKT, mixed `geoarrow.geometry`, GeometryCollection, MultiPoint,
+and MultiLineString use the standard GeoJSON renderer through the loaders.gl
+geometry converter. This path accepts style constants and CPU-readable Arrow
+columns. Each part of a feature uses the style of its source row. Picking
+returns the original Arrow row and its index, including across record batches.

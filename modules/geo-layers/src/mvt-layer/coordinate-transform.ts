@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {lerp} from '@math.gl/core';
-import {lngLatToWorld, worldToLngLat} from '@math.gl/web-mercator';
+import {lngLatToWorld, worldToLngLat} from '@math.gl/geospatial/web-mercator';
 import {GeoBoundingBox} from '../tileset-2d/index';
 
 const availableTransformations = {

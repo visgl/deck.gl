@@ -6,7 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {MapView, OrbitView, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {MapView, OrbitView, OrthographicView, GlobeView} from '@deck.gl/core';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension, type DashUnits} from '@deck.gl/extensions';

@@ -19,7 +19,7 @@ function positions() {
 }
 function props() {
   return {
-    positions: positions(),
+    getPosition: positions(),
     data: [],
     getRadius: 1,
     getFillColor: [0, 0, 0, 255],
@@ -37,7 +37,11 @@ test('Scatterplot rejects mismatched columns without destroying the previous upl
   const old = (columns as any).prepared;
   const buffer = old.columns.instancePositions.data[0].buffer;
   const buffers = vi.spyOn(device, 'createBuffer');
-  await columns.update({...props(), radii: vectorFromArray([1], new Float32())}, () => {}, error);
+  await columns.update(
+    {...props(), getRadius: vectorFromArray([1], new Float32())},
+    () => {},
+    error
+  );
   expect(error).toHaveBeenCalledOnce();
   expect((columns as any).prepared).toBe(old);
   expect(buffer.destroyed).toBe(false);
@@ -85,12 +89,12 @@ test('Scatterplot discards an upload superseded by a newer update', async () => 
 test('Scatterplot attempts invalid inputs once and retries changed inputs', async () => {
   const device = new NullDevice({});
   const columns = new ScatterplotLayerColumns(device);
-  const input = {...props(), radii: vectorFromArray([1], new Float32())};
+  const input = {...props(), getRadius: vectorFromArray([1], new Float32())};
   const error = vi.fn();
   await columns.update(input, () => {}, error);
   expect(error).toHaveBeenCalledOnce();
   expect(columns.needsUpdate(input, input)).toBe(false);
-  expect(columns.needsUpdate({...input, radii: undefined}, input)).toBe(true);
+  expect(columns.needsUpdate({...input, getRadius: undefined}, input)).toBe(true);
   columns.destroy();
   device.destroy();
 });
@@ -127,8 +131,8 @@ test('Scatterplot preserves transformed fallback position residuals', async () =
   await columns.update(
     {
       ...props(),
-      positions: undefined,
-      radii: vectorFromArray([1, 2], new Float32()),
+
+      getRadius: vectorFromArray([1, 2], new Float32()),
       getPosition: () => [1, 2]
     },
     () => {},
@@ -186,18 +190,17 @@ test('Scatterplot reuses generator rows for all accessors and later column updat
   const error = vi.fn();
   const input = {
     ...props(),
-    positions: undefined,
-    radii: vectorFromArray([1, 2], new Float32()),
+
+    getRadius: vectorFromArray([1, 2], new Float32()),
     data,
-    getPosition,
-    getRadius
+    getPosition
   };
   await columns.update(input, () => {}, error);
   await columns.update(
     {
       ...input,
-      radii: undefined,
-      fillColors: vectorFromArray(
+      getRadius,
+      getFillColor: vectorFromArray(
         [
           [1, 0, 0, 1],
           [0, 1, 0, 1]
@@ -268,8 +271,8 @@ test('Scatterplot uses array rows directly without copying or iterating them', a
   await columns.update(
     {
       ...props(),
-      positions: undefined,
-      radii: vectorFromArray([1, 2], new Float32()),
+
+      getRadius: vectorFromArray([1, 2], new Float32()),
       data,
       getPosition: row => row.position
     },
@@ -317,11 +320,15 @@ test('Scatterplot retains iterator input when the first conversion fails', async
     yield {position: [3, 4]};
   }
   const getPosition = vi.fn(row => row.position);
-  const input = {...props(), positions: undefined, data: rows(), getPosition};
+  const input = {...props(), data: rows(), getPosition};
   const error = vi.fn();
-  await columns.update({...input, radii: vectorFromArray([1], new Float32())}, () => {}, error);
+  await columns.update({...input, getRadius: vectorFromArray([1], new Float32())}, () => {}, error);
   expect(error).toHaveBeenCalledOnce();
-  await columns.update({...input, radii: vectorFromArray([1, 2], new Float32())}, () => {}, error);
+  await columns.update(
+    {...input, getRadius: vectorFromArray([1, 2], new Float32())},
+    () => {},
+    error
+  );
   expect(error).toHaveBeenCalledOnce();
   expect(getPosition.mock.calls.map(([row]) => row.position)).toEqual([
     [1, 2],
@@ -341,8 +348,8 @@ test('Scatterplot shares normalized iterator input with a replacement pending re
   }
   const input = {
     ...props(),
-    positions: undefined,
-    radii: vectorFromArray([1, 2], new Float32()),
+
+    getRadius: vectorFromArray([1, 2], new Float32()),
     data: rows(),
     getPosition: row => row.position
   };
@@ -364,7 +371,7 @@ test('Scatterplot shares normalized iterator input with a replacement pending re
     const old = columns.update(input, () => {}, error);
     await vi.waitFor(() => expect(spy).toHaveBeenCalledOnce());
     await columns.update(
-      {...input, radii: vectorFromArray([3, 4], new Float32())},
+      {...input, getRadius: vectorFromArray([3, 4], new Float32())},
       () => {},
       error
     );
@@ -390,7 +397,7 @@ test('Arrow columns reject differing chunk structures and retain previous buffer
   const radii = vectorFromArray([1], new Float32()).concat(
     vectorFromArray([2, 3, 4], new Float32())
   );
-  await columns.update({...props(), positions: source, radii}, () => {}, error);
+  await columns.update({...props(), getPosition: source, getRadius: radii}, () => {}, error);
   expect(error.mock.calls[0][0].message).toMatch('chunk structures must match');
   expect((columns as any).prepared).toBe(previous);
   columns.destroy();
@@ -406,7 +413,7 @@ test('Arc columns prepare both position inputs and accessor fallbacks', async ()
   await columns.update(
     {
       data: [{}, {}],
-      sourcePositions: positions(),
+      getSourcePosition: positions(),
       getTargetPosition,
       getSourceColor: [255, 0, 0, 255],
       getTargetColor: [0, 0, 255, 255],

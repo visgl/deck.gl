@@ -1,6 +1,6 @@
 # LayerManager Class (Internal)
 
-> The `LayerManager` class is gradually being refactor into a `ComponentManager` class and will be made part of the `lifecycle` directory. It is now an internal class, use the `Deck` class (or the [`DeckGL`](../react/deckgl.md) React Component) which creates a `LayerManager` under the hood.
+> The `LayerManager` class is gradually being refactor into a `ComponentManager` class and will be made part of the `lifecycle` directory. It is now an internal class, use the `Deck` class (or the [`DeckGL`](../react/legacy/deckgl.md) React Component) which creates a `LayerManager` under the hood.
 
 The `LayerManager` class manages a set of layers' lifecycle.
 
