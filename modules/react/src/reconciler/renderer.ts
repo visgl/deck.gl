@@ -236,7 +236,8 @@ function getRemovedProps(
   const defaults = Deck.defaultProps as Record<string, unknown>;
   const removed: Record<string, unknown> = {};
   for (const key of Object.keys(previous)) {
-    if (isResetOnRemoval(key) && !Object.hasOwn(next, key)) {
+    // Not `Object.hasOwn`, which Safari 15.0-15.3 lack
+    if (isResetOnRemoval(key) && !Object.prototype.hasOwnProperty.call(next, key)) {
       removed[key] = defaults[key];
     }
   }

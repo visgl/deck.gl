@@ -170,6 +170,21 @@ describe('removing a prop', () => {
     expect(Object.hasOwn(props, '_canvases')).toBe(false);
   });
 
+  it('works without Object.hasOwn, which Safari 15.0-15.3 lack', () => {
+    const {hasOwn} = Object;
+    // @ts-expect-error simulates a browser without `Object.hasOwn`
+    delete Object.hasOwn;
+    try {
+      const {deck, root} = setup({width: 100});
+      root.configure({width: 100});
+      expect(lastSetProps(deck).width, 'an unchanged prop is kept').toBe(100);
+      root.configure({});
+      expect(lastSetProps(deck).width, 'a removed prop resets').toBe(Deck.defaultProps.width);
+    } finally {
+      Object.hasOwn = hasOwn;
+    }
+  });
+
   it('keeps device and _canvases passed as undefined, as when they are removed', () => {
     const device = {id: 'device'};
     const {deck, root} = setup({_canvases: [], device: device as never});
