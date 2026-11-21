@@ -7,7 +7,7 @@ import {getGlobeCloudViewUniforms} from '@deck.gl/proposals/layers';
 import type {RenderPass, Texture} from '@luma.gl/core';
 import {Model, SphereGeometry} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shaders';
-import type {NumberArray3} from '@math.gl/core';
+import type {NumberArray3} from '@math.gl/core/matrix';
 
 const earthScene = {
   name: 'earthScene',

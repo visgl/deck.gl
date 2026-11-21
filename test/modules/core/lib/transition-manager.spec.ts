@@ -6,7 +6,7 @@ import {test, expect} from 'vitest';
 import TransitionManager from '@deck.gl/core/controllers/transition-manager';
 import {MapState} from '@deck.gl/core/controllers/map-controller';
 import {Timeline} from '@luma.gl/engine';
-import {config} from '@math.gl/core';
+import {config} from '@math.gl/core/matrix';
 import {LinearInterpolator, FlyToInterpolator, WebMercatorViewport} from '@deck.gl/core';
 
 const makeViewport = (props: Record<string, any>) => new WebMercatorViewport(props);

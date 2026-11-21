@@ -15,7 +15,7 @@ import {
   updateDataFilterCategoryAttributes,
   getDataFilterCategoryKey
 } from './attributes';
-import {NumberArray4} from '@math.gl/core';
+import {NumberArray4} from '@math.gl/core/matrix';
 
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {query, queryGroupedSQL, type Query, type QueryOptions} from '@loaders.gl/core/scan';
+import {query, queryGroupedSQL, type Query, type QueryOptions} from '@loaders.gl/core/query';
 import {parseSQLSelectStatement} from '@math.gl/sql/parser';
 import {unwrapLoaderArrowResult} from '../utils/loader-utils';
 import {isArrowTable} from './upstream-math/is-arrow-table';
@@ -50,7 +50,7 @@ export async function queryLayerData(
   } catch (error) {
     // Custom parsers own their grammar and diagnostics.
     if (parse !== defaultSQLParser.parseQuery) throw error;
-    const {queryArrowSQL} = await import('@math.gl/sql');
+    const {queryArrowSQL} = await import('@math.gl/sql/query');
     return queryArrowSQL(sql, new Map([['data', data]]));
   }
   return query(scanQuery, {source: data});
