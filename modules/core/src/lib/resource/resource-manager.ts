@@ -79,19 +79,22 @@ export default class ResourceManager {
     }
   }
 
-  unsubscribe({consumerId}: {consumerId: string}): void {
+  /** Removes one request subscription, or all subscriptions for the consumer. */
+  unsubscribe({consumerId, requestId}: {consumerId: string; requestId?: string}): void {
     const consumer = this._consumers[consumerId];
-    if (consumer) {
-      for (const requestId in consumer) {
-        const request = consumer[requestId];
-        const resource = this._resources[request.resourceId];
-        if (resource) {
-          resource.unsubscribe(request);
-        }
+    if (!consumer) return;
+
+    for (const id of requestId === undefined ? Object.keys(consumer) : [requestId]) {
+      const request = consumer[id];
+      if (request) {
+        this._resources[request.resourceId]?.unsubscribe(request);
+        delete consumer[id];
       }
-      delete this._consumers[consumerId];
-      this.prune();
     }
+    if (!Object.keys(consumer).length) {
+      delete this._consumers[consumerId];
+    }
+    this.prune();
   }
 
   subscribe<T>({

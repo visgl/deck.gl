@@ -269,6 +269,11 @@ new PathLayer<{vertices: Float32Array}>({
 })
 ```
 
+On top-level layers, Deck's [`normalizedColors`](../core/deck.md#normalizedcolors) option
+interprets plain-array `getColor` values and callback results as 0–1 channels. Callbacks can also return plain RGB(A) arrays per vertex.
+Omitted alpha is opaque. Byte typed arrays, binary attributes, and built-in defaults keep
+their existing encoding.
+
 #### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 * Default `[0, 0, 0, 255]`

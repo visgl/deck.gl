@@ -5,7 +5,7 @@
 import Viewport from '../viewports/viewport';
 
 import {Matrix4} from '@math.gl/core';
-import {pixelsToWorld, fovyToAltitude} from '@math.gl/web-mercator';
+import {pixelsToWorld, fovyToAltitude} from '@math.gl/geospatial/web-mercator';
 import {getProjectionParameters} from '../utils/math-utils';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;

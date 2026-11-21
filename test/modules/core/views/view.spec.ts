@@ -10,7 +10,7 @@ import {
   OrbitView,
   OrthographicView,
   FirstPersonView,
-  _GlobeView as GlobeView
+  GlobeView
 } from 'deck.gl';
 import {equals} from '@math.gl/core';
 

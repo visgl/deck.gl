@@ -9,7 +9,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import {getDeckInstance, getProjection, getViewState} from '@deck.gl/mapbox/deck-utils';
 import MapboxLayerGroup from '@deck.gl/mapbox/mapbox-layer-group';
-import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
+import {GlobeView, MapView} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 
 import MockMapboxMap from './mapbox-gl-mock/map';

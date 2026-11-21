@@ -1,0 +1,4064 @@
+[
+  [{
+    "travel_type": "car",
+    "instruction": "Drive northwest on Steuart Street.",
+    "length": 0.049,
+    "begin_shape": [-122.394181, 37.793991],
+    "end_shape": [-122.394845, 37.794448],
+    "begin_time": 0,
+    "end_time": 11
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Market Street.",
+    "length": 0.198,
+    "begin_shape": [-122.394845, 37.794448],
+    "end_shape": [-122.3974, 37.792438],
+    "begin_time": 11,
+    "end_time": 52
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Pine Street.",
+    "length": 2.727,
+    "begin_shape": [-122.3974, 37.792438],
+    "end_shape": [-122.446625, 37.7863],
+    "begin_time": 52,
+    "end_time": 500
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto Masonic Avenue.",
+    "length": 0.954,
+    "begin_shape": [-122.446625, 37.7863],
+    "end_shape": [-122.445923, 37.772994],
+    "begin_time": 500,
+    "end_time": 687
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Fell Street.",
+    "length": 0.459,
+    "begin_shape": [-122.445923, 37.772994],
+    "end_shape": [-122.454018, 37.771511],
+    "begin_time": 687,
+    "end_time": 750
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on John F Kennedy Drive.",
+    "length": 0.061,
+    "begin_shape": [-122.454018, 37.771511],
+    "end_shape": [-122.455002, 37.771102],
+    "begin_time": 750,
+    "end_time": 765
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto Kezar Drive.",
+    "length": 0.155,
+    "begin_shape": [-122.455002, 37.771102],
+    "end_shape": [-122.454888, 37.769088],
+    "begin_time": 765,
+    "end_time": 784
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Alvord Lake Bridge.",
+    "length": 0.01,
+    "begin_shape": [-122.454888, 37.769088],
+    "end_shape": [-122.45488, 37.768947],
+    "begin_time": 784,
+    "end_time": 785
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Kezar Drive.",
+    "length": 0.366,
+    "begin_shape": [-122.45488, 37.768947],
+    "end_shape": [-122.460312, 37.766269],
+    "begin_time": 785,
+    "end_time": 839
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto Lincoln Way.",
+    "length": 0.204,
+    "begin_shape": [-122.460312, 37.766269],
+    "end_shape": [-122.464043, 37.766094],
+    "begin_time": 839,
+    "end_time": 863
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto 7th Avenue.",
+    "length": 0.533,
+    "begin_shape": [-122.464043, 37.766094],
+    "end_shape": [-122.463799, 37.758544],
+    "begin_time": 863,
+    "end_time": 942
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Lawton Street.",
+    "length": 0.058,
+    "begin_shape": [-122.463799, 37.758544],
+    "end_shape": [-122.464867, 37.758499],
+    "begin_time": 942,
+    "end_time": 961
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto 8th Avenue.",
+    "length": 0.388,
+    "begin_shape": [-122.464867, 37.758499],
+    "end_shape": [-122.464478, 37.752902],
+    "begin_time": 961,
+    "end_time": 1047
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Ortega Street.",
+    "length": 0.117,
+    "begin_shape": [-122.464478, 37.752902],
+    "end_shape": [-122.466622, 37.752807],
+    "begin_time": 1047,
+    "end_time": 1089
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto 10th Avenue.",
+    "length": 0.258,
+    "begin_shape": [-122.466622, 37.752807],
+    "end_shape": [-122.466362, 37.749076],
+    "begin_time": 1089,
+    "end_time": 1153
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Quintara Street.",
+    "length": 0.057,
+    "begin_shape": [-122.466362, 37.749076],
+    "end_shape": [-122.4674, 37.749031],
+    "begin_time": 1153,
+    "end_time": 1166
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.4674, 37.749031],
+    "end_shape": [-122.4674, 37.749031],
+    "begin_time": 1166,
+    "end_time": 1166
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive north on Kearny Street.",
+    "length": 0.054,
+    "begin_shape": [-122.405365, 37.797248],
+    "end_shape": [-122.405495, 37.798019],
+    "begin_time": 0,
+    "end_time": 7
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Broadway.",
+    "length": 0.089,
+    "begin_shape": [-122.405495, 37.798019],
+    "end_shape": [-122.403878, 37.798229],
+    "begin_time": 7,
+    "end_time": 24
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Montgomery Street.",
+    "length": 0.66,
+    "begin_shape": [-122.403878, 37.798229],
+    "end_shape": [-122.402009, 37.788803],
+    "begin_time": 24,
+    "end_time": 159
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto New Montgomery Street.",
+    "length": 0.246,
+    "begin_shape": [-122.402009, 37.788803],
+    "end_shape": [-122.398987, 37.786205],
+    "begin_time": 159,
+    "end_time": 208
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Howard Street.",
+    "length": 0.288,
+    "begin_shape": [-122.398987, 37.786205],
+    "end_shape": [-122.40271, 37.783252],
+    "begin_time": 208,
+    "end_time": 272
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto 4th Street/Fourth Street.",
+    "length": 0.119,
+    "begin_shape": [-122.40271, 37.783252],
+    "end_shape": [-122.401177, 37.782024],
+    "begin_time": 272,
+    "end_time": 305
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.401177, 37.782024],
+    "end_shape": [-122.401177, 37.782024],
+    "begin_time": 305,
+    "end_time": 305
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southeast on 4th Street/Fourth Street.",
+    "length": 0.055,
+    "begin_shape": [-122.394837, 37.776981],
+    "end_shape": [-122.394127, 37.776412],
+    "begin_time": 0,
+    "end_time": 5
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto King Street.",
+    "length": 0.174,
+    "begin_shape": [-122.394127, 37.776412],
+    "end_shape": [-122.396378, 37.774642],
+    "begin_time": 5,
+    "end_time": 32
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on I 280.",
+    "length": 7.21,
+    "begin_shape": [-122.396378, 37.774642],
+    "end_shape": [-122.464478, 37.710506],
+    "begin_time": 32,
+    "end_time": 483
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 49 on the right toward John Daly Boulevard | Junipero Serra Boulevard.",
+    "length": 0.564,
+    "begin_shape": [-122.464478, 37.710506],
+    "end_shape": [-122.470933, 37.705123],
+    "begin_time": 483,
+    "end_time": 522
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto John Daly Boulevard.",
+    "length": 1.333,
+    "begin_shape": [-122.470933, 37.705123],
+    "end_shape": [-122.493882, 37.698738],
+    "begin_time": 522,
+    "end_time": 672
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto CA 35/Skyline Boulevard.",
+    "length": 1.956,
+    "begin_shape": [-122.493882, 37.698738],
+    "end_shape": [-122.502976, 37.724765],
+    "begin_time": 672,
+    "end_time": 808
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Great Highway.",
+    "length": 2.801,
+    "begin_shape": [-122.502976, 37.724765],
+    "end_shape": [-122.510293, 37.763946],
+    "begin_time": 808,
+    "end_time": 1104
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Lincoln Way.",
+    "length": 0.024,
+    "begin_shape": [-122.510293, 37.763946],
+    "end_shape": [-122.509865, 37.763969],
+    "begin_time": 1104,
+    "end_time": 1109
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Great Highway/Lower Great Highway.",
+    "length": 0.257,
+    "begin_shape": [-122.509865, 37.763969],
+    "end_shape": [-122.509408, 37.760276],
+    "begin_time": 1109,
+    "end_time": 1147
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Judah Street.",
+    "length": 0.014,
+    "begin_shape": [-122.509408, 37.760276],
+    "end_shape": [-122.509163, 37.760288],
+    "begin_time": 1147,
+    "end_time": 1158
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto La Playa Street.",
+    "length": 0.017,
+    "begin_shape": [-122.509163, 37.760288],
+    "end_shape": [-122.509141, 37.760047],
+    "begin_time": 1158,
+    "end_time": 1164
+  }, {
+    "travel_type": "car",
+    "instruction": "Your destination is on the left.",
+    "length": 0,
+    "begin_shape": [-122.509141, 37.760047],
+    "end_shape": [-122.509141, 37.760047],
+    "begin_time": 1164,
+    "end_time": 1164
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive west on California Street.",
+    "length": 0.948,
+    "begin_shape": [-122.459214, 37.785686],
+    "end_shape": [-122.476456, 37.784278],
+    "begin_time": 0,
+    "end_time": 223
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.476456, 37.784278],
+    "end_shape": [-122.476456, 37.784278],
+    "begin_time": 223,
+    "end_time": 223
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southwest on Market Street.",
+    "length": 0.121,
+    "begin_shape": [-122.39499, 37.79438],
+    "end_shape": [-122.396538, 37.793125],
+    "begin_time": 0,
+    "end_time": 15
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn sharp right onto Drumm Street.",
+    "length": 0.224,
+    "begin_shape": [-122.396538, 37.793125],
+    "end_shape": [-122.396874, 37.79631],
+    "begin_time": 15,
+    "end_time": 53
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Washington Street.",
+    "length": 0.077,
+    "begin_shape": [-122.396874, 37.79631],
+    "end_shape": [-122.395554, 37.796634],
+    "begin_time": 53,
+    "end_time": 71
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto The Embarcadero.",
+    "length": 1.02,
+    "begin_shape": [-122.395554, 37.796634],
+    "end_shape": [-122.407303, 37.807456],
+    "begin_time": 71,
+    "end_time": 224
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto North Point Street.",
+    "length": 0.998,
+    "begin_shape": [-122.407303, 37.807456],
+    "end_shape": [-122.42524, 37.805091],
+    "begin_time": 224,
+    "end_time": 312
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Van Ness Avenue.",
+    "length": 0.27,
+    "begin_shape": [-122.42524, 37.805091],
+    "end_shape": [-122.424637, 37.801345],
+    "begin_time": 312,
+    "end_time": 341
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto US 101/Lombard Street.",
+    "length": 1.109,
+    "begin_shape": [-122.424637, 37.801345],
+    "end_shape": [-122.444672, 37.798873],
+    "begin_time": 341,
+    "end_time": 481
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto US 101/Richardson Avenue. Continue on US 101.",
+    "length": 1.371,
+    "begin_shape": [-122.444672, 37.798873],
+    "end_shape": [-122.46711, 37.802593],
+    "begin_time": 481,
+    "end_time": 594
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 438 on the right onto 1 South/19 Avenue.",
+    "length": 0.417,
+    "begin_shape": [-122.46711, 37.802593],
+    "end_shape": [-122.469498, 37.801326],
+    "begin_time": 594,
+    "end_time": 621
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto CA 1.",
+    "length": 1.335,
+    "begin_shape": [-122.469498, 37.801326],
+    "end_shape": [-122.472542, 37.782585],
+    "begin_time": 621,
+    "end_time": 739
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Clement Street.",
+    "length": 0.025,
+    "begin_shape": [-122.472542, 37.782585],
+    "end_shape": [-122.473, 37.782566],
+    "begin_time": 739,
+    "end_time": 743
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.473, 37.782566],
+    "end_shape": [-122.473, 37.782566],
+    "begin_time": 743,
+    "end_time": 743
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive west on Sutter Street.",
+    "length": 0.177,
+    "begin_shape": [-122.400673, 37.790237],
+    "end_shape": [-122.40387, 37.789833],
+    "begin_time": 0,
+    "end_time": 50
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Kearny Street.",
+    "length": 0.13,
+    "begin_shape": [-122.40387, 37.789833],
+    "end_shape": [-122.404236, 37.791702],
+    "begin_time": 50,
+    "end_time": 91
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Pine Street.",
+    "length": 1.991,
+    "begin_shape": [-122.404236, 37.791702],
+    "end_shape": [-122.440217, 37.78712],
+    "begin_time": 91,
+    "end_time": 399
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Divisadero Street.",
+    "length": 0.067,
+    "begin_shape": [-122.440217, 37.78712],
+    "end_shape": [-122.440415, 37.788078],
+    "begin_time": 399,
+    "end_time": 415
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto California Street.",
+    "length": 0.354,
+    "begin_shape": [-122.440415, 37.788078],
+    "end_shape": [-122.446808, 37.787261],
+    "begin_time": 415,
+    "end_time": 486
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Presidio Avenue.",
+    "length": 0.008,
+    "begin_shape": [-122.446808, 37.787261],
+    "end_shape": [-122.446831, 37.78738],
+    "begin_time": 486,
+    "end_time": 495
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.446831, 37.78738],
+    "end_shape": [-122.446831, 37.78738],
+    "begin_time": 495,
+    "end_time": 495
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southwest on Market Street.",
+    "length": 0.509,
+    "begin_shape": [-122.402131, 37.788707],
+    "end_shape": [-122.408715, 37.783508],
+    "begin_time": 0,
+    "end_time": 146
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto Turk Street.",
+    "length": 1.845,
+    "begin_shape": [-122.408715, 37.783508],
+    "end_shape": [-122.442055, 37.77927],
+    "begin_time": 146,
+    "end_time": 482
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Turk Boulevard.",
+    "length": 0.277,
+    "begin_shape": [-122.442055, 37.77927],
+    "end_shape": [-122.44706, 37.778629],
+    "begin_time": 482,
+    "end_time": 515
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Masonic Avenue.",
+    "length": 0.197,
+    "begin_shape": [-122.44706, 37.778629],
+    "end_shape": [-122.446496, 37.77581],
+    "begin_time": 515,
+    "end_time": 564
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Fulton Street.",
+    "length": 3.485,
+    "begin_shape": [-122.446496, 37.77581],
+    "end_shape": [-122.509919, 37.7714],
+    "begin_time": 564,
+    "end_time": 1033
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto La Playa Street.",
+    "length": 0.15,
+    "begin_shape": [-122.509919, 37.7714],
+    "end_shape": [-122.510071, 37.773563],
+    "begin_time": 1033,
+    "end_time": 1070
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.510071, 37.773563],
+    "end_shape": [-122.510071, 37.773563],
+    "begin_time": 1070,
+    "end_time": 1070
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive northeast.",
+    "length": 0.034,
+    "begin_shape": [-122.474412, 37.71577],
+    "end_shape": [-122.474549, 37.716018],
+    "begin_time": 0,
+    "end_time": 5
+  }, {
+    "travel_type": "car",
+    "instruction": "Exit the roundabout onto Font Boulevard.",
+    "length": 0.082,
+    "begin_shape": [-122.474549, 37.716018],
+    "end_shape": [-122.475731, 37.716751],
+    "begin_time": 5,
+    "end_time": 52
+  }, {
+    "travel_type": "car",
+    "instruction": "Enter the roundabout and take the 2nd exit.",
+    "length": 0.021,
+    "begin_shape": [-122.475731, 37.716751],
+    "end_shape": [-122.475953, 37.716938],
+    "begin_time": 52,
+    "end_time": 60
+  }, {
+    "travel_type": "car",
+    "instruction": "Exit the roundabout onto Font Boulevard.",
+    "length": 0.091,
+    "begin_shape": [-122.475953, 37.716938],
+    "end_shape": [-122.477227, 37.717773],
+    "begin_time": 60,
+    "end_time": 106
+  }, {
+    "travel_type": "car",
+    "instruction": "Enter the roundabout and take the 4th exit.",
+    "length": 0.106,
+    "begin_shape": [-122.477227, 37.717773],
+    "end_shape": [-122.478417, 37.718624],
+    "begin_time": 106,
+    "end_time": 129
+  }, {
+    "travel_type": "car",
+    "instruction": "Exit the roundabout onto Font Boulevard.",
+    "length": 0.092,
+    "begin_shape": [-122.478417, 37.718624],
+    "end_shape": [-122.479592, 37.719566],
+    "begin_time": 129,
+    "end_time": 163
+  }, {
+    "travel_type": "car",
+    "instruction": "Enter the roundabout and take the 2nd exit.",
+    "length": 0.037,
+    "begin_shape": [-122.479592, 37.719566],
+    "end_shape": [-122.479889, 37.719478],
+    "begin_time": 163,
+    "end_time": 173
+  }, {
+    "travel_type": "car",
+    "instruction": "Exit the roundabout onto Serrano Drive.",
+    "length": 0.186,
+    "begin_shape": [-122.479889, 37.719478],
+    "end_shape": [-122.483086, 37.719108],
+    "begin_time": 173,
+    "end_time": 221
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Arballo Drive.",
+    "length": 0.047,
+    "begin_shape": [-122.483086, 37.719108],
+    "end_shape": [-122.483063, 37.719791],
+    "begin_time": 221,
+    "end_time": 234
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.483063, 37.719791],
+    "end_shape": [-122.483063, 37.719791],
+    "begin_time": 234,
+    "end_time": 234
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive north on Bayshore Boulevard.",
+    "length": 0.416,
+    "begin_shape": [-122.406853, 37.740283],
+    "end_shape": [-122.403885, 37.745758],
+    "begin_time": 0,
+    "end_time": 43
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left.",
+    "length": 0.055,
+    "begin_shape": [-122.403885, 37.745758],
+    "end_shape": [-122.404191, 37.745216],
+    "begin_time": 43,
+    "end_time": 47
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Bayshore Boulevard.",
+    "length": 0.455,
+    "begin_shape": [-122.404191, 37.745216],
+    "end_shape": [-122.40709, 37.739158],
+    "begin_time": 47,
+    "end_time": 102
+  }, {
+    "travel_type": "car",
+    "instruction": "Take the ramp on the right.",
+    "length": 0.017,
+    "begin_shape": [-122.40709, 37.739158],
+    "end_shape": [-122.407158, 37.738922],
+    "begin_time": 102,
+    "end_time": 103
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left.",
+    "length": 0.073,
+    "begin_shape": [-122.407158, 37.738922],
+    "end_shape": [-122.407395, 37.737907],
+    "begin_time": 103,
+    "end_time": 111
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto Alemany Boulevard.",
+    "length": 0.125,
+    "begin_shape": [-122.407395, 37.737907],
+    "end_shape": [-122.40889, 37.736713],
+    "begin_time": 111,
+    "end_time": 142
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left to stay on Alemany Boulevard.",
+    "length": 0.094,
+    "begin_shape": [-122.40889, 37.736713],
+    "end_shape": [-122.407815, 37.735935],
+    "begin_time": 142,
+    "end_time": 155
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left to take the US 101 ramp.",
+    "length": 0.339,
+    "begin_shape": [-122.407815, 37.735935],
+    "end_shape": [-122.406403, 37.734436],
+    "begin_time": 155,
+    "end_time": 196
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto US 101/James Lick Freeway.",
+    "length": 0.992,
+    "begin_shape": [-122.406403, 37.734436],
+    "end_shape": [-122.400277, 37.720954],
+    "begin_time": 196,
+    "end_time": 273
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 429B on the right toward Third Street/Cow Palace.",
+    "length": 0.214,
+    "begin_shape": [-122.400277, 37.720954],
+    "end_shape": [-122.399758, 37.717899],
+    "begin_time": 273,
+    "end_time": 288
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Bayshore Boulevard.",
+    "length": 1.065,
+    "begin_shape": [-122.399758, 37.717899],
+    "end_shape": [-122.407052, 37.704727],
+    "begin_time": 288,
+    "end_time": 395
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Geneva Avenue.",
+    "length": 0.507,
+    "begin_shape": [-122.407052, 37.704727],
+    "end_shape": [-122.415764, 37.707164],
+    "begin_time": 395,
+    "end_time": 438
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Rio Verde Street.",
+    "length": 0.008,
+    "begin_shape": [-122.415764, 37.707164],
+    "end_shape": [-122.41581, 37.707057],
+    "begin_time": 438,
+    "end_time": 440
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.41581, 37.707057],
+    "end_shape": [-122.41581, 37.707057],
+    "begin_time": 440,
+    "end_time": 440
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive northwest on 23rd Street.",
+    "length": 0.112,
+    "begin_shape": [-122.396676, 37.754707],
+    "end_shape": [-122.398697, 37.754749],
+    "begin_time": 0,
+    "end_time": 22
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Wisconsin Street.",
+    "length": 0.065,
+    "begin_shape": [-122.398697, 37.754749],
+    "end_shape": [-122.398606, 37.753822],
+    "begin_time": 22,
+    "end_time": 51
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Coral Road.",
+    "length": 0.051,
+    "begin_shape": [-122.398606, 37.753822],
+    "end_shape": [-122.399521, 37.753864],
+    "begin_time": 51,
+    "end_time": 67
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Carolina Street.",
+    "length": 0.059,
+    "begin_shape": [-122.399521, 37.753864],
+    "end_shape": [-122.399758, 37.75468],
+    "begin_time": 67,
+    "end_time": 96
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto 23rd Street.",
+    "length": 0.313,
+    "begin_shape": [-122.399758, 37.75468],
+    "end_shape": [-122.405472, 37.754344],
+    "begin_time": 96,
+    "end_time": 255
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Utah Street.",
+    "length": 0.089,
+    "begin_shape": [-122.405472, 37.754344],
+    "end_shape": [-122.40535, 37.753067],
+    "begin_time": 255,
+    "end_time": 293
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto 24th Street.",
+    "length": 0.052,
+    "begin_shape": [-122.40535, 37.753067],
+    "end_shape": [-122.406289, 37.753005],
+    "begin_time": 293,
+    "end_time": 310
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Potrero Avenue.",
+    "length": 0.004,
+    "begin_shape": [-122.406289, 37.753005],
+    "end_shape": [-122.406296, 37.753063],
+    "begin_time": 310,
+    "end_time": 329
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.406296, 37.753063],
+    "end_shape": [-122.406296, 37.753063],
+    "begin_time": 329,
+    "end_time": 329
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive north on Mission Street.",
+    "length": 0.061,
+    "begin_shape": [-122.418229, 37.748168],
+    "end_shape": [-122.418152, 37.749038],
+    "begin_time": 0,
+    "end_time": 36
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto 26th Street.",
+    "length": 0.119,
+    "begin_shape": [-122.418152, 37.749038],
+    "end_shape": [-122.41597, 37.749176],
+    "begin_time": 36,
+    "end_time": 153
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto South Van Ness Avenue.",
+    "length": 1.427,
+    "begin_shape": [-122.41597, 37.749176],
+    "end_shape": [-122.417725, 37.769744],
+    "begin_time": 153,
+    "end_time": 463
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto 13th Street.",
+    "length": 0.117,
+    "begin_shape": [-122.417725, 37.769744],
+    "end_shape": [-122.415597, 37.769523],
+    "begin_time": 463,
+    "end_time": 484
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Folsom Street.",
+    "length": 0.007,
+    "begin_shape": [-122.415597, 37.769523],
+    "end_shape": [-122.415574, 37.769626],
+    "begin_time": 484,
+    "end_time": 500
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.415574, 37.769626],
+    "end_shape": [-122.415574, 37.769626],
+    "begin_time": 500,
+    "end_time": 500
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southwest on Mission Street.",
+    "length": 2.238,
+    "begin_shape": [-122.422089, 37.742198],
+    "end_shape": [-122.442574, 37.71466],
+    "begin_time": 0,
+    "end_time": 391
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.442574, 37.71466],
+    "end_shape": [-122.442574, 37.71466],
+    "begin_time": 391,
+    "end_time": 391
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive west on Bosworth Street.",
+    "length": 0.088,
+    "begin_shape": [-122.431717, 37.733024],
+    "end_shape": [-122.43319, 37.733432],
+    "begin_time": 0,
+    "end_time": 32
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left to take the I 280 ramp.",
+    "length": 0.467,
+    "begin_shape": [-122.43319, 37.733432],
+    "end_shape": [-122.440255, 37.72985],
+    "begin_time": 32,
+    "end_time": 81
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto I 280/John F Foran Freeway.",
+    "length": 0.384,
+    "begin_shape": [-122.440255, 37.72985],
+    "end_shape": [-122.445801, 37.726554],
+    "begin_time": 81,
+    "end_time": 111
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 51 on the right toward Ocean Avenue/Geneva Avenue.",
+    "length": 0.14,
+    "begin_shape": [-122.445801, 37.726554],
+    "end_shape": [-122.447258, 37.724914],
+    "begin_time": 111,
+    "end_time": 123
+  }, {
+    "travel_type": "car",
+    "instruction": "Keep right at the fork.",
+    "length": 0.169,
+    "begin_shape": [-122.447258, 37.724914],
+    "end_shape": [-122.449021, 37.723033],
+    "begin_time": 123,
+    "end_time": 136
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto Ocean Avenue.",
+    "length": 1.417,
+    "begin_shape": [-122.449021, 37.723033],
+    "end_shape": [-122.47165, 37.731018],
+    "begin_time": 136,
+    "end_time": 378
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Junipero Serra Boulevard.",
+    "length": 0.253,
+    "begin_shape": [-122.47165, 37.731018],
+    "end_shape": [-122.471451, 37.734676],
+    "begin_time": 378,
+    "end_time": 412
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Sloat Boulevard.",
+    "length": 0.494,
+    "begin_shape": [-122.471451, 37.734676],
+    "end_shape": [-122.480256, 37.734592],
+    "begin_time": 412,
+    "end_time": 580
+  }, {
+    "travel_type": "car",
+    "instruction": "Your destination is on the left.",
+    "length": 0,
+    "begin_shape": [-122.480256, 37.734592],
+    "end_shape": [-122.480256, 37.734592],
+    "begin_time": 580,
+    "end_time": 580
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive east on Bush Street.",
+    "length": 0.09,
+    "begin_shape": [-122.441742, 37.785972],
+    "end_shape": [-122.440117, 37.786178],
+    "begin_time": 0,
+    "end_time": 10
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Divisadero Street.",
+    "length": 0.522,
+    "begin_shape": [-122.440117, 37.786178],
+    "end_shape": [-122.438622, 37.778724],
+    "begin_time": 10,
+    "end_time": 122
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Golden Gate Avenue.",
+    "length": 1.002,
+    "begin_shape": [-122.438622, 37.778724],
+    "end_shape": [-122.420533, 37.781024],
+    "begin_time": 122,
+    "end_time": 267
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto US 101/Van Ness Avenue. Continue on Van Ness Avenue.",
+    "length": 2.289,
+    "begin_shape": [-122.420533, 37.781024],
+    "end_shape": [-122.415886, 37.74826],
+    "begin_time": 267,
+    "end_time": 655
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Cesar Chavez Street/Army Street.",
+    "length": 0.127,
+    "begin_shape": [-122.415886, 37.74826],
+    "end_shape": [-122.418206, 37.74821],
+    "begin_time": 655,
+    "end_time": 677
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Mission Street.",
+    "length": 0.558,
+    "begin_shape": [-122.418206, 37.74821],
+    "end_shape": [-122.422844, 37.741027],
+    "begin_time": 677,
+    "end_time": 802
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Cortland Avenue.",
+    "length": 0.068,
+    "begin_shape": [-122.422844, 37.741027],
+    "end_shape": [-122.421746, 37.740581],
+    "begin_time": 802,
+    "end_time": 838
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.421746, 37.740581],
+    "end_shape": [-122.421746, 37.740581],
+    "begin_time": 838,
+    "end_time": 838
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive north on CA 1/19th Avenue.",
+    "length": 2.75,
+    "begin_shape": [-122.474823, 37.725795],
+    "end_shape": [-122.477265, 37.765453],
+    "begin_time": 0,
+    "end_time": 362
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Crossover Drive.",
+    "length": 0.722,
+    "begin_shape": [-122.477265, 37.765453],
+    "end_shape": [-122.484208, 37.772571],
+    "begin_time": 362,
+    "end_time": 475
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Fulton Street.",
+    "length": 0.528,
+    "begin_shape": [-122.484208, 37.772571],
+    "end_shape": [-122.493851, 37.772132],
+    "begin_time": 475,
+    "end_time": 548
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto 34th Avenue.",
+    "length": 1.025,
+    "begin_shape": [-122.493851, 37.772132],
+    "end_shape": [-122.499505, 37.78482],
+    "begin_time": 548,
+    "end_time": 768
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.499505, 37.78482],
+    "end_shape": [-122.499505, 37.78482],
+    "begin_time": 768,
+    "end_time": 768
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southwest on Horn Avenue.",
+    "length": 0.06,
+    "begin_shape": [-122.36467, 37.728618],
+    "end_shape": [-122.365296, 37.727916],
+    "begin_time": 0,
+    "end_time": 8
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Galvez Avenue.",
+    "length": 0.099,
+    "begin_shape": [-122.365296, 37.727916],
+    "end_shape": [-122.366768, 37.728755],
+    "begin_time": 8,
+    "end_time": 32
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn sharp right onto Robinson Street.",
+    "length": 0.116,
+    "begin_shape": [-122.366768, 37.728755],
+    "end_shape": [-122.36467, 37.728618],
+    "begin_time": 32,
+    "end_time": 60
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.36467, 37.728618],
+    "end_shape": [-122.36467, 37.728618],
+    "begin_time": 60,
+    "end_time": 60
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southwest on Market Street.",
+    "length": 0.71,
+    "begin_shape": [-122.399521, 37.790763],
+    "end_shape": [-122.408715, 37.783508],
+    "begin_time": 0,
+    "end_time": 209
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto Turk Street.",
+    "length": 1.661,
+    "begin_shape": [-122.408715, 37.783508],
+    "end_shape": [-122.438714, 37.779666],
+    "begin_time": 209,
+    "end_time": 489
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Divisadero Street.",
+    "length": 0.396,
+    "begin_shape": [-122.438714, 37.779666],
+    "end_shape": [-122.437676, 37.774066],
+    "begin_time": 489,
+    "end_time": 571
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Fell Street.",
+    "length": 0.272,
+    "begin_shape": [-122.437676, 37.774066],
+    "end_shape": [-122.442582, 37.773422],
+    "begin_time": 571,
+    "end_time": 612
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Lyon Street.",
+    "length": 0.066,
+    "begin_shape": [-122.442582, 37.773422],
+    "end_shape": [-122.442772, 37.774372],
+    "begin_time": 612,
+    "end_time": 623
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.442772, 37.774372],
+    "end_shape": [-122.442772, 37.774372],
+    "begin_time": 623,
+    "end_time": 623
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive east on 19th Street.",
+    "length": 0.045,
+    "begin_shape": [-122.389611, 37.761711],
+    "end_shape": [-122.388779, 37.761764],
+    "begin_time": 0,
+    "end_time": 8
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto 3rd Street.",
+    "length": 0.364,
+    "begin_shape": [-122.388779, 37.761764],
+    "end_shape": [-122.388985, 37.766902],
+    "begin_time": 8,
+    "end_time": 91
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto 16th Street.",
+    "length": 1.02,
+    "begin_shape": [-122.388985, 37.766902],
+    "end_shape": [-122.407563, 37.765781],
+    "begin_time": 91,
+    "end_time": 273
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.407563, 37.765781],
+    "end_shape": [-122.407563, 37.765781],
+    "begin_time": 273,
+    "end_time": 273
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive northwest on Persia Avenue.",
+    "length": 0.407,
+    "begin_shape": [-122.429596, 37.720088],
+    "end_shape": [-122.435975, 37.723117],
+    "begin_time": 0,
+    "end_time": 132
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Mission Street.",
+    "length": 0.063,
+    "begin_shape": [-122.435975, 37.723117],
+    "end_shape": [-122.435387, 37.723907],
+    "begin_time": 132,
+    "end_time": 151
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Ocean Avenue.",
+    "length": 1.438,
+    "begin_shape": [-122.435387, 37.723907],
+    "end_shape": [-122.461236, 37.724952],
+    "begin_time": 151,
+    "end_time": 506
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Jules Avenue.",
+    "length": 0.342,
+    "begin_shape": [-122.461236, 37.724952],
+    "end_shape": [-122.461258, 37.720016],
+    "begin_time": 506,
+    "end_time": 622
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.461258, 37.720016],
+    "end_shape": [-122.461258, 37.720016],
+    "begin_time": 622,
+    "end_time": 622
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive south on Mission Street.",
+    "length": 0.039,
+    "begin_shape": [-122.418152, 37.749038],
+    "end_shape": [-122.418114, 37.74847],
+    "begin_time": 0,
+    "end_time": 7
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Cesar Chavez Street/Army Street.",
+    "length": 0.072,
+    "begin_shape": [-122.418114, 37.74847],
+    "end_shape": [-122.419182, 37.748191],
+    "begin_time": 7,
+    "end_time": 31
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Bartlett Street.",
+    "length": 0.054,
+    "begin_shape": [-122.419182, 37.748191],
+    "end_shape": [-122.419259, 37.748973],
+    "begin_time": 31,
+    "end_time": 40
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto 26th Street.",
+    "length": 0.06,
+    "begin_shape": [-122.419259, 37.748973],
+    "end_shape": [-122.418152, 37.749038],
+    "begin_time": 40,
+    "end_time": 66
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.418152, 37.749038],
+    "end_shape": [-122.418152, 37.749038],
+    "begin_time": 66,
+    "end_time": 66
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive south on CA 1/19th Avenue.",
+    "length": 0.053,
+    "begin_shape": [-122.475213, 37.721054],
+    "end_shape": [-122.475365, 37.720355],
+    "begin_time": 0,
+    "end_time": 44
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Crespi Drive.",
+    "length": 0.036,
+    "begin_shape": [-122.475365, 37.720355],
+    "end_shape": [-122.475892, 37.720062],
+    "begin_time": 44,
+    "end_time": 50
+  }, {
+    "travel_type": "car",
+    "instruction": "Enter the roundabout and take the 6th exit.",
+    "length": 0.058,
+    "begin_shape": [-122.475892, 37.720062],
+    "end_shape": [-122.475655, 37.719921],
+    "begin_time": 50,
+    "end_time": 63
+  }, {
+    "travel_type": "car",
+    "instruction": "Exit the roundabout onto Crespi Drive.",
+    "length": 0.03,
+    "begin_shape": [-122.475655, 37.719921],
+    "end_shape": [-122.475342, 37.72026],
+    "begin_time": 63,
+    "end_time": 76
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto CA 1/19th Avenue. Continue on CA 1.",
+    "length": 3.43,
+    "begin_shape": [-122.475342, 37.72026],
+    "end_shape": [-122.478486, 37.769508],
+    "begin_time": 76,
+    "end_time": 588
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.478486, 37.769508],
+    "end_shape": [-122.478486, 37.769508],
+    "begin_time": 588,
+    "end_time": 588
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southwest on Bemis Street.",
+    "length": 0.005,
+    "begin_shape": [-122.429505, 37.737827],
+    "end_shape": [-122.429581, 37.737777],
+    "begin_time": 0,
+    "end_time": 0
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Addison Street.",
+    "length": 0.354,
+    "begin_shape": [-122.429581, 37.737777],
+    "end_shape": [-122.433754, 37.740146],
+    "begin_time": 0,
+    "end_time": 74
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left to stay on Addison Street.",
+    "length": 0.115,
+    "begin_shape": [-122.433754, 37.740146],
+    "end_shape": [-122.435822, 37.74015],
+    "begin_time": 74,
+    "end_time": 114
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Diamond Heights Boulevard.",
+    "length": 0.805,
+    "begin_shape": [-122.435822, 37.74015],
+    "end_shape": [-122.444001, 37.746776],
+    "begin_time": 114,
+    "end_time": 224
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Clipper Street.",
+    "length": 0.057,
+    "begin_shape": [-122.444001, 37.746776],
+    "end_shape": [-122.44484, 37.746932],
+    "begin_time": 224,
+    "end_time": 257
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Portola Drive.",
+    "length": 0.247,
+    "begin_shape": [-122.44484, 37.746932],
+    "end_shape": [-122.443306, 37.750022],
+    "begin_time": 257,
+    "end_time": 293
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Market Street.",
+    "length": 1.371,
+    "begin_shape": [-122.443306, 37.750022],
+    "end_shape": [-122.435189, 37.762596],
+    "begin_time": 293,
+    "end_time": 455
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Castro Street.",
+    "length": 0.013,
+    "begin_shape": [-122.435189, 37.762596],
+    "end_shape": [-122.435174, 37.762409],
+    "begin_time": 455,
+    "end_time": 459
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.435174, 37.762409],
+    "end_shape": [-122.435174, 37.762409],
+    "begin_time": 459,
+    "end_time": 459
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive south on Laguna Honda Boulevard.",
+    "length": 0.538,
+    "begin_shape": [-122.463799, 37.754146],
+    "end_shape": [-122.458855, 37.747669],
+    "begin_time": 0,
+    "end_time": 78
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right to stay on Laguna Honda Boulevard.",
+    "length": 0.032,
+    "begin_shape": [-122.458855, 37.747669],
+    "end_shape": [-122.459214, 37.747303],
+    "begin_time": 78,
+    "end_time": 82
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left to stay on Laguna Honda Boulevard.",
+    "length": 0.032,
+    "begin_shape": [-122.459214, 37.747303],
+    "end_shape": [-122.458985, 37.746929],
+    "begin_time": 82,
+    "end_time": 111
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Woodside Avenue.",
+    "length": 0.411,
+    "begin_shape": [-122.458985, 37.746929],
+    "end_shape": [-122.451829, 37.745555],
+    "begin_time": 111,
+    "end_time": 184
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto Portola Drive.",
+    "length": 0.321,
+    "begin_shape": [-122.451829, 37.745555],
+    "end_shape": [-122.446221, 37.746742],
+    "begin_time": 184,
+    "end_time": 287
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Clipper Street.",
+    "length": 0.977,
+    "begin_shape": [-122.446221, 37.746742],
+    "end_shape": [-122.429421, 37.749156],
+    "begin_time": 287,
+    "end_time": 436
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Sanchez Street.",
+    "length": 0.11,
+    "begin_shape": [-122.429421, 37.749156],
+    "end_shape": [-122.429268, 37.747573],
+    "begin_time": 436,
+    "end_time": 458
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Cesar Chavez Street/Army Street.",
+    "length": 0.37,
+    "begin_shape": [-122.429268, 37.747573],
+    "end_shape": [-122.422532, 37.747943],
+    "begin_time": 458,
+    "end_time": 574
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Guerrero Street.",
+    "length": 0.164,
+    "begin_shape": [-122.422532, 37.747943],
+    "end_shape": [-122.422287, 37.74559],
+    "begin_time": 574,
+    "end_time": 615
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on San Jose Avenue.",
+    "length": 0.236,
+    "begin_shape": [-122.422287, 37.74559],
+    "end_shape": [-122.423363, 37.742298],
+    "begin_time": 615,
+    "end_time": 643
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto 30th Street.",
+    "length": 0.004,
+    "begin_shape": [-122.423363, 37.742298],
+    "end_shape": [-122.423295, 37.742298],
+    "begin_time": 643,
+    "end_time": 644
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.423295, 37.742298],
+    "end_shape": [-122.423295, 37.742298],
+    "begin_time": 644,
+    "end_time": 644
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive north on Powell Street.",
+    "length": 0.262,
+    "begin_shape": [-122.408616, 37.78923],
+    "end_shape": [-122.409363, 37.792976],
+    "begin_time": 0,
+    "end_time": 119
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Sacramento Street.",
+    "length": 0.724,
+    "begin_shape": [-122.409363, 37.792976],
+    "end_shape": [-122.422455, 37.791313],
+    "begin_time": 119,
+    "end_time": 245
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto US 101/Van Ness Avenue.",
+    "length": 0.704,
+    "begin_shape": [-122.422455, 37.791313],
+    "end_shape": [-122.424477, 37.801361],
+    "begin_time": 245,
+    "end_time": 372
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto US 101/Lombard Street.",
+    "length": 0.278,
+    "begin_shape": [-122.424477, 37.801361],
+    "end_shape": [-122.429497, 37.800731],
+    "begin_time": 372,
+    "end_time": 413
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Octavia Street.",
+    "length": 0.065,
+    "begin_shape": [-122.429497, 37.800731],
+    "end_shape": [-122.429688, 37.801654],
+    "begin_time": 413,
+    "end_time": 424
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.429688, 37.801654],
+    "end_shape": [-122.429688, 37.801654],
+    "begin_time": 424,
+    "end_time": 424
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive west on Balboa Street.",
+    "length": 0.352,
+    "begin_shape": [-122.490906, 37.776016],
+    "end_shape": [-122.49733, 37.775722],
+    "begin_time": 0,
+    "end_time": 68
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.49733, 37.775722],
+    "end_shape": [-122.49733, 37.775722],
+    "begin_time": 68,
+    "end_time": 68
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive north on Broderick Street.",
+    "length": 0.19,
+    "begin_shape": [-122.443779, 37.796043],
+    "end_shape": [-122.444321, 37.798751],
+    "begin_time": 0,
+    "end_time": 52
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto US 101/Lombard Street.",
+    "length": 1.083,
+    "begin_shape": [-122.444321, 37.798751],
+    "end_shape": [-122.424759, 37.801242],
+    "begin_time": 52,
+    "end_time": 197
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Van Ness Avenue.",
+    "length": 0.279,
+    "begin_shape": [-122.424759, 37.801242],
+    "end_shape": [-122.42524, 37.805091],
+    "begin_time": 197,
+    "end_time": 276
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto North Point Street.",
+    "length": 0.989,
+    "begin_shape": [-122.42524, 37.805091],
+    "end_shape": [-122.40738, 37.807346],
+    "begin_time": 276,
+    "end_time": 364
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto The Embarcadero.",
+    "length": 2.163,
+    "begin_shape": [-122.40738, 37.807346],
+    "end_shape": [-122.388428, 37.781791],
+    "begin_time": 364,
+    "end_time": 674
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on King Street.",
+    "length": 0.495,
+    "begin_shape": [-122.388428, 37.781791],
+    "end_shape": [-122.394127, 37.776412],
+    "begin_time": 674,
+    "end_time": 742
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto 4th Street/Fourth Street.",
+    "length": 0.067,
+    "begin_shape": [-122.394127, 37.776412],
+    "end_shape": [-122.394997, 37.777099],
+    "begin_time": 742,
+    "end_time": 754
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Townsend Street.",
+    "length": 0.009,
+    "begin_shape": [-122.394997, 37.777099],
+    "end_shape": [-122.39489, 37.777179],
+    "begin_time": 754,
+    "end_time": 762
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.39489, 37.777179],
+    "end_shape": [-122.39489, 37.777179],
+    "begin_time": 762,
+    "end_time": 762
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive south on Masonic Avenue.",
+    "length": 0.189,
+    "begin_shape": [-122.445336, 37.770118],
+    "end_shape": [-122.444748, 37.767425],
+    "begin_time": 0,
+    "end_time": 39
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Frederick Street.",
+    "length": 0.091,
+    "begin_shape": [-122.444748, 37.767425],
+    "end_shape": [-122.446389, 37.767215],
+    "begin_time": 39,
+    "end_time": 58
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Ashbury Street.",
+    "length": 0.324,
+    "begin_shape": [-122.446389, 37.767215],
+    "end_shape": [-122.447053, 37.762836],
+    "begin_time": 58,
+    "end_time": 123
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Clayton Street.",
+    "length": 0.133,
+    "begin_shape": [-122.447053, 37.762836],
+    "end_shape": [-122.446518, 37.761005],
+    "begin_time": 123,
+    "end_time": 170
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto Twin Peaks Boulevard.",
+    "length": 0.188,
+    "begin_shape": [-122.446518, 37.761005],
+    "end_shape": [-122.448487, 37.759048],
+    "begin_time": 170,
+    "end_time": 202
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left to stay on Twin Peaks Boulevard.",
+    "length": 0.203,
+    "begin_shape": [-122.448487, 37.759048],
+    "end_shape": [-122.446946, 37.7565],
+    "begin_time": 202,
+    "end_time": 249
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Burnett Avenue.",
+    "length": 0.547,
+    "begin_shape": [-122.446946, 37.7565],
+    "end_shape": [-122.444718, 37.750961],
+    "begin_time": 249,
+    "end_time": 394
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right to stay on Burnett Avenue.",
+    "length": 0.07,
+    "begin_shape": [-122.444718, 37.750961],
+    "end_shape": [-122.445778, 37.750503],
+    "begin_time": 394,
+    "end_time": 418
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.445778, 37.750503],
+    "end_shape": [-122.445778, 37.750503],
+    "begin_time": 418,
+    "end_time": 418
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive east on Geary Boulevard.",
+    "length": 0.237,
+    "begin_shape": [-122.496529, 37.779552],
+    "end_shape": [-122.492249, 37.779693],
+    "begin_time": 0,
+    "end_time": 56
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto 32nd Avenue.",
+    "length": 0.24,
+    "begin_shape": [-122.492249, 37.779693],
+    "end_shape": [-122.491997, 37.776233],
+    "begin_time": 56,
+    "end_time": 105
+  }, {
+    "travel_type": "car",
+    "instruction": "Your destination is on the left.",
+    "length": 0,
+    "begin_shape": [-122.491997, 37.776233],
+    "end_shape": [-122.491997, 37.776233],
+    "begin_time": 105,
+    "end_time": 105
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive west on Union Street.",
+    "length": 0.175,
+    "begin_shape": [-122.404442, 37.80104],
+    "end_shape": [-122.407601, 37.800643],
+    "begin_time": 0,
+    "end_time": 57
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Grant Avenue.",
+    "length": 0.196,
+    "begin_shape": [-122.407601, 37.800643],
+    "end_shape": [-122.408165, 37.803443],
+    "begin_time": 57,
+    "end_time": 128
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Lombard Street.",
+    "length": 0.087,
+    "begin_shape": [-122.408165, 37.803443],
+    "end_shape": [-122.406609, 37.803653],
+    "begin_time": 128,
+    "end_time": 153
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Telegraph Hill Boulevard.",
+    "length": 0.024,
+    "begin_shape": [-122.406609, 37.803653],
+    "end_shape": [-122.406289, 37.803516],
+    "begin_time": 153,
+    "end_time": 157
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right to stay on Telegraph Hill Boulevard.",
+    "length": 0.231,
+    "begin_shape": [-122.406289, 37.803516],
+    "end_shape": [-122.405808, 37.802722],
+    "begin_time": 157,
+    "end_time": 222
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.405808, 37.802722],
+    "end_shape": [-122.405808, 37.802722],
+    "begin_time": 222,
+    "end_time": 222
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive northeast on Naples Street.",
+    "length": 0.051,
+    "begin_shape": [-122.436631, 37.713527],
+    "end_shape": [-122.436165, 37.714145],
+    "begin_time": 0,
+    "end_time": 11
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Geneva Avenue.",
+    "length": 0.434,
+    "begin_shape": [-122.436165, 37.714145],
+    "end_shape": [-122.442315, 37.717796],
+    "begin_time": 11,
+    "end_time": 128
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Alemany Boulevard.",
+    "length": 1.765,
+    "begin_shape": [-122.442315, 37.717796],
+    "end_shape": [-122.419449, 37.731678],
+    "begin_time": 128,
+    "end_time": 313
+  }, {
+    "travel_type": "car",
+    "instruction": "Take the I 280 ramp on the left.",
+    "length": 0.237,
+    "begin_shape": [-122.419449, 37.731678],
+    "end_shape": [-122.415177, 37.732032],
+    "begin_time": 313,
+    "end_time": 329
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto I 280/John F Foran Freeway.",
+    "length": 0.112,
+    "begin_shape": [-122.415177, 37.732032],
+    "end_shape": [-122.413308, 37.732673],
+    "begin_time": 329,
+    "end_time": 346
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 54B on the left toward US-101 North/Civic Center/Bay Bridge.",
+    "length": 0.734,
+    "begin_shape": [-122.413308, 37.732673],
+    "end_shape": [-122.407685, 37.740901],
+    "begin_time": 346,
+    "end_time": 396
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto US 101/James Lick Freeway.",
+    "length": 1.748,
+    "begin_shape": [-122.407685, 37.740901],
+    "end_shape": [-122.404885, 37.764385],
+    "begin_time": 396,
+    "end_time": 531
+  }, {
+    "travel_type": "car",
+    "instruction": "Keep left to take Central Freeway.",
+    "length": 1.342,
+    "begin_shape": [-122.404885, 37.764385],
+    "end_shape": [-122.423325, 37.771858],
+    "begin_time": 531,
+    "end_time": 634
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Octavia Boulevard.",
+    "length": 0.278,
+    "begin_shape": [-122.423325, 37.771858],
+    "end_shape": [-122.424347, 37.775764],
+    "begin_time": 634,
+    "end_time": 694
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Fell Street.",
+    "length": 0.733,
+    "begin_shape": [-122.424347, 37.775764],
+    "end_shape": [-122.437584, 37.774078],
+    "begin_time": 694,
+    "end_time": 794
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Divisadero Street.",
+    "length": 0.981,
+    "begin_shape": [-122.437584, 37.774078],
+    "end_shape": [-122.440415, 37.788078],
+    "begin_time": 794,
+    "end_time": 999
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto California Street.",
+    "length": 0.354,
+    "begin_shape": [-122.440415, 37.788078],
+    "end_shape": [-122.446808, 37.787261],
+    "begin_time": 999,
+    "end_time": 1071
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Presidio Avenue.",
+    "length": 0.311,
+    "begin_shape": [-122.446808, 37.787261],
+    "end_shape": [-122.447701, 37.791709],
+    "begin_time": 1071,
+    "end_time": 1123
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Presidio Boulevard.",
+    "length": 0.669,
+    "begin_shape": [-122.447701, 37.791709],
+    "end_shape": [-122.452614, 37.799217],
+    "begin_time": 1123,
+    "end_time": 1230
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Letterman Drive.",
+    "length": 0.02,
+    "begin_shape": [-122.452614, 37.799217],
+    "end_shape": [-122.452294, 37.799343],
+    "begin_time": 1230,
+    "end_time": 1241
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.452294, 37.799343],
+    "end_shape": [-122.452294, 37.799343],
+    "begin_time": 1241,
+    "end_time": 1241
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive south on Middle Point Road.",
+    "length": 0.186,
+    "begin_shape": [-122.37941, 37.736774],
+    "end_shape": [-122.379433, 37.734081],
+    "begin_time": 0,
+    "end_time": 47
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Ingalls Street.",
+    "length": 0.126,
+    "begin_shape": [-122.379433, 37.734081],
+    "end_shape": [-122.379593, 37.732463],
+    "begin_time": 47,
+    "end_time": 83
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Hudson Avenue.",
+    "length": 0.175,
+    "begin_shape": [-122.379593, 37.732463],
+    "end_shape": [-122.382256, 37.733581],
+    "begin_time": 83,
+    "end_time": 123
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Whitney Young Circle.",
+    "length": 0.068,
+    "begin_shape": [-122.382256, 37.733581],
+    "end_shape": [-122.383408, 37.733238],
+    "begin_time": 123,
+    "end_time": 146
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.383408, 37.733238],
+    "end_shape": [-122.383408, 37.733238],
+    "begin_time": 146,
+    "end_time": 146
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive south on La Grande Avenue.",
+    "length": 0.016,
+    "begin_shape": [-122.425828, 37.719306],
+    "end_shape": [-122.42598, 37.719108],
+    "begin_time": 0,
+    "end_time": 2
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Dublin Street.",
+    "length": 0.044,
+    "begin_shape": [-122.42598, 37.719108],
+    "end_shape": [-122.426392, 37.718559],
+    "begin_time": 2,
+    "end_time": 17
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Persia Avenue.",
+    "length": 0.612,
+    "begin_shape": [-122.426392, 37.718559],
+    "end_shape": [-122.435975, 37.723117],
+    "begin_time": 17,
+    "end_time": 116
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Mission Street.",
+    "length": 0.9,
+    "begin_shape": [-122.435975, 37.723117],
+    "end_shape": [-122.426392, 37.733684],
+    "begin_time": 116,
+    "end_time": 254
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Bosworth Street.",
+    "length": 0.734,
+    "begin_shape": [-122.426392, 37.733684],
+    "end_shape": [-122.439347, 37.734775],
+    "begin_time": 254,
+    "end_time": 432
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left to stay on Bosworth Street.",
+    "length": 0.173,
+    "begin_shape": [-122.439347, 37.734775],
+    "end_shape": [-122.44191, 37.735977],
+    "begin_time": 432,
+    "end_time": 477
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto O'Shaughnessy Boulevard.",
+    "length": 1.1,
+    "begin_shape": [-122.44191, 37.735977],
+    "end_shape": [-122.451554, 37.745498],
+    "begin_time": 477,
+    "end_time": 610
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto Woodside Avenue.",
+    "length": 0.418,
+    "begin_shape": [-122.451554, 37.745498],
+    "end_shape": [-122.458787, 37.746917],
+    "begin_time": 610,
+    "end_time": 713
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Laguna Honda Boulevard.",
+    "length": 0.094,
+    "begin_shape": [-122.458787, 37.746917],
+    "end_shape": [-122.458733, 37.748119],
+    "begin_time": 713,
+    "end_time": 742
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left to stay on Laguna Honda Boulevard.",
+    "length": 0.012,
+    "begin_shape": [-122.458733, 37.748119],
+    "end_shape": [-122.458863, 37.74826],
+    "begin_time": 742,
+    "end_time": 744
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.458863, 37.74826],
+    "end_shape": [-122.458863, 37.74826],
+    "begin_time": 744,
+    "end_time": 744
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southeast on 4th Street/Fourth Street.",
+    "length": 0.077,
+    "begin_shape": [-122.395119, 37.777202],
+    "end_shape": [-122.394127, 37.776412],
+    "begin_time": 0,
+    "end_time": 7
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto King Street.",
+    "length": 0.531,
+    "begin_shape": [-122.394127, 37.776412],
+    "end_shape": [-122.388131, 37.781772],
+    "begin_time": 7,
+    "end_time": 117
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on The Embarcadero.",
+    "length": 2.18,
+    "begin_shape": [-122.388131, 37.781772],
+    "end_shape": [-122.407303, 37.807456],
+    "begin_time": 117,
+    "end_time": 422
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto North Point Street.",
+    "length": 0.273,
+    "begin_shape": [-122.407303, 37.807456],
+    "end_shape": [-122.412163, 37.806766],
+    "begin_time": 422,
+    "end_time": 446
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Powell Street.",
+    "length": 0.057,
+    "begin_shape": [-122.412163, 37.806766],
+    "end_shape": [-122.412323, 37.807586],
+    "begin_time": 446,
+    "end_time": 460
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.412323, 37.807586],
+    "end_shape": [-122.412323, 37.807586],
+    "begin_time": 460,
+    "end_time": 460
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive south on Pennsylvania Avenue.",
+    "length": 0.395,
+    "begin_shape": [-122.393136, 37.757652],
+    "end_shape": [-122.392617, 37.751953],
+    "begin_time": 0,
+    "end_time": 54
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left to take the I 280 ramp.",
+    "length": 0.119,
+    "begin_shape": [-122.392617, 37.751953],
+    "end_shape": [-122.392075, 37.75053],
+    "begin_time": 54,
+    "end_time": 78
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto I 280.",
+    "length": 2.809,
+    "begin_shape": [-122.392075, 37.75053],
+    "end_shape": [-122.432122, 37.732254],
+    "begin_time": 78,
+    "end_time": 269
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 52 on the right onto Monterey Boulevard.",
+    "length": 0.249,
+    "begin_shape": [-122.432122, 37.732254],
+    "end_shape": [-122.436547, 37.731578],
+    "begin_time": 269,
+    "end_time": 287
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Monterey Boulevard.",
+    "length": 1.726,
+    "begin_shape": [-122.436547, 37.731578],
+    "end_shape": [-122.465783, 37.733306],
+    "begin_time": 287,
+    "end_time": 643
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto Santa Clara Avenue.",
+    "length": 0.42,
+    "begin_shape": [-122.465783, 37.733306],
+    "end_shape": [-122.466172, 37.739154],
+    "begin_time": 643,
+    "end_time": 723
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Portola Drive.",
+    "length": 0.061,
+    "begin_shape": [-122.466172, 37.739154],
+    "end_shape": [-122.465249, 37.739627],
+    "begin_time": 723,
+    "end_time": 743
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Claremont Boulevard.",
+    "length": 0.072,
+    "begin_shape": [-122.465249, 37.739627],
+    "end_shape": [-122.465043, 37.740646],
+    "begin_time": 743,
+    "end_time": 774
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Ulloa Street.",
+    "length": 0.045,
+    "begin_shape": [-122.465043, 37.740646],
+    "end_shape": [-122.465783, 37.740894],
+    "begin_time": 774,
+    "end_time": 819
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto West Portal Avenue.",
+    "length": 0.01,
+    "begin_shape": [-122.465783, 37.740894],
+    "end_shape": [-122.465928, 37.740905],
+    "begin_time": 819,
+    "end_time": 845
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.465928, 37.740905],
+    "end_shape": [-122.465928, 37.740905],
+    "begin_time": 845,
+    "end_time": 845
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive east on Ocean Avenue.",
+    "length": 0.056,
+    "begin_shape": [-122.436402, 37.723793],
+    "end_shape": [-122.435387, 37.723907],
+    "begin_time": 0,
+    "end_time": 6
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Mission Street.",
+    "length": 0.275,
+    "begin_shape": [-122.435387, 37.723907],
+    "end_shape": [-122.432808, 37.727313],
+    "begin_time": 6,
+    "end_time": 70
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.432808, 37.727313],
+    "end_shape": [-122.432808, 37.727313],
+    "begin_time": 70,
+    "end_time": 70
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive north on 9th Avenue.",
+    "length": 0.006,
+    "begin_shape": [-122.466195, 37.7621],
+    "end_shape": [-122.466202, 37.762184],
+    "begin_time": 0,
+    "end_time": 0
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Judah Street.",
+    "length": 0.652,
+    "begin_shape": [-122.466202, 37.762184],
+    "end_shape": [-122.478089, 37.761657],
+    "begin_time": 0,
+    "end_time": 154
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto 20th Avenue.",
+    "length": 0.129,
+    "begin_shape": [-122.478089, 37.761657],
+    "end_shape": [-122.477959, 37.759792],
+    "begin_time": 154,
+    "end_time": 191
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Kirkham Street.",
+    "length": 0.058,
+    "begin_shape": [-122.477959, 37.759792],
+    "end_shape": [-122.476899, 37.759841],
+    "begin_time": 191,
+    "end_time": 218
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto CA 1/19th Avenue.",
+    "length": 1.422,
+    "begin_shape": [-122.476899, 37.759841],
+    "end_shape": [-122.475495, 37.739322],
+    "begin_time": 218,
+    "end_time": 409
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Vicente Street.",
+    "length": 0.635,
+    "begin_shape": [-122.475495, 37.739322],
+    "end_shape": [-122.487084, 37.738819],
+    "begin_time": 409,
+    "end_time": 590
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.487084, 37.738819],
+    "end_shape": [-122.487084, 37.738819],
+    "begin_time": 590,
+    "end_time": 590
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive east on Ellsworth Street.",
+    "length": 0.005,
+    "begin_shape": [-122.414933, 37.734733],
+    "end_shape": [-122.414933, 37.734802],
+    "begin_time": 0,
+    "end_time": 0
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Crescent Avenue.",
+    "length": 0.539,
+    "begin_shape": [-122.414933, 37.734802],
+    "end_shape": [-122.424729, 37.735389],
+    "begin_time": 0,
+    "end_time": 174
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Mission Street.",
+    "length": 0.959,
+    "begin_shape": [-122.424729, 37.735389],
+    "end_shape": [-122.418274, 37.7481],
+    "begin_time": 174,
+    "end_time": 335
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Cesar Chavez Street/Army Street.",
+    "length": 0.131,
+    "begin_shape": [-122.418274, 37.7481],
+    "end_shape": [-122.415879, 37.748168],
+    "begin_time": 335,
+    "end_time": 362
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto South Van Ness Avenue.",
+    "length": 0.291,
+    "begin_shape": [-122.415879, 37.748168],
+    "end_shape": [-122.416283, 37.752376],
+    "begin_time": 362,
+    "end_time": 423
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto 24th Street.",
+    "length": 0.111,
+    "begin_shape": [-122.416283, 37.752376],
+    "end_shape": [-122.418305, 37.75225],
+    "begin_time": 423,
+    "end_time": 480
+  }, {
+    "travel_type": "car",
+    "instruction": "Your destination is on the right.",
+    "length": 0,
+    "begin_shape": [-122.418305, 37.75225],
+    "end_shape": [-122.418305, 37.75225],
+    "begin_time": 480,
+    "end_time": 480
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southeast on Hudson Avenue.",
+    "length": 0.012,
+    "begin_shape": [-122.38237, 37.733722],
+    "end_shape": [-122.382256, 37.733581],
+    "begin_time": 0,
+    "end_time": 2
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Whitney Young Circle.",
+    "length": 0.132,
+    "begin_shape": [-122.382256, 37.733581],
+    "end_shape": [-122.384514, 37.733436],
+    "begin_time": 2,
+    "end_time": 33
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Newcomb Avenue.",
+    "length": 0.224,
+    "begin_shape": [-122.384514, 37.733436],
+    "end_shape": [-122.387909, 37.734169],
+    "begin_time": 33,
+    "end_time": 111
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Lane Street.",
+    "length": 0.054,
+    "begin_shape": [-122.387909, 37.734169],
+    "end_shape": [-122.388482, 37.733535],
+    "begin_time": 111,
+    "end_time": 133
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Oakdale Avenue.",
+    "length": 0.145,
+    "begin_shape": [-122.388482, 37.733535],
+    "end_shape": [-122.390641, 37.734767],
+    "begin_time": 133,
+    "end_time": 166
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue.",
+    "length": 0.004,
+    "begin_shape": [-122.390641, 37.734767],
+    "end_shape": [-122.390679, 37.73479],
+    "begin_time": 166,
+    "end_time": 192
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.390679, 37.73479],
+    "end_shape": [-122.390679, 37.73479],
+    "begin_time": 192,
+    "end_time": 192
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive north on Rutland Street.",
+    "length": 0.05,
+    "begin_shape": [-122.407082, 37.71323],
+    "end_shape": [-122.406785, 37.713905],
+    "begin_time": 0,
+    "end_time": 8
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Arleta Avenue.",
+    "length": 0.257,
+    "begin_shape": [-122.406785, 37.713905],
+    "end_shape": [-122.402596, 37.712257],
+    "begin_time": 8,
+    "end_time": 99
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn sharp left.",
+    "length": 0.007,
+    "begin_shape": [-122.402596, 37.712257],
+    "end_shape": [-122.40255, 37.712158],
+    "begin_time": 99,
+    "end_time": 116
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive east.",
+    "length": 0.01,
+    "begin_shape": [-122.396225, 37.793807],
+    "end_shape": [-122.396355, 37.793716],
+    "begin_time": 0,
+    "end_time": 2
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Drumm Street.",
+    "length": 0.062,
+    "begin_shape": [-122.396355, 37.793716],
+    "end_shape": [-122.396546, 37.794601],
+    "begin_time": 2,
+    "end_time": 17
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Sacramento Street.",
+    "length": 0.07,
+    "begin_shape": [-122.396546, 37.794601],
+    "end_shape": [-122.39782, 37.794441],
+    "begin_time": 17,
+    "end_time": 46
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Davis Street.",
+    "length": 0.14,
+    "begin_shape": [-122.39782, 37.794441],
+    "end_shape": [-122.3974, 37.792438],
+    "begin_time": 46,
+    "end_time": 81
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Pine Street.",
+    "length": 1.008,
+    "begin_shape": [-122.3974, 37.792438],
+    "end_shape": [-122.415574, 37.790256],
+    "begin_time": 81,
+    "end_time": 258
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Leavenworth Street.",
+    "length": 0.066,
+    "begin_shape": [-122.415574, 37.790256],
+    "end_shape": [-122.415764, 37.791206],
+    "begin_time": 258,
+    "end_time": 271
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto California Street.",
+    "length": 0.091,
+    "begin_shape": [-122.415764, 37.791206],
+    "end_shape": [-122.417412, 37.791],
+    "begin_time": 271,
+    "end_time": 313
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.417412, 37.791],
+    "end_shape": [-122.417412, 37.791],
+    "begin_time": 313,
+    "end_time": 313
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive northeast on San Jose Avenue.",
+    "length": 0.095,
+    "begin_shape": [-122.431878, 37.733219],
+    "end_shape": [-122.43039, 37.733951],
+    "begin_time": 0,
+    "end_time": 9
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Rousseau Street.",
+    "length": 0.044,
+    "begin_shape": [-122.43039, 37.733951],
+    "end_shape": [-122.430298, 37.733322],
+    "begin_time": 9,
+    "end_time": 21
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Bosworth Street.",
+    "length": 0.168,
+    "begin_shape": [-122.430298, 37.733322],
+    "end_shape": [-122.43319, 37.733432],
+    "begin_time": 21,
+    "end_time": 80
+  }, {
+    "travel_type": "car",
+    "instruction": "Make a left U-turn onto Lyell Street.",
+    "length": 0.24,
+    "begin_shape": [-122.43319, 37.733432],
+    "end_shape": [-122.431229, 37.730606],
+    "begin_time": 80,
+    "end_time": 156
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Alemany Boulevard.",
+    "length": 0.229,
+    "begin_shape": [-122.431229, 37.730606],
+    "end_shape": [-122.43454, 37.728748],
+    "begin_time": 156,
+    "end_time": 195
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Theresa Street.",
+    "length": 0.161,
+    "begin_shape": [-122.43454, 37.728748],
+    "end_shape": [-122.436524, 37.730438],
+    "begin_time": 195,
+    "end_time": 238
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto San Jose Avenue.",
+    "length": 0.022,
+    "begin_shape": [-122.436524, 37.730438],
+    "end_shape": [-122.436135, 37.730522],
+    "begin_time": 238,
+    "end_time": 255
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.436135, 37.730522],
+    "end_shape": [-122.436135, 37.730522],
+    "begin_time": 255,
+    "end_time": 255
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southeast on Ulloa Street.",
+    "length": 0.045,
+    "begin_shape": [-122.465783, 37.740894],
+    "end_shape": [-122.465043, 37.740646],
+    "begin_time": 0,
+    "end_time": 24
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Claremont Boulevard.",
+    "length": 0.065,
+    "begin_shape": [-122.465043, 37.740646],
+    "end_shape": [-122.465271, 37.739734],
+    "begin_time": 24,
+    "end_time": 47
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Portola Drive.",
+    "length": 1.532,
+    "begin_shape": [-122.465271, 37.739734],
+    "end_shape": [-122.443306, 37.750022],
+    "begin_time": 47,
+    "end_time": 298
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Market Street.",
+    "length": 1.539,
+    "begin_shape": [-122.443306, 37.750022],
+    "end_shape": [-122.432961, 37.76424],
+    "begin_time": 298,
+    "end_time": 489
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn sharp left onto 16th Street.",
+    "length": 0.013,
+    "begin_shape": [-122.432961, 37.76424],
+    "end_shape": [-122.433198, 37.764225],
+    "begin_time": 489,
+    "end_time": 511
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto Market Street.",
+    "length": 0.106,
+    "begin_shape": [-122.433198, 37.764225],
+    "end_shape": [-122.434563, 37.76313],
+    "begin_time": 511,
+    "end_time": 534
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.434563, 37.76313],
+    "end_shape": [-122.434563, 37.76313],
+    "begin_time": 534,
+    "end_time": 534
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southwest on Howard Street.",
+    "length": 0.13,
+    "begin_shape": [-122.394349, 37.789867],
+    "end_shape": [-122.396027, 37.788543],
+    "begin_time": 0,
+    "end_time": 28
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto 1st Street.",
+    "length": 0.24,
+    "begin_shape": [-122.396027, 37.788543],
+    "end_shape": [-122.393006, 37.786033],
+    "begin_time": 28,
+    "end_time": 62
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Harrison Street.",
+    "length": 0.513,
+    "begin_shape": [-122.393006, 37.786033],
+    "end_shape": [-122.399636, 37.780792],
+    "begin_time": 62,
+    "end_time": 160
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left to take the I 80 West ramp.",
+    "length": 0.231,
+    "begin_shape": [-122.399636, 37.780792],
+    "end_shape": [-122.401955, 37.778095],
+    "begin_time": 160,
+    "end_time": 191
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto I 80 West/James Lick Freeway.",
+    "length": 0.558,
+    "begin_shape": [-122.401955, 37.778095],
+    "end_shape": [-122.406449, 37.771701],
+    "begin_time": 191,
+    "end_time": 247
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 1A-B on the right.",
+    "length": 0.508,
+    "begin_shape": [-122.406449, 37.771701],
+    "end_shape": [-122.411988, 37.769527],
+    "begin_time": 247,
+    "end_time": 282
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto Central Freeway.",
+    "length": 0.676,
+    "begin_shape": [-122.411988, 37.769527],
+    "end_shape": [-122.423325, 37.771858],
+    "begin_time": 282,
+    "end_time": 339
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Octavia Boulevard.",
+    "length": 0.278,
+    "begin_shape": [-122.423325, 37.771858],
+    "end_shape": [-122.424347, 37.775764],
+    "begin_time": 339,
+    "end_time": 400
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Fell Street.",
+    "length": 1.654,
+    "begin_shape": [-122.424347, 37.775764],
+    "end_shape": [-122.454018, 37.771511],
+    "begin_time": 400,
+    "end_time": 661
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on John F Kennedy Drive.",
+    "length": 0.061,
+    "begin_shape": [-122.454018, 37.771511],
+    "end_shape": [-122.455002, 37.771102],
+    "begin_time": 661,
+    "end_time": 677
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto Kezar Drive.",
+    "length": 0.155,
+    "begin_shape": [-122.455002, 37.771102],
+    "end_shape": [-122.454888, 37.769088],
+    "begin_time": 677,
+    "end_time": 695
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Alvord Lake Bridge.",
+    "length": 0.01,
+    "begin_shape": [-122.454888, 37.769088],
+    "end_shape": [-122.45488, 37.768947],
+    "begin_time": 695,
+    "end_time": 697
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Kezar Drive.",
+    "length": 0.366,
+    "begin_shape": [-122.45488, 37.768947],
+    "end_shape": [-122.460312, 37.766269],
+    "begin_time": 697,
+    "end_time": 751
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto Lincoln Way.",
+    "length": 1.977,
+    "begin_shape": [-122.460312, 37.766269],
+    "end_shape": [-122.496377, 37.764656],
+    "begin_time": 751,
+    "end_time": 964
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto 37th Avenue.",
+    "length": 0.043,
+    "begin_shape": [-122.496377, 37.764656],
+    "end_shape": [-122.496529, 37.764106],
+    "begin_time": 964,
+    "end_time": 981
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto Sunset Boulevard.",
+    "length": 0.748,
+    "begin_shape": [-122.496529, 37.764106],
+    "end_shape": [-122.495324, 37.753414],
+    "begin_time": 981,
+    "end_time": 1063
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Noriega Street.",
+    "length": 0.719,
+    "begin_shape": [-122.495324, 37.753414],
+    "end_shape": [-122.508454, 37.752834],
+    "begin_time": 1063,
+    "end_time": 1152
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Great Highway/Lower Great Highway.",
+    "length": 0.129,
+    "begin_shape": [-122.508454, 37.752834],
+    "end_shape": [-122.50821, 37.750972],
+    "begin_time": 1152,
+    "end_time": 1177
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Ortega Street.",
+    "length": 0.042,
+    "begin_shape": [-122.50821, 37.750972],
+    "end_shape": [-122.507439, 37.751007],
+    "begin_time": 1177,
+    "end_time": 1195
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.507439, 37.751007],
+    "end_shape": [-122.507439, 37.751007],
+    "begin_time": 1195,
+    "end_time": 1195
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive south on Kirkpatrick Street.",
+    "length": 0.01,
+    "begin_shape": [-122.53862, 37.832283],
+    "end_shape": [-122.538643, 37.832138],
+    "begin_time": 0,
+    "end_time": 1
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Mitchell Road.",
+    "length": 0.436,
+    "begin_shape": [-122.538643, 37.832138],
+    "end_shape": [-122.530762, 37.831909],
+    "begin_time": 1,
+    "end_time": 98
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Bunker Road.",
+    "length": 1.838,
+    "begin_shape": [-122.530762, 37.831909],
+    "end_shape": [-122.502442, 37.836494],
+    "begin_time": 98,
+    "end_time": 489
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto McCullough Road.",
+    "length": 0.889,
+    "begin_shape": [-122.502442, 37.836494],
+    "end_shape": [-122.49408, 37.833789],
+    "begin_time": 489,
+    "end_time": 669
+  }, {
+    "travel_type": "car",
+    "instruction": "Enter the roundabout and take the 2nd exit.",
+    "length": 0.043,
+    "begin_shape": [-122.49408, 37.833789],
+    "end_shape": [-122.493828, 37.833648],
+    "begin_time": 669,
+    "end_time": 681
+  }, {
+    "travel_type": "car",
+    "instruction": "Exit the roundabout onto Conzelman Road.",
+    "length": 1.149,
+    "begin_shape": [-122.493828, 37.833648],
+    "end_shape": [-122.483635, 37.833778],
+    "begin_time": 681,
+    "end_time": 866
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto US 101.",
+    "length": 5.031,
+    "begin_shape": [-122.483635, 37.833778],
+    "end_shape": [-122.424759, 37.801242],
+    "begin_time": 866,
+    "end_time": 1355
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Van Ness Avenue.",
+    "length": 0.279,
+    "begin_shape": [-122.424759, 37.801242],
+    "end_shape": [-122.42524, 37.805091],
+    "begin_time": 1355,
+    "end_time": 1433
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto North Point Street.",
+    "length": 0.989,
+    "begin_shape": [-122.42524, 37.805091],
+    "end_shape": [-122.40738, 37.807346],
+    "begin_time": 1433,
+    "end_time": 1522
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto The Embarcadero.",
+    "length": 2.163,
+    "begin_shape": [-122.40738, 37.807346],
+    "end_shape": [-122.388428, 37.781791],
+    "begin_time": 1522,
+    "end_time": 1831
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on King Street.",
+    "length": 0.495,
+    "begin_shape": [-122.388428, 37.781791],
+    "end_shape": [-122.394127, 37.776412],
+    "begin_time": 1831,
+    "end_time": 1900
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto 4th Street/Fourth Street.",
+    "length": 0.051,
+    "begin_shape": [-122.394127, 37.776412],
+    "end_shape": [-122.394791, 37.776939],
+    "begin_time": 1900,
+    "end_time": 1910
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.394791, 37.776939],
+    "end_shape": [-122.394791, 37.776939],
+    "begin_time": 1910,
+    "end_time": 1910
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive south on Van Ness Avenue.",
+    "length": 0.063,
+    "begin_shape": [-122.425385, 37.805034],
+    "end_shape": [-122.425202, 37.804141],
+    "begin_time": 0,
+    "end_time": 4
+  }, {
+    "travel_type": "car",
+    "instruction": "Make a left U-turn at Bay Street to stay on Van Ness Avenue.",
+    "length": 0.074,
+    "begin_shape": [-122.425202, 37.804141],
+    "end_shape": [-122.42524, 37.805091],
+    "begin_time": 4,
+    "end_time": 35
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto North Point Street.",
+    "length": 0.989,
+    "begin_shape": [-122.42524, 37.805091],
+    "end_shape": [-122.40738, 37.807346],
+    "begin_time": 35,
+    "end_time": 124
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto The Embarcadero.",
+    "length": 2.163,
+    "begin_shape": [-122.40738, 37.807346],
+    "end_shape": [-122.388428, 37.781791],
+    "begin_time": 124,
+    "end_time": 435
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on King Street.",
+    "length": 0.669,
+    "begin_shape": [-122.388428, 37.781791],
+    "end_shape": [-122.396378, 37.774642],
+    "begin_time": 435,
+    "end_time": 536
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on I 280.",
+    "length": 2.816,
+    "begin_shape": [-122.396378, 37.774642],
+    "end_shape": [-122.401558, 37.738025],
+    "begin_time": 536,
+    "end_time": 720
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 54 on the left toward US-101 South/San Jose.",
+    "length": 0.883,
+    "begin_shape": [-122.401558, 37.738025],
+    "end_shape": [-122.402482, 37.726604],
+    "begin_time": 720,
+    "end_time": 782
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto US 101/James Lick Freeway.",
+    "length": 0.409,
+    "begin_shape": [-122.402482, 37.726604],
+    "end_shape": [-122.400277, 37.720954],
+    "begin_time": 782,
+    "end_time": 816
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 429B on the right toward Third Street/Cow Palace.",
+    "length": 0.214,
+    "begin_shape": [-122.400277, 37.720954],
+    "end_shape": [-122.399758, 37.717899],
+    "begin_time": 816,
+    "end_time": 831
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Bayshore Boulevard.",
+    "length": 0.48,
+    "begin_shape": [-122.399758, 37.717899],
+    "end_shape": [-122.402596, 37.712257],
+    "begin_time": 831,
+    "end_time": 884
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right.",
+    "length": 0.007,
+    "begin_shape": [-122.402596, 37.712257],
+    "end_shape": [-122.40255, 37.712158],
+    "begin_time": 884,
+    "end_time": 892
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive south on CA 1/19th Avenue.",
+    "length": 0.053,
+    "begin_shape": [-122.475213, 37.721054],
+    "end_shape": [-122.475365, 37.720355],
+    "begin_time": 0,
+    "end_time": 44
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Crespi Drive.",
+    "length": 0.036,
+    "begin_shape": [-122.475365, 37.720355],
+    "end_shape": [-122.475892, 37.720062],
+    "begin_time": 44,
+    "end_time": 50
+  }, {
+    "travel_type": "car",
+    "instruction": "Enter the roundabout and take the 6th exit.",
+    "length": 0.058,
+    "begin_shape": [-122.475892, 37.720062],
+    "end_shape": [-122.475655, 37.719921],
+    "begin_time": 50,
+    "end_time": 63
+  }, {
+    "travel_type": "car",
+    "instruction": "Exit the roundabout onto Crespi Drive.",
+    "length": 0.03,
+    "begin_shape": [-122.475655, 37.719921],
+    "end_shape": [-122.475342, 37.72026],
+    "begin_time": 63,
+    "end_time": 76
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto CA 1/19th Avenue.",
+    "length": 0.995,
+    "begin_shape": [-122.475342, 37.72026],
+    "end_shape": [-122.475052, 37.734558],
+    "begin_time": 76,
+    "end_time": 258
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Sloat Boulevard.",
+    "length": 0.176,
+    "begin_shape": [-122.475052, 37.734558],
+    "end_shape": [-122.47184, 37.734683],
+    "begin_time": 258,
+    "end_time": 288
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto Portola Drive.",
+    "length": 0.503,
+    "begin_shape": [-122.47184, 37.734683],
+    "end_shape": [-122.465249, 37.739627],
+    "begin_time": 288,
+    "end_time": 408
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Claremont Boulevard.",
+    "length": 0.072,
+    "begin_shape": [-122.465249, 37.739627],
+    "end_shape": [-122.465043, 37.740646],
+    "begin_time": 408,
+    "end_time": 439
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Ulloa Street.",
+    "length": 0.045,
+    "begin_shape": [-122.465043, 37.740646],
+    "end_shape": [-122.465783, 37.740894],
+    "begin_time": 439,
+    "end_time": 484
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue.",
+    "length": 0.003,
+    "begin_shape": [-122.465783, 37.740894],
+    "end_shape": [-122.465836, 37.740921],
+    "begin_time": 484,
+    "end_time": 488
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.465836, 37.740921],
+    "end_shape": [-122.465836, 37.740921],
+    "begin_time": 488,
+    "end_time": 488
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southwest on Market Street.",
+    "length": 1.543,
+    "begin_shape": [-122.408982, 37.783294],
+    "end_shape": [-122.428971, 37.767581],
+    "begin_time": 0,
+    "end_time": 496
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Church Street.",
+    "length": 0.005,
+    "begin_shape": [-122.428971, 37.767581],
+    "end_shape": [-122.428971, 37.767509],
+    "begin_time": 496,
+    "end_time": 497
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.428971, 37.767509],
+    "end_shape": [-122.428971, 37.767509],
+    "begin_time": 497,
+    "end_time": 497
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive west on Randolph Street.",
+    "length": 0.196,
+    "begin_shape": [-122.466202, 37.714279],
+    "end_shape": [-122.469773, 37.714286],
+    "begin_time": 0,
+    "end_time": 60
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto 19th Avenue.",
+    "length": 0.241,
+    "begin_shape": [-122.469773, 37.714286],
+    "end_shape": [-122.472466, 37.717037],
+    "begin_time": 60,
+    "end_time": 109
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto Junipero Serra Boulevard.",
+    "length": 1.221,
+    "begin_shape": [-122.472466, 37.717037],
+    "end_shape": [-122.471451, 37.734676],
+    "begin_time": 109,
+    "end_time": 288
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto Portola Drive.",
+    "length": 0.425,
+    "begin_shape": [-122.471451, 37.734676],
+    "end_shape": [-122.466172, 37.739154],
+    "begin_time": 288,
+    "end_time": 385
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Vicente Street.",
+    "length": 0.058,
+    "begin_shape": [-122.466172, 37.739154],
+    "end_shape": [-122.466942, 37.739704],
+    "begin_time": 385,
+    "end_time": 404
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto West Portal Avenue.",
+    "length": 0.104,
+    "begin_shape": [-122.466942, 37.739704],
+    "end_shape": [-122.465783, 37.740894],
+    "begin_time": 404,
+    "end_time": 466
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.465783, 37.740894],
+    "end_shape": [-122.465783, 37.740894],
+    "begin_time": 466,
+    "end_time": 466
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive north on The Embarcadero.",
+    "length": 1.754,
+    "begin_shape": [-122.387719, 37.787921],
+    "end_shape": [-122.407303, 37.807456],
+    "begin_time": 0,
+    "end_time": 255
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto North Point Street.",
+    "length": 0.998,
+    "begin_shape": [-122.407303, 37.807456],
+    "end_shape": [-122.42524, 37.805091],
+    "begin_time": 255,
+    "end_time": 342
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Van Ness Avenue.",
+    "length": 0.27,
+    "begin_shape": [-122.42524, 37.805091],
+    "end_shape": [-122.424637, 37.801345],
+    "begin_time": 342,
+    "end_time": 372
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto US 101/Lombard Street.",
+    "length": 1.109,
+    "begin_shape": [-122.424637, 37.801345],
+    "end_shape": [-122.444672, 37.798873],
+    "begin_time": 372,
+    "end_time": 513
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto US 101/Richardson Avenue. Continue on US 101.",
+    "length": 1.371,
+    "begin_shape": [-122.444672, 37.798873],
+    "end_shape": [-122.46711, 37.802593],
+    "begin_time": 513,
+    "end_time": 626
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 438 on the right onto 1 South/19 Avenue.",
+    "length": 0.417,
+    "begin_shape": [-122.46711, 37.802593],
+    "end_shape": [-122.469498, 37.801326],
+    "begin_time": 626,
+    "end_time": 653
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto CA 1.",
+    "length": 2.92,
+    "begin_shape": [-122.469498, 37.801326],
+    "end_shape": [-122.477395, 37.765449],
+    "begin_time": 653,
+    "end_time": 957
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Lincoln Way.",
+    "length": 1.802,
+    "begin_shape": [-122.477395, 37.765449],
+    "end_shape": [-122.510308, 37.764087],
+    "begin_time": 957,
+    "end_time": 1150
+  }, {
+    "travel_type": "car",
+    "instruction": "Make a left U-turn to stay on Lincoln Way.",
+    "length": 0.043,
+    "begin_shape": [-122.510308, 37.764087],
+    "end_shape": [-122.509865, 37.763969],
+    "begin_time": 1150,
+    "end_time": 1171
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Great Highway/Lower Great Highway.",
+    "length": 0.257,
+    "begin_shape": [-122.509865, 37.763969],
+    "end_shape": [-122.509408, 37.760276],
+    "begin_time": 1171,
+    "end_time": 1208
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Judah Street.",
+    "length": 0.032,
+    "begin_shape": [-122.509408, 37.760276],
+    "end_shape": [-122.508828, 37.760303],
+    "begin_time": 1208,
+    "end_time": 1230
+  }, {
+    "travel_type": "car",
+    "instruction": "Your destination is on the right.",
+    "length": 0,
+    "begin_shape": [-122.508828, 37.760303],
+    "end_shape": [-122.508828, 37.760303],
+    "begin_time": 1230,
+    "end_time": 1230
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southwest on Howard Street.",
+    "length": 0.135,
+    "begin_shape": [-122.39428, 37.789924],
+    "end_shape": [-122.396027, 37.788543],
+    "begin_time": 0,
+    "end_time": 29
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto 1st Street.",
+    "length": 0.24,
+    "begin_shape": [-122.396027, 37.788543],
+    "end_shape": [-122.393006, 37.786033],
+    "begin_time": 29,
+    "end_time": 63
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue.",
+    "length": 0.106,
+    "begin_shape": [-122.393006, 37.786033],
+    "end_shape": [-122.391526, 37.785507],
+    "begin_time": 63,
+    "end_time": 77
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto I 80 East/San Francisco – Oakland Bay Bridge.",
+    "length": 2.053,
+    "begin_shape": [-122.391526, 37.785507],
+    "end_shape": [-122.367211, 37.80812],
+    "begin_time": 77,
+    "end_time": 228
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 4A on the left toward Treasure Island|Yerba Buena Island.",
+    "length": 0.251,
+    "begin_shape": [-122.367211, 37.80812],
+    "end_shape": [-122.37008, 37.809391],
+    "begin_time": 228,
+    "end_time": 289
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Treasure Island Road.",
+    "length": 0.616,
+    "begin_shape": [-122.37008, 37.809391],
+    "end_shape": [-122.372338, 37.817378],
+    "begin_time": 289,
+    "end_time": 427
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto California Avenue.",
+    "length": 0.37,
+    "begin_shape": [-122.372338, 37.817378],
+    "end_shape": [-122.366356, 37.819896],
+    "begin_time": 427,
+    "end_time": 484
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Avenue H.",
+    "length": 0.662,
+    "begin_shape": [-122.366356, 37.819896],
+    "end_shape": [-122.37204, 37.82835],
+    "begin_time": 484,
+    "end_time": 639
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.37204, 37.82835],
+    "end_shape": [-122.37204, 37.82835],
+    "begin_time": 639,
+    "end_time": 639
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive northeast on Mission Street.",
+    "length": 0.062,
+    "begin_shape": [-122.394875, 37.791912],
+    "end_shape": [-122.394097, 37.79256],
+    "begin_time": 0,
+    "end_time": 7
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Spear Street.",
+    "length": 0.361,
+    "begin_shape": [-122.394097, 37.79256],
+    "end_shape": [-122.389428, 37.788852],
+    "begin_time": 7,
+    "end_time": 67
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Harrison Street.",
+    "length": 0.062,
+    "begin_shape": [-122.389428, 37.788852],
+    "end_shape": [-122.388619, 37.789493],
+    "begin_time": 67,
+    "end_time": 89
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto The Embarcadero.",
+    "length": 0.539,
+    "begin_shape": [-122.388619, 37.789493],
+    "end_shape": [-122.388428, 37.781791],
+    "begin_time": 89,
+    "end_time": 161
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on King Street.",
+    "length": 0.669,
+    "begin_shape": [-122.388428, 37.781791],
+    "end_shape": [-122.396378, 37.774642],
+    "begin_time": 161,
+    "end_time": 263
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on I 280.",
+    "length": 6.39,
+    "begin_shape": [-122.396378, 37.774642],
+    "end_shape": [-122.451226, 37.714302],
+    "begin_time": 263,
+    "end_time": 666
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 50 on the right toward SR-82/Mission Street/Daly City/SR-1 North.",
+    "length": 0.279,
+    "begin_shape": [-122.451226, 37.714302],
+    "end_shape": [-122.455208, 37.711822],
+    "begin_time": 666,
+    "end_time": 685
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on CA 82.",
+    "length": 0.611,
+    "begin_shape": [-122.455208, 37.711822],
+    "end_shape": [-122.462357, 37.705047],
+    "begin_time": 685,
+    "end_time": 815
+  }, {
+    "travel_type": "car",
+    "instruction": "Make a left U-turn onto Mission Street/CA 82.",
+    "length": 0.114,
+    "begin_shape": [-122.462357, 37.705047],
+    "end_shape": [-122.461236, 37.706043],
+    "begin_time": 815,
+    "end_time": 868
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.461236, 37.706043],
+    "end_shape": [-122.461236, 37.706043],
+    "begin_time": 868,
+    "end_time": 868
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive east on Ocean Avenue.",
+    "length": 0.193,
+    "begin_shape": [-122.459946, 37.724685],
+    "end_shape": [-122.456543, 37.723964],
+    "begin_time": 0,
+    "end_time": 36
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.456543, 37.723964],
+    "end_shape": [-122.456543, 37.723964],
+    "begin_time": 36,
+    "end_time": 36
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive west on Clayton Street.",
+    "length": 0.394,
+    "begin_shape": [-122.444565, 37.758331],
+    "end_shape": [-122.447053, 37.762836],
+    "begin_time": 0,
+    "end_time": 93
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Ashbury Street.",
+    "length": 0.04,
+    "begin_shape": [-122.447053, 37.762836],
+    "end_shape": [-122.446755, 37.763347],
+    "begin_time": 93,
+    "end_time": 103
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.446755, 37.763347],
+    "end_shape": [-122.446755, 37.763347],
+    "begin_time": 103,
+    "end_time": 103
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southeast on Columbus Avenue.",
+    "length": 0.288,
+    "begin_shape": [-122.414879, 37.803543],
+    "end_shape": [-122.41095, 37.800773],
+    "begin_time": 0,
+    "end_time": 52
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right onto Powell Street.",
+    "length": 0.037,
+    "begin_shape": [-122.41095, 37.800773],
+    "end_shape": [-122.410851, 37.800243],
+    "begin_time": 52,
+    "end_time": 57
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Union Street.",
+    "length": 0.09,
+    "begin_shape": [-122.410851, 37.800243],
+    "end_shape": [-122.412484, 37.800037],
+    "begin_time": 57,
+    "end_time": 76
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.412484, 37.800037],
+    "end_shape": [-122.412484, 37.800037],
+    "begin_time": 76,
+    "end_time": 76
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive east on Beach Street.",
+    "length": 0.031,
+    "begin_shape": [-122.421135, 37.806591],
+    "end_shape": [-122.420571, 37.806655],
+    "begin_time": 0,
+    "end_time": 7
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Hyde Street.",
+    "length": 0.734,
+    "begin_shape": [-122.420571, 37.806655],
+    "end_shape": [-122.41845, 37.796169],
+    "begin_time": 7,
+    "end_time": 166
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.41845, 37.796169],
+    "end_shape": [-122.41845, 37.796169],
+    "begin_time": 166,
+    "end_time": 166
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive northwest on San Bruno Avenue.",
+    "length": 0.271,
+    "begin_shape": [-122.405594, 37.732437],
+    "end_shape": [-122.407815, 37.735935],
+    "begin_time": 0,
+    "end_time": 44
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Alemany Boulevard.",
+    "length": 0.027,
+    "begin_shape": [-122.407815, 37.735935],
+    "end_shape": [-122.40738, 37.736106],
+    "begin_time": 44,
+    "end_time": 58
+  }, {
+    "travel_type": "car",
+    "instruction": "Take the ramp on the left.",
+    "length": 0.027,
+    "begin_shape": [-122.40738, 37.736106],
+    "end_shape": [-122.407158, 37.736461],
+    "begin_time": 58,
+    "end_time": 61
+  }, {
+    "travel_type": "car",
+    "instruction": "Keep straight at the fork.",
+    "length": 0.165,
+    "begin_shape": [-122.407158, 37.736461],
+    "end_shape": [-122.407998, 37.738719],
+    "begin_time": 61,
+    "end_time": 79
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto US 101/James Lick Freeway.",
+    "length": 1.9,
+    "begin_shape": [-122.407998, 37.738719],
+    "end_shape": [-122.404885, 37.764385],
+    "begin_time": 79,
+    "end_time": 231
+  }, {
+    "travel_type": "car",
+    "instruction": "Keep right to take James Lick Freeway.",
+    "length": 1.063,
+    "begin_shape": [-122.404885, 37.764385],
+    "end_shape": [-122.401612, 37.777839],
+    "begin_time": 231,
+    "end_time": 315
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 2 on the right toward Fourth Street|Embarcadero.",
+    "length": 0.232,
+    "begin_shape": [-122.401612, 37.777839],
+    "end_shape": [-122.398087, 37.779563],
+    "begin_time": 315,
+    "end_time": 331
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Bryant Street.",
+    "length": 0.768,
+    "begin_shape": [-122.398087, 37.779563],
+    "end_shape": [-122.388016, 37.787094],
+    "begin_time": 331,
+    "end_time": 482
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto The Embarcadero.",
+    "length": 1.723,
+    "begin_shape": [-122.388016, 37.787094],
+    "end_shape": [-122.405633, 37.80669],
+    "begin_time": 482,
+    "end_time": 762
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Bay Street.",
+    "length": 0.086,
+    "begin_shape": [-122.405633, 37.80669],
+    "end_shape": [-122.407166, 37.806434],
+    "begin_time": 762,
+    "end_time": 781
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Kearny Street.",
+    "length": 0.051,
+    "begin_shape": [-122.407166, 37.806434],
+    "end_shape": [-122.407303, 37.807159],
+    "begin_time": 781,
+    "end_time": 795
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.407303, 37.807159],
+    "end_shape": [-122.407303, 37.807159],
+    "begin_time": 795,
+    "end_time": 795
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive east on Taraval Street.",
+    "length": 1.058,
+    "begin_shape": [-122.483216, 37.742725],
+    "end_shape": [-122.463944, 37.743736],
+    "begin_time": 0,
+    "end_time": 312
+  }, {
+    "travel_type": "car",
+    "instruction": "Enter the roundabout and take the 1st exit.",
+    "length": 0.017,
+    "begin_shape": [-122.463944, 37.743736],
+    "end_shape": [-122.463738, 37.743568],
+    "begin_time": 312,
+    "end_time": 317
+  }, {
+    "travel_type": "car",
+    "instruction": "Exit the roundabout onto Claremont Boulevard.",
+    "length": 0.283,
+    "begin_shape": [-122.463738, 37.743568],
+    "end_shape": [-122.465271, 37.739734],
+    "begin_time": 317,
+    "end_time": 353
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Portola Drive.",
+    "length": 1.532,
+    "begin_shape": [-122.465271, 37.739734],
+    "end_shape": [-122.443306, 37.750022],
+    "begin_time": 353,
+    "end_time": 604
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Market Street.",
+    "length": 2.174,
+    "begin_shape": [-122.443306, 37.750022],
+    "end_shape": [-122.424767, 37.770713],
+    "begin_time": 604,
+    "end_time": 891
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Guerrero Street.",
+    "length": 0.068,
+    "begin_shape": [-122.424767, 37.770713],
+    "end_shape": [-122.424637, 37.769741],
+    "begin_time": 891,
+    "end_time": 907
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Duboce Avenue.",
+    "length": 0.082,
+    "begin_shape": [-122.424637, 37.769741],
+    "end_shape": [-122.426133, 37.769649],
+    "begin_time": 907,
+    "end_time": 926
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue.",
+    "length": 0.01,
+    "begin_shape": [-122.426133, 37.769649],
+    "end_shape": [-122.426316, 37.769638],
+    "begin_time": 926,
+    "end_time": 951
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.426316, 37.769638],
+    "end_shape": [-122.426316, 37.769638],
+    "begin_time": 951,
+    "end_time": 951
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive northwest on Laguna Honda Boulevard.",
+    "length": 0.198,
+    "begin_shape": [-122.458863, 37.74826],
+    "end_shape": [-122.460854, 37.750606],
+    "begin_time": 0,
+    "end_time": 32
+  }, {
+    "travel_type": "car",
+    "instruction": "Make a right U-turn to stay on Laguna Honda Boulevard.",
+    "length": 0.273,
+    "begin_shape": [-122.460854, 37.750606],
+    "end_shape": [-122.458855, 37.747669],
+    "begin_time": 32,
+    "end_time": 128
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right to stay on Laguna Honda Boulevard.",
+    "length": 0.032,
+    "begin_shape": [-122.458855, 37.747669],
+    "end_shape": [-122.459214, 37.747303],
+    "begin_time": 128,
+    "end_time": 132
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Dewey Boulevard.",
+    "length": 0.334,
+    "begin_shape": [-122.459214, 37.747303],
+    "end_shape": [-122.46354, 37.743896],
+    "begin_time": 132,
+    "end_time": 195
+  }, {
+    "travel_type": "car",
+    "instruction": "Enter the roundabout and take the 3rd exit.",
+    "length": 0.05,
+    "begin_shape": [-122.46354, 37.743896],
+    "end_shape": [-122.463738, 37.743568],
+    "begin_time": 195,
+    "end_time": 204
+  }, {
+    "travel_type": "car",
+    "instruction": "Exit the roundabout onto Claremont Boulevard.",
+    "length": 0.218,
+    "begin_shape": [-122.463738, 37.743568],
+    "end_shape": [-122.465043, 37.740646],
+    "begin_time": 204,
+    "end_time": 239
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Ulloa Street.",
+    "length": 0.045,
+    "begin_shape": [-122.465043, 37.740646],
+    "end_shape": [-122.465783, 37.740894],
+    "begin_time": 239,
+    "end_time": 270
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.465783, 37.740894],
+    "end_shape": [-122.465783, 37.740894],
+    "begin_time": 270,
+    "end_time": 270
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive northwest on Laguna Honda Boulevard.",
+    "length": 0.198,
+    "begin_shape": [-122.458863, 37.74826],
+    "end_shape": [-122.460854, 37.750606],
+    "begin_time": 0,
+    "end_time": 32
+  }, {
+    "travel_type": "car",
+    "instruction": "Make a right U-turn to stay on Laguna Honda Boulevard.",
+    "length": 0.273,
+    "begin_shape": [-122.460854, 37.750606],
+    "end_shape": [-122.458855, 37.747669],
+    "begin_time": 32,
+    "end_time": 128
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear right to stay on Laguna Honda Boulevard.",
+    "length": 0.032,
+    "begin_shape": [-122.458855, 37.747669],
+    "end_shape": [-122.459214, 37.747303],
+    "begin_time": 128,
+    "end_time": 133
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Dewey Boulevard.",
+    "length": 0.334,
+    "begin_shape": [-122.459214, 37.747303],
+    "end_shape": [-122.46354, 37.743896],
+    "begin_time": 133,
+    "end_time": 197
+  }, {
+    "travel_type": "car",
+    "instruction": "Enter the roundabout and take the 3rd exit.",
+    "length": 0.05,
+    "begin_shape": [-122.46354, 37.743896],
+    "end_shape": [-122.463738, 37.743568],
+    "begin_time": 197,
+    "end_time": 207
+  }, {
+    "travel_type": "car",
+    "instruction": "Exit the roundabout onto Claremont Boulevard.",
+    "length": 0.283,
+    "begin_shape": [-122.463738, 37.743568],
+    "end_shape": [-122.465271, 37.739734],
+    "begin_time": 207,
+    "end_time": 243
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Portola Drive.",
+    "length": 0.485,
+    "begin_shape": [-122.465271, 37.739734],
+    "end_shape": [-122.471512, 37.734809],
+    "begin_time": 243,
+    "end_time": 336
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Sloat Boulevard.",
+    "length": 1.873,
+    "begin_shape": [-122.471512, 37.734809],
+    "end_shape": [-122.50528, 37.735565],
+    "begin_time": 336,
+    "end_time": 576
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto 47th Avenue.",
+    "length": 0.04,
+    "begin_shape": [-122.50528, 37.735565],
+    "end_shape": [-122.505318, 37.736137],
+    "begin_time": 576,
+    "end_time": 584
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Wawona Street.",
+    "length": 0.052,
+    "begin_shape": [-122.505318, 37.736137],
+    "end_shape": [-122.504372, 37.736179],
+    "begin_time": 584,
+    "end_time": 597
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.504372, 37.736179],
+    "end_shape": [-122.504372, 37.736179],
+    "begin_time": 597,
+    "end_time": 597
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive northwest on Laguna Honda Boulevard.",
+    "length": 0.231,
+    "begin_shape": [-122.458863, 37.74826],
+    "end_shape": [-122.461098, 37.751045],
+    "begin_time": 0,
+    "end_time": 28
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Clarendon Avenue.",
+    "length": 1.079,
+    "begin_shape": [-122.461098, 37.751045],
+    "end_shape": [-122.448487, 37.759048],
+    "begin_time": 28,
+    "end_time": 163
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Twin Peaks Boulevard.",
+    "length": 0.188,
+    "begin_shape": [-122.448487, 37.759048],
+    "end_shape": [-122.446518, 37.761005],
+    "begin_time": 163,
+    "end_time": 188
+  }, {
+    "travel_type": "car",
+    "instruction": "Bear left onto Clayton Street.",
+    "length": 0.133,
+    "begin_shape": [-122.446518, 37.761005],
+    "end_shape": [-122.447053, 37.762836],
+    "begin_time": 188,
+    "end_time": 229
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Ashbury Street.",
+    "length": 0.324,
+    "begin_shape": [-122.447053, 37.762836],
+    "end_shape": [-122.446389, 37.767215],
+    "begin_time": 229,
+    "end_time": 280
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Frederick Street.",
+    "length": 0.091,
+    "begin_shape": [-122.446389, 37.767215],
+    "end_shape": [-122.444748, 37.767425],
+    "begin_time": 280,
+    "end_time": 301
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Masonic Avenue.",
+    "length": 0.327,
+    "begin_shape": [-122.444748, 37.767425],
+    "end_shape": [-122.44574, 37.772094],
+    "begin_time": 301,
+    "end_time": 376
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Oak Street.",
+    "length": 1.192,
+    "begin_shape": [-122.44574, 37.772094],
+    "end_shape": [-122.42421, 37.774822],
+    "begin_time": 376,
+    "end_time": 566
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Octavia Boulevard.",
+    "length": 0.205,
+    "begin_shape": [-122.42421, 37.774822],
+    "end_shape": [-122.423485, 37.771919],
+    "begin_time": 566,
+    "end_time": 599
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Central Freeway.",
+    "length": 0.812,
+    "begin_shape": [-122.423485, 37.771919],
+    "end_shape": [-122.409813, 37.769161],
+    "begin_time": 599,
+    "end_time": 698
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 433 on the left toward I 80 East/ Bay Bridge/ Oakland.",
+    "length": 0.397,
+    "begin_shape": [-122.409813, 37.769161],
+    "end_shape": [-122.406083, 37.771392],
+    "begin_time": 698,
+    "end_time": 725
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto I 80 East/James Lick Freeway.",
+    "length": 0.567,
+    "begin_shape": [-122.406083, 37.771392],
+    "end_shape": [-122.401612, 37.777839],
+    "begin_time": 725,
+    "end_time": 774
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 2 on the right toward Fourth Street|Embarcadero.",
+    "length": 0.232,
+    "begin_shape": [-122.401612, 37.777839],
+    "end_shape": [-122.398087, 37.779563],
+    "begin_time": 774,
+    "end_time": 790
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Bryant Street.",
+    "length": 0.721,
+    "begin_shape": [-122.398087, 37.779563],
+    "end_shape": [-122.388787, 37.786926],
+    "begin_time": 790,
+    "end_time": 933
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Main Street.",
+    "length": 0.479,
+    "begin_shape": [-122.388787, 37.786926],
+    "end_shape": [-122.394951, 37.791851],
+    "begin_time": 933,
+    "end_time": 1039
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Mission Street.",
+    "length": 0.135,
+    "begin_shape": [-122.394951, 37.791851],
+    "end_shape": [-122.393204, 37.793247],
+    "begin_time": 1039,
+    "end_time": 1068
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Steuart Street.",
+    "length": 0.067,
+    "begin_shape": [-122.393204, 37.793247],
+    "end_shape": [-122.394082, 37.79391],
+    "begin_time": 1068,
+    "end_time": 1086
+  }, {
+    "travel_type": "car",
+    "instruction": "You have arrived at your destination.",
+    "length": 0,
+    "begin_shape": [-122.394082, 37.79391],
+    "end_shape": [-122.394082, 37.79391],
+    "begin_time": 1086,
+    "end_time": 1086
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive southeast on 4th Street/Fourth Street.",
+    "length": 0.055,
+    "begin_shape": [-122.394837, 37.776981],
+    "end_shape": [-122.394127, 37.776412],
+    "begin_time": 0,
+    "end_time": 5
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto King Street.",
+    "length": 0.174,
+    "begin_shape": [-122.394127, 37.776412],
+    "end_shape": [-122.396378, 37.774642],
+    "begin_time": 5,
+    "end_time": 32
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on I 280.",
+    "length": 7.21,
+    "begin_shape": [-122.396378, 37.774642],
+    "end_shape": [-122.464478, 37.710506],
+    "begin_time": 32,
+    "end_time": 483
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 49 on the right toward John Daly Boulevard | Junipero Serra Boulevard.",
+    "length": 0.564,
+    "begin_shape": [-122.464478, 37.710506],
+    "end_shape": [-122.470933, 37.705123],
+    "begin_time": 483,
+    "end_time": 522
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto John Daly Boulevard.",
+    "length": 1.333,
+    "begin_shape": [-122.470933, 37.705123],
+    "end_shape": [-122.493882, 37.698738],
+    "begin_time": 522,
+    "end_time": 672
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto CA 35/Skyline Boulevard.",
+    "length": 1.956,
+    "begin_shape": [-122.493882, 37.698738],
+    "end_shape": [-122.502976, 37.724765],
+    "begin_time": 672,
+    "end_time": 808
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on Great Highway.",
+    "length": 2.801,
+    "begin_shape": [-122.502976, 37.724765],
+    "end_shape": [-122.510293, 37.763946],
+    "begin_time": 808,
+    "end_time": 1104
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Lincoln Way.",
+    "length": 0.024,
+    "begin_shape": [-122.510293, 37.763946],
+    "end_shape": [-122.509865, 37.763969],
+    "begin_time": 1104,
+    "end_time": 1109
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto Great Highway/Lower Great Highway.",
+    "length": 0.257,
+    "begin_shape": [-122.509865, 37.763969],
+    "end_shape": [-122.509408, 37.760276],
+    "begin_time": 1109,
+    "end_time": 1147
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn left onto Judah Street.",
+    "length": 0.014,
+    "begin_shape": [-122.509408, 37.760276],
+    "end_shape": [-122.509163, 37.760288],
+    "begin_time": 1147,
+    "end_time": 1158
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn right onto La Playa Street.",
+    "length": 0.017,
+    "begin_shape": [-122.509163, 37.760288],
+    "end_shape": [-122.509141, 37.760047],
+    "begin_time": 1158,
+    "end_time": 1164
+  }, {
+    "travel_type": "car",
+    "instruction": "Your destination is on the left.",
+    "length": 0,
+    "begin_shape": [-122.509141, 37.760047],
+    "end_shape": [-122.509141, 37.760047],
+    "begin_time": 1164,
+    "end_time": 1164
+  }],
+  [{
+    "travel_type": "car",
+    "instruction": "Drive northeast on Bayshore Boulevard.",
+    "length": 0.571,
+    "begin_shape": [-122.404229, 37.710411],
+    "end_shape": [-122.398552, 37.716758],
+    "begin_time": 0,
+    "end_time": 98
+  }, {
+    "travel_type": "car",
+    "instruction": "Take the US 101 ramp on the left.",
+    "length": 0.156,
+    "begin_shape": [-122.398552, 37.716758],
+    "end_shape": [-122.399407, 37.718906],
+    "begin_time": 98,
+    "end_time": 108
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto US 101/James Lick Freeway.",
+    "length": 0.436,
+    "begin_shape": [-122.399407, 37.718906],
+    "end_shape": [-122.401566, 37.724967],
+    "begin_time": 108,
+    "end_time": 143
+  }, {
+    "travel_type": "car",
+    "instruction": "Take exit 430A on the right toward Daly City/Port of S.F./I-280.",
+    "length": 0.451,
+    "begin_shape": [-122.401566, 37.724967],
+    "end_shape": [-122.404, 37.731178],
+    "begin_time": 143,
+    "end_time": 175
+  }, {
+    "travel_type": "car",
+    "instruction": "Keep right at the fork.",
+    "length": 0.554,
+    "begin_shape": [-122.404, 37.731178],
+    "end_shape": [-122.401528, 37.737998],
+    "begin_time": 175,
+    "end_time": 213
+  }, {
+    "travel_type": "car",
+    "instruction": "Merge onto I 280/Southern Embarcadero Freeway.",
+    "length": 2.824,
+    "begin_shape": [-122.401528, 37.737998],
+    "end_shape": [-122.39618, 37.774497],
+    "begin_time": 213,
+    "end_time": 404
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on King Street.",
+    "length": 0.68,
+    "begin_shape": [-122.39618, 37.774497],
+    "end_shape": [-122.388131, 37.781772],
+    "begin_time": 404,
+    "end_time": 517
+  }, {
+    "travel_type": "car",
+    "instruction": "Continue on The Embarcadero.",
+    "length": 0.801,
+    "begin_shape": [-122.388131, 37.781772],
+    "end_shape": [-122.390969, 37.792545],
+    "begin_time": 517,
+    "end_time": 624
+  }, {
+    "travel_type": "car",
+    "instruction": "Turn sharp left to stay on The Embarcadero.",
+    "length": 0.122,
+    "begin_shape": [-122.390969, 37.792545],
+    "end_shape": [-122.390465, 37.791004],
+    "begin_time": 624,
+    "end_time": 648
+  }, {
+    "travel_type": "car",
+    "instruction": "Your destination is on the left.",
+    "length": 0,
+    "begin_shape": [-122.390465, 37.791004],
+    "end_shape": [-122.390465, 37.791004],
+    "begin_time": 648,
+    "end_time": 648
+  }]
+]

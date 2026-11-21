@@ -5,14 +5,19 @@
 import Layer, {UpdateParameters} from './layer';
 import debug from '../debug/index';
 import {flatten} from '../utils/flatten';
+import {packNormalizedColor} from '../utils/color';
 
 import type AttributeManager from './attribute/attribute-manager';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type {FilterContext} from '../passes/layers-pass';
 import type {LayersList, LayerContext} from './layer-manager';
-import type {CompositeLayerProps, Accessor, AccessorContext} from '../types/layer-props';
+import type {CompositeLayerProps, Accessor, AccessorContext, Color} from '../types/layer-props';
 import {ConstructorOf} from '../types/types';
-import {PROP_TYPES_SYMBOL} from '../lifecycle/constants';
+import {
+  ACCESSOR_QUERIES_SYMBOL,
+  PROP_TYPES_SYMBOL,
+  ROW_ACCESSOR_COLUMNS_SYMBOL
+} from '../lifecycle/constants';
 
 const TRACE_RENDER_LAYERS = 'compositeLayer.renderLayers';
 
@@ -142,6 +147,28 @@ export default abstract class CompositeLayer<PropsT extends {} = {}> extends Lay
     return accessor;
   }
 
+  /** Converts a parent color to bytes before passing it to a byte-oriented child. */
+  protected getSubLayerColorAccessor<In>(
+    accessor: Accessor<In, Color>,
+    defaultColor: Color,
+    size: 3 | 4 = 4
+  ): Accessor<In, Color> {
+    if (!this.usesNormalizedColors() || accessor === defaultColor) return accessor;
+
+    /** Packs plain arrays to the child attribute width. */
+    const encode = (color: Color): Color => {
+      if (!Array.isArray(color)) return color;
+      /** A new tuple so callers can retain colors without aliasing later accessor calls. */
+      const packed: [number, number, number] | [number, number, number, number] =
+        size === 3 ? [0, 0, 0] : [0, 0, 0, 0];
+      packNormalizedColor(color, packed, 0, size);
+      return packed;
+    };
+    return typeof accessor === 'function'
+      ? (object, info) => encode(accessor(object, info))
+      : encode(accessor);
+  }
+
   /** Returns sub layer props for a specific sublayer */
   // eslint-disable-next-line complexity
   protected getSubLayerProps(
@@ -168,7 +195,7 @@ export default abstract class CompositeLayer<PropsT extends {} = {}> extends Lay
     } = this.props;
     const newProps = {
       id: '',
-      updateTriggers: {},
+      updateTriggers: {} as Record<string, unknown>,
       opacity,
       pickable,
       visible,
@@ -227,6 +254,23 @@ export default abstract class CompositeLayer<PropsT extends {} = {}> extends Lay
           updateTriggers: Object.assign(newProps.updateTriggers, passThroughProps.updateTriggers)
         });
       }
+    }
+
+    /** Row accessor columns must invalidate children controlled by parent callbacks. */
+    const rowColumns = Object.entries(this.props[ROW_ACCESSOR_COLUMNS_SYMBOL] ?? {});
+    for (const [name, query] of Object.entries(this.props[ACCESSOR_QUERIES_SYMBOL] ?? {})) {
+      const type = this.props[PROP_TYPES_SYMBOL][name];
+      if (type && 'arrow' in type && typeof type.arrow === 'string' && query.column) {
+        rowColumns.push([name, query.column]);
+      }
+    }
+    if (rowColumns.length) {
+      const all = newProps.updateTriggers.all;
+      const allEntries = all && typeof all === 'object' ? Object.entries(all).flat() : [all];
+      newProps.updateTriggers = {
+        ...newProps.updateTriggers,
+        all: [...allEntries, ...rowColumns.flat()]
+      };
     }
 
     return newProps;

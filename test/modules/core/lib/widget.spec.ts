@@ -40,6 +40,11 @@ test('Widget#id', () => {
   implicit.setProps(new TestWidget({label: 'next'}).props);
   expect(implicit.props.label, 'props from a new instance apply').toBe('next');
   expect(implicit.id, 'id is unchanged').toBe('test-widget');
+
+  // Widgets such as TooltipWidget reapply props that may carry `id: undefined`
+  implicit.setProps({id: undefined});
+  expect(implicit.props.id, 'an undefined id falls back to the default').toBe('test-widget');
+  expect(Object.hasOwn(implicit.props, 'id'), 'and stays implicit').toBe(false);
 });
 
 test('Widget#id falsy values use the default, as for views', () => {
@@ -64,4 +69,15 @@ test('Widget#id falsy values use the default, as for views', () => {
     Object.hasOwn(new TestWidget(explicit.props).props, 'id'),
     'a reused passed id stays own'
   ).toBe(true);
+
+  for (const id of [null, ''] as (string | undefined)[]) {
+    const updated = new TestWidget({});
+    updated.setProps({id});
+    expect(updated.props.id, `setProps id ${JSON.stringify(id)} reads the default`).toBe(
+      'test-widget'
+    );
+    expect(Object.hasOwn(updated.props, 'id'), `setProps id ${JSON.stringify(id)} is not own`).toBe(
+      false
+    );
+  }
 });

@@ -24,7 +24,7 @@ import {
   fovyToAltitude,
   fitBounds,
   getBounds
-} from '@math.gl/web-mercator';
+} from '@math.gl/geospatial/web-mercator';
 import {Padding} from './viewport';
 
 import {Matrix4, Vector3, clamp} from '@math.gl/core';
