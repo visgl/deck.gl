@@ -423,12 +423,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     getEventRoot: canvas => this._getEventRoot(canvas)
   });
   private _ownedCanvas: HTMLCanvasElement | null = null;
-  /**
-   * The device Deck created, if the app passed neither `device` nor `gl`. Kept after `finalize()`
-   * for a canvas the app passed, so `_releaseCanvasContext` can release it.
-   * @internal
-   */
-  _createdDevice: CreatedDevice | null = null;
+  /** Device wrapper created by Deck, including in-flight initialization. */
+  private _createdDevice: CreatedDevice | null = null;
   /** The canvas this Deck renders to, counted so its context isn't released while in use. */
   private _usedCanvas: DeviceCanvas | null = null;
   private _pickRequest: {
@@ -560,18 +556,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
     this._canvasContext = null;
 
-    // Tear down Deck's wrapper when it can be destroyed without losing a reusable canvas.
-    // Owners of externally supplied canvases that opt into context loss release them separately.
     this._useCanvas(null);
-    const created = this._createdDevice;
-    if (created) {
-      destroyCreatedDevice(
-        created,
-        device => created.ownsCanvas || !device.ownsHandle || device.type !== 'webgl'
-      );
-      if (created.ownsCanvas) {
-        this._createdDevice = null;
-      }
+    if (this._createdDevice) {
+      destroyCreatedDevice(this._createdDevice);
+      this._createdDevice = null;
     }
   }
 

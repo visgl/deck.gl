@@ -29,92 +29,59 @@ export function getDeviceCanvas(device: Device): DeviceCanvas | null {
   }
 }
 
-/** Number of live Decks rendering to each canvas. */
-const liveDecks = new WeakMap<DeviceCanvas, number>();
+/** Live Decks sharing a canvas and any wrapper awaiting their final release. */
+const canvasUsers = new WeakMap<
+  DeviceCanvas,
+  {count: number; teardowns?: Map<Device, () => void>}
+>();
 
-/** Releases waiting for the last Deck on a canvas to stop, such as one that borrowed a device. */
-const pendingReleases = new WeakMap<DeviceCanvas, () => void>();
-
-/**
- * Records that a Deck renders to `canvas`. Call {@link releaseCanvas} once when it stops.
- * @param canvas The canvas of the Deck's device.
- */
+/** Records a Deck rendering to this canvas. */
 export function retainCanvas(canvas: DeviceCanvas): void {
-  liveDecks.set(canvas, (liveDecks.get(canvas) ?? 0) + 1);
-}
-
-/**
- * Records that a Deck no longer renders to `canvas`.
- * @param canvas The canvas passed to {@link retainCanvas}.
- */
-export function releaseCanvas(canvas: DeviceCanvas): void {
-  const count = (liveDecks.get(canvas) ?? 1) - 1;
-  if (count > 0) {
-    liveDecks.set(canvas, count);
+  const users = canvasUsers.get(canvas);
+  if (users) {
+    users.count++;
   } else {
-    liveDecks.delete(canvas);
-    const pending = pendingReleases.get(canvas);
-    pendingReleases.delete(canvas);
-    pending?.();
+    canvasUsers.set(canvas, {count: 1});
   }
 }
 
-/** Whether a canvas is in the document. An `OffscreenCanvas` never is. */
-function isInDocument(canvas: DeviceCanvas): boolean {
-  return 'isConnected' in canvas && canvas.isConnected;
+/** Releases a Deck's use of the canvas and runs any pending teardown. */
+export function releaseCanvas(canvas: DeviceCanvas): void {
+  const users = canvasUsers.get(canvas);
+  if (users && --users.count === 0) {
+    canvasUsers.delete(canvas);
+    for (const teardown of users.teardowns?.values() ?? []) {
+      teardown();
+    }
+  }
 }
 
 /**
- * Destroys a created device once it has initialized. If a Deck still
- * renders to its canvas, for example one that was passed the device, the release waits until the
- * last such Deck stops.
- * @param created The device to release.
- * @param canRelease Checked again just before the device is destroyed.
+ * Destroys Deck's wrapper after its last Deck user departs. If a wrapper owns the WebGL
+ * context of a supplied canvas, wait a task and check that the canvas has been removed.
+ * React StrictMode can remount on the same canvas during that task.
  */
-export function destroyCreatedDevice(
-  created: CreatedDevice,
-  canRelease: (device: Device) => boolean
-): void {
-  const release = () => {
-    created.device.then(device => {
-      if (!device || device.isLost || !canRelease(device)) {
+export function destroyCreatedDevice({canvas, device, ownsCanvas}: CreatedDevice): void {
+  void device.then(created => {
+    if (!created) {
+      return;
+    }
+    const waitForRemoval = !ownsCanvas && created.type === 'webgl' && created.ownsHandle;
+    const destroy = () => {
+      if (waitForRemoval && 'isConnected' in canvas && canvas.isConnected) {
         return;
       }
-      if (liveDecks.has(created.canvas)) {
-        pendingReleases.set(created.canvas, release);
+      const users = canvasUsers.get(canvas);
+      if (users) {
+        (users.teardowns ??= new Map()).set(created, destroy);
       } else {
-        device.destroy();
+        created.destroy();
       }
-    });
-  };
-  release();
-}
-
-/**
- * Releases the WebGL context of a finalized Deck once its canvas has left the document.
- *
- * For components that render their own `<canvas>` and pass it to Deck, such as the React
- * `DeckGL` components. Call it right after `deck.finalize()` when the component unmounts. After
- * the current task, if the canvas is no longer in the document and no other Deck has started on
- * it, the device is destroyed and its context released. A remount that keeps the canvas in the
- * document, such as React StrictMode or `<Activity mode="hidden">`, is unaffected.
- *
- * Does nothing when the app passed its own `device` or `gl`, or when Deck created the canvas
- * (`finalize()` already releases those).
- *
- * Don't call it if the component may later start a new Deck on the same canvas after it has
- * left the document: a canvas only ever has one WebGL context, so that Deck would get the lost one.
- * @param deck A finalized Deck.
- */
-export function releaseCanvasContext(deck: {readonly _createdDevice: CreatedDevice | null}): void {
-  const created = deck._createdDevice;
-  if (!created || created.ownsCanvas) {
-    return;
-  }
-  const {canvas} = created;
-  setTimeout(() => {
-    if (!isInDocument(canvas)) {
-      destroyCreatedDevice(created, () => !isInDocument(canvas));
+    };
+    if (waitForRemoval) {
+      setTimeout(destroy, 0);
+    } else {
+      destroy();
     }
-  }, 0);
+  });
 }

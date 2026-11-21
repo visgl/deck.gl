@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {Deck, _releaseCanvasContext as releaseCanvasContext} from '@deck.gl/core';
+import {Deck} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
 import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {device as testDevice} from '@deck.gl/test-utils/vitest';
@@ -92,13 +92,12 @@ test('Deck#finalize waits for a borrower before detaching a device from a suppli
   }
 });
 
-test('_releaseCanvasContext keeps a canvas that is still in the document', async () => {
+test('Deck#finalize keeps a canvas that is still in the document', async () => {
   const canvas = attachCanvas();
   const deck = await createDeck({canvas, deviceProps: {ownsHandle: true}});
   const gl = getContext(deck);
 
   deck.finalize();
-  releaseCanvasContext(deck);
   await nextTask();
   expect(gl.isContextLost()).toBe(false);
 
@@ -106,14 +105,13 @@ test('_releaseCanvasContext keeps a canvas that is still in the document', async
   gl.getExtension('WEBGL_lose_context')?.loseContext();
 });
 
-test('_releaseCanvasContext keeps the context when a new Deck starts on the canvas', async () => {
+test('Deck#finalize keeps the context when a new Deck starts on the canvas', async () => {
   const canvas = attachCanvas();
   const first = await createDeck({canvas, deviceProps: {ownsHandle: true}});
   const gl = getContext(first);
 
   // As in React StrictMode: finalize, then start again on the same canvas.
   first.finalize();
-  releaseCanvasContext(first);
   const second = await createDeck({canvas, deviceProps: {ownsHandle: true}});
   canvas.remove();
   await nextTask();
@@ -121,24 +119,21 @@ test('_releaseCanvasContext keeps the context when a new Deck starts on the canv
   expect(getContext(second)).toBe(gl);
 
   second.finalize();
-  releaseCanvasContext(second);
   await nextTask();
   expect(gl.isContextLost()).toBe(true);
 });
 
-test('_releaseCanvasContext waits for a device that is still initializing', async () => {
+test('Deck#finalize waits for a device that is still initializing', async () => {
   const canvas = attachCanvas();
+  const gl = canvas.getContext('webgl2')!;
   const deck = new Deck({...SIZE, canvas, deviceProps: {ownsHandle: true}});
 
   canvas.remove();
   deck.finalize();
-  releaseCanvasContext(deck);
-  const device = await deck._createdDevice!.device;
-  await nextTask();
-  expect(device!.isLost).toBe(true);
+  await expect.poll(() => gl.isContextLost()).toBe(true);
 });
 
-test('_releaseCanvasContext leaves an app device that Deck reused for a passed canvas', async () => {
+test('Deck#finalize leaves an app device that Deck reused for a passed canvas', async () => {
   const canvas = attachCanvas();
   const appDevice = await luma.createDevice({
     type: 'webgl',
@@ -148,21 +143,18 @@ test('_releaseCanvasContext leaves an app device that Deck reused for a passed c
   });
   const deck = await createDeck({canvas});
   expect(deck.device, 'luma.gl reuses the device already on the canvas').toBe(appDevice);
-  expect(await deck._createdDevice!.device, 'Deck only borrowed it').toBe(null);
 
   canvas.remove();
   deck.finalize();
-  releaseCanvasContext(deck);
   await nextTask();
   expect(appDevice.isLost, 'the app still owns its device').toBe(false);
   appDevice.destroy();
 });
 
-test('_releaseCanvasContext never releases a device the app passed', async () => {
+test('Deck#finalize never releases a device the app passed', async () => {
   const deck = await createDeck({device: testDevice});
 
   deck.finalize();
-  releaseCanvasContext(deck);
   await nextTask();
   expect(testDevice.isLost).toBe(false);
 });
@@ -176,17 +168,15 @@ test('finalizing a Deck twice keeps the context another Deck uses', async () => 
   const second = await createDeck({canvas, deviceProps: {ownsHandle: true}});
   first.finalize();
   canvas.remove();
-  releaseCanvasContext(first);
   await nextTask();
   expect(gl.isContextLost(), 'the second Deck still uses it').toBe(false);
 
   second.finalize();
-  releaseCanvasContext(second);
   await nextTask();
   expect(gl.isContextLost()).toBe(true);
 });
 
-test('_releaseCanvasContext keeps a context that another Deck borrowed', async () => {
+test('Deck#finalize keeps a context that another Deck borrowed', async () => {
   const canvas = attachCanvas();
   const first = await createDeck({canvas, deviceProps: {ownsHandle: true}});
   const gl = getContext(first);
@@ -194,7 +184,6 @@ test('_releaseCanvasContext keeps a context that another Deck borrowed', async (
 
   canvas.remove();
   first.finalize();
-  releaseCanvasContext(first);
   await nextTask();
   expect(gl.isContextLost(), 'the second Deck renders with the same device').toBe(false);
 
