@@ -87,6 +87,42 @@ test('View#equals', () => {
   expect(mapView1.equals(baseView), 'Different type').toBeFalsy();
 });
 
+test('View#id', () => {
+  const implicit = new MapView({zoom: 1});
+  const explicit = new MapView({id: 'MapView', zoom: 1});
+  const named = new MapView({id: 'main', zoom: 1});
+
+  expect(implicit.id, 'default id').toBe('MapView');
+  expect(implicit.props.id, 'props.id reads the default').toBe('MapView');
+  expect(Object.hasOwn(implicit.props, 'id'), 'default id is not own').toBe(false);
+  expect(Object.hasOwn(explicit.props, 'id'), 'passed id is own').toBe(true);
+  expect(Object.hasOwn(new MapView({id: ''}).props, 'id'), 'empty id uses the default').toBe(false);
+
+  expect(implicit.equals(explicit), 'same resolved id').toBe(true);
+  expect(explicit.equals(implicit), 'same resolved id, reversed').toBe(true);
+  expect(implicit.equals(named), 'different id').toBe(false);
+
+  expect(Object.hasOwn(implicit.clone({zoom: 2}).props, 'id'), 'clone keeps default').toBe(false);
+  expect(Object.hasOwn(explicit.clone({zoom: 2}).props, 'id'), 'clone keeps passed id').toBe(true);
+  expect(
+    Object.hasOwn(new MapView(implicit.props).props, 'id'),
+    'props from a view with a default id keep it default'
+  ).toBe(false);
+  expect(new MapView(implicit.props).id, 'reuses the default id').toBe(implicit.id);
+  expect(Object.hasOwn(new MapView(explicit.props).props, 'id'), 'reused passed id stays own').toBe(
+    true
+  );
+  expect(implicit.clone({id: 'other'}).id, 'clone overrides id').toBe('other');
+
+  const viewState = {longitude: 0, latitude: 0, zoom: 1};
+  expect(implicit.makeViewport({width: 100, height: 100, viewState})?.id, 'viewport id').toBe(
+    'MapView'
+  );
+  expect(named.makeViewport({width: 100, height: 100, viewState})?.id, 'named viewport id').toBe(
+    'main'
+  );
+});
+
 test('MapView', () => {
   const view = new MapView();
   const viewport = view.makeViewport({
