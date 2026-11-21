@@ -219,7 +219,9 @@ export function drawMapLibreLayerGroup(
       return layer.props.beforeId === group.beforeId;
     },
     clearStack,
-    clearCanvas: false
+    clearCanvas: false,
+    // Widgets redraw once per frame in afterMapLibreRender, with every layer group
+    deferWidgetRedraw: true
   });
 }
 
@@ -300,6 +302,11 @@ function afterMapLibreRender(deck: Deck, map: MapLibreMap): void {
     const gl = device?.gl;
     deck.props.onBeforeRender?.({device, gl});
     deck.props.onAfterRender?.({device, gl});
+
+    // Without layers no pass draws, but widgets still need the empty frame
+    const mapLibreViewport =
+      (deck.userData as UserData).currentViewport || getMapLibreViewport(deck, map);
+    deck._redrawWidgets(mapLibreViewport ? [mapLibreViewport] : []);
   }
 
   (deck.userData as UserData).currentViewport = null;
