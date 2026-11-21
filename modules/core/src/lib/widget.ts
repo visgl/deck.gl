@@ -89,6 +89,10 @@ export abstract class Widget<
     }
 
     Object.assign(this.props, props);
+    if (this.props.id === undefined) {
+      // As in the constructor, an `undefined` id falls back to the default on the prototype
+      delete (this.props as {id?: string}).id;
+    }
 
     // Update the HTML to match the new props
     this.updateHTML();

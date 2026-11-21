@@ -40,4 +40,9 @@ test('Widget#id', () => {
   implicit.setProps(new TestWidget({label: 'next'}).props);
   expect(implicit.props.label, 'props from a new instance apply').toBe('next');
   expect(implicit.id, 'id is unchanged').toBe('test-widget');
+
+  // Widgets such as TooltipWidget reapply props that may carry `id: undefined`
+  implicit.setProps({id: undefined});
+  expect(implicit.props.id, 'an undefined id falls back to the default').toBe('test-widget');
+  expect(Object.hasOwn(implicit.props, 'id'), 'and stays implicit').toBe(false);
 });
