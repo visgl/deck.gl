@@ -4,7 +4,7 @@
 
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
 import {PROJECTION_MODE} from './constants';
-import {getOffsetOrigin} from './viewport-uniforms';
+import {getOffsetOrigin, getMeterOffsetsJacobian} from './viewport-uniforms';
 import {vec3} from '@math.gl/core';
 import {vec4} from '@math.gl/core';
 import {addMetersToLngLat} from '@math.gl/geospatial/web-mercator';
@@ -66,9 +66,16 @@ export function getWorldPosition(
         const origin = viewport.projectPosition(coordinateOrigin);
         const targetOrigin = viewport.crs!.converter.WGS84.from(coordinateOrigin);
         const {unitsPerMeter} = viewport.getDistanceScales(targetOrigin);
+        // East and north are not parallel to the target axes: use the full local Jacobian.
+        const jacobian = getMeterOffsetsJacobian(viewport, coordinateOrigin) || [
+          unitsPerMeter[0],
+          0,
+          0,
+          unitsPerMeter[1]
+        ];
         return [
-          origin[0] + x * unitsPerMeter[0],
-          origin[1] + y * unitsPerMeter[1],
+          origin[0] + x * jacobian[0] + y * jacobian[2],
+          origin[1] + x * jacobian[1] + y * jacobian[3],
           origin[2] + z * unitsPerMeter[2]
         ];
       }

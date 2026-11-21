@@ -27,6 +27,10 @@ const ZERO_VECTOR: Vec4 = [0, 0, 0, 0];
 const VECTOR_TO_POINT_MATRIX: Matrix4Like = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 const IDENTITY_MATRIX: Matrix4Like = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const DEFAULT_COORDINATE_ORIGIN: Vec3 = [0, 0, 0];
+const DEGREES_TO_RADIANS = Math.PI / 180;
+// WGS84 ellipsoid
+const WGS84_SEMI_MAJOR_AXIS = 6378137;
+const WGS84_ECCENTRICITY_SQUARED = 6.69437999014e-3;
 
 /** Uniform frame of normalized, packed attributes. */
 export function getShaderCoordinateFrame(coordinateSystem: string, viewport: Viewport): number {
@@ -77,6 +81,117 @@ function getShaderProjectionMode(projectionMode: number, coordinateSystem: strin
 }
 
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
+const getMemoizedMeterOffsetsJacobian = memoize(calculateMeterOffsetsJacobian);
+const getMemoizedMeterOffsetsMatrix = memoize(calculateMeterOffsetsMatrix);
+
+/**
+ * Local Jacobian of a custom projection at a WGS84 anchor, from east/north meters on the
+ * ellipsoid to common units: [dx/dEast, dy/dEast, dx/dNorth, dy/dNorth].
+ * East and north are not parallel to the axes of a projected CRS away from its central
+ * meridian, so a per-axis scale omits the grid convergence.
+ * Returns null where the projection cannot be sampled.
+ */
+export function getMeterOffsetsJacobian(
+  viewport: Viewport,
+  coordinateOrigin: number[]
+): Vec4 | null {
+  return getMemoizedMeterOffsetsJacobian({viewport, coordinateOrigin});
+}
+
+function calculateMeterOffsetsJacobian({
+  viewport,
+  coordinateOrigin
+}: {
+  viewport: Viewport;
+  coordinateOrigin: number[];
+}): Vec4 | null {
+  const [longitude, latitude, altitude = 0] = coordinateOrigin;
+  const phi = latitude * DEGREES_TO_RADIANS;
+  const w2 = 1 - WGS84_ECCENTRICITY_SQUARED * Math.sin(phi) ** 2;
+  const primeVerticalRadius = WGS84_SEMI_MAJOR_AXIS / Math.sqrt(w2);
+  const meridianRadius = (primeVerticalRadius * (1 - WGS84_ECCENTRICITY_SQUARED)) / w2;
+  // Central differences over one meter on each side of the anchor
+  const dLng = 1 / (primeVerticalRadius * Math.cos(phi) * DEGREES_TO_RADIANS);
+  const dLat = 1 / (meridianRadius * DEGREES_TO_RADIANS);
+  // East is undefined at the poles
+  if (!(Math.abs(dLng) < 1)) {
+    return null;
+  }
+  let center: number[];
+  let east: number[];
+  let west: number[];
+  let north: number[];
+  let south: number[];
+  try {
+    center = viewport.projectPosition([longitude, latitude, altitude]);
+    east = viewport.projectPosition([longitude + dLng, latitude, altitude]);
+    west = viewport.projectPosition([longitude - dLng, latitude, altitude]);
+    north = viewport.projectPosition([longitude, latitude + dLat, altitude]);
+    south = viewport.projectPosition([longitude, latitude - dLat, altitude]);
+  } catch {
+    return null;
+  }
+  const jacobian: Vec4 = [
+    (east[0] - west[0]) / 2,
+    (east[1] - west[1]) / 2,
+    (north[0] - south[0]) / 2,
+    (north[1] - south[1]) / 2
+  ];
+  // The two one-sided differences agree where the projection is smooth. They do not
+  // agree where a sample wraps or clamps, for example across the antimeridian.
+  const tolerance = 1e-3 * Math.hypot(...jacobian);
+  const isSmooth = [
+    [east, west],
+    [north, south]
+  ].every(([after, before]) =>
+    [0, 1].every(i => Math.abs(after[i] + before[i] - 2 * center[i]) <= tolerance)
+  );
+  // A sample that clamps, for example at the latitude limit of Web Mercator, can give a
+  // zero or a parallel column, which collapses offsets onto a line.
+  const [eastX, eastY, northX, northY] = jacobian;
+  const isRegular =
+    Math.abs(eastX * northY - eastY * northX) >
+    1e-3 * Math.hypot(eastX, eastY) * Math.hypot(northX, northY);
+  return isSmooth && isRegular ? jacobian : null;
+}
+
+/**
+ * Matrix that turns meter offsets into the frame of the per-axis `unitsPerMeter` scale
+ * that `project_offset_` applies. The product of the two is the local Jacobian.
+ */
+function calculateMeterOffsetsMatrix({
+  viewport,
+  coordinateOrigin,
+  unitsPerMeter
+}: {
+  viewport: Viewport;
+  coordinateOrigin: Vec3;
+  unitsPerMeter: Vec3;
+}): Matrix4Like | null {
+  const jacobian = getMeterOffsetsJacobian(viewport, coordinateOrigin);
+  const [scaleX, scaleY] = unitsPerMeter;
+  if (!jacobian || !(scaleX > 0 && scaleY > 0)) {
+    return null;
+  }
+  return [
+    jacobian[0] / scaleX,
+    jacobian[1] / scaleY,
+    0,
+    0,
+    jacobian[2] / scaleX,
+    jacobian[3] / scaleY,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1
+  ];
+}
 
 export function getOffsetOrigin(
   viewport: Viewport,
@@ -371,6 +486,22 @@ export function getUniformsFromViewport({
 
   uniforms.wrapLongitude = autoWrapLongitude;
   uniforms.modelMatrix = modelMatrix || IDENTITY_MATRIX;
+
+  if (
+    coordinateSystem === 'meter-offsets' &&
+    viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL
+  ) {
+    // The shader scales meter offsets per axis. Apply the remainder of the local
+    // Jacobian (the grid convergence) with the model matrix, in meter space.
+    const meterOffsetsMatrix = getMemoizedMeterOffsetsMatrix({
+      viewport,
+      coordinateOrigin,
+      unitsPerMeter: uniforms.commonUnitsPerWorldUnit
+    });
+    if (meterOffsetsMatrix) {
+      uniforms.modelMatrix = mat4.multiply([], meterOffsetsMatrix, uniforms.modelMatrix);
+    }
+  }
 
   return uniforms;
 }
