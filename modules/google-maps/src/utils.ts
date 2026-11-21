@@ -19,12 +19,12 @@ type UserData = {
 /**
  * Get a new deck instance
  * @param map (google.maps.Map) - The parent Map instance
- * @param pane (HTMLElement) - The element to place the deck container in
+ * @param pane (Element) - The element to place the deck container in
  * @param [deck] (Deck) - a previously created instances
  */
 export function createDeckInstance(
   map: google.maps.Map,
-  pane: HTMLElement | null | undefined,
+  pane: Element | null | undefined,
   deck: Deck | null | undefined,
   props
 ): Deck {
@@ -94,7 +94,7 @@ export function createDeckInstance(
 
 // Create a container that will host the deck canvas and tooltip
 function getContainer(
-  pane: HTMLElement | null | undefined,
+  pane: Element | null | undefined,
   style?: Partial<CSSStyleDeclaration>
 ): HTMLElement {
   const container = document.createElement('div');

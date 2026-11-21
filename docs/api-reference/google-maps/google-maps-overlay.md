@@ -126,6 +126,7 @@ new GoogleMapsOverlay(props: GoogleMapsOverlayProps);
 The constructor additionally accepts the following option:
 
 - `interleaved` (boolean) - When set to `false`, a dedicated deck.gl canvas is layered on top of the base map. If set to `true` and the Google Map is configured for Vector rendering, deck.gl layers are inserted into the Google Maps layer stack, sharing the same WebGL2RenderingContext. Default is `true`.
+- `overlayPane` (key of [Google Maps `MapPanes`](https://developers.google.com/maps/documentation/javascript/reference/overlay-view#MapPanes)) - Pane that hosts the dedicated deck.gl canvas. Options are `mapPane`, `overlayLayer` (default), `markerLayer`, `overlayMouseTarget`, and `floatPane`. Applies to raster maps and noninterleaved vector maps. Use `setProps({overlayPane: 'markerLayer'})` to move an attached canvas, or pass `undefined` to restore the default. The setting is ignored in interleaved vector mode, where Google Maps owns the shared canvas.
 
 ## Remarks
 

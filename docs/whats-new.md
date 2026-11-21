@@ -73,6 +73,10 @@ The `@deck.gl/react` module is now a deep React Fiber integration.
 - [GridLayer](./api-reference/aggregation-layers/grid-layer.md), [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md), [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md), and [ContourLayer](./api-reference/aggregation-layers/contour-layer.md) now accept [custom aggregators](./api-reference/aggregation-layers/aggregator.md) with GPUVector results.
 - The aggregation layers support clipping, brushing, and numeric filtering extensions with [GPUVector inputs](./api-reference/aggregation-layers/aggregator.md#gpu-column-extensions).
 
+### Google Maps
+
+- [`GoogleMapsOverlay`](./api-reference/google-maps/google-maps-overlay.md) accepts an `overlayPane` option to control where its dedicated canvas sits in the Google Maps pane stack.
+
 ### Examples
 
 - [Examples v10](/examples-v10) have been updated to use Arrow loading and SQL accessors.
