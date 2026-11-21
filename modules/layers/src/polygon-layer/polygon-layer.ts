@@ -23,6 +23,7 @@ import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
 import {replaceInRange} from '../utils';
+import type {GeographicClip} from '../utils/geographic-clip';
 
 /** Marks converted color callbacks without nesting shallow-compared trigger values. */
 function getColorUpdateTrigger(trigger: unknown, converted: boolean): unknown {
@@ -203,6 +204,11 @@ type _PolygonLayerProps<DataT = unknown> = {
    * @default 0
    */
   _projectionTolerance?: number;
+  /** Clip CPU-preprojected WGS84 fills and outlines at the specified seam and latitude band.
+   * @experimental
+   * @default null
+   */
+  _geographicClip?: GeographicClip | null;
 
   /**
    * Specifies the winding order of rings in the polygon data.
@@ -233,6 +239,7 @@ const defaultProps: DefaultProps<PolygonLayerProps> = {
   wireframe: false,
   _normalize: true,
   _projectionTolerance: {type: 'number', value: 0, min: 0},
+  _geographicClip: {type: 'object', value: null, compare: 2},
   _windingOrder: 'CW',
 
   lineWidthUnits: 'meters',
@@ -439,6 +446,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           wireframe,
           _normalize,
           _projectionTolerance: this.props._projectionTolerance,
+          _geographicClip: this.props._geographicClip,
           _windingOrder,
 
           getElevation,
@@ -487,6 +495,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           // Already normalized
           _pathType: this.props._projectionTolerance ? null : 'loop',
           _projectionTolerance: this.props._projectionTolerance,
+          _geographicClip: this.props._geographicClip,
           _projectionNoCut: Boolean(this.props._projectionTolerance),
 
           transitions: transitions && {

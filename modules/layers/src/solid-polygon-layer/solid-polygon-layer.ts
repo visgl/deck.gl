@@ -37,6 +37,7 @@ import type {
   DefaultProps
 } from '@deck.gl/core';
 import type {PolygonGeometry} from './polygon';
+import type {GeographicClip} from '../utils/geographic-clip';
 
 type _SolidPolygonLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
@@ -48,6 +49,11 @@ type _SolidPolygonLayerProps<DataT> = {
    * @default 0
    */
   _projectionTolerance?: number;
+  /** Clip CPU-preprojected WGS84 polygons at the specified seam and latitude band.
+   * @experimental
+   * @default null
+   */
+  _geographicClip?: GeographicClip | null;
   /** Whether to fill the polygons
    * @default true
    */
@@ -120,6 +126,7 @@ const defaultProps: DefaultProps<SolidPolygonLayerProps> = {
   _windingOrder: 'CW',
   _full3d: false,
   _projectionTolerance: {type: 'number', value: 0, min: 0},
+  _geographicClip: {type: 'object', value: null, compare: 2},
 
   elevationScale: {type: 'number', min: 0, value: 1},
 
@@ -297,6 +304,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   draw({uniforms}) {
     const {extruded, filled, wireframe, elevationScale} = this.props;
     const {topModel, sideModel, wireframeModel, polygonTesselator} = this.state;
+    // A fully clipped polygon would give the side and wireframe models a negative instance count.
+    if (polygonTesselator.opts.geographicClip && polygonTesselator.instanceCount === 0) return;
 
     const renderUniforms: SolidPolygonProps = {
       extruded: Boolean(extruded),
@@ -373,16 +382,27 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     const refinementChanged =
       props._projectionTolerance !== oldProps._projectionTolerance ||
       (props._projectionTolerance > 0 && props._normalize !== oldProps._normalize);
-    const geometryConfigChanged =
-      refinementChanged ||
+    const geographicSource = this.state.sourceCrs?.signature === 'WGS84';
+    const canGeographicClip = this.state.preproject && geographicSource;
+    const geographicClip = canGeographicClip ? props._geographicClip : undefined;
+    const geographicClipChanged =
+      canGeographicClip &&
+      (!deepEqual(geographicClip, oldProps._geographicClip, 2) ||
+        (geographicClip &&
+          (props._normalize !== oldProps._normalize ||
+            props._windingOrder !== oldProps._windingOrder ||
+            props.positionFormat !== oldProps.positionFormat)));
+    const geometryConfigurationChanged =
+      refinementChanged || geographicClipChanged || projectionChanged;
+    const geometryChanged =
+      geometryConfigurationChanged ||
       changeFlags.dataChanged ||
-      projectionChanged ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
 
     // When the geometry config  or the data is changed,
     // tessellator needs to be invoked
-    if (geometryConfigChanged) {
+    if (geometryChanged) {
       const {polygonTesselator} = this.state;
       const buffers = (props.data as any).attributes || {};
       const projectionToleranceScale = getMetersPerUnit(this.state.packedCrs);
@@ -416,15 +436,14 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           : undefined,
         positionFormat: props.positionFormat,
         // Longitude cutting assumes geographic input and cannot run on preprojected coordinates.
-        wrapLongitude:
-          props.wrapLongitude &&
-          !this.state.preproject &&
-          this.state.sourceCrs?.signature === 'WGS84',
+        wrapLongitude: props.wrapLongitude && !this.state.preproject && geographicSource,
+        geographicClip,
+        windingOrder: props._windingOrder,
         resolution: subdivisionStep,
         projectionTolerance: props._projectionTolerance,
         projectionToleranceScale: projectionToleranceScale ?? undefined,
         fp64: this.use64bitPositions(),
-        dataChanged: projectionChanged || refinementChanged ? undefined : changeFlags.dataChanged,
+        dataChanged: geometryConfigurationChanged ? undefined : changeFlags.dataChanged,
         // A geocentric target needs a polygon plane selected from XYZ, even for flat source data.
         full3d: props._full3d || geocentric,
         geocentric
@@ -436,7 +455,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         startIndices: polygonTesselator.vertexStarts
       });
 
-      if (!changeFlags.dataChanged || projectionChanged || refinementChanged) {
+      if (!changeFlags.dataChanged || geometryConfigurationChanged) {
         // Projection changes affect all triangles, even alongside a partial data update.
         // Base `layer.updateState` only invalidates all attributes on data change
         // Cover the rest of the scenarios here

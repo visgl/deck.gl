@@ -15,12 +15,10 @@ import {
   cutPolygonByMercatorBounds,
   modifyPolygonWindingDirection
 } from '@math.gl/geometry';
+import {clipPolygon} from '../utils/geographic-clip';
 
-import type {
-  PolygonGeometry,
-  NormalizedPolygonGeometry,
-  FlatComplexPolygonGeometry
-} from './polygon';
+import type {PolygonGeometry, NormalizedPolygonGeometry} from './polygon';
+import type {CutPolygon, GeographicClip} from '../utils/geographic-clip';
 import type {TypedArray} from '@math.gl/core';
 
 type GeometryUpdateContext = {
@@ -28,10 +26,6 @@ type GeometryUpdateContext = {
   indexStart: number;
   geometrySize: number;
   geometryIndex: number;
-};
-
-type CutPolygon = FlatComplexPolygonGeometry & {
-  edgeTypes: number[];
 };
 
 // This class is set up to allow querying one attribute at a time
@@ -45,6 +39,10 @@ export default class PolygonTesselator extends Tesselator<
     resolution?: number;
     projectionTolerance?: number;
     projectionToleranceScale?: [number, number, number];
+    /** Geographic clipping applied before subdivision and projection. */
+    geographicClip?: GeographicClip | null;
+    /** Outer ring winding expected by the shader when normalization is disabled. */
+    windingOrder?: 'CW' | 'CCW';
     wrapLongitude?: boolean;
     preproject?: (xy: number[]) => number[];
     full3d?: boolean;
@@ -94,8 +92,9 @@ export default class PolygonTesselator extends Tesselator<
   protected normalizeGeometry(polygon: PolygonGeometry): NormalizedPolygonGeometry | CutPolygon[] {
     if (!this.opts.transform) return this.preparePolygon(polygon, this.positionSize);
     const prepared = polygon as NormalizedPolygonGeometry | CutPolygon[];
-    if (!this.normalize) return prepared;
+    if (!this.normalize && !this.opts.geographicClip) return prepared;
     if (isCut(prepared)) {
+      const clockwise = this.normalize || this.opts.windingOrder !== 'CCW';
       for (const part of prepared) {
         // Reversing a ring also reverses its outgoing edges. Keep cut-edge visibility
         // attached to the original edge when a projection flips winding.
@@ -106,7 +105,7 @@ export default class PolygonTesselator extends Tesselator<
           const end = ends[ring];
           const reversed = modifyPolygonWindingDirection(
             positions,
-            ring === 0 ? 'clockwise' : 'counter-clockwise',
+            (ring === 0) === clockwise ? 'clockwise' : 'counter-clockwise',
             {start, end, size: this.positionSize, isClosed: true}
           );
           if (reversed && edgeTypes) {
@@ -120,6 +119,7 @@ export default class PolygonTesselator extends Tesselator<
       }
       return prepared;
     }
+    if (this.opts.geographicClip) return prepared; // Fully clipped away.
     return Polygon.normalize(prepared, this.positionSize);
   }
 
@@ -128,6 +128,19 @@ export default class PolygonTesselator extends Tesselator<
     polygon: PolygonGeometry,
     size: number
   ): NormalizedPolygonGeometry | CutPolygon[] {
+    const {geographicClip, resolution} = this.opts;
+    if (geographicClip) {
+      const normalized = this.normalize
+        ? Polygon.normalize(polygon, size)
+        : (polygon as NormalizedPolygonGeometry);
+      const parts = clipPolygon(
+        Polygon.getPositions(normalized),
+        Polygon.getHoleIndices(normalized),
+        size,
+        {clip: geographicClip, resolution}
+      );
+      return this.refinePolygons(parts, size);
+    }
     if (this.normalize) {
       const normalizedPolygon = Polygon.normalize(polygon, size);
       if (this.opts.resolution) {

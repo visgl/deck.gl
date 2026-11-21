@@ -5,9 +5,11 @@
 import {Tesselator} from '@deck.gl/core';
 import {normalizePath} from './path';
 import {subdividePolyline} from '@math.gl/geometry';
+import {clipPath, isClosedRing} from '../utils/geographic-clip';
 
 import type {TypedArray} from '@math.gl/core';
 import type {PathGeometry, FlatPathGeometry, NormalizedPathGeometry} from './path';
+import type {GeographicClip} from '../utils/geographic-clip';
 
 const START_CAP = 1;
 const END_CAP = 2;
@@ -23,6 +25,8 @@ export default class PathTesselator extends Tesselator<
     resolution?: number;
     projectionTolerance?: number;
     projectionToleranceScale?: [number, number, number];
+    /** Geographic clipping applied before subdivision and projection. */
+    geographicClip?: GeographicClip | null;
     wrapLongitude?: boolean;
     loop?: boolean;
     isWebGPU?: boolean;
@@ -85,14 +89,32 @@ export default class PathTesselator extends Tesselator<
   }
 
   protected prepareGeometry(path: PathGeometry): PathGeometry {
-    const prepared = (
-      this.normalize
-        ? normalizePath(path, this.inputPositionSize, this.opts.resolution, this.opts.wrapLongitude)
-        : path
-    ) as NormalizedPathGeometry;
-    const {projectionTolerance, projectionToleranceScale, transform} = this.opts;
+    const {
+      geographicClip,
+      loop,
+      resolution,
+      wrapLongitude,
+      projectionTolerance,
+      projectionToleranceScale,
+      transform
+    } = this.opts;
+    const size = this.inputPositionSize;
+    let prepared: NormalizedPathGeometry;
+    if (geographicClip) {
+      const flat = this.normalize ? normalizePath(path, size) : (path as NormalizedPathGeometry);
+      const parts = (isCut(flat) ? flat : [flat]).flatMap(part =>
+        clipPath(part, size, geographicClip, Boolean(loop))
+      );
+      prepared = resolution
+        ? parts.map(part => normalizePath(part, size, resolution) as FlatPathGeometry)
+        : parts;
+    } else {
+      prepared = this.normalize
+        ? normalizePath(path, size, resolution, wrapLongitude)
+        : (path as NormalizedPathGeometry);
+    }
     if (!projectionTolerance) return prepared as PathGeometry;
-    if (!this.normalize || !transform) {
+    if ((!this.normalize && !geographicClip) || !transform) {
       throw new Error('Projection refinement requires normalized, preprojected paths');
     }
     const scale = projectionToleranceScale || [1, 1, 1];
@@ -111,6 +133,9 @@ export default class PathTesselator extends Tesselator<
 
   /* Implement base Tesselator interface */
   protected normalizeGeometry(path: PathGeometry): NormalizedPathGeometry {
+    if (this.opts.geographicClip && !this.opts.transform) {
+      return this.prepareGeometry(path) as NormalizedPathGeometry;
+    }
     if (this.normalize && !this.opts.transform) {
       return normalizePath(path, this.positionSize, this.opts.resolution, this.opts.wrapLongitude);
     }
@@ -233,18 +258,15 @@ export default class PathTesselator extends Tesselator<
   // Returns true if the first and last points are identical
   private isClosed(path: FlatPathGeometry): boolean {
     if (!this.normalize) {
-      return Boolean(this.opts.loop);
+      return Boolean(
+        this.opts.loop && (!this.opts.geographicClip || isClosedRing(path, this.positionSize))
+      );
     }
-    const {positionSize} = this;
-    const lastPointIndex = path.length - positionSize;
-    return (
-      path[0] === path[lastPointIndex] &&
-      path[1] === path[lastPointIndex + 1] &&
-      (positionSize === 2 || path[2] === path[lastPointIndex + 2])
-    );
+    return isClosedRing(path, this.positionSize);
   }
 }
 
+/** Distinguish a cut path from one packed part. */
 function isCut(path: NormalizedPathGeometry): path is FlatPathGeometry[] {
-  return Array.isArray(path[0]);
+  return Array.isArray(path[0]) || ArrayBuffer.isView(path[0]);
 }
