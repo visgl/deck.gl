@@ -170,6 +170,17 @@ describe('removing a prop', () => {
     expect(Object.hasOwn(props, '_canvases')).toBe(false);
   });
 
+  it('keeps device and _canvases passed as undefined, as when they are removed', () => {
+    const device = {id: 'device'};
+    const {deck, root} = setup({_canvases: [], device: device as never});
+
+    root.configure({_canvases: undefined, device: undefined});
+
+    const props = lastSetProps(deck);
+    expect(Object.hasOwn(props, 'device')).toBe(false);
+    expect(Object.hasOwn(props, '_canvases')).toBe(false);
+  });
+
   it('does not reset the layers, views, widgets or effects props, which the root merges with JSX', () => {
     const {deck, root} = setup({effects: [], layers: [], widgets: []});
 

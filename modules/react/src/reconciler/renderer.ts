@@ -205,14 +205,20 @@ function warnOnCreationOnlyChanges(
 }
 
 /**
- * Leaves out the props that the root sends as merged descriptors. A `views={undefined}` passed
- * through would otherwise reach `Deck.setProps`, which resets an explicit `undefined` to its
- * default (#10906), and clear views that a widget such as `SplitterWidget` set.
+ * Returns the props to forward to `Deck.setProps`, which resets an explicit `undefined` to its
+ * default (#10906). Leaves out the props that the root sends as merged descriptors, so a
+ * `views={undefined}` can't clear views that a widget such as `SplitterWidget` set. Also leaves
+ * out a kept prop passed as `undefined`, which is the same as removing it.
  */
-function omitDescriptorProps(props: DeckGLConfiguration): DeckGLConfiguration {
+function getForwardedProps(props: DeckGLConfiguration): DeckGLConfiguration {
   const rest: Record<string, unknown> = {...props};
   for (const key of DESCRIPTOR_PROPS) {
     delete rest[key];
+  }
+  for (const key of KEPT_ON_REMOVAL_PROPS) {
+    if (rest[key] === undefined) {
+      delete rest[key];
+    }
   }
   return rest as DeckGLConfiguration;
 }
@@ -429,7 +435,7 @@ export function createRoot(node: RootElement, options: RootOptions = {}): Reconc
         warnOnCreationOnlyChanges(previousProps, props, warnedCreationOnlyProps);
         deckgl.setProps({
           ...getRemovedProps(previousProps, props),
-          ...omitDescriptorProps(props),
+          ...getForwardedProps(props),
           ...descriptors
         });
       }
