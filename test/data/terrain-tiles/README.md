@@ -7,6 +7,6 @@ A small set of color-encoded DEM tiles for deck.gl render tests, downloaded from
 * United States 3DEP (formerly NED) and global GMTED2010 and SRTM terrain data
   courtesy of the U.S. Geological Survey.
 
-The render fixtures use every second row and column of the source tiles. This
-keeps the original encoded elevations at those grid points and reduces the
-terrain mesh input to 128 × 128 samples per tile.
+The render fixtures keep the full 256 × 256 grid and truncate the lowest three
+bits of the blue channel. Terrarium stores fractional meters in this channel,
+so the maximum elevation change is 7/256 m before test exaggeration.
