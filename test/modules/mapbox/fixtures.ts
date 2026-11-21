@@ -3,7 +3,6 @@
 // Copyright (c) vis.gl contributors
 
 import {equals} from '@math.gl/core/matrix';
-import {GL} from '@luma.gl/core/webgl-constants';
 
 export const DEFAULT_PARAMETERS = {
   depthWriteEnabled: true,

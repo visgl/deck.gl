@@ -29,8 +29,7 @@ import {VERSION} from './init';
 const CREATED_BY_DECK = '_createdByDeck';
 
 import {luma} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/core/webgl';
-import {GL} from '@luma.gl/core/webgl-constants';
+import {webgl2Adapter, type WebGLDevice} from '@luma.gl/core/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import type {
@@ -1748,12 +1747,13 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
 
     if (this.device.type === 'webgl') {
+      const {gl} = this.device as WebGLDevice;
       this.device.setParametersWebGL({
         blend: true,
-        blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+        blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
         polygonOffsetFill: true,
         depthTest: true,
-        depthFunc: GL.LEQUAL
+        depthFunc: gl.LEQUAL
       });
     }
 
