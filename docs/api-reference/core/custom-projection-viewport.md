@@ -72,9 +72,21 @@ Convert between target-coordinate XY and common-space XY using only the fixed li
 
 Returns a WGS84 `{center}` that keeps the supplied ground point under the requested pixel. The returned center has Z zero.
 
+### `getTopDownViewport()`
+
+Returns a new `CustomProjectionViewport` with zero pitch. It keeps the `crs`, `resolution`, center, `zoom`, `bearing`, `fovy`, `orthographic`, size and `padding` of this viewport. loaders.gl uses it to traverse 3D tilesets, because it cannot rebuild this viewport from longitude, latitude and zoom.
+
 ### `getDistanceScales(coordinateOrigin?)`
 
 Returns ground-meter scales at a target-coordinate anchor. Without an anchor, returns camera-center scales. An explicitly unavailable measurement (`null`) falls back to those camera scales without changing them. Unexpected descriptor errors propagate to the caller. `unitsPerWorldUnit` remains the constant per-axis target-unit-to-common scale.
+
+### `fovy`
+
+The camera vertical field of view in degrees, as in `WebMercatorViewport`. The viewport uses the same default field of view as `WebMercatorViewport`.
+
+### `orthographic`
+
+`true` if the viewport uses an orthographic camera, as in `WebMercatorViewport`. Default `false`.
 
 ### `projectionSignature`
 

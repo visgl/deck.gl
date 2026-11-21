@@ -86,7 +86,8 @@ Limitations:
 
 ## Limitations
 
-- Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
+- Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
+- `Tile3DLayer` is not supported. The viewport supplies `getTopDownViewport()` for tile traversal, which needs a loaders.gl version with [visgl/loaders.gl#4533](https://github.com/visgl/loaders.gl/pull/4533). Tile content is not converted to the CRS: meshes and point clouds draw with `meter-offsets` and do not get the grid convergence or scale of the projection.
 - `BitmapLayer` approximates the projection with a triangle mesh. A positive `resolution` creates an interior grid in the source CRS and projects every grid vertex; higher values improve the approximation at a higher processing cost. [`_projectionTolerance`](../layers/bitmap-layer.md#_projectiontolerance) adds adaptive refinement. Image coordinates are linearly interpolated within each triangle. Subdivision cannot correct an image's pixel-to-coordinate mapping when it differs from the declared source CRS.
 - Great-circle paths are not supported by `GreatCircleLayer` or `ArcLayer` with `greatCircle: true`. They fall back to ordinary arcs between projected endpoints, as with `greatCircle: false`. To preserve a great-circle path, sample it in geographic coordinates and render the samples with `PathLayer`.
 - `LineLayer`, `ArcLayer`, `PathLayer` and `SolidPolygonLayer` ignore `wrapLongitude` when the layer uses CPU preprojection or its source coordinates are not WGS84. Split geometry at the desired longitude boundary before passing it to these layers.

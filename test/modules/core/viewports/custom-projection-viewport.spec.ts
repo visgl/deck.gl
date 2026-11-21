@@ -256,3 +256,127 @@ test('viewport signatures consume CRS identity independently of converters and r
   expect(bounded.projectionSignature).toBe(viewport.projectionSignature);
   expect(bounded.sizeScaleSignature).not.toBe(viewport.sizeScaleSignature);
 });
+
+test('getTopDownViewport keeps the CRS and the camera target with zero pitch', async () => {
+  const utm = await projectionEngine.getCRS('+proj=utm +zone=18 +datum=WGS84 +units=m');
+  const center: [number, number, number] = [-75.612, 40.042, 0];
+  const viewport = new CustomProjectionViewport({
+    id: 'utm',
+    crs: utm,
+    resolution: 16,
+    width: 800,
+    height: 600,
+    padding: {top: 40, bottom: 0, left: 10, right: 0},
+    center,
+    zoom: 16,
+    pitch: 45,
+    bearing: 30
+  });
+  const topDown = viewport.getTopDownViewport();
+
+  expect(topDown).toBeInstanceOf(CustomProjectionViewport);
+  expect(topDown).not.toBe(viewport);
+  expect(topDown.id).toBe('utm');
+  expect(topDown.crs).toBe(utm);
+  expect(topDown.projectionSignature).toBe(viewport.projectionSignature);
+  expect(topDown.pitch).toBe(0);
+  expect(topDown.bearing).toBe(30);
+  expect(topDown.zoom).toBe(16);
+  expect([topDown.width, topDown.height]).toEqual([800, 600]);
+  expect(topDown.padding).toEqual(viewport.padding);
+  expect(topDown.position).toEqual(center);
+  expect(topDown.center).toEqual(viewport.center);
+  topDown
+    .unprojectPosition(topDown.center)
+    .forEach((value, axis) => expect(value).toBeCloseTo(center[axis], 9));
+  // The camera target, not the pitched eye, stays on the same pixel.
+  topDown
+    .project(center)
+    .slice(0, 2)
+    .forEach((value, axis) => expect(value).toBeCloseTo(viewport.project(center)[axis], 6));
+  // A zero-pitch eye is over the target; the pitched eye is not.
+  expect(topDown.cameraPosition[0]).toBeCloseTo(viewport.center[0], 9);
+  expect(topDown.cameraPosition[1]).toBeCloseTo(viewport.center[1], 9);
+  expect(
+    Math.hypot(...viewport.cameraPosition.slice(0, 2).map((v, i) => v - viewport.center[i]))
+  ).toBeGreaterThan(1e-6);
+});
+
+test('getTopDownViewport does not change the original viewport', async () => {
+  const utm = await projectionEngine.getCRS('+proj=utm +zone=18 +datum=WGS84 +units=m');
+  const viewport = new CustomProjectionViewport({
+    crs: utm,
+    width: 640,
+    height: 480,
+    center: [-75.612, 40.042, 0],
+    zoom: 15,
+    pitch: 60,
+    bearing: -20
+  });
+  const before = {
+    pitch: viewport.pitch,
+    bearing: viewport.bearing,
+    zoom: viewport.zoom,
+    position: viewport.position.slice(),
+    center: viewport.center.slice(),
+    cameraPosition: viewport.cameraPosition.slice(),
+    viewMatrix: Array.from(viewport.viewMatrix),
+    projectionMatrix: Array.from(viewport.projectionMatrix)
+  };
+  viewport.getTopDownViewport();
+  expect(viewport.crs).toBe(utm);
+  expect({
+    pitch: viewport.pitch,
+    bearing: viewport.bearing,
+    zoom: viewport.zoom,
+    position: viewport.position.slice(),
+    center: viewport.center.slice(),
+    cameraPosition: viewport.cameraPosition.slice(),
+    viewMatrix: Array.from(viewport.viewMatrix),
+    projectionMatrix: Array.from(viewport.projectionMatrix)
+  }).toEqual(before);
+});
+
+test('fovy matches WebMercatorViewport and the top-down copy keeps it', () => {
+  const viewport = new CustomProjectionViewport({...options, zoom: 12, pitch: 45, bearing: 30});
+  const map = new WebMercatorViewport({width: 800, height: 600, zoom: 12, pitch: 45, bearing: 30});
+  expect(viewport.fovy).toBe(map.fovy);
+  expect(viewport.getTopDownViewport().fovy).toBe(map.fovy);
+});
+
+test('getTopDownViewport keeps an orthographic camera', () => {
+  const pitched = new CustomProjectionViewport({
+    ...options,
+    center: [-75.612, 40.042, 0],
+    zoom: 12,
+    pitch: 45,
+    bearing: 30,
+    orthographic: true
+  });
+  const level = new CustomProjectionViewport({
+    ...options,
+    center: [-75.612, 40.042, 0],
+    zoom: 12,
+    bearing: 30,
+    orthographic: true
+  });
+  const perspective = new CustomProjectionViewport({
+    ...options,
+    center: [-75.612, 40.042, 0],
+    zoom: 12,
+    bearing: 30
+  });
+  const topDown = pitched.getTopDownViewport();
+  expect(Array.from(topDown.projectionMatrix)).toEqual(Array.from(level.projectionMatrix));
+  // An elevated point off center shows the camera model: perspective moves it away from center.
+  const raised = [-75.6, 40.05, 2000];
+  for (const position of [[-75.612, 40.042, 0], raised]) {
+    topDown
+      .project(position)
+      .forEach((value, axis) => expect(value).toBeCloseTo(level.project(position)[axis], 6));
+  }
+  expect(Math.abs(perspective.project(raised)[0] - level.project(raised)[0])).toBeGreaterThan(1);
+  expect(pitched.orthographic).toBe(true);
+  expect(perspective.orthographic).toBe(false);
+  expect(topDown.orthographic).toBe(true);
+});
