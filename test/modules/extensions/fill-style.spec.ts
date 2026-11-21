@@ -7,7 +7,7 @@ import {
   MapView,
   OrthographicViewport,
   WebMercatorViewport,
-  _GlobeViewport as GlobeViewport,
+  GlobeViewport,
   fp64LowPart,
   project
 } from '@deck.gl/core';

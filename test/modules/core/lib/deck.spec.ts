@@ -9,6 +9,8 @@ import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
 import type {CanvasContext, CanvasContextProps} from '@luma.gl/core';
 import {Device} from '@luma.gl/core';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {sleep} from './async-iterator-test-utils';
 
 function createDeferred<T>() {
@@ -75,6 +77,42 @@ function finalizeOwnedDeck(deck: Deck): void {
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
+webglTest('Deck#creates an explicitly requested WebGL device', async () => {
+  const adapters = [webgpuAdapter];
+  Object.freeze(adapters);
+  const deck = new Deck({
+    width: 1,
+    height: 1,
+    deviceProps: {type: 'webgl', adapters},
+    initialViewState: {longitude: 0, latitude: 0, zoom: 0}
+  });
+  try {
+    await waitForRender(deck);
+    expect(deck.device?.type).toBe('webgl');
+  } finally {
+    finalizeOwnedDeck(deck);
+  }
+});
+
+test('Deck#creates an explicitly requested WebGPU device with premultiplied alpha', async context => {
+  if (!(await getWebGPUTestDevice())) return context.skip();
+  const deck = new Deck({
+    width: 1,
+    height: 1,
+    deviceProps: {type: 'webgpu', adapters: [webgpuAdapter]},
+    initialViewState: {longitude: 0, latitude: 0, zoom: 0}
+  });
+  try {
+    await waitForRender(deck);
+    expect(deck.device?.type).toBe('webgpu');
+    expect(deck.device?.getDefaultCanvasContext().props.alphaMode).toBe('premultiplied');
+  } finally {
+    const ownedDevice = deck.device;
+    deck.finalize();
+    ownedDevice?.destroy();
+  }
+});
+
 const gpuDebugTestCases = [
   {name: 'default', props: {}, expected: false},
   {name: 'enabled', props: {debug: true}, expected: true},
@@ -129,6 +167,33 @@ webglTest.each(gpuDebugTestCases)(
     }
   }
 );
+
+webglTest('Deck#uses and preserves a caller-owned WebGL context', async () => {
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl2')!;
+  const onWebGLInitialized = vi.fn();
+  const deck = new Deck({
+    gl,
+    width: 1,
+    height: 1,
+    onWebGLInitialized,
+    initialViewState: {longitude: 0, latitude: 0, zoom: 0}
+  });
+  const loseContext = gl.getExtension('WEBGL_lose_context');
+  try {
+    try {
+      await waitForRender(deck);
+      expect(deck.device?.type).toBe('webgl');
+      expect(deck.device?.getDefaultCanvasContext().canvas).toBe(canvas);
+      expect(onWebGLInitialized).toHaveBeenCalledExactlyOnceWith(gl);
+    } finally {
+      deck.finalize();
+    }
+    expect(gl.isContextLost()).toBe(false);
+  } finally {
+    loseContext?.loseContext();
+  }
+});
 
 test('Deck#constructor', async () => {
   const callbacks = {

@@ -197,11 +197,13 @@ function diffDataProps(props, oldProps): string | false | {startRow: number; end
   const queries = props[ACCESSOR_QUERIES_SYMBOL];
   const oldQueries = oldProps[ACCESSOR_QUERIES_SYMBOL];
   if (
-    Object.keys(oldQueries ?? {}).some(
-      name =>
-        typeof props[PROP_TYPES_SYMBOL][name]?.arrow === 'string' &&
-        queries?.[name]?.sql !== oldQueries[name].sql
-    )
+    Object.keys(oldQueries ?? {}).some(name => {
+      const type = props[PROP_TYPES_SYMBOL][name];
+      const usesRows =
+        typeof type?.arrow === 'string' ||
+        (props.extensions?.length > 0 && type?.arrowWithExtensions);
+      return usesRows && queries?.[name]?.sql !== oldQueries[name].sql;
+    })
   ) {
     return 'An Arrow row accessor query changed';
   }

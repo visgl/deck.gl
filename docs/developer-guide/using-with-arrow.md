@@ -122,7 +122,7 @@ replaces the data or is removed.
 ## Limitations
 
 Rendering columns must have equal lengths and matching chunk structures, and must not contain nulls.
-Arrow rendering accessors do not support attribute transitions or layer extensions. Use row accessors when you need those features.
+Direct column bindings do not support attribute transitions or layer extensions. ScatterplotLayer uses row-based attributes for Arrow and SQL accessors when extensions are active.
 
 See each layer's prop descriptions for supported inputs and the [loading data guide](./loading-data.md)
 for other ways to provide data.

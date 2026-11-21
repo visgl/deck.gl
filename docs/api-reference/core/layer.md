@@ -355,7 +355,9 @@ an explicit `FROM data`, for example
 math.gl executes the grouped query across the whole table. Nullish data and empty
 row arrays render as empty layers until data arrives.
 
-For URL inputs, provide a source-capable loader. Loaders that support query pushdown
+For URL inputs, provide a source-capable loader. To group a URL-backed table, use
+`FROM data GROUP BY` with one grouping column selected first, followed by named
+`COUNT`, `SUM`, `AVG`, `MIN`, or `MAX` aggregates. Loaders that support query pushdown
 can optimize loading based on the supplied query. When the layer has a custom
 `fetch`, SQL runs on the Arrow table returned by that function. Deck loads the SQL
 parser on first use.
@@ -381,6 +383,18 @@ in the range 0–1, this packs them into an 8-bit RGBA color with full opacity.
 ```ts
 getFillColor: {sql: 'RGBA8(red, green, blue, 1)'}
 ```
+
+Accessors can use top-level SQL scales. Numeric accessors accept linear, square-root,
+logarithmic, power, and symmetric-log scales with a numeric `RANGE`. Color
+accessors accept sequential, cyclic, diverging, ordinal, quantile, quantize, and
+threshold scales.
+
+```ts
+getFillColor: {sql: "SCALE_COLOR(temperature, DOMAIN(temperature), PALETTE('viridis'))"}
+```
+
+The domain resolves against the complete loaded table. When data changes, existing
+rows can receive new colors. Missing values are transparent.
 
 #### `dataTransform` (Function, optional) {#datatransform}
 
@@ -801,6 +815,15 @@ Used to propagate errors thrown in layers to the deck.gl error handling system. 
 
 - `error` (Error) - a JavaScript Error object
 - `message` (string, optional) - additional contextual description to amend the error message with
+
+#### `_getResolvedColorScales()` 🧪
+
+Returns a read-only map of accessor names to `ResolvedScale` objects. The type is
+available from `@deck.gl/core`. A scale descriptor provides the domain and color
+range, and `sample(value)` returns RGBA channels in `[0, 1]`. The method returns
+`undefined` before the first evaluation completes or on layers without SQL
+color accessors. During replacement, the method returns the scales for the
+previously applied colors. Call it after a deck redraw to read the latest scales.
 
 ### Layer Lifecycle Methods
 

@@ -5,15 +5,17 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
+import {ParquetLoader} from '@loaders.gl/tables/parquet';
+import parquetWorkerUrl from '@loaders.gl/tables/parquet/parquet-worker.js?url';
+import {isArrowTable} from '@math.gl/core/arrow';
 import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 
 import type {Color, MapViewState} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
 
-// Source data CSV
 const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/screen-grid/uber-pickup-locations.json'; // eslint-disable-line
+  'https://media.githubusercontent.com/media/visgl/deck.gl-data/ea4a0a0a3fa71ee94ed381ce2691431cca864f88/website/uber-pickups-nyc.parquet';
 
 const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -73.75,
@@ -35,17 +37,18 @@ const colorRange: Color[] = [
   [189, 0, 38, 255]
 ];
 
-type DataPoint = [longitude: number, latitude: number, count: number];
-
 export default function App({
   data = DATA_URL,
+  onDataLoad,
   cellSize = 20,
   gpuAggregation = true,
   aggregation = 'SUM',
   mapStyle = MAP_STYLE,
   device
 }: {
-  data?: string | DataPoint[];
+  data?: string;
+  /** Called with the number of rows after the Arrow table loads. */
+  onDataLoad?: (count: number) => void;
   cellSize?: number;
   gpuAggregation?: boolean;
   aggregation?: 'SUM' | 'MEAN' | 'MIN' | 'MAX';
@@ -53,12 +56,20 @@ export default function App({
   device?: Device;
 }) {
   const layers = [
-    new ScreenGridLayer<DataPoint>({
+    new ScreenGridLayer({
       id: 'grid',
+      // Sample row: {longitude: -72.0666, latitude: 42.1166, count: 1}
       data,
+      loaders: [ParquetLoader],
+      loadOptions: {parquet: {workerUrl: parquetWorkerUrl}},
+      onDataLoad: table => {
+        if (isArrowTable(table)) {
+          onDataLoad?.(table.numRows);
+        }
+      },
       opacity: 0.8,
-      getPosition: d => [d[0], d[1]],
-      getWeight: d => d[2],
+      getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
+      getWeight: {sql: 'count'},
       cellSizePixels: cellSize,
       colorRange,
       gpuAggregation,

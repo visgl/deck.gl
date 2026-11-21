@@ -70,12 +70,12 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/carto` | `ClusterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `H3TileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `HeatmapTileLayer` | ✅ | ❌ |
-| `@deck.gl/carto` | `PointLabelLayer` | ✅ | ❌ |
+| `@deck.gl/carto` | `PointLabelLayer` | ✅ | 🚧 |
 | `@deck.gl/carto` | `QuadbinTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `RasterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `VectorTileLayer` | ✅ | ❌ |
 
-`GeoJsonLayer` supports polygon, line, and text point rendering on WebGPU. `TextLayer` supports glyph rendering; text backgrounds and collision filtering still require WebGL.
+`GeoJsonLayer` supports polygon, line, and text point rendering on WebGPU. `TextLayer` supports glyph rendering and text backgrounds. The `PointLabelLayer` render suite covers label backgrounds and collision filtering on WebGPU.
 
 - `S2Layer`, `QuadkeyLayer`, and `GeohashLayer` inherit their WebGPU rendering from `PolygonLayer`, including extruded, stroked, and wireframe cells.
 - `H3HexagonLayer` supports both its high-precision `PolygonLayer` path and its instanced `ColumnLayer` path on WebGPU. 
@@ -121,7 +121,8 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 | --- | --- | --- |
 | Views | 🚧 | The core `project` and `project32` shader modules have WGSL ports, so standard view/projection paths should work. |
 | Picking | ✅ | `Deck` does **async** picking on WebGPU, including hover and click picking paths. |
-| Shader injection targets / layer extensions | 🚧 | Public extensions support WebGPU. Custom shaders need compatible hooks. |
+| Built-in layer extensions | ✅ | See the [extension compatibility table](#extensions). |
+| Custom layer shaders | 🚧 | To use extensions, declare compatible [WGSL shader hooks](./custom-layers/layer-extensions.md#webgpu-shader-plugins). |
 | GPU transforms | 🚧 | Underlying GPU transform APIs are evolving, but deck.gl still has transform-gated tests and no documented WebGPU support for transform-based workflows. |
 | Constant attributes | ✅  | `AttributeManager` now materializes constant attributes into full buffers on WebGPU as a compatibility path for layers that rely on constant accessors. |
 | Attribute transitions | 🚧 | Some layers disable transitions on WebGPU, and transition utilities still contain WebGL-specific buffer read paths. |
