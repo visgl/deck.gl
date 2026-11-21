@@ -1566,6 +1566,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // asynchronous device creation could happen after finalize() is called
       // TODO - createDevice should support AbortController?
       _reuseDevices: true,
+      // Deck owns the context of a device it creates, so `destroy()` releases it once no Deck
+      // renders to the canvas (see release-device-context). An app's `deviceProps` can override it.
+      ownsHandle: true,
       // tests can't handle WebGPU devices yet so we force WebGL2 unless overridden
       type: 'webgl',
       ...deviceProps,

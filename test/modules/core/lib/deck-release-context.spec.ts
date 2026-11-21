@@ -37,6 +37,7 @@ function attachCanvas(): HTMLCanvasElement {
 test('Deck#finalize releases the context of a canvas Deck created', async () => {
   const deck = await createDeck();
   const gl = getContext(deck);
+  expect(deck.device!.ownsHandle, 'Deck owns the context of a device it creates').toBe(true);
 
   deck.finalize();
   await nextTask();

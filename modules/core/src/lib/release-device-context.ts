@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-// Finalizing a Deck doesn't free its WebGL context: luma.gl leaves it to garbage collection, and
-// browsers cap the number of live contexts per page, dropping the oldest one first. These helpers
-// release the context of a device Deck created, once nothing can render to its canvas again.
+// Browsers cap the number of live WebGL contexts per page and drop the oldest one first, so a
+// finalized Deck must free its context instead of leaving it to garbage collection. Deck creates
+// its device with `ownsHandle: true`, so `device.destroy()` releases the context. These helpers
+// call it once nothing can render to the canvas again: a device reused by another Deck on the
+// same canvas shares the same context.
 
 import type {Device} from '@luma.gl/core';
 
@@ -69,7 +71,7 @@ function isInDocument(canvas: DeviceCanvas): boolean {
 }
 
 /**
- * Loses a created device once it has initialized. If a Deck still renders to its canvas, for
+ * Destroys a created device, releasing its context, once it has initialized. If a Deck still renders to its canvas, for
  * example one that was passed the device, the release waits until the last such Deck stops.
  * @param created The device to release.
  * @param canRelease Checked again just before the device is lost.
@@ -84,7 +86,7 @@ export function loseCreatedDevice(
         if (liveDecks.has(created.canvas)) {
           pendingReleases.set(created.canvas, release);
         } else if (!device.isLost && canRelease()) {
-          device.loseDevice();
+          device.destroy();
         }
       },
       () => {
@@ -101,7 +103,7 @@ export function loseCreatedDevice(
  * For components that render their own `<canvas>` and pass it to Deck, such as the React
  * `DeckGL` components. Call it right after `deck.finalize()` when the component unmounts. After
  * the current task, if the canvas is no longer in the document and no other Deck has started on
- * it, the device is lost. A remount that keeps the canvas in the document, such as React
+ * it, the device is destroyed and its context released. A remount that keeps the canvas in the document, such as React
  * StrictMode or `<Activity mode="hidden">`, is unaffected.
  *
  * Does nothing when the app passed its own `device` or `gl`, or when Deck created the canvas

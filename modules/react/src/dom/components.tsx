@@ -4,9 +4,15 @@
 // Copyright (c) Deckgl Fiber Renderer contributors
 
 import 'client-only';
-import {assert, type Deck, type View} from '@deck.gl/core';
+import {
+  _releaseCanvasContext as releaseCanvasContext,
+  assert,
+  type Deck,
+  type View
+} from '@deck.gl/core';
 import {
   createRoot,
+  roots,
   unmountAtNode,
   _RootErrorBoundary as RootErrorBoundary
 } from '../reconciler/index';
@@ -276,7 +282,14 @@ function createDeckGLComponent<Props, Instance extends DeckGLRenderer, MapT = ne
             // An app callback that throws (`onDeckChange`, a ref cleanup or a custom detach) must
             // not leave the root mounted and Deck running.
             overlay.current = null;
+            const deck = roots.get(rootElement)?.store.getState().deckgl;
             unmountAtNode(rootElement);
+            // React never reuses the <canvas> it rendered after unmount, so free the context Deck
+            // created for it once it leaves the document. Map overlays render to Deck's own canvas
+            // or the map's context.
+            if (deck && !isExternalOverlay && !config.canvas) {
+              releaseCanvasContext(deck as Deck);
+            }
           }
         };
       }

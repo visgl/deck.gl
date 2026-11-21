@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {describe, test, expect} from 'vitest';
 import {act, createElement, StrictMode} from 'react';
+import type {ComponentType} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import {DeckGL as LegacyDeckGL} from '@deck.gl/react/legacy';
 import {device as testDevice} from '@deck.gl/test-utils/vitest';
 
 /** Size of every DeckGL in these tests. */
@@ -17,7 +19,11 @@ function nextTask(): Promise<void> {
 }
 
 /** Renders a DeckGL and resolves once it has loaded. */
-async function renderDeckGL(props: Record<string, unknown> = {}, strict = false) {
+async function renderDeckGL(
+  Component: ComponentType<any>,
+  props: Record<string, unknown> = {},
+  strict = false
+) {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
@@ -25,39 +31,44 @@ async function renderDeckGL(props: Record<string, unknown> = {}, strict = false)
   const loaded = new Promise<void>(resolve => {
     onLoad = resolve;
   });
-  const element = createElement(DeckGL, {...SIZE, onLoad, ...props});
+  const element = createElement(Component, {...SIZE, onLoad, ...props});
   await act(() => root.render(strict ? createElement(StrictMode, null, element) : element));
   await loaded;
   const gl = container.querySelector('canvas')!.getContext('webgl2')!;
   return {root, container, gl};
 }
 
-test('DeckGL releases its context when it unmounts', async () => {
-  const {root, container, gl} = await renderDeckGL();
+describe.each([
+  ['DeckGL', DeckGL],
+  ['legacy DeckGL', LegacyDeckGL]
+] as [string, ComponentType<any>][])('%s', (_name, Component) => {
+  test('releases its context when it unmounts', async () => {
+    const {root, container, gl} = await renderDeckGL(Component);
 
-  await act(() => root.unmount());
-  container.remove();
-  await nextTask();
-  expect(gl.isContextLost()).toBe(true);
-});
+    await act(() => root.unmount());
+    container.remove();
+    await nextTask();
+    expect(gl.isContextLost()).toBe(true);
+  });
 
-test('DeckGL keeps its context through a StrictMode remount', async () => {
-  const {root, container, gl} = await renderDeckGL({}, true);
+  test('keeps its context through a StrictMode remount', async () => {
+    const {root, container, gl} = await renderDeckGL(Component, {}, true);
 
-  await nextTask();
-  expect(gl.isContextLost(), 'StrictMode finalized one Deck, but the canvas stayed').toBe(false);
+    await nextTask();
+    expect(gl.isContextLost(), 'StrictMode finalized one Deck, but the canvas stayed').toBe(false);
 
-  await act(() => root.unmount());
-  container.remove();
-  await nextTask();
-  expect(gl.isContextLost()).toBe(true);
-});
+    await act(() => root.unmount());
+    container.remove();
+    await nextTask();
+    expect(gl.isContextLost()).toBe(true);
+  });
 
-test('DeckGL never releases a device the app passed', async () => {
-  const {root, container} = await renderDeckGL({device: testDevice});
+  test('never releases a device the app passed', async () => {
+    const {root, container} = await renderDeckGL(Component, {device: testDevice});
 
-  await act(() => root.unmount());
-  container.remove();
-  await nextTask();
-  expect(testDevice.isLost).toBe(false);
+    await act(() => root.unmount());
+    container.remove();
+    await nextTask();
+    expect(testDevice.isLost).toBe(false);
+  });
 });
