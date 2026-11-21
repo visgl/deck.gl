@@ -199,7 +199,9 @@ export class WidgetManager {
         // Widget is new
         this._addWidget(widget);
       } else if (
-        // Widget placement changed
+        // Widget type or placement changed: replace the old widget, so the props of
+        // another widget type are never passed to it.
+        getWidgetType(oldWidget) !== getWidgetType(widget) ||
         oldWidget.viewId !== widget.viewId ||
         oldWidget.placement !== widget.placement
       ) {
@@ -324,4 +326,14 @@ export class WidgetManager {
       height: viewport.height
     };
   }
+}
+
+/**
+ * The type of a widget, used to decide whether a new widget with the same id can reuse
+ * the old instance. It is the class default id (`defaultProps.id`), which is unique per
+ * class. Comparing it instead of the constructor keeps widgets mounted across hot module
+ * reloads and works across duplicate copies of a package.
+ */
+function getWidgetType(widget: Widget): string | undefined {
+  return (widget.constructor as {defaultProps?: {id?: string}}).defaultProps?.id;
 }
