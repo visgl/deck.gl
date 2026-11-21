@@ -9,14 +9,14 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/pointclouds": "5.0.0-rc.1",
+    "@loaders.gl/pointclouds": "5.0.0-rc.2",
     "apache-arrow": "^21.2.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "deck.gl": "^9.4.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "@math.gl/core": "5.0.0-rc.2"
+    "@math.gl/core": "5.0.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",
