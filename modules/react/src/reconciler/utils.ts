@@ -251,12 +251,13 @@ function mergeEffects(jsxEffects: Effect[], passedEffects: Effect[] | undefined)
  * prop layers draw above JSX layers, and JSX views are merged with the `views` prop by id,
  * with the prop winning. JSX widgets and effects are merged with the `widgets` and `effects`
  * props the same way.
- * An external overlay receives views only when its root forwards them, as the Mapbox and
- * MapLibre roots do; other overlays keep only their `views` prop.
+ * An external overlay receives JSX views only when its root forwards them, as the Mapbox and
+ * MapLibre roots do; other overlays use only their `views` prop.
  *
  * A root with no views leaves deck.gl's `views` alone, as `@deck.gl/react` does, so a
- * widget such as `SplitterWidget` can set them. After the last view is removed, the root
- * sends `null` once, which restores deck.gl's default view.
+ * widget such as `SplitterWidget` can set them. After the last view is removed, whether a
+ * JSX view or the `views` prop, the root sends `null` once, which restores deck.gl's default
+ * view.
  *
  * @param props - The root's passed descriptors, and whether it is an external overlay that
  *   forwards views
@@ -276,11 +277,14 @@ export function combineRootDescriptors(
     widgets: mergeWidgets(jsx.widgets, props._passedWidgets)
   };
 
-  if (!props.isExternalOverlay || props.forwardViews) {
-    const views = mergeViews(jsx.views, props._passedViews);
-    if (views || sentViews) {
-      descriptors.views = views;
-    }
+  // An overlay that does not forward JSX views still owns its `views` prop, so it follows the
+  // same rule with that prop alone.
+  const views =
+    !props.isExternalOverlay || props.forwardViews
+      ? mergeViews(jsx.views, props._passedViews)
+      : (props._passedViews ?? null);
+  if (views || sentViews) {
+    descriptors.views = views;
   }
 
   return descriptors;
