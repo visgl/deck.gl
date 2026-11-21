@@ -88,7 +88,9 @@ test('TripsLayer#WebGPU shader extends PathLayer', () => {
   expect(source).not.toContain('vDashSegment');
   // With dashes, trip time follows the source segment even where camera clipping shortens it
   expect(dashSource).toContain('@location(8) vDashSegment: vec2<f32>');
-  expect(dashSource).toContain('vec2<f32>(varyings.vPathPosition.x, varyings.vDashSegment.x)');
+  expect(dashSource.replace(/\s+/g, ' ')).toContain(
+    'DECKGL_FILTER_PATH_COLOR_VERTEX( &varyings.vColor, vec2<f32>(varyings.vPathPosition.x, varyings.vDashSegment.x), varyings.vDashSegment.y );'
+  );
   expect(dashSource).not.toContain(
     'DECKGL_FILTER_PATH_COLOR_VERTEX(&varyings.vColor, varyings.vPathPosition, varyings.vPathLength)'
   );
