@@ -178,9 +178,7 @@ jobs:
       - name: Install dependencies
         run: yarn bootstrap
 
-      - name: Build packages
-        run: yarn build
-
+      # test-website builds the packages from source before building the site.
       - name: Test website build
         run: |
           yarn test-website
