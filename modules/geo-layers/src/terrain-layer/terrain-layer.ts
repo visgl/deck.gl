@@ -7,7 +7,7 @@ import {
   CompositeLayer,
   CompositeLayerProps,
   DefaultProps,
-  _GlobeViewport as GlobeViewport,
+  GlobeViewport,
   Layer,
   LayersList,
   log,

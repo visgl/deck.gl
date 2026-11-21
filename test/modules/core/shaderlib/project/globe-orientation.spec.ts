@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import {
-  _GlobeViewport as GlobeViewport,
+  GlobeViewport,
   WebMercatorViewport,
   fp64LowPart,
   project,

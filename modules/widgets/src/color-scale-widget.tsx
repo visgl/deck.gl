@@ -45,6 +45,7 @@ const SCALE_TYPE_LABELS: Record<ResolvedScale['descriptor']['type'], string> = {
   sqrt: 'Square root',
   log: 'Logarithmic',
   symlog: 'Symmetric log',
+  cyclic: 'Cyclic',
   sequential: 'continuous',
   diverging: 'Diverging',
   ordinal: 'Categorical',
@@ -176,6 +177,41 @@ function ColorLegend({
   const [focusedBin, setFocusedBin] = useState<{index: number; panel: HTMLElement} | null>(null);
   const activeBin = hoveredBin ?? focusedBin;
   const {domain, thresholds, type} = scale.descriptor;
+  const {range} = scale.descriptor;
+  if (range.type === 'numeric') {
+    const format = formatScaleNumbers([...domain.map(Number), ...range.values], precision);
+    return (
+      <div className="deck-color-scale-domain">
+        {domain.map(value => {
+          const sample = scale.sample(value);
+          return (
+            <span key={String(value)}>
+              {format(Number(value))} → {typeof sample === 'number' ? format(sample) : '–'}
+            </span>
+          );
+        })}
+      </div>
+    );
+  }
+  if (type === 'threshold') {
+    const breaks = domain.map(Number);
+    const format = formatScaleNumbers(breaks, precision);
+    return (
+      <ul>
+        {range.values.map((color, index) => (
+          <li key={index}>
+            <span className="deck-color-scale-swatch" style={{backgroundColor: cssColor(color)}} />
+            {index === 0
+              ? `< ${format(breaks[0])}`
+              : index === breaks.length
+                ? `≥ ${format(breaks[index - 1])}`
+                : `${format(breaks[index - 1])} – ${format(breaks[index])}`}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
   if (type === 'ordinal') {
     return (
       <ul className={categoricalLayout === 'wrap' ? 'deck-color-scale-categories-wrap' : undefined}>
@@ -293,7 +329,7 @@ function ColorLegend({
 }
 
 /** Experimental widget that shows SQL color scales for currently visible layers. */
-export class _ColorScaleWidget extends Widget<ColorScaleWidgetProps> {
+export class _LegendWidget extends Widget<ColorScaleWidgetProps> {
   /** Default identifier and accessible heading. */
   static defaultProps = {
     ...Widget.defaultProps,

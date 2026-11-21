@@ -2,9 +2,9 @@
 
 `DeckGL` is the main interface to deck.gl for React applications. `DeckGL` is a React component that takes a list of deck.gl layer instances and a view state, and renders those layers on a transparent canvas that can be used as an overlay over other components like maps.
 
-Make sure to read the [Using deck.gl with React](../../get-started/using-with-react.md) article.
+Make sure to read the [Using deck.gl with React](../../../get-started/using-with-react.md) article.
 
-The `DeckGL` class is a React wrapper of the [Deck](../core/deck.md) JavaScript class which exposes essentially the same props. The `Deck` class should not be used directly in React applications.
+The `DeckGL` class is a React wrapper of the [Deck](../../core/deck.md) JavaScript class which exposes essentially the same props. The `Deck` class should not be used directly in React applications.
 
 
 ## Usage
@@ -47,7 +47,7 @@ const App = (data) => (
 
 ## Properties
 
-`DeckGL` accepts all [Deck](../core/deck.md#properties) properties, with these additional semantics:
+`DeckGL` accepts all [Deck](../../core/deck.md#properties) properties, with these additional semantics:
 
 ### React Context
 
@@ -55,12 +55,12 @@ const App = (data) => (
 
 A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) component. If supplied, will be rendered as the ancestor to all children. The passed through context contains the following values:
 
-- `viewport` ([Viewport](../core/viewport.md)) - the current viewport
+- `viewport` ([Viewport](../../core/viewport.md)) - the current viewport
 - `container` (DOMElement) - the DOM element containing the deck canvas
 - `eventManager` ([EventManager](https://visgl.github.io/mjolnir.js/docs/api-reference/event-manager))
-- `onViewStateChange` ([onViewStateChange](../core/deck.md#onviewstatechange)) - the view state change handler 
-- `deck` ([Deck](../core/deck.md)) - the current deck instance, if present
-- `widgets` ([Widget](../core/widget.md)[]) - the current jsx widgets, if any
+- `onViewStateChange` ([onViewStateChange](../../core/deck.md#onviewstatechange)) - the view state change handler 
+- `deck` ([Deck](../../core/deck.md)) - the current deck instance, if present
+- `widgets` ([Widget](../../core/widget.md)[]) - the current jsx widgets, if any
 
 ```jsx
 /// Example using react-map-gl v6 controls with deck.gl
@@ -188,7 +188,7 @@ Additional Notes:
 
 ## Methods
 
-All [Deck](../core/deck.md#methods) methods are available on the `DeckGL` component, but not all of them can be explicitly called. For example, to rerender your component, you can pass updated props to `DeckGL` component directly, while you should call `setProps` with new props in `Deck`. 
+All [Deck](../../core/deck.md#methods) methods are available on the `DeckGL` component, but not all of them can be explicitly called. For example, to rerender your component, you can pass updated props to `DeckGL` component directly, while you should call `setProps` with new props in `Deck`. 
 
 The public methods you can call explicitly list below:
 
