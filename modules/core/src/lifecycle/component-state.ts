@@ -159,6 +159,21 @@ export default class ComponentState<ComponentT extends Component> {
     return value;
   }
 
+  /** Projects a resolved source value into the value exposed by the component. */
+  protected _projectValue(_propName: string, value: any): any {
+    return value;
+  }
+
+  /** Refreshes the projection without restarting an active request or stream. */
+  protected _refreshProjection(propName: string, source: unknown) {
+    const prop = this.asyncProps[propName];
+    if (prop) {
+      const value = this._projectValue(propName, source);
+      this._freezeAsyncOldProps();
+      prop.resolvedValue = value;
+    }
+  }
+
   /** Reports the accumulated value after an accepted streamed batch. */
   protected _onProgress(propName: string, value: unknown) {} // eslint-disable-line @typescript-eslint/no-empty-function
 
@@ -236,7 +251,7 @@ export default class ComponentState<ComponentT extends Component> {
         asyncProp,
         propName === 'data' ? unwrapLoaderArrowResult(value) : value
       );
-      asyncProp.resolvedValue = value;
+      asyncProp.resolvedValue = this._projectValue(propName, value);
       asyncProp.pendingLoadCount++;
       asyncProp.resolvedLoadCount = asyncProp.pendingLoadCount;
     }
@@ -251,11 +266,11 @@ export default class ComponentState<ComponentT extends Component> {
       // Save the current value before overwriting so that diffProps can access both
       this._freezeAsyncOldProps();
 
-      asyncProp.resolvedValue = value;
+      asyncProp.resolvedValue = this._projectValue(propName, value);
       asyncProp.resolvedLoadCount = loadCount;
 
       // Call callback to inform listener
-      this.onAsyncPropUpdated(propName, value);
+      this.onAsyncPropUpdated(propName, asyncProp.resolvedValue);
     }
   }
 
@@ -285,7 +300,7 @@ export default class ComponentState<ComponentT extends Component> {
           );
           this._setAsyncPropValue(propName, data, loadCount);
           if (this.component && loadCount === asyncProp.pendingLoadCount) {
-            this._onResolve(propName, data);
+            this._onResolve(propName, this.getAsyncProp(propName));
           }
         })
         .catch(error => {
@@ -319,7 +334,6 @@ export default class ComponentState<ComponentT extends Component> {
     let data: any[] = [];
     let count = 0;
     let arrowBatches: import('apache-arrow').RecordBatch[] = [];
-    let lastResult: unknown = data;
     let chunkKind: 'rows' | 'arrow' | undefined;
 
     try {
@@ -364,7 +378,6 @@ export default class ComponentState<ComponentT extends Component> {
             batches[0]?.schema ?? normalizeArrowSchema(arrow.schema, arrowRuntime),
             arrowBatches
           );
-          lastResult = table;
           this._setAsyncPropValue(propName, table, loadCount);
           if (this.component && loadCount === asyncProp.pendingLoadCount) {
             this._onProgress(propName, table);
@@ -399,7 +412,6 @@ export default class ComponentState<ComponentT extends Component> {
         });
 
         count = data.length;
-        lastResult = data;
         this._setAsyncPropValue(propName, data, loadCount);
         if (this.component && loadCount === asyncProp.pendingLoadCount) {
           this._onProgress(propName, data);
@@ -411,7 +423,7 @@ export default class ComponentState<ComponentT extends Component> {
         this._setAsyncPropValue(propName, data, loadCount);
       }
       if (this.component && loadCount === asyncProp.pendingLoadCount) {
-        this._onResolve(propName, lastResult);
+        this._onResolve(propName, this.getAsyncProp(propName));
       }
     } catch (error) {
       if (this.component && loadCount === asyncProp.pendingLoadCount) {

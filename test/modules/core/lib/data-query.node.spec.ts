@@ -171,3 +171,61 @@ test('URL queries use a custom fetch and refresh when it changes', async () => {
   await vi.waitFor(() => expect(state.getAsyncProp('data').get(0)?.value).toBe(3));
   expect(replacement).toHaveBeenCalledOnce();
 });
+
+test('reactive bindings rerun only the dependent query stage', async () => {
+  const data = tableFromArrays({value: [1, 2, 3]});
+  const fetch = vi.fn(async () => data);
+  const makeLayer = (lower: number, upper: number, unused = 0) => {
+    const layer = new QueryLayer({
+      data: 'points.arrow',
+      fetch,
+      dataQuery: 'SELECT * FROM data WHERE value >= :lower',
+      reactiveQuery: 'SELECT * FROM data WHERE value <= :upper',
+      reactiveQueryParameters: {lower, upper, unused}
+    });
+    Object.assign(layer, {context: {}});
+    return layer;
+  };
+  const layer = makeLayer(1, 2);
+  const state = new LayerState({attributeManager: null, layer});
+  const values = () => Array.from(state.getAsyncProp('data').getChild('value'));
+  state.setAsyncProps(layer.props);
+  await vi.waitFor(() => expect(values()).toEqual([1, 2]));
+  const first = state.getAsyncProp('data');
+  state.setAsyncProps(makeLayer(1, 2, 99).props);
+  expect(state.getAsyncProp('data')).toBe(first);
+  state.setAsyncProps(makeLayer(1, 3).props);
+  expect(values()).toEqual([1, 2, 3]);
+  expect(fetch).toHaveBeenCalledTimes(1);
+  state.setAsyncProps(makeLayer(2, 3).props);
+  await vi.waitFor(() => expect(values()).toEqual([2, 3]));
+  expect(fetch).toHaveBeenCalledTimes(2);
+});
+
+test('layer props expose the current reactive result across layer replacements', async () => {
+  const device = new NullDevice({});
+  const manager = new LayerManager(device, {viewport: new Viewport()});
+  const data = tableFromArrays({value: [1, 2]});
+  const makeLayer = (minimum: number, reactiveQuery: string | null) =>
+    new QueryLayer({
+      id: 'reactive',
+      data,
+      reactiveQuery,
+      reactiveQueryParameters: {minimum}
+    });
+  const sql = 'SELECT * FROM data WHERE value >= :minimum';
+  try {
+    const first = makeLayer(1, sql);
+    manager.setLayers([first]);
+    await vi.waitFor(() => expect((first.props.data as typeof data).numRows).toBe(2));
+    const next = makeLayer(2, sql);
+    manager.setLayers([next]);
+    expect((next.props.data as typeof data).get(0)?.value).toBe(2);
+    const cleared = makeLayer(2, null);
+    manager.setLayers([cleared]);
+    expect(cleared.props.data).toBe(data);
+  } finally {
+    manager.finalize();
+    device.destroy();
+  }
+});

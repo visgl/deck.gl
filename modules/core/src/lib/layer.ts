@@ -108,6 +108,9 @@ const defaultProps: DefaultProps<LayerProps> = {
     optional: true
   },
   query: null,
+  dataQuery: null,
+  reactiveQuery: null,
+  reactiveQueryParameters: null,
   sqlFunctions: {type: 'array', value: [], compare: true},
   dataTransform: {type: 'function', value: null, optional: true},
   _dataLoadOptions: 'auto',
