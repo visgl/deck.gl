@@ -111,6 +111,7 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
     }
     /** Selected field and declared encoding. */
     const geometry = resolveGeoArrowGeometry(data, props.getGeometry, props.geometryType);
+    /** Whether the geometry encoding supports native rendering before styling is considered. */
     const native = [
       'geoarrow.point',
       'geoarrow.linestring',
