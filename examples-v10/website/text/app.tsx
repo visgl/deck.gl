@@ -4,10 +4,12 @@
 
 /* eslint-disable max-len */
 import React from 'react';
-import {useState, useCallback} from 'react';
+import {useMemo, useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 import type {Device} from '@luma.gl/core';
 import {MapView} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
@@ -58,6 +60,7 @@ export default function App({
   fontSize?: number;
   mapStyle?: string;
 }) {
+  const widgets = useMemo(() => [new LoadingWidget()], []);
   const [zoom, setZoom] = useState<number>(INITIAL_VIEW_STATE.zoom);
 
   const onViewStateChange = useCallback(({viewState}) => {
@@ -116,6 +119,7 @@ export default function App({
 
   return (
     <DeckGL
+      widgets={widgets}
       device={device}
       views={new MapView({repeat: true})}
       layers={[textLayer]}
