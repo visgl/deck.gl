@@ -13631,15 +13631,15 @@
         },
         "stencilPassOperation": {
           "$ref": "#/definitions/StencilOperation",
-          "description": "The StencilOperation performed if the fragment stencil comparison test described by compare fails."
+          "description": "The StencilOperation performed if the fragment stencil comparison test described by stencilCompare and the depth comparison described by depthCompare both pass."
         },
         "stencilFailOperation": {
           "$ref": "#/definitions/StencilOperation",
-          "description": "The GPUStencilOperation performed if the fragment depth comparison described by depthCompare fails."
+          "description": "The StencilOperation performed if the fragment stencil comparison test described by stencilCompare fails."
         },
         "stencilDepthFailOperation": {
           "$ref": "#/definitions/StencilOperation",
-          "description": "The GPUStencilOperation performed if the fragment stencil comparison test described by compare passes."
+          "description": "The StencilOperation performed if the fragment stencil comparison test passes but the depth comparison described by depthCompare fails."
         },
         "cullMode": {
           "$ref": "#/definitions/CullMode",
