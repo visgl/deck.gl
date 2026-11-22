@@ -58,6 +58,7 @@ import type Viewport from '../viewports/viewport';
 import type {EventManagerOptions, MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 import type {TypedArrayManagerOptions} from '../utils/typed-array-manager';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
+import type {TransitionTarget} from '../controllers/transition-manager';
 import type {PickingInfo} from './picking/pick-info';
 import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
@@ -914,6 +915,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       unproject3D: true,
       canvasId: viewId ? this.viewManager?.getCanvasId(viewId) : undefined
     });
+  }
+
+  /** Experimental
+   * Returns the destination of the active view state transition of a view, or null.
+   * Layers can use it to load data for the end viewport while the transition runs.
+   */
+  _getTransitionTarget(viewId: string): (TransitionTarget & {viewport: Viewport}) | null {
+    return this.viewManager?.getTransitionTarget(viewId) ?? null;
   }
 
   /** Experimental

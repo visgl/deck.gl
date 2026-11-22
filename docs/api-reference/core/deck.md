@@ -735,6 +735,27 @@ Returns:
 
 * An array of [Viewport](./viewport.md) instances.
 
+#### `_getTransitionTarget` {#_gettransitiontarget}
+
+Experimental. Get the destination of the active view state transition of a view.
+
+```js
+deck._getTransitionTarget(viewId)
+```
+
+Parameters:
+
+* `viewId` (string) - id of a view with a controller.
+
+Returns:
+
+* `null` if the view has no controller or no transition runs. Otherwise an object with these fields:
+  + `viewState` (object) - the view state at the end of the transition, normalized like the view states that the transition emits.
+  + `viewport` ([Viewport](./viewport.md)) - the viewport of the view at the end of the transition.
+  + `remainingTime` (number) - milliseconds of timeline time until the transition ends.
+
+A transition stops when the user interacts with the view, or when a new view state starts a new transition. The returned target then changes or becomes `null`. Transitions that a base map runs (for example in the interleaved mode of a map integration) are not visible here.
+
 #### `setProps` {#setprops}
 
 Updates (partial) properties.
