@@ -27,7 +27,7 @@ coordinate validity or limits on altitude.
 
 The goal of `GlobeView` is to provide a generic solution to rendering and navigating data in the 3D space.
 
-- Above zoom 12, `GlobeView` renders with a [WebMercatorViewport](./web-mercator-viewport.md), at the same precision as `MapView`. Below zoom 12, positions are projected with 32-bit floats; software renderers such as SwiftShader can place them hundreds of meters off Set the experimental [`_cameraRelative`](#_camerarelative) to keep the globe at every zoom level.
+- Above zoom 12, `GlobeView` renders with a [WebMercatorViewport](./web-mercator-viewport.md), at the same precision as `MapView`. Below zoom 12, positions are projected with 32-bit floats; software renderers such as SwiftShader can place them hundreds of meters off. Set the experimental [`_cameraRelative`](#_camerarelative) to keep the globe at every zoom level.
 - With `_cameraRelative`, the TerrainExtension lookups and the points along an `ArcLayer` arc are not camera-relative yet.
 - Supports layers in `'lnglat'` (the default value of the `coordinateSystem` prop) and `'meter-offsets'` coordinates.
 - Polygons, paths and tiles follow the curve of the globe only when the view's `resolution` is set, e.g. `new GlobeView({resolution: 36})` for 10° steps. With the default `0`, their edges are straight.
