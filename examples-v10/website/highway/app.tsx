@@ -11,8 +11,17 @@ import '@deck.gl/widgets/stylesheet.css';
 import type {Device} from '@luma.gl/core';
 import {isArrowTable} from '@math.gl/core/arrow';
 import {GeoArrowLayer} from '@deck.gl/proposals/layers';
-import {Field, FixedSizeList, Float32, Uint8, vectorFromArray, type Table} from 'apache-arrow';
-import {scaleLinear, scaleThreshold} from 'd3-scale';
+import {
+  Field,
+  FixedSizeList,
+  Float32,
+  Uint8,
+  tableFromArrays,
+  vectorFromArray,
+  type Table
+} from 'apache-arrow';
+import {scaleThreshold} from 'd3-scale';
+import {queryArrowSQL} from '@math.gl/sql/query';
 import {GeoParquetLoader} from '@loaders.gl/tables/parquet';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {load} from '@loaders.gl/core';
@@ -41,8 +50,6 @@ export const COLOR_SCALE = scaleThreshold<number, Color>()
     [215, 48, 39],
     [168, 0, 0]
   ]);
-
-const WIDTH_SCALE = scaleLinear().clamp(true).domain([0, 200]).range([10, 2000]);
 
 const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 38,
@@ -183,30 +190,36 @@ export default function App({
     if (!roadTable) {
       return null;
     }
-    /** RGBA bytes for each road. */
-    const colors: number[][] = [];
-    /** Road widths in meters for the selected year. */
-    const widths = new Float32Array(roadTable.numRows);
-    /** Fatality totals keyed by road for the selected year. */
     const roadFatalities = fatalities[year];
-    /** Crash counts keyed by road for the selected year. */
     const roadIncidents = incidents[year];
-    let index = 0;
-    for (const road of roadTable) {
-      /** Road key shared by the geometry and accident datasets. */
-      const key = getKey(road);
-      /** Road color based on fatalities per 1,000 miles. */
-      const color = roadFatalities
-        ? COLOR_SCALE(((roadFatalities[key] || 0) / road.length) * 1000)
-        : [200, 200, 200];
-      colors.push([color[0], color[1], color[2], 255]);
-      widths[index++] = roadIncidents
-        ? WIDTH_SCALE(((roadIncidents[key] || 0) / road.length) * 1000)
-        : 10;
+    if (!roadFatalities || !roadIncidents) {
+      return null;
     }
+
+    // Keep the lookup aligned to the GeoArrow geometry, including roads with no accidents.
+    const rows = tableFromArrays({
+      length: roadTable.getChild('length')!,
+      fatalities: Float64Array.from(roadTable, road => roadFatalities[getKey(road)] || 0),
+      incidents: Float64Array.from(roadTable, road => roadIncidents[getKey(road)] || 0)
+    });
+    const styles = queryArrowSQL(
+      `\
+        SELECT fatalities * 1000 / length AS fatality_rate,
+          CASE
+            WHEN incidents <= 0 THEN 10
+            WHEN incidents >= length / 5 THEN 2000
+            ELSE 10 + 9950 * incidents / length
+          END AS width
+        FROM roads`,
+      new Map([['roads', rows]])
+    );
+    const colors = Array.from(styles.getChild('fatality_rate')!, rate => {
+      const [red, green, blue] = COLOR_SCALE(Number(rate));
+      return [red, green, blue, 255];
+    });
     return {
       colors: vectorFromArray(colors, new FixedSizeList(4, new Field('channel', new Uint8()))),
-      widths: vectorFromArray(widths, new Float32())
+      widths: vectorFromArray(Float32Array.from(styles.getChild('width')!, Number), new Float32())
     };
   }, [roadTable, year, fatalities, incidents]);
 
