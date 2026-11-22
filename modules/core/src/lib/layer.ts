@@ -747,9 +747,20 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
             request.pending = false;
             layer.setNeedsUpdate();
             layer.raiseError(error, 'evaluating SQL accessors');
+            layer.setChangeFlags({dataChanged: 'SQL accessor evaluation failed'});
           }
         }
       );
+  }
+
+  /** Returns whether the caller supplied a SQL expression for this accessor. */
+  protected hasAccessorQuery(name: string): boolean {
+    return Boolean(this.props[ACCESSOR_QUERIES_SYMBOL]?.[name]);
+  }
+
+  /** Returns the current row-aligned SQL accessor results with their Arrow field metadata. */
+  protected getAccessorQueryTable() {
+    return this.internalState?.accessorQueries?.table;
   }
 
   /**

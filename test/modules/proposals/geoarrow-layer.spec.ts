@@ -7,6 +7,7 @@ import {ClipExtension} from '@deck.gl/extensions';
 import {Matrix4} from '@math.gl/core/matrix';
 import {device as webglDevice} from '@deck.gl/test-utils/vitest';
 import {load} from '@loaders.gl/core';
+import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
 import {convertGeoArrowGeometry} from '@loaders.gl/core/geoarrow';
 import {GeoJSONLoader} from '@loaders.gl/tables/geojson';
 import {Buffer, Texture} from '@luma.gl/core';
@@ -46,7 +47,8 @@ const encodings = [
   'native',
   'native-line',
   'separated',
-  'styled'
+  'styled',
+  'centroid'
 ] as const;
 
 for (const backend of ['webgl', 'webgpu'] as const) {
@@ -109,6 +111,17 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             data: new URL('./fixtures/geoarrow-polygon.geojson', import.meta.url).href,
             polygon: 'native polygon'
           },
+          centroid: {
+            data:
+              encoding === 'centroid'
+                ? (load(
+                    new URL('./fixtures/geoarrow-polygon.geojson', import.meta.url).href,
+                    GeoJSONLoader,
+                    {core: {worker: false}, geoarrow: {encodingPreference: 'optimized'}}
+                  ) as Promise<Table>)
+                : source,
+            polygon: 'native polygon'
+          },
           native: {
             data: new URL('./fixtures/geoarrow-polygon.geojson', import.meta.url).href,
             polygon: 'native polygon'
@@ -161,6 +174,11 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             modelMatrix: new Matrix4([1, 0, 0, 0, 0, 1, 0, 0, 0, -0.5, 0.05, 0, 0, 0, 0, 1])
           }),
           colors: [255, 0, 0, 255],
+          ...(encoding === 'centroid' && {
+            getGeometry: {sql: 'ST_Centroid(geometry)'},
+            sqlFunctions: POSTGIS_SPATIAL_FUNCTIONS,
+            getRadius: 6
+          }),
           widths: 2,
           widthScale: 4,
           pickable: true
@@ -199,7 +217,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         }
         const [pickX, pickY] = deck.getViewports()[0].project([0, 0]);
         const info = await deck.pickObjectAsync({x: Math.round(pickX), y: Math.round(pickY)});
-        expect(info?.index).toBe(native || styled ? 0 : 1);
+        expect(info?.index).toBe(native || styled || encoding === 'centroid' ? 0 : 1);
         expect(info?.object.label).toBe(polygon);
         if (nativePolygon) {
           expect(layer.getSubLayers()[0]?.constructor.name).toBe('ArrowSolidPolygonLayer');
@@ -268,6 +286,22 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           const line = await deck.pickObjectAsync({x: Math.round(x), y: Math.round(y)});
           expect(line?.index).toBe(2);
           expect(line?.object.label).toBe(lineLabel);
+        }
+        expect(errors).toEqual([]);
+        if (encoding === 'centroid') {
+          const nativeQuery = layer.clone({getGeometry: {sql: 'geometry'}});
+          deck.setProps({layers: [nativeQuery]});
+          await expect
+            .poll(() => nativeQuery.getSubLayers()[0]?.constructor.name)
+            .toBe('ArrowSolidPolygonLayer');
+          await expect
+            .poll(async () => (await deck.pickObjectAsync({x: 32, y: 32}))?.object.label)
+            .toBe(polygon);
+          const failedLayer = nativeQuery.clone({getGeometry: {sql: 'missing_geometry'}});
+          deck.setProps({layers: [failedLayer]});
+          await expect.poll(() => errors.length).toBe(1);
+          await expect.poll(() => failedLayer.getSubLayers()).toHaveLength(0);
+          errors.length = 0;
         }
         const emptyLayer = new GeoArrowLayer({id: 'geometry', data: null});
         deck.setProps({layers: [emptyLayer]});

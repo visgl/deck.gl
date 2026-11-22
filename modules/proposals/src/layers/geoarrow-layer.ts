@@ -4,6 +4,7 @@
 
 import {
   CompositeLayer,
+  type DefaultProps,
   type GetPickingInfoParams,
   type Layer,
   type LayerProps,
@@ -42,7 +43,7 @@ export type GeoArrowLayerProps = Omit<LayerProps, 'data'> &
     /** A GeoArrow table or batch, or a URL or promise that resolves to one. */
     data?: Table | RecordBatch | string | Promise<Table | RecordBatch> | null;
     /** Geometry column. Defaults to the declared primary geometry or first GeoArrow field. */
-    getGeometry?: string;
+    getGeometry?: string | {readonly sql: string};
     /** Explicit geometry encoding when extension metadata is absent. */
     geometryType?: GeoArrowLayerGeometryType;
     /** Point radius column or constant. */
@@ -83,6 +84,10 @@ export type GeoArrowLayerProps = Omit<LayerProps, 'data'> &
 export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
   static override layerName = 'GeoArrowLayer';
 
+  static override defaultProps: DefaultProps<GeoArrowLayerProps> = {
+    getGeometry: {type: 'accessor', value: '', arrow: true}
+  };
+
   declare state: {
     /** Native geometry with the layout required by the renderer. */
     renderData?: Table | RecordBatch | null;
@@ -114,7 +119,19 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       return;
     }
     /** Selected field and declared encoding. */
-    const geometry = resolveGeoArrowGeometry(data, props.getGeometry, props.geometryType);
+    const computed = this.getAccessorQueryTable();
+    const computedGeometry = computed?.schema.fields.find(field => field.name === 'getGeometry');
+    if (this.hasAccessorQuery('getGeometry') && !computedGeometry) {
+      this.setState({geometry: null, features: null, renderData: null});
+      return;
+    }
+    const columnName = typeof props.getGeometry === 'string' ? props.getGeometry : undefined;
+    const geometryData = computedGeometry ? computed! : data;
+    const geometry = resolveGeoArrowGeometry(
+      geometryData,
+      computedGeometry?.name ?? columnName,
+      props.geometryType
+    );
     /** Whether the geometry encoding supports native rendering before styling is considered. */
     const native = [
       'geoarrow.point',
@@ -124,12 +141,17 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
     ].includes(geometry.geometryType);
     /** Prepared renderer input stays columnar when the selected renderer supports it. */
     const useNative = native && !this.usesGeoJsonRenderer(props, geometry.geometryType);
+    /** Native children need the computed geometry alongside the original style columns. */
+    const nativeData =
+      useNative && computedGeometry
+        ? ('batches' in data ? data : new Table(data.schema, [data])).assign(computed!)
+        : data;
     this.setState({
       geometry,
-      renderData: useNative ? this.prepareNativeGeometry(data, geometry) : data,
+      renderData: useNative ? this.prepareNativeGeometry(nativeData, geometry) : data,
       features: useNative
         ? null
-        : makeGeoArrowFeatures(data, geometry.columnName, geometry.geometryType)
+        : makeGeoArrowFeatures(geometryData, geometry.columnName, geometry.geometryType)
     });
   }
 
