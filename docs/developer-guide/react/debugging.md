@@ -35,9 +35,9 @@ The `debug` prop on `DeckGL` is passed to deck.gl unchanged. It does not turn on
 
 ## Layers that rebuild on every render
 
-If `Initializing` and `Finalizing` appear for the same layer on every render, deck.gl can't match it with its previous version. Usually the layer has no stable `id`. deck.gl matches layers by `id`, so a missing or changing one rebuilds the layer and its GPU resources every time.
+If `Initializing` and `Finalizing` appear for the same layer on every render, deck.gl can't match it with its previous version. Usually the layer's `id` changes between renders. deck.gl matches layers by `id`, so a changing one rebuilds the layer and its GPU resources every time.
 
-Outside production builds, React Fiber warns `ScatterplotLayer needs a stable id` when a layer or view keeps deck.gl's default id. deck.gl warns `Multiple new layers with same id` when two layers share one. See [Native elements](../../api-reference/react/native-elements.md).
+A layer without an `id` gets one from its place in the React tree. In a list without keys, inserting or removing an item moves those ids, so the layers rebuild or take over each other's state. Outside production builds, the renderer warns `Two layers share the id ...` when two layers reach deck.gl with one id, naming both, and deck.gl warns `Multiple new layers with same id`. See [Ids](../../api-reference/react/components.md#ids).
 
 ## React DevTools
 

@@ -33,7 +33,9 @@ Without a `canvas` prop, `DeckGL` renders a wrapper and canvas like `@deck.gl/re
 ## 4. Add layers
 
 Import a layer component from the subpath named after its deck.gl module, and pass it the layer's
-props. deck.gl matches layers by `id`, so give each one a stable, unique ID.
+props. deck.gl matches layers by `id`. A layer without one gets an id from its place in the React
+tree, so give layers in a changing list a `key`, and give an `id` to any layer that other code
+refers to. See [Ids](../../api-reference/react/components.md#ids).
 
 ```tsx
 import {DeckGL} from '@deck.gl/react';

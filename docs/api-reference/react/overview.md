@@ -57,7 +57,8 @@ and [Native elements](native-elements.md).
 
 The renderer flattens the committed tree into deck.gl's `layers`, `views`, `widgets` and `effects`
 arrays. Nesting a layer inside a view does not assign the layer to that view: use a layer filter
-for view-specific layers, and give every layer and view a stable, explicit `id`. The root
+for view-specific layers. Elements without an `id` get one from their place in the tree; see
+[When you need an id](./components.md#when-you-need-an-id). The root
 `DeckGL` owns one standalone `Deck`; import `/mapbox`, `/maplibre` or `/google-maps` for a map overlay.
 
 ## Installation

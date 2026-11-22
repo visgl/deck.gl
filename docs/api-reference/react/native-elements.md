@@ -44,7 +44,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 />;
 ```
 
-Use a stable, unique `id` for every layer. deck.gl uses IDs to compare new descriptors with prior descriptors. Outside production builds, the renderer warns about a missing layer ID, and deck.gl warns when two layers share one.
+deck.gl matches each new layer with the previous one that has the same `id`. A layer without an `id` gets one from its place in the React tree. See [Ids](./components.md#ids).
 
 The `layer` prop is intentionally an instance rather than a set of JSX props. Use the layer class from its deck.gl package for its full, typed property API. For example, import `ScatterplotLayer` from `@deck.gl/layers`, not from the native React Fiber package.
 
@@ -58,7 +58,7 @@ import {MapView} from '@deck.gl/core';
 <deckView view={new MapView({id: 'main-map'})} />;
 ```
 
-Give every view an explicit ID. Outside production builds, the renderer warns when a view has no ID or uses deck.gl's default `unknown` ID.
+A view without an `id` gets one from its place in the React tree. Give a view an explicit `id` when a view state, a widget's `viewId` or a `layerFilter` refers to it. See [Ids](./components.md#ids).
 
 ## `<deckWidget>`
 
@@ -113,7 +113,7 @@ import {vignette} from '@luma.gl/effects';
 </DeckGL>;
 ```
 
-deck.gl matches effects by ID, as it does widgets. Rendering a new effect instance with the same ID updates the mounted effect's props instead of adding another one, so creating the instance during render is fine. A `LightingEffect` always has the ID `lighting-effect`, and a `PostProcessEffect` takes its ID from its shader module, so render at most one `LightingEffect` and one `PostProcessEffect` per shader module. An effect has no children.
+deck.gl matches effects by ID, as it does widgets. Rendering a new effect instance with the same ID updates the mounted effect's props instead of adding another one, so creating the instance during render is fine. deck.gl effects take no `id`: a `LightingEffect` has the ID `lighting-effect`, and a `PostProcessEffect` takes its ID from its shader module. An effect can't say whether its ID was set by you, so `<deckEffect>` keeps the effect's ID. To render two effects of one kind, set a different `id` on each after constructing it, or use the [effect components](./components.md#effects), which add their place in the React tree to the ID. An effect has no children.
 
 ## Tree shape and deck.gl output
 
@@ -136,7 +136,7 @@ Refs on these intrinsic elements resolve to their deck.gl instance, not an inter
 Each element has a matching `DeckGL` prop: `layers`, `views`, `widgets` and `effects`. The root combines the two, as `@deck.gl/react/legacy` does:
 
 - **Layers.** `<deckLayer>` layers come first and `layers` prop layers after them, so prop layers draw on top. IDs must be unique across both lists.
-- **Views, widgets and effects.** The root merges them by ID. A prop entry replaces the element with the same ID, and other prop entries follow the elements.
+- **Views, widgets and effects.** The root merges them by ID. A prop entry replaces the element with the same final ID, so `effects={[new LightingEffect()]}` replaces a `<deckEffect>` with a `LightingEffect`, which keeps its ID. An element with a generated ID is replaced only by an entry with that ID. Other prop entries follow the elements.
 
 ```tsx
 <DeckGL
@@ -154,3 +154,7 @@ Here deck.gl receives `react-layer` then `existing-layer`, and the prop's `main-
 Removing the last element of a kind leaves only the prop's entries; removing the last `<deckView>` with no `views` prop brings back deck.gl's default view. A root with neither leaves deck.gl's views alone, so a widget such as `SplitterWidget` can set them.
 
 The Mapbox and MapLibre roots merge views the same way; a custom overlay root does only with [`forwardViews`](deckgl.md#custom-compatible-overlays). Widgets and effects are sent to every external-overlay root.
+
+## Ids
+
+An element without an `id` gets one from its place in the React tree, exactly as a [component](./components.md#ids) does, so `<deckLayer key="roads" layer={new ScatterplotLayer({data})} />` gives `ScatterplotLayer/roads`, and `<deckView key="minimap" view={new MapView()} />` gives `MapView/minimap`. An `id` you pass is always kept, even one that equals the class's default. `<deckEffect>` is the exception: it keeps its effect's ID; see [`<deckEffect>`](#deckeffect). See [Ids](./components.md#ids) for the format and for when you still need an explicit `id`.
