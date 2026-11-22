@@ -38,6 +38,12 @@ export type GlobeViewProps = {
   farZMultiplier?: number;
   /** Distance of the camera relative to viewport height. Default `1.5`. */
   altitude?: number;
+  /**
+   * Experimental. Keep the globe at every zoom level, with camera-relative projection in the
+   * shaders for float64-like precision near the camera. When `false` (default), the view switches
+   * to a Web Mercator viewport above zoom 12. Not for use with an interleaved or overlaid base map.
+   */
+  _cameraRelative?: boolean;
 } & CommonViewProps<GlobeViewState>;
 
 export default class GlobeView extends View<GlobeViewState, GlobeViewProps> {
@@ -54,6 +60,9 @@ export default class GlobeView extends View<GlobeViewState, GlobeViewProps> {
   }
 
   getViewportType(viewState: GlobeViewState) {
+    if (this.props._cameraRelative) {
+      return GlobeViewport;
+    }
     return viewState.zoom > 12 ? WebMercatorViewport : GlobeViewport;
   }
 

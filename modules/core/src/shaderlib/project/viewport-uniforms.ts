@@ -78,6 +78,23 @@ function getShaderProjectionMode(projectionMode: number, coordinateSystem: strin
 
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 
+/** Float32 longitude and latitude of the camera target: the origin of a camera-relative globe. */
+function getGlobeViewOrigin(viewport: Viewport): Vec3 {
+  // @ts-expect-error longitude and latitude belong to geospatial subclasses
+  return [Math.fround(viewport.longitude), Math.fround(viewport.latitude), 0];
+}
+
+/**
+ * Sine and cosine of the origin longitude and latitude, in float64. The shader combines them with
+ * the angle to each vertex through difference identities, so that no large angle enters float32
+ * trigonometry.
+ */
+export function getGlobeOriginTrig(origin: Vec3): Vec4 {
+  const lambda = (origin[0] * Math.PI) / 180;
+  const phi = (origin[1] * Math.PI) / 180;
+  return [Math.sin(lambda), Math.cos(lambda), Math.sin(phi), Math.cos(phi)];
+}
+
 export function getOffsetOrigin(
   viewport: Viewport,
   coordinateSystem: CoordinateSystem,
@@ -178,10 +195,21 @@ export function getOffsetOrigin(
       break;
     }
 
-    case PROJECTION_MODE.GLOBE:
-      offsetMode = false;
+    case PROJECTION_MODE.GLOBE: {
+      // @ts-expect-error cameraRelative is defined on GlobeViewport
+      if (!viewport.cameraRelative) {
+        offsetMode = false;
+        geospatialOrigin = null;
+        break;
+      }
+      // Camera-relative globe: one origin per view at the camera target. Rounded to float32 so
+      // that the shader subtracts it from float32 attributes without error.
+      shaderCoordinateOrigin = getGlobeViewOrigin(viewport);
+      commonOrigin = viewport.projectPosition(shaderCoordinateOrigin);
+      // Globe distance scales do not depend on the location
       geospatialOrigin = null;
       break;
+    }
 
     default:
       // Unknown projection mode
@@ -205,6 +233,7 @@ function calculateMatrixAndOffset(
   cameraPosCommon: Vec3;
   shaderCoordinateOrigin: Vec3;
   geospatialOrigin: Vec3 | null;
+  offsetMode: boolean;
 } {
   const {viewMatrixUncentered, projectionMatrix} = viewport;
   let {viewMatrix, viewProjectionMatrix} = viewport;
@@ -255,7 +284,8 @@ function calculateMatrixAndOffset(
     originCommon,
     cameraPosCommon,
     shaderCoordinateOrigin,
-    geospatialOrigin
+    geospatialOrigin,
+    offsetMode
   };
 }
 
@@ -291,6 +321,13 @@ export type ProjectUniforms = {
 
   // This is for lighting calculations
   cameraPosition: Vec3;
+
+  /** 1 when GLOBE positions are relative to `commonOrigin` (camera-relative globe), else 0. */
+  globeRelative: number;
+  /** sin and cos of the origin longitude, then of the origin latitude. */
+  globeOriginTrig: Vec4;
+  /** Camera-relative globe, `meter-offsets`: layer origin minus `commonOrigin`, from float64. */
+  globeLayerOffset: Vec3;
 };
 
 export type ProjectProps = {
@@ -392,7 +429,8 @@ function calculateViewportUniforms({
     originCommon,
     cameraPosCommon,
     shaderCoordinateOrigin,
-    geospatialOrigin
+    geospatialOrigin,
+    offsetMode
   } = calculateMatrixAndOffset(viewport, coordinateSystem, coordinateOrigin);
 
   // Calculate projection pixels per unit
@@ -440,7 +478,11 @@ function calculateViewportUniforms({
     modelMatrix: IDENTITY_MATRIX,
 
     // This is for lighting calculations
-    cameraPosition: cameraPosCommon
+    cameraPosition: cameraPosCommon,
+
+    globeRelative: 0,
+    globeOriginTrig: [0, 0, 0, 0],
+    globeLayerOffset: [0, 0, 0]
   };
 
   if (geospatialOrigin) {
@@ -490,11 +532,27 @@ function calculateViewportUniforms({
     const phi = (coordinateOrigin[1] * Math.PI) / 180;
     const cosPhi = Math.cos(phi);
     const D = ((coordinateOrigin[2] || 0) / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
-    uniforms.commonOrigin = [
+    const layerOriginCommon: Vec3 = [
       Math.sin(lambda) * cosPhi * D,
       -Math.cos(lambda) * cosPhi * D,
       Math.sin(phi) * D
     ];
+    if (!offsetMode) {
+      uniforms.commonOrigin = layerOriginCommon;
+    } else {
+      // Camera-relative: commonOrigin stays the view origin. The float64 difference keeps the
+      // layer origin exact near the camera.
+      uniforms.globeLayerOffset = [
+        layerOriginCommon[0] - originCommon[0],
+        layerOriginCommon[1] - originCommon[1],
+        layerOriginCommon[2] - originCommon[2]
+      ];
+    }
+  }
+
+  if (viewport.projectionMode === PROJECTION_MODE.GLOBE && offsetMode) {
+    uniforms.globeRelative = 1;
+    uniforms.globeOriginTrig = getGlobeOriginTrig(getGlobeViewOrigin(viewport));
   }
 
   return uniforms;
