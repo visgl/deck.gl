@@ -289,7 +289,15 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         }
         expect(errors).toEqual([]);
         if (encoding === 'centroid') {
-          const failedLayer = layer.clone({getGeometry: {sql: 'missing_geometry'}});
+          const nativeQuery = layer.clone({getGeometry: {sql: 'geometry'}});
+          deck.setProps({layers: [nativeQuery]});
+          await expect
+            .poll(() => nativeQuery.getSubLayers()[0]?.constructor.name)
+            .toBe('ArrowSolidPolygonLayer');
+          await expect
+            .poll(async () => (await deck.pickObjectAsync({x: 32, y: 32}))?.object.label)
+            .toBe(polygon);
+          const failedLayer = nativeQuery.clone({getGeometry: {sql: 'missing_geometry'}});
           deck.setProps({layers: [failedLayer]});
           await expect.poll(() => errors.length).toBe(1);
           await expect.poll(() => failedLayer.getSubLayers()).toHaveLength(0);
