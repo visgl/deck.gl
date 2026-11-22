@@ -39,6 +39,8 @@ To load a GeoJSON file directly, pass its URL and `GeoJSONLoader`. The loader co
 
 If the table has multiple geometry columns, set `getGeometry` to the field name, for example `getGeometry: 'footprint'`. The layer uses the declared primary geometry when available, then the first field with GeoArrow extension metadata. To render multiple geometry columns, pass the same table to several layers with different `getGeometry` values. A layer `query` can also project or alias a geometry field. Select the alias with `getGeometry` if the projected table still has multiple geometry columns.
 
+To render a derived geometry per source row, pass a SQL accessor such as `getGeometry: {sql: 'ST_PointOnSurface(footprint)'}`. Supply spatial functions with `sqlFunctions: POSTGIS_SPATIAL_FUNCTIONS` from `@math.gl/geospatial/st-functions`. Styling and picking refer to the source rows. The [spatial SQL example](https://github.com/visgl/deck.gl/tree/master/examples-v10/proposals/geoarrow-sql) shows centroid, interior point, and envelope expressions.
+
 ```
 import {GeoArrowLayer} from '@deck.gl/proposals/layers';
 
