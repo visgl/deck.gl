@@ -14,7 +14,6 @@ struct Varyings {
   @location(0) vTexCoord: vec2<f32>,
   @location(1) vTexPos: vec2<f32>,
   @location(2) pickingColor: vec3<f32>,
-  @location(3) pickingDepth: f32,
 };
 
 // from degrees to Web Mercator
@@ -96,7 +95,6 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   }
 
   DECKGL_FILTER_GL_POSITION(&output.position, geometry);
-  output.pickingDepth = output.position.z / output.position.w;
 
   return output;
 }
@@ -122,10 +120,13 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4<f32> {
 
   if (picking.isActive > 0.5) {
     if (picking.isAttribute > 0.5) {
-      var extensionColor = vec4<f32>(input.pickingDepth, 0.0, 0.0, 1.0);
+      // Depth picking reads the rasterized depth, converted from WebGPU's [0, 1] range to
+      // the WebGL NDC range that Viewport.unproject expects.
+      let pickingDepth = input.position.z * 2.0 - 1.0;
+      var extensionColor = vec4<f32>(pickingDepth, 0.0, 0.0, 1.0);
       DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
       // Color filters may discard, but must not alter the picking payload.
-      return vec4<f32>(input.pickingDepth, 0.0, 0.0, 1.0);
+      return vec4<f32>(pickingDepth, 0.0, 0.0, 1.0);
     }
     var extensionColor = vec4<f32>(packUVsIntoRGB(uv), 1.0);
     DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);

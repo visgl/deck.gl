@@ -202,14 +202,6 @@ export const pickingPlugin: ShaderPlugin = {
   injections: [
     {
       stage: 'vertex',
-      target: 'DECKGL_FILTER_GL_POSITION',
-      glsl: `
-    // for picking depth values
-    picking_setPickingAttribute(position.z / position.w);
-  `
-    },
-    {
-      stage: 'vertex',
       target: 'DECKGL_FILTER_COLOR',
       glsl: `
   picking_setPickingColor(geometry.pickingColor);
@@ -225,6 +217,12 @@ export const pickingPlugin: ShaderPlugin = {
 
   // use picking color if rendering to picking FBO.
   color = picking_filterPickingColor(color);
+
+  // Depth picking reads the rasterized depth. NDC z is linear in screen space, so an
+  // interpolated per-vertex z / w is wrong inside large or clipped tilted triangles.
+  if (bool(picking.isActive) && bool(picking.isAttribute)) {
+    color.r = gl_FragCoord.z * 2.0 - 1.0;
+  }
     `
     }
   ]
