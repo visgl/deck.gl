@@ -153,8 +153,9 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           },
           onDataLoad: data => loaded.push(data),
           getFillColor: [255, 0, 0, 255],
+          // A shared polygon style must leave native line rendering enabled.
+          extruded: styled || encoding === 'native-line',
           ...(styled && {
-            extruded: true,
             getElevation: 8,
             material: false,
             modelMatrix: new Matrix4([1, 0, 0, 0, 0, 1, 0, 0, 0, -0.5, 0.05, 0, 0, 0, 0, 1])

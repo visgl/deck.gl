@@ -106,7 +106,8 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       this.state.geometry &&
       !changeFlags.dataChanged &&
       props.data === oldProps.data &&
-      this.usesGeoJsonRenderer(props) === this.usesGeoJsonRenderer(oldProps) &&
+      this.usesGeoJsonRenderer(props, this.state.geometry.geometryType) ===
+        this.usesGeoJsonRenderer(oldProps, this.state.geometry.geometryType) &&
       props.getGeometry === oldProps.getGeometry &&
       props.geometryType === oldProps.geometryType
     ) {
@@ -122,7 +123,7 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       'geoarrow.multipolygon'
     ].includes(geometry.geometryType);
     /** Prepared renderer input stays columnar when the selected renderer supports it. */
-    const useNative = native && !this.usesGeoJsonRenderer(props);
+    const useNative = native && !this.usesGeoJsonRenderer(props, geometry.geometryType);
     this.setState({
       geometry,
       renderData: useNative ? this.prepareNativeGeometry(data, geometry) : data,
@@ -242,13 +243,17 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
   }
 
   /** Uses the standard renderer for polygon faces and extensions that require its attributes. */
-  private usesGeoJsonRenderer(props: GeoArrowLayerProps): boolean {
+  private usesGeoJsonRenderer(
+    props: GeoArrowLayerProps,
+    geometryType: GeoArrowLayerGeometryType
+  ): boolean {
+    /** Polygon-only styles never change the renderer for native points or lines. */
+    const isPolygon =
+      geometryType === 'geoarrow.polygon' || geometryType === 'geoarrow.multipolygon';
     return Boolean(
-      props.extruded ||
-        props.wireframe ||
-        props.stroked ||
-        props.filled === false ||
-        props.extensions?.length
+      props.extensions?.length ||
+        (isPolygon &&
+          (props.extruded || props.wireframe || props.stroked || props.filled === false))
     );
   }
 
