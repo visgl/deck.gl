@@ -81,6 +81,19 @@ void picking_setPickingColorFromInstanceID() {
 }
 `;
 
+const pickingFragmentHelpersGLSL = /* glsl */ `\
+// Applies picking_filterPickingColor and, in depth-pick mode, writes the rasterized depth.
+// NDC z is linear in screen space, so an interpolated per-vertex z / w is wrong inside
+// large or clipped tilted triangles. Use this instead of picking_filterPickingColor.
+vec4 picking_filterPickingColorAndDepth(vec4 color) {
+  color = picking_filterPickingColor(color);
+  if (bool(picking.isActive) && bool(picking.isAttribute)) {
+    color.r = gl_FragCoord.z * 2.0 - 1.0;
+  }
+  return color;
+}
+`;
+
 const sourceWGSL = /* wgsl */ `\
 struct pickingUniforms {
   isActive: f32,
@@ -151,7 +164,7 @@ export type PickingProps = import('@luma.gl/shaders').PickingProps & {
 const pickingModule: ShaderModule = {
   ...picking,
   vs: `${addPickingUniformsGLSL(picking.vs)}\n${pickingHelpersGLSL}`,
-  fs: addPickingUniformsGLSL(picking.fs),
+  fs: `${addPickingUniformsGLSL(picking.fs)}\n${pickingFragmentHelpersGLSL}`,
   source: sourceWGSL,
   uniformTypes: {
     ...picking.uniformTypes,
@@ -215,14 +228,8 @@ export const pickingPlugin: ShaderPlugin = {
   // use highlight color if this fragment belongs to the selected object.
   color = picking_filterHighlightColor(color);
 
-  // use picking color if rendering to picking FBO.
-  color = picking_filterPickingColor(color);
-
-  // Depth picking reads the rasterized depth. NDC z is linear in screen space, so an
-  // interpolated per-vertex z / w is wrong inside large or clipped tilted triangles.
-  if (bool(picking.isActive) && bool(picking.isAttribute)) {
-    color.r = gl_FragCoord.z * 2.0 - 1.0;
-  }
+  // use picking color (or depth) if rendering to picking FBO.
+  color = picking_filterPickingColorAndDepth(color);
     `
     }
   ]

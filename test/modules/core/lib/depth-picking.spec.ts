@@ -7,7 +7,8 @@ import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {Deck, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import type {DeckProps, Layer} from '@deck.gl/core';
-import {SolidPolygonLayer, BitmapLayer} from '@deck.gl/layers';
+import {SolidPolygonLayer, BitmapLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {PathStyleExtension} from '@deck.gl/extensions';
 
 const SIZE = 400;
 const LONGITUDE = -122.4;
@@ -105,9 +106,31 @@ const VIEWS: Record<string, {props: TestDeckProps; halfSize: number}> = {
   }
 };
 
+// A filled circle whose wide dashed stroke covers most of it. The stroke gaps take the fill
+// color through a second picking filter call in PathStyleExtension.
+function makeDashedCircleLayer(halfSize: number) {
+  // Small enough that the view holds several dashes and gaps.
+  const radius = halfSize * 14e3;
+  return new ScatterplotLayer({
+    id: 'dashed-circle',
+    data: [{position: [LONGITUDE, LATITUDE, POLYGON_ALTITUDE]}],
+    getPosition: d => d.position,
+    getRadius: radius,
+    getLineWidth: radius * 0.9,
+    stroked: true,
+    filled: true,
+    getFillColor: [0, 0, 255],
+    getLineColor: [255, 0, 0],
+    getDashArray: [0.4, 0.6],
+    extensions: [new PathStyleExtension({dash: true})],
+    pickable: true
+  });
+}
+
 const LAYERS: Record<string, [(halfSize: number) => Layer, number]> = {
   SolidPolygonLayer: [makePolygonLayer, POLYGON_ALTITUDE],
-  BitmapLayer: [makeBitmapLayer, 0]
+  BitmapLayer: [makeBitmapLayer, 0],
+  'ScatterplotLayer with dash gaps': [makeDashedCircleLayer, POLYGON_ALTITUDE]
 };
 
 // The quads are a few large triangles that the camera sees at a steep angle, so the depth
