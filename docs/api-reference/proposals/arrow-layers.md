@@ -36,8 +36,26 @@ releasing the current set; a rejected column releases partial uploads and retain
 previous vectors. Path streams close their iterators when replaced, finalized, or
 when batch preparation fails. `ArrowTripsLayer` similarly converts aligned timestamp lists before
 delegating to the existing GPUVector path-storage model. `GeoArrowLayer` selects point,
-linestring, polygon, or multipolygon children from field extension metadata without converting to
-GeoJSON.
+linestring, polygon, or multipolygon children from field extension metadata. Encoded and mixed
+geometry uses the GeoJSON renderer and picking returns the source Arrow row.
+
+To load a GeoJSON file directly, pass its URL and `GeoJSONLoader`. The loader converts the file to
+an Arrow table with a GeoArrow geometry column. Set
+`loadOptions: {geoarrow: {encodingPreference: 'optimized'}}` to request native coordinate buffers
+when the input contains a single geometry type.
+
+```ts
+import {GeoArrowLayer} from '@deck.gl/proposals/layers';
+import {GeoJSONLoader} from '@loaders.gl/tables/geojson';
+
+new GeoArrowLayer({
+  id: 'boundaries',
+  data: '/data/boundaries.geojson',
+  loaders: [GeoJSONLoader],
+  getFillColor: [93, 138, 82, 255],
+  pickable: true
+});
+```
 
 These Arrow layers intentionally accept only Arrow sources. Classic JavaScript arrays and legacy binary
 attributes belong in sibling adapters rather than alternate code paths here. A future unified

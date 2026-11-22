@@ -12,7 +12,8 @@ import {
   type UpdateParameters
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {RecordBatch, Table} from 'apache-arrow';
+import type {RecordBatch, Table} from 'apache-arrow';
+import type {Feature, Geometry} from 'geojson';
 import {ArrowScatterplotLayer, type ArrowScatterplotLayerProps} from './arrow-scatterplot-layer';
 import {ArrowPathLayer, type ArrowPathLayerProps} from './arrow-path-layer';
 import {
@@ -31,7 +32,8 @@ export {resolveGeoArrowGeometry, type GeoArrowLayerGeometryType} from './resolve
 
 /** GeoArrow metadata-driven composite props. Geometry-specific props pass to the selected child. */
 export type GeoArrowLayerProps = Omit<LayerProps, 'data'> & {
-  data: Table | RecordBatch;
+  /** A GeoArrow table or batch, or a URL or promise that resolves to one. */
+  data?: Table | RecordBatch | string | Promise<Table | RecordBatch> | null;
   /** Geometry column. Defaults to the first field with GeoArrow extension metadata. */
   getGeometry?: string;
   /** Explicit geometry encoding when extension metadata is absent. */
@@ -74,11 +76,23 @@ export type GeoArrowLayerProps = Omit<LayerProps, 'data'> & {
 export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
   static override layerName = 'GeoArrowLayer';
 
+  declare state: {
+    /** Selected column and encoding for the loaded source. */
+    geometry?: {columnName: string; geometryType: GeoArrowLayerGeometryType} | null;
+    /** Decoded geometry for formats handled by the GeoJSON renderer. */
+    features?: Feature<Geometry, GeoArrowFeatureProperties>[] | null;
+  };
+
   /** Rebuilds decoded features only when the geometry input changes. */
   override updateState(params: UpdateParameters<this>): void {
     super.updateState(params);
     /** Current source and geometry selection. */
     const {props, oldProps, changeFlags} = params;
+    const data = this.getSourceData();
+    if (!data?.numRows) {
+      this.setState({geometry: null, features: null});
+      return;
+    }
     if (
       this.state.geometry &&
       !changeFlags.dataChanged &&
@@ -89,7 +103,7 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       return;
     }
     /** Selected field and declared encoding. */
-    const geometry = resolveGeoArrowGeometry(props.data, props.getGeometry, props.geometryType);
+    const geometry = resolveGeoArrowGeometry(data, props.getGeometry, props.geometryType);
     switch (geometry.geometryType) {
       case 'geoarrow.point':
       case 'geoarrow.linestring':
@@ -100,7 +114,7 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       default:
         this.setState({
           geometry,
-          features: makeGeoArrowFeatures(props.data, geometry.columnName, geometry.geometryType)
+          features: makeGeoArrowFeatures(data, geometry.columnName, geometry.geometryType)
         });
     }
   }
@@ -109,9 +123,10 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
   override getPickingInfo(params: GetPickingInfoParams): PickingInfo {
     /** Selection after the geometry sublayer resolves multipart features. */
     const info = super.getPickingInfo(params);
-    if (info.index >= 0) {
+    const data = this.getSourceData();
+    if (data && info.index >= 0) {
       info.index = this.state.features ? info.object.properties.rowIndex : info.index;
-      info.object = this.props.data.get(info.index);
+      info.object = data.get(info.index);
     }
     return info;
   }
@@ -119,7 +134,11 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
   /** Dispatches prepared geometry to its renderer. */
   override renderLayers(): Layer | null {
     const {
-      data,
+      data: _source,
+      dataTransform: _dataTransform,
+      query: _query,
+      onDataLoad: _onDataLoad,
+      onDataProgress: _onDataProgress,
       getGeometry,
       geometryType,
       getRadius,
@@ -132,6 +151,10 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
     } = this.props;
     /** Geometry prepared for the current input. */
     const {geometry, features} = this.state;
+    const data = this.getSourceData();
+    if (!data || !geometry) {
+      return null;
+    }
     if (features) {
       /** Inherited extension and accessor refresh triggers for the decoded child. */
       const subLayerProps = this.getSubLayerProps({id: 'features'});
@@ -172,7 +195,7 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       case 'geoarrow.point':
         return new ArrowScatterplotLayer({
           ...layerProps,
-          id: `${this.props.id}-points`,
+          ...this.getSubLayerProps({id: 'points'}),
           data,
           getPosition: geometry.columnName,
           getRadius,
@@ -181,7 +204,7 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       case 'geoarrow.linestring':
         return new ArrowPathLayer({
           ...layerProps,
-          id: `${this.props.id}-paths`,
+          ...this.getSubLayerProps({id: 'paths'}),
           data,
           paths: geometry.columnName,
           colors,
@@ -192,7 +215,7 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       case 'geoarrow.multipolygon':
         return new ArrowSolidPolygonLayer({
           ...layerProps,
-          id: `${this.props.id}-polygons`,
+          ...this.getSubLayerProps({id: 'polygons'}),
           data,
           getPolygon: geometry.columnName,
           getFillColor: getFillColor as ArrowSolidPolygonLayerProps['getFillColor'],
@@ -201,5 +224,11 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
         } as ArrowSolidPolygonLayerProps);
     }
     return null;
+  }
+
+  /** Returns the Arrow source after Layer resolves an asynchronous data prop. */
+  private getSourceData(): Table | RecordBatch | null {
+    const {data} = this.props;
+    return data && typeof data === 'object' && 'schema' in data ? data : null;
   }
 }
