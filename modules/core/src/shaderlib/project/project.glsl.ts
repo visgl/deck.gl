@@ -44,6 +44,7 @@ layout(std140) uniform projectUniforms {
   vec4 globeOriginTrig;
   vec3 globeLayerOffset;
   vec2 globeLongitudeWrap;
+  float globeRadiusMeters;
 } project;
 
 
@@ -51,7 +52,8 @@ const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
 const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
 const vec3 ZERO_64_LOW = vec3(0.0);
-const float EARTH_RADIUS = 6370972.0; // meters
+// The Earth's radius in meters. Globe code uses project.globeRadiusMeters, the radius of the view.
+const float EARTH_RADIUS = 6370972.0;
 const float GLOBE_RADIUS = 256.0;
 
 // Absolute globe position of a common position. Under a camera-relative globe, common positions
@@ -224,7 +226,7 @@ vec3 project_globe_(vec3 lnglatz) {
   float cosPhi = cos(phi);
   // Preserve longitude at the poles despite GPU cosine rounding to zero or negative.
   if (abs(lnglatz.y) == 90.0) cosPhi = max(abs(cosPhi), 1e-7);
-  float D = (lnglatz.z / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
+  float D = (lnglatz.z / project.globeRadiusMeters + 1.0) * GLOBE_RADIUS;
 
   return vec3(
     sin(lambda) * cosPhi,
@@ -291,9 +293,9 @@ vec3 project_globe_relative_(vec3 lnglatz, vec3 lnglatz64Low) {
     vec3(-sinLambda0 * sinPhi0, cosLambda0 * sinPhi0, cosPhi0) * radians(lnglatz64Low.y);
   vec3 unit0 = vec3(sinLambda0 * cosPhi0, -cosLambda0 * cosPhi0, sinPhi0);
   float altitude = lnglatz.z + lnglatz64Low.z;
-  float D = (altitude / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
-  // The origin is at altitude 0: D - D0 = altitude * GLOBE_RADIUS / EARTH_RADIUS
-  return dUnit * D + unit0 * (altitude / EARTH_RADIUS * GLOBE_RADIUS);
+  float D = (altitude / project.globeRadiusMeters + 1.0) * GLOBE_RADIUS;
+  // The origin is at altitude 0: D - D0 = altitude / globeRadiusMeters * GLOBE_RADIUS
+  return dUnit * D + unit0 * (altitude / project.globeRadiusMeters * GLOBE_RADIUS);
 }
 
 // Mercator y of project_mercator_'s latitude clamp: log(tan(PI / 4 + radians(89.9) / 2))

@@ -108,7 +108,7 @@ fn interpolateGreatCircle(
   }
 
   let z = paraboloid(
-    angularDistance * EARTH_RADIUS,
+    angularDistance * project.globeRadiusMeters,
     source.z,
     targetPosition.z,
     ratio,

@@ -4,6 +4,7 @@
 
 import View, {CommonViewState, CommonViewProps} from './view';
 import GlobeViewport from '../viewports/globe-viewport';
+import {GLOBE_EARTH_RADIUS} from '../viewports/globe-util';
 import WebMercatorViewport from '../viewports/web-mercator-viewport';
 import GlobeController from '../controllers/globe-controller';
 import type {Parameters} from '@luma.gl/core';
@@ -44,6 +45,13 @@ export type GlobeViewProps = {
    * to a Web Mercator viewport above zoom 12. Not for use with an interleaved or overlaid base map.
    */
   _cameraRelative?: boolean;
+  /**
+   * Experimental. Radius of the sphere in meters, for a body other than the Earth. Altitudes and
+   * sizes in meters scale with it; positions in longitude and latitude do not change. Default
+   * `6370972`. With another radius, the view keeps the globe at every zoom level, because a
+   * Web Mercator viewport has the Earth's scale.
+   */
+  _radius?: number;
 } & CommonViewProps<GlobeViewState>;
 
 export default class GlobeView extends View<GlobeViewState, GlobeViewProps> {
@@ -60,7 +68,8 @@ export default class GlobeView extends View<GlobeViewState, GlobeViewProps> {
   }
 
   getViewportType(viewState: GlobeViewState) {
-    if (this.props._cameraRelative) {
+    const {_cameraRelative, _radius = GLOBE_EARTH_RADIUS} = this.props;
+    if (_cameraRelative || _radius !== GLOBE_EARTH_RADIUS) {
       return GlobeViewport;
     }
     return viewState.zoom > 12 ? WebMercatorViewport : GlobeViewport;

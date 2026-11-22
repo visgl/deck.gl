@@ -10,8 +10,6 @@ import type {NumericArray} from '@math.gl/core/matrix';
 
 /** TILE_SIZE in the project shader module: the width of one world copy in flat common space */
 export const TILE_SIZE = 512;
-/** GLOBE_RADIUS / EARTH_RADIUS in the project shader module */
-const GLOBE_METERS_TO_COMMON = 256 / 6370972;
 
 /** Bounds in CARTESIAN coordinates */
 export type Bounds = [minX: number, minY: number, maxX: number, maxY: number];
@@ -102,9 +100,10 @@ function projectGlobeMeterOffsetsToFlatCommon(
   const ux =
     horizontalLength > 0 ? [-uz[1] / horizontalLength, uz[0] / horizontalLength, 0] : [1, 0, 0];
   const uy = vec3.cross([] as number[], uz, ux);
-  // enuMatrix * vec3(x, y, z) * metersToCommon
+  // enuMatrix * vec3(x, y, z) * project.commonUnitsPerMeter
+  const unitsPerMeter = viewport.distanceScales.unitsPerMeter[0];
   const displaced = [0, 1, 2].map(
-    i => originCommon[i] + (ux[i] * x + uy[i] * y + uz[i] * z) * GLOBE_METERS_TO_COMMON
+    i => originCommon[i] + (ux[i] * x + uy[i] * y + uz[i] * z) * unitsPerMeter
   );
   // project_globe_to_mercator_
   const lngLatZ = viewport.unprojectPosition(displaced);

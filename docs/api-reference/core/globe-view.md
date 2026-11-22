@@ -16,7 +16,8 @@ It's recommended that you read the [Views and Projections guide](../../developer
 ## Target CRS
 
 `GlobeViewport.crs` describes standard geocentric XYZ coordinates in meters on the
-existing deck.gl sphere, with radius 6370972 meters. The descriptor is defined locally
+sphere of the view, with radius 6370972 meters unless [`_radius`](#_radius) is set. Its
+signature is `+proj=geocent +R=<radius> +datum=none`. The descriptor is defined locally
 using math.gl's geocentric projection plugin. The viewport retains its common-space
 orientation, radius, and altitude behavior during the CRS transition.
 
@@ -66,6 +67,16 @@ Experimental. Default `false`.
 When `true`, the view keeps the globe at every zoom level, instead of switching to a [WebMercatorViewport](./web-mercator-viewport.md) above zoom 12. The shaders project positions relative to the camera target, with an origin computed in 64-bit floats. Near the camera, positions then have the precision of `MapView`, also on software renderers such as SwiftShader.
 
 Use it with a standalone deck. It is not for an interleaved or overlaid base map.
+
+#### `_radius` (number, optional) {#_radius}
+
+Experimental. Default `6370972`, the radius of the Earth in meters.
+
+The radius of the sphere in meters, for example `1737400` for the Moon. Positions in longitude and latitude draw at the same place on the screen at every radius. Altitudes, extrusions and sizes in meters scale with the radius, so that they keep their size relative to the sphere. The radius also applies to picking (`unproject3D`), to `getBounds` at an altitude, and to the horizon test of billboards.
+
+With a radius other than the Earth's, the view keeps the globe at every zoom level, because a Web Mercator viewport has the Earth's scale. Set [`_cameraRelative`](#_camerarelative) for precision at high zoom.
+
+The `'globe'` coordinate system stays on the Earth's sphere. For geocentric coordinates on the sphere of the view, use `viewport.crs.signature` as the layer's `coordinateSystem`. Layers that describe Earth data, such as `Tile3DLayer` and `WMSLayer`, keep the Earth's ellipsoid.
 
 #### `parameters` (object, optional) {#parameters}
 

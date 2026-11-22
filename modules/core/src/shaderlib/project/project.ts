@@ -67,7 +67,8 @@ export default {
     globeRelative: 'i32',
     globeOriginTrig: 'vec4<f32>',
     globeLayerOffset: 'vec3<f32>',
-    globeLongitudeWrap: 'vec2<f32>'
+    globeLongitudeWrap: 'vec2<f32>',
+    globeRadiusMeters: 'f32'
   }
   // @ts-ignore TODO v9.1
 } as const satisfies ShaderModule<ProjectProps, ProjectUniforms, {}> & {

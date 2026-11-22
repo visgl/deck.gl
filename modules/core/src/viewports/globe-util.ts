@@ -16,16 +16,9 @@ import type {
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
 
-// Retain the existing globe radius during the CRS transition.
+// Default sphere radius of GlobeView, in meters.
 export const GLOBE_EARTH_RADIUS = 6370972;
 const DISTANCE_SCALE: CRSRenderingScale = [1, 1, 1];
-const parameters = {proj: 'geocent', R: String(GLOBE_EARTH_RADIUS), datum: 'none'};
-const projection = geocentric.create({
-  semiMajorAxis: GLOBE_EARTH_RADIUS,
-  semiMinorAxis: GLOBE_EARTH_RADIUS,
-  eccentricitySquared: 0,
-  parameters
-});
 
 function convert(transform: (coordinate: number[]) => number[]): CRSConversion {
   return ((coordinate, output?) => {
@@ -36,54 +29,83 @@ function convert(transform: (coordinate: number[]) => number[]): CRSConversion {
   }) as CRSConversion;
 }
 
-/** Standard geocentric metre coordinates on the existing deck.gl sphere.
+/** Standard geocentric metre coordinates on a sphere of `radius` meters.
  * Common-space orientation and radius remain the responsibility of GlobeViewport.
  */
-export const GLOBE_CRS: CRSDescriptor = {
-  signature: `+proj=geocent +R=${GLOBE_EARTH_RADIUS} +datum=none`,
-  coordinateFrame: 'geocentric',
-  projection: 'geocent',
-  parameters,
-  ellipsoid: {semiMajorAxis: GLOBE_EARTH_RADIUS, semiMinorAxis: GLOBE_EARTH_RADIUS},
-  axis: 'enu',
-  xUnit: {name: 'meters', metersPerUnit: 1},
-  yUnit: {name: 'meters', metersPerUnit: 1},
-  zUnit: {name: 'meters', metersPerUnit: 1},
-  lossy: false,
-  renderingBounds: [
-    [-GLOBE_EARTH_RADIUS, -GLOBE_EARTH_RADIUS, -GLOBE_EARTH_RADIUS],
-    [GLOBE_EARTH_RADIUS, GLOBE_EARTH_RADIUS, GLOBE_EARTH_RADIUS]
-  ],
-  renderingScale: DISTANCE_SCALE,
-  getRenderingScale: () => DISTANCE_SCALE,
-  converter: {
-    WGS84: {
-      from: convert(coordinate => {
-        const result = projection.forward3D!([
-          coordinate[0] * DEGREES_TO_RADIANS,
-          coordinate[1] * DEGREES_TO_RADIANS,
-          coordinate[2] ?? 0
-        ]);
-        [coordinate[0], coordinate[1], coordinate[2]] = result;
-        return coordinate;
-      }),
-      to: convert(coordinate => {
-        const result = projection.inverse3D!([coordinate[0], coordinate[1], coordinate[2]]);
-        coordinate[0] = result[0] / DEGREES_TO_RADIANS;
-        coordinate[1] = result[1] / DEGREES_TO_RADIANS;
-        coordinate[2] = result[2];
-        return coordinate;
-      }),
-      normalize: convert(coordinate => {
-        const longitude = coordinate[0];
-        coordinate[0] =
-          Math.abs(longitude) <= 180 ? longitude : ((((longitude + 180) % 360) + 360) % 360) - 180;
-        coordinate[1] = Math.max(-90, Math.min(90, coordinate[1]));
-        return coordinate;
-      })
+function createGlobeCRS(radius: number): CRSDescriptor {
+  const parameters = {proj: 'geocent', R: String(radius), datum: 'none'};
+  const projection = geocentric.create({
+    semiMajorAxis: radius,
+    semiMinorAxis: radius,
+    eccentricitySquared: 0,
+    parameters
+  });
+  return {
+    signature: `+proj=geocent +R=${radius} +datum=none`,
+    coordinateFrame: 'geocentric',
+    projection: 'geocent',
+    parameters,
+    ellipsoid: {semiMajorAxis: radius, semiMinorAxis: radius},
+    axis: 'enu',
+    xUnit: {name: 'meters', metersPerUnit: 1},
+    yUnit: {name: 'meters', metersPerUnit: 1},
+    zUnit: {name: 'meters', metersPerUnit: 1},
+    lossy: false,
+    renderingBounds: [
+      [-radius, -radius, -radius],
+      [radius, radius, radius]
+    ],
+    renderingScale: DISTANCE_SCALE,
+    getRenderingScale: () => DISTANCE_SCALE,
+    converter: {
+      WGS84: {
+        from: convert(coordinate => {
+          const result = projection.forward3D!([
+            coordinate[0] * DEGREES_TO_RADIANS,
+            coordinate[1] * DEGREES_TO_RADIANS,
+            coordinate[2] ?? 0
+          ]);
+          [coordinate[0], coordinate[1], coordinate[2]] = result;
+          return coordinate;
+        }),
+        to: convert(coordinate => {
+          const result = projection.inverse3D!([coordinate[0], coordinate[1], coordinate[2]]);
+          coordinate[0] = result[0] / DEGREES_TO_RADIANS;
+          coordinate[1] = result[1] / DEGREES_TO_RADIANS;
+          coordinate[2] = result[2];
+          return coordinate;
+        }),
+        normalize: convert(coordinate => {
+          const longitude = coordinate[0];
+          coordinate[0] =
+            Math.abs(longitude) <= 180
+              ? longitude
+              : ((((longitude + 180) % 360) + 360) % 360) - 180;
+          coordinate[1] = Math.max(-90, Math.min(90, coordinate[1]));
+          return coordinate;
+        })
+      }
     }
+  };
+}
+
+/** Geocentric CRS of the default GlobeView sphere, and of the `'globe'` coordinate system. */
+export const GLOBE_CRS: CRSDescriptor = createGlobeCRS(GLOBE_EARTH_RADIUS);
+
+const globeCRSCache = new Map<number, CRSDescriptor>([[GLOBE_EARTH_RADIUS, GLOBE_CRS]]);
+
+/** Geocentric CRS of a sphere of `radius` meters. The radius of a GlobeViewport lives here. */
+export function getGlobeCRS(radius: number): CRSDescriptor {
+  let crs = globeCRSCache.get(radius);
+  if (!crs) {
+    if (!(radius > 0) || !Number.isFinite(radius)) {
+      throw new Error(`Invalid globe radius: ${radius}`);
+    }
+    crs = createGlobeCRS(radius);
+    globeCRSCache.set(radius, crs);
   }
-};
+  return crs;
+}
 
 export function zoomAdjust(latitude: number, clampToPoles?: boolean): number {
   if (clampToPoles) {

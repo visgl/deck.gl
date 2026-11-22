@@ -5,7 +5,14 @@
 // Shared helpers of the camera-relative GlobeView render tests
 
 import {expect} from 'vitest';
-import {Deck, GlobeView, GlobeViewport, type DeckProps, type Layer} from '@deck.gl/core';
+import {
+  Deck,
+  GlobeView,
+  GlobeViewport,
+  type DeckProps,
+  type GlobeViewState,
+  type Layer
+} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import type {Framebuffer} from '@luma.gl/core';
 import {webgl2Adapter, type WebGLDevice} from '@luma.gl/core/webgl';
@@ -44,7 +51,8 @@ export function renderFrame(
 /** Runs `run` on a Deck of WIDTH x HEIGHT. */
 export async function withDeck(
   views: GlobeView,
-  run: (deck: Deck<GlobeView>, read: () => Uint8Array, viewport: GlobeViewport) => Promise<void>
+  run: (deck: Deck<GlobeView>, read: () => Uint8Array, viewport: GlobeViewport) => Promise<void>,
+  viewState: GlobeViewState = VIEW_STATE
 ) {
   const container = document.createElement('div');
   document.body.appendChild(container);
@@ -69,7 +77,7 @@ export async function withDeck(
       useDevicePixels: false,
       _framebuffer: framebuffer,
       views,
-      viewState: VIEW_STATE,
+      viewState,
       layers: []
     });
     await renderFrame(deck);

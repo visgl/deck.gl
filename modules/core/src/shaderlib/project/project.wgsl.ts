@@ -24,7 +24,8 @@ const TILE_SIZE: f32 = 512.0;
 const PI: f32 = 3.1415926536;
 const WORLD_SCALE: f32 = TILE_SIZE / (PI * 2.0);
 const ZERO_64_LOW: vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
-const EARTH_RADIUS: f32 = 6370972.0; // meters
+// The Earth's radius in meters. Globe code uses project.globeRadiusMeters, the radius of the view.
+const EARTH_RADIUS: f32 = 6370972.0;
 const GLOBE_RADIUS: f32 = 256.0;
 
 // Absolute globe position of a common position; see project.glsl.ts
@@ -62,6 +63,7 @@ struct ProjectUniforms {
   globeOriginTrig: vec4<f32>,
   globeLayerOffset: vec3<f32>,
   globeLongitudeWrap: vec2<f32>,
+  globeRadiusMeters: f32,
 };
 
 @group(0) @binding(auto)
@@ -248,7 +250,7 @@ fn project_globe_(lnglatz: vec3<f32>) -> vec3<f32> {
   // Preserve longitude at the poles despite GPU cosine rounding to zero or negative.
   var cosPhi = cos(phi);
   if (abs(lnglatz.y) == 90.0) { cosPhi = max(abs(cosPhi), 1e-7); }
-  let D = (lnglatz.z / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
+  let D = (lnglatz.z / project.globeRadiusMeters + 1.0) * GLOBE_RADIUS;
   return vec3<f32>(
     sin(lambda) * cosPhi,
     -cos(lambda) * cosPhi,
@@ -306,8 +308,8 @@ fn project_globe_relative_(lnglatz: vec3<f32>, lnglatz64Low: vec3<f32>) -> vec3<
     vec3<f32>(-sinLambda0 * sinPhi0, cosLambda0 * sinPhi0, cosPhi0) * radians(lnglatz64Low.y);
   let unit0 = vec3<f32>(sinLambda0 * cosPhi0, -cosLambda0 * cosPhi0, sinPhi0);
   let altitude = lnglatz.z + lnglatz64Low.z;
-  let D = (altitude / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
-  return dUnit * D + unit0 * (altitude / EARTH_RADIUS * GLOBE_RADIUS);
+  let D = (altitude / project.globeRadiusMeters + 1.0) * GLOBE_RADIUS;
+  return dUnit * D + unit0 * (altitude / project.globeRadiusMeters * GLOBE_RADIUS);
 }
 
 // Mercator y of project_mercator_'s latitude clamp: log(tan(PI / 4 + radians(89.9) / 2))

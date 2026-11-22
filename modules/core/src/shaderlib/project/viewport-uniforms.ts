@@ -17,6 +17,8 @@ import type {CRSDescriptor} from '@math.gl/geospatial/projection-core';
 import type Viewport from '../../viewports/viewport';
 import type {Buffer, Texture} from '@luma.gl/core';
 import type {CoordinateSystem} from '../../lib/constants';
+import type GlobeViewport from '../../viewports/globe-viewport';
+import {GLOBE_EARTH_RADIUS} from '../../viewports/globe-util';
 
 type Vec2 = [number, number];
 type Vec3 = [number, number, number];
@@ -334,6 +336,8 @@ export type ProjectUniforms = {
    * antimeridian subtracts one of them in a single, exactly rounded step.
    */
   globeLongitudeWrap: Vec2;
+  /** Radius of the globe in meters: GlobeViewport.radius, else the Earth's. */
+  globeRadiusMeters: number;
 };
 
 export type ProjectProps = {
@@ -454,6 +458,11 @@ function calculateViewportUniforms({
   const focalDistance =
     vec4.transformMat4([], [0, 0, -viewport.focalDistance, 1], viewport.projectionMatrix)[3] || 1;
 
+  const globeRadiusMeters =
+    viewport.projectionMode === PROJECTION_MODE.GLOBE
+      ? (viewport as GlobeViewport).radius
+      : GLOBE_EARTH_RADIUS;
+
   const uniforms: ProjectUniforms = {
     // Projection mode values
     coordinateFrame: getShaderCoordinateFrame(coordinateSystem, viewport),
@@ -489,7 +498,8 @@ function calculateViewportUniforms({
     globeRelative: 0,
     globeOriginTrig: [0, 0, 0, 0],
     globeLayerOffset: [0, 0, 0],
-    globeLongitudeWrap: [0, 0]
+    globeLongitudeWrap: [0, 0],
+    globeRadiusMeters
   };
 
   if (geospatialOrigin) {
@@ -533,17 +543,11 @@ function calculateViewportUniforms({
   // coordinateOrigin into commonOrigin. The shader derives the ENU frame from
   // this direction via project_get_orientation_matrix, avoiding per-vertex trig.
   if (viewport.projectionMode === PROJECTION_MODE.GLOBE && coordinateSystem === 'meter-offsets') {
-    const EARTH_RADIUS = 6370972;
-    const GLOBE_RADIUS = 256;
-    const lambda = (coordinateOrigin[0] * Math.PI) / 180;
-    const phi = (coordinateOrigin[1] * Math.PI) / 180;
-    const cosPhi = Math.cos(phi);
-    const D = ((coordinateOrigin[2] || 0) / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
-    const layerOriginCommon: Vec3 = [
-      Math.sin(lambda) * cosPhi * D,
-      -Math.cos(lambda) * cosPhi * D,
-      Math.sin(phi) * D
-    ];
+    const layerOriginCommon = viewport.projectPosition([
+      coordinateOrigin[0],
+      coordinateOrigin[1],
+      coordinateOrigin[2] || 0
+    ]);
     if (!offsetMode) {
       uniforms.commonOrigin = layerOriginCommon;
     } else {
