@@ -4,6 +4,7 @@
 
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {device as webglDevice} from '@deck.gl/test-utils/vitest';
+import {load} from '@loaders.gl/core';
 import {convertGeoArrowGeometry} from '@loaders.gl/core/geoarrow';
 import {GeoJSONLoader} from '@loaders.gl/tables/geojson';
 import {Buffer, Texture} from '@luma.gl/core';
@@ -35,7 +36,7 @@ function makeSource() {
   return table.slice(0, 1).concat(table.slice(1));
 }
 
-const encodings = ['wkt', 'wkb', 'mixed', 'geojson', 'native', 'native-line'] as const;
+const encodings = ['wkt', 'wkb', 'mixed', 'geojson', 'native', 'native-line', 'separated'] as const;
 
 for (const backend of ['webgl', 'webgpu'] as const) {
   test.for(encodings)(
@@ -97,6 +98,24 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             data: new URL('./fixtures/geoarrow-polygon.geojson', import.meta.url).href,
             polygon: 'native polygon'
           },
+          separated: {
+            data:
+              encoding === 'separated'
+                ? (
+                    load(
+                      new URL('./fixtures/geoarrow-polygon.geojson', import.meta.url).href,
+                      GeoJSONLoader,
+                      {
+                        core: {worker: false},
+                        geoarrow: {encodingPreference: 'optimized'}
+                      }
+                    ) as Promise<Table>
+                  ).then(table =>
+                    convertGeoArrowGeometry(table, 'geoarrow.polygon', {coordinates: 'separated'})
+                  )
+                : source,
+            polygon: 'native polygon'
+          },
           'native-line': {
             data: new URL('./fixtures/geoarrow-line.geojson', import.meta.url).href,
             polygon: 'native line'
@@ -104,7 +123,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         };
         const input = inputs[encoding];
         const {data, polygon} = input;
-        const nativePolygon = encoding === 'native';
+        const nativePolygon = encoding === 'native' || encoding === 'separated';
         const native = nativePolygon || encoding === 'native-line';
         const lineLabel = 'line' in input ? input.line : undefined;
         const loaded: unknown[] = [];
