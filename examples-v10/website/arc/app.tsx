@@ -7,6 +7,8 @@ import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 import {tableFromArrays} from 'apache-arrow';
 import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
@@ -128,6 +130,7 @@ export default function App({
   /** Reports county and directed flow counts to the website controls. */
   onDataLoad?: (stats: {count: number; flowCount: number}) => void;
 }) {
+  const widgets = useMemo(() => [new LoadingWidget()], []);
   const [selectedCounty, selectCounty] = useState<County>();
 
   const [counties, setCounties] = useState<County[]>();
@@ -176,6 +179,7 @@ export default function App({
 
   return (
     <DeckGL
+      widgets={widgets}
       device={device}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}

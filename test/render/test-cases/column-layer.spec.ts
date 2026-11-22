@@ -8,13 +8,11 @@ import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
-import {GL} from '@luma.gl/core/webgl-constants';
 import {hexagons, worldGrid} from 'deck.gl-test/data';
 import type {SnapshotTestCase} from '@deck.gl/test-utils';
 
 const cullBackParameters = {
-  cull: true,
-  cullFace: GL.BACK
+  cullMode: 'back' as const
 };
 
 const polygonCCW = [

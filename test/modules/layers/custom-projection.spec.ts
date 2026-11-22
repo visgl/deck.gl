@@ -14,7 +14,7 @@ import {
   SolidPolygonLayer
 } from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {Timeline} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 

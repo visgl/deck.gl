@@ -18,7 +18,7 @@ import {
 } from '@deck.gl/layers';
 import {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {device} from '@deck.gl/test-utils/vitest';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {shouldComposeModelMatrix} from '@deck.gl/mesh-layers/utils/matrix';
 
 function createViewport(signature: string, projected: boolean, scale = 2, resolution = 360) {

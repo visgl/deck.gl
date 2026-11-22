@@ -13,7 +13,7 @@ import {getWorldPosition} from './project-glsl-test-utils';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Buffer} from '@luma.gl/core';
 import {Computation} from '@luma.gl/engine';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {projectionEngine} from '@math.gl/geospatial/projection';
 
 const normalizationScale = 512 / 40075016.6855;

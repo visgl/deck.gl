@@ -7,7 +7,7 @@ import {AmbientLight, LightingEffect} from '@deck.gl/core';
 import {_CameraLight as CameraLight, DirectionalLight, PointLight} from '@deck.gl/core';
 import {MapView, LayerManager, WebMercatorViewport} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
-import {equals, Matrix4} from '@math.gl/core';
+import {equals, Matrix4} from '@math.gl/core/matrix';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils/vitest';
 

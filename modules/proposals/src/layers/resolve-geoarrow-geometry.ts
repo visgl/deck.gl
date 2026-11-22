@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {getGeoMetadata} from '@loaders.gl/core/schema';
 import type {Schema} from 'apache-arrow';
 
 /** GeoArrow encodings accepted by the composite layer. */
@@ -23,12 +24,18 @@ export function resolveGeoArrowGeometry(
   columnName?: string,
   explicitGeometryType?: GeoArrowLayerGeometryType
 ): {columnName: string; geometryType: GeoArrowLayerGeometryType} {
-  const fields = data.schema.fields;
+  const {fields, metadata} = data.schema;
+  const primaryColumn = columnName ? undefined : getGeoMetadata(metadata)?.primary_column;
   const field = columnName
     ? fields.find(candidate => candidate.name === columnName)
-    : fields.find(candidate =>
+    : (fields.find(
+        candidate =>
+          candidate.name === primaryColumn &&
+          isSupportedGeoArrowGeometryType(getGeoArrowExtensionName(candidate.metadata))
+      ) ??
+      fields.find(candidate =>
         getGeoArrowExtensionName(candidate.metadata)?.startsWith('geoarrow.')
-      );
+      ));
   if (!field) {
     throw new Error(
       columnName
