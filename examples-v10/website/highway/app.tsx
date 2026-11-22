@@ -221,8 +221,8 @@ export default function App({
           onDataLoad?.({count: table.numRows});
         }
       },
-      colors: styles?.colors,
-      widths: styles?.widths,
+      colors: styles?.colors ?? [200, 200, 200, 255],
+      widths: styles?.widths ?? 10,
       widthUnits: 'meters',
       widthMinPixels: 0.5,
       transitions: {getLineColor: 1000, getLineWidth: 1000},
