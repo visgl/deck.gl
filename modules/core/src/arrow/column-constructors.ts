@@ -104,7 +104,7 @@ export function evaluateColumnExpression(
     return compile(expression);
   }
 
-  const components = call.arguments.map(argument => compile(argument).column);
+  const components = call.arguments.map(argument => compile(argument as ArrowExpression).column);
   const rows: (number[] | null)[] = new Array(input.numRows);
   for (let row = 0; row < input.numRows; row++) {
     const values: number[] = [];
