@@ -85,7 +85,7 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
   static override layerName = 'GeoArrowLayer';
 
   static override defaultProps: DefaultProps<GeoArrowLayerProps> = {
-    getGeometry: {type: 'accessor', value: undefined, arrow: true, constantTypes: ['string']}
+    getGeometry: {type: 'accessor', value: '', arrow: true}
   };
 
   declare state: {
