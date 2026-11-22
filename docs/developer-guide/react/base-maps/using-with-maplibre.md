@@ -12,7 +12,7 @@ layers into it. The application owns the MapLibre map and attaches the overlay t
 [Using with maps](../using-with-maps.md) describes the shared provider-root behavior and lifecycle.
 
 deck.gl's [Using with MapLibre](../../base-maps/using-with-maplibre.md)
-guide covers the same integration without React Fiber.
+guide covers the same integration without `@deck.gl/react`.
 
 ## Integration modes
 
@@ -70,7 +70,7 @@ The `?worker&url` query is Vite-only. Next.js (Turbopack or webpack) and other b
 [installation guide](https://maplibre.org/maplibre-gl-js/docs/#installation) lists the setup for
 each bundler.
 
-The React Fiber examples configure the worker in their MapLibre modules:
+The `@deck.gl/react` examples configure the worker in their MapLibre modules:
 
 - [Vite](https://github.com/visgl/deck.gl-community/blob/master/examples/react-fiber/vite/src/modules/map/maplibre.ts)
 - [React Router](https://github.com/visgl/deck.gl-community/blob/master/examples/react-fiber/react-router/app/modules/map/maplibre.ts)

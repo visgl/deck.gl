@@ -2,7 +2,7 @@
 
 ![From v10.0](https://img.shields.io/badge/from-v10.0-green.svg?style=flat-square)
 
-React Fiber has a component for every layer, view, widget and effect that deck.gl ships. Each
+`@deck.gl/react` has a component for every layer, view, widget and effect that deck.gl ships. Each
 subpath matches a deck.gl module, and each component has the deck.gl class's name:
 
 | Import | Components | Install |

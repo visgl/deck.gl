@@ -45,7 +45,7 @@ v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, S
 
 ### React
 
-The `@deck.gl/react` module is now a deep React Fiber integration.
+The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, widgets and effects are React elements.
 
 - [**React components**](./api-reference/react/overview.md) 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
 - **Map integrations** 🚧 — Use dedicated React entry points for [Mapbox](./developer-guide/react/base-maps/using-with-mapbox.md), [MapLibre](./developer-guide/react/base-maps/using-with-maplibre.md), and [Google Maps](./developer-guide/react/base-maps/using-with-google-maps.md).

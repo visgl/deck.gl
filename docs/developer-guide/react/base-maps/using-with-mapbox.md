@@ -12,7 +12,7 @@ layers into it. The application owns the Mapbox map and attaches the overlay to 
 [Using with maps](../using-with-maps.md) describes the shared provider-root behavior and lifecycle.
 
 deck.gl's [Using with Mapbox](../../base-maps/using-with-mapbox.md)
-guide covers the same integration without React Fiber.
+guide covers the same integration without `@deck.gl/react`.
 
 ## Integration modes
 

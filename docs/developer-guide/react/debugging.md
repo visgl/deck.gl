@@ -1,13 +1,13 @@
 # Debugging
 
-React Fiber sits between React and deck.gl. When something looks wrong, first find out which side of that boundary it comes from:
+`@deck.gl/react` sits between React and deck.gl. When something looks wrong, first find out which side of that boundary it comes from:
 
 - **The React side.** What the renderer received from your components and sent to deck.gl.
 - **The deck.gl side.** What deck.gl did with it: which layers it created, updated, kept or removed.
 
 ## Logs
 
-React Fiber and deck.gl write to the same deck.gl `log`. Turn it on in the browser console:
+The renderer and deck.gl write to the same deck.gl `log`. Turn it on in the browser console:
 
 ```js
 deck.log.enable();
@@ -31,7 +31,7 @@ At the same levels, deck.gl logs its side:
 
 deck.gl's lifecycle messages are only in development builds. To get them in a production build, see deck.gl's [Debugging](../debugging.md) page, which also covers GPU-level debugging with luma.gl.
 
-The `debug` prop on `DeckGL` is passed to deck.gl unchanged. It does not turn on React Fiber's logs.
+The `debug` prop on `DeckGL` is passed to deck.gl unchanged. It does not turn on the renderer's logs.
 
 ## Layers that rebuild on every render
 

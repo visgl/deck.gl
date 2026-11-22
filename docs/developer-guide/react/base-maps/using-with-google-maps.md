@@ -12,7 +12,7 @@ JSX layers into it. The application owns the Google map and attaches the overlay
 [Using with maps](../using-with-maps.md) describes the shared provider-root behavior and lifecycle.
 
 deck.gl's [Using with Google Maps](../../base-maps/using-with-google-maps.md)
-guide covers the same integration without React Fiber.
+guide covers the same integration without `@deck.gl/react`.
 
 ## Integration modes
 

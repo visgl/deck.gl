@@ -86,4 +86,4 @@ Without `canvas`, a standalone root renders an absolutely positioned wrapper tha
 - [DeckGL API](deckgl.md) documents root ownership and lifecycle behavior.
 - [Components](components.md) lists the component subpaths and the factories for custom classes.
 - [Native elements](native-elements.md) documents `<deckLayer>`, `<deckView>`, `<deckWidget>` and `<deckEffect>`.
-- [React Fiber examples](https://visgl.github.io/deck.gl-community/examples/react-fiber/overview) link to the maintained Vite, Next.js, React Router, and TanStack Start applications.
+- [`@deck.gl/react` examples](https://visgl.github.io/deck.gl-community/examples/react-fiber/overview) link to the maintained Vite, Next.js, React Router, and TanStack Start applications.

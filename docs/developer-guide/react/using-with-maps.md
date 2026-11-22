@@ -62,7 +62,9 @@ finalizes the current overlay, which removes it from the map, and creates a new 
 the new overlay itself; see [Attach the overlay to the host map](#attach-the-overlay-to-the-host-map).
 The new overlay starts
 without the old one's internal state, such as the hovered object. `interleaved` does not select the
-provider; select Mapbox, MapLibre or Google Maps through the import path.
+provider; select Mapbox, MapLibre or Google Maps through the import path. Other props that only
+apply when the overlay is created are listed in
+[Props that only apply at creation](../../api-reference/react/deckgl.md#props-that-only-apply-at-creation).
 
 Provider roots render no host DOM node. You can place them inside a React Map GL `<Map>`, or beside
 a manual `new Map({container})` integration without adding a child to the map container.

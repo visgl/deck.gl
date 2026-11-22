@@ -50,13 +50,32 @@ On the standalone root, `canvas` accepts an `HTMLCanvasElement` or the id of a `
 
 Deck event properties such as `onClick` remain deck.gl callbacks, not React synthetic events.
 
+Removing a prop resets it to deck.gl's default, as React expects: a removed `onError` stops being called, removed `parameters` stop applying, and a removed `viewState` returns the camera to deck.gl's own view state. A prop set to `undefined` also falls back to deck.gl's default, as it does in React: deck.gl treats an explicit `undefined` like a prop that was left out ([deck.gl#10906](https://github.com/visgl/deck.gl/pull/10906)). The `layers`, `widgets` and `effects` props are merged with JSX children, so removing one leaves only the JSX elements. Removing `views` when the tree has no `<deckView>` restores deck.gl's default view, after which the root leaves deck.gl's views alone, so a widget such as `SplitterWidget` can set them. The exceptions are the [props that only apply at creation](#props-that-only-apply-at-creation).
+
 Effects such as `LightingEffect` and `PostProcessEffect` can be JSX children, as [components](components.md#effects) or [`<deckEffect>`](native-elements.md#deckeffect) elements, or the `effects` prop, as in `@deck.gl/react/legacy`. The root merges the two by ID. deck.gl matches effects by ID, as it does widgets, so a new instance with the same ID updates the mounted effect's props, and creating effects during render is fine.
 
 An error thrown while rendering inside a root, including one the renderer raises for an invalid element, is rethrown from the `DeckGL` component. The nearest [error boundary](https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary) around `DeckGL` handles it, as it would for any other component, and the framework's development error overlay shows it. An error boundary inside `DeckGL` catches errors from its own children first; its fallback can only render native elements or `null`. Errors that deck.gl raises at runtime, such as a layer whose data fails to load, never reach an error boundary; deck.gl passes them to its `onError` prop, as with `@deck.gl/react/legacy`.
 
-`debug` is a deck.gl prop and is passed to `Deck` or the overlay unchanged. Warnings and traces go through deck.gl's `log`: root creation, unmounting and each commit log at level 3, and the props of every configure, including prop-only updates, at level 4. Enable them in the browser console with `deck.log.enable()` and `deck.log.level = 3`; see [Debugging](../../developer-guide/debugging.md). The React Fiber [debugging guide](../../developer-guide/react/debugging.md) explains how to read these logs alongside deck.gl's.
+`debug` is a deck.gl prop and is passed to `Deck` or the overlay unchanged. Warnings and traces go through deck.gl's `log`: root creation, unmounting and each commit log at level 3, and the props of every configure, including prop-only updates, at level 4. Enable them in the browser console with `deck.log.enable()` and `deck.log.level = 3`; see [Debugging](../../developer-guide/debugging.md). The `@deck.gl/react` [debugging guide](../../developer-guide/react/debugging.md) explains how to read these logs alongside deck.gl's.
 
 The renderer registers with [React DevTools](https://react.dev/learn/react-developer-tools), so the Components tab shows the `<deckLayer>`, `<deckView>`, `<deckWidget>` and `<deckEffect>` elements inside each root, with their props and the components that render them.
+
+## Props that only apply at creation
+
+deck.gl reads some props only when it creates its device, canvas or event manager. Changing or removing them after the root is created has no effect, and in development builds the root warns once per prop. To apply a new value, remount `DeckGL` with a new React `key`.
+
+| Prop | Read when deck.gl creates | Changing it |
+| --- | --- | --- |
+| `canvas` | Its canvas | Creates a new root, with a new `Deck` |
+| `interleaved` (`/mapbox`, `/maplibre`) | The overlay | Creates a new overlay; see [Provider roots](#provider-roots) |
+| `deviceProps`, `gl` | Its GPU device | No effect; dev warning |
+| `debug` | Its GPU device | No effect; dev warning |
+| `touchAction`, `eventRecognizerOptions` | Its event manager | No effect; dev warning |
+| `_typedArrayManagerProps` | The instance | No effect; dev warning |
+
+`device` and `_canvases` are not in the table, because deck.gl applies changes to them after creation. A new `device` replaces the GPU device, and `_canvases` updates the canvases of a `Deck` created in multi-canvas mode. A `DeckGL` root always renders to its own canvas, which multi-canvas mode does not allow, so to draw one `Deck` into several canvases, create it with `_canvases: []` and use [`DeckCanvas`](https://visgl.github.io/deck.gl-community/docs/modules/react/api-reference/deck-canvas) from `@deck.gl-community/react`.
+
+`id` names a canvas that deck.gl creates. The standalone root renders its own canvas, whose id follows `id`, as [Root DOM and sizing](#root-dom-and-sizing) describes.
 
 ## Root DOM and sizing
 
