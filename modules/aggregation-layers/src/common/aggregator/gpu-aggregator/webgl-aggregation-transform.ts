@@ -14,7 +14,7 @@ import {
   AggregatorTransformProps,
   aggregatorTransformUniforms
 } from './aggregation-transform-uniforms';
-import {NumberArray3} from '@math.gl/core';
+import {NumberArray3} from '@math.gl/core/matrix';
 
 const MAX_FLOAT32 = 3e38;
 

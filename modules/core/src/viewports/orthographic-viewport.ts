@@ -4,8 +4,8 @@
 
 import Viewport from '../viewports/viewport';
 
-import {Matrix4, clamp} from '@math.gl/core';
-import {vec2} from '@math.gl/core';
+import {Matrix4, clamp} from '@math.gl/core/matrix';
+import {vec2} from '@math.gl/core/matrix';
 import {pixelsToWorld} from '@math.gl/geospatial/web-mercator';
 
 import type {DistanceScales, Padding} from './viewport';

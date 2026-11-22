@@ -154,7 +154,7 @@ const optimizeDepsConfig = {
     'maplibre-gl-v4',
     'maplibre-gl-v5',
     // loaders.gl dependencies
-    '@loaders.gl/core/scan',
+    '@loaders.gl/core/query',
     '@math.gl/sql/arrow',
     '@math.gl/sql/parser',
     '@loaders.gl/core/polyfills',

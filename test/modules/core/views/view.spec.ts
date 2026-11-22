@@ -12,7 +12,7 @@ import {
   FirstPersonView,
   GlobeView
 } from 'deck.gl';
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
 
 test('View#imports', () => {
   expect(View, 'View import ok').toBeTruthy();

@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 import type {Device} from '@luma.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
@@ -88,6 +90,7 @@ export default function App({
   onDataLoad?: (count: number) => void;
   mapStyle?: string;
 }) {
+  const widgets = useMemo(() => [new LoadingWidget()], []);
   const [filter, setFilter] = useState<[start: number, end: number] | null>(null);
 
   const [timeRange, setTimeRange] = useState<[number, number] | null>(null);
@@ -144,6 +147,7 @@ export default function App({
   return (
     <>
       <DeckGL
+        widgets={widgets}
         device={device}
         views={MAP_VIEW}
         layers={layers}

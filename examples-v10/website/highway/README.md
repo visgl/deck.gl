@@ -31,4 +31,4 @@ This example loads the full website dataset with `GeoParquetLoader` from `@loade
 
 The 20,592 road features retain all LineString and MultiLineString paths. `CSVLoader` loads all 29,342 accident records from `accidents-full.csv`; year controls aggregate these records by road.
 
-Standalone installations use deck.gl v10 and loaders.gl 5.0.0-rc.1; the package overrides keep the loader runtime aligned.
+Standalone installations use deck.gl v10 and loaders.gl 5.0.0-rc.2; the package overrides keep the loader runtime aligned.

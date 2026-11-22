@@ -6,6 +6,8 @@ import React, {useState, useMemo, useEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
@@ -148,6 +150,7 @@ export default function App({
   /** Reports loaded path and vertex counts to the website controls. */
   onDataLoad?: (stats: {count: number; vertexCount: number}) => void;
 }) {
+  const widgets = useMemo(() => [new LoadingWidget()], []);
   const [hoverInfo, setHoverInfo] = useState<PickingInfo<Road>>();
   const [loadedAccidents, setLoadedAccidents] = useState<Accident[]>();
   useEffect(() => {
@@ -223,6 +226,7 @@ export default function App({
 
   return (
     <DeckGL
+      widgets={widgets}
       device={device}
       layers={layers}
       pickingRadius={5}

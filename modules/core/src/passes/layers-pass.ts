@@ -12,7 +12,7 @@ import type {
 } from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
 import type {WebGLDevice} from '@luma.gl/core/webgl';
-import type {NumberArray4} from '@math.gl/core';
+import type {NumberArray4} from '@math.gl/core/matrix';
 
 import {normalizeByteColor4} from '@luma.gl/shaders';
 import Pass from './pass';
