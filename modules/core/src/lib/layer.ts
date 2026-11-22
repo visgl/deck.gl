@@ -752,6 +752,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       );
   }
 
+  /** Returns the current row-aligned SQL accessor results with their Arrow field metadata. */
+  protected getAccessorQueryTable() {
+    return this.internalState?.accessorQueries?.table;
+  }
+
   /**
    * Experimental. Returns resolved SQL color scales keyed by accessor. The result is undefined
    * until the first evaluation completes. While updating, it describes the previously applied

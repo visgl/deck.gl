@@ -6,6 +6,7 @@ import {
   Field,
   FixedSizeList,
   Float64,
+  Schema,
   Table,
   Uint8,
   vectorFromArray,
@@ -142,19 +143,32 @@ export function evaluateAccessorQueries(
     if (previousBatch && !scaleExpressions.length)
       return new Table(priorTable!.schema, [previousBatch]);
     const columns: Record<string, Vector> = Object.create(null);
+    const fields: Field[] = [];
     for (const {name, expression, isColorScale} of parsed) {
+      if (!isColorScale) {
+        const reused = previousBatch?.getChild(name);
+        const result = reused
+          ? {
+              column: reused,
+              metadata: priorTable?.schema.fields.find(field => field.name === name)?.metadata
+            }
+          : evaluateColumnExpression(expression, input, functions);
+        columns[name] = result.column;
+        fields.push(new Field(name, result.column.type, true, result.metadata));
+        continue;
+      }
       // A new domain can change the color of previously evaluated rows.
-      columns[name] = isColorScale
-        ? (compiled[name]?.evaluate(input) ??
-          (parsedScales.get(name)?.scale.range.type === 'numeric'
-            ? vectorFromArray(new Array(input.numRows).fill(null), new Float64())
-            : vectorFromArray(
-                Array.from({length: input.numRows}, () => [0, 0, 0, 0]),
-                new FixedSizeList(4, new Field('item', new Uint8(), false))
-              )))
-        : (previousBatch?.getChild(name) ?? evaluateColumnExpression(expression, input, functions));
+      columns[name] =
+        compiled[name]?.evaluate(input) ??
+        (parsedScales.get(name)?.scale.range.type === 'numeric'
+          ? vectorFromArray(new Array(input.numRows).fill(null), new Float64())
+          : vectorFromArray(
+              Array.from({length: input.numRows}, () => [0, 0, 0, 0]),
+              new FixedSizeList(4, new Field('item', new Uint8(), false))
+            ));
+      fields.push(new Field(name, columns[name].type, true));
     }
-    return new Table(columns);
+    return new Table(new Schema(fields), columns);
   };
   const table =
     data.batches.length <= 1
