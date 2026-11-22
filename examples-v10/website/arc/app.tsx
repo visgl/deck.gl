@@ -13,7 +13,7 @@ import {tableFromArrays, type Table} from 'apache-arrow';
 import type {Device} from '@luma.gl/core';
 import {isArrowTable} from '@math.gl/core/arrow';
 import {ArcLayer} from '@deck.gl/layers';
-import {GeoArrowLayer} from '../../../modules/proposals/src/layers/geoarrow-layer';
+import {GeoArrowLayer} from '@deck.gl/proposals/layers';
 import {scaleQuantile} from 'd3-scale';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';

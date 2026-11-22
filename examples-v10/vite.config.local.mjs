@@ -23,6 +23,10 @@ export default defineConfig(async () => {
 
       alias: [
         ...Object.entries(aliases).map(([find, replacement]) => ({find, replacement})),
+        {
+          find: '@deck.gl/proposals/layers',
+          replacement: join(rootDir, 'modules/proposals/src/layers/index.ts')
+        },
         // Use root dependencies
         {find: 'mjolnir.js', replacement: join(rootDir, './node_modules/mjolnir.js')},
         aliasScopedPackages('@luma.gl'),

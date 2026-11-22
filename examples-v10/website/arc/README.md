@@ -3,15 +3,16 @@ on [deck.gl](http://deck.gl) website.
 
 ### Usage
 
-Run this example from a deck.gl checkout with `yarn start-local`. Its SQL accessors require the current repository source; the published `10.0.0-alpha.1` package predates that API. 
+Run this example from a deck.gl checkout with the root workspace dependencies installed.
+It uses the repository’s private experimental GeoArrowLayer.
 
 ```bash
 # install dependencies
 npm install
 # or
 yarn
-# run with the local deck.gl source
-yarn start-local
+# bundle and serve the app with vite
+npm start
 ```
 
 ### Data format

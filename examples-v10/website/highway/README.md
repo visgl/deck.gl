@@ -1,17 +1,18 @@
-This is a minimal standalone version of the GeoJsonLayer (Paths) example
+This is a GeoArrowLayer (Paths) example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
 
-Run this example from a deck.gl checkout. It uses the repository’s experimental GeoArrowLayer.
+Run this example from a deck.gl checkout with the root workspace dependencies installed.
+It uses the repository’s private experimental GeoArrowLayer.
 
 ```bash
 # install dependencies
 npm install
 # or
 yarn
-# run with the local deck.gl source
-yarn start-local
+# bundle and serve the app with vite
+npm start
 ```
 
 ### Data format
@@ -19,7 +20,7 @@ yarn start-local
 Sample data is stored in [deck.gl Example Data](https://github.com/visgl/deck.gl-data/tree/master/examples/highway), showing fatal accidents on U.S. highways. [Source](https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars)
 
 To use your own data, check out
-the [documentation of GeoJsonLayer](../../../docs/api-reference/layers/geojson-layer.md).
+the [GeoArrowLayer documentation](../../../docs/api-reference/proposals/arrow-layers.md).
 
 ### Basemap
 

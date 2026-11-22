@@ -10,7 +10,7 @@ import {LoadingWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 import type {Device} from '@luma.gl/core';
 import {isArrowTable} from '@math.gl/core/arrow';
-import {GeoArrowLayer} from '../../../modules/proposals/src/layers/geoarrow-layer';
+import {GeoArrowLayer} from '@deck.gl/proposals/layers';
 import {Field, FixedSizeList, Float32, Uint8, vectorFromArray, type Table} from 'apache-arrow';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
 import {GeoParquetLoader} from '@loaders.gl/tables/parquet';
@@ -225,6 +225,7 @@ export default function App({
       widths: styles?.widths,
       widthUnits: 'meters',
       widthMinPixels: 0.5,
+      transitions: {getLineColor: 1000, getLineWidth: 1000},
       pickable: true,
       onHover: setHoverInfo
     })
