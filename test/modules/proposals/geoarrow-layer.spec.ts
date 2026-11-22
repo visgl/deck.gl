@@ -147,6 +147,8 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         expect(info?.object.label).toBe(polygon);
         if (native) {
           expect(layer.getSubLayers()[0]?.constructor.name).toBe('ArrowSolidPolygonLayer');
+          const [x, y] = deck.getViewports()[0].project([5, 5]);
+          expect(await deck.pickObjectAsync({x: Math.round(x), y: Math.round(y)})).toBeNull();
         }
         if (lineLabel) {
           const [x, y] = deck.getViewports()[0].project([17, 12]);
