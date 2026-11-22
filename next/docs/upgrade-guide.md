@@ -20,7 +20,7 @@ A View's [`clearColor`](https://deck.gl/next/docs/api-reference/core/view.md#cle
 
 ### luma.gl v10 alpha.11[​](#lumagl-v10-alpha11 "Direct link to luma.gl v10 alpha.11")
 
-The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from `@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and `@luma.gl/core/webgpu`. WebGL constants and debugging tools move to `@luma.gl/core/webgl-constants` and `@luma.gl/core/webgl-debug`.
+The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from `@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and `@luma.gl/core/webgpu`. WebGL debugging tools move to `@luma.gl/core/webgl-debug`. Use string-valued GPU parameters in deck.gl.
 
 Import `postProcessGLTF` from `@luma.gl/engine/gltf`; the legacy loaders.gl postprocessor dependency is no longer needed.
 
@@ -653,7 +653,7 @@ new Deck({
 `DeckProps.parameters`, `LayerProps.parameters`, and `LayerProps.textureParameters` no longer use WebGL constants, but instead use (WebGPU style) [string constants](https://luma.gl/docs/api-reference/core/parameters/):
 
 ```
-// deck.gl v9 using string constants (preferred)
+// deck.gl v9 using string constants
 
 import {Deck} from '@deck.gl/core'
 
@@ -672,52 +672,6 @@ new Deck({
     blendAlphaSrcFactor: 'one-minus-dst-alpha',
 
     blendAlphaDstFactor: 'one'
-
-  }
-
-})
-
-
-
-// deck.gl v9 using GL constants
-
-// The constant module remains but is now considered an internal luma.gl module, and is no longer intended to be imported by applications.
-
-import {Deck} from '@deck.gl/core'
-
-import {GL} from '@luma.gl/webgl/constants'
-
-
-
-new Deck({
-
-  parameters: {
-
-    blendEquation: [GL.ADD, GL.ADD],
-
-    blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
-
-  }
-
-})
-
-
-
-// deck.gl v8
-
-import {Deck} from '@deck.gl/core/typed'
-
-import {GL} from '@luma.gl/webgl/constants';
-
-
-
-new Deck({
-
-  parameters: {
-
-    blendEquation: [GL.ADD, GL.ADD],
-
-    blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
 
   }
 
