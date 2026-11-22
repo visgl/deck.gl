@@ -10,6 +10,7 @@ import {
   Table,
   Uint8,
   vectorFromArray,
+  type RecordBatch,
   type Vector
 } from 'apache-arrow';
 import {compileArrowScale, compileArrowScales} from '@math.gl/sql/scales';
@@ -53,10 +54,14 @@ export function evaluateAccessorQueries(
   },
   functions?: SQLFunctions
 ): {table: Table; scales: Readonly<Record<string, ResolvedScale>>} {
-  const data = unwrapLoaderArrowResult(source);
-  if (!isArrowTable(data)) {
+  const inputData = unwrapLoaderArrowResult(source);
+  if (!isArrowTable(inputData)) {
     throw new Error('SQL accessors require Arrow table data');
   }
+
+  const data = Array.isArray(inputData.batches)
+    ? inputData
+    : new Table(inputData.schema, [inputData as unknown as RecordBatch]);
 
   const entries = Object.entries(expressions);
   const parse = parseExpression ?? sqlParser.parseExpression;
@@ -130,6 +135,7 @@ export function evaluateAccessorQueries(
   const priorTable = previous?.table;
   const canAppend =
     isArrowTable(priorSource) &&
+    Array.isArray(priorSource.batches) &&
     priorTable &&
     previous.parseExpression === parseExpression &&
     deepEqual(previous.functions, functions, 1) &&

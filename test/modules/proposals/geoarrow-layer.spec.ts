@@ -287,6 +287,14 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           expect(line?.index).toBe(2);
           expect(line?.object.label).toBe(lineLabel);
         }
+        expect(errors).toEqual([]);
+        if (encoding === 'centroid') {
+          const failedLayer = layer.clone({getGeometry: {sql: 'missing_geometry'}});
+          deck.setProps({layers: [failedLayer]});
+          await expect.poll(() => errors.length).toBe(1);
+          await expect.poll(() => failedLayer.getSubLayers()).toHaveLength(0);
+          errors.length = 0;
+        }
         const emptyLayer = new GeoArrowLayer({id: 'geometry', data: null});
         deck.setProps({layers: [emptyLayer]});
         await expect.poll(() => emptyLayer.isLoaded).toBe(true);

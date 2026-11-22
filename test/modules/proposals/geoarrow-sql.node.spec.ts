@@ -29,7 +29,7 @@ test('spatial SQL accessors preserve source row order and geometry field metadat
     'geoarrow.wkb'
   );
   const {table} = evaluateAccessorQueries(
-    source,
+    source.batches[0],
     {
       centroid: 'ST_Centroid(footprint)',
       anchor: 'ST_PointOnSurface(footprint)',

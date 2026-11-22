@@ -121,6 +121,10 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
     /** Selected field and declared encoding. */
     const computed = this.getAccessorQueryTable();
     const computedGeometry = computed?.schema.fields.find(field => field.name === 'getGeometry');
+    if (this.hasAccessorQuery('getGeometry') && !computedGeometry) {
+      this.setState({geometry: null, features: null, renderData: null});
+      return;
+    }
     const columnName = typeof props.getGeometry === 'string' ? props.getGeometry : undefined;
     const geometryData = computedGeometry ? computed! : data;
     const geometry = resolveGeoArrowGeometry(
@@ -137,7 +141,11 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
     ].includes(geometry.geometryType);
     /** Prepared renderer input stays columnar when the selected renderer supports it. */
     const useNative = native && !this.usesGeoJsonRenderer(props, geometry.geometryType);
-    const nativeData = computedGeometry && 'assign' in data ? data.assign(computed!) : data;
+    /** Native children need the computed geometry alongside the original style columns. */
+    const nativeData =
+      useNative && computedGeometry
+        ? ('batches' in data ? data : new Table(data.schema, [data])).assign(computed!)
+        : data;
     this.setState({
       geometry,
       renderData: useNative ? this.prepareNativeGeometry(nativeData, geometry) : data,
