@@ -37,11 +37,27 @@ function sinCosSmall(x: number, r: (x: number) => number): [number, number] {
   ];
 }
 
+/**
+ * Port of the longitude difference in project_globe_relative_, wrapped to [-180, 180]. The
+ * globeLongitudeWrap uniform is float64 origin - 360 and origin + 360, rounded once on upload.
+ */
+function lngDelta(lng: number, origin: number, r: (x: number) => number): number {
+  const dLng = r(lng - origin);
+  if (dLng > 180) return r(lng - r(origin + 360));
+  if (dLng < -180) return r(lng - r(origin - 360));
+  return dLng;
+}
+
 /** Float64 port of project_globe_relative_ in project.glsl.ts, with an optional float32 rounding. */
-function globeRelative(hi: Vec3, lo: Vec3, origin: Vec3, trig: number[], r: (x: number) => number) {
-  let dLng = r(hi[0] - origin[0]);
-  if (dLng > 180) dLng = r(dLng - 360);
-  if (dLng < -180) dLng = r(dLng + 360);
+function globeRelative(
+  hi: Vec3,
+  lo: Vec3,
+  origin: Vec3,
+  trig: number[],
+  r: (x: number) => number,
+  delta: (lng: number, origin: number, r: (x: number) => number) => number = lngDelta
+) {
+  const dLng = delta(hi[0], origin[0], r);
   const dLat = r(hi[1] - origin[1]);
   const hL = r(r(dLng * r(Math.PI / 180)) * 0.5);
   const hP = r(r(dLat * r(Math.PI / 180)) * 0.5);
@@ -167,6 +183,7 @@ test('flag on: float64 origin at the camera target and float64 center', () => {
   expect(uniforms.coordinateOrigin).toEqual(origin);
   expect(uniforms.globeOriginTrig).toEqual(getGlobeOriginTrig(origin));
   expect(uniforms.globeOriginTrig[0]).toBe(Math.sin((origin[0] * Math.PI) / 180));
+  expect(uniforms.globeLongitudeWrap).toEqual([origin[0] - 360, origin[0] + 360]);
 
   const originCommon = viewport.projectPosition(origin);
   uniforms.commonOrigin.forEach((v, i) => expect(v).toBe(originCommon[i]));
@@ -272,4 +289,96 @@ test('float32 shader model at zoom 20: camera-relative within 0.01 px, absolute 
   }
   expect(maxRelative).toBeLessThan(0.01);
   expect(maxAbsolute).toBeGreaterThan(1);
+});
+
+/** Distance in meters between the float32 model and the float64 projection, relative to origin. */
+function float32ModelError(p: Vec3, origin: Vec3): number {
+  const viewport = makeViewport();
+  const {hi, lo} = split(p);
+  const actual = globeRelative(hi, lo, origin, getGlobeOriginTrig(origin), f);
+  const expected = viewport.projectPosition(p);
+  const base = viewport.projectPosition(origin);
+  const error = Math.hypot(...actual.map((v, i) => v - (expected[i] - base[i])));
+  return (error * EARTH_RADIUS) / GLOBE_RADIUS;
+}
+
+// Float32 longitude step in [128, 256)
+const STEP = 2 ** -16;
+
+test('float32 shader model: the longitude difference across the antimeridian is exact', () => {
+  // The origin is 2 steps west of 180, the point 1 step east of -180: 3 steps apart
+  const origin = 179.999969482421875;
+  const point = -179.9999847412109375;
+  expect(f(origin)).toBe(origin);
+  expect(f(point)).toBe(point);
+  expect(lngDelta(point, origin, f)).toBe(3 * STEP);
+  expect(lngDelta(-point, -origin, f)).toBe(-3 * STEP);
+  expect(float32ModelError([point, 0, 0], [origin, 0, 0])).toBeLessThan(0.001);
+  expect(float32ModelError([-point, 0, 0], [-origin, 0, 0])).toBeLessThan(0.001);
+
+  // Both directions, up to 64 steps from the seam on each side, and some larger offsets. With
+  // the origin within 52 degrees of the seam, origin -/+ 360 is a float32 value and the one
+  // subtraction is exact near the seam.
+  const offsets = [...Array.from({length: 65}, (_, i) => i * STEP), 0.001, 0.0123, 0.5, 7.25, 51];
+  for (const a of offsets) {
+    for (const b of offsets) {
+      const east = f(180 - a);
+      const west = f(-180 + b);
+      // Float64 differences of float32 values are exact
+      const expected = west - east + 360;
+      expect(lngDelta(west, east, f)).toBe(expected);
+      expect(lngDelta(east, west, f)).toBe(0 - expected);
+    }
+  }
+  // Farther from the seam, origin -/+ 360 rounds: within 2 float32 steps of a difference > 52
+  for (const a of [52.5, 60, 85, 120, 170]) {
+    for (const b of [0, STEP, 0.5, 10, 100]) {
+      const east = f(180 - a);
+      const west = f(-180 + b);
+      const expected = west - east + 360;
+      // A difference of 180 may land on either side
+      if (expected >= 180) continue;
+      const step = 2 ** (Math.floor(Math.log2(expected)) - 23);
+      expect(Math.abs(lngDelta(west, east, f) - expected)).toBeLessThanOrEqual(2 * step);
+      expect(Math.abs(lngDelta(east, west, f) + expected)).toBeLessThanOrEqual(2 * step);
+    }
+  }
+  for (const a of [0, 3, 40].map(i => i * STEP)) {
+    for (const b of [1, 17].map(i => i * STEP)) {
+      for (const lat of [0, 37.5, -61.25]) {
+        const east: Vec3 = [f(180 - a), f(lat), 0];
+        const west: Vec3 = [-180 + b + 1e-9, lat + 1e-5, 2];
+        expect(float32ModelError(west, east)).toBeLessThan(0.001);
+        expect(float32ModelError([-west[0], west[1], 2], [-east[0], east[1], 0])).toBeLessThan(
+          0.001
+        );
+      }
+    }
+  }
+});
+
+test('float32 shader model: points that do not cross the antimeridian subtract directly', () => {
+  const plain = (lng: number, origin: number, r: (x: number) => number) => r(lng - origin);
+  const origins: Vec3[] = [
+    [f(VIEW_STATE.longitude), f(VIEW_STATE.latitude), 0],
+    [f(179.99), f(10), 0],
+    [f(-179.99), f(-10), 0],
+    [0, 0, 0]
+  ];
+  let count = 0;
+  for (const origin of origins) {
+    const trig = getGlobeOriginTrig(origin);
+    for (let lng = -180; lng <= 180; lng += 7.3) {
+      for (const d of [0, 1e-4, -3e-3, 0.7]) {
+        const p: Vec3 = [lng + d, 20 + d, 1.5];
+        const {hi, lo} = split(p);
+        if (Math.abs(f(hi[0] - origin[0])) > 180) continue;
+        count++;
+        expect(globeRelative(hi, lo, origin, trig, f)).toEqual(
+          globeRelative(hi, lo, origin, trig, f, plain)
+        );
+      }
+    }
+  }
+  expect(count).toBeGreaterThan(400);
 });

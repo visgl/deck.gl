@@ -61,6 +61,7 @@ struct ProjectUniforms {
   globeRelative: i32,
   globeOriginTrig: vec4<f32>,
   globeLayerOffset: vec3<f32>,
+  globeLongitudeWrap: vec2<f32>,
 };
 
 @group(0) @binding(auto)
@@ -270,8 +271,12 @@ fn project_sin_cos_small_(x: f32) -> vec2<f32> {
 // Camera-relative globe position relative to project.commonOrigin; see project.glsl.ts
 fn project_globe_relative_(lnglatz: vec3<f32>, lnglatz64Low: vec3<f32>) -> vec3<f32> {
   var dLng = lnglatz.x - project.coordinateOrigin.x;
-  if (dLng > 180.0) { dLng -= 360.0; }
-  if (dLng < -180.0) { dLng += 360.0; }
+  // Across the antimeridian, one subtraction from the origin minus or plus 360; see project.glsl.ts
+  if (dLng > 180.0) {
+    dLng = lnglatz.x - project.globeLongitudeWrap.y;
+  } else if (dLng < -180.0) {
+    dLng = lnglatz.x - project.globeLongitudeWrap.x;
+  }
   let dLat = lnglatz.y - project.coordinateOrigin.y;
   let hLambda = radians(dLng) * 0.5;
   let hPhi = radians(dLat) * 0.5;

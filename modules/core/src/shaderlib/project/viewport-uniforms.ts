@@ -18,6 +18,7 @@ import type Viewport from '../../viewports/viewport';
 import type {Buffer, Texture} from '@luma.gl/core';
 import type {CoordinateSystem} from '../../lib/constants';
 
+type Vec2 = [number, number];
 type Vec3 = [number, number, number];
 type Vec4 = [number, number, number, number];
 
@@ -328,6 +329,11 @@ export type ProjectUniforms = {
   globeOriginTrig: Vec4;
   /** Camera-relative globe, `meter-offsets`: layer origin minus `commonOrigin`, from float64. */
   globeLayerOffset: Vec3;
+  /**
+   * Origin longitude minus and plus 360, rounded once to float32. A longitude across the
+   * antimeridian subtracts one of them in a single, exactly rounded step.
+   */
+  globeLongitudeWrap: Vec2;
 };
 
 export type ProjectProps = {
@@ -482,7 +488,8 @@ function calculateViewportUniforms({
 
     globeRelative: 0,
     globeOriginTrig: [0, 0, 0, 0],
-    globeLayerOffset: [0, 0, 0]
+    globeLayerOffset: [0, 0, 0],
+    globeLongitudeWrap: [0, 0]
   };
 
   if (geospatialOrigin) {
@@ -552,7 +559,9 @@ function calculateViewportUniforms({
 
   if (viewport.projectionMode === PROJECTION_MODE.GLOBE && offsetMode) {
     uniforms.globeRelative = 1;
-    uniforms.globeOriginTrig = getGlobeOriginTrig(getGlobeViewOrigin(viewport));
+    const origin = getGlobeViewOrigin(viewport);
+    uniforms.globeOriginTrig = getGlobeOriginTrig(origin);
+    uniforms.globeLongitudeWrap = [origin[0] - 360, origin[0] + 360];
   }
 
   return uniforms;

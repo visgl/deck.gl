@@ -183,6 +183,31 @@ test('camera-relative GlobeView: meter-offsets layer at zoom 19', async () => {
   expect(Math.max(...absolute)).toBeGreaterThan(0.5);
 });
 
+test('camera-relative GlobeView: points across the antimeridian at zoom 19', async () => {
+  // Float32 longitudes 2 steps west of 180 and 1 step east of -180
+  const seamOrigin = 179.999969482421875;
+  const seamPoint = -179.9999847412109375;
+  const step = 2 ** -16;
+  for (const sign of [1, -1]) {
+    await withDeck(new GlobeView({_cameraRelative: true}), async (deck, read) => {
+      await renderFrame(deck, {
+        viewState: {...VIEW_STATE, longitude: sign * seamOrigin, latitude: 0}
+      });
+      const viewport = deck.getViewports()[0] as GlobeViewport;
+      const positions = [
+        seamPoint,
+        seamPoint + 9 * step,
+        seamPoint + 4.5 * step,
+        180 - 5 * step
+      ].map((lng, i) => [sign * lng, (i - 1.5) * 1e-4, 0] as Vec3);
+      await renderFrame(deck, {layers: [scatterplot(positions)]});
+      const errors = measureErrors(read(), viewport, positions);
+      console.log('Antimeridian point errors (px)', sign, errors);
+      expect(Math.max(...errors)).toBeLessThan(TOLERANCE);
+    });
+  }
+});
+
 test('camera-relative GlobeView: picking at the float64 projection', async () => {
   await withDeck(new GlobeView({_cameraRelative: true}), async (deck, _read, viewport) => {
     const positions = samplePositions(viewport);

@@ -43,6 +43,7 @@ layout(std140) uniform projectUniforms {
   int globeRelative;
   vec4 globeOriginTrig;
   vec3 globeLayerOffset;
+  vec2 globeLongitudeWrap;
 } project;
 
 
@@ -251,10 +252,16 @@ vec2 project_sin_cos_small_(float x) {
 // multiply float32 trigonometry errors by small deltas only. The angle sums use the float64 origin
 // trigonometry. The low part enters after the trigonometry, through the derivative at the origin:
 // a GPU compiler may reassociate (high - origin) + low and lose the low part.
+// Across the antimeridian, the longitude is one subtraction from the origin minus or plus 360,
+// which is exact near the seam. Subtracting and then adding 360 rounds twice and loses a float32
+// step; so does any sum of three terms that the compiler is free to reassociate.
 vec3 project_globe_relative_(vec3 lnglatz, vec3 lnglatz64Low) {
   float dLng = lnglatz.x - project.coordinateOrigin.x;
-  if (dLng > 180.0) dLng -= 360.0;
-  if (dLng < -180.0) dLng += 360.0;
+  if (dLng > 180.0) {
+    dLng = lnglatz.x - project.globeLongitudeWrap.y;
+  } else if (dLng < -180.0) {
+    dLng = lnglatz.x - project.globeLongitudeWrap.x;
+  }
   float dLat = lnglatz.y - project.coordinateOrigin.y;
   float hLambda = radians(dLng) * 0.5;
   float hPhi = radians(dLat) * 0.5;
