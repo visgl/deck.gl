@@ -12,7 +12,8 @@ import {
   type UpdateParameters
 } from '@deck.gl/core';
 import {GeoJsonLayer, type GeoJsonLayerProps} from '@deck.gl/layers';
-import type {RecordBatch, Table} from 'apache-arrow';
+import {convertGeoArrowGeometry} from '@loaders.gl/core/geoarrow';
+import {DataType, Table, type RecordBatch} from 'apache-arrow';
 import type {Feature, Geometry} from 'geojson';
 import {ArrowScatterplotLayer, type ArrowScatterplotLayerProps} from './arrow-scatterplot-layer';
 import {ArrowPathLayer, type ArrowPathLayerProps} from './arrow-path-layer';
@@ -83,6 +84,8 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
   static override layerName = 'GeoArrowLayer';
 
   declare state: {
+    /** Native geometry with the layout required by the renderer. */
+    renderData?: Table | RecordBatch | null;
     /** Selected column and encoding for the loaded source. */
     geometry?: {columnName: string; geometryType: GeoArrowLayerGeometryType} | null;
     /** Decoded geometry for formats handled by the GeoJSON renderer. */
@@ -96,7 +99,7 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
     const {props, oldProps, changeFlags} = params;
     const data = this.getSourceData();
     if (!data?.numRows) {
-      this.setState({geometry: null, features: null});
+      this.setState({geometry: null, features: null, renderData: null});
       return;
     }
     if (
@@ -118,12 +121,14 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       'geoarrow.polygon',
       'geoarrow.multipolygon'
     ].includes(geometry.geometryType);
+    /** Prepared renderer input stays columnar when the selected renderer supports it. */
+    const useNative = native && !this.usesGeoJsonRenderer(props);
     this.setState({
       geometry,
-      features:
-        native && !this.usesGeoJsonRenderer(props)
-          ? null
-          : makeGeoArrowFeatures(data, geometry.columnName, geometry.geometryType)
+      renderData: useNative ? this.prepareNativeGeometry(data, geometry) : data,
+      features: useNative
+        ? null
+        : makeGeoArrowFeatures(data, geometry.columnName, geometry.geometryType)
     });
   }
 
@@ -159,8 +164,7 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       ...layerProps
     } = this.props;
     /** Geometry prepared for the current input. */
-    const {geometry, features} = this.state;
-    const data = this.getSourceData();
+    const {geometry, features, renderData: data} = this.state;
     if (!data || !geometry) {
       return null;
     }
@@ -246,6 +250,26 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
         props.filled === false ||
         props.extensions?.length
     );
+  }
+
+  /** Adapts separated coordinates without expanding the source into feature rows. */
+  private prepareNativeGeometry(
+    data: Table | RecordBatch,
+    geometry: {columnName: string; geometryType: GeoArrowLayerGeometryType}
+  ): Table | RecordBatch {
+    let type = data.getChild(geometry.columnName)?.type;
+    while (type && DataType.isList(type)) {
+      type = type.children[0].type;
+    }
+    if (!type || !DataType.isStruct(type)) {
+      return data;
+    }
+    const table = 'batches' in data ? data : new Table(data.schema, [data]);
+    return convertGeoArrowGeometry(table, geometry.geometryType, {
+      geometryColumn: geometry.columnName,
+      coordinates: 'interleaved',
+      fallback: 'error'
+    });
   }
 
   /** Returns the Arrow source after Layer resolves an asynchronous data prop. */

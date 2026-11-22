@@ -6,6 +6,7 @@ import {Deck, OrthographicView} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {Matrix4} from '@math.gl/core/matrix';
 import {device as webglDevice} from '@deck.gl/test-utils/vitest';
+import {load} from '@loaders.gl/core';
 import {convertGeoArrowGeometry} from '@loaders.gl/core/geoarrow';
 import {GeoJSONLoader} from '@loaders.gl/tables/geojson';
 import {Buffer, Texture} from '@luma.gl/core';
@@ -37,7 +38,16 @@ function makeSource() {
   return table.slice(0, 1).concat(table.slice(1));
 }
 
-const encodings = ['wkt', 'wkb', 'mixed', 'geojson', 'native', 'styled'] as const;
+const encodings = [
+  'wkt',
+  'wkb',
+  'mixed',
+  'geojson',
+  'native',
+  'native-line',
+  'separated',
+  'styled'
+] as const;
 
 for (const backend of ['webgl', 'webgpu'] as const) {
   test.for(encodings)(
@@ -102,11 +112,34 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           native: {
             data: new URL('./fixtures/geoarrow-polygon.geojson', import.meta.url).href,
             polygon: 'native polygon'
+          },
+          separated: {
+            data:
+              encoding === 'separated'
+                ? (
+                    load(
+                      new URL('./fixtures/geoarrow-polygon.geojson', import.meta.url).href,
+                      GeoJSONLoader,
+                      {
+                        core: {worker: false},
+                        geoarrow: {encodingPreference: 'optimized'}
+                      }
+                    ) as Promise<Table>
+                  ).then(table =>
+                    convertGeoArrowGeometry(table, 'geoarrow.polygon', {coordinates: 'separated'})
+                  )
+                : source,
+            polygon: 'native polygon'
+          },
+          'native-line': {
+            data: new URL('./fixtures/geoarrow-line.geojson', import.meta.url).href,
+            polygon: 'native line'
           }
         };
         const input = inputs[encoding];
         const {data, polygon} = input;
-        const native = encoding === 'native';
+        const nativePolygon = encoding === 'native' || encoding === 'separated';
+        const native = nativePolygon || encoding === 'native-line';
         const styled = encoding === 'styled';
         const lineLabel = 'line' in input ? input.line : undefined;
         const loaded: unknown[] = [];
@@ -126,13 +159,14 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             material: false,
             modelMatrix: new Matrix4([1, 0, 0, 0, 0, 1, 0, 0, 0, -0.5, 0.05, 0, 0, 0, 0, 1])
           }),
+          colors: [255, 0, 0, 255],
           widths: 2,
           widthScale: 4,
           pickable: true
         });
         deck.setProps({layers: [layer]});
         await expect.poll(() => layer.isLoaded).toBe(true);
-        if (native) {
+        if (nativePolygon) {
           await expect
             .poll(() => {
               const polygonLayer = layer.getSubLayers()[0] as ArrowSolidPolygonLayer | undefined;
@@ -166,10 +200,12 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         const info = await deck.pickObjectAsync({x: Math.round(pickX), y: Math.round(pickY)});
         expect(info?.index).toBe(native || styled ? 0 : 1);
         expect(info?.object.label).toBe(polygon);
-        if (native) {
+        if (nativePolygon) {
           expect(layer.getSubLayers()[0]?.constructor.name).toBe('ArrowSolidPolygonLayer');
           const [x, y] = deck.getViewports()[0].project([5, 5]);
           expect(await deck.pickObjectAsync({x: Math.round(x), y: Math.round(y)})).toBeNull();
+        } else if (native) {
+          expect(layer.getSubLayers()[0]?.constructor.name).toBe('ArrowPathLayer');
         }
         if (styled) {
           const child = layer.getSubLayers()[0];
