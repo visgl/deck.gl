@@ -11,7 +11,7 @@ import {
   type Unit,
   type UpdateParameters
 } from '@deck.gl/core';
-import {GeoJsonLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, type GeoJsonLayerProps} from '@deck.gl/layers';
 import {convertGeoArrowGeometry} from '@loaders.gl/core/geoarrow';
 import {DataType, Table, type RecordBatch} from 'apache-arrow';
 import type {Feature, Geometry} from 'geojson';
@@ -32,42 +32,48 @@ import {resolveGeoArrowGeometry, type GeoArrowLayerGeometryType} from './resolve
 export {resolveGeoArrowGeometry, type GeoArrowLayerGeometryType} from './resolve-geoarrow-geometry';
 
 /** GeoArrow metadata-driven composite props. Geometry-specific props pass to the selected child. */
-export type GeoArrowLayerProps = Omit<LayerProps, 'data'> & {
-  /** A GeoArrow table or batch, or a URL or promise that resolves to one. */
-  data?: Table | RecordBatch | string | Promise<Table | RecordBatch> | null;
-  /** Geometry column. Defaults to the declared primary geometry or first GeoArrow field. */
-  getGeometry?: string;
-  /** Explicit geometry encoding when extension metadata is absent. */
-  geometryType?: GeoArrowLayerGeometryType;
-  /** Point radius column or constant. */
-  getRadius?: ArrowScatterplotLayerProps['getRadius'];
-  /** Point fill or polygon fill color. */
-  getFillColor?:
-    | ArrowScatterplotLayerProps['getFillColor']
-    | ArrowSolidPolygonLayerProps['getFillColor'];
-  /** Linestring color. */
-  colors?: ArrowPathLayerProps['colors'];
-  /** Linestring width. */
-  widths?: ArrowPathLayerProps['widths'];
-  /** Multiplier applied to point radii in pixels. */
-  radiusScale?: number;
-  /** Minimum point radius in pixels. */
-  radiusMinPixels?: number;
-  /** Maximum point radius in pixels. */
-  radiusMaxPixels?: number;
-  /** Units for line widths. Defaults to pixels. */
-  widthUnits?: Unit;
-  /** Multiplier applied to line widths. */
-  widthScale?: number;
-  /** Minimum line width in pixels. */
-  widthMinPixels?: number;
-  /** Maximum line width in pixels. */
-  widthMaxPixels?: number;
-  /** Optional pre-tessellated polygon interpretation. */
-  tessellated?: ArrowSolidPolygonLayerProps['tessellated'];
-  /** GPU model selection forwarded to the selected native renderer. */
-  model?: ArrowPathLayerProps['model'];
-};
+export type GeoArrowLayerProps = Omit<LayerProps, 'data'> &
+  Pick<
+    GeoJsonLayerProps,
+    'filled' | 'stroked' | 'extruded' | 'wireframe' | 'elevationScale' | 'material'
+  > & {
+    /** Polygon elevation constant, field name, or Arrow column in source row order. */
+    getElevation?: number | string | import('apache-arrow').Vector;
+    /** A GeoArrow table or batch, or a URL or promise that resolves to one. */
+    data?: Table | RecordBatch | string | Promise<Table | RecordBatch> | null;
+    /** Geometry column. Defaults to the declared primary geometry or first GeoArrow field. */
+    getGeometry?: string;
+    /** Explicit geometry encoding when extension metadata is absent. */
+    geometryType?: GeoArrowLayerGeometryType;
+    /** Point radius column or constant. */
+    getRadius?: ArrowScatterplotLayerProps['getRadius'];
+    /** Point fill or polygon fill color. */
+    getFillColor?:
+      | ArrowScatterplotLayerProps['getFillColor']
+      | ArrowSolidPolygonLayerProps['getFillColor'];
+    /** Linestring color. */
+    colors?: ArrowPathLayerProps['colors'];
+    /** Linestring width. */
+    widths?: ArrowPathLayerProps['widths'];
+    /** Multiplier applied to point radii in pixels. */
+    radiusScale?: number;
+    /** Minimum point radius in pixels. */
+    radiusMinPixels?: number;
+    /** Maximum point radius in pixels. */
+    radiusMaxPixels?: number;
+    /** Units for line widths. Defaults to pixels. */
+    widthUnits?: Unit;
+    /** Multiplier applied to line widths. */
+    widthScale?: number;
+    /** Minimum line width in pixels. */
+    widthMinPixels?: number;
+    /** Maximum line width in pixels. */
+    widthMaxPixels?: number;
+    /** Optional pre-tessellated polygon interpretation. */
+    tessellated?: ArrowSolidPolygonLayerProps['tessellated'];
+    /** GPU model selection forwarded to the selected native renderer. */
+    model?: ArrowPathLayerProps['model'];
+  };
 
 /**
  * Renders GeoArrow geometry with source-row picking.
@@ -100,6 +106,8 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       this.state.geometry &&
       !changeFlags.dataChanged &&
       props.data === oldProps.data &&
+      this.usesGeoJsonRenderer(props, this.state.geometry.geometryType) ===
+        this.usesGeoJsonRenderer(oldProps, this.state.geometry.geometryType) &&
       props.getGeometry === oldProps.getGeometry &&
       props.geometryType === oldProps.geometryType
     ) {
@@ -107,24 +115,22 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
     }
     /** Selected field and declared encoding. */
     const geometry = resolveGeoArrowGeometry(data, props.getGeometry, props.geometryType);
-    switch (geometry.geometryType) {
-      case 'geoarrow.point':
-      case 'geoarrow.linestring':
-      case 'geoarrow.polygon':
-      case 'geoarrow.multipolygon':
-        this.setState({
-          geometry,
-          features: null,
-          renderData: this.prepareNativeGeometry(data, geometry)
-        });
-        break;
-      default:
-        this.setState({
-          geometry,
-          renderData: data,
-          features: makeGeoArrowFeatures(data, geometry.columnName, geometry.geometryType)
-        });
-    }
+    /** Whether the geometry encoding supports native rendering before styling is considered. */
+    const native = [
+      'geoarrow.point',
+      'geoarrow.linestring',
+      'geoarrow.polygon',
+      'geoarrow.multipolygon'
+    ].includes(geometry.geometryType);
+    /** Prepared renderer input stays columnar when the selected renderer supports it. */
+    const useNative = native && !this.usesGeoJsonRenderer(props, geometry.geometryType);
+    this.setState({
+      geometry,
+      renderData: useNative ? this.prepareNativeGeometry(data, geometry) : data,
+      features: useNative
+        ? null
+        : makeGeoArrowFeatures(data, geometry.columnName, geometry.geometryType)
+    });
   }
 
   /** Restores the original Arrow row for both native and decoded geometry. */
@@ -151,6 +157,7 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
       geometryType,
       getRadius,
       getFillColor,
+      getElevation,
       colors,
       widths,
       tessellated,
@@ -175,7 +182,8 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
             : features.findIndex(
                 feature => feature.properties.rowIndex === layerProps.highlightedObjectIndex
               ),
-        stroked: false,
+        stroked: layerProps.stroked ?? false,
+        getElevation: makeGeoArrowFeatureAccessor(data, getElevation, 1000),
         pointRadiusUnits: 'pixels',
         pointRadiusScale: layerProps.radiusScale ?? 1,
         pointRadiusMinPixels: layerProps.radiusMinPixels ?? 0,
@@ -191,6 +199,7 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
         updateTriggers: {
           ...layerProps.updateTriggers,
           ...subLayerProps.updateTriggers,
+          getElevation: [getElevation, layerProps.updateTriggers?.getElevation],
           getPointRadius: [getRadius, layerProps.updateTriggers?.getRadius],
           getFillColor: [getFillColor, layerProps.updateTriggers?.getFillColor],
           getLineColor: [colors, layerProps.updateTriggers?.colors],
@@ -231,6 +240,21 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
         } as ArrowSolidPolygonLayerProps);
     }
     return null;
+  }
+
+  /** Uses the standard renderer for polygon faces and extensions that require its attributes. */
+  private usesGeoJsonRenderer(
+    props: GeoArrowLayerProps,
+    geometryType: GeoArrowLayerGeometryType
+  ): boolean {
+    /** Polygon-only styles never change the renderer for native points or lines. */
+    const isPolygon =
+      geometryType === 'geoarrow.polygon' || geometryType === 'geoarrow.multipolygon';
+    return Boolean(
+      props.extensions?.length ||
+        (isPolygon &&
+          (props.extruded || props.wireframe || props.stroked || props.filled === false))
+    );
   }
 
   /** Adapts separated coordinates without expanding the source into feature rows. */
