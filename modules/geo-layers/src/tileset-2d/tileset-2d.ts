@@ -462,13 +462,15 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     } else if (this.needsReload) {
       this._selectedTiles = this._selectedTiles!.map(tile => this._getTile(tile.index, true));
     }
-    if (preloadViewport || this._preloadTiles.size) {
-      const indices = preloadViewport ? this._getPreloadIndices(preloadViewport, zRange) : [];
-      this._preloadTiles = this._createPreloadTiles(indices);
-    }
 
     // Update tile states
     const changed = this.updateTileStates();
+    // After the visibility update, so that the preload cap counts this frame's placeholders.
+    if (preloadViewport || this._preloadTiles.size) {
+      const indices = preloadViewport ? this._getPreloadIndices(preloadViewport, zRange) : [];
+      this._preloadTiles.clear();
+      this._preloadTiles = this._createPreloadTiles(indices);
+    }
     this._pruneRequests();
 
     if (this._dirty) {
@@ -718,15 +720,51 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
   }
 
   /**
-   * Creates and requests preload tiles in index order. The set is capped so that it and the
-   * selected tiles fit the tile-count limit of the cache.
+   * Creates and requests preload tiles in index order. The set is capped so that it fits the
+   * tile-count limit of the cache beside the selected, visible and other preload tiles.
    */
   private _createPreloadTiles(indices: TileIndex[]): Map<Tile2DHeader<DataT>, number> {
-    const limit = Math.max(0, this._getMaxCacheSize() - this._getSelectedTilesUnion().size);
+    const keptTiles = new Set([
+      ...this._getSelectedTilesUnion(),
+      ...this._getVisibleTilesUnion(),
+      ...this._getPreloadTilesUnion().keys()
+    ]);
+    let room = this._getMaxCacheSize() - keptTiles.size;
     const preloadTiles = new Map<Tile2DHeader<DataT>, number>();
-    for (const index of indices.slice(0, limit)) {
-      preloadTiles.set(this._getTile(index, true), preloadTiles.size);
+    for (const index of indices) {
+      const tile = this._getTile(index);
+      if (!tile || !keptTiles.has(tile)) {
+        if (room-- <= 0) break;
+      }
+      preloadTiles.set(tile || this._getTile(index, true), preloadTiles.size);
     }
+    return preloadTiles;
+  }
+
+  /**
+   * Shrinks the preload sets, best rank first, so that they fit the tile-count limit of the
+   * cache beside the selected and visible tiles. Returns the preload tiles that remain.
+   */
+  private _capPreloadTiles(
+    maxCacheSize: number,
+    selectedTiles: Set<Tile2DHeader<DataT>>,
+    visibleTiles: Set<Tile2DHeader<DataT>>
+  ): Set<Tile2DHeader<DataT>> {
+    const preloadTiles = new Set<Tile2DHeader<DataT>>();
+    const ranked = [...this._getPreloadTilesUnion()].sort((a, b) => a[1] - b[1]);
+    if (!ranked.length) return preloadTiles;
+    const keptTiles = new Set([...selectedTiles, ...visibleTiles]);
+    let room = maxCacheSize - keptTiles.size;
+    for (const [tile] of ranked) {
+      if (keptTiles.has(tile) || room-- > 0) preloadTiles.add(tile);
+    }
+    const cap = (tiles: Map<Tile2DHeader<DataT>, number>) => {
+      for (const tile of tiles.keys()) {
+        if (!preloadTiles.has(tile)) tiles.delete(tile);
+      }
+    };
+    cap(this._preloadTiles);
+    for (const consumer of this._consumers.values()) cap(consumer.preloadTiles);
     return preloadTiles;
   }
 
@@ -874,12 +912,12 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     const maxCacheByteSize = this.opts.maxCacheByteSize ?? Infinity;
     const visibleTiles = this._getVisibleTilesUnion();
     const selectedTiles = this._getSelectedTilesUnion();
+    const preloadTiles = this._capPreloadTiles(maxCacheSize, selectedTiles, visibleTiles);
     const overflown = this._cache.size > maxCacheSize || this._cacheByteSize > maxCacheByteSize;
 
     if (overflown) {
-      // Every update touches its preload tiles, so LRU order evicts them after older tiles.
       for (const [id, tile] of this._cache) {
-        if (!visibleTiles.has(tile) && !selectedTiles.has(tile)) {
+        if (!visibleTiles.has(tile) && !selectedTiles.has(tile) && !preloadTiles.has(tile)) {
           this._removeCachedTile(id, tile);
           tile.abort();
           this._handleTileUnload(tile);

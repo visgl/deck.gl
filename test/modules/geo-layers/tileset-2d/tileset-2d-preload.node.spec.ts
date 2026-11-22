@@ -210,3 +210,118 @@ test('Tileset2D preload: a cleared set cancels the queued preload requests', asy
     'queued preload tiles never loaded'
   ).toBe(true);
 });
+
+test('Tileset2D preload: visible placeholders do not push preload tiles out of the cache', async () => {
+  const zoomed = new WebMercatorViewport({...CURRENT, zoom: 4});
+  const {tileset: probe} = makeTileset();
+  const currentIds = getIds(probe, CURRENT);
+  const zoomedIds = getIds(probe, zoomed);
+  const targetIds = getIds(probe, TARGET);
+  expect(targetIds.length).toBeGreaterThan(1);
+  // Room for the selected tiles, their placeholders and one preload tile.
+  const maxCacheSize = zoomedIds.length + currentIds.length + 1;
+  const unloaded: string[] = [];
+  const {tileset, requests} = makeTileset({
+    maxCacheSize,
+    refinementStrategy: 'best-available',
+    onTileUnload: tile => unloaded.push(tile.id)
+  });
+  tileset.update(CURRENT, {zRange: null, modelMatrix: null});
+  await settle();
+  requests.forEach(r => r.resolve());
+  await settle();
+
+  // Zoom in: the new tiles are not loaded, so the loaded parents stay visible as placeholders.
+  tileset.update(zoomed, {zRange: null, modelMatrix: null, preloadViewport: TARGET});
+  await settle();
+  const placeholders = tileset.tiles.filter(t => t.isVisible && currentIds.includes(t.id));
+  expect(placeholders.length, 'placeholders exist').toBe(currentIds.length);
+
+  expect(
+    targetIds.filter(id => unloaded.includes(id)),
+    'no preload tile evicted'
+  ).toEqual([]);
+  expect(
+    requests.filter(r => r.signal?.aborted).map(r => r.id),
+    'no request aborted'
+  ).toEqual([]);
+  expect(
+    targetIds.filter(id => tileset.tiles.some(t => t.id === id)),
+    'the preload set shrinks to the best tile'
+  ).toEqual(targetIds.slice(0, 1));
+  expect(tileset.tiles.length).toBeLessThanOrEqual(maxCacheSize);
+});
+
+test('Tileset2D preload: a second consumer does not evict the preload tiles of the first', async () => {
+  const other = new WebMercatorViewport({...TARGET, longitude: -40});
+  const {tileset: probe} = makeTileset();
+  const currentIds = getIds(probe, CURRENT);
+  const targetIds = getIds(probe, TARGET);
+  const otherIds = getIds(probe, other);
+  expect(otherIds.some(id => targetIds.includes(id) || currentIds.includes(id))).toBe(false);
+
+  const unloaded: string[] = [];
+  const {tileset, requests} = makeTileset({
+    maxCacheSize: currentIds.length + targetIds.length,
+    onTileUnload: tile => unloaded.push(tile.id)
+  });
+  const first = new Tile2DView(tileset);
+  const second = new Tile2DView(tileset);
+  first.update(CURRENT, {zRange: null, modelMatrix: null, preloadViewport: TARGET});
+  second.update(CURRENT, {zRange: null, modelMatrix: null, preloadViewport: other});
+  await settle();
+
+  expect(
+    requests.filter(r => r.signal?.aborted).map(r => r.id),
+    'no preload request aborted'
+  ).toEqual([]);
+  expect(
+    targetIds.filter(id => unloaded.includes(id)),
+    'first consumer keeps its preload tiles'
+  ).toEqual([]);
+  expect(
+    targetIds.every(id => tileset.tiles.some(t => t.id === id)),
+    'first preload set cached'
+  ).toBe(true);
+  expect(
+    otherIds.filter(id => tileset.tiles.some(t => t.id === id)),
+    'no room for the second preload set'
+  ).toEqual([]);
+  first.finalize();
+  second.finalize();
+});
+
+test('Tileset2D preload: the preload set shrinks, best tiles first, when other views need the cache', async () => {
+  const other = new WebMercatorViewport({...TARGET, longitude: -40});
+  const {tileset: probe} = makeTileset();
+  const currentIds = getIds(probe, CURRENT);
+  const targetIds = getIds(probe, TARGET);
+  const otherIds = getIds(probe, other);
+  expect(targetIds.length).toBeGreaterThan(1);
+
+  // Room for both views' selected tiles and one preload tile.
+  const maxCacheSize = currentIds.length + otherIds.length + 1;
+  const {tileset} = makeTileset({maxCacheSize});
+  const first = new Tile2DView(tileset);
+  const second = new Tile2DView(tileset);
+  first.update(CURRENT, {zRange: null, modelMatrix: null, preloadViewport: TARGET});
+  expect(
+    targetIds.every(id => tileset.tiles.some(t => t.id === id)),
+    'room for the whole set at first'
+  ).toBe(true);
+
+  second.update(other, {zRange: null, modelMatrix: null});
+  await settle();
+  const cached = tileset.tiles.map(tile => tile.id);
+  expect(
+    otherIds.every(id => cached.includes(id)),
+    'the selected tiles of the second view are kept'
+  ).toBe(true);
+  expect(
+    targetIds.filter(id => cached.includes(id)),
+    'the best preload tile is kept'
+  ).toEqual(targetIds.slice(0, 1));
+  expect(tileset.tiles.length).toBeLessThanOrEqual(maxCacheSize);
+  first.finalize();
+  second.finalize();
+});
