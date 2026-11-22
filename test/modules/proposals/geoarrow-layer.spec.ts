@@ -141,9 +141,11 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             deck.redraw('GeoArrow color readback');
             expect(errors.map(error => error.message)).toEqual([]);
             target.readBuffer(sample, readback);
-            return Array.from(await readback.readAsync(0, 4));
+            const [red, green, blue, alpha] = new Uint8Array(await readback.readAsync(0, 4));
+            // Standard polygon lighting can change the intensity of the extruded fill.
+            return red >= (styled ? 128 : 255) && green === 0 && blue === 0 && alpha === 255;
           })
-          .toEqual([255, 0, 0, 255]);
+          .toBe(true);
         if (typeof data === 'string') {
           expect(loaded).toHaveLength(1);
           expect(loaded[0]).toMatchObject({numRows: native || styled ? 1 : 3});
