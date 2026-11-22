@@ -14,7 +14,7 @@ import {ConcurrentRoot} from 'react-reconciler/constants.js';
 
 import * as config from './config';
 import {RootErrorBoundary} from './error-boundary';
-import {combineRootDescriptors} from './utils';
+import {prepareRootUpdate} from './utils';
 import type {
   ChildSet,
   Container,
@@ -297,12 +297,10 @@ export function createRoot(node: RootElement, options: RootOptions = {}): Reconc
       if (deckgl) {
         // A prop-only update need not commit the JSX tree again, so reapply its last
         // committed layers, views, widgets and effects in the same order that a commit uses.
-        const descriptors = combineRootDescriptors(
-          store.getState(),
-          containerInfo.jsxDescriptors ?? EMPTY_JSX_DESCRIPTORS,
-          containerInfo.sentViews
+        const descriptors = prepareRootUpdate(
+          containerInfo,
+          containerInfo.jsxDescriptors ?? EMPTY_JSX_DESCRIPTORS
         );
-        containerInfo.sentViews = Boolean(descriptors.views);
         deckgl.setProps({...props, ...descriptors});
       }
       return;
