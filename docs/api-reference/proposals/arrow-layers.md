@@ -44,6 +44,14 @@ an Arrow table with a GeoArrow geometry column. Set
 `loadOptions: {geoarrow: {encodingPreference: 'optimized'}}` to request native coordinate buffers
 when the input contains a single geometry type.
 
+If the table has multiple geometry columns, set `getGeometry` to the field name, for example
+`getGeometry: 'footprint'`. The layer uses the declared primary geometry when available,
+then the first field with GeoArrow extension metadata.
+To render multiple geometry columns, pass the same table to several layers with different
+`getGeometry` values.
+A layer `query` can also project or alias a geometry field. Select the alias with `getGeometry`
+if the projected table still has multiple geometry columns.
+
 ```ts
 import {GeoArrowLayer} from '@deck.gl/proposals/layers';
 import {GeoJSONLoader} from '@loaders.gl/tables/geojson';

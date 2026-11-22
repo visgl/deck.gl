@@ -34,7 +34,7 @@ export {resolveGeoArrowGeometry, type GeoArrowLayerGeometryType} from './resolve
 export type GeoArrowLayerProps = Omit<LayerProps, 'data'> & {
   /** A GeoArrow table or batch, or a URL or promise that resolves to one. */
   data?: Table | RecordBatch | string | Promise<Table | RecordBatch> | null;
-  /** Geometry column. Defaults to the first field with GeoArrow extension metadata. */
+  /** Geometry column. Defaults to the declared primary geometry or first GeoArrow field. */
   getGeometry?: string;
   /** Explicit geometry encoding when extension metadata is absent. */
   geometryType?: GeoArrowLayerGeometryType;
