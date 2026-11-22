@@ -338,6 +338,14 @@ If the web server supports HTTP/2 (Open Chrome dev tools and look for "h2" in th
 
 - Default: `6`
 
+#### `_preloadTransitionTarget` (boolean, optional) {#_preloadtransitiontarget}
+
+Experimental. While a view state transition of the layer's view runs (for example a `FlyToInterpolator` or `LinearInterpolator` transition), request the tiles of the transition's end viewport before all other tiles. The layer does not select or render these tiles. A tile that is loading or loaded for the end viewport is not aborted for being off screen, and it is evicted from the cache after older tiles. The preload set holds at most as many tiles as fit in the cache tile-count limit beside the selected tiles. The set clears when the transition ends or stops. The `maxRequests` limit applies to all requests.
+
+The view must have a controller. See [Deck#_getTransitionTarget](../core/deck.md#_gettransitiontarget).
+
+- Default: `false`
+
 #### `debounceTime` (number, optional) {#debouncetime}
 
 Queue tile requests until no new tiles have been added for at least `debounceTime` milliseconds.

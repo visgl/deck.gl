@@ -139,10 +139,10 @@ unsubscribe();
 
 ## Compatibility and Adapters
 
-Legacy `update(viewport, {zRange, modelMatrix})` drives one default consumer and returns its visibility revision. `selectedTiles`, `isLoaded`, and `isTileVisible(tile, cullRect, modelMatrix)` retain that consumer's behavior. When no legacy update has run, `selectedTiles` instead exposes registered consumers' union; the new layers compute their own loaded state.
+Legacy `update(viewport, {zRange, modelMatrix, preloadViewport})` drives one default consumer and returns its visibility revision. The experimental `preloadViewport` requests the tiles of a second viewport (for example the end of a view transition) first, without selecting them; `null` clears the set. `selectedTiles`, `isLoaded`, and `isTileVisible(tile, cullRect, modelMatrix)` retain that consumer's behavior. When no legacy update has run, `selectedTiles` instead exposes registered consumers' union; the new layers compute their own loaded state.
 
 Standard applications do not need a custom adapter. `Tileset2DAdapter<ViewStateT>` is useful when a source has a different tile pyramid or an application uses a non-deck view representation. Its `getTileIndices(context)` selects indices, and `getTileBoundingBox(context, index)` supplies geographic or planar bounds. The public `tile2DDeckAdapter` delegates to the same traversal utility as the compatibility layers.
 
-Low-level `attachConsumer(id)`, `updateConsumer(id, selectedTiles, visibleTiles)`, and `detachConsumer(id)` control retention for custom consumers. `getTile(index, true)` starts or reuses a request; `prepareTiles()` synchronizes the tile tree before refinement. Normal `Tile2DLayer` applications must not call these methods themselves.
+Low-level `attachConsumer(id)`, `updateConsumer(id, selectedTiles, visibleTiles, preloadIndices?)`, and `detachConsumer(id)` control retention for custom consumers. `getTile(index, true)` starts or reuses a request; `prepareTiles()` synchronizes the tile tree before refinement. Normal `Tile2DLayer` applications must not call these methods themselves.
 
 See the [shared-tileset example](/examples-v10/shared-tile-2d-layer) for ownership, subscriptions, and multiple consumers in one application.

@@ -60,6 +60,8 @@ const DEFAULT_CACHE_SCALE = 5;
 const SELECTED_TILE_PRIORITY = 0;
 const VISIBLE_TILE_PRIORITY = 1e8;
 const MAX_TILE_DISTANCE_PRIORITY = VISIBLE_TILE_PRIORITY - SELECTED_TILE_PRIORITY - 1;
+/** Added to the other priorities while preload tiles exist, so that preload tiles load first. */
+const PRELOAD_PRIORITY_OFFSET = VISIBLE_TILE_PRIORITY;
 
 /** Loading, traversal, and cache options shared by the default view and registered consumers. */
 export type Tileset2DProps<DataT = any, ViewStateT = Viewport> = {
@@ -152,6 +154,8 @@ type ConsumerState<DataT = any> = {
   selectedTiles: Set<Tile2DHeader<DataT>>;
   /** Tiles currently marked render-visible for this consumer. */
   visibleTiles: Set<Tile2DHeader<DataT>>;
+  /** Tiles preloaded for this consumer, with their request rank. */
+  preloadTiles: Map<Tile2DHeader<DataT>, number>;
 };
 /** Tile-content cache with a compatibility default view and independent registered consumers. */
 export class Tileset2D<DataT = any, ViewStateT = Viewport> {
@@ -206,6 +210,8 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
   private _zRange: ZRange | null;
   /** Tiles selected by the compatibility default consumer, or null before its first update. */
   private _selectedTiles: Tile2DHeader[] | null;
+  /** Tiles preloaded by the default consumer, with their request rank. */
+  private _preloadTiles = new Map<Tile2DHeader<DataT>, number>();
   /** Default-consumer visibility revision returned by update. */
   private _frameNumber: number;
   /** Model transform used by the default consumer. */
@@ -362,6 +368,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     this._cache.clear();
     this._tiles = [];
     this._selectedTiles = null;
+    this._preloadTiles.clear();
     this._consumers.clear();
     this._cacheByteSize = 0;
     this._updateStats();
@@ -406,12 +413,18 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     viewport: Viewport,
     {
       zRange,
-      modelMatrix
+      modelMatrix,
+      preloadViewport
     }: {
       /** Minimum and maximum elevations used for tile selection and culling. */
       zRange: ZRange | null;
       /** Optional transform from layer coordinates to world coordinates. */
       modelMatrix: NumericArray | null;
+      /**
+       * Experimental. A second viewport, for example the end of a view transition, whose tiles
+       * load first without being selected. Null or omitted clears the preload set.
+       */
+      preloadViewport?: Viewport | null;
     } = {
       zRange: null,
       modelMatrix: null
@@ -448,6 +461,10 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
       // Check for needed reloads explicitly even if the view/matrix has not changed.
     } else if (this.needsReload) {
       this._selectedTiles = this._selectedTiles!.map(tile => this._getTile(tile.index, true));
+    }
+    if (preloadViewport || this._preloadTiles.size) {
+      const indices = preloadViewport ? this._getPreloadIndices(preloadViewport, zRange) : [];
+      this._preloadTiles = this._createPreloadTiles(indices);
     }
 
     // Update tile states
@@ -659,14 +676,19 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
 
   /** Prioritizes requested tiles while retaining the default-view center-distance ordering. */
   private _getRequestPriority(tile: Tile2DHeader): number {
+    const preloadTiles = this._getPreloadTilesUnion();
+    const preloadRank = preloadTiles.get(tile);
+    if (preloadRank !== undefined) return preloadRank;
+    const offset = preloadTiles.size ? PRELOAD_PRIORITY_OFFSET : 0;
+
     if (this._consumers.size) {
       let visible = tile.isVisible;
-      if (tile.isSelected) return 0;
+      if (tile.isSelected) return offset;
       for (const consumer of this._consumers.values()) {
-        if (consumer.selectedTiles.has(tile)) return 0;
+        if (consumer.selectedTiles.has(tile)) return offset;
         visible ||= consumer.visibleTiles.has(tile);
       }
-      return visible ? VISIBLE_TILE_PRIORITY : -1;
+      return visible ? offset + VISIBLE_TILE_PRIORITY : -1;
     }
     if (!tile.isSelected && !tile.isVisible) {
       return -1;
@@ -675,9 +697,37 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     // RequestScheduler loads lower priority values first.
     const distance = this._getTileDistancePriority(tile);
     if (tile.isSelected) {
-      return SELECTED_TILE_PRIORITY + distance;
+      return offset + SELECTED_TILE_PRIORITY + distance;
     }
-    return VISIBLE_TILE_PRIORITY + distance;
+    return offset + VISIBLE_TILE_PRIORITY + distance;
+  }
+
+  /** Selects the tile indices that cover a preload viewport, restoring the traversal viewport. */
+  private _getPreloadIndices(viewport: Viewport, zRange: ZRange | null): TileIndex[] {
+    const tileViewport = this._tileViewport;
+    const indices = this.getTileIndices({
+      viewport,
+      maxZoom: this._maxZoom,
+      minZoom: this._minZoom,
+      zRange,
+      modelMatrix: this._modelMatrix,
+      modelMatrixInverse: this._modelMatrixInverse
+    });
+    this._tileViewport = tileViewport;
+    return indices;
+  }
+
+  /**
+   * Creates and requests preload tiles in index order. The set is capped so that it and the
+   * selected tiles fit the tile-count limit of the cache.
+   */
+  private _createPreloadTiles(indices: TileIndex[]): Map<Tile2DHeader<DataT>, number> {
+    const limit = Math.max(0, this._getMaxCacheSize() - this._getSelectedTilesUnion().size);
+    const preloadTiles = new Map<Tile2DHeader<DataT>, number>();
+    for (const index of indices.slice(0, limit)) {
+      preloadTiles.set(this._getTile(index, true), preloadTiles.size);
+    }
+    return preloadTiles;
   }
 
   /** Computes distance from the viewport center to the projected tile footprint. */
@@ -775,10 +825,12 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     const abortCandidates: Tile2DHeader<DataT>[] = [];
     let ongoingRequestCount = 0;
 
+    const preloadTiles = this._getPreloadTilesUnion();
+
     for (const tile of this._cache.values()) {
       if (tile.isLoading) {
         ongoingRequestCount++;
-        if (!selectedTiles.has(tile) && !visibleTiles.has(tile)) {
+        if (!selectedTiles.has(tile) && !visibleTiles.has(tile) && !preloadTiles.has(tile)) {
           abortCandidates.push(tile);
         }
       }
@@ -818,19 +870,14 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
 
   /** Evicts unused cached tiles when configured cache limits are exceeded. */
   private _resizeCache(): void {
-    const maxCacheSize =
-      this.opts.maxCacheSize ??
-      (this._viewport
-        ? this.opts.maxCacheByteSize !== null
-          ? Infinity
-          : DEFAULT_CACHE_SCALE * (this.selectedTiles?.length || 1)
-        : 100);
+    const maxCacheSize = this._getMaxCacheSize();
     const maxCacheByteSize = this.opts.maxCacheByteSize ?? Infinity;
     const visibleTiles = this._getVisibleTilesUnion();
     const selectedTiles = this._getSelectedTilesUnion();
     const overflown = this._cache.size > maxCacheSize || this._cacheByteSize > maxCacheByteSize;
 
     if (overflown) {
+      // Every update touches its preload tiles, so LRU order evicts them after older tiles.
       for (const [id, tile] of this._cache) {
         if (!visibleTiles.has(tile) && !selectedTiles.has(tile)) {
           this._removeCachedTile(id, tile);
@@ -851,6 +898,18 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     }
   }
   /* eslint-enable complexity */
+
+  /** Tile-count limit of the cache. */
+  private _getMaxCacheSize(): number {
+    return (
+      this.opts.maxCacheSize ??
+      (this._viewport
+        ? this.opts.maxCacheByteSize !== null
+          ? Infinity
+          : DEFAULT_CACHE_SCALE * (this.selectedTiles?.length || 1)
+        : 100)
+    );
+  }
 
   /** Compatibility lookup used by default-view traversal and subclass helpers. */
   private _getTile(index: TileIndex, create: true): Tile2DHeader;
@@ -954,7 +1013,11 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
 
   /** Registers a consumer so cache pruning can account for its selected tiles. */
   attachConsumer(id: symbol): void {
-    this._consumers.set(id, {selectedTiles: new Set(), visibleTiles: new Set()});
+    this._consumers.set(id, {
+      selectedTiles: new Set(),
+      visibleTiles: new Set(),
+      preloadTiles: new Map()
+    });
     this._updateStats();
   }
 
@@ -966,16 +1029,25 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     this._updateStats();
   }
 
-  /** Updates the selected and visible tile sets for one consumer. */
+  /**
+   * Updates the selected and visible tile sets for one consumer.
+   * @param preloadIndices - Experimental. Tiles to load first without selecting them, for
+   * example the tiles of a view transition's end viewport. Capped like the default preload set.
+   */
   updateConsumer(
     id: symbol,
     selectedTiles: Tile2DHeader<DataT>[],
-    visibleTiles: Tile2DHeader<DataT>[]
+    visibleTiles: Tile2DHeader<DataT>[],
+    preloadIndices: TileIndex[] = []
   ): void {
     this._consumers.set(id, {
       selectedTiles: new Set(selectedTiles),
-      visibleTiles: new Set(visibleTiles)
+      visibleTiles: new Set(visibleTiles),
+      preloadTiles: new Map()
     });
+    if (preloadIndices.length) {
+      this._consumers.get(id)!.preloadTiles = this._createPreloadTiles(preloadIndices);
+    }
     this._pruneRequests();
     this._resizeCache();
     this._updateStats();
@@ -1155,6 +1227,22 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
         union.add(tile);
       }
     }
+    return union;
+  }
+
+  /** Returns cached preload tiles across all consumers with their best request rank. */
+  private _getPreloadTilesUnion(): Map<Tile2DHeader<DataT>, number> {
+    const union = new Map<Tile2DHeader<DataT>, number>();
+    const add = (tiles: Map<Tile2DHeader<DataT>, number>) => {
+      for (const [tile, rank] of tiles) {
+        const best = union.get(tile);
+        if (this._cache.get(tile.id) === tile && (best === undefined || rank < best)) {
+          union.set(tile, rank);
+        }
+      }
+    };
+    add(this._preloadTiles);
+    for (const consumer of this._consumers.values()) add(consumer.preloadTiles);
     return union;
   }
 

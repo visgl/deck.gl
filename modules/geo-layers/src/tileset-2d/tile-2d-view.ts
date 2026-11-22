@@ -81,12 +81,18 @@ export class Tile2DView<DataT = any> {
     viewport: Viewport,
     {
       zRange,
-      modelMatrix
+      modelMatrix,
+      preloadViewport
     }: {
       /** Minimum and maximum elevations considered during this view's traversal. */
       zRange: [number, number] | null;
       /** Layer-to-world transform applied only to this consumer. */
       modelMatrix: NumericArray | null;
+      /**
+       * Experimental. A second viewport, for example the end of a view transition, whose tiles
+       * load first without being selected. Null or omitted clears the preload set.
+       */
+      preloadViewport?: Viewport | null;
     } = {zRange: null, modelMatrix: null}
   ): number {
     const modelMatrixAsMatrix4 = modelMatrix ? new Matrix4(modelMatrix) : new Matrix4();
@@ -125,7 +131,23 @@ export class Tile2DView<DataT = any> {
     }
 
     const changed = this._updateTileStates();
-    this._tileset.updateConsumer(this.id, this._selectedTiles || [], this._getVisibleTiles());
+    const preloadIndices = preloadViewport
+      ? this._tileset.getTileIndices({
+          viewport: preloadViewport,
+          viewState: preloadViewport,
+          maxZoom: this._tileset.maxZoom,
+          minZoom: this._tileset.minZoom,
+          zRange,
+          modelMatrix: this._modelMatrix,
+          modelMatrixInverse: this._modelMatrixInverse
+        })
+      : [];
+    this._tileset.updateConsumer(
+      this.id,
+      this._selectedTiles || [],
+      this._getVisibleTiles(),
+      preloadIndices
+    );
 
     if (changed) {
       this._frameNumber++;

@@ -93,6 +93,7 @@ const defaultProps: DefaultProps<Tile2DLayerProps> = {
   refinementStrategy: STRATEGY_DEFAULT,
   zRange: null,
   maxRequests: 6,
+  _preloadTransitionTarget: false,
   debounceTime: 0,
   zoomOffset: 0,
   visibleMinZoom: null,
@@ -164,6 +165,11 @@ export type Tile2DLayerProps<DataT = unknown> = CompositeLayerProps & {
   zRange?: ZRange | null;
   /** Maximum concurrent requests. */
   maxRequests?: number;
+  /**
+   * Experimental. While a view state transition of a view runs, load the tiles of its end
+   * viewport first, without rendering them. Needs a view with a controller.
+   */
+  _preloadTransitionTarget?: boolean;
   /** Debounce interval before issuing queued requests. */
   debounceTime?: number;
   /** Integer zoom offset applied during tile selection. */
@@ -471,7 +477,8 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
 
   /** Updates traversal and releases consumers outside the layer's active view IDs. */
   private _updateTileset(): void {
-    const {zRange, modelMatrix} = this.props;
+    const {zRange, modelMatrix, _preloadTransitionTarget} = this.props;
+    const {deck} = this.context;
     let anyTilesetChanged = false;
     const activeViewports = (
       this.context.layerManager?.getViewports() || Array.from(this._knownViewports.values())
@@ -490,7 +497,10 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
     for (const [viewportKey, viewport] of this._knownViewports) {
       this._prunePlaceholderViewportView(viewportKey);
       const tilesetView = this._getOrCreateTilesetView(viewportKey);
-      const frameNumber = tilesetView.update(viewport, {zRange, modelMatrix});
+      const preloadViewport = _preloadTransitionTarget
+        ? deck?._getTransitionTarget(viewport.id)?.viewport
+        : null;
+      const frameNumber = tilesetView.update(viewport, {zRange, modelMatrix, preloadViewport});
       const previousFrameNumber = this.state.frameNumbers.get(viewportKey);
       const tilesetChanged = previousFrameNumber !== frameNumber;
       anyTilesetChanged ||= tilesetChanged;
