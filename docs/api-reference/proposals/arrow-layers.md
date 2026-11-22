@@ -38,6 +38,8 @@ when batch preparation fails. `ArrowTripsLayer` similarly converts aligned times
 delegating to the existing GPUVector path-storage model. `GeoArrowLayer` selects point,
 linestring, polygon, or multipolygon children from field extension metadata. Encoded and mixed
 geometry uses the GeoJSON renderer and picking returns the source Arrow row.
+Polygon extrusion, outlines, and extensions also use the standard GeoJSON renderer.
+Set `getElevation` to a constant or a source column for extruded polygons.
 
 To load a GeoJSON file directly, pass its URL and `GeoJSONLoader`. The loader converts the file to
 an Arrow table with a GeoArrow geometry column. Set

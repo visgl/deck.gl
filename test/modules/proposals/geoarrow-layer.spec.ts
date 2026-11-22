@@ -35,7 +35,7 @@ function makeSource() {
   return table.slice(0, 1).concat(table.slice(1));
 }
 
-const encodings = ['wkt', 'wkb', 'mixed', 'geojson', 'native'] as const;
+const encodings = ['wkt', 'wkb', 'mixed', 'geojson', 'native', 'styled'] as const;
 
 for (const backend of ['webgl', 'webgpu'] as const) {
   test.for(encodings)(
@@ -93,6 +93,10 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             polygon: 'loaded polygon',
             line: 'loaded line'
           },
+          styled: {
+            data: new URL('./fixtures/geoarrow-polygon.geojson', import.meta.url).href,
+            polygon: 'native polygon'
+          },
           native: {
             data: new URL('./fixtures/geoarrow-polygon.geojson', import.meta.url).href,
             polygon: 'native polygon'
@@ -101,6 +105,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         const input = inputs[encoding];
         const {data, polygon} = input;
         const native = encoding === 'native';
+        const styled = encoding === 'styled';
         const lineLabel = 'line' in input ? input.line : undefined;
         const loaded: unknown[] = [];
         const layer = new GeoArrowLayer({
@@ -109,10 +114,11 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           loaders: [GeoJSONLoader],
           loadOptions: {
             core: {worker: false},
-            ...(native && {geoarrow: {encodingPreference: 'optimized'}})
+            ...((native || styled) && {geoarrow: {encodingPreference: 'optimized'}})
           },
           onDataLoad: data => loaded.push(data),
           getFillColor: [255, 0, 0, 255],
+          ...(styled && {extruded: true, getElevation: 0, material: false}),
           widths: 2,
           widthScale: 4,
           pickable: true
@@ -140,15 +146,20 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           .toEqual([255, 0, 0, 255]);
         if (typeof data === 'string') {
           expect(loaded).toHaveLength(1);
-          expect(loaded[0]).toMatchObject({numRows: native ? 1 : 3});
+          expect(loaded[0]).toMatchObject({numRows: native || styled ? 1 : 3});
         }
         const info = await deck.pickObjectAsync({x: 32, y: 32});
-        expect(info?.index).toBe(native ? 0 : 1);
+        expect(info?.index).toBe(native || styled ? 0 : 1);
         expect(info?.object.label).toBe(polygon);
         if (native) {
           expect(layer.getSubLayers()[0]?.constructor.name).toBe('ArrowSolidPolygonLayer');
           const [x, y] = deck.getViewports()[0].project([5, 5]);
           expect(await deck.pickObjectAsync({x: Math.round(x), y: Math.round(y)})).toBeNull();
+        }
+        if (styled) {
+          const child = layer.getSubLayers()[0];
+          expect(child.constructor.name).toBe('GeoJsonLayer');
+          expect(child.props).toMatchObject({extruded: true, material: false});
         }
         if (lineLabel) {
           const [x, y] = deck.getViewports()[0].project([17, 12]);
