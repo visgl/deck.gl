@@ -33,3 +33,24 @@ test('picking#wgsl source validates and includes the byte-color uniform', () => 
 
   expect(source, 'WGSL picking module source is generated').toContain('useByteColors');
 });
+
+test('picking#normalizes highlights without changing picking IDs', () => {
+  const uniforms = picking.getUniforms({
+    highlightColor: [255, 128, 0, 0],
+    highlightedObjectColor: [1, 128, 255],
+    useByteColors: true
+  });
+  expect(uniforms.highlightColor).toEqual([1, 128 / 255, 0, 0]);
+  expect(uniforms.highlightedObjectColor).toEqual([1, 128, 255]);
+  expect(uniforms.useByteColors).toBe(true);
+  expect(picking.getUniforms({highlightColor: [255, 128, 0]}).highlightColor).toEqual([
+    1,
+    128 / 255,
+    0,
+    1
+  ]);
+  expect(
+    picking.getUniforms({highlightColor: [1, 0.5, 0, 0], useByteColors: false}).highlightColor
+  ).toEqual([1, 0.5, 0, 0]);
+  expect(picking.getUniforms({isActive: true}).highlightColor).toBeUndefined();
+});

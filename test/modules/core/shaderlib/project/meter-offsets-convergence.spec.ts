@@ -10,7 +10,7 @@ import {
 } from '@deck.gl/core';
 import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions';
 import {device} from '@deck.gl/test-utils/vitest';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {projectionEngine} from '@math.gl/geospatial/projection';
 import {OSM_TILE_CRS} from '@deck.gl/core/viewports/web-mercator-util';
 import {createTestViewport} from '../../viewports/test-crs';

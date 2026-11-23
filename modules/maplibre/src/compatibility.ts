@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {clamp} from '@math.gl/core';
+import {clamp} from '@math.gl/core/matrix';
 
 export type MapLibreRenderParameters = {
   farZ: number;

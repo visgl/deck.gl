@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Layer, picking, _GlobeViewport, type LayerContext, type LayerProps} from '@deck.gl/core';
+import {Layer, picking, GlobeViewport, type LayerContext, type LayerProps} from '@deck.gl/core';
 import type {Buffer, RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shaders';
 import {getStarfieldRotation, type SkyObserver} from '@math.gl/earth/sun';
-import {getStarPositions, getStarLayerData, type StarLayerDatum} from '@math.gl/earth/sun/stars';
+import {getStarPositions, getStarLayerData, type StarLayerDatum} from '@math.gl/earth/sun-stars';
 import {getSkyObserver, getSkyProjectionMatrix, makeSkyRotationMatrix} from './sky-coordinates';
 
 export type StarfieldLayerProps = LayerProps & {
@@ -165,7 +165,7 @@ export class StarfieldLayer extends Layer<StarfieldLayerProps> {
         ),
         localUp: [rotation[2], rotation[5], rotation[8]],
         offset: [2 / viewport.width, 2 / viewport.height],
-        clipHorizon: viewport instanceof _GlobeViewport ? 0 : 1,
+        clipHorizon: viewport instanceof GlobeViewport ? 0 : 1,
         brightness: this.props.brightness! * this.props.opacity,
         colorStrength: this.props.colorStrength!
       }

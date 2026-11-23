@@ -15,7 +15,7 @@ import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
 import type {ClipExtensionProps} from '@deck.gl/extensions';
 
-import {Matrix4, equals} from '@math.gl/core';
+import {Matrix4, equals} from '@math.gl/core/matrix';
 import {MVTWorkerLoader} from '@loaders.gl/tiles/mvt';
 import {convertBinaryFeatureCollectionToGeojson} from '@loaders.gl/core/geoarrow';
 

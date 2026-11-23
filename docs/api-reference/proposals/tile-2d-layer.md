@@ -10,7 +10,7 @@ This layer is available from the private `@deck.gl/proposals/layers` module in a
 
 Use `Tile2DLayer` when the same tiled payload should feed multiple views, such as a main map and minimap. The layer keeps selection and visibility state per viewport, while [`Tileset2D`](./tileset-2d.md) owns loading, request scheduling, cache eviction, stats, and TileSource metadata.
 
-The inline demo uses two styled layers and three synchronized views. Toggle **Share tile cache** to compare one tileset with two independently owned caches. [Open the full example](/examples/shared-tile-2d-layer) or [browse its source](https://github.com/visgl/deck.gl/tree/master/examples/proposals/shared-tile-2d-layer). Counts reset on each toggle; visible and cached entries are counted once per cache, not once per view.
+The inline demo uses two styled layers and three synchronized views. Toggle **Share tile cache** to compare one tileset with two independently owned caches. [Open the full example](/examples-v10/shared-tile-2d-layer) or [browse its source](https://github.com/visgl/deck.gl/tree/master/examples-v10/proposals/shared-tile-2d-layer). Counts reset on each toggle; visible and cached entries are counted once per cache, not once per view.
 
 ```ts
 import {Deck, MapView} from '@deck.gl/core';

@@ -9,7 +9,7 @@ import {
   OrthographicViewport,
   WebMercatorViewport,
   project,
-  _GlobeViewport as GlobeViewport
+  GlobeViewport
 } from '@deck.gl/core';
 import type {ProjectUniforms} from '@deck.gl/core';
 import {PathStyleExtension} from '@deck.gl/extensions';
@@ -27,7 +27,7 @@ import {
   offsetInjections,
   pathStylePipelineInjections
 } from '../../../modules/extensions/src/path-style/shaders.glsl';
-import {vec3} from '@math.gl/core';
+import {vec3} from '@math.gl/core/matrix';
 
 import * as FIXTURES from 'deck.gl-test/data';
 

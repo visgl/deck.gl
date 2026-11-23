@@ -98,7 +98,7 @@ initializeState() {
     /* this attribute is automatically filled by the return value of `props.getPosition` */
     instancePositions: {size: 3, accessor: 'getPosition'},
     /* this attribute is populated by calling `layer.calculateInstanceColors` */
-    instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
+    instanceColors: {size: 4, type: 'unorm8', accessor: 'getColor', update: this.calculateInstanceColors}
   });
 }
 ```

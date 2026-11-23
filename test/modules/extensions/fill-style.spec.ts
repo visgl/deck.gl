@@ -7,7 +7,7 @@ import {
   MapView,
   OrthographicViewport,
   WebMercatorViewport,
-  _GlobeViewport as GlobeViewport,
+  GlobeViewport,
   fp64LowPart,
   project
 } from '@deck.gl/core';
@@ -133,6 +133,51 @@ webglTest('FillStyleExtension#PolygonLayer', () => {
   ];
 
   testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+webglTest('FillStyleExtension forwards normalized polygon background colors', () => {
+  testLayer({
+    Layer: PolygonLayer,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          data: FIXTURES.polygons,
+          getPolygon: d => d,
+          extensions: [new FillStyleExtension({proceduralPattern: true})]
+        }
+      },
+      {
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({subLayers}) => {
+          const fill = subLayers.find(layer => layer.id.endsWith('fill'));
+          expect(fill.props.getFillPatternBackgroundColor).toEqual([0, 0, 0, 0]);
+        }
+      },
+      {
+        updateProps: {getFillPatternBackgroundColor: [1, 0.5, 0]},
+        onAfterUpdate: ({subLayers}) => {
+          const fill = subLayers.find(layer => layer.id.endsWith('fill'));
+          expect(fill.props.getFillPatternBackgroundColor).toEqual([255, 128, 0, 255]);
+        }
+      },
+      {
+        updateProps: {
+          getFillPatternBackgroundColor: () => [0, 0.5, 1, 0],
+          updateTriggers: {getFillPatternBackgroundColor: 1}
+        },
+        onAfterUpdate: ({subLayers}) => {
+          const fill = subLayers.find(layer => layer.id.endsWith('fill'));
+          const {value} = fill.getAttributeManager().attributes.fillPatternBackgroundColors;
+          expect(Array.from(value.slice(0, 4))).toEqual([0, 128, 255, 0]);
+        }
+      }
+    ]
+  });
 });
 
 webglTest('FillStyleExtension#originPrecision', () => {
