@@ -2,21 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {useTransition} from 'react';
 import {useAppStore} from '../stores/app';
 
 /**
- * Search box component with deferred value and transition indicator
+ * Search box. The list and the layer read the search through a deferred value (see
+ * `useAirports`), so typing never replaces them with a loading fallback.
  */
 export function SearchBox() {
   const search = useAppStore(state => state.search);
   const setSearch = useAppStore(state => state.setSearch);
-  const [isPending, startTransition] = useTransition();
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    startTransition(() => {
-      setSearch(e.target.value);
-    });
+    setSearch(e.target.value);
   };
 
   return (
@@ -46,20 +42,6 @@ export function SearchBox() {
             width: 300
           }}
         />
-        {isPending && (
-          <div
-            style={{
-              color: '#666',
-              fontSize: '0.85em',
-              position: 'absolute',
-              right: 16,
-              top: '50%',
-              transform: 'translateY(-50%)'
-            }}
-          >
-            Loading...
-          </div>
-        )}
       </div>
     </div>
   );

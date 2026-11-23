@@ -14,7 +14,8 @@ interface AppState {
 }
 
 /**
- * Zustand store with manual URL synchronization
+ * Zustand store with manual URL synchronization. The URL is replaced rather than pushed, so
+ * typing a search doesn't add a history entry per keystroke.
  * - selected and search are synced to URL
  * - hovered is transient (not persisted)
  */
@@ -46,7 +47,7 @@ export const useAppStore = create<AppState>(set => {
         ? `${window.location.pathname}?${urlParams.toString()}`
         : window.location.pathname;
 
-      window.history.pushState({}, '', newUrl);
+      window.history.replaceState({}, '', newUrl);
     },
 
     setSelected: id => {
@@ -64,7 +65,7 @@ export const useAppStore = create<AppState>(set => {
         ? `${window.location.pathname}?${urlParams.toString()}`
         : window.location.pathname;
 
-      window.history.pushState({}, '', newUrl);
+      window.history.replaceState({}, '', newUrl);
     }
   };
 });
