@@ -9,6 +9,12 @@ interface ErrorBoundaryProps {
   children: ReactNode;
   /** Renders in place of the children after one of them throws. */
   fallback: (error: Error) => ReactNode;
+  /**
+   * Clears a caught error when it changes, so a new search tries again. Unlike a React `key`, it
+   * doesn't remount the children while nothing has failed, which would discard the previous
+   * results that `useDeferredValue` keeps on screen.
+   */
+  resetKey: unknown;
 }
 
 /**
@@ -21,6 +27,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, {error: Error |
 
   static getDerivedStateFromError(error: Error) {
     return {error};
+  }
+
+  componentDidUpdate(prevProps: ErrorBoundaryProps) {
+    if (this.state.error && prevProps.resetKey !== this.props.resetKey) {
+      this.setState({error: null});
+    }
   }
 
   render() {
