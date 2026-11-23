@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {Viewport} from '@deck.gl/core';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
 /** The metre-sized view coordinates and WebGPU clip depth used by luma screen-space passes. */
 export function getSceneBufferCamera(

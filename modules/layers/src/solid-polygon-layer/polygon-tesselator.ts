@@ -14,12 +14,12 @@ import {
   cutPolygonByGrid,
   cutPolygonByMercatorBounds,
   modifyPolygonWindingDirection
-} from '@math.gl/geometry';
+} from '@math.gl/geometry/polygon';
 import {clipPolygon} from '../utils/geographic-clip';
 
 import type {PolygonGeometry, NormalizedPolygonGeometry} from './polygon';
 import type {CutPolygon, GeographicClip} from '../utils/geographic-clip';
-import type {TypedArray} from '@math.gl/core';
+import type {TypedArray} from '@math.gl/core/matrix';
 
 type GeometryUpdateContext = {
   vertexStart: number;

@@ -66,7 +66,7 @@ class ArcDemo extends Component {
             Counties<b>{meta.count || 0}</b>
           </div>
           <div className="stat col-1-2">
-            Arcs<b>{readableInteger(meta.flowCount || 0)}</b>
+            Visible arcs<b>{readableInteger(meta.flowCount || 0)}</b>
           </div>
         </div>
       </>
@@ -75,7 +75,7 @@ class ArcDemo extends Component {
 
   /** Updates the selected county shown in the information panel. */
   _onSelectCounty = f => {
-    this.props.onStateChange({sourceName: f.properties.name});
+    this.props.onStateChange({sourceName: f.name});
   };
 
   /** Renders the Arrow demo with the current controls and data. */
@@ -88,6 +88,7 @@ class ArcDemo extends Component {
         {...otherProps}
         key={this.props.device?.type}
         onDataLoad={stats => this.props.onStateChange(stats)}
+        onArcDataLoad={flowCount => this.props.onStateChange({flowCount})}
         strokeWidth={params.lineWidth.value}
         onSelectCounty={this._onSelectCounty}
       />

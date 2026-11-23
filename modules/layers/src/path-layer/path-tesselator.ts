@@ -4,10 +4,10 @@
 
 import {Tesselator} from '@deck.gl/core';
 import {normalizePath} from './path';
-import {subdividePolyline} from '@math.gl/geometry';
+import {subdividePolyline} from '@math.gl/geometry/polygon';
 import {clipPath, isClosedRing} from '../utils/geographic-clip';
 
-import type {TypedArray} from '@math.gl/core';
+import type {TypedArray} from '@math.gl/core/matrix';
 import type {PathGeometry, FlatPathGeometry, NormalizedPathGeometry} from './path';
 import type {GeographicClip} from '../utils/geographic-clip';
 

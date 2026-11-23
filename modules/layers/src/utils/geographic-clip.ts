@@ -2,9 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {clipGeographicPolygon, clipGeographicPolyline} from '@math.gl/geospatial';
-import type {NumericArray} from '@math.gl/core';
-import type {GeographicClipOptions, GeographicPolygonRing} from '@math.gl/geospatial';
+import {clipGeographicPolygon, clipGeographicPolyline} from '@math.gl/geospatial/geographic-cuts';
+import type {NumericArray} from '@math.gl/core/matrix';
+import type {
+  GeographicClipOptions,
+  GeographicPolygonRing
+} from '@math.gl/geospatial/geographic-cuts';
 import type {FlatComplexPolygonGeometry} from '../solid-polygon-layer/polygon';
 
 /** Source-space clipping for CPU-preprojected WGS84 geometry. */

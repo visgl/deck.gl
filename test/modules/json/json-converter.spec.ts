@@ -30,10 +30,10 @@ test('JSONConverter#convert', () => {
   expect(deckProps.views.length, 'JSONConverter converted views').toBe(2);
   expect(deckProps.controller, 'Should evaluate constants.').toBe(MapController);
 
-  deckProps = jsonConverter.convert({...COMPLEX_JSON, primitive: '@@#GL.TRIANGLES'});
+  deckProps = jsonConverter.convert({...COMPLEX_JSON, primitive: '@@#Primitive.TRIANGLES'});
   const pointCloudLayerProps = deckProps.layers[3].props;
   expect(deckProps.primitive, 'Should evaluate enums.').toBe(
-    JSON_CONFIGURATION.enumerations.GL.TRIANGLES
+    JSON_CONFIGURATION.enumerations.Primitive.TRIANGLES
   );
   expect(pointCloudLayerProps.coordinateSystem, 'Should retain CRS strings.').toBe('meter-offsets');
 

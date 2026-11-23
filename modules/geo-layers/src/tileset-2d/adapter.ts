@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Matrix4} from '@math.gl/core';
+import type {Matrix4} from '@math.gl/core/matrix';
 import type {Bounds, TileBoundingBox, TileIndex, ZRange} from './types';
 
 /** Traversal inputs required by a {@link Tileset2DAdapter}. */

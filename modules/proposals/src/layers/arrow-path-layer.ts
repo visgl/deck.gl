@@ -24,7 +24,8 @@ export class ArrowPathLayer extends CompositeLayer<ArrowPathLayerProps> {
   override renderLayers(): StoragePathLayer {
     return new StoragePathLayer({
       ...this.props,
-      ...this.getSubLayerProps({id: 'path'})
+      ...this.getSubLayerProps({id: 'path'}),
+      data: this.props.data
     });
   }
 

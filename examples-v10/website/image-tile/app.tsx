@@ -12,7 +12,7 @@ import {OrthographicView} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer} from '@deck.gl/layers';
 import {load} from '@loaders.gl/core';
-import {clamp} from '@math.gl/core';
+import {clamp} from '@math.gl/core/matrix';
 
 import type {OrthographicViewState} from '@deck.gl/core';
 import type {TileLayerPickingInfo} from '@deck.gl/geo-layers';

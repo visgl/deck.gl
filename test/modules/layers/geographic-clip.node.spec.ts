@@ -6,7 +6,7 @@ import {afterEach, expect, test, vi} from 'vitest';
 import {LayerManager, _CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
 import {PathLayer, PolygonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
-import {getPolygonSignedArea} from '@math.gl/geometry';
+import {getPolygonSignedArea} from '@math.gl/geometry/polygon';
 import PolygonTesselator from '@deck.gl/layers/solid-polygon-layer/polygon-tesselator';
 import PathTesselator from '@deck.gl/layers/path-layer/path-tesselator';
 import type {PolygonGeometry} from '@deck.gl/layers/solid-polygon-layer/polygon';
