@@ -119,6 +119,10 @@ Distance scales now describe world units for any CRS, so the same API supports g
 
 To retain an old degree step `d`, set `resolution: 360 / d`; for example, the former `GlobeView` default of 10 degrees becomes `resolution: 36`. Custom layers should use `viewport.getSubdivisionStep(sourceCrs)` for a step in their source CRS units instead of interpreting `viewport.resolution` directly.
 
+### Widget[​](#widget "Direct link to Widget")
+
+* A widget `id` of `''` or `null` now falls back to the widget's default id, as a view `id` already does. Previously two such widgets shared that id and replaced each other in the `WidgetManager`. Pass a non-empty `id` to tell widgets of the same type apart.
+
 ### Layer[​](#layer "Direct link to Layer")
 
 #### Coordinate and projection constants[​](#coordinate-and-projection-constants "Direct link to Coordinate and projection constants")
