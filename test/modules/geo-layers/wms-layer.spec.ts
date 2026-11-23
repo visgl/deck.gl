@@ -4,10 +4,17 @@
 
 // deck.gl, MIT license
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {generateLayerTests, testInitializeLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {
+  _CustomProjectionView as CustomProjectionView,
+  WebMercatorViewport,
+  log
+} from '@deck.gl/core';
+import type {Viewport} from '@deck.gl/core';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
+import type {WMSLayerProps} from '@deck.gl/geo-layers';
+import type {BitmapLayer} from '@deck.gl/layers';
 import {WMSImageSource} from '@loaders.gl/ogc/wms';
 import type {ImageSource} from '@loaders.gl/ogc/wms';
 import type {
@@ -80,20 +87,13 @@ function createRecordingImageSource() {
   return {imageSource, requests};
 }
 
-test('WMSLayer positions an EPSG:4326 image in LNGLAT coordinates', async () => {
-  const viewport = new WebMercatorViewport({
-    width: 800,
-    height: 600,
-    longitude: -72,
-    latitude: 40,
-    zoom: 6
-  });
+/** Mount a WMS layer and let the test request images without waiting for the debounce. */
+function initializeRecordingLayer(viewport: Viewport, srs?: WMSLayerProps['srs']) {
   const {imageSource, requests} = createRecordingImageSource();
   const layer = new WMSLayer({
-    id: 'wms-epsg-4326',
     data: imageSource,
     layers: ['test-layer'],
-    srs: 'EPSG:4326'
+    srs
   });
   const {finalize} = testInitializeLayer({
     layer,
@@ -101,15 +101,164 @@ test('WMSLayer positions an EPSG:4326 image in LNGLAT coordinates', async () => 
     finalize: false,
     onError: error => expect(error).toBeFalsy()
   });
-  try {
-    // Request the image directly instead of waiting for the debounced initial load.
-    clearTimeout((layer.state as any)._timeoutId);
-    await layer.loadImage(viewport, 'test');
-    expect(requests.map(request => request.crs)).toEqual(['EPSG:4326']);
+  clearTimeout(layer.state._timeoutId);
+  return {layer, requests, finalize};
+}
 
-    const bitmapLayer = layer.renderLayers() as any;
-    expect(bitmapLayer.props._imageCoordinateSystem).toBe('lnglat');
+test.each(['EPSG:4326', 'auto'] as const)('WMSLayer in Web Mercator with srs %s', async srs => {
+  const viewport = new WebMercatorViewport({
+    width: 800,
+    height: 600,
+    longitude: -72,
+    latitude: 40,
+    zoom: 6
+  });
+  const {layer, requests, finalize} = initializeRecordingLayer(viewport, srs);
+  try {
+    await layer.loadImage(viewport, 'test');
+    const bounds = viewport.getBounds();
+    const min: [number, number] = [bounds[0], bounds[1]];
+    const max: [number, number] = [bounds[2], bounds[3]];
+    expect(requests).toEqual([
+      {
+        crs: srs === 'auto' ? 'EPSG:3857' : 'EPSG:4326',
+        width: 800,
+        height: 600,
+        layers: ['test-layer'],
+        boundingBox:
+          srs === 'auto' ? [WGS84ToPseudoMercator(min), WGS84ToPseudoMercator(max)] : [min, max]
+      }
+    ]);
+    expect(layer.renderLayers().props).toMatchObject({
+      bounds,
+      coordinateSystem: 'default',
+      _imageCoordinateSystem: srs === 'auto' ? 'cartesian' : 'lnglat'
+    });
   } finally {
+    finalize();
+  }
+});
+
+test.each([
+  {
+    crs: 'EPSG:32632',
+    srs: 'auto',
+    center: [9, 45, 0],
+    zoom: 8,
+    // UTM zone 32N's central meridian at 45°N, with a 305.75 m/pixel view scale.
+    bounds: [377701, 4891226, 622299, 5074675]
+  },
+  {
+    crs: '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m',
+    center: [10, 52, 0],
+    zoom: 5,
+    // LAEA false origin at the center, with a 2446 m/pixel view scale.
+    bounds: [3342606, 2476205, 5299394, 3943795]
+  },
+  {
+    crs: '+proj=eqc +R=6378137 +units=m',
+    center: [0, 0, 0],
+    zoom: 0,
+    // The viewport extends past the projection's global bounds on all four sides.
+    bounds: [-20037508, -10018754, 20037508, 10018754]
+  }
+])(
+  'WMSLayer requests and places native imagery in $crs',
+  async ({crs, srs = crs, center, zoom, bounds}) => {
+    const view = new CustomProjectionView({crs, resolution: 16});
+    await view.initialize();
+    const viewport = view.makeViewport({
+      width: 800,
+      height: 600,
+      viewState: {center: center as [number, number, number], zoom}
+    })!;
+    const {layer, requests, finalize} = initializeRecordingLayer(viewport, srs);
+    try {
+      await layer.loadImage(viewport, 'test');
+      expect(requests).toHaveLength(1);
+      expect(requests[0]).toMatchObject({crs, width: 800, height: 600, layers: ['test-layer']});
+      const requestedBounds = requests[0].boundingBox.flat();
+      requestedBounds.forEach((value, axis) => expect(value).toBeCloseTo(bounds[axis], -1));
+      if (zoom === 0) {
+        expect(requestedBounds).toEqual(
+          viewport.crs.renderingBounds.flatMap(point => point.slice(0, 2))
+        );
+      }
+      const bitmap = layer.renderLayers() as BitmapLayer;
+      expect(bitmap.props).toMatchObject({
+        bounds: requestedBounds,
+        coordinateSystem: viewport.crs.signature,
+        _imageCoordinateSystem: 'default'
+      });
+      expect(viewport.getPreprojection(viewport.crs).preproject).toBeNull();
+    } finally {
+      finalize();
+    }
+  }
+);
+
+test('WMSLayer covers visible ground below the horizon at high pitch', async () => {
+  const crs = '+proj=eqc +R=6378137 +units=m';
+  const view = new CustomProjectionView({crs});
+  await view.initialize();
+  const viewport = view.makeViewport({
+    width: 800,
+    height: 600,
+    viewState: {center: [0, 0, 0], zoom: 8, pitch: 80}
+  })!;
+  const {layer, requests, finalize} = initializeRecordingLayer(viewport, crs);
+  try {
+    await layer.loadImage(viewport, 'test');
+    expect(requests).toHaveLength(1);
+    const [[, minY], [, maxY]] = requests[0].boundingBox;
+    const [, , nearDepth] = viewport.project([0, 20, 0]);
+    const [, , farDepth] = viewport.project([0, 25, 0]);
+    expect(nearDepth).toBeLessThan(1);
+    expect(farDepth).toBeGreaterThan(1);
+    expect(minY).toBeLessThan(0);
+    expect(maxY).toBeGreaterThan(viewport.crs.converter.WGS84.from([0, 20, 0])[1]);
+    expect(maxY).toBeLessThan(viewport.crs.converter.WGS84.from([0, 25, 0])[1]);
+  } finally {
+    finalize();
+  }
+});
+
+test.each([
+  {srs: 'auto', crs: '+proj=eqc +R=6378137 +units=m', center: [0, 0, 0]},
+  {srs: 'EPSG:4326', crs: 'EPSG:32632', center: [9, 45, 0]},
+  {srs: 'EPSG:3857', crs: 'EPSG:32632', center: [9, 45, 0]}
+])('WMSLayer falls back to EPSG:4326 with srs $srs in a $crs view', async ({srs, crs, center}) => {
+  const view = new CustomProjectionView({crs});
+  await view.initialize();
+  const viewport = view.makeViewport({
+    width: 800,
+    height: 600,
+    viewState: {center: center as [number, number, number], zoom: 5}
+  })!;
+  const {layer, requests, finalize} = initializeRecordingLayer(viewport, srs);
+  const warn = vi.spyOn(log, 'warn').mockReturnValue(() => {});
+  try {
+    await layer.loadImage(viewport, 'test');
+    await layer.loadImage(viewport, 'test');
+    expect(warn).toHaveBeenCalledTimes(srs === 'EPSG:3857' ? 1 : 0);
+    if (srs === 'EPSG:3857') {
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining(`srs ${srs}`));
+    }
+    const bounds = viewport.getBounds();
+    expect(requests).toHaveLength(2);
+    for (const request of requests) {
+      expect(request).toMatchObject({
+        crs: 'EPSG:4326',
+        boundingBox: [bounds.slice(0, 2), bounds.slice(2)]
+      });
+    }
+    expect(layer.renderLayers().props).toMatchObject({
+      bounds,
+      coordinateSystem: 'default',
+      _imageCoordinateSystem: 'lnglat'
+    });
+  } finally {
+    warn.mockRestore();
     finalize();
   }
 });

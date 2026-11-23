@@ -213,9 +213,13 @@ Specifies names of layers that should be visualized from the image service.
 
 - Default: `'auto'`
 
-Spatial Reference System for map output, used to query image from the server. Can be one of `EPSG:4326'`, `'EPSG:3857'` or `'auto'`. 
+Coordinate reference system (CRS) to request from the image service. Use `'EPSG:4326'`, `'EPSG:3857'`, or a projected CRS identifier that matches the [`CustomProjectionView`](../core/custom-projection-view.md). The service must support the requested CRS.
 
-If `'auto'`, the layer will request `EPSG:3857` in `MapView`, and `EPSG:4326` otherwise. Note that a particular SRS may not be supported by your image server.
+With `'auto'`, the layer requests `EPSG:3857` in `MapView`, the resolved CRS identifier when available in `CustomProjectionView`, and `EPSG:4326` otherwise. A view defined by a PROJ string typically has no identifier. If a custom image source accepts PROJ strings, you can pass the same definition to the view and `srs`.
+
+A matching request in `CustomProjectionView` uses a bounding box in the view's CRS units and places the image directly in that CRS. An explicit mismatch logs one warning per layer and requests `EPSG:4326` for approximate placement.
+
+The layer supplies bounding boxes in X/Y order. For WMS 1.3.0, the loaders.gl WMS source swaps axes for `EPSG:4326` by default. Other geographic CRSs lack automatic axis handling. For a projected CRS that requires Y/X order, use WMS 1.1.1 if the service supports it or add the CRS to `WMSImageSource.flipCRS`.
 
 
 ### Callbacks
