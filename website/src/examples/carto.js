@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, {Component} from 'react';
-import {GITHUB_TREE, MAPBOX_STYLES} from '../constants/defaults';
+import {GITHUB_TREE} from '../constants/defaults';
 import App from 'website-examples/carto-sql/app';
 
 import {makeExample} from '../components';
@@ -40,7 +40,7 @@ class CartoSQLDemo extends Component {
     }
   };
 
-  static mapStyle = MAPBOX_STYLES.DARK;
+  static mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
   static renderInfo() {
     return (

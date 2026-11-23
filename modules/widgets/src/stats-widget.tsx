@@ -6,7 +6,7 @@ import {Widget, type WidgetPlacement, type WidgetProps} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
 import {render, type JSX} from 'preact';
 import {useEffect, useState} from 'preact/hooks';
-import type {Stats, Stat} from '@probe.gl/stats';
+import type {Stats, Stat} from 'probe.gl/stats';
 import {IconButton} from './lib/components/icon-button';
 
 const DEFAULT_COUNT_FORMATTER = (stat: Stat): string => `${stat.name}: ${stat.count}`;

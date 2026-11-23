@@ -27,7 +27,7 @@ setWorkerUrl(maplibreWorkerUrl);
 
 const map = new Map({
   container: 'map',
-  style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  style: 'https://tiles.openfreemap.org/styles/positron',
   center: [0.45, 51.47],
   zoom: 11
 });
@@ -59,6 +59,8 @@ See [Using with MapLibre](../../developer-guide/base-maps/using-with-maplibre.md
 ### interleaved
 
 If `false`, deck.gl renders to a separate canvas over the map. If `true`, deck.gl layers share MapLibre's WebGL2 context and may be inserted into its style layer stack. The default is `false`.
+
+In overlaid mode, the deck.gl canvas sits above the basemap and below MapLibre controls. Attribution and navigation controls remain visible and interactive, regardless of the control position passed to `map.addControl`.
 
 This property is fixed when the overlay is constructed. To change rendering modes, remove the overlay and create another one.
 

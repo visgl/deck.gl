@@ -5,7 +5,7 @@
 /* eslint-disable max-statements, max-params, complexity, max-depth */
 // TODO merge with icon-layer/icon-manager
 import {log} from '@deck.gl/core';
-import type {NumericArray} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 
 const MISSING_CHAR_WIDTH = 32;
 const SINGLE_LINE = [];

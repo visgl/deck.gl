@@ -2,15 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {createTestViewport} from '../core/viewports/test-crs';
+import {test, expect, vi} from 'vitest';
 
-import {
-  COORDINATE_SYSTEM,
-  _GlobeViewport as GlobeViewport,
-  _CustomProjectionViewport as CustomProjectionViewport
-} from '@deck.gl/core';
+import {GlobeViewport} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
-import {testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
+import {device, testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
+import {Timeline} from '@luma.gl/engine';
 import createMesh from '@deck.gl/layers/bitmap-layer/create-mesh';
 
 import {testPickingLayer} from './test-picking-layer';
@@ -67,10 +65,10 @@ test('BitmapLayer#constructor', () => {
 });
 
 test('BitmapLayer#imageCoordinateSystem with preprojection', () => {
-  const viewport = new CustomProjectionViewport({
+  const viewport = createTestViewport({
     width: 800,
     height: 600,
-    projection: {
+    converter: {
       forward: ([x, y, z = 0]) => [x * 2, y * 2, z],
       inverse: ([x, y, z = 0]) => [x / 2, y / 2, z]
     }
@@ -123,7 +121,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
       {
         title: 'MapView + imageCoordinateSystem: CARTESIAN',
         updateProps: {
-          _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+          _imageCoordinateSystem: 'cartesian'
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
@@ -134,7 +132,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
       {
         title: 'MapView + imageCoordinateSystem: LNGLAT',
         updateProps: {
-          _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+          _imageCoordinateSystem: 'lnglat'
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
@@ -164,7 +162,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
       {
         title: 'GlobeView + imageCoordinateSystem: CARTESIAN',
         updateProps: {
-          _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+          _imageCoordinateSystem: 'cartesian'
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
@@ -175,7 +173,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
       {
         title: 'GlobeView + imageCoordinateSystem: LNGLAT',
         updateProps: {
-          _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+          _imageCoordinateSystem: 'lnglat'
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
@@ -194,7 +192,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
         [2, 3, 0],
         [2, 1, 1]
       ],
-      _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+      _imageCoordinateSystem: 'cartesian'
     }),
     onError: () =>
       console.log('Layer should throw if _imageCoordinateSystem is used with quad bounds')
@@ -266,4 +264,185 @@ test('BitmapLayer#picking', async () => {
       }
     ]
   });
+});
+
+test('adaptive bitmap mesh preserves bilinear UVs, altitude and seed indices', () => {
+  const bounds = [
+    [0, 0, 2],
+    [0, 2, 4],
+    [3, 3, 8],
+    [2, 0, 6]
+  ];
+  const seed = createMesh(bounds, 0);
+  const originalIndices = Array.from(seed.indices);
+  const transform = ([x, y, z]) => [x, y + x * x, z];
+  const mesh = createMesh(bounds, 0, {transform, tolerance: 0.05, scale: [1, 1, 1]});
+  expect(mesh.positions.length).toBeGreaterThan(seed.positions.length);
+  for (let i = 0; i < mesh.positions.length / 3; i++) {
+    const u = mesh.texCoords[2 * i],
+      v = 1 - mesh.texCoords[2 * i + 1];
+    const expected = [0, 1, 2].map(
+      axis =>
+        (1 - u) * ((1 - v) * bounds[0][axis] + v * bounds[1][axis]) +
+        u * ((1 - v) * bounds[3][axis] + v * bounds[2][axis])
+    );
+    expected.forEach((value, axis) => expect(mesh.positions[3 * i + axis]).toBeCloseTo(value, 6));
+    const projected = transform(expected);
+    projected.forEach((value, axis) =>
+      expect(mesh.projectedPositions![3 * i + axis]).toBeCloseTo(value, 6)
+    );
+  }
+  expect(Array.from(seed.indices)).toEqual(originalIndices);
+  expect(Array.from(createMesh(bounds, 0).indices)).toEqual(originalIndices);
+  const feetMesh = createMesh(bounds, 0, {
+    transform: position => transform(position).map(value => value / 0.3048),
+    tolerance: 0.05,
+    scale: [0.3048, 0.3048, 0.3048]
+  });
+  expect(Array.from(feetMesh.indices)).toEqual(Array.from(mesh.indices));
+  expect(Array.from(feetMesh.positions)).toEqual(Array.from(mesh.positions));
+  feetMesh.projectedPositions!.forEach((value, index) =>
+    expect(value * 0.3048).toBeCloseTo(mesh.projectedPositions![index], 6)
+  );
+});
+
+test('adaptive bitmap rebuilds on modelMatrix changes and disabling refinement', () => {
+  const viewport = createTestViewport({
+    converter: {
+      forward: ([x, y, z = 0]) => [x, y + x * x, z],
+      inverse: ([x, y, z = 0]) => [x, y - x * x, z]
+    }
+  });
+  testLayer({
+    Layer: BitmapLayer,
+    viewport,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          bounds: [
+            [0, 0, 2],
+            [0, 2, 4],
+            [3, 3, 8],
+            [2, 0, 6]
+          ],
+          _projectionTolerance: 0.05
+        },
+        onAfterUpdate({layer}) {
+          expect(layer.state.mesh.projectedPositions).toBeTruthy();
+        }
+      },
+      {
+        updateProps: {coordinateOrigin: [3, 0, 0]},
+        onAfterUpdate({layer, oldState}) {
+          expect(layer.state.mesh).not.toBe(oldState.mesh);
+          expect(layer.state.mesh.projectedPositions[0]).toBe(3);
+          expect(layer.getAttributeManager()!.attributes.positions.value[0]).toBe(3);
+        }
+      },
+      {
+        updateProps: {
+          coordinateOrigin: [0, 0, 0],
+          modelMatrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1]
+        },
+        onAfterUpdate({layer, oldState}) {
+          expect(layer.state.mesh).not.toBe(oldState.mesh);
+          expect(layer.state.mesh.projectedPositions[0]).toBe(2);
+          expect(layer.getAttributeManager()!.attributes.positions.value[0]).toBe(2);
+        }
+      },
+      {
+        updateProps: {_projectionTolerance: 0},
+        onAfterUpdate({layer}) {
+          expect(layer.state.mesh.projectedPositions).toBeUndefined();
+          expect(layer.state.mesh.positions.length).toBe(12);
+          expect(layer.getAttributeManager()!.attributes.positions.value[0]).toBe(2);
+        }
+      }
+    ]
+  });
+});
+
+test('BitmapLayer#typed byte colors retain fractional shader components', () => {
+  const setProps = vi.fn();
+  const tintColor = new Uint8Array([128, 64, 32]);
+  const transparentColor = new Uint8Array([32, 64, 128, 192]);
+  BitmapLayer.prototype.draw.call(
+    Object.assign(Object.create(BitmapLayer.prototype), {
+      props: new BitmapLayer({
+        image: {width: 1, height: 1, data: new Uint8Array(4)},
+        tintColor,
+        transparentColor
+      }).props,
+      state: {model: {shaderInputs: {setProps}, draw: vi.fn()}},
+      context: {renderPass: {}, normalizedColors: true}
+    }),
+    {shaderModuleProps: {picking: {isActive: false}}}
+  );
+  const {bitmap} = setProps.mock.calls[0][0];
+  expect(bitmap.tintColor).toEqual([128 / 255, 64 / 255, 32 / 255]);
+  expect(bitmap.transparentColor).toEqual([32 / 255, 64 / 255, 128 / 255, 192 / 255]);
+  expect(Array.from(tintColor)).toEqual([128, 64, 32]);
+  expect(Array.from(transparentColor)).toEqual([32, 64, 128, 192]);
+});
+
+test('BitmapLayer#normalizes plain colors and preserves the default tint', () => {
+  const setProps = vi.fn();
+  const {tintColor} = new BitmapLayer().props;
+  const layer = Object.assign(Object.create(BitmapLayer.prototype), {
+    props: new BitmapLayer({
+      image: {width: 1, height: 1, data: new Uint8Array(4)},
+      tintColor,
+      transparentColor: [0.5, 0.25, 0, 0]
+    }).props,
+    state: {model: {shaderInputs: {setProps}, draw: vi.fn()}},
+    context: {renderPass: {}, normalizedColors: true}
+  });
+  layer.draw({shaderModuleProps: {picking: {isActive: false}}});
+  expect(setProps.mock.calls[0][0].bitmap.tintColor).toEqual([1, 1, 1]);
+  expect(setProps.mock.calls[0][0].bitmap.transparentColor).toEqual([0.5, 0.25, 0, 0]);
+
+  layer.props = new BitmapLayer({image: layer.props.image, tintColor: [1, 0.5, 0]}).props;
+  layer.draw({shaderModuleProps: {picking: {isActive: false}}});
+  expect(setProps.mock.calls[1][0].bitmap.tintColor).toEqual([1, 0.5, 0]);
+});
+
+test('BitmapLayer interpolates byte defaults and typed colors with normalized arrays', () => {
+  const image = device.createTexture({width: 1, height: 1, data: new Uint8Array(4)});
+  const timeline = new Timeline();
+  try {
+    testLayer({
+      Layer: BitmapLayer,
+      timeline,
+      onError: error => {
+        throw error;
+      },
+      testCases: [
+        {props: {image, transparentColor: new Uint8Array([0, 255, 0, 255])}},
+        {
+          updateProps: {
+            tintColor: [1, 0, 0],
+            transparentColor: [1, 0, 0, 0],
+            transitions: {tintColor: 100, transparentColor: 100}
+          },
+          onBeforeUpdate: ({layer}) => {
+            layer.context.layerManager.setProps({normalizedColors: true});
+            timeline.setTime(0);
+          }
+        },
+        {
+          onBeforeUpdate: () => timeline.setTime(50),
+          onAfterUpdate: ({layer}) => {
+            const {bitmap} = layer.state.model!.shaderInputs.getUniformValues();
+            expect(bitmap.tintColor).toEqual([1, 0.5, 0.5]);
+            expect(bitmap.transparentColor).toEqual([0.5, 0.5, 0, 0.5]);
+          }
+        }
+      ]
+    });
+  } finally {
+    image.destroy();
+  }
 });

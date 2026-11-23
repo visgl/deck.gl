@@ -1,0 +1,12 @@
+{
+  "name": "deck.gl-examples-private-fireflies",
+  "version": "10.0.0-alpha.3",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "test:visual": "node ../riverfront-lighting-visual.mjs fireflies",
+    "generate:thumbnail": "node ../riverfront-lighting-visual.mjs fireflies --thumbnail"
+  }
+}

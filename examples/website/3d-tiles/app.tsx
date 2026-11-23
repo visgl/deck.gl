@@ -8,10 +8,10 @@ import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
 import type {Device} from '@luma.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
-import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 
 import type {MapViewState} from '@deck.gl/core';
-import type {Tileset3D} from '@loaders.gl/tiles';
+import type {Tileset3D} from '@loaders.gl/tiles-3d';
 
 const ION_ASSET_ID = 43978;
 const ION_TOKEN =
@@ -31,7 +31,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
 
 export default function App({
   device,
-  mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
+  mapStyle = 'https://tiles.openfreemap.org/styles/dark',
   updateAttributions
 }: {
   device?: Device;

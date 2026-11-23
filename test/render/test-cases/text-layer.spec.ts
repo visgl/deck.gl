@@ -6,7 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
+import {OrthographicView} from '@deck.gl/core';
 import {TextLayer, PathLayer} from '@deck.gl/layers';
 import {PointLabelLayer} from '@deck.gl/carto';
 import {CollisionFilterExtension, PathStyleExtension} from '@deck.gl/extensions';
@@ -521,8 +521,6 @@ const testCases = [
   },
   {
     name: 'point-label-layer-collision',
-    // CollisionFilterExtension render tests are WebGL only, see collision-filter-extension.spec.ts
-    skip: ['webgpu'],
     viewState: {
       target: [0, 0, 0],
       zoom: 0
@@ -591,7 +589,6 @@ TextLayer is a CompositeLayer that wraps around the IconLayer. It automatically 
   },
   {
     name: 'text-layer-background-dash',
-    skip: ['webgpu'],
     viewState: {
       target: [0, 0, 0],
       zoom: 0

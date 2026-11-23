@@ -52,6 +52,10 @@ A relative (e.g. `'50%'`) or absolute extent. Accepts CSS-like expressions that 
 
 Padding around the viewport, in the shape of `{left, right, top, bottom}` where each value is either a relative (e.g. `'50%'`) or absolute pixels. These values support the same CSS-style expressions (numbers/percentages/`px` with parentheses and `calc()` addition/subtraction) as `x`, `y`, `width`, and `height`. This can be used to move the "look at"/target/vanishing point away from the center of the viewport rectangle.
 
+#### `resolution` (number, optional) {#resolution}
+
+Divide long straight lines in paths, polygons or meshes into smaller segments so that they closely follow the shape of the target CRS. Higher values produce finer geometry details but requires more processing and memory. Default `0` disables subdivision. See [geometry approximation](./viewport.md#geometry-approximation).
+
 #### `controller` (Function | boolean | object, optional) {#controller}
 
 Options for viewport interactivity.
@@ -96,7 +100,9 @@ Default `false`.
 
 #### `clearColor` (number[] | false, optional) {#clearcolor}
 
-Specifies the color to clear the viewport with, as an array of four numbers `[r, g, b, a?]`. Each channel should be an integer between 0 and 255. For example, `[255, 0, 0, 255]` for opaque red. If `clearColor` is `false`, the depth buffer will not be cleared. If `clear` is set to `false`, this property will be ignored.
+Specifies the color to clear the viewport with as `[r, g, b, a?]`. By default, channels use 0–255 (for example, `[255, 0, 0, 255]` for opaque red). With Deck's [`normalizedColors`](./deck.md#normalizedcolors), channels use 0–1.
+
+An omitted alpha is opaque, and an explicit zero alpha is transparent. Set `clearColor: false` to skip clearing the color buffer. This property only applies when `clear` is enabled.
 
 Default `[0, 0, 0, 0]` (transparent).
 

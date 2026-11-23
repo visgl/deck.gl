@@ -5,6 +5,7 @@
 import Viewport from '../viewports/viewport';
 import {parsePosition, getPosition, LayoutExpression} from '../utils/positions';
 import {deepEqual} from '../utils/deep-equal';
+import {createPropsWithDefaultId} from '../utils/props-with-default-id';
 import {deepMergeViewState} from '../utils/deep-merge';
 import type Controller from '../controllers/controller';
 import type {ControllerOptions} from '../controllers/controller';
@@ -16,6 +17,8 @@ import type {Parameters} from '@luma.gl/core';
 export type CommonViewState = TransitionProps;
 
 export type CommonViewProps<ViewState> = {
+  /** Subdivision intervals around the earth. Default 0 disables subdivision. */
+  resolution?: number;
   /** A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view. */
   id?: string;
   /**
@@ -42,7 +45,7 @@ export type CommonViewProps<ViewState> = {
   } | null;
   /** When using multiple views, set this flag to wipe the pixels drawn by other overlapping views. Default `false` */
   clear?: boolean;
-  /** Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0-255. Default `[0, 0, 0, 0]` (transparent). */
+  /** Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0–255 by default or 0–1 with Deck's normalizedColors. Default `[0, 0, 0, 0]` (transparent). */
   clearColor?: number[] | false;
   /** Depth buffer value to clear the viewport with, between 0.0 - 1.0. Default `1.0` (far plane). */
   clearDepth?: number | false;
@@ -93,7 +96,10 @@ export default abstract class View<
     // @ts-ignore
     this.id = id || this.constructor.displayName || 'view';
 
-    this.props = {...props, id: this.id};
+    // A falsy id means the class default. Read only an own `id`: props from another view keep
+    // their default on the prototype, and copying it would make it look app-supplied.
+    const ownId = Object.prototype.hasOwnProperty.call(props, 'id') ? props.id : undefined;
+    this.props = createPropsWithDefaultId<ViewProps>(this.id, props, {id: ownId || undefined});
 
     // Extents
     this._x = parsePosition(x);
@@ -113,13 +119,20 @@ export default abstract class View<
     Object.seal(this);
   }
 
+  /** Prepare asynchronous resources before this view can create a viewport. */
+  initialize(): void | Promise<void> {}
+
   equals(view: this): boolean {
     if (this === view) {
       return true;
     }
 
-    // To correctly compare padding use depth=2
-    return this.constructor === view.constructor && deepEqual(this.props, view.props, 2);
+    // To correctly compare padding use depth=2. `id` is an own prop only when it was passed, so
+    // compare props with their resolved ids.
+    return (
+      this.constructor === view.constructor &&
+      deepEqual({...this.props, id: this.id}, {...view.props, id: view.id}, 2)
+    );
   }
 
   /** Clone this view with modified props */
@@ -128,7 +141,10 @@ export default abstract class View<
     return new ViewConstructor({...this.props, ...newProps});
   }
 
-  /** Make viewport from canvas dimensions and view state */
+  /** Create a viewport from canvas dimensions and view state.
+   * To wait for resources prepared by initialize(), override this method to return null
+   * until they are ready. This method may be called while initialize() is still pending.
+   */
   makeViewport({width, height, viewState}: {width: number; height: number; viewState: ViewState}) {
     viewState = this.filterViewState(viewState);
 
@@ -138,7 +154,8 @@ export default abstract class View<
       return null;
     }
     const ViewportType = this.getViewportType(viewState);
-    return new ViewportType({...viewState, ...this.props, ...viewportDimensions});
+    // Spreading props drops the default `id`, which lives on the prototype
+    return new ViewportType({...viewState, ...this.props, id: this.id, ...viewportDimensions});
   }
 
   getViewStateId(): string {

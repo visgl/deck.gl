@@ -12,6 +12,9 @@ The `A5Layer` renders filled and/or stroked polygons based on the [A5](https://a
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -21,7 +24,7 @@ import {A5Layer} from '@deck.gl/geo-layers';
 
 const layer = new A5Layer({
   id: 'A5Layer',
-  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5v1.json',
   
   extruded: true,
   getPentagon: f => f.pentagon,
@@ -60,7 +63,7 @@ type DataType = {
 
 const layer = new A5Layer<DataType>({
   id: 'A5Layer',
-  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
+  data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5v1.json',
   
   extruded: true,
   getPentagon: (f: DataType) => f.pentagon,
@@ -102,7 +105,7 @@ type DataType = {
 function App() {
   const layer = new A5Layer<DataType>({
     id: 'A5Layer',
-    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json',
+    data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5v1.json',
     
     extruded: true,
     getPentagon: (f: DataType) => f.pentagon,
@@ -127,6 +130,26 @@ function App() {
   />;
 }
 ```
+
+  </TabItem>
+</Tabs>
+
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Utf8, vectorFromArray} from 'apache-arrow';
+import {A5Layer} from '@deck.gl/geo-layers';
+
+const cells = vectorFromArray(['2e80000000000000'], new Utf8());
+
+const layer = new A5Layer({
+  getPentagon: cells,
+  getFillColor: [255, 140, 0]
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
 </Tabs>
@@ -170,7 +193,7 @@ Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/compo
 
 ### Data Accessors
 
-#### `getPentagon` ([Accessor&lt;bigint | string&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpentagon}
+#### `getPentagon` (Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpentagon}
 
 Called for each data object to retrieve the identifier of the A5 pentagon cell.  May return one of the following:
 
@@ -181,6 +204,33 @@ For more information on representing the A5 cell, see [A5 Cell Representation](h
 
 
 * default: `object => object.pentagon`
+
+Each Arrow row supplies one identifier or a list of identifiers for one source feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for supported encodings and picking behavior.
+
+
+#### `getFillColor` (constant | Accessor | arrow.Vector, optional) {#getfillcolor}
+
+* Default: `[0, 0, 0, 255]`
+
+The fill color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getLineColor` (constant | Accessor | arrow.Vector, optional) {#getlinecolor}
+
+* Default: `[0, 0, 0, 255]`
+
+The outline color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getLineWidth` (constant | Accessor | arrow.Vector, optional) {#getlinewidth}
+
+* Default: `1`
+
+The outline width of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getElevation` (constant | Accessor | arrow.Vector, optional) {#getelevation}
+
+* Default: `1000`
+
+The elevation of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
 
 ## Sub Layers
@@ -193,4 +243,3 @@ The `A5Layer` renders the following sublayers:
 ## Source
 
 [modules/geo-layers/src/a5-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/a5-layer)
-

@@ -36,5 +36,10 @@ layer = pdk.Layer(
 )
 
 view_state = pdk.ViewState(latitude=37.80, longitude=-122.30, zoom=10)
-r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{name}"})
+r = pdk.Deck(
+    layers=[layer],
+    initial_view_state=view_state,
+    tooltip={"text": "{name}"},
+    map_style="https://tiles.openfreemap.org/styles/dark",
+)
 r.to_html("clip_extension.html")

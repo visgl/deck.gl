@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor, ArrowAccessorFunction} from '@deck.gl/core';
 /* global setTimeout clearTimeout */
 import {
   getBounds,
@@ -16,10 +17,12 @@ import {
   Texture,
   TextureProps,
   TextureFormat,
-  TextureFormatColor
+  TextureFormatColor,
+  type VertexFormat
 } from '@luma.gl/core';
+import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
 import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
-import {pixelsToWorld} from '@math.gl/web-mercator';
+import {pixelsToWorld} from '@math.gl/geospatial/web-mercator';
 import {
   Accessor,
   AccessorFunction,
@@ -36,11 +39,12 @@ import {
   ProjectUniforms,
   project,
   project32,
+  type LayerExtension,
   _deepEqual as deepEqual
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
-import {defaultColorRange, colorRangeToFlatArray} from '../common/utils/color-utils';
+import {defaultColorRange, packColorRange} from '../common/utils/color-utils';
 import weightsVs from './weights-vs.glsl';
 import weightsFs from './weights-fs.glsl';
 import maxVs from './max-vs.glsl';
@@ -53,6 +57,16 @@ import {
   WeightProps,
   weightUniforms
 } from './heatmap-layer-uniforms';
+
+/** Recognize ClipExtension without adding an extensions package dependency. */
+function isClipExtension(extension: LayerExtension): boolean {
+  return (extension.constructor as typeof LayerExtension).extensionName === 'ClipExtension';
+}
+
+/** Recognize DataFilterExtension without importing the extensions package. */
+function isDataFilterExtension(extension: LayerExtension): boolean {
+  return (extension.constructor as typeof LayerExtension).extensionName === 'DataFilterExtension';
+}
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const MAX_WEIGHT_REDUCTION_SIZE = 16;
@@ -75,8 +89,11 @@ const AGGREGATION_MODE = {
 };
 
 const defaultProps: DefaultProps<HeatmapLayerProps> = {
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
-  getWeight: {type: 'accessor', value: 1},
+  positions: {type: 'object', value: null, optional: true},
+  weights: {type: 'array', value: null, optional: true, compare: 1},
+  extensionAttributes: {type: 'object', value: null, optional: true, compare: 1},
+  getPosition: {type: 'accessor', arrow: 'row', value: (x: any) => x.position},
+  getWeight: {type: 'accessor', arrow: 'row', value: 1},
   intensity: {type: 'number', min: 0, value: 1},
   radiusPixels: {type: 'number', min: 1, max: 100, value: 50},
   colorRange: defaultColorRange,
@@ -103,6 +120,17 @@ export type HeatmapLayerProps<DataT = unknown> = _HeatmapLayerProps<DataT> &
   AggregationLayerProps<DataT>;
 
 type _HeatmapLayerProps<DataT> = {
+  /** Borrowed single-chunk float32x3 positions, bypassing the position accessor.
+   * @experimental
+   */
+  positions?: GPUVector | null;
+  /** One borrowed scalar float32 weight vector with the same row count as positions.
+   * @experimental
+   */
+  weights?: readonly GPUVector[] | null;
+  /** Borrowed numeric DataFilter values in position row order. @experimental */
+  extensionAttributes?: {filterValues?: GPUVector} | null;
+
   /**
    * Radius of the circle in pixels, to which the weight of an object is distributed.
    *
@@ -114,6 +142,7 @@ type _HeatmapLayerProps<DataT> = {
    * Specified as an array of colors [color1, color2, ...].
    *
    * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
+   * Custom plain-array entries are 0–1 when Deck normalizedColors is enabled.
    */
   colorRange?: Color[];
 
@@ -168,14 +197,14 @@ type _HeatmapLayerProps<DataT> = {
    *
    * @default d => d.position
    */
-  getPosition?: AccessorFunction<DataT, Position>;
+  getPosition?: ArrowAccessorFunction<DataT, Position>;
 
   /**
    * The weight of each object.
    *
    * @default 1
    */
-  getWeight?: Accessor<DataT, number>;
+  getWeight?: ArrowAccessor<DataT, number>;
 };
 
 /** Visualizes the spatial distribution of data. */
@@ -187,8 +216,12 @@ export default class HeatmapLayer<
   static defaultProps = defaultProps;
 
   state!: AggregationLayer<DataT>['state'] & {
-    colorDomain?: Readonly<[number, number]>;
+    /** Whether the current texture was packed from normalized plain arrays. */
+    normalizedColorRange?: boolean;
+    gpuPositionsLow?: Buffer;
     isWeightMapDirty?: boolean;
+    /** Conversion from sum-domain units to weights in the current texture. */
+    weightColorScale?: number;
     weightsTexture?: Texture;
     maxWeightsTexture?: Texture;
     colorTexture?: Texture;
@@ -205,7 +238,7 @@ export default class HeatmapLayer<
     weightsScale: number;
     visibleWorldBounds: number[];
     viewportCorners: number[][];
-  };
+  } & AggregationLayer<any>['state'];
 
   getShaders(shaders: any) {
     let modules = [project32];
@@ -218,7 +251,6 @@ export default class HeatmapLayer<
 
   initializeState() {
     super.initializeAggregationLayer(DIMENSIONS);
-    this.setState({colorDomain: DEFAULT_COLOR_DOMAIN});
     this._setupTextureParams();
     this._setupAttributes();
     this._setupResources();
@@ -238,19 +270,32 @@ export default class HeatmapLayer<
   _updateHeatmapState(opts: UpdateParameters<this>) {
     const {props, oldProps} = opts;
     const changeFlags = this._getChangeFlags(opts);
+    const clipModeChanged = props['clipByInstance'] !== oldProps['clipByInstance'];
+    const clipChanged =
+      this.context.device.type === 'webgpu' &&
+      (opts.changeFlags.extensionsChanged ||
+        (props.extensions.some(isClipExtension) &&
+          (clipModeChanged || !deepEqual(props['clipBounds'], oldProps['clipBounds'], 1))));
+    const maskPropsChanged =
+      props['maskId'] !== oldProps['maskId'] ||
+      props['maskInverted'] !== oldProps['maskInverted'] ||
+      props['maskByInstance'] !== oldProps['maskByInstance'];
 
-    if (changeFlags.dataChanged || changeFlags.viewportChanged) {
+    if (changeFlags.dataChanged || changeFlags.viewportChanged || maskPropsChanged) {
       // if data is changed, do not debounce and immediately update the weight map
-      changeFlags.boundsChanged = this._updateBounds(changeFlags.dataChanged);
+      changeFlags.boundsChanged = this._updateBounds(changeFlags.dataChanged || maskPropsChanged);
       this._updateTextureRenderingBounds();
     }
 
-    if (changeFlags.dataChanged || changeFlags.boundsChanged) {
+    if (changeFlags.dataChanged || changeFlags.boundsChanged || maskPropsChanged || clipChanged) {
       // Update weight map immediately
       clearTimeout(this.state.updateTimer);
-      this.setState({isWeightMapDirty: true});
+      this.setState({isWeightMapDirty: true, updateTimer: null});
 
-      if (changeFlags.dataChanged) {
+      if (
+        changeFlags.dataChanged ||
+        (clipChanged && (clipModeChanged || opts.changeFlags.extensionsChanged))
+      ) {
         // Recreate weights transform if data changed, as buffer layout may have changed,
         // happens when binary attibutes passed.
         const weightsTransformShaders = this.getShaders({vs: weightsVs, fs: weightsFs});
@@ -261,26 +306,35 @@ export default class HeatmapLayer<
       this._debouncedUpdateWeightmap();
     }
 
-    if (props.colorRange !== oldProps.colorRange) {
-      this._updateColorTexture(opts);
-    }
-
-    if (this.state.isWeightMapDirty) {
-      this._updateWeightmap();
+    const normalized = this.usesNormalizedColors() && props.colorRange !== defaultColorRange;
+    if (
+      props.colorRange !== oldProps.colorRange ||
+      normalized !== this.state.normalizedColorRange
+    ) {
+      this._updateColorTexture(opts, normalized);
     }
 
     this.setState({zoom: opts.context.viewport.zoom});
   }
 
   renderLayers(): LayersList | Layer {
-    const {
-      weightsTexture,
-      triPositionBuffer,
-      triTexCoordBuffer,
-      maxWeightsTexture,
-      colorTexture,
-      colorDomain
-    } = this.state;
+    if (this.state.isWeightMapDirty && !this._hasMaskExtension()) {
+      this._updateWeightmap();
+    }
+    const displayExtensions = this.props.extensions.filter(extension => {
+      if (isClipExtension(extension) && this._clipsSourcePoints()) return false;
+      if (isDataFilterExtension(extension)) {
+        // Update counts from source points after the extension has updated its state.
+        extension.draw.call(this, {context: this.context}, extension);
+        return false;
+      }
+      return (
+        extension.constructor['extensionName'] !== 'MaskExtension' ||
+        this.props['maskByInstance'] === false
+      );
+    });
+    const {weightsTexture, triPositionBuffer, triTexCoordBuffer, maxWeightsTexture, colorTexture} =
+      this.state;
     const {updateTriggers, intensity, threshold, aggregation} = this.props;
 
     const TriangleLayerClass = this.getSubLayerClass('triangle', TriangleLayer);
@@ -288,12 +342,16 @@ export default class HeatmapLayer<
     return new TriangleLayerClass(
       this.getSubLayerProps({
         id: 'triangle-layer',
+        extensions: displayExtensions,
         updateTriggers
       }),
       {
         // position buffer is filled with world coordinates generated from viewport.unproject
         // i.e. LNGLAT if geospatial, CARTESIAN otherwise
         coordinateSystem: 'default',
+        // The screen quad comes from the viewport, independently of data transforms.
+        coordinateOrigin: [0, 0, 0],
+        modelMatrix: null,
         data: {
           attributes: {
             positions: triPositionBuffer,
@@ -307,7 +365,7 @@ export default class HeatmapLayer<
         weightsTexture,
         intensity,
         threshold,
-        colorDomain
+        getColorDomain: () => this._getColorDomain()
       }
     );
   }
@@ -325,6 +383,7 @@ export default class HeatmapLayer<
       updateTimer
     } = this.state;
     weightsTransform?.destroy();
+    this.state.gpuPositionsLow?.destroy();
     weightsTexture?.destroy();
     maxWeightTransform?.destroy();
     maxWeightsTexture?.destroy();
@@ -353,6 +412,12 @@ export default class HeatmapLayer<
     } = {};
     const {dimensions} = this.state;
     changeFlags.dataChanged =
+      ((opts.props.positions !== opts.oldProps.positions ||
+        opts.props.weights?.[0] !== opts.oldProps.weights?.[0] ||
+        opts.props.extensionAttributes?.filterValues !==
+          opts.oldProps.extensionAttributes?.filterValues ||
+        opts.props.numInstances !== opts.oldProps.numInstances) &&
+        'GPU columns changed') ||
       (opts.changeFlags.projectionChanged && 'projection changed') ||
       // Uniform transforms must regenerate the weight texture even when packed positions stay unchanged.
       ((!deepEqual(opts.props.modelMatrix, opts.oldProps.modelMatrix, 1) ||
@@ -393,6 +458,49 @@ export default class HeatmapLayer<
     });
   }
 
+  /** Use GPU column length unless an explicit row prefix is supplied. */
+  override getNumInstances(): number {
+    return this.props.positions && !Number.isFinite(this.props.numInstances)
+      ? this.props.positions.length
+      : super.getNumInstances();
+  }
+
+  /** Borrow GPU columns directly; accessor inputs retain normal attribute updates. */
+  protected override _updateAttributes(): void {
+    const {positions, weights, extensions} = this.props;
+    if (!positions) {
+      if (weights || this.props.extensionAttributes?.filterValues)
+        throw new Error('Heatmap weights and extension columns require positions');
+      super._updateAttributes();
+      return;
+    }
+    if (
+      this.context.device.type !== 'webgpu' ||
+      extensions.some(
+        extension => !isClipExtension(extension) && !isDataFilterExtension(extension)
+      ) ||
+      this.state.preproject
+    ) {
+      throw new Error(
+        'Heatmap GPU columns require WebGPU, compatible extensions, and compatible coordinates'
+      );
+    }
+    const weight = weights?.[0];
+    if (
+      weights?.length !== 1 ||
+      positions.format !== 'float32x3' ||
+      weight?.format !== 'float32' ||
+      positions.length !== weight.length ||
+      this.getNumInstances() > positions.length
+    ) {
+      throw new Error('Heatmap requires matching float32x3 positions and float32 weights');
+    }
+    getGPUVectorData(positions);
+    getGPUVectorData(weight);
+    this._getBorrowedFilterValues();
+    this.updateAttributes({});
+  }
+
   _setupAttributes() {
     const attributeManager = this.getAttributeManager()!;
 
@@ -404,9 +512,12 @@ export default class HeatmapLayer<
           accessor: 'getPosition',
           // Normalize binary XY positions into the packed XYZ high/low layout WebGPU requires.
           ...this.usePositionTransforms(),
-          transform:
-            this.usePositionTransforms().transform ||
-            ((position: Position) => [position[0], position[1], position[2] ?? 0])
+          transform(this: HeatmapLayer, position: Position) {
+            // Keep XYZ packing even when source-CRS changes add or remove CPU conversion.
+            const transformed =
+              this.usePositionTransforms().transform?.call(this, position) || position;
+            return [transformed[0], transformed[1], transformed[2] ?? 0];
+          }
         },
         instanceWeights: {size: 1, accessor: 'getWeight'}
       });
@@ -430,15 +541,19 @@ export default class HeatmapLayer<
     const {weightsTextureSize} = this.props;
 
     const textureSize = Math.min(weightsTextureSize, device.limits.maxTextureDimension2D);
-    const isWebGPU = device.type === 'webgpu';
-    const floatTargetSupport = isWebGPU
-      ? device.getTextureFormatCapabilities('rgba16float').blend
-      : FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
-    const format: TextureFormat = floatTargetSupport
-      ? isWebGPU
-        ? 'rgba16float'
-        : 'rgba32float'
-      : 'rgba8unorm';
+    /** Candidate targets in descending precision. */
+    const floatFormats = ['rgba32float', 'rgba16float'] as const;
+    const format: TextureFormat =
+      floatFormats.find(candidate => {
+        /** Check support for accumulation and linear sampling separately. */
+        const capabilities = device.getTextureFormatCapabilities(candidate);
+        if (!capabilities.render || !capabilities.filter) return false;
+        if (device.type === 'webgl' && candidate === 'rgba32float') {
+          return FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
+        }
+        return capabilities.blend;
+      }) ?? 'rgba8unorm';
+    const floatTargetSupport = format !== 'rgba8unorm';
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
     this.setState({textureSize, format, weightsScale});
     if (!floatTargetSupport) {
@@ -448,18 +563,99 @@ export default class HeatmapLayer<
     }
   }
 
-  _createWeightsTransform(shaders: {vs: string; fs?: string; modules: any[]}) {
+  /** Validate the column consumed by the borrowed input accumulation pass. */
+  private _getBorrowedFilterValues() {
+    const {positions, extensions, extensionAttributes} = this.props;
+    const extension = extensions.find(isDataFilterExtension);
+    if (!positions || !extension) return null;
+
+    const {filterSize, categorySize, fp64, countItems} = extension.opts as {
+      filterSize?: number;
+      categorySize?: number;
+      fp64?: boolean;
+      countItems?: boolean;
+    };
+    if (!filterSize || categorySize || fp64 || countItems) {
+      throw new Error(
+        'Heatmap GPU column filtering requires numeric DataFilter without fp64 or item counting'
+      );
+    }
+    const format = (filterSize === 1 ? 'float32' : `float32x${filterSize}`) as VertexFormat;
+    const vector = extensionAttributes?.filterValues;
+    if (
+      vector?.format !== format ||
+      vector.length !== positions.length ||
+      !(getGPUVectorData(vector).buffer.usage & Buffer.VERTEX)
+    ) {
+      throw new Error(
+        `Invalid Heatmap filterValues: expected ${format}, one value per position and VERTEX usage`
+      );
+    }
+    return {...getGPUVectorData(vector), format};
+  }
+
+  /** Whether ClipExtension filters source points instead of the display quad. */
+  private _clipsSourcePoints(): boolean {
+    return this.context.device.type === 'webgpu' && this.props['clipByInstance'] !== false;
+  }
+
+  /** Create the source weight transform with its current buffer layout and shader plugins. */
+  _createWeightsTransform(shaders: {
+    vs: string;
+    fs?: string;
+    modules: any[];
+    plugins?: TextureTransformProps['plugins'];
+  }) {
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
     const isWebGPU = this.context.device.type === 'webgpu';
     const attributeManager = this.getAttributeManager()!;
 
+    const filterValues = this._getBorrowedFilterValues();
     weightsTransform?.destroy();
     weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
       ...shaders,
       source: weightsSource,
-      bufferLayout: attributeManager.getBufferLayouts({isInstanced: isWebGPU}),
+      plugins: isWebGPU
+        ? shaders.plugins?.filter(plugin => plugin.name !== 'clip-geometry')
+        : shaders.plugins,
+      bufferLayout: this.props.positions
+        ? [
+            {
+              name: 'instancePositions',
+              stepMode: 'instance',
+              byteStride: getGPUVectorData(this.props.positions).byteStride,
+              attributes: [{attribute: 'instancePositions', format: 'float32x3', byteOffset: 0}]
+            },
+            {
+              name: 'instanceWeights',
+              stepMode: 'instance',
+              byteStride: getGPUVectorData(this.props.weights![0]).byteStride,
+              attributes: [{attribute: 'instanceWeights', format: 'float32', byteOffset: 0}]
+            },
+            ...(filterValues
+              ? [
+                  {
+                    name: 'filterValues',
+                    stepMode: 'instance' as const,
+                    byteStride: filterValues.byteStride,
+                    attributes: [
+                      {attribute: 'filterValues', format: filterValues.format, byteOffset: 0}
+                    ]
+                  }
+                ]
+              : []),
+            {
+              name: 'instancePositions64Low',
+              stepMode: 'instance',
+              byteStride: 12,
+              attributes: [
+                {attribute: 'instancePositions64Low', format: 'float32x3', byteOffset: 0}
+              ]
+            }
+          ]
+        : attributeManager.getBufferLayouts({isInstanced: isWebGPU}),
       vertexCount: isWebGPU ? 6 : 1,
       ...(isWebGPU
         ? {
@@ -496,17 +692,20 @@ export default class HeatmapLayer<
     });
     this._createWeightsTransform(weightsTransformShaders);
 
-    const maxWeightsTransformShaders = this.getShaders({
+    const maxWeightsTransformShaders = {
+      shaderAssembler: this.context.shaderAssembler,
       // Reduction operates on texture values, not projected positions or sizes.
       defines: {USE_EXTERNAL_PROJECTION: false},
       source: maxSource,
       vs: maxVs,
       fs: maxFs,
       modules: [maxWeightUniforms]
-    });
+    };
     const maxWeightTransform = new TextureTransform(device, {
       id: `${this.id}-max-weights-transform`,
       targetTexture: maxWeightsTexture!,
+      targetTextureChannels: 4,
+      targetTextureVarying: 'outTexture',
       ...maxWeightsTransformShaders,
       ...(device.type === 'webgpu'
         ? {colorAttachmentFormats: [maxWeightsTexture!.format as TextureFormatColor]}
@@ -526,7 +725,7 @@ export default class HeatmapLayer<
         blendAlphaSrcFactor: 'one',
         blendAlphaDstFactor: 'one'
       }
-    });
+    } as TextureTransformProps);
 
     const maxWeightProps: MaxWeightProps = {inTexture: weightsTexture!, textureSize};
     maxWeightTransform.model.shaderInputs.setProps({
@@ -574,7 +773,7 @@ export default class HeatmapLayer<
       [0, viewport.height],
       [viewport.width, viewport.height]
     ].map(pixel =>
-      (viewport.preproject
+      (project.isCustomProjection(viewport)
         ? pixelsToWorld(pixel, viewport.pixelUnprojectionMatrix, 0)
         : viewport.unproject(pixel)
       ).map(Math.fround)
@@ -599,7 +798,11 @@ export default class HeatmapLayer<
       const worldBounds = this._commonToWorldBounds(scaledCommonBounds);
 
       // Clip webmercator projection limits
-      if (!viewport.preproject && this.props.coordinateSystem === 'lnglat') {
+      if (
+        !project.isCustomProjection(viewport) &&
+        this.internalState!.packedCrs?.signature === 'WGS84' &&
+        this.props.coordinateSystem !== 'lnglat-offsets'
+      ) {
         worldBounds[1] = Math.max(worldBounds[1], -85.051129);
         worldBounds[3] = Math.min(worldBounds[3], 85.051129);
         worldBounds[0] = Math.max(worldBounds[0], -360);
@@ -627,24 +830,27 @@ export default class HeatmapLayer<
 
     triPositionBuffer!.write(
       packVertices(
-        viewport.preproject ? viewportCorners.map(p => viewport.unprojectFlat(p)) : viewportCorners,
+        project.isCustomProjection(viewport)
+          ? viewportCorners.map(p => viewport.unprojectFlat(p))
+          : viewportCorners,
         3
       )
     );
 
     const textureBounds = viewportCorners.map(p =>
       getTextureCoordinates(
-        viewport.preproject ? p : viewport.projectPosition(p),
+        project.isCustomProjection(viewport) ? p : viewport.projectPosition(p),
         normalizedCommonBounds!
       )
     );
     triTexCoordBuffer!.write(packVertices(textureBounds, 2));
   }
 
-  _updateColorTexture(opts) {
+  /** Replace the byte palette texture using the given plain-array color convention. */
+  _updateColorTexture(opts: UpdateParameters<this>, normalized: boolean) {
     const {colorRange} = opts.props;
     let {colorTexture} = this.state;
-    const colors = colorRangeToFlatArray(colorRange, false, Uint8Array as any);
+    const colors = packColorRange(colorRange, normalized);
 
     colorTexture?.destroy();
     colorTexture = this.context.device.createTexture({
@@ -653,38 +859,97 @@ export default class HeatmapLayer<
       width: colorRange.length,
       height: 1
     });
-    this.setState({colorTexture});
+    this.setState({colorTexture, normalizedColorRange: normalized});
   }
 
-  _updateWeightmap() {
-    const {radiusPixels, colorDomain, aggregation} = this.props;
+  /** Whether weight rendering needs the mask effect to run first. */
+  private _hasMaskExtension(): boolean {
+    return this.props.extensions.some(
+      extension => extension.constructor['extensionName'] === 'MaskExtension'
+    );
+  }
+
+  /** Runs masked accumulation after the mask pass updates its channels. */
+  _updateAggregationMask(mask: Record<string, unknown>, maskChanged: boolean): void {
+    if (
+      this.state?.weightsTransform &&
+      this.state.worldBounds &&
+      this._hasMaskExtension() &&
+      (maskChanged || this.state.isWeightMapDirty)
+    ) {
+      const viewport = this.context.viewport;
+      this.context.viewport = this.internalState?.viewport || viewport;
+      try {
+        if (this.state.updateTimer) {
+          clearTimeout(this.state.updateTimer);
+          this._updateBounds(true);
+          this._updateTextureRenderingBounds();
+          this.setState({updateTimer: null});
+        }
+        this._updateWeightmap(mask);
+      } finally {
+        this.context.viewport = viewport;
+      }
+    }
+  }
+
+  /** Returns the domain in accumulated weight per texel for the display pass. */
+  private _getColorDomain(): Readonly<[number, number]> {
+    const {colorDomain, aggregation} = this.props;
+    if (!colorDomain) return DEFAULT_COLOR_DOMAIN;
+    if (aggregation !== 'SUM') return colorDomain;
+    const scale = this.state.weightColorScale;
+    return scale === undefined
+      ? DEFAULT_COLOR_DOMAIN
+      : [colorDomain[0] * scale, colorDomain[1] * scale];
+  }
+
+  /** Renders source weights and records the scale used by the display layer. */
+  _updateWeightmap(mask?: Record<string, unknown>) {
+    const {radiusPixels} = this.props;
     const {worldBounds, textureSize, weightsScale, weightsTexture} = this.state;
     const weightsTransform = this.state.weightsTransform!;
     this.state.isWeightMapDirty = false;
-
-    // convert world bounds to common using Layer's coordiante system and origin
-    const commonBounds = this._worldToCommonBounds(worldBounds, {
-      useLayerCoordinateSystem: true
-    });
-
-    if (colorDomain && aggregation === 'SUM') {
-      // scale color domain to weight per pixel
-      const {viewport} = this.context;
-      const metersPerPixel =
-        (viewport.distanceScales.metersPerUnit[2] * (commonBounds[2] - commonBounds[0])) /
-        textureSize;
-      this.state.colorDomain = [
-        colorDomain[0] * metersPerPixel * weightsScale,
-        colorDomain[1] * metersPerPixel * weightsScale
-      ];
-    } else {
-      this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
-    }
+    const commonBounds = this._worldToCommonBounds(worldBounds, {useLayerCoordinateSystem: true});
+    this.state.weightColorScale =
+      (this.context.viewport.distanceScales.metersPerUnit[2] *
+        (commonBounds[2] - commonBounds[0]) *
+        weightsScale) /
+      textureSize;
 
     const attributeManager = this.getAttributeManager()!;
     const attributes = attributeManager.getAttributes();
     const moduleSettings = this.getModuleSettings();
-    this._setModelAttributes(weightsTransform.model, attributes);
+    if (this.props.positions) {
+      const positions = getGPUVectorData(this.props.positions);
+      const weights = getGPUVectorData(this.props.weights![0]);
+      const filterValues = this._getBorrowedFilterValues();
+      const size = Math.max(1, this.getNumInstances()) * 12;
+      if (!this.state.gpuPositionsLow || this.state.gpuPositionsLow.byteLength < size) {
+        this.state.gpuPositionsLow?.destroy();
+        this.state.gpuPositionsLow = this.context.device.createBuffer({
+          byteLength: size,
+          usage: Buffer.VERTEX | Buffer.COPY_DST
+        });
+      }
+      weightsTransform.model.setAttributes(
+        {
+          instancePositions: positions.buffer as Buffer,
+          instanceWeights: weights.buffer as Buffer,
+          instancePositions64Low: this.state.gpuPositionsLow,
+          ...(filterValues && {filterValues: filterValues.buffer as Buffer})
+        },
+        {
+          byteOffsets: {
+            instancePositions: positions.byteOffset,
+            instanceWeights: weights.byteOffset,
+            ...(filterValues && {filterValues: filterValues.byteOffset})
+          }
+        }
+      );
+    } else {
+      this._setModelAttributes(weightsTransform.model, attributes);
+    }
     if (this.context.device.type === 'webgpu') {
       const instanceCount = this.getNumInstances();
       weightsTransform.model.setVertexCount(instanceCount > 0 ? 6 : 0);
@@ -708,11 +973,31 @@ export default class HeatmapLayer<
         devicePixelRatio,
         modelMatrix,
         coordinateSystem,
+        sourceCrs: this.internalState!.sourceCrs,
         coordinateOrigin,
         sizeScale: this.context.layerManager.projectionScaleResources.get(viewport)
       },
       weight: weightProps
     });
+    const projectProps = {viewport, coordinateSystem, coordinateOrigin, modelMatrix};
+    if (mask) weightsTransform.model.shaderInputs.setProps({mask});
+    for (const extension of this.props.extensions) {
+      if (isClipExtension(extension) && !this._clipsSourcePoints()) continue;
+      const shaderProps = extension.getAggregationShaderProps.call(this, extension, {
+        mask,
+        project: projectProps
+      });
+      if (shaderProps) {
+        if (shaderProps.mask) {
+          const applyMask = this.props['maskByInstance'] !== false;
+          Object.assign(shaderProps.mask, {
+            maskByInstance: true,
+            ...(applyMask ? {} : {enabled: false})
+          });
+        }
+        weightsTransform.model.shaderInputs.setProps(shaderProps);
+      }
+    }
     weightsTransform.run({
       parameters: {viewport: [0, 0, textureSize, textureSize]},
       clearColor: [0, 0, 0, 0]
@@ -754,13 +1039,13 @@ export default class HeatmapLayer<
     const {coordinateSystem} = this.props;
 
     const offsetMode =
-      !viewport.preproject &&
+      !project.isCustomProjection(viewport) &&
       useLayerCoordinateSystem &&
       (coordinateSystem === 'lnglat-offsets' || coordinateSystem === 'meter-offsets');
     // The weight shader uses offset common coordinates. Match its precision
     // origin without projecting the already-common bounds through the converter.
     const offsetOriginCommon =
-      viewport.preproject && useLayerCoordinateSystem
+      project.isCustomProjection(viewport) && useLayerCoordinateSystem
         ? (project.getUniforms({viewport}) as ProjectUniforms).commonOrigin
         : offsetMode
           ? viewport.projectPosition(this.props.coordinateOrigin)
@@ -771,12 +1056,20 @@ export default class HeatmapLayer<
     let topRightCommon;
 
     // Y-axis is flipped between World and Common bounds
-    if (viewport.preproject) {
+    if (project.isCustomProjection(viewport)) {
       bottomLeftCommon = [minLong, minLat, 0];
       topRightCommon = [maxLong, maxLat, 0];
     } else if (useLayerCoordinateSystem && !offsetMode) {
-      bottomLeftCommon = this.projectPosition([minLong, minLat, 0]);
-      topRightCommon = this.projectPosition([maxLong, maxLat, 0]);
+      // Attribute bounds already consumed CPU source conversion and layer transforms.
+      const params = this.state.preproject
+        ? {
+            sourceCrs: this.internalState!.packedCrs!,
+            coordinateOrigin: [0, 0, 0] as [number, number, number],
+            modelMatrix: null
+          }
+        : undefined;
+      bottomLeftCommon = this.projectPosition([minLong, minLat, 0], params);
+      topRightCommon = this.projectPosition([maxLong, maxLat, 0], params);
     } else {
       bottomLeftCommon = viewport.projectPosition([minLong, minLat, 0]);
       topRightCommon = viewport.projectPosition([maxLong, maxLat, 0]);
@@ -798,7 +1091,7 @@ export default class HeatmapLayer<
   // output worldBounds: [minLong, minLat, maxLong, maxLat]
   _commonToWorldBounds(commonBounds) {
     // Preprojected heatmaps maintain their working bounds entirely in common space.
-    if (this.context.viewport.preproject) return commonBounds.slice();
+    if (project.isCustomProjection(this.context.viewport)) return commonBounds.slice();
     const [xMin, yMin, xMax, yMax] = commonBounds;
     const {viewport} = this.context;
     const bottomLeftWorld = viewport.unprojectPosition([xMin, yMin]);

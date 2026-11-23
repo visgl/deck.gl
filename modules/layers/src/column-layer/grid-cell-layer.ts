@@ -53,9 +53,10 @@ export default class GridCellLayer<DataT = any, ExtraPropsT extends {} = {}> ext
       widthUnits: 0,
       widthScale: 0,
       widthMinPixels: 0,
-      widthMaxPixels: 0
+      widthMaxPixels: 0,
+      rowIndexOffset: 0
     };
     fillModel.shaderInputs.setProps({column: columnProps});
-    fillModel.draw(this.context.renderPass);
+    this.drawModel(fillModel);
   }
 }

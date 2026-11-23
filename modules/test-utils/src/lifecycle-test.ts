@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LayerManager, MapView, DeckRenderer} from '@deck.gl/core';
+import {LayerManager, MapView, DeckRenderer, assert} from '@deck.gl/core';
 
 import {device} from './utils/setup-gl';
 
 import type {Layer, CompositeLayer, Viewport} from '@deck.gl/core';
 import type {Timeline} from '@luma.gl/engine';
-import type {StatsManager} from '@luma.gl/core';
+import type {Device, StatsManager} from '@luma.gl/core';
 
 const testViewport = new MapView({}).makeViewport({
   width: 100,
@@ -116,7 +116,7 @@ export async function testInitializeLayerAsync(
   const layerManager = initializeLayerManager(opts);
   const deckRenderer = new DeckRenderer(device);
   while (!opts.layer.isLoaded) {
-    await update({layerManager, deckRenderer, oldResourceCounts: {}});
+    await update({draw: true, layerManager, deckRenderer, oldResourceCounts: {}});
   }
   if (opts.finalize === false) {
     return {
@@ -166,7 +166,7 @@ export type LayerTestCase<LayerT extends Layer> = {
   /** Called before layer updates */
   onBeforeUpdate?: (params: {layer: Layer; testCase: LayerTestCase<LayerT>}) => void;
 
-  /** Called after layer is updated */
+  /** Called after layer is updated. Async assertions require `testLayerAsync`. */
   onAfterUpdate?: (params: {
     testCase: LayerTestCase<LayerT>;
     layer: LayerT;
@@ -174,16 +174,21 @@ export type LayerTestCase<LayerT extends Layer> = {
     subLayers: Layer[];
     subLayer: Layer | null;
     spies: Record<string, Spy>;
-  }) => void;
+  }) => void | Promise<void>;
 };
 
 type TestResources = {
+  draw: boolean;
   layerManager: LayerManager;
   deckRenderer: DeckRenderer;
   oldResourceCounts: Record<string, number>;
 };
 
 export type TestLayerOptions<LayerT extends Layer> = {
+  /** Render after each update. Disable for tests that only inspect attribute bindings. */
+  draw?: boolean;
+  /** Device used to initialize and render the layer. Defaults to the WebGL test device. */
+  device?: Device;
   /** The layer class to test against */
   Layer: LayerClass<LayerT>;
   /** The initial viewport
@@ -245,7 +250,7 @@ export function testLayer<LayerT extends Layer>(opts: TestLayerOptions<LayerT>):
 
 /**
  * Initialize and updates a layer over a sequence of scenarios (test cases).
- * Each test case is awaited until the layer's isLoaded flag is true.
+ * Each test case waits for loaded data and checks all requested layer updates.
  */
 export async function testLayerAsync<LayerT extends Layer>(
   opts: TestLayerOptions<LayerT>
@@ -255,45 +260,55 @@ export async function testLayerAsync<LayerT extends Layer>(
   const resources = setupLayerTests(`testing ${Layer.layerName}`, opts);
 
   let layer = new Layer();
-  // Run successive update tests
-  for (const testCase of testCases) {
-    // Save old state before update
-    const oldState = {...layer.state};
+  try {
+    // Run successive update tests
+    for (const testCase of testCases) {
+      // Save old state before update
+      const oldState = {...layer.state};
 
-    const {layer: newLayer, spyMap} = runLayerTestUpdate(
-      testCase,
-      resources,
-      layer,
-      spies,
-      createSpy
-    );
+      const {layer: newLayer, spyMap} = runLayerTestUpdate(
+        testCase,
+        resources,
+        layer,
+        spies,
+        createSpy
+      );
 
-    runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
+      await runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
-    while (!newLayer.isLoaded) {
-      await update(resources);
-      runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
+      // Async props may finish while an assertion is awaited. Apply their requested updates too.
+      while (
+        !newLayer.isLoaded ||
+        resources.layerManager.getLayers().some(layer => layer.internalState?.needsUpdate)
+      ) {
+        await update(resources);
+        await runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
+      }
+
+      // Reset spies between test cases
+      Object.keys(spyMap).forEach(k => resetSpy(spyMap[k]));
+      layer = newLayer;
     }
-
-    // Reset spies between test cases
-    Object.keys(spyMap).forEach(k => resetSpy(spyMap[k]));
-    layer = newLayer;
-  }
-
-  // Use async cleanup to allow pending luma.gl async operations to complete
-  const error = await cleanupAfterLayerTestsAsync(resources);
-  if (error) {
-    onError(error, `${Layer.layerName} should delete all resources`);
+  } finally {
+    // Use async cleanup to allow pending luma.gl async operations to complete
+    const error = await cleanupAfterLayerTestsAsync(resources);
+    if (error) {
+      onError(error, `${Layer.layerName} should delete all resources`);
+    }
   }
 }
 
 function setupLayerTests(
   testTitle: string,
   {
+    device: testDevice = device,
+    draw = true,
     viewport = testViewport,
     timeline,
     onError = defaultOnError
   }: {
+    device?: Device;
+    draw?: boolean;
     viewport?: Viewport;
     timeline?: Timeline;
     onError?: (error: Error, title: string) => void;
@@ -301,8 +316,8 @@ function setupLayerTests(
 ): TestResources {
   const oldResourceCounts = getResourceCounts();
 
-  const layerManager = new LayerManager(device, {viewport, timeline});
-  const deckRenderer = new DeckRenderer(device);
+  const layerManager = new LayerManager(testDevice, {viewport, timeline});
+  const deckRenderer = new DeckRenderer(testDevice);
 
   const props = {
     layerFilter: null,
@@ -312,7 +327,7 @@ function setupLayerTests(
   layerManager.setProps(props);
   deckRenderer.setProps(props);
 
-  return {layerManager, deckRenderer, oldResourceCounts};
+  return {draw, layerManager, deckRenderer, oldResourceCounts};
 }
 
 function cleanupAfterLayerTests({
@@ -398,7 +413,7 @@ function runLayerTestPostUpdateCheck<LayerT extends Layer>(
       : [];
     const subLayer = subLayers.length ? subLayers[0] : null;
 
-    testCase.onAfterUpdate({
+    return testCase.onAfterUpdate({
       testCase,
       layer: newLayer,
       oldState,
@@ -411,7 +426,7 @@ function runLayerTestPostUpdateCheck<LayerT extends Layer>(
 
 function runLayerTestUpdate<LayerT extends Layer>(
   testCase: LayerTestCase<LayerT>,
-  {layerManager, deckRenderer}: TestResources,
+  {draw, layerManager, deckRenderer}: TestResources,
   layer: LayerT,
   spies: string[],
   spyFactory: SpyFactory
@@ -420,6 +435,8 @@ function runLayerTestUpdate<LayerT extends Layer>(
   spyMap: Record<string, Spy>;
 } {
   const {props, updateProps, onBeforeUpdate, viewport = layerManager.context.viewport} = testCase;
+  // Lifecycle tests construct their manager with a materialized test viewport.
+  assert(viewport);
 
   if (onBeforeUpdate) {
     onBeforeUpdate({layer, testCase});
@@ -437,6 +454,7 @@ function runLayerTestUpdate<LayerT extends Layer>(
   spies = testCase.spies || spies;
   const spyMap = injectSpies(layer, spies, spyFactory);
   const drawLayers = () => {
+    if (!draw) return;
     deckRenderer.renderLayers({
       pass: 'test',
       views: {},
@@ -460,27 +478,32 @@ function runLayerTestUpdate<LayerT extends Layer>(
 }
 
 /* global setTimeout */
-function update({layerManager, deckRenderer}: TestResources): Promise<void> {
-  return new Promise(resolve => {
-    const onAnimationFrame = () => {
-      if (layerManager.needsUpdate()) {
-        layerManager.updateLayers();
+async function update({draw, layerManager, deckRenderer}: TestResources): Promise<void> {
+  let delay = 0;
+  while (true) {
+    // Let asynchronous data and coordinate-system loads finish between update attempts.
+    await new Promise<void>(resolve => setTimeout(resolve, delay));
+    if (layerManager.getLayers().some(layer => layer.internalState?.needsUpdate)) {
+      layerManager.setNeedsUpdate('pending layer update');
+    }
+    if (!layerManager.needsUpdate()) {
+      delay = 50;
+      continue;
+    }
+    layerManager.updateLayers();
 
-        deckRenderer.renderLayers({
-          pass: 'test',
-          views: {},
-          effects: [],
-          viewports: [layerManager.context.viewport],
-          layers: layerManager.getLayers(),
-          onViewportActive: layerManager.activateViewport
-        });
-        resolve();
-        return;
-      }
-
-      setTimeout(onAnimationFrame, 50);
-    };
-
-    onAnimationFrame();
-  });
+    const viewport = layerManager.context.viewport;
+    // Lifecycle tests always provide a viewport before running updates.
+    assert(viewport);
+    if (draw)
+      deckRenderer.renderLayers({
+        pass: 'test',
+        views: {},
+        effects: [],
+        viewports: [viewport],
+        layers: layerManager.getLayers(),
+        onViewportActive: layerManager.activateViewport
+      });
+    return;
+  }
 }

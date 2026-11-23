@@ -5,7 +5,7 @@
 import type {Basemap} from '../types';
 
 const MAPBOX_STYLE = 'mapbox://styles/mapbox/light-v9';
-const MAPLIBRE_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+const MAPLIBRE_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 
 /**
  * Get map style URL for a given basemap type.

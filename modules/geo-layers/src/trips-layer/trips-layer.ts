@@ -2,37 +2,38 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {NumericArray} from '@math.gl/core';
+import type {ArrowAccessorFunction} from '@deck.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 import {createIterable} from '@deck.gl/core';
 import type {AccessorFunction, Attribute, DefaultProps} from '@deck.gl/core';
 import {PathLayer, PathLayerProps} from '@deck.gl/layers';
 
 import {tripsUniforms, TripsProps} from './trips-layer-uniforms';
-import {packTripTimestamps, tripsShaderInjectionsWGSL} from './trips-layer.wgsl';
+import {packTripTimestamps, tripsShaderPluginWGSL} from './trips-layer.wgsl';
 
 const defaultProps: DefaultProps<TripsLayerProps> = {
   fadeTrail: true,
   trailLength: {type: 'number', value: 120, min: 0},
   currentTime: {type: 'number', value: 0, min: 0},
-  getTimestamps: {type: 'accessor', value: (d: any) => d.timestamps}
+  getTimestamps: {type: 'accessor', arrow: 'row', value: (d: any) => d.timestamps}
 };
 
 const tripsShaderInjectionsGLSL = {
-  'vs:#decl': `\
+  'glsl:vs:#decl': `\
 in float instanceTimestamps;
 in float instanceNextTimestamps;
 out float vTime;
 `,
   // Timestamp of the vertex
-  'vs:#main-end': `\
+  'glsl:vs:#main-end': `\
 vTime = instanceTimestamps + (instanceNextTimestamps - instanceTimestamps) * vPathPosition.y / vPathLength;
 `,
-  'fs:#decl': `\
+  'glsl:fs:#decl': `\
 in float vTime;
 `,
   // Drop segments only after PathLayer evaluates analytic-coverage derivatives, then
   // fade the color (currentTime - 100%, end of trail - 0%).
-  'fs:DECKGL_FILTER_COLOR': `\
+  'glsl:fs:DECKGL_FILTER_COLOR': `\
 if(vTime > trips.currentTime || (trips.fadeTrail && (vTime < trips.currentTime - trips.trailLength))) {
   discard;
 }
@@ -65,7 +66,7 @@ type _TripsLayerProps<DataT = unknown> = {
   /**
    * Timestamp accessor.
    */
-  getTimestamps?: AccessorFunction<DataT, NumericArray>;
+  getTimestamps?: ArrowAccessorFunction<DataT, NumericArray>;
 };
 
 /** Render animated paths that represent vehicle trips. */
@@ -78,9 +79,11 @@ export default class TripsLayer<DataT = any, ExtraProps extends {} = {}> extends
 
   getShaders() {
     const shaders = super.getShaders();
-    shaders.inject =
-      this.context.device.type === 'webgpu' ? tripsShaderInjectionsWGSL : tripsShaderInjectionsGLSL;
-    shaders.modules = [...shaders.modules, tripsUniforms];
+    const plugin =
+      this.context.device.type === 'webgpu'
+        ? tripsShaderPluginWGSL
+        : {name: 'trips', module: tripsUniforms, injections: tripsShaderInjectionsGLSL};
+    shaders.plugins = [...(shaders.plugins || []), plugin];
     return shaders;
   }
 
@@ -136,7 +139,8 @@ export default class TripsLayer<DataT = any, ExtraProps extends {} = {}> extends
         continue;
       }
 
-      const timestamps = props.getTimestamps?.(object, objectInfo) ?? [];
+      const timestamps =
+        (props.getTimestamps as AccessorFunction<DataT, NumericArray>)?.(object, objectInfo) ?? [];
       packedTimestamps.set(
         packTripTimestamps(timestamps, vertexEnd - vertexStart, props._pathType === 'loop'),
         vertexStart * 2

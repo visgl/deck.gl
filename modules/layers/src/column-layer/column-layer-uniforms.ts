@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 const uniformBlockWGSL = /* wgsl */ `\
 struct ColumnUniforms {
@@ -20,6 +20,7 @@ struct ColumnUniforms {
   widthMaxPixels: f32,
   radiusUnits: i32,
   widthUnits: i32,
+  rowIndexOffset: u32,
 };
 
 @group(0) @binding(auto) var<uniform> column: ColumnUniforms;
@@ -41,6 +42,7 @@ layout(std140) uniform columnUniforms {
   float widthMaxPixels;
   highp int radiusUnits;
   highp int widthUnits;
+  highp uint rowIndexOffset;
 } column;
 `;
 
@@ -59,6 +61,8 @@ export type ColumnProps = {
   widthMaxPixels: number;
   radiusUnits: number;
   widthUnits: number;
+  /** Global row offset for chunked Arrow draws. */
+  rowIndexOffset?: number;
 };
 
 export const columnUniforms = {
@@ -80,6 +84,7 @@ export const columnUniforms = {
     widthMinPixels: 'f32',
     widthMaxPixels: 'f32',
     radiusUnits: 'i32',
-    widthUnits: 'i32'
+    widthUnits: 'i32',
+    rowIndexOffset: 'u32'
   }
 } as const satisfies ShaderModule<ColumnProps>;

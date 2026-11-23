@@ -172,7 +172,7 @@ new DeckGL({
 const {DeckGL, ScatterplotLayer} = deck;
 
 new DeckGL({
-  mapStyle: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
+  mapStyle: 'https://tiles.openfreemap.org/styles/positron',
   initialViewState: {
     longitude: -122.45,
     latitude: 37.8,

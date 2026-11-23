@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {Vector} from 'apache-arrow';
+
 import {
   getResolution,
   cellToLatLng,
@@ -21,8 +23,11 @@ import {
   WebMercatorViewport,
   DefaultProps
 } from '@deck.gl/core';
-import {ColumnLayer, PolygonLayer, PolygonLayerProps} from '@deck.gl/layers';
+import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
+import GeoCellLayer, {type GeoCellLayerProps} from '../geo-cell-layer/GeoCellLayer';
 import {flattenPolygon, getHexagonCentroid, h3ToPolygon} from './h3-utils';
+
+import {hasCellColumns, getCellValue, renderCellColumns} from '../geo-cell-layer/cell-columns';
 
 // There is a cost to updating the instanced geometries when using highPrecision: false
 // This constant defines the distance between two hexagons that leads to "significant
@@ -42,17 +47,21 @@ function mergeTriggers(getHexagon, coverage) {
 }
 
 const defaultProps: DefaultProps<H3HexagonLayerProps> = {
-  ...PolygonLayer.defaultProps,
+  ...GeoCellLayer.defaultProps,
   highPrecision: 'auto',
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   centerHexagon: null,
-  getHexagon: {type: 'accessor', value: (x: any) => x.hexagon},
+  getHexagon: {
+    type: 'accessor',
+    arrow: true,
+    value: (x: any) => x.hexagon
+  },
   extruded: true
 };
 
 /** All properties supported by H3HexagonLayer */
 export type H3HexagonLayerProps<DataT = unknown> = _H3HexagonLayerProps<DataT> &
-  PolygonLayerProps<DataT>;
+  GeoCellLayerProps<DataT>;
 
 /** Props added by the H3HexagonLayer */
 type _H3HexagonLayerProps<DataT> = {
@@ -74,8 +83,9 @@ type _H3HexagonLayerProps<DataT> = {
    * Called for each data object to retrieve the quadkey string identifier.
    *
    * By default, it reads `hexagon` property of data object.
+   * Also accepts an Arrow vector of identifiers or identifier lists in source-feature order.
    */
-  getHexagon?: AccessorFunction<DataT, string>;
+  getHexagon?: AccessorFunction<DataT, string> | Vector;
   /**
    * Whether to extrude polygons.
    * @default true
@@ -113,16 +123,19 @@ export default class H3HexagonLayer<
     vertices?: number[][];
   };
 
-  shouldUpdateState({changeFlags}: UpdateParameters<this>): boolean {
+  shouldUpdateState({props, changeFlags}: UpdateParameters<this>): boolean {
+    if (hasCellColumns(props, 'getHexagon')) return changeFlags.propsOrDataChanged;
     return this._shouldUseHighPrecision()
       ? changeFlags.propsOrDataChanged
       : changeFlags.somethingChanged;
   }
 
-  updateState({props, changeFlags}: UpdateParameters<this>): void {
+  updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
+    if (hasCellColumns(props, 'getHexagon')) return;
     if (
       props.highPrecision !== true &&
-      (changeFlags.dataChanged ||
+      (hasCellColumns(oldProps, 'getHexagon') ||
+        changeFlags.dataChanged ||
         (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getHexagon))
     ) {
       const dataProps = this._calculateH3DataProps();
@@ -140,7 +153,7 @@ export default class H3HexagonLayer<
     const {iterable, objectInfo} = createIterable(this.props.data);
     for (const object of iterable) {
       objectInfo.index++;
-      const hexId = this.props.getHexagon(object, objectInfo);
+      const hexId = getCellValue(this.props.getHexagon, object, objectInfo);
       // Take the resolution of the first hex
       const hexResolution = getResolution(hexId);
       if (resolution < 0) {
@@ -167,9 +180,8 @@ export default class H3HexagonLayer<
   private _shouldUseHighPrecision(): boolean {
     if (this.props.highPrecision === 'auto') {
       const {resolution, hasPentagon, hasMultipleRes} = this.state;
-      const {viewport} = this.context;
       return (
-        Boolean(viewport?.resolution) ||
+        this.getSubdivisionStep() > 0 ||
         hasMultipleRes ||
         hasPentagon ||
         (resolution >= 0 && resolution <= 5)
@@ -222,7 +234,15 @@ export default class H3HexagonLayer<
     this.setState({centerHex: hex, vertices});
   }
 
+  /** Routes cell columns through source-preserving geometry and style accessors. */
+  /** Routes cell columns through source-preserving geometry and style accessors. */
   renderLayers(): Layer | null | LayersList {
+    if (hasCellColumns(this.props, 'getHexagon'))
+      return renderCellColumns(this, 'getHexagon', false, {
+        row: this.getSubLayerRow.bind(this),
+        accessor: this.getSubLayerAccessor.bind(this),
+        props: this.getSubLayerProps.bind(this)
+      });
     return this._shouldUseHighPrecision() ? this._renderPolygonLayer() : this._renderColumnLayer();
   }
 
@@ -248,6 +268,7 @@ export default class H3HexagonLayer<
     } = this.props;
 
     return {
+      dataComparator: this.props.dataComparator,
       elevationScale,
       extruded,
       coverage,
@@ -299,7 +320,7 @@ export default class H3HexagonLayer<
         _windingOrder: 'CCW',
         positionFormat: 'XY',
         getPolygon: (object, objectInfo) => {
-          const hexagonId = getHexagon(object, objectInfo);
+          const hexagonId = getCellValue(getHexagon, object, objectInfo);
           return flattenPolygon(h3ToPolygon(hexagonId, coverage));
         }
       }

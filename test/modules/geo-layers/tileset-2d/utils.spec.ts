@@ -9,9 +9,9 @@ import {
   urlType,
   getURLFromTemplate
 } from '@deck.gl/geo-layers/tileset-2d';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
-import {WebMercatorViewport, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {WebMercatorViewport, OrthographicView, GlobeView} from '@deck.gl/core';
 
 const TEST_CASES = [
   {
@@ -345,7 +345,7 @@ test('getTileIndices', () => {
 
 test('tileToBoundingBox', () => {
   for (const testCase of TEST_CASES) {
-    if (testCase.output.length && !testCase.viewport.resolution) {
+    if (testCase.output.length && testCase.viewport.crs?.coordinateFrame !== 'geocentric') {
       const {viewport, minZoom, maxZoom, tileSize, zRange} = testCase;
       const boundingBoxes = getTileIndices({viewport, maxZoom, minZoom, zRange, tileSize}).map(
         tile => tileToBoundingBox(viewport, tile.x, tile.y, tile.z)

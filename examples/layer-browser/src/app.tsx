@@ -19,7 +19,7 @@ import {SolidPolygonLayer} from '@deck.gl/layers';
 import React, {PureComponent} from 'react';
 import autobind from 'react-autobind';
 
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
 import LayerSelector from './components/layer-selector';
 import LayerControls from './components/layer-controls';
@@ -27,7 +27,7 @@ import LayerControls from './components/layer-controls';
 import LAYER_CATEGORIES from './examples';
 import Map from './map';
 
-import {ink} from '@luma.gl/effects';
+import {ink} from '@luma.gl/engine/effects';
 
 const AMBIENT_LIGHT = new AmbientLight({
   color: [255, 255, 255],

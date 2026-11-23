@@ -4,9 +4,11 @@
 
 // Extensions to math.gl library. Intended to be folded back.
 import typedArrayManager from './typed-array-manager';
-import {Vector3, NumericArray} from '@math.gl/core';
+import {Vector3, NumericArray} from '@math.gl/core/matrix';
 
-import type {Matrix4} from '@math.gl/core';
+import type {Matrix4} from '@math.gl/core/matrix';
+
+export {worldToPixels, pixelsToWorld} from '@math.gl/geospatial/web-mercator';
 
 // Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
 export function createMat4(): number[] {

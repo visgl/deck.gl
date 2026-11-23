@@ -1,0 +1,92 @@
+<html>
+  <head>
+    <title>deck.gl IconLayer Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rest.js/15.2.6/octokit-rest.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src='https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.js'></script>
+
+    <link href='https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        background: #f7f7f7;
+        overflow: hidden;
+      }
+      .deck-tooltip {
+        font-family: Helvetica, Arial, sans-serif;
+        padding: 6px !important;
+        margin: 8px;
+        max-width: 300px;
+        font-size: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="tooltip"></div>
+  </body>
+
+  <script type="text/javascript">
+
+    const {DeckGL, OrthographicView, IconLayer, LineLayer, ScatterplotLayer, TextLayer} = deck;
+
+    const deckgl =  new DeckGL({
+      views: new OrthographicView(),
+      initialViewState: { target: [0, 0, 0], zoom: 3 },
+      controller: true,
+      getTooltip: ({object}) => object && `${object.login}\nContributions: ${object.contributions}`
+    });
+
+    function renderLayers(data) {
+      const iconLayer = new IconLayer({
+        id: 'users',
+        data,
+        getIcon: d => ({
+          url: d.avatar_url,
+          width: 128,
+          height: 128
+        }),
+        getSize : d => d.r * 1.4,
+        getPosition: d => [d.x, d.y],
+        sizeUnits: 'common',
+        pickable: true
+      });
+
+      deckgl.setProps({ layers: [iconLayer] });
+    }
+
+    async function getContributors() {
+      const octokit = new Octokit();
+      const perPage = 100;
+      let page = 1;
+      let result = [];
+      while (true) {
+        const {data} = await octokit.repos.getContributors({ owner: 'visgl', repo: 'deck.gl', per_page: perPage, page: page++});
+        result = result.concat(data);
+        if (data.length < perPage) return result;
+      }
+    }
+
+    getContributors()
+    .then(data => {
+      const circles = data.map((d, i) => {
+        return {
+          login: d.login,
+          avatar_url: d.avatar_url,
+          contributions: d.contributions,
+          // For d3.pack
+          r: Math.log(d.contributions + 1)
+        };
+      });
+
+      d3.packSiblings(circles);
+
+      renderLayers(circles);
+    })
+
+  </script>
+</html>

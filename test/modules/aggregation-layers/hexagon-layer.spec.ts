@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {HexagonLayer, WebGLAggregator, CPUAggregator} from '@deck.gl/aggregation-layers';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils/vitest';
+import {WebGPUHexagonAggregator} from '../../../modules/aggregation-layers/src/hexagon-layer/webgpu-hexagon-aggregator';
 
 const SAMPLE_PROPS = {
   data: FIXTURES.points.slice(0, 3),
@@ -16,7 +17,7 @@ const SAMPLE_PROPS = {
   // gpuAggregation: false
 };
 
-test('HexagonLayer#WebGPU renders with automatic CPU aggregation', async ({skip}) => {
+test('HexagonLayer#WebGPU renders with automatic compute domains', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
 
   if (!webgpuDevice) {
@@ -45,7 +46,24 @@ test('HexagonLayer#WebGPU renders with automatic CPU aggregation', async ({skip}
   layerManager.setLayers([layer]);
 
   expect(errors).toEqual([]);
-  expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+  expect(layer.state.aggregator).toBeInstanceOf(WebGPUHexagonAggregator);
+  await vi.waitFor(
+    () => {
+      layer.draw({
+        shaderModuleProps: {
+          project: {
+            viewport,
+            coordinateSystem: 'lnglat',
+            coordinateOrigin: [0, 0, 0],
+            devicePixelRatio: 1
+          }
+        }
+      } as any);
+      expect(layer.state.aggregator.isLoaded).toBe(true);
+    },
+    {timeout: 10000}
+  );
+  layerManager.updateLayers();
   expect(
     layerManager
       .getLayers()
@@ -221,4 +239,41 @@ test('HexagonLayer#non-iterable data', () => {
       }
     ]
   });
+});
+
+test('Hexagon picking retains bin metadata when inverse projection fails', () => {
+  const viewport = new MapView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: 0, latitude: 0, zoom: 1}
+  })!;
+  const layer = new HexagonLayer({id: 'failed-inverse-picking'});
+  const manager = new LayerManager(device, {viewport});
+  try {
+    manager.setLayers([layer]);
+    vi.spyOn(layer.state.aggregator, 'getBin').mockReturnValue({
+      id: [0, 0],
+      value: [1, 2],
+      count: 3
+    });
+    layer.state.unpreproject = () => {
+      throw new Error('Outside inverse domain');
+    };
+    const result = layer.getPickingInfo({
+      info: {index: 0, coordinate: [0, 0]} as any,
+      mode: 'hover',
+      sourceLayer: null
+    });
+    expect(result.coordinate).toBeNull();
+    expect(result.object).toMatchObject({
+      position: null,
+      col: 0,
+      row: 0,
+      colorValue: 1,
+      elevationValue: 2,
+      count: 3
+    });
+  } finally {
+    manager.finalize();
+  }
 });

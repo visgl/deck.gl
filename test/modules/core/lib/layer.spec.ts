@@ -2,19 +2,18 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../viewports/test-crs';
 import {test, expect, vi} from 'vitest';
 import {
   Layer,
-  _CustomProjectionViewport as CustomProjectionViewport,
   LayerExtension,
   AttributeManager,
-  COORDINATE_SYSTEM,
   MapView,
   OrbitView,
-  picking
+  pickingPlugin
 } from '@deck.gl/core';
 import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
-import {equals, Matrix4} from '@math.gl/core';
+import {equals, Matrix4} from '@math.gl/core/matrix';
 import {Timeline, Model} from '@luma.gl/engine';
 
 import {sleep, testAsyncData} from './async-iterator-test-utils';
@@ -275,17 +274,14 @@ test('Layer#use64bitPositions', () => {
   let layer = new SubLayer({});
   expect(layer.use64bitPositions(), 'returns true for default settings').toBeTruthy();
 
-  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
-  expect(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.LNGLAT').toBeTruthy();
+  layer = new SubLayer({coordinateSystem: 'lnglat'});
+  expect(layer.use64bitPositions(), 'returns true for lnglat').toBeTruthy();
 
-  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.CARTESIAN});
-  expect(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.CARTESIAN').toBeTruthy();
+  layer = new SubLayer({coordinateSystem: 'cartesian'});
+  expect(layer.use64bitPositions(), 'returns true for cartesian').toBeTruthy();
 
-  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS});
-  expect(
-    layer.use64bitPositions(),
-    'returns false for COORDINATE_SYSTEM.METER_OFFSETS'
-  ).toBeFalsy();
+  layer = new SubLayer({coordinateSystem: 'meter-offsets'});
+  expect(layer.use64bitPositions(), 'returns false for meter-offsets').toBeFalsy();
 });
 
 test('Layer#project', () => {
@@ -296,6 +292,7 @@ test('Layer#project', () => {
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
+  layer.activateViewport(layer.context.viewport);
   expect(
     () => layer.project([0, 0, 100]),
     'default coordinate system does not throw'
@@ -305,20 +302,21 @@ test('Layer#project', () => {
     'returns correct value for default coordinate system'
   ).toBeTruthy();
 
-  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
+  layer = new SubLayer({coordinateSystem: 'lnglat'});
   testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
   layer.context.viewport = new MapView().makeViewport({
     width: 400,
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
+  layer.activateViewport(layer.context.viewport);
   expect(
     equals(layer.project([0, 0, 100]), [200, 150, 0.9981698636949582]),
     'returns correct value'
   ).toBeTruthy();
 
   layer = new SubLayer({
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     coordinateOrigin: [0.01, 0.01]
   });
   testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
@@ -327,6 +325,7 @@ test('Layer#project', () => {
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
+  layer.activateViewport(layer.context.viewport);
   expect(
     equals(
       layer.project([100, 100, 100]),
@@ -336,7 +335,7 @@ test('Layer#project', () => {
   ).toBeTruthy();
 
   layer = new SubLayer({
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+    coordinateSystem: 'cartesian',
     modelMatrix: new Matrix4().rotateZ(Math.PI / 2)
   });
   testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
@@ -345,6 +344,7 @@ test('Layer#project', () => {
     height: 300,
     viewState: {zoom: 0, rotationOrbit: 30}
   });
+  layer.activateViewport(layer.context.viewport);
 
   expect(
     equals(
@@ -360,17 +360,18 @@ test('Layer#projectPosition overrides projection props without mutating them', (
   const coordinateOrigin: [number, number, number] = [100, 200, 300];
   const layer = new SubLayer({modelMatrix, coordinateOrigin});
   testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
-  const viewport = new CustomProjectionViewport({
-    fromCrs: 'map-meters',
-    projection: {
+  const viewport = createTestViewport({
+    converter: {
       forward: ([x, y, z = 0]) => [x * 2, y * 3, z],
       inverse: ([x, y, z = 0]) => [x / 2, y / 3, z]
     },
-    getDistanceScale: () => [1, 1]
+    distanceScale: () => [1, 1, 1]
   });
   const position = [1, 2, 3];
   expect(layer.projectPosition(position, {viewport, autoOffset: false})).toEqual(
-    viewport.projectPosition(modelMatrix.transformAsPoint(position))
+    viewport.projectPosition(
+      modelMatrix.transformAsPoint(position).map((value, axis) => value + coordinateOrigin[axis])
+    )
   );
   const projectParams = {
     viewport,
@@ -591,6 +592,7 @@ test('Layer#updateModules', async () => {
 
     _getModel() {
       return new Model(this.context.device, {
+        shaderAssembler: this.context.shaderAssembler,
         vs: `\
   #version 300 es
   void main() {
@@ -605,12 +607,13 @@ test('Layer#updateModules', async () => {
     fragColor = vec4(1.0);
   }
         `,
-        modules: [picking]
+        plugins: [pickingPlugin]
       });
     }
   }
 
   const HALF_BYTE = 128 / 255;
+  let callbackLayer: Layer | null = null;
 
   await testLayerAsync({
     Layer: LayerWithModel,
@@ -648,9 +651,95 @@ test('Layer#updateModules', async () => {
         }
       },
       {
-        title: 'only highlightedObjectIndex',
+        title: 'Normalized highlights preserve the default color',
+
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.highlightColor).toEqual([0, 0, HALF_BYTE, HALF_BYTE]);
+        }
+      },
+      {
+        title: 'Normalized highlight constant does not change byte picking IDs',
+
+        updateProps: {highlightColor: [1, 0.5, 0, 0], highlightedObjectIndex: 1},
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.highlightColor).toEqual([1, 0.5, 0, 0]);
+          expect(picking.highlightedObjectColor).toEqual([2, 0, 0]);
+          expect(picking.useByteColors).toBe(true);
+        }
+      },
+      {
+        title: 'Normalized hover callback supplies opaque alpha',
 
         updateProps: {
+          autoHighlight: true,
+          highlightedObjectIndex: null,
+          highlightColor: () => [1, 0.5, 0]
+        },
+        onAfterUpdate: ({layer}) => {
+          layer.updateAutoHighlight({picked: true, color: [3, 0, 0], layer});
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.highlightColor).toEqual([1, 0.5, 0, 1]);
+          expect(picking.highlightedObjectColor).toEqual([3, 0, 0]);
+        }
+      },
+      {
+        title: 'Deck convention changes update a stationary hover',
+
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: false});
+        },
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.highlightColor).toEqual([1 / 255, 0.5 / 255, 0, 1]);
+          expect(picking.highlightedObjectColor).toEqual([3, 0, 0]);
+        }
+      },
+      {
+        title: 'Deck convention changes update a replacement hover callback',
+
+        updateProps: {
+          highlightColor: ({layer}) => {
+            callbackLayer = layer;
+            return [0, 0.5, 1, 0];
+          }
+        },
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(callbackLayer).toBe(layer);
+          expect(picking.highlightColor).toEqual([0, 0.5, 1, 0]);
+          expect(picking.highlightedObjectColor).toEqual([3, 0, 0]);
+        }
+      },
+      {
+        title: 'Data replacement discards the stale hover',
+
+        updateProps: {
+          data: [{}],
+          highlightColor: () => {
+            throw new Error('stale highlight callback');
+          }
+        },
+        onAfterUpdate: ({layer}) => {
+          const {picking} = layer.state.model.shaderInputs.getUniformValues();
+          expect(picking.isHighlightActive).toBe(false);
+        }
+      },
+      {
+        title: 'only highlightedObjectIndex',
+
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: false});
+        },
+        updateProps: {
+          autoHighlight: false,
           highlightColor: [255, 0, 0, 128],
           highlightedObjectIndex: 1
         },
@@ -756,7 +845,7 @@ test('Layer#updateModules', async () => {
         }
       },
       {
-        title: 'Other props update',
+        title: 'Data replacement clears constant hover highlights',
 
         updateProps: {
           data: []
@@ -764,14 +853,7 @@ test('Layer#updateModules', async () => {
 
         onAfterUpdate: ({layer}) => {
           const modelUniforms = layer.state.model.shaderInputs.getUniformValues();
-          expect(
-            modelUniforms.picking.isHighlightActive,
-            'model selectedColor uniform is enabled'
-          ).toBe(true);
-          expect(
-            modelUniforms.picking.highlightedObjectColor,
-            'model selectedColor uniform is set from hovered object index'
-          ).toEqual([3, 0, 0]);
+          expect(modelUniforms.picking.isHighlightActive).toBe(false);
         }
       },
       {
