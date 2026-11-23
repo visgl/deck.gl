@@ -2,7 +2,7 @@ This is a [Vite](https://vitejs.dev) application that renders deck.gl layers as 
 components with `@deck.gl/react`. It lists US airports, draws them over an interleaved
 MapLibre map, and highlights the hovered and selected airport.
 
-It shows the patterns from the [`@deck.gl/react` docs](../../../docs/developer-guide/react/get-started.md):
+It shows the patterns from the [`@deck.gl/react` docs](../../../docs/get-started/using-with-react.md):
 
 - `DeckGL` from `@deck.gl/react/maplibre` attaches its overlay to a map the app creates, through the `map` prop.
 - `ScatterplotLayer` from `@deck.gl/react/layers` is an ordinary React component, so a feature
