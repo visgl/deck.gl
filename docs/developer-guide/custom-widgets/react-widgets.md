@@ -171,7 +171,7 @@ The [`<DeckGL/>`](../../api-reference/react/legacy/deckgl.md) component must be 
 </DeckGL>
 ```
 
-> Note: A widget component cannot be nested inside a [JSX view](../../get-started/using-with-react.md#using-jsx-layers-views-and-widgets) such as `<MapView>`; widgets registered there are ignored. Place the widget component directly under `<DeckGL>` and set its [`viewId`](../../api-reference/core/widget.md#viewid) prop instead.
+> Note: A widget component cannot be nested inside a [JSX view](../../api-reference/react/legacy/deckgl.md#jsx-views) such as `<MapView>`; widgets registered there are ignored. Place the widget component directly under `<DeckGL>` and set its [`viewId`](../../api-reference/core/widget.md#viewid) prop instead.
 
 ```tsx
 <DeckGL views={[new MapView({id: 'main'}), new MapView({id: 'minimap', ...})]}>
