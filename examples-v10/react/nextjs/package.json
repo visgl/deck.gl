@@ -1,0 +1,35 @@
+{
+  "name": "deckgl-example-react-nextjs",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "next dev",
+    "start-local": "DECK_GL_LOCAL=true next dev --webpack",
+    "build": "next build",
+    "serve": "next start"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^10.0.0-alpha.1",
+    "@deck.gl/layers": "^10.0.0-alpha.1",
+    "@deck.gl/maplibre": "^10.0.0-alpha.1",
+    "@deck.gl/react": "^10.0.0-alpha.1",
+    "@deck.gl/widgets": "^10.0.0-alpha.1",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "client-only": "^0.0.1",
+    "maplibre-gl": "^6.13.0",
+    "next": "^16",
+    "nuqs": "^2.0.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-error-boundary": "^6.0.0",
+    "server-only": "^0.0.1",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "typescript": "6.0.3"
+  }
+}

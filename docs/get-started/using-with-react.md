@@ -170,5 +170,5 @@ Callbacks such as `onHover` and `onViewStateChange` can run on every animation f
 - [DeckGL API](../api-reference/react/deckgl.md) covers the root's props and lifecycle.
 - [Components](../api-reference/react/components.md) lists every component subpath.
 - [Debugging](../developer-guide/react/debugging.md) traces a problem through the renderer.
-- The [`@deck.gl/react` examples](https://github.com/visgl/deck.gl-community/tree/7086b0a5edca913e59906ebeb7a69bbbfac95e87/examples/react-fiber) are Vite, Next.js, React Router and TanStack Start applications.
+- The [`@deck.gl/react` examples](https://github.com/visgl/deck.gl/tree/master/examples-v10/react) are standalone applications, one per framework.
 - To upgrade from deck.gl 9, see [Migrating from the previous API](../developer-guide/react/migrate-from-deckgl-react.md). The previous API is still available from `@deck.gl/react/legacy`.

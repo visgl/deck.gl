@@ -72,10 +72,10 @@ each bundler.
 
 The `@deck.gl/react` examples configure the worker in their MapLibre modules:
 
-- [Vite](https://github.com/visgl/deck.gl-community/blob/7086b0a5edca913e59906ebeb7a69bbbfac95e87/examples/react-fiber/vite/src/modules/map/maplibre.ts)
+- [Vite](https://github.com/visgl/deck.gl/blob/master/examples-v10/react/vite/src/modules/map/maplibre.ts)
 - [React Router](https://github.com/visgl/deck.gl-community/blob/7086b0a5edca913e59906ebeb7a69bbbfac95e87/examples/react-fiber/react-router/app/modules/map/maplibre.ts)
 - [TanStack Start](https://github.com/visgl/deck.gl-community/blob/7086b0a5edca913e59906ebeb7a69bbbfac95e87/examples/react-fiber/tanstack-start/app/modules/map/maplibre.ts)
-- [Next.js](https://github.com/visgl/deck.gl-community/blob/7086b0a5edca913e59906ebeb7a69bbbfac95e87/examples/react-fiber/nextjs/src/modules/map/maplibre.ts)
+- [Next.js](https://github.com/visgl/deck.gl/blob/master/examples-v10/react/nextjs/src/modules/map/maplibre.ts)
 
 MapLibre loads a same-origin worker URL directly, so a Content Security Policy needs only
 `worker-src 'self'`. A cross-origin worker URL, such as one served from a CDN, is wrapped in a

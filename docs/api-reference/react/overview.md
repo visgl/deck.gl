@@ -72,4 +72,4 @@ The package requires `@deck.gl/core`, and `@deck.gl/widgets` for `@deck.gl/react
 - [DeckGL API](deckgl.md) documents root ownership and lifecycle behavior.
 - [Components](components.md) lists the component subpaths and the factories for custom classes.
 - [Native elements](native-elements.md) documents `<deckLayer>`, `<deckView>`, `<deckWidget>` and `<deckEffect>`.
-- The [`@deck.gl/react` examples](https://github.com/visgl/deck.gl-community/tree/7086b0a5edca913e59906ebeb7a69bbbfac95e87/examples/react-fiber) are Vite, Next.js, React Router and TanStack Start applications.
+- The [`@deck.gl/react` examples](https://github.com/visgl/deck.gl/tree/master/examples-v10/react) are standalone applications, one per framework.

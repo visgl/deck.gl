@@ -1,0 +1,11 @@
+/* Ensure maplibre container fills the viewport */
+#maplibre {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+/* deck.gl interleave container */
+#deckgl-fiber-interleave {
+  display: none;
+}
