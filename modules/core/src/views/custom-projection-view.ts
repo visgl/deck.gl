@@ -5,7 +5,7 @@
 import View from './view';
 import {resolveCRS} from '../utils/crs';
 import {deepEqual} from '../utils/deep-equal';
-import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/geospatial/projection/core';
+import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/geospatial/projection-core';
 import type {CommonViewProps, CommonViewState} from './view';
 import CustomProjectionViewport from '../viewports/custom-projection-viewport';
 import type {CustomProjectionViewportOptions} from '../viewports/custom-projection-viewport';
@@ -55,9 +55,10 @@ export default class CustomProjectionView extends View<
   equals(view: this): boolean {
     if (this === view) return true;
     if (this.constructor !== view.constructor) return false;
-    const {crs, ...props} = this.props;
-    const {crs: otherCrs, ...otherProps} = view.props;
     // Structured CRS definitions can nest more deeply than View's layout and controller props.
+    // `id` is an own prop only when it was passed, so compare props with their resolved ids.
+    const {crs, ...props} = {...this.props, id: this.id};
+    const {crs: otherCrs, ...otherProps} = {...view.props, id: view.id};
     return deepEqual(crs, otherCrs, -1) && deepEqual(props, otherProps, 2);
   }
   /** Resolve the target CRS once for this view before creating its synchronous viewport. */
@@ -91,6 +92,8 @@ export default class CustomProjectionView extends View<
     return new CustomProjectionViewport({
       ...viewState,
       ...viewportProps,
+      // Spreading props drops the default `id`, which lives on the prototype
+      id: this.id,
       ...dimensions,
       crs: this.#crs,
       padding: dimensions.padding

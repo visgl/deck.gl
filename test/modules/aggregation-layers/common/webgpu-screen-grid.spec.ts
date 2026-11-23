@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {Buffer} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
@@ -160,7 +160,7 @@ test('ScreenGridLayer selects compute aggregation and renders its vectors', asyn
   const device = await getWebGPUTestDevice();
   if (!device) return skip();
   device.handle.pushErrorScope('validation');
-  const {ScreenGridLayer, CPUAggregator} = await import('@deck.gl/aggregation-layers');
+  const {ScreenGridLayer} = await import('@deck.gl/aggregation-layers');
   const {testLayerAsync} = await import('@deck.gl/test-utils/vitest');
   const viewport = new OrthographicView().makeViewport({
     width: 100,
@@ -198,8 +198,11 @@ test('ScreenGridLayer selects compute aggregation and renders its vectors', asyn
       },
       {
         updateProps: {pickable: true},
-        onAfterUpdate({layer}) {
-          expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+        async onAfterUpdate({layer}) {
+          expect(layer.state.aggregator).toBeInstanceOf(WebGPUScreenGridAggregator);
+          await vi.waitFor(() => expect(layer.state.aggregator.getResultValues(0)).not.toBeNull(), {
+            timeout: 10000
+          });
         }
       }
     ]
@@ -253,6 +256,7 @@ test('ScreenGridLayer accepts GPU columns and updates prefixes without readback'
         ...(i === 0
           ? {
               props: {
+                data: {attributes: {getWeight: new Uint8Array([255])}},
                 positions,
                 weights: [weights],
                 colorDomain: [0, 10],

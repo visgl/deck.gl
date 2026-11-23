@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {SphereGeometry} from '@luma.gl/engine';
-import {_GlobeView as GlobeView, OrthographicView, MapView, FirstPersonView} from '@deck.gl/core';
+import {GlobeView, OrthographicView, MapView, FirstPersonView} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MVTLayer} from '@deck.gl/geo-layers';

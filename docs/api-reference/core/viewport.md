@@ -14,7 +14,7 @@ Without a descriptor, positions remain in local coordinates; supplying longitude
 a projection. CRS resolution belongs to the View, not the viewport constructor.
 
 Specialized viewports retain their projection conventions. In particular,
-`WebMercatorViewport` and geospatial `FirstPersonViewport` use `@math.gl/web-mercator`
+`WebMercatorViewport` and geospatial `FirstPersonViewport` use `@math.gl/geospatial/web-mercator`
 for their Mercator projection, altitude scaling, and high-precision distance scales.
 
 ## Overview of Viewport Classes
@@ -174,7 +174,7 @@ Returns:
 * `{near: {normal, distance}, far: {normal, distance}, left: {normal, distance}, right: {normal, distance}, top: {normal, distance}, bottom: {normal, distance}}`
 
 ```js
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 
 // Culling tests must be done in common space
 const commonPosition = new Vector3(viewport.projectPosition(point));

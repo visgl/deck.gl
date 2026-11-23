@@ -98,7 +98,8 @@ export class WidgetManager {
     }
   }
 
-  onRedraw({viewports, layers}: {viewports: Viewport[]; layers: Layer[]}) {
+  /** Dispatches screen redraw state to widgets in each active view. */
+  onRedraw({viewports, layers, renderedLayers}: Parameters<Widget['onRedraw']>[0]) {
     const viewportsById: {[id: string]: Viewport} = viewports.reduce((acc, v) => {
       acc[v.id] = v;
       return acc;
@@ -113,7 +114,7 @@ export class WidgetManager {
           if (widget.onViewportChange) {
             widget.onViewportChange(viewport);
           }
-          widget.onRedraw?.({viewports: [viewport], layers});
+          widget.onRedraw?.({viewports: [viewport], layers, renderedLayers});
         }
       } else {
         // Not attached to a specific view
@@ -122,7 +123,7 @@ export class WidgetManager {
             widget.onViewportChange(viewport);
           }
         }
-        widget.onRedraw?.({viewports, layers});
+        widget.onRedraw?.({viewports, layers, renderedLayers});
       }
     }
     this.lastViewports = viewportsById;

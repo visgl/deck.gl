@@ -11,7 +11,7 @@ import {runPersistentRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {registerLoaders} from '@loaders.gl/core';
 import {GLTFLoader} from '@loaders.gl/scene/gltf';
 

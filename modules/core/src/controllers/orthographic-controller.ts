@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {clamp} from '@math.gl/core';
+import {clamp} from '@math.gl/core/matrix';
 import Controller, {ControllerProps} from './controller';
 import ViewState, {
   CONSTRAINT_AROUND,

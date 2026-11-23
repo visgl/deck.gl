@@ -4,7 +4,7 @@
 
 import {Layer, Viewport, Effect, EffectContext, PreRenderOptions, log} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
 import MaskPass from './mask-pass';
 import {
   joinLayerBounds,
@@ -77,10 +77,13 @@ export default class MaskEffect implements Effect {
 
     const maskLayers = layers.filter(l => l.props.visible && l.props.operation.includes('mask'));
     if (maskLayers.length === 0) {
+      const removedMasks = this.masks !== null;
       this.masks = null;
       this.channels.length = 0;
+      this._updateMaskedAggregations(layers, removedMasks);
       return {didRender};
     }
+    const previousMasks = this.masks;
     this.masks = {};
 
     // Map layers to channels
@@ -101,8 +104,21 @@ export default class MaskEffect implements Effect {
       didRender ||= result;
     }
 
-    // debugFBO(this.maskMap, {opaque: true});
+    const channelRemoved =
+      previousMasks && Object.keys(previousMasks).some(id => !this.masks?.[id]);
+    this._updateMaskedAggregations(layers, didRender || Boolean(channelRemoved));
     return {didRender};
+  }
+
+  /** Refreshes aggregations after the mask texture for this frame is available. */
+  private _updateMaskedAggregations(layers: Layer[], maskChanged: boolean): void {
+    const props = this.getShaderModuleProps();
+    for (const layer of layers) {
+      const aggregation = layer as Layer & {
+        _updateAggregationMask?: (props: Record<string, unknown>, maskChanged: boolean) => void;
+      };
+      aggregation._updateAggregationMask?.(props.mask, maskChanged);
+    }
   }
 
   /* eslint-disable-next-line complexity */
@@ -191,6 +207,8 @@ export default class MaskEffect implements Effect {
           views,
           effects,
           shaderModuleProps: {
+            // Mask writers must not bind the attachment they are rendering into.
+            mask: {maskMap: this.dummyMaskMap, maskChannels: null},
             project: {
               devicePixelRatio: 1
             }

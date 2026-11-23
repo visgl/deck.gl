@@ -7,7 +7,7 @@ import {test, expect} from 'vitest';
 import React, {createElement, Fragment} from 'react';
 
 import {View, MapView, FirstPersonView, ScatterplotLayer, LineLayer} from 'deck.gl';
-import extractJSXLayers from '@deck.gl/react/utils/extract-jsx-layers';
+import extractJSXLayers from '@deck.gl/react/legacy/utils/extract-jsx-layers';
 
 const noop = () => {};
 const mapView = new MapView({id: 'map', height: '50%'});

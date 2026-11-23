@@ -151,3 +151,28 @@ test('GridCellLayer - packed geometry matches the model buffer layout', () => {
     onError: err => expect(err).toBeFalsy()
   });
 });
+
+test('ColumnLayer updates normalized fill and line colors through Deck context', () => {
+  const getLineColor = () => [1, 0.5, 0, 0] as const;
+  testLayer({
+    Layer: ColumnLayer,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {props: {data: [{position: [0, 0]}], getLineColor}},
+      {
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({layer}) => {
+          const attributes = layer.getAttributeManager()!.attributes;
+          expect(Array.from(attributes.instanceFillColors.value!)).toEqual([0, 0, 0, 1]);
+          expect(Array.from(attributes.instanceLineColors.value!.slice(0, 4))).toEqual([
+            255, 128, 0, 0
+          ]);
+        }
+      }
+    ]
+  });
+});

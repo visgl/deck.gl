@@ -25,7 +25,7 @@ Widgets differ mainly in *where the UI is rendered*. Consider which approach sui
 
 * **[Implement a universal widget](./universal-widgets.md)** - A "universal widget" renders its own UI inside `onRenderHTML` using DOM APIs. It is compatible with any deck.gl application and is UI framework agnostic. This is the best option for widgets intended to be shared across the deck.gl ecosystem.
 * **[Use Preact in a universal widget](./preact-widgets.md)** - The built-in deck.gl widgets are universal widgets that use [Preact](https://preactjs.com/) internally. Preact lets you write JSX and reuse the same button, menu and tooltip components the built-in widgets use, while your widget remains framework agnostic from the outside.
-* **[Render widget UI with React](./react-widgets.md)** - If you are developing a widget for a React application, you can hand an element to the widget and render into it with a React portal via the [`useWidget`](../../api-reference/react/use-widget.md) hook. The widget is tightly coupled to your React app but can share components and state with the rest of your UI.
+* **[Render widget UI with React](./react-widgets.md)** - If you are developing a widget for a React application, you can hand an element to the widget and render into it with a React portal via the [`useWidget`](../../api-reference/react/legacy/use-widget.md) hook. The widget is tightly coupled to your React app but can share components and state with the rest of your UI.
 
 Universal widgets (with or without Preact) can be used in any application, including React applications, and can be wrapped in React components. The reverse is not true: a widget whose UI is rendered by React can only be used in a React application.
 
