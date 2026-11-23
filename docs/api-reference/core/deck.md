@@ -48,6 +48,8 @@ The following properties are used to initialize a `Deck` instance. Any custom va
 
 The canvas to render into. It can be either a HTMLCanvasElement or the element id, and will be auto-created if not supplied.
 
+When Deck creates a WebGL device for a supplied canvas, finalizing the last Deck using it disposes of the device wrapper and its resize observers. By default the WebGL context stays available for reuse. Pass `deviceProps.ownsHandle: true` if Deck should also release the context when the canvas is removed during finalization.
+
 #### `_canvases` ((HTMLCanvasElement | String)[], optional) {#_canvases}
 
 Experimental: presentation canvases for multi-canvas mode. Deck renders into an offscreen default context and presents the result into one `PresentationContext` per canvas entry. String entries are resolved as DOM element ids. Views without an explicit [`canvasId`](./view.md#canvasid) render into the first configured canvas.
@@ -218,7 +220,7 @@ layer can override a function by name through its own
 
 SQL accessors can use `LIST_EXTRACT(column, index)` and
 `STRUCT_EXTRACT(column, 'field')` by default. List indices start at 1, negative
-indices count from the end, and an out-of-range index returns null.
+indices count from the end, and a non-integer or out-of-range index returns null.
 
 #### `layers` (LayersList) {#layers}
 
@@ -243,15 +245,13 @@ new Deck({
 
 Default: `false`.
 
-When enabled, top-level ScatterplotLayer, LineLayer, ArcLayer, PathLayer, PolygonLayer, and SolidPolygonLayer interpret plain JavaScript arrays
-passed to their color accessors, including arrays returned by callbacks, as 0–1 channels.
-Channels are clamped and rounded to bytes for GPU storage. Omitted alpha is opaque.
-Built-in defaults, typed arrays, Arrow columns, and binary inputs keep their existing encoding.
-[View clear colors](./view.md#clearcolor) and [top-level layer highlights](./layer.md#highlightcolor)
-also use 0–1 channels when enabled.
-Top-level BitmapLayer tint and transparency and TextLayer outline colors also follow this setting.
-Top-level [GeoJsonLayer color accessors](../layers/geojson-layer.md#getfillcolor) also use this convention.
-Composite-generated colors, other layers, and other color properties continue to use their documented conventions.
+When enabled, supported color props interpret plain JavaScript arrays as 0–1 channels,
+including arrays returned by accessor functions. Missing alpha is opaque. Color attributes and
+palette textures pack channels into bytes. Built-in defaults, byte typed arrays, Arrow columns,
+and binary or GPU inputs retain their existing encodings.
+
+See [Normalized colors](../../developer-guide/using-layers.md#normalized-colors) for the list of
+supported props and migration examples.
 
 #### `layerFilter` (Function) {#layerfilter}
 

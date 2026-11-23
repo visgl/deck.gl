@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {WebMercatorViewport, _GlobeViewport, type Viewport} from '@deck.gl/core';
-import {Matrix4, type NumberArray3} from '@math.gl/core';
+import {WebMercatorViewport, GlobeViewport, type Viewport} from '@deck.gl/core';
+import {Matrix4, type NumberArray3} from '@math.gl/core/matrix';
 import {createSkyObserver, getSkyGlobeRotation, type SkyObserver} from '@math.gl/earth/sun';
 
 /** Explicit observers stay fixed as the camera moves. Otherwise use the map's current location. */
@@ -16,10 +16,10 @@ export function getSkyObserver(
   const origin = coordinateOrigin.some(value => value !== 0)
     ? coordinateOrigin
     : [
-        viewport instanceof _GlobeViewport || viewport instanceof WebMercatorViewport
+        viewport instanceof GlobeViewport || viewport instanceof WebMercatorViewport
           ? viewport.longitude
           : 0,
-        viewport instanceof _GlobeViewport || viewport instanceof WebMercatorViewport
+        viewport instanceof GlobeViewport || viewport instanceof WebMercatorViewport
           ? viewport.latitude
           : 0,
         0
@@ -51,7 +51,7 @@ export function makeSkyRotationMatrix(rotation: readonly number[]): Matrix4 {
 /** Infinite ENU directions: translation and zoom never change a body's angular position. */
 export function getSkyProjectionMatrix(viewport: Viewport, observer: SkyObserver): Matrix4 {
   const coordinates =
-    viewport instanceof _GlobeViewport
+    viewport instanceof GlobeViewport
       ? makeSkyRotationMatrix(getSkyGlobeRotation(observer))
       : new Matrix4().scale(
           viewport.getDistanceScales([observer.longitude, observer.latitude, observer.elevation])

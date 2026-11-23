@@ -11,6 +11,7 @@ const darkCodeTheme = prismThemes.nightOwl;
 
 const {getSwcLoaderOptions, rspack} = require('@docusaurus/faster');
 const {resolve} = require('path');
+const {createRequire} = require('node:module');
 const exampleCatalogs = require('./scripts/example-catalogs.cjs');
 const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/';
 const websiteBasePathSegments = websiteBaseUrl.split('/').filter(Boolean);
@@ -147,6 +148,14 @@ const config = {
           // Resolve dependencies through their package export maps, including subpaths.
           modules: [resolve('node_modules'), resolve('../node_modules')],
           alias: {
+            // The legacy Web Mercator package still imports the math.gl v4 root.
+            '@math.gl/core$': createRequire(require.resolve('@math.gl/web-mercator')).resolve(
+              '@math.gl/core'
+            ),
+            // concaveman imports a UMD file from its nested robust-predicates 2.x dependency.
+            'robust-predicates/umd/orient2d.min.js$': createRequire(
+              require.resolve('concaveman')
+            ).resolve('robust-predicates/umd/orient2d.min.js'),
             '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers/dist'),
             '@deck.gl/arcgis': resolve('../modules/arcgis/dist'),
             '@deck.gl/carto': resolve('../modules/carto/dist'),
@@ -162,6 +171,10 @@ const config = {
             '@deck.gl/mapbox': resolve('../modules/mapbox/dist'),
             '@deck.gl/maplibre': resolve('../modules/maplibre/dist'),
             '@deck.gl/mesh-layers': resolve('../modules/mesh-layers/dist'),
+            // `examples/` imports the package root, which is the React 19 renderer in v10. The
+            // website runs React 18 and shows the current API, so the bare root resolves to
+            // `/legacy` until the v10 examples replace those apps.
+            '@deck.gl/react$': resolve('../modules/react/dist/legacy'),
             '@deck.gl/react': resolve('../modules/react/dist'),
             '@deck.gl/widgets': resolve('../modules/widgets/dist'),
             'proposal-examples': resolve('../examples-v10/proposals'),
@@ -187,6 +200,8 @@ const config = {
         ],
         module: {
           rules: [
+            // Match Vite asset imports used by standalone examples.
+            {resourceQuery: /\?url$/, type: 'asset/resource'},
             // https://github.com/Esri/calcite-components/issues/2865
             {
               test: /\.m?js/,

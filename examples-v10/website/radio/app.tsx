@@ -9,17 +9,15 @@ import {Map} from 'react-map-gl/maplibre';
 import {MapView, WebMercatorViewport, FlyToInterpolator} from '@deck.gl/core';
 import {ScatterplotLayer, PathLayer} from '@deck.gl/layers';
 import {MVTLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
-import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {scaleSqrt, scaleLinear} from 'd3-scale';
-import {tableFromArrays} from 'apache-arrow';
+import {scaleLinear} from 'd3-scale';
+import {isArrowTable} from '@math.gl/core/arrow';
 import SearchBar from './search-bar';
 
 import type {
   Color,
-  LayerData,
   ViewStateChangeParameters,
   MapViewState,
   PickingInfo,
@@ -68,13 +66,6 @@ const INITIAL_VIEW_STATE: {main: MapViewState; minimap: MapViewState} = {
   }
 };
 
-const coverageColorScale = scaleSqrt<Color>()
-  .domain([1, 10, 100])
-  .range([
-    [237, 248, 177],
-    [127, 205, 187],
-    [44, 127, 184]
-  ]);
 const fmColorScale = scaleLinear<Color>()
   .domain([87, 108])
   .range([
@@ -137,27 +128,31 @@ function getTooltipText(
 /* eslint-disable react/no-deprecated */
 export default function App({
   device,
-  data,
   mapStyle = 'https://tiles.openfreemap.org/styles/positron',
   showMinimap = true
 }: {
   device?: Device;
-  data?: Station[];
   mapStyle?: string;
   showMinimap?: boolean;
 }) {
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [highlight, setHighlight] = useState(null);
+  /** Rows used only by station search and the MVT contour lookup. */
+  const [stations, setStations] = useState<Station[]>([]);
+  /** Shares loaded station rows with the UI without repacking layer positions. */
+  const onStationsLoaded = useCallback((table: unknown) => {
+    if (isArrowTable(table)) {
+      setStations(Array.from(table, row => row.toJSON() as Station));
+    }
+  }, []);
 
   const stationMap: {[callSign: string]: Station} = useMemo(() => {
-    if (!data) return null;
-
     const result = {};
-    for (const station of data) {
+    for (const station of stations) {
       result[station.callSign] = station;
     }
     return result;
-  }, [data]);
+  }, [stations]);
 
   const onViewStateChange = useCallback(
     ({viewState: newViewState}: ViewStateChangeParameters<MapViewState>) => {
@@ -209,7 +204,7 @@ export default function App({
   );
 
   const layers = [
-    data &&
+    stations.length > 0 &&
       new MVTLayer<ServiceContour>({
         id: 'service-contours',
         data: DATA_URL.CONTOURS,
@@ -229,33 +224,37 @@ export default function App({
         getFillColor: [255, 255, 255, 0]
       }),
 
-    data &&
-      new ScatterplotLayer({
-        id: 'stations',
-        data,
-        dataTransform: <LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT => {
-          const stations = source as Station[];
-          return tableFromArrays({
-            longitude: Float64Array.from(stations, station => station.longitude),
-            latitude: Float64Array.from(stations, station => station.latitude)
-          }) as LayerDataT;
-        },
-        getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
-        getFillColor: [40, 40, 40, 128],
-        getRadius: 20,
-        radiusMinPixels: 2
-      }),
+    new ScatterplotLayer({
+      id: 'stations',
+      // Sample row: WAQI,710,AM,MIAMI,FL,UNIVISION RADIO STATIONS GROUP INC.,-80.37889,25.96861
+      data: DATA_URL.STATIONS,
+      loaders: [CSVLoader],
+      onDataLoad: onStationsLoaded,
+      getPosition: {sql: 'ARRAY[longitude, latitude]'},
+      getFillColor: [40, 40, 40, 128],
+      getRadius: 20,
+      radiusMinPixels: 2
+    }),
 
     new H3HexagonLayer<{hex: string; count: number}>({
       id: 'coverage',
+      // Sample row (hex,count): 8444b6bffffffff,3
       data: DATA_URL.COVERAGE,
-      getHexagon: d => d.hex,
+      loaders: [CSVLoader],
+      getHexagon: {sql: 'hex'},
       stroked: false,
       extruded: false,
-      getFillColor: d => coverageColorScale(d.count),
-
-      loaders: [CSVLoader],
-      loadOptions: {csv: {shape: 'object-row-table'}}
+      // Interpolate the original coverage palette in square-root-count space.
+      getFillColor: {
+        sql: `\
+          RGBA8(
+            (CASE WHEN count < 10 THEN 237 - 110 * (SQRT(count) - 1) / (SQRT(10) - 1)
+              ELSE 127 - 83 * (SQRT(count) - SQRT(10)) / (10 - SQRT(10)) END) / 255,
+            (CASE WHEN count < 10 THEN 248 - 43 * (SQRT(count) - 1) / (SQRT(10) - 1)
+              ELSE 205 - 78 * (SQRT(count) - SQRT(10)) / (10 - SQRT(10)) END) / 255,
+            (CASE WHEN count < 10 THEN 177 + 10 * (SQRT(count) - 1) / (SQRT(10) - 1)
+              ELSE 187 - 3 * (SQRT(count) - SQRT(10)) / (10 - SQRT(10)) END) / 255, 1)`
+      }
     }),
 
     new PathLayer({
@@ -281,7 +280,7 @@ export default function App({
     >
       <MapView id="main">
         <Map reuseMaps mapStyle={mapStyle} key="map" />
-        <SearchBar data={data} onChange={onSelectStation} />
+        <SearchBar data={stations} onChange={onSelectStation} />
       </MapView>
       {showMinimap && (
         <MapView id="minimap">
@@ -292,15 +291,6 @@ export default function App({
   );
 }
 
-export async function renderToDOM(container: HTMLDivElement) {
-  const root = createRoot(container);
-  root.render(<App />);
-
-  const stations = (
-    await load(DATA_URL.STATIONS, CSVLoader, {
-      csv: {shape: 'object-row-table'}
-    })
-  ).data;
-
-  root.render(<App data={stations} />);
+export function renderToDOM(container: HTMLDivElement) {
+  createRoot(container).render(<App />);
 }

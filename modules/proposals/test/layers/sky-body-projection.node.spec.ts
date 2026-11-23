@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {OrthographicViewport, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
+import {OrthographicViewport, WebMercatorViewport, GlobeViewport} from '@deck.gl/core';
 import {expect, test} from 'vitest';
 import {
   createSkyObserver,
@@ -51,7 +51,7 @@ test('sky bodies do not render below the horizon, behind the eye, or on orthogra
 
 test('globe celestial directions are independent of the chosen observer frame', () => {
   const timestamp = Date.UTC(2026, 9, 4, 13);
-  const viewport = new _GlobeViewport({
+  const viewport = new GlobeViewport({
     width: 800,
     height: 600,
     longitude: 180,
@@ -82,7 +82,7 @@ test('globe celestial directions are independent of the chosen observer frame', 
 });
 
 test('observer defaults follow the camera, while explicit observers remain fixed', () => {
-  const viewport = new _GlobeViewport({width: 800, height: 600, longitude: 137, latitude: -35});
+  const viewport = new GlobeViewport({width: 800, height: 600, longitude: 137, latitude: -35});
   expect(getSkyObserver(viewport)).toEqual({longitude: 137, latitude: -35, elevation: 0});
   expect(getSkyObserver(viewport, undefined, [-74, 40.7, 15])).toEqual({
     longitude: -74,
@@ -105,7 +105,7 @@ test('SkyLayer uses separate cloud identities when switching map and globe views
   });
   layer.context = {viewport: getViewport()} as any;
   const mapCloud = layer.renderLayers().find(child => child instanceof CloudLayer)!;
-  layer.context = {viewport: new _GlobeViewport({width: 800, height: 600})} as any;
+  layer.context = {viewport: new GlobeViewport({width: 800, height: 600})} as any;
   const globeCloud = layer.renderLayers().find(child => child instanceof GlobeCloudLayer)!;
   expect(mapCloud).toBeInstanceOf(CloudLayer);
   expect(globeCloud).toBeInstanceOf(GlobeCloudLayer);

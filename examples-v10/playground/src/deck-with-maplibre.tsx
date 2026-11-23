@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React from 'react';
-import {DeckGL, type DeckGLProps} from '@deck.gl/react';
+import {DeckGL, type DeckGLProps} from '@deck.gl/react/legacy';
 import {View} from '@deck.gl/core';
 import {Map, type MapProps} from 'react-map-gl/maplibre';
 

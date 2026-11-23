@@ -17,7 +17,7 @@ import {
   _flatten as flatten
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import type {TileSource} from '@loaders.gl/core/loader-utils';
 
 import {

@@ -15,11 +15,21 @@ import CanvasManager from './canvas-manager';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
+import {
+  type CreatedDevice,
+  type DeviceCanvas,
+  getDeviceCanvas,
+  destroyCreatedDevice,
+  releaseCanvas,
+  retainCanvas
+} from './release-device-context';
 import {VERSION} from './init';
 
+/** Device prop that marks a device a Deck created, as opposed to one the app created. */
+const CREATED_BY_DECK = '_createdByDeck';
+
 import {luma} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/core/webgl';
-import {GL} from '@luma.gl/core/webgl-constants';
+import {webgl2Adapter, type WebGLDevice} from '@luma.gl/core/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import type {
@@ -329,6 +339,17 @@ const defaultProps: DeckProps = {
   drawPickingColors: false
 };
 
+/** Replace explicitly `undefined` props with their defaults, so `undefined` behaves like omitting the prop */
+function resolveUndefinedProps<PropsT extends DeckProps<any>>(props: PropsT): PropsT {
+  const resolvedProps: Record<string, unknown> = {...props};
+  for (const key in resolvedProps) {
+    if (resolvedProps[key] === undefined && key in defaultProps) {
+      resolvedProps[key] = defaultProps[key as keyof DeckProps];
+    }
+  }
+  return resolvedProps as PropsT;
+}
+
 /* eslint-disable max-statements */
 export default class Deck<ViewsT extends ViewOrViews = null> {
   static defaultProps = defaultProps;
@@ -401,6 +422,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     getEventRoot: canvas => this._getEventRoot(canvas)
   });
   private _ownedCanvas: HTMLCanvasElement | null = null;
+  /** Device wrapper created by Deck, including in-flight initialization. */
+  private _createdDevice: CreatedDevice | null = null;
+  /** The canvas this Deck renders to, counted so its context isn't released while in use. */
+  private _usedCanvas: DeviceCanvas | null = null;
   private _pickRequest: {
     mode: string;
     event: MjolnirPointerEvent | null;
@@ -429,7 +454,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   constructor(props: DeckProps<ViewsT>) {
     const initialProps = props;
     // @ts-ignore views
-    this.props = {...defaultProps, ...props};
+    this.props = {...defaultProps, ...resolveUndefinedProps(props)};
     props = this.props;
 
     this._validateCanvasConfiguration(props);
@@ -445,6 +470,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     if (props.device) {
       this.device = props.device;
       this._setDeviceCanvasContext(props.device);
+      this._useCanvas(getDeviceCanvas(props.device));
     }
 
     let deviceOrPromise: Device | Promise<Device> | null = this.device;
@@ -454,6 +480,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       if (props.gl instanceof WebGLRenderingContext) {
         log.error('WebGL1 context not supported.')();
       }
+      this._useCanvas(props.gl.canvas);
       deviceOrPromise = webgl2Adapter.attach(props.gl, {
         // Enable shader and pipeline caching for attached devices (matches _createDevice defaults)
         // Without this, interleaved mode (e.g., MapboxOverlay) creates new pipelines every frame
@@ -527,11 +554,18 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this._ownedCanvas = null;
     }
     this._canvasContext = null;
+
+    this._useCanvas(null);
+    if (this._createdDevice) {
+      destroyCreatedDevice(this._createdDevice);
+      this._createdDevice = null;
+    }
   }
 
   /** Partially update props */
   setProps(props: DeckProps<ViewsT>): void {
     this.stats.get('setProps Time').timeStart();
+    props = resolveUndefinedProps(props);
 
     if ('onLayerHover' in props) {
       log.removed('onLayerHover', 'onHover')();
@@ -578,6 +612,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     });
 
     if (props.device && props.device.id !== this.device?.id) {
+      this._useCanvas(getDeviceCanvas(props.device));
       const canvasContext = props.device.getDefaultCanvasContext();
       this.animationLoop?.stop();
       if (!this._isMultiCanvasMode() && this.canvas !== canvasContext.canvas) {
@@ -1476,6 +1511,24 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     });
   }
 
+  /**
+   * Counts `canvas` as the one this Deck renders to, uncounting the previous one. Every Deck
+   * counts its canvas, whether it created its device or was passed `device` or `gl`, so a context
+   * is never released while another Deck renders with it. `finalize()` passes `null`.
+   */
+  private _useCanvas(canvas: DeviceCanvas | null): void {
+    if (canvas === this._usedCanvas) {
+      return;
+    }
+    if (this._usedCanvas) {
+      releaseCanvas(this._usedCanvas);
+    }
+    if (canvas) {
+      retainCanvas(canvas);
+    }
+    this._usedCanvas = canvas;
+  }
+
   // Create a device from the deviceProps, assigning required defaults
   private _createDevice(props: DeckProps<ViewsT>): Promise<Device> {
     const canvasContextUserProps = this.props.deviceProps?.createCanvasContext;
@@ -1485,10 +1538,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // In deck.gl v9, Deck always bundles and adds a webgl2Adapter.
     // This behavior is expected to change in deck.gl v10 to support WebGPU only builds.
     const deviceProps = {
-      adapters: [],
       _cacheShaders: true,
       _cachePipelines: true,
       ...props.deviceProps,
+      adapters: [...(props.deviceProps?.adapters ?? [])],
       debug: getDeviceDebug(props)
     };
     if (!deviceProps.adapters.includes(webgl2Adapter)) {
@@ -1500,12 +1553,23 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       alphaMode: this.props.deviceProps?.type === 'webgpu' ? 'premultiplied' : undefined
     };
 
+    const canvas = this._createDeviceCanvas(props);
+    // Track who created the canvas directly, including canvases in a different document.
+    const ownsCanvas = this._isMultiCanvasMode() || canvas === this._ownedCanvas;
+    const requestedType = deviceProps.type ?? 'webgl';
+    const deviceType =
+      requestedType === 'best-available'
+        ? luma.getBestAvailableAdapterType(deviceProps.adapters)
+        : requestedType;
+
     // Create the "best" device supported from the registered adapters
-    return luma.createDevice({
+    const device = luma.createDevice({
       // luma by default throws if a device is already attached
       // asynchronous device creation could happen after finalize() is called
       // TODO - createDevice should support AbortController?
       _reuseDevices: true,
+      // A supplied WebGL canvas can outlive Deck. Destroy only its luma wrapper by default.
+      ownsHandle: ownsCanvas || deviceType !== 'webgl',
       // tests can't handle WebGPU devices yet so we force WebGL2 unless overridden
       type: 'webgl',
       ...deviceProps,
@@ -1513,11 +1577,26 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       createCanvasContext: {
         ...defaultCanvasProps,
         ...canvasContextProps,
-        canvas: this._createDeviceCanvas(props),
+        canvas,
         useDevicePixels: this.props.useDevicePixels,
         autoResize: true
-      }
-    });
+      },
+      // Marks the device as Deck's. luma.gl keeps a device's props, so the mark survives when another
+      // Deck reuses the device, and a device the app created never has it.
+      [CREATED_BY_DECK]: true
+    } as CreateDeviceProps);
+    this._useCanvas(canvas);
+    this._createdDevice = {
+      canvas,
+      // With `_reuseDevices`, luma.gl returns the device already on this canvas, which may be one the
+      // app created. Deck only owns a device that a Deck created.
+      device: device.then(
+        created => ((created.props as Record<string, unknown>)[CREATED_BY_DECK] ? created : null),
+        () => null
+      ),
+      ownsCanvas
+    };
+    return device;
   }
 
   // Get the most relevant view state: props.viewState, if supplied, shadows internal viewState
@@ -1668,12 +1747,13 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // instrumentGLContext(this.device.gl, {enable: true, copyState: true});
 
     if (this.device.type === 'webgl') {
+      const {gl} = this.device as WebGLDevice;
       this.device.setParametersWebGL({
         blend: true,
-        blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+        blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
         polygonOffsetFill: true,
         depthTest: true,
-        depthFunc: GL.LEQUAL
+        depthFunc: gl.LEQUAL
       });
     }
 
@@ -1770,6 +1850,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.props.onBeforeRender({device, gl});
 
+    // Reuse the renderer's visibility decisions without invoking user filters again.
+    const renderedLayers = new Map<Viewport, Set<Layer>>();
     const opts = {
       target: this.props._framebuffer,
       layers: this.layerManager!.getLayers(),
@@ -1778,7 +1860,16 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       views: this.viewManager!.getViews(),
       pass: 'screen',
       effects: this.effectManager!.getEffects(),
-      ...renderOptions
+      ...renderOptions,
+      /** Records one eligible layer for the screen widgets in each viewport. */
+      onLayerEligible: (layer: Layer, viewport: Viewport) => {
+        let layers = renderedLayers.get(viewport);
+        if (!layers) {
+          layers = new Set();
+          renderedLayers.set(viewport, layers);
+        }
+        layers.add(layer);
+      }
     };
 
     if (
@@ -1825,7 +1916,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // Only when drawing to screen, update all widgets (UI components)
       this.widgetManager!.onRedraw({
         viewports: opts.viewports,
-        layers: opts.layers
+        layers: opts.layers,
+        renderedLayers
       });
     }
 

@@ -3,7 +3,8 @@ on [deck.gl](http://deck.gl) website.
 
 ### Usage
 
-Copy the content of this folder to your project. 
+Run this example from a deck.gl checkout with the root workspace dependencies installed.
+It uses the repository’s private experimental GeoArrowLayer.
 
 ```bash
 # install dependencies
@@ -24,3 +25,8 @@ the [documentation of ArcLayer](../../../docs/api-reference/layers/arc-layer.md)
 ### Basemap
 
 The basemap in this example is provided by [OpenFreeMap](https://openfreemap.org/). To use an alternative base map solution, visit [this guide](https://deck.gl/docs/get-started/using-with-map#using-other-basemap-services)
+### Full website dataset
+
+This example loads the full website dataset with `GeoParquetLoader` from `@loaders.gl/tables/parquet`. The loader returns an Arrow table for the experimental `GeoArrowLayer`, which returns the source Arrow row when picked. Geometry uses WKB with GeoParquet metadata and internal Zstd compression.
+
+The 3,220 counties retain source order: migration map keys reference county row indices. Properties include `name`, `centroid`, and signed net `flows`.

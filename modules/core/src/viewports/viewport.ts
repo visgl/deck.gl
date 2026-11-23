@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection-core';
 import log from '../utils/log';
 import assert from '../utils/assert';
 import {WGS84_CRS} from '../utils/crs';
@@ -16,8 +16,8 @@ import {
   pixelsToWorld
 } from '../utils/math-utils';
 
-import {Matrix4, Vector3, equals, clamp} from '@math.gl/core';
-import {mat4} from '@math.gl/core';
+import {Matrix4, Vector3, equals, clamp} from '@math.gl/core/matrix';
+import {mat4} from '@math.gl/core/matrix';
 
 import {PROJECTION_MODE} from '../shaderlib/project/constants';
 

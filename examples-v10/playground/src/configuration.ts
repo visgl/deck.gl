@@ -13,8 +13,6 @@ import {CARTO_LAYERS, colorBins, colorCategories, colorContinuous} from '@deck.g
 import {CARTO_SOURCES} from '@carto/api-client';
 import * as Widgets from '@deck.gl/widgets';
 
-import {GL as GLConstants} from '@luma.gl/core/webgl-constants';
-
 import {registerLoaders} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {DracoWorkerLoader} from '@loaders.gl/scene';
@@ -52,7 +50,7 @@ export default {
   // Enumerations that should be available to JSON parser
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
-    GL: GLConstants
+    GL: globalThis.WebGL2RenderingContext ?? {}
   },
 
   // Constants that should be resolved with the provided values by JSON converter

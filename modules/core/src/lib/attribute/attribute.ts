@@ -647,7 +647,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       /** Whether this row contains plain-array colors to pack. */
       const normalizeRow = normalizeColor && Array.isArray(objectValue);
       /** Whether the row starts with a typed per-vertex color. */
-      const nestedColor = normalizeRow && startIndices && ArrayBuffer.isView(objectValue[0]);
+      const nestedColor = startIndices && ArrayBuffer.isView(objectValue?.[0]);
       /** Whether the row contains flat per-vertex color channels. */
       const flatColors = normalizeRow && startIndices && objectValue.length > 4;
       if (
@@ -680,7 +680,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
           for (let offset = 0; offset < objectValue.length; offset += size) {
             packNormalizedColor(objectValue, value as TypedArray, i + offset, size, offset);
           }
-        } else if (objectValue && objectValue.length > size) {
+        } else if (
+          objectValue &&
+          objectValue.length > size &&
+          !(size === 3 && objectValue instanceof Uint8ClampedArray && objectValue.length === 4)
+        ) {
           (value as TypedArray).set(objectValue, i);
         } else {
           attribute._normalizeValue(objectValue, objectInfo.target, 0);

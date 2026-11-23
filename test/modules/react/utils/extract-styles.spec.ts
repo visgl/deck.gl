@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import extractStyles from '@deck.gl/react/utils/extract-styles';
+import extractStyles from '@deck.gl/react/legacy/utils/extract-styles';
 
 test('extractStyles', () => {
   let result = extractStyles({width: '100%', height: '100%'});
