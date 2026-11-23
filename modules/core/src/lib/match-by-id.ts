@@ -10,18 +10,25 @@ export type IdMatch<T> = {
   item: T;
   /** The first entry in the old list with the same id, if any. */
   previous: T | undefined;
-  /** An earlier entry in the new list has the same id. Only the first entry with an id is managed. */
+  /** An earlier entry in the new list has the same id. */
   duplicate: boolean;
 };
 
 /**
- * Pairs the entries of a new list with those of an old list by id. `WidgetManager` and
- * `ViewManager` use it to carry widgets, views and their controllers across updates.
+ * Pairs the entries of a new list with those of an old list by id.
  *
- * The id is the identity. The first new entry with an id is matched with the first old entry
- * with that id; each later new entry with the same id is a duplicate. Whether a matched entry is
- * reused is up to the caller: a widget is reused when its class default id, `viewId` and
- * `placement` are unchanged, and a view when it `equals` the old one.
+ * The first new entry with an id is matched with the first old entry with that id. Each later new
+ * entry with the same id is a duplicate. The caller decides what to do with each match.
+ *
+ * @example
+ * const {matches, removed} = matchById(
+ *   [{id: 'a'}, {id: 'b', version: 1}],
+ *   [{id: 'b', version: 2}, {id: 'c'}, {id: 'c'}]
+ * );
+ * // matches[0]: the new 'b', with the old 'b' as `previous`
+ * // matches[1]: the first 'c', with no `previous`
+ * // matches[2]: the second 'c', a duplicate
+ * // removed: [{id: 'a'}]
  *
  * @param oldItems the entries from the previous update
  * @param newItems the entries for this update

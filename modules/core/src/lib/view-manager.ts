@@ -408,7 +408,9 @@ export default class ViewManager<ViewsT extends View[]> {
 
     const previousViews = this.views;
     const {matches, removed} = matchById(previousViews, views);
-    // Retain pending and ready views, but let a fresh descriptor retry failed initialization.
+    // Keep the old view only when it `equals` the new one: a view has no `setProps`, so its class
+    // and props are its behavior. Retain pending and ready views, but let a fresh descriptor retry
+    // failed initialization.
     views = matches.map(({item, previous}) =>
       previous && !this._failedViews.has(previous) && previous.equals(item) ? previous : item
     );
