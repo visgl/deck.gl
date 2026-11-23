@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Suspense} from 'react';
+import {Suspense, type ReactNode} from 'react';
 import {MapClient} from './modules/map';
 import {AirportsLayer} from './features/airports-layer';
 import {AirportsList} from './features/airports-list';
@@ -11,9 +11,12 @@ import {SearchBox} from './components/search-box';
 import {ErrorBoundary} from './components/error-boundary';
 import {useAppStore} from './stores/app';
 
-/** Shown in place of the list (on the left) or the card (on the right) when its query fails. */
-function QueryError({error, side}: {error: Error; side: 'left' | 'right'}) {
-  return <div style={{[side]: 20, position: 'absolute', top: 20, zIndex: 1}}>{error.message}</div>;
+/**
+ * Shown in place of the list (on the left) or the card (on the right) while its query loads or
+ * after it fails. It is positioned above the map, which fills the page.
+ */
+function Notice({side, children}: {side: 'left' | 'right'; children: ReactNode}) {
+  return <div style={{[side]: 20, position: 'absolute', top: 20, zIndex: 1}}>{children}</div>;
 }
 
 /**
@@ -33,8 +36,11 @@ export function Page() {
           </Suspense>
         </ErrorBoundary>
       </MapClient>
-      <ErrorBoundary resetKey={search} fallback={error => <QueryError error={error} side="left" />}>
-        <Suspense fallback={<div>Loading airports...</div>}>
+      <ErrorBoundary
+        resetKey={search}
+        fallback={error => <Notice side="left">{error.message}</Notice>}
+      >
+        <Suspense fallback={<Notice side="left">Loading airports...</Notice>}>
           <AirportsList />
         </Suspense>
       </ErrorBoundary>
@@ -42,9 +48,9 @@ export function Page() {
       {selected !== null && (
         <ErrorBoundary
           resetKey={selected}
-          fallback={error => <QueryError error={error} side="right" />}
+          fallback={error => <Notice side="right">{error.message}</Notice>}
         >
-          <Suspense fallback={<div>Loading airport details...</div>}>
+          <Suspense fallback={<Notice side="right">Loading airport details...</Notice>}>
             <AirportsCard />
           </Suspense>
         </ErrorBoundary>
