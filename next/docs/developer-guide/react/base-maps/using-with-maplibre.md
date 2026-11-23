@@ -50,10 +50,10 @@ The `?worker&url` query is Vite-only. Next.js (Turbopack or webpack) and other b
 
 The `@deck.gl/react` examples configure the worker in their MapLibre modules:
 
-* [Vite](https://github.com/visgl/deck.gl-community/blob/master/examples/react-fiber/vite/src/modules/map/maplibre.ts)
-* [React Router](https://github.com/visgl/deck.gl-community/blob/master/examples/react-fiber/react-router/app/modules/map/maplibre.ts)
-* [TanStack Start](https://github.com/visgl/deck.gl-community/blob/master/examples/react-fiber/tanstack-start/app/modules/map/maplibre.ts)
-* [Next.js](https://github.com/visgl/deck.gl-community/blob/master/examples/react-fiber/nextjs/src/modules/map/maplibre.ts)
+* [Vite](https://github.com/visgl/deck.gl-community/blob/7086b0a5edca913e59906ebeb7a69bbbfac95e87/examples/react-fiber/vite/src/modules/map/maplibre.ts)
+* [React Router](https://github.com/visgl/deck.gl-community/blob/7086b0a5edca913e59906ebeb7a69bbbfac95e87/examples/react-fiber/react-router/app/modules/map/maplibre.ts)
+* [TanStack Start](https://github.com/visgl/deck.gl-community/blob/7086b0a5edca913e59906ebeb7a69bbbfac95e87/examples/react-fiber/tanstack-start/app/modules/map/maplibre.ts)
+* [Next.js](https://github.com/visgl/deck.gl-community/blob/7086b0a5edca913e59906ebeb7a69bbbfac95e87/examples/react-fiber/nextjs/src/modules/map/maplibre.ts)
 
 MapLibre loads a same-origin worker URL directly, so a Content Security Policy needs only `worker-src 'self'`. A cross-origin worker URL, such as one served from a CDN, is wrapped in a `blob:` URL and needs `blob:` in `worker-src`. See MapLibre's [CSP directives](https://maplibre.org/maplibre-gl-js/docs/#csp-directives) for the full list.
 
