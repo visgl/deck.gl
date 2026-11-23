@@ -2,6 +2,13 @@
 
 ## Upgrading to v10[​](#upgrading-to-v10 "Direct link to Upgrading to v10")
 
+### @deck.gl/react[​](#deckglreact "Direct link to @deck.gl/react")
+
+`@deck.gl/react` is now a React renderer for deck.gl: layers, views, widgets and effects are React elements. It requires React 19.2 or later.
+
+* To keep the previous API, change the imports from `@deck.gl/react` to [`@deck.gl/react/legacy`](https://deck.gl/next/docs/api-reference/react/legacy/overview.md). It also requires React 19.2.
+* To move to the renderer, follow [Migrating from the previous API](https://deck.gl/next/docs/developer-guide/react/migrate-from-deckgl-react.md).
+
 ### GlobeView[​](#globeview "Direct link to GlobeView")
 
 `GlobeView`, `GlobeViewport` and `GlobeController` are no longer experimental. Import them without the underscore. `_GlobeView`, `_GlobeViewport` and `_GlobeController` remain as deprecated aliases of the same classes and will be removed in a future major release.

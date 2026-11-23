@@ -173,7 +173,7 @@ Attribute and palette RGB(A) channels are clamped to 0–1 and rounded to a byte
 
 ## Rendering Layers[​](#rendering-layers "Direct link to Rendering Layers")
 
-deck.gl allows you to render multiple layers using the same or different data sets. You simply provide an array of layer instances to the [Deck](https://deck.gl/next/docs/api-reference/core/deck.md) class (pure JS) or [DeckGL](https://deck.gl/next/docs/api-reference/react/legacy/deckgl.md) component (React) and they will be rendered in order.
+deck.gl allows you to render multiple layers using the same or different data sets. You simply provide an array of layer instances to the [Deck](https://deck.gl/next/docs/api-reference/core/deck.md) class (pure JS) or [DeckGL](https://deck.gl/next/docs/api-reference/react/deckgl.md) component (React) and they will be rendered in order.
 
 This allows you to compose visualizations using several primitive layers.
 

@@ -150,6 +150,17 @@ Applications written against math.gl's projection interfaces can use external pr
 
 - [Projection domains and worker preprocessing](https://deck.gl/next/docs/developer-guide/projection-domains.md): Applications written against math.gl's projection interfaces can use external projection engines through a CRS descriptor adapter. That adapter converts coordinates; it does not supply geometry clipping, antimeridian topology or triangulation. Applications that need those operations can preprocess geometry with the external engine and render the result in deck.gl's Cartesian coordinate system.
 
+#### react
+
+- [Using with custom overlays](https://deck.gl/next/docs/developer-guide/react/base-maps/using-with-custom-overlays.md): The Mapbox and MapLibre provider roots are thin bindings of the native createDeckGL factory. Use
+- [Using with Google Maps](https://deck.gl/next/docs/developer-guide/react/base-maps/using-with-google-maps.md): | Import path | deck.gl overlay | Overlaid | Interleaved | React Google Maps |
+- [Using with Mapbox](https://deck.gl/next/docs/developer-guide/react/base-maps/using-with-mapbox.md): | Import path | deck.gl overlay | Overlaid | Interleaved | React Map GL |
+- [Using with MapLibre](https://deck.gl/next/docs/developer-guide/react/base-maps/using-with-maplibre.md): | Import path | deck.gl overlay | Overlaid | Interleaved | React Map GL |
+- [Debugging](https://deck.gl/next/docs/developer-guide/react/debugging.md): @deck.gl/react sits between React and deck.gl. When something looks wrong, first find out which side of that boundary it comes from:
+- [Get started](https://deck.gl/next/docs/developer-guide/react/get-started.md): @deck.gl/react renders deck.gl in a React client tree. The root exports DeckGL, and subpaths named after deck.gl's modules export a component for each built-in layer, view, widget and effect.
+- [Migrating from the previous API](https://deck.gl/next/docs/developer-guide/react/migrate-from-deckgl-react.md): This page lists the changes to make when you move an app from the deck.gl 9 React API to the React
+- [Using with maps](https://deck.gl/next/docs/developer-guide/react/using-with-maps.md): deck.gl works without a base map, but a base map gives geospatial layers context. This page
+
 #### testing
 
 Testing WebGL2/WebGPU code is much harder than testing regular JavaScript. GPU and browser dependent commands may not run under Node. Rendering behavior differs cross platforms and hardware. Since it draws into a canvas, there is also no precisely verifiable output.
@@ -367,9 +378,13 @@ For first-time deck.gl developers, it is helpful to read the following pages bef
 
 #### react
 
+- [Components](https://deck.gl/next/docs/api-reference/react/components.md): From v10.0
+- [DeckGL](https://deck.gl/next/docs/api-reference/react/deckgl.md): From v10.0
 - [DeckGL (React Component)](https://deck.gl/next/docs/api-reference/react/legacy/deckgl.md): DeckGL is the main interface to deck.gl for React applications. DeckGL is a React component that takes a list of deck.gl layer instances and a view state, and renders those layers on a transparent canvas that can be used as an overlay over other components like maps.
 - [@deck.gl/react](https://deck.gl/next/docs/api-reference/react/legacy/overview.md): This module integrates deck.gl with React. First-time deck.gl developers may find it helpful to read Using deck.gl with React before getting started.
 - [useWidget](https://deck.gl/next/docs/api-reference/react/legacy/use-widget.md): The useWidget hook is used to create React wrappers for normal (non-React) deck.gl widgets, or to create custom widgets with UI rendered by React.
+- [Native elements](https://deck.gl/next/docs/api-reference/react/native-elements.md): From v10.0
+- [@deck.gl/react](https://deck.gl/next/docs/api-reference/react/overview.md): From v10.0
 
 #### test-utils
 

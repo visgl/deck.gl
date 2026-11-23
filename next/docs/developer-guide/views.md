@@ -1499,7 +1499,11 @@ const layerFilter: DeckProps["layerFilter"] = useCallback(({layer, viewport, isP
 
 ### Auto-Positioning UI Components Behind Views[​](#auto-positioning-ui-components-behind-views "Direct link to Auto-Positioning UI Components Behind Views")
 
-When the deck.gl project first started, one of our major use cases was to build complex Web apps with perfectly synchronized WebGL visualizations and other UI components (HTML markers, charts, lists, etc.). Given the scale of these applications, some reactive, virtual-DOM framework is expected to be in use. At the moment, these features are only implemented for React. Visit the [DeckGL React component](https://deck.gl/next/docs/api-reference/react/legacy/deckgl.md) docs for examples.
+When the deck.gl project first started, one of our major use cases was to build complex Web apps with perfectly synchronized WebGL visualizations and other UI components (HTML markers, charts, lists, etc.).
+
+Widgets do this in any framework. A widget with a `viewId` and `placement: 'fill'` covers that view, and deck.gl calls its `onViewportChange` method as the camera moves, so its content stays in sync with the view. See [Writing Your Own Widget](https://deck.gl/next/docs/developer-guide/custom-widgets.md).
+
+The [`DeckGL` component of `@deck.gl/react/legacy`](https://deck.gl/next/docs/api-reference/react/legacy/deckgl.md) can also position React children behind views. The `DeckGL` component of `@deck.gl/react` does not support this yet.
 
 ## Performance Notes[​](#performance-notes "Direct link to Performance Notes")
 
