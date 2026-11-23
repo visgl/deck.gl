@@ -136,7 +136,11 @@ I would like to call out the expected behavior when the `widgets` prop shallowly
 - If a widget only exists in the old array, call `onRemove`
 - If a widget exists in both old and new arrays, transfer the new props to the old instance, instead of adopting the new instance
 
-> **Update (November 2026):** widgets are matched by id, and a matched widget is updated only if it has the same class default id (`defaultProps.id`), not the same constructor. Otherwise it is replaced. Comparing constructors would remount a widget on every hot module reload and across duplicate copies of a package. When two widgets share an id, the first one is mounted and the rest are skipped with a warning. Views are matched by id too, but a view is reused only if `View.equals` passes, which compares the constructor and the props. A view has no `setProps`, so keeping an old instance of another class would skip that class's code. See [#11113](https://github.com/visgl/deck.gl/issues/11113), [#11115](https://github.com/visgl/deck.gl/pull/11115) and [#11287](https://github.com/visgl/deck.gl/issues/11287).
+> [!NOTE]
+> **Updated in November 2026** ([#11113](https://github.com/visgl/deck.gl/issues/11113))
+>
+> - Widgets with the same id and class default id (`defaultProps.id`) are the "same", so a widget stays mounted across hot module reloads.
+> - When two widgets share an id, only the first is mounted.
 
 This would avoid the performance hit by constantly adding/removing controls when using React.
 

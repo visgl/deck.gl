@@ -43,13 +43,22 @@ export function matchById<T extends {id: string}>(
   const newIds = new Set<string>();
   const matches = newItems.map(item => {
     const duplicate = newIds.has(item.id);
-    if (duplicate && kind) {
-      log.warn(`Multiple ${kind} with same id ${item.id}`)();
-    }
     newIds.add(item.id);
     return {item, previous: oldById.get(item.id), duplicate};
   });
+  if (kind) {
+    warnDuplicates(matches, kind);
+  }
 
   const removed = oldItems.filter(item => !newIds.has(item.id));
   return {matches, removed};
+}
+
+/** Warns about each duplicate in the result of `matchById`. */
+export function warnDuplicates<T extends {id: string}>(matches: IdMatch<T>[], kind: string): void {
+  for (const {item, duplicate} of matches) {
+    if (duplicate) {
+      log.warn(`Multiple ${kind} with same id ${item.id}`)();
+    }
+  }
 }

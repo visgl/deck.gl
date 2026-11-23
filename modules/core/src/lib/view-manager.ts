@@ -5,7 +5,7 @@
 import {deepEqual} from '../utils/deep-equal';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
-import {matchById} from './match-by-id';
+import {matchById, warnDuplicates} from './match-by-id';
 
 import type Controller from '../controllers/controller';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
@@ -407,13 +407,14 @@ export default class ViewManager<ViewsT extends View[]> {
     views = flatten(views, Boolean);
 
     const previousViews = this.views;
-    const {matches, removed} = matchById(previousViews, views, 'views');
+    const {matches, removed} = matchById(previousViews, views);
     // Retain pending and ready views, but let a fresh descriptor retry failed initialization.
     views = matches.map(({item, previous}) =>
       previous && !this._failedViews.has(previous) && previous.equals(item) ? previous : item
     );
     const viewsChanged = this._diffViews(views, previousViews);
     if (viewsChanged) {
+      warnDuplicates(matches, 'views');
       for (const view of removed) {
         this._eventCallbacks.onViewRemoved?.(view.id);
       }
