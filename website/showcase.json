@@ -1,5 +1,14 @@
 [
   {
+    "name": "Stadiq: Antwerp live city map",
+    "url": "https://stadiq.app/en/antwerp-live-city-map?utm_source=deckgl&utm_medium=showcase&utm_campaign=geo",
+    "image": "/images/showcase/stadiq-antwerp.jpg",
+    "links": {
+      "by Stadiq": "https://stadiq.app/kaart"
+    },
+    "description": "A live 3D map of Antwerp, Belgium: road works by impact, live De Lijn trams and buses, and street footfall by hour. deck.gl draws the transit network and the hourly street volume over Mapbox GL in interleaved mode."
+  },
+  {
     "name": "2026 El Niño Kelvin Wave Tracker",
     "url": "https://alexba.in/visuals/kelvin-wave/",
     "image": "/images/showcase/alexba.in-kelvin-wave.jpg",
