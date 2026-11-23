@@ -14,11 +14,12 @@ interface AirportsLayerProps {
 }
 
 /**
- * Orchestrator component with Suspense and ErrorBoundary
+ * Orchestrator component with Suspense and ErrorBoundary. A failed load shows the error until the
+ * search changes.
  */
 export function AirportsLayer({search}: AirportsLayerProps) {
   return (
-    <ErrorBoundary FallbackComponent={AirportsLayerError}>
+    <ErrorBoundary FallbackComponent={AirportsLayerError} resetKeys={[search]}>
       <Suspense fallback={<AirportsLayerLoading />}>
         <AirportsLayerServer search={search} />
       </Suspense>

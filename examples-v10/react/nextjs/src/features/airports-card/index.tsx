@@ -14,11 +14,12 @@ interface AirportsCardProps {
 }
 
 /**
- * Orchestrator component with Suspense and ErrorBoundary
+ * Orchestrator component with Suspense and ErrorBoundary. A failed load shows the error until
+ * another airport is selected.
  */
 export function AirportsCard({id}: AirportsCardProps) {
   return (
-    <ErrorBoundary FallbackComponent={AirportsCardError}>
+    <ErrorBoundary FallbackComponent={AirportsCardError} resetKeys={[id]}>
       <Suspense fallback={<AirportsCardLoading />}>
         <AirportsCardServer id={id} />
       </Suspense>
