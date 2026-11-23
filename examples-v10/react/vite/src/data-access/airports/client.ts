@@ -2,10 +2,28 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Airport, AirportsResponse} from './types';
+import type {Airport, AirportsResponse, ArcGISErrorResponse} from './types';
 
 const API_URL =
   'https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/arcgis/rest/services/US_Airport/FeatureServer/0/query';
+
+/**
+ * Reads a query response. ArcGIS reports a failed or rate-limited query in the body with HTTP
+ * status 200, so check for an `error` member as well as the status.
+ */
+async function readResponse(response: Response): Promise<AirportsResponse> {
+  if (!response.ok) {
+    throw new Error(`Failed to fetch airports: ${response.statusText}`);
+  }
+  const data: AirportsResponse | ArcGISErrorResponse = await response.json();
+  if ('error' in data) {
+    const {message, details} = data.error;
+    throw new Error(
+      `Failed to fetch airports: ${message || details?.join(' ') || data.error.code}`
+    );
+  }
+  return data;
+}
 
 /**
  * Fetch airports from FAA API with optional search filtering
@@ -13,7 +31,8 @@ const API_URL =
 export async function fetchAirports(search?: string): Promise<Airport[]> {
   let whereClause = '1=1';
   if (search && search.trim()) {
-    const searchTerm = search.trim().toUpperCase();
+    // Quote the term as an SQL string literal, so a name such as O'Hare stays valid SQL.
+    const searchTerm = search.trim().toUpperCase().replaceAll("'", "''");
     whereClause = `UPPER(NAME) LIKE '%${searchTerm}%' OR UPPER(CITY) LIKE '%${searchTerm}%' OR UPPER(STATE) LIKE '%${searchTerm}%'`;
   }
 
@@ -22,12 +41,7 @@ export async function fetchAirports(search?: string): Promise<Airport[]> {
   url.searchParams.set('where', whereClause);
   url.searchParams.set('f', 'geojson');
 
-  const response = await fetch(url.toString());
-  if (!response.ok) {
-    throw new Error(`Failed to fetch airports: ${response.statusText}`);
-  }
-
-  const data: AirportsResponse = await response.json();
+  const data = await readResponse(await fetch(url.toString()));
 
   return data.features.map(feature => ({
     city: feature.properties.CITY,
@@ -49,12 +63,7 @@ export async function fetchAirportById(id: number): Promise<Airport | null> {
   url.searchParams.set('where', `OBJECTID=${id}`);
   url.searchParams.set('f', 'geojson');
 
-  const response = await fetch(url.toString());
-  if (!response.ok) {
-    throw new Error(`Failed to fetch airport: ${response.statusText}`);
-  }
-
-  const data: AirportsResponse = await response.json();
+  const data = await readResponse(await fetch(url.toString()));
 
   if (data.features.length === 0) {
     return null;

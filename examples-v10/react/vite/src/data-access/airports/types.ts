@@ -23,6 +23,11 @@ export interface AirportsResponse {
   features: AirportFeature[];
 }
 
+/** The body ArcGIS returns, with HTTP status 200, when a query fails or is rate-limited. */
+export interface ArcGISErrorResponse {
+  error: {code: number; message: string; details?: string[]};
+}
+
 export interface Airport {
   id: number;
   name: string;
