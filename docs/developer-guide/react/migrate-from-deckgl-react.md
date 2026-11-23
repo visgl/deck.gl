@@ -11,7 +11,7 @@ renderer. deck.gl 10 publishes the previous API as `@deck.gl/react/legacy`, and 
 - deck.gl 10.
 - TypeScript 5.3 or later, if you use TypeScript.
 - A client module: in an app that uses React Server Components, import `DeckGL` from a
-  `'use client'` module. See [Get started](get-started.md).
+  `'use client'` module. See [Render on the client](../../get-started/using-with-react.md#using-deckgl-with-ssr).
 
 ## Write JSX
 
