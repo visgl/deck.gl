@@ -555,3 +555,47 @@ test('WidgetManager#onHover, onEvent#viewId', () => {
 
   widgetManager.finalize();
 });
+
+test('WidgetManager#setProps#replaces a widget of another class with the same id', () => {
+  class OtherTestWidget extends TestWidget {
+    static defaultProps = {...TestWidget.defaultProps, id: 'other-test-widget'};
+  }
+
+  const container = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement: container});
+
+  const widget = new TestWidget({id: 'shared', version: 1});
+  widgetManager.setProps({widgets: [widget]});
+
+  const otherWidget = new OtherTestWidget({id: 'shared', version: 2});
+  widgetManager.setProps({widgets: [otherWidget]});
+  expect(widgetManager.getWidgets(), 'the new class is used').toEqual([otherWidget]);
+  expect(widget.isVisible, 'old widget is removed').toBe(false);
+  expect(widget.props.version, 'old widget keeps its own props').toBe(1);
+  expect(otherWidget.isVisible, 'new widget is added').toBe(true);
+
+  widgetManager.finalize();
+});
+
+test('WidgetManager#setProps#reuses a widget when only the class identity changes', () => {
+  // A hot module reload, or a second copy of a package, creates a new class with the same
+  // default id. The widget is the same type, so the old instance is kept.
+  class ReloadedTestWidget extends TestWidget {
+    static defaultProps = {...TestWidget.defaultProps};
+  }
+
+  const container = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement: container});
+
+  const widget = new TestWidget({id: 'shared', version: 1});
+  widgetManager.setProps({widgets: [widget]});
+
+  const reloadedWidget = new ReloadedTestWidget({id: 'shared', version: 2});
+  widgetManager.setProps({widgets: [reloadedWidget]});
+  expect(widgetManager.getWidgets(), 'the old instance is kept').toEqual([widget]);
+  expect(widget.isVisible, 'old widget stays mounted').toBe(true);
+  expect(widget.props.version, 'old widget takes the new props').toBe(2);
+  expect(reloadedWidget.isVisible, 'new instance is not added').toBe(false);
+
+  widgetManager.finalize();
+});
