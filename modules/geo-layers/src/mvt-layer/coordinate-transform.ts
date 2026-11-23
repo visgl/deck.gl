@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {lerp} from '@math.gl/core';
+import {lerp} from '@math.gl/core/matrix';
 import {lngLatToWorld, worldToLngLat} from '@math.gl/geospatial/web-mercator';
 import {GeoBoundingBox} from '../tileset-2d/index';
 

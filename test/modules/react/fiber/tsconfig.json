@@ -6,9 +6,6 @@
     "jsx": "react-jsx",
     "noEmit": true,
     "paths": {
-      "@luma.gl/core/webgl-constants": [
-        "../../../../node_modules/@luma.gl/core/dist/webgl-constants"
-      ],
       "@luma.gl/graph/gpu-simple-graph/webgpu": [
         "../../../../node_modules/@luma.gl/graph/dist/gpu-simple-graph/operations/webgpu/index"
       ],

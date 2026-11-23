@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {CompositeLayer, GlobeViewport, type LayerProps, type UpdateParameters} from '@deck.gl/core';
-import type {NumberArray3} from '@math.gl/core';
+import type {NumberArray3} from '@math.gl/core/matrix';
 import {
   getSunPosition,
   getSkyDirection,

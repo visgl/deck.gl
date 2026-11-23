@@ -20,7 +20,7 @@ import {
 import {GeoJsonLayer, PathLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getLayerUniforms, testLayer, device} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
 
 import {geojson, polygons, points} from 'deck.gl-test/data';

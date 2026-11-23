@@ -155,8 +155,53 @@ describe('built-in wrappers', () => {
     expect(lighting).toBeInstanceOf(DeckLightingEffect);
     expect((lighting as DeckLightingEffect).ambientLight).toBe(ambientLight);
     expect(postProcess).toBeInstanceOf(deckCore.PostProcessEffect);
-    expect(postProcess?.id).toBe('tint-pass');
+    // The effect's own id, `tint-pass`, plus its place among its siblings.
+    expect(postProcess?.id).toBe('tint-pass/#1');
     expect((postProcess as deckCore.PostProcessEffect<typeof tint>).props).toEqual({amount: 0.2});
+  });
+});
+
+describe('ids of components without an id', () => {
+  it('builds them from React keys, so a component keeps its id when the list changes', async () => {
+    const renderList = (keys: string[]) =>
+      render(keys.map(key => <layers.ScatterplotLayer key={key} data={[]} />));
+
+    expect((await renderList(['roads', 'rivers'])).getLayerIds()).toEqual([
+      'ScatterplotLayer/roads',
+      'ScatterplotLayer/rivers'
+    ]);
+    // Reordering and inserting keep each keyed layer's id.
+    expect((await renderList(['lakes', 'rivers', 'roads'])).getLayerIds()).toEqual([
+      'ScatterplotLayer/lakes',
+      'ScatterplotLayer/rivers',
+      'ScatterplotLayer/roads'
+    ]);
+  });
+
+  it('adds the place of a list among its siblings, and gives views and widgets ids too', async () => {
+    const deck = await render(
+      <>
+        {['roads', 'rivers'].map(key => (
+          <layers.ScatterplotLayer key={key} data={[]} />
+        ))}
+        <widgets.ZoomWidget key="zoom" />
+        <core.MapView key="main" />
+      </>
+    );
+
+    // The list is the first child of the fragment, so its items are under `#0`.
+    expect(deck.getLayerIds()).toEqual(['ScatterplotLayer/#0/roads', 'ScatterplotLayer/#0/rivers']);
+    expect(deck.widgets.map(widget => widget.id)).toEqual(['zoom/zoom']);
+    expect(deck.views.map(view => view.id)).toEqual(['MapView/main']);
+  });
+
+  it('keeps an explicit id, and the default id of a lone component', async () => {
+    expect((await render(<layers.ScatterplotLayer data={[]} />)).getLayerIds()).toEqual([
+      'ScatterplotLayer'
+    ]);
+    expect((await render(<layers.ScatterplotLayer id="points" data={[]} />)).getLayerIds()).toEqual(
+      ['points']
+    );
   });
 });
 

@@ -230,7 +230,7 @@ export default function App({
       data: DATA_URL.STATIONS,
       loaders: [CSVLoader],
       onDataLoad: onStationsLoaded,
-      getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
+      getPosition: {sql: 'ARRAY[longitude, latitude]'},
       getFillColor: [40, 40, 40, 128],
       getRadius: 20,
       radiusMinPixels: 2

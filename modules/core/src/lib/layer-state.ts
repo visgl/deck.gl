@@ -4,7 +4,7 @@
 
 // deck.gl, MIT license
 import type {ResolvedScale} from '@math.gl/core/color';
-import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection-core';
 import {compareLoaderOptions} from '@loaders.gl/core';
 import ComponentState from '../lifecycle/component-state';
 

@@ -9,7 +9,7 @@ import {
   urlType,
   getURLFromTemplate
 } from '@deck.gl/geo-layers/tileset-2d';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {MAX_LATITUDE} from '@math.gl/geospatial/web-mercator';
 import {getGeographicBounds} from '../../../../modules/geo-layers/src/tileset-2d/tile-2d-traversal';
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';

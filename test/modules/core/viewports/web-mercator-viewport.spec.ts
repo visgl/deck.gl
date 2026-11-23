@@ -3,9 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {equals, config, Vector3} from '@math.gl/core';
+import {equals, config, Vector3} from '@math.gl/core/matrix';
 import {WebMercatorViewport} from 'deck.gl';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {getDistanceScales} from '@math.gl/geospatial/web-mercator';
 
 // Adjust sensitivity of math.gl's equals

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {query} from '@loaders.gl/core/query';
 import {Field, Null, Schema, Table, tableFromArrays} from 'apache-arrow';
 import {expect, test} from 'vitest';
 import {resolveGeoArrowGeometry} from '../../../modules/proposals/src/layers/resolve-geoarrow-geometry';
@@ -54,4 +55,27 @@ test('reports missing fields and unsupported encodings', () => {
   expect(() => resolveGeoArrowGeometry(data)).toThrow('geoarrow.box');
   expect(() => resolveGeoArrowGeometry(data, 'id')).toThrow('untyped');
   expect(() => resolveGeoArrowGeometry(new Table())).toThrow('could not find');
+});
+
+test('resolves a geometry column after query projection and aliasing', async () => {
+  const data = new Table(
+    new Schema([field('centroid', 'geoarrow.point'), field('footprint', 'geoarrow.polygon')])
+  );
+  const projected = await query({select: [{column: 'footprint', as: 'boundary'}]}, {source: data});
+  expect(resolveGeoArrowGeometry(projected)).toEqual({
+    columnName: 'boundary',
+    geometryType: 'geoarrow.polygon'
+  });
+});
+
+test('prefers the declared GeoParquet primary geometry unless a column is selected', () => {
+  const metadata = new Map([['geo', JSON.stringify({primary_column: 'footprint'})]]);
+  const data = new Table(
+    new Schema(
+      [field('centroid', 'geoarrow.point'), field('footprint', 'geoarrow.polygon')],
+      metadata
+    )
+  );
+  expect(resolveGeoArrowGeometry(data).columnName).toBe('footprint');
+  expect(resolveGeoArrowGeometry(data, 'centroid').columnName).toBe('centroid');
 });

@@ -19,7 +19,7 @@ import {
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {lngLatToWorld, worldToLngLat} from '@math.gl/geospatial/web-mercator';
 import type {MeshAttributes} from '@loaders.gl/core/schema';
-import {TerrainWorkerLoader} from '@loaders.gl/raster/terrain/index';
+import {TerrainWorkerLoader} from '@loaders.gl/raster/terrain';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
 import type {
   Bounds,
