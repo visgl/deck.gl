@@ -165,4 +165,4 @@ Read the [DeckGL API](../../api-reference/react/deckgl.md) for standalone and in
 
 If you are upgrading from `@deck.gl/react/legacy`, see [Migrating from the previous API](migrate-from-deckgl-react.md).
 
-For framework-specific project layouts, see the [`@deck.gl/react` examples](https://visgl.github.io/deck.gl-community/examples/react-fiber/overview).
+For framework-specific project layouts, see the [`@deck.gl/react` examples](https://github.com/visgl/deck.gl-community/tree/7086b0a5edca913e59906ebeb7a69bbbfac95e87/examples/react-fiber).
