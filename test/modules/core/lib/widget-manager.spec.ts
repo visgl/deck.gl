@@ -3,10 +3,16 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {WidgetManager} from '@deck.gl/core/lib/widget-manager';
-import {Widget, WebMercatorViewport, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
+import {
+  Widget,
+  WebMercatorViewport,
+  log,
+  type WidgetProps,
+  type WidgetPlacement
+} from '@deck.gl/core';
 
 type TestWidgetProps = WidgetProps & {
   placement?: WidgetPlacement;
@@ -115,6 +121,42 @@ test('WidgetManager#setProps', () => {
   widgetManager.setProps({widgets: []});
   expect(widgetManager.getWidgets().length, 'all widgets are removed').toBe(0);
   expect(widgetB2.isVisible, 'widget.onRemove is called').toBeFalsy();
+});
+
+test('WidgetManager#setProps#duplicate ids', () => {
+  const container = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement: container});
+  const warn = vi.spyOn(log, 'warn').mockReturnValue(() => {});
+
+  try {
+    // Re-render several times with two new instances that share an id each time
+    for (let version = 1; version <= 3; version++) {
+      widgetManager.setProps({
+        widgets: [
+          new TestWidget({id: 'A', version}),
+          new TestWidget({id: 'A', version: version + 10})
+        ]
+      });
+
+      expect(widgetManager.getWidgets(), 'only one widget is mounted').toHaveLength(1);
+      expect(
+        container.querySelectorAll('.deck-test-widget'),
+        'only one widget element is in the DOM'
+      ).toHaveLength(1);
+      expect(widgetManager.getWidgets()[0].props.version, 'the first widget wins').toBe(version);
+    }
+    expect(warn).toHaveBeenCalledWith('Multiple widgets with same id A');
+
+    widgetManager.setProps({widgets: []});
+    expect(widgetManager.getWidgets(), 'all widgets are removed').toHaveLength(0);
+    expect(
+      container.querySelectorAll('.deck-test-widget'),
+      'no widget element is left'
+    ).toHaveLength(0);
+  } finally {
+    warn.mockRestore();
+    widgetManager.finalize();
+  }
 });
 
 test('WidgetManager#finalize', () => {
