@@ -40,6 +40,9 @@ type _WMSLayerProps = {
   layers?: string[];
   /**
    * CRS to request from the image service. A matching custom view CRS uses native bounds.
+   * For a custom view defined without a CRS identifier, set this to the server's identifier
+   * for the view CRS to request native bounds. In a custom view, EPSG:4326 uses approximate
+   * placement and an explicit EPSG:3857 falls back to EPSG:4326 with a warning.
    * `'auto'` uses the custom view's CRS identifier when available, EPSG:3857 in MapView,
    * and EPSG:4326 otherwise.
    * @default 'auto'
@@ -217,16 +220,23 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       return;
     }
 
-    const {width, height} = viewport;
-    const srs = this.getRequestSrs(viewport);
-    const nativeViewport =
-      viewport instanceof CustomProjectionViewport && srs === viewport.crs.signature
-        ? viewport
-        : null;
-    const bounds = nativeViewport
-      ? getProjectedViewportBounds(nativeViewport)
-      : viewport.getBounds();
-    if (!bounds) return;
+    let {width, height} = viewport;
+    const {srs, native} = this.getRequestSrs(viewport);
+    const nativeViewport = native && viewport instanceof CustomProjectionViewport ? viewport : null;
+    let bounds: [number, number, number, number];
+    if (nativeViewport) {
+      const projectedBounds = getProjectedViewportBounds(nativeViewport);
+      if (!projectedBounds) return;
+      bounds = projectedBounds.bounds;
+      const {unclampedBounds} = projectedBounds;
+      // Preserve the requested pixel density when the CRS clips the visible ground bounds.
+      const widthFraction = (bounds[2] - bounds[0]) / (unclampedBounds[2] - unclampedBounds[0]);
+      const heightFraction = (bounds[3] - bounds[1]) / (unclampedBounds[3] - unclampedBounds[1]);
+      width = Math.max(1, Math.round(width * widthFraction));
+      height = Math.max(1, Math.round(height * heightFraction));
+    } else {
+      bounds = viewport.getBounds();
+    }
 
     const requestId = this.getRequestId();
     const requestParams: GetImageParameters = {
@@ -273,27 +283,35 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
 
   // HELPERS
 
-  /** Select the request CRS, falling back to longitude/latitude for a custom view mismatch. */
-  private getRequestSrs(viewport: Viewport): string {
+  /** Select the request CRS and whether the request uses native custom view bounds. */
+  private getRequestSrs(viewport: Viewport): {srs: string; native: boolean} {
     const {srs} = this.props;
     if (viewport instanceof CustomProjectionViewport) {
       const {signature} = viewport.crs;
+      // math.gl preserves a supplied identifier in the signature under default conventions.
+      const hasIdentifier = /^[\w.-]+:[\w.-]+$/.test(signature);
       if (srs === 'auto') {
-        // math.gl preserves a supplied identifier in the signature under default conventions.
-        return /^[\w.-]+:[\w.-]+$/.test(signature) ? signature : 'EPSG:4326';
+        return hasIdentifier ? {srs: signature, native: true} : {srs: 'EPSG:4326', native: false};
       }
-      if (srs !== signature && srs !== 'EPSG:4326') {
-        if (!this.state.srsMismatchWarned) {
-          this.state.srsMismatchWarned = true;
-          log.warn(`WMSLayer: srs ${srs} differs from the view CRS. Using EPSG:4326.`)();
-        }
-        return 'EPSG:4326';
+      if (srs === 'EPSG:4326') {
+        return {srs, native: false};
       }
+      if (srs !== 'EPSG:3857' && (!hasIdentifier || srs === signature)) {
+        return {srs, native: true};
+      }
+      if (!this.state.srsMismatchWarned) {
+        this.state.srsMismatchWarned = true;
+        log.warn(`WMSLayer: srs ${srs} differs from the view CRS. Using EPSG:4326.`)();
+      }
+      return {srs: 'EPSG:4326', native: false};
     }
     if (srs === 'auto') {
-      return viewport.crs?.signature === 'OSMTile512' ? 'EPSG:3857' : 'EPSG:4326';
+      return {
+        srs: viewport.crs?.signature === 'OSMTile512' ? 'EPSG:3857' : 'EPSG:4326',
+        native: false
+      };
     }
-    return srs;
+    return {srs, native: false};
   }
 
   /** Global counter for issuing unique request ids */

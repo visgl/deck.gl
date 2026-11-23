@@ -26,6 +26,9 @@ import {projectionEngine} from '@math.gl/geospatial/projection';
 import {WGS84ToPseudoMercator} from '@deck.gl/geo-layers/wms-layer/utils';
 import {equals} from '@math.gl/core/matrix';
 
+/** PROJ definition of the ETRS89 / LAEA Europe CRS. */
+const LAEA_CRS = '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m';
+
 test.each([undefined, 'wms'] as const)('WMSLayer creates a URL source (%s)', serviceType => {
   const data = 'https://example.com/maps';
   const loadOptions = {wms: {wmsParameters: {version: '1.1.1'}}};
@@ -146,25 +149,43 @@ test.each([
     center: [9, 45, 0],
     zoom: 8,
     // UTM zone 32N's central meridian at 45°N, with a 305.75 m/pixel view scale.
-    bounds: [377701, 4891226, 622299, 5074675]
+    bounds: [377701, 4891226, 622299, 5074675],
+    width: 800,
+    height: 600
   },
   {
-    crs: '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m',
+    crs: 'EPSG:32648',
+    srs: 'EPSG:32648',
+    center: [105, 45, 0],
+    zoom: 6,
+    // The UTM zone clamps the horizontal span to about 668 km at 1223 m/pixel.
+    bounds: [166021, 4616052, 833979, 5349848],
+    width: 546,
+    height: 600
+  },
+  {
+    crs: LAEA_CRS,
+    srs: 'EPSG:3035',
     center: [10, 52, 0],
     zoom: 5,
     // LAEA false origin at the center, with a 2446 m/pixel view scale.
-    bounds: [3342606, 2476205, 5299394, 3943795]
+    bounds: [3342606, 2476205, 5299394, 3943795],
+    width: 800,
+    height: 600
   },
   {
     crs: '+proj=eqc +R=6378137 +units=m',
+    srs: 'EPSG:4087',
     center: [0, 0, 0],
     zoom: 0,
     // The viewport extends past the projection's global bounds on all four sides.
-    bounds: [-20037508, -10018754, 20037508, 10018754]
+    bounds: [-20037508, -10018754, 20037508, 10018754],
+    width: 512,
+    height: 256
   }
 ])(
   'WMSLayer requests and places native imagery in $crs',
-  async ({crs, srs = crs, center, zoom, bounds}) => {
+  async ({crs, srs, center, zoom, bounds, width, height}) => {
     const view = new CustomProjectionView({crs, resolution: 16});
     await view.initialize();
     const viewport = view.makeViewport({
@@ -173,10 +194,17 @@ test.each([
       viewState: {center: center as [number, number, number], zoom}
     })!;
     const {layer, requests, finalize} = initializeRecordingLayer(viewport, srs);
+    const warn = vi.spyOn(log, 'warn').mockReturnValue(() => {});
     try {
       await layer.loadImage(viewport, 'test');
+      expect(warn).not.toHaveBeenCalled();
       expect(requests).toHaveLength(1);
-      expect(requests[0]).toMatchObject({crs, width: 800, height: 600, layers: ['test-layer']});
+      expect(requests[0]).toMatchObject({
+        crs: srs === 'auto' ? crs : srs,
+        width,
+        height,
+        layers: ['test-layer']
+      });
       const requestedBounds = requests[0].boundingBox.flat();
       requestedBounds.forEach((value, axis) => expect(value).toBeCloseTo(bounds[axis], -1));
       if (zoom === 0) {
@@ -192,6 +220,7 @@ test.each([
       });
       expect(viewport.getPreprojection(viewport.crs).preproject).toBeNull();
     } finally {
+      warn.mockRestore();
       finalize();
     }
   }
@@ -206,7 +235,7 @@ test('WMSLayer covers visible ground below the horizon at high pitch', async () 
     height: 600,
     viewState: {center: [0, 0, 0], zoom: 8, pitch: 80}
   })!;
-  const {layer, requests, finalize} = initializeRecordingLayer(viewport, crs);
+  const {layer, requests, finalize} = initializeRecordingLayer(viewport, 'EPSG:4087');
   try {
     await layer.loadImage(viewport, 'test');
     expect(requests).toHaveLength(1);
@@ -224,41 +253,49 @@ test('WMSLayer covers visible ground below the horizon at high pitch', async () 
 });
 
 test.each([
-  {srs: 'auto', crs: '+proj=eqc +R=6378137 +units=m', center: [0, 0, 0]},
-  {srs: 'EPSG:4326', crs: 'EPSG:32632', center: [9, 45, 0]},
-  {srs: 'EPSG:3857', crs: 'EPSG:32632', center: [9, 45, 0]}
-])('WMSLayer falls back to EPSG:4326 with srs $srs in a $crs view', async ({srs, crs, center}) => {
-  const view = new CustomProjectionView({crs});
-  await view.initialize();
-  const viewport = view.makeViewport({
-    width: 800,
-    height: 600,
-    viewState: {center: center as [number, number, number], zoom: 5}
-  })!;
-  const {layer, requests, finalize} = initializeRecordingLayer(viewport, srs);
-  const warn = vi.spyOn(log, 'warn').mockReturnValue(() => {});
-  try {
-    await layer.loadImage(viewport, 'test');
-    await layer.loadImage(viewport, 'test');
-    expect(warn).toHaveBeenCalledTimes(srs === 'EPSG:3857' ? 1 : 0);
-    if (srs === 'EPSG:3857') {
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining(`srs ${srs}`));
-    }
-    const bounds = viewport.getBounds();
-    expect(requests).toHaveLength(2);
-    for (const request of requests) {
-      expect(request).toMatchObject({
-        crs: 'EPSG:4326',
-        boundingBox: [bounds.slice(0, 2), bounds.slice(2)]
+  {srs: 'auto', crs: LAEA_CRS, center: [10, 52, 0], warns: false},
+  {srs: 'EPSG:4326', crs: 'EPSG:32632', center: [9, 45, 0], warns: false},
+  {srs: 'EPSG:4326', crs: LAEA_CRS, center: [10, 52, 0], warns: false},
+  {srs: 'EPSG:3857', crs: 'EPSG:32632', center: [9, 45, 0], warns: true},
+  {srs: 'EPSG:3857', crs: LAEA_CRS, center: [10, 52, 0], warns: true},
+  {srs: 'EPSG:3035', crs: 'EPSG:32632', center: [9, 45, 0], warns: true}
+])(
+  'WMSLayer requests EPSG:4326 with srs $srs in a $crs view',
+  async ({srs, crs, center, warns}) => {
+    const view = new CustomProjectionView({crs});
+    await view.initialize();
+    const viewport = view.makeViewport({
+      width: 800,
+      height: 600,
+      viewState: {center: center as [number, number, number], zoom: 5}
+    })!;
+    const {layer, requests, finalize} = initializeRecordingLayer(viewport, srs);
+    const warn = vi.spyOn(log, 'warn').mockReturnValue(() => {});
+    try {
+      await layer.loadImage(viewport, 'test');
+      await layer.loadImage(viewport, 'test');
+      expect(warn).toHaveBeenCalledTimes(warns ? 1 : 0);
+      if (warns) {
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining(`srs ${srs}`));
+      }
+      const bounds = viewport.getBounds();
+      expect(requests).toHaveLength(2);
+      for (const request of requests) {
+        expect(request).toMatchObject({
+          crs: 'EPSG:4326',
+          width: 800,
+          height: 600,
+          boundingBox: [bounds.slice(0, 2), bounds.slice(2)]
+        });
+      }
+      expect(layer.renderLayers().props).toMatchObject({
+        bounds,
+        coordinateSystem: 'default',
+        _imageCoordinateSystem: 'lnglat'
       });
+    } finally {
+      warn.mockRestore();
+      finalize();
     }
-    expect(layer.renderLayers().props).toMatchObject({
-      bounds,
-      coordinateSystem: 'default',
-      _imageCoordinateSystem: 'lnglat'
-    });
-  } finally {
-    warn.mockRestore();
-    finalize();
   }
-});
+);

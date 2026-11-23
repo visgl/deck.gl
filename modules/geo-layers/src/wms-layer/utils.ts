@@ -22,10 +22,13 @@ export function WGS84ToPseudoMercator(coord: [number, number]): [number, number]
 /** Number of subdivisions per edge when sampling the viewport in projected coordinates. */
 const EDGE_SEGMENTS = 8;
 
-/** Get the visible ground bounds directly in the viewport's CRS units. */
-export function getProjectedViewportBounds(
-  viewport: CustomProjectionViewport
-): [number, number, number, number] | null {
+/** Get the visible ground bounds in the viewport's CRS units before and after clamping. */
+export function getProjectedViewportBounds(viewport: CustomProjectionViewport): {
+  /** Visible ground bounds clamped to the CRS rendering bounds. */
+  bounds: [number, number, number, number];
+  /** Sampled ground bounds before clamping. */
+  unclampedBounds: [number, number, number, number];
+} | null {
   const {width, height, pixelUnprojectionMatrix} = viewport;
   let top = 0;
   let bottom = height;
@@ -63,10 +66,11 @@ export function getProjectedViewportBounds(
     }
   }
 
+  const unclampedBounds: [number, number, number, number] = [minX, minY, maxX, maxY];
   const [[left, bottomBound], [right, topBound]] = viewport.crs.renderingBounds;
   if (Number.isFinite(left)) minX = Math.max(minX, left);
   if (Number.isFinite(bottomBound)) minY = Math.max(minY, bottomBound);
   if (Number.isFinite(right)) maxX = Math.min(maxX, right);
   if (Number.isFinite(topBound)) maxY = Math.min(maxY, topBound);
-  return minX < maxX && minY < maxY ? [minX, minY, maxX, maxY] : null;
+  return minX < maxX && minY < maxY ? {bounds: [minX, minY, maxX, maxY], unclampedBounds} : null;
 }
