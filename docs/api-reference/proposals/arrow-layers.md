@@ -36,8 +36,43 @@ releasing the current set; a rejected column releases partial uploads and retain
 previous vectors. Path streams close their iterators when replaced, finalized, or
 when batch preparation fails. `ArrowTripsLayer` similarly converts aligned timestamp lists before
 delegating to the existing GPUVector path-storage model. `GeoArrowLayer` selects point,
-linestring, polygon, or multipolygon children from field extension metadata without converting to
-GeoJSON.
+linestring, polygon, or multipolygon children from field extension metadata. Encoded and mixed
+geometry uses the GeoJSON renderer and picking returns the source Arrow row.
+Polygon extrusion, outlines, and extensions also use the standard GeoJSON renderer.
+Set `getElevation` to a constant or a source column for extruded polygons.
+
+To load a GeoJSON file directly, pass its URL and `GeoJSONLoader`. The loader converts the file to
+an Arrow table with a GeoArrow geometry column. Set
+`loadOptions: {geoarrow: {encodingPreference: 'optimized'}}` to request native coordinate buffers
+when the input contains a single geometry type.
+
+If the table has multiple geometry columns, set `getGeometry` to the field name, for example
+`getGeometry: 'footprint'`. The layer uses the declared primary geometry when available,
+then the first field with GeoArrow extension metadata.
+To render multiple geometry columns, pass the same table to several layers with different
+`getGeometry` values.
+A layer `query` can also project or alias a geometry field. Select the alias with `getGeometry`
+if the projected table still has multiple geometry columns.
+
+To render a derived geometry per source row, pass a SQL accessor such as
+`getGeometry: {sql: 'ST_PointOnSurface(footprint)'}`. Supply spatial functions with
+`sqlFunctions: POSTGIS_SPATIAL_FUNCTIONS` from `@math.gl/geospatial/st-functions`.
+Styling and picking refer to the source rows. The
+[spatial SQL example](https://github.com/visgl/deck.gl/tree/master/examples-v10/proposals/geoarrow-sql)
+shows centroid, interior point, and envelope expressions.
+
+```ts
+import {GeoArrowLayer} from '@deck.gl/proposals/layers';
+import {GeoJSONLoader} from '@loaders.gl/tables/geojson';
+
+new GeoArrowLayer({
+  id: 'boundaries',
+  data: '/data/boundaries.geojson',
+  loaders: [GeoJSONLoader],
+  getFillColor: [93, 138, 82, 255],
+  pickable: true
+});
+```
 
 These Arrow layers intentionally accept only Arrow sources. Classic JavaScript arrays and legacy binary
 attributes belong in sibling adapters rather than alternate code paths here. A future unified
@@ -124,6 +159,6 @@ workspace already receives Arrow through its loaders.gl dependencies.
 ## Examples and integration tests
 
 The original standalone examples and their shared fixtures are available in
-[`examples/proposals`](https://github.com/visgl/deck.gl/tree/master/examples/proposals). Run `yarn build-private-examples`
+[`examples-v10/proposals`](https://github.com/visgl/deck.gl/tree/master/examples-v10/proposals). Run `yarn build-private-examples`
 after installing workspace dependencies. `yarn test-private` includes the copied
 example integration tests alongside the module tests.

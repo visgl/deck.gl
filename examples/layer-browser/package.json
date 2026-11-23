@@ -8,10 +8,10 @@
     "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
-    "@loaders.gl/core": "5.0.0-beta.4",
-    "@loaders.gl/pointclouds": "5.0.0-beta.4",
-    "@loaders.gl/scene": "5.0.0-beta.4",
-    "@probe.gl/log": "^4.0.9",
+    "@loaders.gl/core": "5.0.0-rc.2",
+    "@loaders.gl/pointclouds": "5.0.0-rc.2",
+    "@loaders.gl/scene": "5.0.0-rc.2",
+    "probe.gl": "^5.0.0",
     "colorbrewer": "^1.0.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.1.0",

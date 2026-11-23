@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {NumericArray} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 import {parsePBRMaterial, ParsedPBRMaterial} from '@luma.gl/engine/gltf';
 import type {Model} from '@luma.gl/engine';
 import {_GPUVectorModel as GPUVectorModel} from '@deck.gl/core';

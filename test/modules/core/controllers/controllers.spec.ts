@@ -11,8 +11,8 @@ import {
   OrthographicView,
   FirstPersonView,
   WebMercatorViewport,
-  _GlobeView as GlobeView,
-  _GlobeViewport as GlobeViewport
+  GlobeView,
+  GlobeViewport
 } from '@deck.gl/core';
 import {Timeline} from '@luma.gl/engine';
 

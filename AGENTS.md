@@ -71,6 +71,16 @@ When asked to "get ready for merge", do a full merge-readiness pass:
 - In the final handoff, call out which merge-readiness gates passed, which were not run, and any
   remaining risk or unrelated pre-existing failures.
 
+## Documentation
+
+- Describe current features and behavior in API documentation. Explain what changed in release
+  notes or, for changes that require user action, in the upgrade guide.
+
+## Source Code
+
+- Add TSDoc comments to classes, functions, methods, types, interfaces, constants, and fields,
+  including internal declarations.
+
 ## Code Style
 
 - Prefer TypeScript and ES module syntax.

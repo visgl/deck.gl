@@ -56,7 +56,7 @@ export type PopupWidgetProps = WidgetProps & {
 export class PopupWidget extends Widget<PopupWidgetProps> {
   static defaultProps: Required<PopupWidgetProps> = {
     ...Widget.defaultProps,
-    id: 'info',
+    id: 'popup',
     viewId: null,
     position: [0, 0],
     marker: null,

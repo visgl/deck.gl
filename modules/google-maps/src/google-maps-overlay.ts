@@ -3,8 +3,6 @@
 // Copyright (c) vis.gl contributors
 
 /* global google */
-import type {GLParameters} from '@luma.gl/core/webgl-constants';
-import {GL} from '@luma.gl/core/webgl-constants';
 import {WebGLDevice} from '@luma.gl/core/webgl';
 import {
   createDeckInstance,
@@ -18,13 +16,6 @@ import {Deck, _flatten as flatten} from '@deck.gl/core';
 import type {DeckProps, Layer, MapViewState} from '@deck.gl/core';
 import type {Device, Framebuffer} from '@luma.gl/core';
 const HIDE_ALL_LAYERS = () => false;
-const GL_STATE: GLParameters = {
-  depthMask: true,
-  depthTest: true,
-  blend: true,
-  blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
-  blendEquation: GL.FUNC_ADD
-};
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
@@ -320,13 +311,12 @@ export default class GoogleMapsOverlay {
     // @ts-ignore accessing protected member
     const animationLoop = deck.animationLoop!;
     animationLoop._renderFrame = () => {
-      const ab = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
       // @ts-expect-error accessing protected member
       const device: Device = deck.device;
-      device.withParametersWebGL({}, () => {
+      const arrayBuffer = device.getParametersWebGL(gl.ARRAY_BUFFER_BINDING);
+      device.withParametersWebGL({[gl.ARRAY_BUFFER_BINDING]: arrayBuffer}, () => {
         animationLoop.props.onRender(animationLoop.animationProps!);
       });
-      gl.bindBuffer(gl.ARRAY_BUFFER, ab);
     };
   }
 
@@ -390,7 +380,7 @@ export default class GoogleMapsOverlay {
       // which we need to pass onto deck. Wrap external handle so luma.gl
       // treats it as a proper Framebuffer resource.
       if (device instanceof WebGLDevice) {
-        const externalFbo = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
+        const externalFbo = device.getParametersWebGL(gl.FRAMEBUFFER_BINDING);
         let _framebuffer: Framebuffer | null = null;
         if (externalFbo) {
           if (this._externalFramebuffer?.handle !== externalFbo) {
@@ -421,11 +411,18 @@ export default class GoogleMapsOverlay {
           stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
         });
 
-        device.withParametersWebGL(GL_STATE, () => {
-          deck._drawLayers('google-vector', {
-            clearCanvas: false
-          });
-        });
+        device.withParametersWebGL(
+          {
+            depthMask: true,
+            depthTest: true,
+            blend: true,
+            blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
+            blendEquation: gl.FUNC_ADD
+          },
+          () => {
+            deck._drawLayers('google-vector', {clearCanvas: false});
+          }
+        );
       }
     } else if (!interleaved) {
       deck.redraw();

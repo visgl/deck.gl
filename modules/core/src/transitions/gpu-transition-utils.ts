@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Device, Buffer, VertexFormat} from '@luma.gl/core';
+import {Buffer, type Device, type VertexFormat} from '@luma.gl/core';
 import {padArray} from '../utils/array-utils';
 import {NumericArray, TypedArray, TypedArrayConstructor} from '../types/types';
 import Attribute from '../lib/attribute/attribute';
-import {GL} from '@luma.gl/core/webgl-constants';
 
 /** Create a new empty attribute with the same settings: type, shader layout etc. */
 export function cloneAttribute(attribute: Attribute): Attribute {
@@ -180,7 +179,7 @@ export function padBuffer({
     buffer?.destroy();
     buffer = device.createBuffer({
       byteLength: target.byteLength + targetByteOffset,
-      usage: GL.DYNAMIC_COPY
+      usage: Buffer.VERTEX | Buffer.COPY_SRC | Buffer.COPY_DST
     });
   }
   buffer.write(target, targetByteOffset);

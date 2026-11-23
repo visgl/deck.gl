@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Vector3} from '@math.gl/core';
-import {mat3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
+import {mat3} from '@math.gl/core/matrix';
 
 const NEAR = [255, 0, 128];
 const FAR = [128, 0, 255];

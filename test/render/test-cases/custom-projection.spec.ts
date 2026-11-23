@@ -3,11 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {describe, expect} from 'vitest';
-import {
-  MapView,
-  _GlobeView as GlobeView,
-  _CustomProjectionView as CustomProjectionView
-} from '@deck.gl/core';
+import {MapView, GlobeView, _CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
 import {GeoJsonLayer, PathLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {ContourLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 import {

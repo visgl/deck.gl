@@ -11,7 +11,7 @@ import {_SunLight as SunLight} from '@deck.gl/core';
 
 new SunLight({
   timestamp: 1554927200000, 
-  color: [255, 0, 0],
+  color: [255, 0, 0], // [1, 0, 0] with Deck normalizedColors enabled
   intensity: 1
 });
 ```
@@ -25,7 +25,7 @@ const sunLight = new SunLight({timestamp, color, intensity});
 ```
 
 * `timestamp` - (number) - Unix timestamp in milliseconds.
-* `color` - (number[3])  RGB color of sun light source, default value is `[255, 255, 255]`.
+* `color` - (number[3])  RGB color of sun light source, default value is `[255, 255, 255]`. Custom RGB arrays use 0–1 channels when Deck’s [`normalizedColors`](./deck.md#normalizedcolors) is enabled and 0–255 channels otherwise.
 * `intensity` - (number) Strength of sun light source, default value is `1.0`.
 
 ## Source

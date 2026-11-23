@@ -5,7 +5,7 @@
 import {test, expect, vi} from 'vitest';
 import {MapView, log} from '@deck.gl/core';
 import ViewManager from '@deck.gl/core/lib/view-manager';
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
 import {EventManager} from 'mjolnir.js';
 import type {CanvasContext} from '@luma.gl/core';
 
