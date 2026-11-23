@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {projectPosition} from '../../shaderlib/project/project-functions';
-import {COORDINATE_SYSTEM} from '../../lib/constants';
+import {WGS84_CRS} from '../../utils/crs';
+import {getWorldPosition} from '../../shaderlib/project/project-functions';
+import {getOffsetOrigin} from '../../shaderlib/project/viewport-uniforms';
+import {vec3} from '@math.gl/core/matrix';
 
 import type Layer from '../../lib/layer';
 
-const DEFAULT_LIGHT_COLOR = [255, 255, 255] as [number, number, number];
+/** Built-in white light in byte RGB. */
+export const DEFAULT_POINT_LIGHT_COLOR = [255, 255, 255] as [number, number, number];
 const DEFAULT_LIGHT_INTENSITY = 1.0;
 const DEFAULT_ATTENUATION = [1, 0, 0] as [number, number, number];
 const DEFAULT_LIGHT_POSITION = [0.0, 0.0, 1.0] as [number, number, number];
@@ -16,7 +19,7 @@ let idCount = 0;
 
 export type PointLightOptions = {
   id?: string;
-  /** Light color, [r, g, b] in the 0-255 range
+  /** Light color as RGB. Channels are 0–1 with Deck normalizedColors and 0–255 otherwise.
    * @default [255, 255, 255]
    */
   color?: [number, number, number];
@@ -45,7 +48,7 @@ export class PointLight {
   protected projectedLight: PointLight;
 
   constructor(props: PointLightOptions = {}) {
-    const {color = DEFAULT_LIGHT_COLOR} = props;
+    const {color = DEFAULT_POINT_LIGHT_COLOR} = props;
     const {intensity = DEFAULT_LIGHT_INTENSITY} = props;
     const {position = DEFAULT_LIGHT_POSITION} = props;
 
@@ -62,15 +65,27 @@ export class PointLight {
     const {projectedLight} = this;
     const viewport = layer.context.viewport;
     const {coordinateSystem, coordinateOrigin} = layer.props;
-    const position = projectPosition(this.position, {
+    const {offsetMode, commonOrigin, geospatialOrigin, shaderCoordinateOrigin} = getOffsetOrigin(
       viewport,
       coordinateSystem,
       coordinateOrigin,
-      fromCoordinateSystem: viewport.isGeospatial
-        ? COORDINATE_SYSTEM.LNGLAT
-        : COORDINATE_SYSTEM.CARTESIAN,
-      fromCoordinateOrigin: [0, 0, 0]
+      layer.internalState!.sourceCrs
+    );
+    // Lights have their own coordinates but share the receiving shader's altitude
+    // convention and common origin. Layer transforms apply only to the geometry.
+    const position = getWorldPosition(this.position, {
+      viewport,
+      sourceCrs: viewport.isGeospatial ? WGS84_CRS : null,
+      coordinateSystem: viewport.isGeospatial ? 'lnglat' : 'cartesian',
+      coordinateOrigin: [0, 0, 0],
+      modelMatrix: null,
+      offsetMode
     });
+    if (offsetMode) {
+      const origin =
+        commonOrigin || viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
+      vec3.sub(position, position, origin);
+    }
     projectedLight.color = this.color;
     projectedLight.intensity = this.intensity;
     projectedLight.position = position;

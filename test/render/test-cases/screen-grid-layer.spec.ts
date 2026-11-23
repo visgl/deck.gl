@@ -6,7 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {OrthographicView} from '@deck.gl/core';
 import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 import {points} from 'deck.gl-test/data';
 
@@ -41,7 +41,7 @@ const testCases = [
       new ScreenGridLayer({
         id: 'screengrid-infoviz',
         data: screenSpaceData,
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         opacity: 0.8,
         getPosition: d => d,
         cellSizePixels: 40,

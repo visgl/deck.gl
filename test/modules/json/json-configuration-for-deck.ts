@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, MapView, FirstPersonView, MapController} from '@deck.gl/core';
-// Rename so that unused constants are not stripped at end of build
-import {GL as GLConstants} from '@luma.gl/webgl/constants';
+import {MapView, FirstPersonView, MapController} from '@deck.gl/core';
 import * as deckglLayers from '@deck.gl/layers';
 
 export const log = console; // eslint-disable-line
@@ -22,8 +20,7 @@ export const JSON_CONFIGURATION = {
   // Enumerations that should be available to JSON parser
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
-    COORDINATE_SYSTEM,
-    GL: GLConstants
+    Primitive: {TRIANGLES: 'triangle-list'}
   },
   constants: {
     MapController

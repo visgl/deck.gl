@@ -6,7 +6,7 @@ import {device} from '@deck.gl/test-utils';
 import {processPickInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {
   type Layer,
-  type Viewport,
+  Viewport,
   type PickingInfo,
   type CompositeLayer,
   LayerManager
@@ -21,7 +21,7 @@ import {
 // @param testCase.onAfterUpdate {Function} - callback after picking
 export async function testPickingLayer({
   layer,
-  viewport,
+  viewport = new Viewport(),
   testCases
 }: {
   layer: Layer;
@@ -33,7 +33,7 @@ export async function testPickingLayer({
     onAfterUpdate: (params: {layer: Layer; subLayers: Layer[]; info: PickingInfo}) => void;
   }[];
 }) {
-  // Initialize layer
+  // Picking-only tests still need projection context before layers can initialize.
   const layerManager = new LayerManager(device, {viewport});
   layerManager.setLayers([layer]);
 
@@ -62,7 +62,7 @@ export async function testPickingLayer({
       lastPickedInfo,
       mode,
       layers: layerManager.layers,
-      viewports: [layerManager.context.viewport],
+      viewports: [viewport],
       x: 1,
       y: 1,
       pixelRatio: 1

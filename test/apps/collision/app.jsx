@@ -6,7 +6,7 @@
 import React, {useCallback, useState} from 'react';
 import {render} from 'react-dom';
 import {Map} from 'react-map-gl/maplibre';
-import DeckGL from '@deck.gl/react';
+import DeckGL from '@deck.gl/react/legacy';
 import {OPERATION} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer, TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension, MaskExtension} from '@deck.gl/extensions';

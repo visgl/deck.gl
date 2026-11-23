@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {FixedSizeList, Float, Int} from 'apache-arrow';
+
 import {
   Layer,
   project32,
@@ -12,30 +14,55 @@ import {
   LayerProps,
   LayerDataSource,
   Unit,
-  AccessorFunction,
   Position,
-  Accessor,
+  ArrowAccessor,
   Color,
-  DefaultProps
+  DefaultProps,
+  type _ColumnDefinition as ColumnDefinition,
+  _GPUVectorModel as DeckGPUVectorModel
 } from '@deck.gl/core';
 
-import {Model} from '@luma.gl/engine';
+import {GPUVectorModel} from '@luma.gl/engine';
+import {
+  DEFAULT_COLOR,
+  ArcLayerColumns,
+  hasArcColumns,
+  type ArcColumnProps
+} from './arc-layer-columns';
 
 import {arcUniforms, ArcProps} from './arc-layer-uniforms';
 import {shaderWGSL} from './arc-layer.wgsl';
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
 
-const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+const defaultSourcePosition = (row: any) => row.sourcePosition;
+const defaultTargetPosition = (row: any) => row.targetPosition;
 
 const defaultProps: DefaultProps<ArcLayerProps> = {
-  getSourcePosition: {type: 'accessor', value: (x: any) => x.sourcePosition},
-  getTargetPosition: {type: 'accessor', value: (x: any) => x.targetPosition},
-  getSourceColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getTargetColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getWidth: {type: 'accessor', value: 1},
-  getHeight: {type: 'accessor', value: 1},
-  getTilt: {type: 'accessor', value: 0},
+  sourcePositions: {type: 'object', value: null, optional: true},
+  targetPositions: {type: 'object', value: null, optional: true},
+  sourceColors: {type: 'object', value: null, optional: true},
+  targetColors: {type: 'object', value: null, optional: true},
+  widths: {type: 'object', value: null, optional: true},
+  heights: {type: 'object', value: null, optional: true},
+  tilts: {type: 'object', value: null, optional: true},
+  getSourcePosition: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['array'],
+    value: defaultSourcePosition
+  },
+  getTargetPosition: {
+    type: 'accessor',
+    arrow: true,
+    constantTypes: ['array'],
+    value: defaultTargetPosition
+  },
+  getSourceColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getTargetColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
+  getWidth: {type: 'accessor', arrow: true, value: 1},
+  getHeight: {type: 'accessor', arrow: true, value: 1},
+  getTilt: {type: 'accessor', arrow: true, value: 0},
 
   greatCircle: false,
   numSegments: {type: 'number', value: 50, min: 1},
@@ -51,7 +78,7 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
 export type ArcLayerProps<DataT = unknown> = _ArcLayerProps<DataT> & LayerProps;
 
 /** Properties added by ArcLayer. */
-type _ArcLayerProps<DataT> = {
+type _ArcLayerProps<DataT> = ArcColumnProps & {
   data: LayerDataSource<DataT>;
   /**
    * If `true`, create the arc along the shortest path on the earth surface.
@@ -100,45 +127,52 @@ type _ArcLayerProps<DataT> = {
 
   /**
    * Method called to retrieve the source position of each object.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default object => object.sourcePosition
    */
-  getSourcePosition?: AccessorFunction<DataT, Position>;
+  getSourcePosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
 
   /**
    * Method called to retrieve the target position of each object.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default object => object.targetPosition
    */
-  getTargetPosition?: AccessorFunction<DataT, Position>;
+  getTargetPosition?: ArrowAccessor<DataT, Position, FixedSizeList<Int | Float>>;
 
   /**
    * The rgba color is in the format of `[r, g, b, [a]]`.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 0, 255]
    */
-  getSourceColor?: Accessor<DataT, Color>;
+  getSourceColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
 
   /**
    * The rgba color is in the format of `[r, g, b, [a]]`.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 0, 255]
    */
-  getTargetColor?: Accessor<DataT, Color>;
+  getTargetColor?: ArrowAccessor<DataT, Color, FixedSizeList<Int | Float>>;
 
   /**
    * The line width of each object, in units specified by `widthUnits`.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default 1
    */
-  getWidth?: Accessor<DataT, number>;
+  getWidth?: ArrowAccessor<DataT, number, Int | Float>;
 
   /**
    * Multiplier of layer height. `0` will make the layer flat.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default 1
    */
-  getHeight?: Accessor<DataT, number>;
+  getHeight?: ArrowAccessor<DataT, number, Int | Float>;
 
   /**
    * Use to tilt the arc to the side if you have multiple arcs with the same source and target positions.
+   * Accepts a constant, row callback, or numeric Arrow column.
    * @default 0
    */
-  getTilt?: Accessor<DataT, number>;
+  getTilt?: ArrowAccessor<DataT, number, Int | Float>;
 };
 
 /** Render raised arcs joining pairs of source and target coordinates. */
@@ -149,10 +183,32 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   static defaultProps = defaultProps;
 
   state!: {
-    model?: Model;
-  };
+    model?: GPUVectorModel;
+    columns?: ArcLayerColumns;
+  } & Layer['state'];
+
+  /** Bypasses attribute generation while Arrow columns drive the model. */
+  protected _getAttributeManager() {
+    return this.hasColumns() ? null : super._getAttributeManager();
+  }
+
+  getNumInstances(): number {
+    return this.state?.columns && !Number.isFinite(this.props.numInstances)
+      ? this.state.columns.length
+      : super.getNumInstances();
+  }
+
+  get isLoaded(): boolean {
+    return !this.state?.columns?.loading && super.isLoaded;
+  }
+
+  finalizeState(context) {
+    this.state.columns?.destroy();
+    super.finalizeState(context);
+  }
 
   getBounds(): [number[], number[]] | null {
+    if (this.state?.columns) return this.state.columns.getBounds();
     return this.getAttributeManager()?.getBounds([
       'instanceSourcePositions',
       'instanceTargetPositions'
@@ -176,6 +232,16 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   initializeState() {
+    if (this.hasColumns()) {
+      if (this.props.extensions.length)
+        throw new Error('Arc Arrow columns do not support extensions');
+      return;
+    }
+    this.initializeAccessorAttributes();
+  }
+
+  /** Registers instance attributes for the accessor model, including after a mode switch. */
+  protected initializeAccessorAttributes() {
     const attributeManager = this.getAttributeManager()!;
 
     /* eslint-disable max-len */
@@ -201,6 +267,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
         type: 'unorm8',
         transition: true,
         accessor: 'getSourceColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR
       },
       instanceTargetColors: {
@@ -208,6 +275,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
         type: 'unorm8',
         transition: true,
         accessor: 'getTargetColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR
       },
       instanceWidths: {
@@ -233,14 +301,79 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   updateState(params: UpdateParameters<this>): void {
+    if (this.hasColumns()) {
+      this.updateColumnState(params);
+      return;
+    }
+    this.restoreAccessorState();
     super.updateState(params);
-
     const {props, oldProps, changeFlags} = params;
     if (changeFlags.extensionsChanged || props.antialiasing !== oldProps.antialiasing) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
+  }
+
+  /** Restores the accessor model and attributes after removing the Arrow columns. */
+  private restoreAccessorState(): void {
+    if (this.state.columns) {
+      this.state.columns.destroy();
+      this.state.columns = undefined;
+      this.internalState!.attributeManager = super._getAttributeManager();
+      this.initializeAccessorAttributes();
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
+    }
+  }
+
+  /** Adds instance columns for subclass shaders when ArcLayer uses the Arrow path. */
+  protected getExtraColumnDefinitions(): Readonly<Record<string, ColumnDefinition>> | undefined {
+    return undefined;
+  }
+
+  /** Selects the same column definitions for initialization and updates. */
+  private hasColumns(): boolean {
+    return hasArcColumns(this.props, this.getExtraColumnDefinitions());
+  }
+
+  /** Updates the model and schedules conversion while Arrow columns are active. */
+  private updateColumnState(params: UpdateParameters<this>): void {
+    if (this.props.extensions.length)
+      throw new Error('Arc Arrow columns do not support extensions');
+    const entering = !this.state.columns;
+    if (entering) {
+      this.internalState!.attributeManager?.finalize();
+      this.internalState!.attributeManager = null;
+      this.state.columns = new ArcLayerColumns(
+        this.context.device,
+        this.getExtraColumnDefinitions()
+      );
+    }
+    if (
+      entering ||
+      params.changeFlags.extensionsChanged ||
+      params.props.antialiasing !== params.oldProps.antialiasing
+    ) {
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
+    }
+    void this.state.columns!.updateIfNeeded(params, {
+      normalizedColors: this.usesNormalizedColors(),
+      dataLoading: this.internalState!.isAsyncPropLoading('data'),
+      changed: () => {
+        this.setState({});
+        this.setNeedsUpdate();
+      },
+      failed: error => this.raiseError(error, 'converting Arrow columns'),
+      positionOptions: {
+        transform: this.usePositionTransforms().transform?.bind(this),
+        fp64: this.use64bitPositions(),
+        requireRows:
+          (!this.props.sourcePositions && this.props.getSourcePosition === defaultSourcePosition) ||
+          (!this.props.targetPositions && this.props.getTargetPosition === defaultTargetPosition)
+      }
+    });
   }
 
   draw({uniforms}) {
@@ -255,26 +388,39 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     } = this.props;
     const arcProps: ArcProps = {
       numSegments,
+      rowIndexOffset: 0,
       widthUnits: UNIT[widthUnits],
       widthScale,
       widthMinPixels,
       widthMaxPixels,
       greatCircle,
-      useShortestPath: wrapLongitude && !this.context.viewport.preproject
+      useShortestPath:
+        wrapLongitude && !this.state.preproject && this.state.sourceCrs?.signature === 'WGS84'
     };
 
     const model = this.state.model!;
     model.shaderInputs.setProps({arc: arcProps});
     model.setVertexCount(numSegments * 2);
-    model.draw(this.context.renderPass);
+    if (this.state.columns)
+      this.state.columns.draw(model, this.context.renderPass, offset => {
+        model.setInstanceCount(
+          Math.min(model.instanceCount, Math.max(0, this.getNumInstances() - offset))
+        );
+        model.shaderInputs.setProps({arc: {rowIndexOffset: offset}});
+      });
+    else model.draw(this.context.renderPass);
   }
 
-  protected _getModel(): Model {
-    return new Model(this.context.device, {
+  protected _getModel(): GPUVectorModel {
+    const ModelClass = this.state.columns ? GPUVectorModel : DeckGPUVectorModel;
+    return new ModelClass(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bufferLayout:
+        this.state.columns?.getBufferLayouts() ?? this.getAttributeManager()!.getBufferLayouts(),
       topology: 'triangle-strip',
+      enforceMatchingVectorLengths: Boolean(this.state.columns),
+      inferDrawCount: this.state.columns ? 'instance' : 'no',
       isInstanced: true
     });
   }

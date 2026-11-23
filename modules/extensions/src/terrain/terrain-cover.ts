@@ -4,7 +4,7 @@
 
 import {Framebuffer} from '@luma.gl/core';
 
-import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {GlobeViewport} from '@deck.gl/core';
 import type {Layer, Viewport} from '@deck.gl/core';
 
 import {createRenderTarget} from './utils';
@@ -190,7 +190,11 @@ export class TerrainCover {
   }
 
   getPickingFramebuffer(): Framebuffer | null {
-    if (!this.renderViewport || (this.layers.length === 0 && !this.targetLayer.props.pickable)) {
+    if (
+      !this.renderViewport ||
+      (this.layers.length === 0 &&
+        (!this.targetLayer.props.pickable || this.targetLayer.context.device.type === 'webgpu'))
+    ) {
       return null;
     }
     if (!this.pickingFbo) {

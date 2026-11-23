@@ -29,16 +29,17 @@ const layers = [
   new TerrainLayer({
       id: 'terrain',
       minZoom: 0,
-      maxZoom: 23,
+      maxZoom: 12,
       strategy: 'no-overlap',
       elevationDecoder: {
-        rScaler: 6553.6,
-        gScaler: 25.6,
-        bScaler: 0.1,
-        offset: -10000
+        rScaler: 256,
+        gScaler: 1,
+        bScaler: 1 / 256,
+        offset: -32768
       },
-      elevationData: `https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=${MAPBOX_TOKEN}`,
-      texture: `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`,
+      elevationData: 'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp',
+      texture: 'https://tiles.versatiles.org/tiles/satellite/{z}/{x}/{y}.webp',
+      tileSize: 512,
       operation: 'terrain+draw'
     }),
     new GeoJsonLayer({
@@ -111,6 +112,15 @@ How data should be fitted to the terrain surface. If not specified, will be auto
     </tr>
   </tbody>
 </table>
+
+## Limitations
+
+When using `terrainDrawMode: 'offset'` on WebGPU, a custom layer with `operation: 'terrain'` must
+return three-dimensional bounds from `getBounds()`. Return `[[minX, minY, minZ], [maxX, maxY, maxZ]]`
+in the terrain layer's coordinate system and include the full elevation range of the surface.
+The offset pass uses that range to encode terrain heights.
+
+`TerrainLayer` and non-instanced `SimpleMeshLayer` meshes already provide the elevation range.
 
 ## Source
 

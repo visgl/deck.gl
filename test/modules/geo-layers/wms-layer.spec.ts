@@ -6,13 +6,28 @@
 
 import {test, expect} from 'vitest';
 import {generateLayerTests, testInitializeLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
-import {COORDINATE_SYSTEM, WebMercatorViewport} from '@deck.gl/core';
+import {WebMercatorViewport} from '@deck.gl/core';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
-import type {ImageSource} from '@loaders.gl/wms';
-import type {GetImageParameters, ImageSourceMetadata, ImageType} from '@loaders.gl/loader-utils';
-import {projectionEngine} from '@math.gl/projection';
+import {WMSImageSource} from '@loaders.gl/ogc/wms';
+import type {ImageSource} from '@loaders.gl/ogc/wms';
+import type {
+  GetImageParameters,
+  ImageSourceMetadata,
+  ImageType
+} from '@loaders.gl/core/loader-utils';
+import {projectionEngine} from '@math.gl/geospatial/projection';
 import {WGS84ToPseudoMercator} from '@deck.gl/geo-layers/wms-layer/utils';
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
+
+test.each([undefined, 'wms'] as const)('WMSLayer creates a URL source (%s)', serviceType => {
+  const data = 'https://example.com/maps';
+  const loadOptions = {wms: {wmsParameters: {version: '1.1.1'}}};
+  const layer = new WMSLayer(serviceType ? {data, loadOptions, serviceType} : {data, loadOptions});
+
+  const source = layer._createImageSource(layer.props);
+  expect(source).toBeInstanceOf(WMSImageSource);
+  expect(source).toMatchObject({wmsParameters: {version: '1.1.1'}});
+});
 
 test.skip('WMSLayer', async () => {
   const testCases = generateLayerTests({
@@ -93,7 +108,7 @@ test('WMSLayer positions an EPSG:4326 image in LNGLAT coordinates', async () => 
     expect(requests.map(request => request.crs)).toEqual(['EPSG:4326']);
 
     const bitmapLayer = layer.renderLayers() as any;
-    expect(bitmapLayer.props._imageCoordinateSystem).toBe(COORDINATE_SYSTEM.LNGLAT);
+    expect(bitmapLayer.props._imageCoordinateSystem).toBe('lnglat');
   } finally {
     finalize();
   }

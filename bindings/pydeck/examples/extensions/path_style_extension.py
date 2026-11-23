@@ -44,5 +44,10 @@ layer = pdk.Layer(
     extensions=[pdk.Extension("PathStyleExtension", dash=True)],
 )
 
-r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{name}"})
+r = pdk.Deck(
+    layers=[layer],
+    initial_view_state=view_state,
+    tooltip={"text": "{name}"},
+    map_style="https://tiles.openfreemap.org/styles/dark",
+)
 r.to_html("path_style_extension.html")

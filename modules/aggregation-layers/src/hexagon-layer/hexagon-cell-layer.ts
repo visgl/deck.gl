@@ -25,7 +25,11 @@ export type _HexagonCellLayerProps = {
 
 export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
   null,
-  ExtraPropsT & Required<_HexagonCellLayerProps>
+  ExtraPropsT &
+    Required<_HexagonCellLayerProps> & {
+      /** Whether plain-array palette entries are normalized. */
+      normalizedColorRange?: boolean;
+    }
 > {
   static layerName = 'HexagonCellLayer';
 
@@ -74,12 +78,16 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
     const {props, oldProps} = params;
     const model = this.state.fillModel!;
 
-    if (oldProps.colorRange !== props.colorRange) {
+    if (
+      oldProps.colorRange !== props.colorRange ||
+      oldProps.normalizedColorRange !== props.normalizedColorRange
+    ) {
       this.state.colorTexture?.destroy();
       this.state.colorTexture = createColorRangeTexture(
         this.context.device,
         props.colorRange,
-        props.colorScaleType
+        props.colorScaleType,
+        props.normalizedColorRange
       );
       const hexagonProps: Partial<HexagonProps> = {colorRange: this.state.colorTexture};
       model.shaderInputs.setProps({hexagon: hexagonProps});

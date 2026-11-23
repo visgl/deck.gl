@@ -14,7 +14,7 @@
 </body>
 <script type="module">
   import {renderToDOM} from './app.tsx';
-  import {webgpuAdapter} from '@luma.gl/webgpu';
+  import {webgpuAdapter} from '@luma.gl/core/webgpu';
   renderToDOM(document.getElementById('app'), undefined, {adapters: [webgpuAdapter], type: 'webgl'});
 </script>
 </html>

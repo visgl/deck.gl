@@ -7,7 +7,7 @@
 
 import type {Device, Framebuffer, RenderPipelineParameters} from '@luma.gl/core';
 import {ClipSpace} from '@luma.gl/engine';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 import Pass from './pass';
 import {ScreenProps, screenUniforms} from './screen-pass-uniforms';
 

@@ -5,8 +5,8 @@
 import React, {useMemo, useState} from 'react';
 import CodeBlock from '@theme/CodeBlock';
 import {useColorMode} from '@docusaurus/theme-common';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import {DeckGL} from '@deck.gl/react';
+
+import {DeckGL} from '@deck.gl/react/legacy';
 import {PathLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {ResetViewWidget, DarkGlassTheme, LightGlassTheme} from '@deck.gl/widgets';
@@ -27,7 +27,7 @@ const ROW_STYLE = {display: 'inline-flex', alignItems: 'center', gap: 8};
 
 // Both demos draw in meters around [0, 0] on a blank background
 const LAYER_PROPS = {
-  coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+  coordinateSystem: 'meter-offsets',
   coordinateOrigin: [0, 0, 0]
 };
 

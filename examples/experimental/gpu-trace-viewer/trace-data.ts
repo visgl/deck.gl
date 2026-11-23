@@ -5,7 +5,7 @@
 import {
   GPU_TRACE_LINK_RECORD_WORD_LENGTH,
   GPU_TRACE_SPAN_RECORD_WORD_LENGTH
-} from '@luma.gl/experimental/gpu-trace';
+} from '@luma.gl/graph/gpu-trace';
 
 /** Reference duration for the smallest interactive demonstration. */
 export const TRACE_DURATION = 1000;

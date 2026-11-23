@@ -13,7 +13,7 @@ import {MapView} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import {scaleLog} from 'd3-scale';
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 import {load} from '@loaders.gl/core';
 
 import type {Color, MapViewState} from '@deck.gl/core';
@@ -32,7 +32,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
   bearing: 0
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/dark';
 
 type City = {
   name: string;

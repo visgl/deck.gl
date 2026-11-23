@@ -33,5 +33,10 @@ layer = pdk.Layer(
 )
 
 view_state = pdk.ViewState(latitude=37.775, longitude=-122.42, zoom=11)
-r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{name}"})
+r = pdk.Deck(
+    layers=[layer],
+    initial_view_state=view_state,
+    tooltip={"text": "{name}"},
+    map_style="https://tiles.openfreemap.org/styles/dark",
+)
 r.to_html("collision_filter_extension.html")

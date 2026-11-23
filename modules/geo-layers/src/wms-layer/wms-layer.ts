@@ -16,13 +16,16 @@ import {
   UpdateParameters,
   DefaultProps,
   Viewport,
-  COORDINATE_SYSTEM,
   _deepEqual as deepEqual
 } from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
-import type {GetImageParameters, ImageSourceMetadata, ImageType} from '@loaders.gl/loader-utils';
-import {createDataSource} from '@loaders.gl/core';
-import {ImageSource, WMSSource} from '@loaders.gl/wms';
+import type {
+  GetImageParameters,
+  ImageSourceMetadata,
+  ImageType
+} from '@loaders.gl/core/loader-utils';
+import {createDataSourceSync} from '@loaders.gl/core';
+import {ImageSource, WMSSource} from '@loaders.gl/ogc/wms';
 import {WGS84ToPseudoMercator} from './utils';
 
 /** All props supported by the TileLayer */
@@ -129,10 +132,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       image &&
       new BitmapLayer({
         ...this.getSubLayerProps({id: 'bitmap'}),
-        _imageCoordinateSystem:
-          lastRequestParameters.crs === 'EPSG:4326'
-            ? COORDINATE_SYSTEM.LNGLAT
-            : COORDINATE_SYSTEM.CARTESIAN,
+        _imageCoordinateSystem: lastRequestParameters.crs === 'EPSG:4326' ? 'lnglat' : 'cartesian',
         bounds,
         image
       })
@@ -161,13 +161,13 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     }
 
     if (typeof props.data === 'string') {
-      return createDataSource(props.data, [WMSSource], {
-        wms: {},
+      return createDataSourceSync(props.data, [WMSSource], {
+        ...props.loadOptions,
         core: {
-          type: props.serviceType,
-          loadOptions: props.loadOptions
+          ...props.loadOptions?.core,
+          type: props.serviceType
         }
-      }) as ImageSource;
+      });
     }
 
     throw new Error('invalid image source in props.data');
@@ -206,7 +206,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     let {srs} = this.props;
     if (srs === 'auto') {
       // BitmapLayer only supports LNGLAT or CARTESIAN (Web-Mercator)
-      srs = viewport.resolution ? 'EPSG:4326' : 'EPSG:3857';
+      srs = viewport.crs?.signature === 'OSMTile512' ? 'EPSG:3857' : 'EPSG:4326';
     }
     const requestParams: GetImageParameters = {
       width,

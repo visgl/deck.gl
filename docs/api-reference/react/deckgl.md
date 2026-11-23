@@ -1,205 +1,123 @@
-# DeckGL (React Component)
+# DeckGL
 
-`DeckGL` is the main interface to deck.gl for React applications. `DeckGL` is a React component that takes a list of deck.gl layer instances and a view state, and renders those layers on a transparent canvas that can be used as an overlay over other components like maps.
+![From v10.0](https://img.shields.io/badge/from-v10.0-green.svg?style=flat-square)
 
-Make sure to read the [Using deck.gl with React](../../get-started/using-with-react.md) article.
-
-The `DeckGL` class is a React wrapper of the [Deck](../core/deck.md) JavaScript class which exposes essentially the same props. The `Deck` class should not be used directly in React applications.
-
-
-## Usage
-
-```js
-// Basic usage
+```tsx
 import {DeckGL} from '@deck.gl/react';
-import {ScatterplotLayer} from '@deck.gl/layers';
-
-const App = (data) => (
-  <DeckGL
-    longitude={-122.45}
-    latitude={37.78}
-    zoom={12}
-    layers={[new ScatterplotLayer({data})]} />
-);
+import type {DeckGLProps, OnDeckChange} from '@deck.gl/react';
 ```
 
-Like any React component, `DeckGL` can accept child components. Typical React components include:
+The root import creates only a standalone `Deck`. It owns a canvas unless the caller supplies `canvas`, and sends JSX `<deckView>` descriptors to deck.gl, merged with the `views` prop as [Native elements](native-elements.md#mixing-elements-and-props) describes. Its props are `DeckProps`, which has no `interleaved` option.
 
-- Base maps such as the [`Map`](https://visgl.github.io/react-map-gl/docs/api-reference/map) component from `react-map-gl`, which can synchronize with deck.gl's view state.
-- [Widgets](./overview.md#using-react-wrapped-widgets), which can display and control deck.gl state.
+## Provider roots
 
-```js
-import {DeckGL} from '@deck.gl/react';
-import {Map} from 'react-map-gl/maplibre';
-import 'maplibre-gl/dist/maplibre-gl.css';
+Choose an external overlay by import path, not by a runtime provider-selection prop:
 
-const App = (data) => (
-  <DeckGL
-    initialViewState={{longitude: -122.45, latitude: 37.78, zoom: 12}}
-    controller={true}
-    layers={[new ScatterplotLayer({data})]}
-  >
-    <Map mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" />
-  </DeckGL>
-);
-
+```tsx
+import {DeckGL as MapboxDeckGL} from '@deck.gl/react/mapbox';
+import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/maplibre';
+import {DeckGL as GoogleMapsDeckGL} from '@deck.gl/react/google-maps';
 ```
 
-## Properties
+`/mapbox` always creates `MapboxOverlay`, `/maplibre` always creates `MapLibreOverlay`, and `/google-maps` always creates `GoogleMapsOverlay`. They pass `interleaved` to the overlay unchanged, so the overlay's own default applies: `false` for [`MapboxOverlay`](../mapbox/mapbox-overlay.md#constructor) and [`MapLibreOverlay`](../maplibre/overview.md), and `true` for [`GoogleMapsOverlay`](../google-maps/google-maps-overlay.md). The Mapbox and MapLibre overlays read `interleaved` only in their constructors, and the Google Maps overlay when it attaches to its map. When the prop changes, the root finalizes the current overlay, which removes it from the map, and creates a new one. `onDeckChange` receives `null` and then the new instance, which the application attaches. Provider roots render no host DOM node and use a detached internal registry key, so they are safe inside a map container that must remain child-free.
 
-`DeckGL` accepts all [Deck](../core/deck.md#properties) properties, with these additional semantics:
+Each provider entry point exposes its concrete overlay contract:
 
-### React Context
+| Entry point | Props and instance |
+| --- | --- |
+| Root | `DeckGLProps`; the instance is `Deck` |
+| `/mapbox` | `MapboxDeckGLProps`; `onDeckChange` receives `MapboxOverlay \| null` |
+| `/maplibre` | `MapLibreDeckGLProps`; `onDeckChange` receives `MapLibreOverlay \| null` |
+| `/google-maps` | `GoogleMapsDeckGLProps`; `onDeckChange` receives `GoogleMapsOverlay \| null` |
 
-#### `ContextProvider` (React.Component, optional) {#contextprovider}
+Provider overlay props exclude map-owned configuration such as `canvas`, `parent`, `device`, `viewState`, `initialViewState`, and `controller`. The MapLibre provider also excludes `width`, `height`, and `gl`. Configure those options on the application-owned Mapbox or MapLibre map, and pass the map in `map`. `DeckGL` adds its overlay to the map, adds the new one when `interleaved` recreates it, and removes it when `map` changes or `DeckGL` unmounts. `map` takes a Mapbox or MapLibre `Map` or a React Map GL `MapRef`; keep it in React state. Without `map`, attach the instance from `onDeckChange` with `map.addControl` and remove the same control during cleanup. JSX `<deckView>` descriptors, merged with the `views` prop, are sent to the overlay, which keeps one view in step with the map camera. See [Views beside the map](../../developer-guide/react/using-with-maps.md#views-beside-the-map). See [Using with maps](../../developer-guide/react/using-with-maps.md) for complete attachment and shared-context guidance.
 
-A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) component. If supplied, will be rendered as the ancestor to all children. The passed through context contains the following values:
+## Props and lifecycle
 
-- `viewport` ([Viewport](../core/viewport.md)) - the current viewport
-- `container` (DOMElement) - the DOM element containing the deck canvas
-- `eventManager` ([EventManager](https://visgl.github.io/mjolnir.js/docs/api-reference/event-manager))
-- `onViewStateChange` ([onViewStateChange](../core/deck.md#onviewstatechange)) - the view state change handler 
-- `deck` ([Deck](../core/deck.md)) - the current deck instance, if present
-- `widgets` ([Widget](../core/widget.md)[]) - the current jsx widgets, if any
+`DeckGLProps` is the standalone `DeckProps` surface plus optional React children, `onDeckChange`, and `ref`; the instance is `Deck`. Provider entry points infer their concrete overlay instance in `onDeckChange`.
 
-```jsx
-/// Example using react-map-gl v6 controls with deck.gl
-/// To use react-map-gl v7, see https://deck.gl/docs/api-reference/mapbox/mapbox-overlay
-import {DeckGL} from '@deck.gl/react';
-import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
+The notification runs after configuration and receives `null` during cleanup. It is a lifecycle notification rather than a callback ref: replacing only its identity does not recreate the root, but later notifications use the replacement.
 
-<DeckGL ... ContextProvider={MapContext.Provider}>
-  <div style={NAVIGATION_CONTROL_STYLES}>
-    <NavigationControl />
-  </div>
-</DeckGL>
+Every root also accepts a React 19 `ref`, which receives the same instance as `onDeckChange`: `Deck` on the standalone root, or the overlay on a provider or `createDeckGL` root. The ref is set after configuration, before `onDeckChange` runs, and receives `null` on teardown; a callback ref may return a cleanup function instead. When a provider root recreates its overlay, the ref receives `null` and then the new instance. Replacing the ref moves the current instance to the new ref without recreating the root.
+
+```tsx
+const deckRef = useRef<Deck>(null);
+
+<DeckGL ref={deckRef} layers={layers} />;
 ```
 
+On the standalone root, `canvas` accepts an `HTMLCanvasElement` or the id of a `<canvas>` element. An id is resolved with `document.getElementById` on the client after mount, so the canvas may be rendered in the same commit as `DeckGL`. An id that does not name a mounted `<canvas>` throws. Without `parent`, deck.gl uses the canvas's parent element. The root binds to the element found at mount; to bind a replacement element that reuses the id, pass that element as `canvas` or remount with a different React `key`.
 
-### Children
+Deck event properties such as `onClick` remain deck.gl callbacks, not React synthetic events.
 
-The following semantics of the standard React `children` property are considered experimental.
+Removing a prop resets it to deck.gl's default, as React expects: a removed `onError` stops being called, removed `parameters` stop applying, and a removed `viewState` returns the camera to deck.gl's own view state. A prop set to `undefined` also falls back to deck.gl's default, as it does in React: deck.gl treats an explicit `undefined` like a prop that was left out ([deck.gl#10906](https://github.com/visgl/deck.gl/pull/10906)). The `layers`, `widgets` and `effects` props are merged with JSX children, so removing one leaves only the JSX elements. Removing `views` when the tree has no `<deckView>` restores deck.gl's default view, after which the root leaves deck.gl's views alone, so a widget such as `SplitterWidget` can set them. The exceptions are the [props that only apply at creation](#props-that-only-apply-at-creation).
 
+Effects such as `LightingEffect` and `PostProcessEffect` can be JSX children, as [components](components.md#effects) or [`<deckEffect>`](native-elements.md#deckeffect) elements, or the `effects` prop, as in `@deck.gl/react/legacy`. The root merges the two by ID. deck.gl matches effects by ID, as it does widgets, so a new instance with the same ID updates the mounted effect's props, and creating effects during render is fine.
 
-#### JSX layers
+An error thrown while rendering inside a root, including one the renderer raises for an invalid element, is rethrown from the `DeckGL` component. The nearest [error boundary](https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary) around `DeckGL` handles it, as it would for any other component, and the framework's development error overlay shows it. An error boundary inside `DeckGL` catches errors from its own children first; its fallback can only render native elements or `null`. Errors that deck.gl raises at runtime, such as a layer whose data fails to load, never reach an error boundary; deck.gl passes them to its `onError` prop, as with `@deck.gl/react/legacy`.
 
-It is possible to use JSX syntax to create deck.gl layers as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `layers` prop.
+`debug` is a deck.gl prop and is passed to `Deck` or the overlay unchanged. Warnings and traces go through deck.gl's `log`: root creation, unmounting and each commit log at level 3, and the props of every configure, including prop-only updates, at level 4. Enable them in the browser console with `deck.log.enable()` and `deck.log.level = 3`; see [Debugging](../../developer-guide/debugging.md). The `@deck.gl/react` [debugging guide](../../developer-guide/react/debugging.md) explains how to read these logs alongside deck.gl's.
 
-```jsx
-  <DeckGL initialViewState={...viewState}>
-    <LineLayer id="line-layer" data={data} />
-  <DeckGL />
+The renderer registers with [React DevTools](https://react.dev/learn/react-developer-tools), so the Components tab shows the `<deckLayer>`, `<deckView>`, `<deckWidget>` and `<deckEffect>` elements inside each root, with their props and the components that render them.
+
+## Props that only apply at creation
+
+deck.gl reads some props only when it creates its device, canvas or event manager. Changing or removing them after the root is created has no effect, and in development builds the root warns once per prop. To apply a new value, remount `DeckGL` with a new React `key`.
+
+| Prop | Read when deck.gl creates | Changing it |
+| --- | --- | --- |
+| `canvas` | Its canvas | Creates a new root, with a new `Deck` |
+| `interleaved` (`/mapbox`, `/maplibre`) | The overlay | Creates a new overlay; see [Provider roots](#provider-roots) |
+| `deviceProps`, `gl` | Its GPU device | No effect; dev warning |
+| `debug` | Its GPU device | No effect; dev warning |
+| `touchAction`, `eventRecognizerOptions` | Its event manager | No effect; dev warning |
+| `_typedArrayManagerProps` | The instance | No effect; dev warning |
+
+`device` and `_canvases` are not in the table, because deck.gl applies changes to them after creation. A new `device` replaces the GPU device, and `_canvases` updates the canvases of a `Deck` created in multi-canvas mode. A `DeckGL` root always renders to its own canvas, which multi-canvas mode does not allow, so to draw one `Deck` into several canvases, create it with `_canvases: []` and use [`DeckCanvas`](https://visgl.github.io/deck.gl-community/docs/modules/react/api-reference/deck-canvas) from `@deck.gl-community/react`.
+
+`id` names a canvas that deck.gl creates. The standalone root renders its own canvas, whose id follows `id`, as [Root DOM and sizing](#root-dom-and-sizing) describes.
+
+## Root DOM and sizing
+
+Without a `canvas` prop, the standalone root renders the same wrapper and canvas as `@deck.gl/react/legacy`:
+
+```html
+<div id="deckgl-wrapper" style="position: absolute; z-index: 0; left: 0; top: 0; width: 100%; height: 100%">
+  <canvas id="deckgl-overlay" style="left: 0; top: 0"></canvas>
+</div>
 ```
 
-> Caveat: The JSX layer syntax is limited in that it only works when the layers are direct children of the `DeckGL` component. deck.gl layers are not true React components and cannot be rendered independently by React, and the JSX support depends on deck.gl intercepting the JSX generated child elements before React tries to render them.
+The ids derive from the `id` prop: `id="map"` renders `map-wrapper` and a canvas with id `map`. Give each root a distinct `id` when a page has more than one. The wrapper fills its nearest positioned ancestor by default. `width` and `height` size the wrapper, `style` applies to the wrapper except `mixBlendMode`, which applies to the canvas, and the canvas fills the wrapper. With a caller-supplied `canvas`, the root renders no DOM and forwards `width`, `height`, and `style` to deck.gl unchanged. Provider roots never render DOM.
 
+## Custom compatible overlays
 
-#### JSX views
+For a compatible overlay not covered by the provider roots, bind its factory once:
 
-It is possible to use JSX syntax to create deck.gl views as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `views` prop.
+```tsx
+import {createDeckGL} from '@deck.gl/react';
 
-```jsx
-  <DeckGL initialViewState={...viewState} layers={layers} >
-    <MapView id="map" width="50%" controller={true} >
-      <Map mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" />
-    </MapView>
-    <FirstPersonView width="50%" x="50%" fovy={50} />
-  <DeckGL />
+const DeckGL = createDeckGL({
+  createExternalOverlay: props => new MyCompatibleOverlay(props)
+});
 ```
 
-If a certain view id is used in both JSX views and the `views` prop, the view instance in the `views` prop has priority.
+The factory runs only when the root is initially configured. It is not a render prop and never reaches `setProps`. The result must implement deck.gl's `setProps` and `finalize` lifecycle. See [Using with custom overlays](../../developer-guide/react/base-maps/using-with-custom-overlays.md) for the overlay requirements and host attachment.
 
-```jsx
-  const views = [
-    new MapView({id: 'map', width: '50%', controller: true}),
-    new FirstPersonView({width: '50%', x: '50%', fovy: 50})
-  ];
+`recreateOverlayOnChange` lists props that the overlay reads only at construction or attach time. When one of them changes (compared with `Object.is`), the component finalizes the overlay and calls the factory again with the full props. `onDeckChange` receives `null` and then the new instance. The provider roots declare `recreateOverlayOnChange: ['interleaved']`.
 
-  <DeckGL initialViewState={...viewState} layers={layers} views={views} >
-    <View id="map">
-      <Map mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" />
-    </View>
-  <DeckGL />
+`forwardViews: true` sends `<deckView>` children, merged with the `views` prop, to the overlay. Set it for an overlay that renders deck.gl views beside its map, as the provider roots do. Without it, the overlay receives only its `views` prop.
+
+`attach(map, overlay)` gives the root a `map` prop. It attaches the overlay to `map` and returns a function that detaches it. The root calls it for each overlay it creates while `map` is set, and calls the returned function before replacing or finalizing the overlay, when `map` changes or becomes `null`, and on unmount. Both steps must be safe to repeat, because a Strict Mode replay can call them twice. `map` is never passed to the overlay. The provider roots attach with `map.addControl`. See [Attach to the host](../../developer-guide/react/base-maps/using-with-custom-overlays.md#attach-to-the-host).
+
+```tsx
+const DeckGL = createDeckGL({
+  createExternalOverlay: props => new MyCompatibleOverlay(props),
+  recreateOverlayOnChange: ['interleaved']
+});
 ```
 
-#### JSX Widgets
+Recreating an overlay discards its internal state, such as the hovered object.
 
-It is possible to use JSX syntax to create deck.gl widgets as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `widgets` props.
+## Advanced reconciler APIs
 
-```jsx
-  <DeckGL initialViewState={...viewState}>
-    <ZoomWidget id="zoom-widget" placement="top-right" />
-  <DeckGL />
-```
-
-Learn how to use widgets in JSX by reading [Using React-wrapped widgets](./overview.md#using-react-wrapped-widgets).
-
-#### Position Children in Views
-
-To make it easy to use React components in combination with deck.gl views (e.g. to place a base map under a view, or add a label on top of a view), deck.gl can make such components automatically adjust as that view is added, removed or resized.
-
-Each child element of `DeckGL` is positioned inside a view. All children of a view is wrapped in a DOM container that:
-
-* is offset to be relative to the deck.gl view that it corresponds to.
-* is resized to match the extent of the deck.gl view with the corresponding view id.
-* is hidden if the view id is missing from `DeckGL`'s `views` prop.
-
-The containing view of each element is determined as follows:
-
-- If the element is a direct child of `DeckGL`, it is positioned inside the default (first) view.
-- If the element is nested under a `<View id={id}>` tag, it is positioned inside the view corresponding to the `id` prop. 
-
-
-#### Render callbacks
-
-You may supply a function as a child to the `DeckGL` or `View` node (see **JSX views**). The function will be called to retrieve the React children when the viewport updates.
-
-The following arguments are passed:
-
-* `x` - the left offset of the current view, in pixels
-* `y` - the top offset of the current view, in pixels
-* `width` - the width of the current view, in pixels
-* `height` - the height of the current view, in pixels
-* `viewState` - the view state of the current view
-* `viewport` - the `Viewport` instance of the current view
-
-This is useful when you need to specify custom rendering logic for a child:
-
-```jsx
-  <DeckGL {...viewState}>
-    {({x, y, width, height, viewState, viewport}) => (
-      <Marker
-        project={viewport.project}
-        longitude={-122.45}
-        latitude={37.8}
-        width={24}
-        height={24} />
-    )}
-  <DeckGL />
-```
-
-Additional Notes:
-
-* The DeckGL components own `canvas` element is added last to the child list, to sit on top of all the base components, however Z index can be used to override this.
-* Child repositioning is done with CSS styling on a wrapper div.
-* Children that do not belong to any `<View>` tag and are functions are called with the properties of the default view.
-* Children that do not belong to any `<View>` tag and are valid React elements are rendered as is.
-
-
-## Methods
-
-All [Deck](../core/deck.md#methods) methods are available on the `DeckGL` component, but not all of them can be explicitly called. For example, to rerender your component, you can pass updated props to `DeckGL` component directly, while you should call `setProps` with new props in `Deck`. 
-
-The public methods you can call explicitly list below:
-
-* `pickObjectAsync`
-* `pickObjectsAsync`
-* `pickObject`
-* `pickMultipleObjects`
-* `pickObjects`
-
-We do recommend you to use the pure JavaScript version of deck.gl if you are more comfortable with an imperative programming style (e.g. `deck.setProps()`).
-
-## Source
-
-[modules/react/src/deckgl.ts](https://github.com/visgl/deck.gl/blob/master/modules/react/src/deckgl.ts)
+`@deck.gl/react/reconciler` exports `createRoot` and `unmountAtNode` for direct integration. These are advanced APIs; normal applications should use one of the entry points above.

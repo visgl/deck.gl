@@ -169,3 +169,8 @@ test('TooltipWidget#onHover accounts for canvas offset', () => {
 
   widgetManager.finalize();
 });
+
+test('TooltipWidget#id', () => {
+  expect(new TooltipWidget().id).toBe('default-tooltip');
+  expect(new TooltipWidget({id: 'custom-tooltip'}).id).toBe('custom-tooltip');
+});

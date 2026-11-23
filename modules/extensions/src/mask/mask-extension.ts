@@ -2,9 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, Layer, LayerExtension, log} from '@deck.gl/core';
-import mask, {MaskProps} from './shader-module';
+import {Layer, LayerExtension, log, project, type ProjectUniforms} from '@deck.gl/core';
+import {maskPlugin, MaskProps} from './shader-module';
 import MaskEffect from './mask-effect';
+import {
+  getFlatCommonOrigin,
+  isFlatViewport,
+  lngLatToMercatorCommon
+} from '../utils/projection-utils';
 
 const defaultProps = {
   maskId: '',
@@ -48,33 +53,46 @@ export default class MaskExtension extends LayerExtension {
     this.state.maskByInstance = maskByInstance;
 
     return {
-      modules: [mask]
+      plugins: [maskPlugin]
     };
   }
 
-  /* eslint-disable camelcase */
-  draw(this: Layer<Required<MaskExtensionProps>>, {context, shaderModuleProps}: any) {
+  /** Applies mask uniforms for a normal layer draw. */
+  draw(this: Layer<Required<MaskExtensionProps>>, {shaderModuleProps}: any, extension: this) {
+    this.setShaderModuleProps(
+      extension.getAggregationShaderProps.call(this, extension, shaderModuleProps)
+    );
+  }
+
+  /** Resolves the mask's bounds and channel in the drawing viewport. */
+  getAggregationShaderProps(
+    this: Layer<Required<MaskExtensionProps>>,
+    extension: this,
+    shaderModuleProps?: any
+  ) {
+    if (!shaderModuleProps?.mask) return {mask: {enabled: false}};
+    const {context} = this;
     const maskProps = {} as MaskProps;
     maskProps.maskByInstance = Boolean(this.state.maskByInstance);
     const {maskId, maskInverted} = this.props;
     const {maskChannels} = shaderModuleProps.mask || {};
     const {viewport} = context;
     if (maskChannels && maskChannels[maskId]) {
-      const {index, bounds, coordinateOrigin: fromCoordinateOrigin} = maskChannels[maskId];
-      let {coordinateSystem: fromCoordinateSystem} = maskChannels[maskId];
+      const {index, bounds} = maskChannels[maskId];
       maskProps.enabled = true;
       maskProps.channel = index;
       maskProps.inverted = maskInverted;
 
-      if (fromCoordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
-        fromCoordinateSystem = viewport.isGeospatial
-          ? COORDINATE_SYSTEM.LNGLAT
-          : COORDINATE_SYSTEM.CARTESIAN;
-      }
-      const opts = {modelMatrix: null, fromCoordinateOrigin, fromCoordinateSystem};
-      const bl = this.projectPosition([bounds[0], bounds[1], 0], opts);
-      const tr = this.projectPosition([bounds[2], bounds[3], 0], opts);
-      maskProps.bounds = [bl[0], bl[1], tr[0], tr[1]];
+      // Bounds come from the mask viewport, independently of either layer's CRS and transforms:
+      // WGS84 on geospatial views. Flatten them like project_common_position_to_flat() does.
+      const projectUniforms = project.getUniforms(shaderModuleProps.project) as ProjectUniforms;
+      const [originX, originY] = getFlatCommonOrigin(projectUniforms, viewport);
+      const toFlat = isFlatViewport(viewport)
+        ? (position: number[]) => viewport.projectPosition(position)
+        : lngLatToMercatorCommon;
+      const bl = toFlat([bounds[0], bounds[1], 0]);
+      const tr = toFlat([bounds[2], bounds[3], 0]);
+      maskProps.bounds = [bl[0] - originX, bl[1] - originY, tr[0] - originX, tr[1] - originY];
     } else {
       if (maskId) {
         log.warn(`Could not find a mask layer with id: ${maskId}`)();
@@ -82,6 +100,6 @@ export default class MaskExtension extends LayerExtension {
       maskProps.enabled = false;
     }
 
-    this.setShaderModuleProps({mask: maskProps});
+    return {mask: maskProps};
   }
 }

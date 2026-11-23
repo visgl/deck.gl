@@ -6,7 +6,7 @@
 /* eslint-disable no-console */
 import React, {Component} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, PolygonLayer} from 'deck.gl';
+import DeckGL, {ScatterplotLayer, PolygonLayer} from 'deck.gl';
 
 import DataGenerator from './data-generator';
 
@@ -105,7 +105,7 @@ class Root extends Component {
 
     const layers = [
       new ScatterplotLayer({
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         coordinateOrigin: MAP_CENTER,
         data: points,
         _dataDiff: isDragging ? diffGeometries : null,
@@ -115,7 +115,7 @@ class Root extends Component {
         getRadius: d => d.radius
       }),
       new PolygonLayer({
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         coordinateOrigin: MAP_CENTER,
         data: polygons,
         _dataDiff: isDragging ? diffGeometries : null,

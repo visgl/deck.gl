@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import {Fp64Extension} from '@deck.gl/extensions';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
+
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 
@@ -22,7 +22,7 @@ test('Fp64Extension', () => {
     },
     {
       updateProps: {
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+        coordinateSystem: 'lnglat',
         extensions: [new Fp64Extension()]
       },
       onAfterUpdate: ({layer}) => {

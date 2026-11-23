@@ -3,7 +3,7 @@
 
 The `ClipExtension` adds support for clipping rendered layers by rectangular bounds.
 
-On WebGPU, clipping is currently supported on `ScatterplotLayer`, `PathLayer`, and `SolidPolygonLayer`. Other layer types continue to require WebGL.
+Clipping works with rendering primitives in `@deck.gl/layers` and `@deck.gl/mesh-layers`. Composite layers inherit support from their sublayers. Both clipping modes compose with `BrushingExtension`. Custom layers must expose the [extension shader hooks](../../developer-guide/custom-layers/layer-extensions.md#webgpu-shader-plugins).
 
 ```js
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -61,6 +61,8 @@ When added to a layer via the `extensions` prop, the `ClipExtension` adds the fo
 Rectangular bounds to be used for clipping the rendered region.
 
 Supported format: `[left, bottom, right, top]`
+
+To clip across the antimeridian, use a `left` more than 180° greater than `right`, e.g. `[170, -20, -170, 20]`. Other reversed edges are re-ordered. Crossing regions 180° or wider, and clipping with `clipByInstance: true`, need two layers.
 
 #### `clipByInstance` (boolean, optional) {#clipbyinstance}
 
