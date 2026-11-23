@@ -30,7 +30,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, {error: Error |
   }
 
   componentDidUpdate(prevProps: ErrorBoundaryProps) {
-    if (this.state.error && prevProps.resetKey !== this.props.resetKey) {
+    if (this.state.error && !Object.is(prevProps.resetKey, this.props.resetKey)) {
       this.setState({error: null});
     }
   }

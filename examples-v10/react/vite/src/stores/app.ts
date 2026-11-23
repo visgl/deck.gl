@@ -22,13 +22,14 @@ interface AppState {
 export const useAppStore = create<AppState>(set => {
   // Initialize from URL on store creation
   const params = new URLSearchParams(window.location.search);
-  const initialSelected = params.get('selected');
+  // A value that isn't a number, such as `?selected=abc`, selects nothing.
+  const initialSelected = Number.parseInt(params.get('selected') ?? '', 10);
   const initialSearch = params.get('q') ?? '';
 
   return {
     hovered: null,
     search: initialSearch,
-    selected: initialSelected ? Number.parseInt(initialSelected, 10) : null,
+    selected: Number.isFinite(initialSelected) ? initialSelected : null,
 
     setHovered: id => set({hovered: id}),
 
