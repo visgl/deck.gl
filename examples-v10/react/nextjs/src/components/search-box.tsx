@@ -8,15 +8,16 @@ import {useTransition} from 'react';
 import {useSearch} from '@/hooks/use-search';
 
 /**
- * Search box component with deferred value and transition indicator
+ * Search box with a pending indicator. nuqs takes `startTransition` as an option: the input's
+ * state updates at once, and only the server re-render for the new search runs in the
+ * transition. Wrapping the setter in `startTransition` instead would hold the input at its old
+ * value until the server answers, and drop keystrokes.
  */
 export function SearchBox() {
   const [search, setSearch] = useSearch();
   const [isPending, startTransition] = useTransition();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    startTransition(() => {
-      setSearch(e.target.value);
-    });
+    void setSearch(e.target.value, {startTransition});
   };
 
   return (
