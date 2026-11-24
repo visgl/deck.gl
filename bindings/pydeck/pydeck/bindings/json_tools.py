@@ -4,6 +4,8 @@ Support serializing objects into JSON
 
 import json
 
+import numpy as np
+
 from pydeck.types.base import PydeckType
 
 # Attributes to ignore during JSON serialization
@@ -73,6 +75,10 @@ def default_serialize(o, remap_function=lower_camel_case_keys):
     """Default method for rendering JSON from a dictionary"""
     if issubclass(type(o), PydeckType):
         return repr(o)
+
+    # NumPy arrays and scalars (np.int64, np.float32, np.bool_, ...) become plain Python values
+    if isinstance(o, (np.ndarray, np.generic)):
+        return o.tolist()
 
     # Handle objects without __dict__ (e.g., pandas 3.x DataFrames if detection fails)
     try:
