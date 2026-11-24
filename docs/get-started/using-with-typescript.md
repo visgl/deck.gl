@@ -14,7 +14,7 @@ import {DeckGL} from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 // Types only.
-import type {DeckGLRef} from '@deck.gl/react';
+import type {DeckGLProps} from '@deck.gl/react';
 import type {GeoJsonLayerProps} from '@deck.gl/layers';
 ```
 
@@ -31,6 +31,7 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 
 and replace the package name with `@deck.gl/<module_name>/typed`:
 
+<!-- snippet-check: skip -->
 ```typescript
 import DeckGL from '@deck.gl/react/typed';
 import {GeoJsonLayer} from '@deck.gl/layers/typed';
@@ -38,6 +39,7 @@ import {GeoJsonLayer} from '@deck.gl/layers/typed';
 
 You can also import additional type definitions:
 
+<!-- snippet-check: skip -->
 ```typescript
 import type {DeckGLRef} from '@deck.gl/react/typed';
 import type {GeoJsonLayerProps} from '@deck.gl/layers/typed';

@@ -126,20 +126,24 @@ function extractSnippets(markdownFile) {
   }));
 }
 
-/** Maps every `@deck.gl/react` subpath to its source file, following the package's exports. */
-function getReactSubpathPaths() {
-  const {exports} = JSON.parse(
-    fs.readFileSync(path.join(ROOT, 'modules/react/package.json'), 'utf8')
-  );
+/** Maps every subpath export of each deck.gl module to its source file. */
+function getSubpathPaths() {
   const paths = {};
-  for (const [subpath, target] of Object.entries(exports)) {
-    if (subpath === '.' || subpath === './package.json' || !target.types) {
+  for (const dir of fs.readdirSync(path.join(ROOT, 'modules'))) {
+    const manifestPath = path.join(ROOT, 'modules', dir, 'package.json');
+    if (!fs.existsSync(manifestPath)) {
       continue;
     }
-    const source = target.types
-      .replace(/^\.\/dist\//, './modules/react/src/')
-      .replace(/\.d\.ts$/, '');
-    paths[`@deck.gl/react${subpath.slice(1)}`] = [source];
+    const {name, exports} = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    for (const [subpath, target] of Object.entries(exports ?? {})) {
+      if (subpath === '.' || subpath.includes('*') || typeof target !== 'object' || !target.types) {
+        continue;
+      }
+      const source = target.types
+        .replace(/^\.\/dist\//, `./modules/${dir}/src/`)
+        .replace(/\.d\.ts$/, '');
+      paths[`${name}${subpath.slice(1)}`] = [source];
+    }
   }
   return paths;
 }
@@ -150,7 +154,7 @@ function getCompilerOptions() {
   const {options} = ts.parseJsonConfigFileContent(configFile.config, ts.sys, ROOT);
   return {
     ...options,
-    paths: {...getReactSubpathPaths(), ...options.paths},
+    paths: {...getSubpathPaths(), ...options.paths},
     jsx: ts.JsxEmit.ReactJSX,
     allowJs: true,
     checkJs: true,
