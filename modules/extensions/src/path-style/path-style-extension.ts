@@ -4,8 +4,8 @@
 
 import {getPathStylePlugin, getSDFDashPlugin} from './shaders.wgsl';
 import {LayerExtension, WebMercatorViewport, project, _deepEqual as deepEqual} from '@deck.gl/core';
-import {vec3} from '@math.gl/core';
-import {vec4} from '@math.gl/core';
+import {vec3} from '@math.gl/core/matrix';
+import {vec4} from '@math.gl/core/matrix';
 import {
   dashInjections,
   Defines,

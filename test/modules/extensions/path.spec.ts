@@ -27,7 +27,7 @@ import {
   offsetInjections,
   pathStylePipelineInjections
 } from '../../../modules/extensions/src/path-style/shaders.glsl';
-import {vec3} from '@math.gl/core';
+import {vec3} from '@math.gl/core/matrix';
 
 import * as FIXTURES from 'deck.gl-test/data';
 

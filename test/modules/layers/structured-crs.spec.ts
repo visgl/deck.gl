@@ -11,7 +11,7 @@ import {PathStyleExtension, Fp64Extension} from '@deck.gl/extensions';
 import {device} from '@deck.gl/test-utils/vitest';
 import {resolveCRS} from '@deck.gl/core/utils/crs';
 import {normalizeCoordinateSystem} from '@deck.gl/geo-layers/tile-3d-layer/tile-3d-layer';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
 const geographicCRS = {
   type: 'GeographicCRS',

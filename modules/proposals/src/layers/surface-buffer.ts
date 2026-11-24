@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {ShaderModule} from '@luma.gl/shaders';
-import type {NumberArray16} from '@math.gl/core';
+import type {NumberArray16} from '@math.gl/core/matrix';
 
 /** Opt-in view-space normal/roughness output for auxiliary geometry passes. */
 export const surfaceBuffer = {

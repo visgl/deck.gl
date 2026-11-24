@@ -4,7 +4,7 @@
 
 /* global google, document */
 import {Deck, MapView} from '@deck.gl/core';
-import {Matrix4, Vector2} from '@math.gl/core';
+import {Matrix4, Vector2} from '@math.gl/core/matrix';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 export const POSITIONING_CONTAINER_ID = 'deck-gl-google-maps-container';
 

@@ -6,7 +6,8 @@
 import {Layer, View, Widget} from '@deck.gl/core';
 import type {DeckProps, Effect, LayersList} from '@deck.gl/core';
 
-import type {Instance, JsxDescriptors, ViewOrViews} from './types';
+import {warnOnDuplicateIds} from './element-ids';
+import type {Container, Instance, JsxDescriptors, ViewOrViews} from './types';
 
 /**
  * Type guard to check if a node is a View instance.
@@ -163,6 +164,34 @@ interface RootDescriptorProps {
 }
 
 /**
+ * Merges JSX descriptors with a prop's descriptors by their final id.
+ *
+ * JSX entries with one id collapse into the last of them, at the first one's place. A prop entry
+ * then replaces the entry with its id, so the prop wins over JSX. Other prop entries follow the
+ * JSX entries. Only the final id is compared: elements without an id get distinct ids from their
+ * paths, so a prop entry with the class's default id, such as `new MapView()`, matches none of
+ * them and is added beside them, instead of replacing every one built from that class.
+ */
+function mergeById<T extends {id: string}>(
+  jsxEntries: readonly T[],
+  passedEntries: readonly (T | null | undefined | false)[]
+): T[] {
+  const merged: T[] = [];
+  for (const entry of [...jsxEntries, ...passedEntries]) {
+    if (!entry) {
+      continue;
+    }
+    const index = merged.findIndex(other => other.id === entry.id);
+    if (index < 0) {
+      merged.push(entry);
+    } else {
+      merged[index] = entry;
+    }
+  }
+  return merged;
+}
+
+/**
  * Merges JSX views with the `views` prop as `@deck.gl/react` does.
  *
  * Without JSX views, the prop is used unchanged. When it is also absent, the result is
@@ -178,17 +207,7 @@ function mergeViews(jsxViews: View[], passedViews: ViewOrViews | undefined): Vie
   if (!passedViews) {
     return jsxViews;
   }
-
-  const viewsById = new Map<string, View>();
-  for (const view of jsxViews) {
-    viewsById.set(view.id, view);
-  }
-  for (const view of Array.isArray(passedViews) ? passedViews : [passedViews]) {
-    if (view) {
-      viewsById.set(view.id, view);
-    }
-  }
-  return [...viewsById.values()];
+  return mergeById(jsxViews, Array.isArray(passedViews) ? passedViews : [passedViews]);
 }
 
 /**
@@ -209,14 +228,7 @@ function mergeWidgets(
   if (!passedWidgets) {
     return jsxWidgets;
   }
-
-  const widgetsById = new Map<string, NonNullable<RootWidgets>[number]>();
-  for (const widget of [...jsxWidgets, ...passedWidgets]) {
-    if (widget) {
-      widgetsById.set(widget.id, widget);
-    }
-  }
-  return [...widgetsById.values()];
+  return mergeById<NonNullable<NonNullable<RootWidgets>[number]>>(jsxWidgets, passedWidgets);
 }
 
 /**
@@ -233,14 +245,7 @@ function mergeEffects(jsxEffects: Effect[], passedEffects: Effect[] | undefined)
   if (!passedEffects) {
     return jsxEffects;
   }
-
-  const effectsById = new Map<string, Effect>();
-  for (const effect of [...jsxEffects, ...passedEffects]) {
-    if (effect) {
-      effectsById.set(effect.id, effect);
-    }
-  }
-  return [...effectsById.values()];
+  return mergeById(jsxEffects, passedEffects);
 }
 
 /**
@@ -251,12 +256,13 @@ function mergeEffects(jsxEffects: Effect[], passedEffects: Effect[] | undefined)
  * prop layers draw above JSX layers, and JSX views are merged with the `views` prop by id,
  * with the prop winning. JSX widgets and effects are merged with the `widgets` and `effects`
  * props the same way.
- * An external overlay receives views only when its root forwards them, as the Mapbox and
- * MapLibre roots do; other overlays keep only their `views` prop.
+ * An external overlay receives JSX views only when its root forwards them, as the Mapbox and
+ * MapLibre roots do; other overlays use only their `views` prop.
  *
  * A root with no views leaves deck.gl's `views` alone, as `@deck.gl/react` does, so a
- * widget such as `SplitterWidget` can set them. After the last view is removed, the root
- * sends `null` once, which restores deck.gl's default view.
+ * widget such as `SplitterWidget` can set them. After the last view is removed, whether a
+ * JSX view or the `views` prop, the root sends `null` once, which restores deck.gl's default
+ * view.
  *
  * @param props - The root's passed descriptors, and whether it is an external overlay that
  *   forwards views
@@ -276,12 +282,34 @@ export function combineRootDescriptors(
     widgets: mergeWidgets(jsx.widgets, props._passedWidgets)
   };
 
-  if (!props.isExternalOverlay || props.forwardViews) {
-    const views = mergeViews(jsx.views, props._passedViews);
-    if (views || sentViews) {
-      descriptors.views = views;
-    }
+  // An overlay that does not forward JSX views still owns its `views` prop, so it follows the
+  // same rule with that prop alone.
+  const views =
+    !props.isExternalOverlay || props.forwardViews
+      ? mergeViews(jsx.views, props._passedViews)
+      : (props._passedViews ?? null);
+  if (views || sentViews) {
+    descriptors.views = views;
   }
 
+  return descriptors;
+}
+
+/**
+ * Builds the update a root sends to deck.gl from its JSX descriptors and its props, and checks
+ * it for duplicate ids. Commits and prop-only reconfigures both send their updates through it.
+ */
+export function prepareRootUpdate(
+  container: Container,
+  jsx: JsxDescriptors
+): ReturnType<typeof combineRootDescriptors> {
+  const state = container.store.getState();
+  container.duplicateIdWarnings = warnOnDuplicateIds(
+    jsx,
+    state._passedLayers,
+    container.duplicateIdWarnings
+  );
+  const descriptors = combineRootDescriptors(state, jsx, container.sentViews);
+  container.sentViews = Boolean(descriptors.views);
   return descriptors;
 }

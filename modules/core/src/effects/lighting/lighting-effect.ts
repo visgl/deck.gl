@@ -7,7 +7,7 @@ import {Texture} from '@luma.gl/core';
 import {AmbientLight, DEFAULT_AMBIENT_LIGHT_COLOR} from './ambient-light';
 import {DirectionalLight, DEFAULT_DIRECTIONAL_LIGHT_COLOR} from './directional-light';
 import {PointLight, DEFAULT_POINT_LIGHT_COLOR} from './point-light';
-import {Matrix4, Vector3} from '@math.gl/core';
+import {Matrix4, Vector3} from '@math.gl/core/matrix';
 import ShadowPass from '../../passes/shadow-pass';
 import {shadowPlugin} from '../../shaderlib/shadow/shadow';
 

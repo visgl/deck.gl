@@ -7,6 +7,8 @@ import {LightingEffect, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
+import {markGeneratedEffectId} from '@deck.gl/react/shared/generated-effect-id';
+
 import {
   cloneHiddenInstance,
   cloneHiddenTextInstance,
@@ -17,6 +19,28 @@ import {
 import type {Instance, Props, Type} from '@deck.gl/react/reconciler/types';
 import {createMockHostContext, setupLogSpy} from './test-utils';
 import {TestWidget} from './test-widget';
+
+const HOST_ROOT_TAG = 3;
+const FUNCTION_COMPONENT_TAG = 0;
+const HOST_COMPONENT_TAG = 5;
+
+/**
+ * Builds the fiber chain React passes to `createInstance`: a host fiber under the root, reached
+ * through function components, one per step. A step is a key, or the index of an unkeyed fiber.
+ */
+function createFiberPath(steps: (string | number | null)[]): never {
+  let parent: object = {index: 0, key: null, return: null, sibling: null, tag: HOST_ROOT_TAG};
+  steps.forEach((step, depth) => {
+    parent = {
+      index: typeof step === 'number' ? step : 0,
+      key: typeof step === 'string' ? step : null,
+      return: parent,
+      sibling: null,
+      tag: depth === steps.length - 1 ? HOST_COMPONENT_TAG : FUNCTION_COMPONENT_TAG
+    };
+  });
+  return parent as never;
+}
 
 describe('config-instance-creation', () => {
   let originalEnv: string | undefined;
@@ -180,73 +204,104 @@ describe('config-instance-creation', () => {
       ).toThrow('Unsupported element <unsupported>');
     });
 
-    it('should warn in dev mode for missing layer ID', () => {
-      // Arrange
-      process.env.NODE_ENV = 'development';
-      const {warnSpy} = setupLogSpy();
-
-      const layer = new ScatterplotLayer({data: [], id: 'unknown'}); // "unknown" ID triggers warning
-      const type: Type = 'deckLayer';
-      const props: Props = {layer};
-      const hostContext = createMockHostContext();
-
-      // Act
-      createInstance(type, props, {} as never, hostContext, {} as never);
-
-      // Assert
-      expect(warnSpy).toHaveBeenCalledWith('ScatterplotLayer needs a stable id');
-    });
-
-    it('should warn in dev mode for missing view ID', () => {
-      // Arrange
-      process.env.NODE_ENV = 'development';
-      const {warnSpy} = setupLogSpy();
-
-      const view = new MapView({id: 'unknown'}); // "unknown" ID triggers warning
-      const type: Type = 'deckView';
-      const props: Props = {view};
-      const hostContext = createMockHostContext();
-
-      // Act
-      createInstance(type, props, {} as never, hostContext, {} as never);
-
-      // Assert
-      expect(warnSpy).toHaveBeenCalledWith('MapView needs a stable id');
-    });
-
-    it('warns about default ids in every build except production, as deck.gl does', () => {
+    it('gives each kind of descriptor without an id one from its element path', () => {
       const {warnSpy} = setupLogSpy();
       const hostContext = createMockHostContext();
+      // A keyed element under the root's first child, as React passes its fiber.
+      const fiber = createFiberPath([null, 'a/b']);
+      const create = (type: Type, props: Props) =>
+        createInstance(type, props, {} as never, hostContext, fiber).node;
 
-      for (const env of ['test', 'staging']) {
-        process.env.NODE_ENV = env;
-        warnSpy.mockClear();
-        createInstance(
-          'deckLayer',
-          {layer: new ScatterplotLayer({data: [], id: 'unknown'})},
-          {} as never,
-          hostContext,
-          {} as never
-        );
-        expect(warnSpy).toHaveBeenCalledWith('ScatterplotLayer needs a stable id');
-      }
-    });
-
-    it('should not warn in production mode for missing IDs', () => {
-      // Arrange
-      process.env.NODE_ENV = 'production';
-      const {warnSpy} = setupLogSpy();
-
-      const layer = new ScatterplotLayer({data: []}); // No ID
-      const type: Type = 'deckLayer';
-      const props: Props = {layer};
-      const hostContext = createMockHostContext();
-
-      // Act
-      createInstance(type, props, {} as never, hostContext, {} as never);
-
-      // Assert
+      expect(create('deckLayer', {layer: new ScatterplotLayer({data: []})}).id).toBe(
+        'ScatterplotLayer/#0/a%2Fb'
+      );
+      expect(create('deckView', {view: new MapView()}).id).toBe('MapView/#0/a%2Fb');
+      const widget = new TestWidget({});
+      // Widgets and effects are given their id in place.
+      expect(create('deckWidget', {widget})).toBe(widget);
+      expect(widget.id).toBe('test-widget/#0/a%2Fb');
+      expect(widget.props.id).toBe('test-widget/#0/a%2Fb');
+      // Only an effect a component built, which the component marks, gets an id from its path.
+      const effect = markGeneratedEffectId(new LightingEffect());
+      expect(create('deckEffect', {effect})).toBe(effect);
+      expect(effect.id).toBe('lighting-effect/#0/a%2Fb');
+      // Rendering the same effect again starts from its own id, not the one it was given.
+      create('deckEffect', {effect});
+      expect(effect.id).toBe('lighting-effect/#0/a%2Fb');
       expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    it('keeps an explicit id, and treats an empty one as missing', () => {
+      const hostContext = createMockHostContext();
+      const fiber = createFiberPath([1]);
+      const create = (type: Type, props: Props) =>
+        createInstance(type, props, {} as never, hostContext, fiber).node;
+
+      const layer = new ScatterplotLayer({data: [], id: 'points'});
+      expect(create('deckLayer', {layer})).toBe(layer);
+      expect(create('deckLayer', {layer: new ScatterplotLayer({data: [], id: ''})}).id).toBe(
+        'ScatterplotLayer/#1'
+      );
+      const view = new MapView({id: 'main'});
+      expect(create('deckView', {view})).toBe(view);
+      const widget = new TestWidget({id: 'legend'});
+      expect(create('deckWidget', {widget}).id).toBe('legend');
+    });
+
+    it("keeps an explicit id that equals the class's default id", () => {
+      const hostContext = createMockHostContext();
+      const fiber = createFiberPath([null, 'a']);
+      const create = (type: Type, props: Props) =>
+        createInstance(type, props, {} as never, hostContext, fiber).node;
+
+      const layer = new ScatterplotLayer({data: [], id: 'ScatterplotLayer'});
+      expect(create('deckLayer', {layer})).toBe(layer);
+      const view = new MapView({id: 'MapView'});
+      expect(create('deckView', {view})).toBe(view);
+      const widget = new TestWidget({id: 'test-widget'});
+      expect(create('deckWidget', {widget})).toBe(widget);
+      expect(widget.id).toBe('test-widget');
+      expect(widget.props.id).toBe('test-widget');
+    });
+
+    it('keeps the id of an effect passed in, which cannot say whether its id was chosen', () => {
+      const hostContext = createMockHostContext();
+      const fiber = createFiberPath([null, 'a']);
+      const effect = new LightingEffect();
+      expect(createInstance('deckEffect', {effect}, {} as never, hostContext, fiber).node).toBe(
+        effect
+      );
+      expect(effect.id).toBe('lighting-effect');
+      effect.id = 'sun';
+      createInstance('deckEffect', {effect}, {} as never, hostContext, fiber);
+      expect(effect.id).toBe('sun');
+    });
+
+    it('keeps the element path through a hidden clone, so a later clone keeps its id', () => {
+      const hostContext = createMockHostContext();
+      const fiber = createFiberPath([null, 'a']);
+      const layerProps = {layer: new ScatterplotLayer({data: []})};
+      const instance = createInstance('deckLayer', layerProps, {} as never, hostContext, fiber);
+      expect(instance.node.id).toBe('ScatterplotLayer/#0/a');
+
+      // Suspense or Activity hides the element, then it renders a new layer.
+      const hidden = cloneHiddenInstance(instance, 'deckLayer', layerProps);
+      const nextProps = {layer: new ScatterplotLayer({data: []})};
+      const next = cloneInstance(hidden, 'deckLayer', layerProps, nextProps, false, null);
+      expect(next?.node.id).toBe('ScatterplotLayer/#0/a');
+    });
+
+    it("gives a lone top-level element deck.gl's default id", () => {
+      const hostContext = createMockHostContext();
+      const node = createInstance(
+        'deckLayer',
+        {layer: new ScatterplotLayer({data: []})},
+        {} as never,
+        hostContext,
+        createFiberPath([0])
+      ).node;
+
+      expect(node.id).toBe('ScatterplotLayer');
     });
 
     it('should return instance with node and empty children array', () => {
