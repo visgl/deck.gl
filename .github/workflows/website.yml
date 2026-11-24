@@ -6,7 +6,10 @@ on:
       - '*-release'
   workflow_dispatch:
 
-concurrency: website-gh-pages
+concurrency:
+  group: website-gh-pages
+  queue: max
+  cancel-in-progress: false
 
 jobs:
   check_branch:
@@ -89,6 +92,7 @@ jobs:
         with:
           token: ${{ secrets.WEBSITE_DEPLOY_TOKEN }}
           branch: gh-pages
+          force: false
           folder: website-pages-marker
           clean: false
 
@@ -97,6 +101,7 @@ jobs:
         with:
           token: ${{ secrets.WEBSITE_DEPLOY_TOKEN }}
           branch: gh-pages
+          force: false
           folder: website/build
           target-folder: ${{ needs.check_branch.outputs.target_folder }}
           clean: true
