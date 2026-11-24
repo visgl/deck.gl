@@ -131,8 +131,8 @@ function extractSnippets(markdownFile) {
   }));
 }
 
-/** Maps every subpath export of each deck.gl module to its source file. */
-function getSubpathPaths() {
+/** Maps every export of each deck.gl module, its root and its subpaths, to its source file. */
+function getExportPaths() {
   const paths = {};
   for (const dir of fs.readdirSync(path.join(ROOT, 'modules'))) {
     const manifestPath = path.join(ROOT, 'modules', dir, 'package.json');
@@ -141,7 +141,7 @@ function getSubpathPaths() {
     }
     const {name, exports} = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
     for (const [subpath, target] of Object.entries(exports ?? {})) {
-      if (subpath === '.' || subpath.includes('*') || typeof target !== 'object' || !target.types) {
+      if (subpath.includes('*') || typeof target !== 'object' || !target.types) {
         continue;
       }
       const source = target.types
@@ -159,7 +159,7 @@ function getCompilerOptions() {
   const {options} = ts.parseJsonConfigFileContent(configFile.config, ts.sys, ROOT);
   return {
     ...options,
-    paths: {...getSubpathPaths(), ...options.paths},
+    paths: {...getExportPaths(), ...options.paths},
     jsx: ts.JsxEmit.ReactJSX,
     allowJs: true,
     checkJs: true,
