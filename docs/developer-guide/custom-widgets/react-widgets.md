@@ -12,12 +12,12 @@ There are two distinct patterns, and it is important to pick the right one:
 
    ```tsx
    import {createWidgetComponent} from '@deck.gl/react';
-   import {RotateWidget as DeckRotateWidget} from './rotate-widget';
+   import {SwitchWidget as DeckSwitchWidget} from './switch-widget';
 
-   export const RotateWidget = createWidgetComponent(DeckRotateWidget);
+   export const SwitchWidget = createWidgetComponent(DeckSwitchWidget);
    ```
 
-   Render it inside `DeckGL` like any other widget component: `<RotateWidget step={45} />`. Use this whenever the widget already exists or should also work outside React. See [Custom classes](../../api-reference/react/components.md#custom-classes).
+   `SwitchWidget` is the toggle from [Managing Widget State](./universal-widgets.md#managing-widget-state), which renders its own button. Render it inside `DeckGL` like any other widget component: `<SwitchWidget onChange={setOn} />`. Use this whenever the widget already exists or should also work outside React. See [Custom classes](../../api-reference/react/components.md#custom-classes).
 
 2. **Render the widget's UI with React.** The widget class hooks into deck.gl and hands its root element to React, which renders into it with a portal. This is the subject of the rest of this guide. It is most suitable when you are working on a React application and do not intend to distribute the widget outside of it.
 
