@@ -1,6 +1,6 @@
 {
   "name": "@deck.gl/proposals",
-  "version": "10.0.0-alpha.1",
+  "version": "10.0.0-alpha.2",
   "private": true,
   "description": "Private experimental deck.gl layers and effects",
   "license": "MIT",
@@ -53,10 +53,10 @@
   ],
   "sideEffects": false,
   "dependencies": {
-    "@deck.gl/core": "10.0.0-alpha.1",
-    "@deck.gl/extensions": "10.0.0-alpha.1",
-    "@deck.gl/geo-layers": "10.0.0-alpha.1",
-    "@deck.gl/layers": "10.0.0-alpha.1",
+    "@deck.gl/core": "10.0.0-alpha.2",
+    "@deck.gl/extensions": "10.0.0-alpha.2",
+    "@deck.gl/geo-layers": "10.0.0-alpha.2",
+    "@deck.gl/layers": "10.0.0-alpha.2",
     "@loaders.gl/core": "5.0.0-rc.2",
     "@loaders.gl/tiles": "5.0.0-rc.2",
     "@luma.gl/anari": "10.0.0-beta.3",
