@@ -33,7 +33,10 @@ export type IdMatch<T> = {
  * @param oldItems the entries from the previous update
  * @param newItems the entries for this update
  * @param kind the plural noun for the duplicate warning, such as `'widgets'`. Omit it to skip the warning.
- * @returns a match for each new entry, in order, and the old entries whose id is not in the new list
+ * @returns a match for each new entry, in order, and the old entries whose id is not in the new list.
+ *   An old entry that repeats an earlier old entry's id is never a `previous`, and is in `removed`
+ *   only once its id is gone, so a caller that holds resources per old entry must release those
+ *   duplicates itself.
  */
 export function matchById<T extends {id: string}>(
   oldItems: readonly T[],

@@ -139,7 +139,7 @@ I would like to call out the expected behavior when the `widgets` prop shallowly
 > [!NOTE]
 > **Updated in November 2026** ([#11113](https://github.com/visgl/deck.gl/issues/11113))
 >
-> - Widgets with the same id and class default id (`defaultProps.id`) are the "same", so a widget stays mounted across hot module reloads.
+> - Widgets with the same id, class default id (`defaultProps.id`), `viewId` and `placement` are the "same". Comparing the class default id, not the constructor, keeps a widget mounted across hot module reloads.
 > - When two widgets share an id, only the first is mounted.
 
 This would avoid the performance hit by constantly adding/removing controls when using React.
