@@ -19,6 +19,27 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.4
 
+#### deck.gl [v9.4.2] - Nov 23 2026
+
+- fix(widgets): respect the id prop on TimelineWidget and TooltipWidget (#11099)
+- fix(core): keep the default view and widget id on a prototype (#11114)
+- fix(widgets): give each widget class its own default id (#11116)
+- fix(core): give duplicate view ids one controller in ViewManager (#11065)
+- fix(core): replace a matched widget when its type changes in WidgetManager (#11115)
+- fix(core): mount one widget per id in WidgetManager (#11064)
+- fix(geo-layers): clip MVTLayer sub layers to the tile under GlobeView (#10727)
+- fix(extensions): FillStyleExtension pattern placement in GlobeView (#10658)
+- fix(maplibre): insert interleaved layer groups once sources load (#10734)
+- fix(google-maps): follow rendering type changes and remove containers (#10901)
+- fix(layers): render LineLayer and ArcLayer under GlobeView back-face culling (#10670)
+- fix(core, layers): hide icons, text and billboard points behind the globe (#10750)
+- fix(extensions): ClipExtension geometry mode in GlobeView (#10659)
+- fix(extensions): redraw collision map when its size changes (#10999)
+- fix(core): ignore stale async prop loads before releasing the current value (#10828)
+- fix(geo-layers): call `onTileUnload` when finalizing a TileLayer (#10883)
+- fix(jupyter-widget): size MapLibre map to the widget and load its CSS (#10951)
+- fix(layers): drop the deleted texture in IconManager.finalize (#10810)
+
 #### deck.gl [v9.4.1] - Oct 28 2026
 
 - fix(core): honor Deck GPU debug option during device initialization (#10782)
