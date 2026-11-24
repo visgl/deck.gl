@@ -52,6 +52,7 @@ you built yourself, use `<deckLayer layer={layer} />`, `<deckView>`, `<deckWidge
 The root is a named export. Import layers, views and widgets from the `@deck.gl/react` subpaths
 instead of the deck.gl modules; the JSX stays the same.
 
+<!-- snippet-check: skip -->
 ```tsx
 // Before
 import DeckGL from '@deck.gl/react';

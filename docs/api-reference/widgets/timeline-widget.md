@@ -91,7 +91,8 @@ const deck = new Deck({
 
 ```tsx
 import React, {useState} from 'react';
-import DeckGL, {_TimelineWidget as TimelineWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import {_TimelineWidget as TimelineWidget} from '@deck.gl/react/widgets';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -127,7 +128,8 @@ function App() {
 
 ```tsx
 import React, {useState} from 'react';
-import DeckGL, {_TimelineWidget as TimelineWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import {_TimelineWidget as TimelineWidget} from '@deck.gl/react/widgets';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import '@deck.gl/widgets/stylesheet.css';
 
