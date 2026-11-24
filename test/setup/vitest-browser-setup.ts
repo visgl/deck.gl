@@ -31,3 +31,7 @@ import {commands} from 'vitest/browser';
 (window as any).browserTestDriver_emulateInput = async (event: any) => {
   return commands.emulateInput(event);
 };
+
+// Release the WebGL contexts that each test file's detached canvases leave behind
+import {releaseWebGLContextsAfterFile} from './release-webgl-contexts';
+releaseWebGLContextsAfterFile();
