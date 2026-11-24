@@ -1548,11 +1548,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       deviceProps.adapters.push(webgl2Adapter);
     }
 
-    const defaultCanvasProps: CanvasContextProps = {
-      // we must use 'premultiplied' canvas for webgpu to enable transparency and match shaders
-      alphaMode: this.props.deviceProps?.type === 'webgpu' ? 'premultiplied' : undefined
-    };
-
     const canvas = this._createDeviceCanvas(props);
     // Track who created the canvas directly, including canvases in a different document.
     const ownsCanvas = this._isMultiCanvasMode() || canvas === this._ownedCanvas;
@@ -1575,7 +1570,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       ...deviceProps,
       // In deck.gl v10 we may emphasize multi canvas support and unwind this prop wrapping
       createCanvasContext: {
-        ...defaultCanvasProps,
+        // Match the premultiplied colors produced by the WebGPU shaders.
+        alphaMode: deviceType === 'webgpu' ? 'premultiplied' : undefined,
         ...canvasContextProps,
         canvas,
         useDevicePixels: this.props.useDevicePixels,
