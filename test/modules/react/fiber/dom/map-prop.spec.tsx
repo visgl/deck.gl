@@ -85,7 +85,6 @@ for (const {name, Root, createMap} of PROVIDERS) {
           await act(async () => {
             reactRoot.render(
               <Root
-                deviceProps={{type: 'webgl'}}
                 interleaved={interleaved}
                 map={map as never}
                 onDeckChange={deckgl => {

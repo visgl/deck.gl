@@ -4,8 +4,6 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v10
 
-Standalone Deck instances now prefer WebGPU. See [device selection and migration](./developer-guide/webgpu.md#device-selection-and-migration) for the WebGL2 override and backend-specific behavior.
-
 Target release date: EOY 2026. Alpha releases available.
 
 v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, SQL expression powered big data library. It brings support for non-mercator projection and initial hooks for advanced GPU compute integration.
@@ -16,7 +14,7 @@ v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, S
 
 ### GPU
 
-- [**WebGPU**](./developer-guide/webgpu.md) 🚧 — WebGPU is now the default renderer with full feature support.
+- Standalone Deck instances now prefer [**WebGPU**](./developer-guide/webgpu.md#device-selection-and-migration).
 - [**GPU vectors**](./developer-guide/using-with-arrow.md#direct-gpuvector-inputs) — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph.
 
 ### Apache Arrow

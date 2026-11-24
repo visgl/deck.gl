@@ -23,10 +23,11 @@ new Deck({deviceProps: {type: 'webgpu'}}); // Require WebGPU
 
 The [WebGL-only build](./building-apps.md) defaults to WebGL2. Read `device.type` in `onDeviceInitialized` to see which backend a running application uses.
 
-- **Picking.** Use `await deck.pickObjectAsync(...)` for one object and `await deck.pickObjectsAsync(...)` for a rectangle. Applications that depend on synchronous or multi-depth picking can explicitly request WebGL2.
+- **Render callbacks.** Use `onDeviceInitialized` for either backend. WebGPU skips `onWebGLInitialized` and supplies no `gl` to `onBeforeRender` or `onAfterRender`.
+- **Picking.** WebGPU requires asynchronous picking and rejects `pickAsync: 'sync'`. Use `await deck.pickObjectAsync(...)` for one object and `await deck.pickObjectsAsync(...)` for a rectangle. Applications that depend on synchronous or multi-depth picking can explicitly request WebGL2.
 - **Layers and effects.** Check the tables below for the layers, transitions and effects your application uses. Some CARTO layers, attribute transitions, shadows and postprocessing have backend-specific limitations.
 - **Custom shaders and binary data.** Custom layers need WGSL implementations and compatible extension hooks. Test application-supplied buffer layouts on WebGPU, especially external float64 buffers and packed attributes.
-- **Map integrations.** Separate-canvas overlays can use their own device. Interleaved integrations use the rendering context supplied by the host map.
+- **Map integrations.** Mapbox, MapLibre and Google Maps overlays default to WebGL2 when creating their own device to support synchronous picking. Interleaved integrations use the rendering context supplied by the host map.
 
 ## Layers
 

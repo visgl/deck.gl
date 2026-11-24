@@ -6,7 +6,11 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
-Standalone Deck instances now prefer WebGPU. See [device selection and migration](./developer-guide/webgpu.md#device-selection-and-migration) for the WebGL2 override and backend-specific behavior.
+### Default device
+
+If your application creates a standalone Deck without supplying a device or context, Deck now prefers WebGPU. To keep WebGL2, set `deviceProps: {type: 'webgl'}`.
+
+On WebGPU, use `onDeviceInitialized` in place of `onWebGLInitialized`. The `gl` argument to `onBeforeRender` and `onAfterRender` is undefined, and `pickAsync: 'sync'` reports an error. See [device selection and migration](./developer-guide/webgpu.md#device-selection-and-migration).
 
 ### @deck.gl/react
 
