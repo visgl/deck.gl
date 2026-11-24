@@ -31,7 +31,7 @@ type PackedGroup = {
 type PackedGroupState = {
   /**
    * Shared vertex buffer owned by this helper. Every model of the layer binds it, so repacks write
-   * into it in place instead of returning it to the gpgpu buffer pool while it is still bound.
+   * into it in place instead of returning it to the luma.gl buffer pool while it is still bound.
    */
   buffer: Buffer;
   layoutKey: string;

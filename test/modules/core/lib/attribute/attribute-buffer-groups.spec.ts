@@ -6,7 +6,7 @@ import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import {Layer, Viewport} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
-import {GPUDataEvaluator} from '@luma.gl/gpgpu';
+import {GPUDataEvaluator} from '@luma.gl/graph/gpu-simple-graph';
 import {beforeAll, test, expect, vi} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
 
@@ -315,7 +315,7 @@ test('AttributeManager buffer groups are shared across model step modes', () => 
 test('AttributeManager buffer groups keep earlier model bindings valid', async () => {
   if (!webgpuDevice) return;
 
-  // Leave two buffers of the packed size in the shared gpgpu buffer pool, as earlier layers on
+  // Leave two buffers of the packed size in the shared luma.gl buffer pool, as earlier layers on
   // the same device do. The pool returns the first buffer that fits.
   const pooledEvaluators = [0, 1].map(() => GPUDataEvaluator.fromArray(new Float32Array(4), {}));
   pooledEvaluators.forEach(evaluator => evaluator.evaluateSync(webgpuDevice));
