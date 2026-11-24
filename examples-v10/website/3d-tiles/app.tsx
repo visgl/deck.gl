@@ -13,7 +13,7 @@ import {
   type CesiumIonTilesetMetadata
 } from '@loaders.gl/tiles-3d/3d-tiles';
 
-import {log, type MapViewState} from '@deck.gl/core';
+import type {MapViewState} from '@deck.gl/core';
 import type {Tileset3D} from '@loaders.gl/tiles-3d';
 
 const ION_ASSET_ID = 43978;
@@ -44,22 +44,8 @@ export default function App({
   const [ionTileset, setIonTileset] = useState<CesiumIonTilesetMetadata | null>(null);
 
   useEffect(() => {
-    // Exchange the ion access token for the asset's tileset URL and endpoint credential
-    let isCancelled = false;
-    resolveCesiumIonTileset(ION_TOKEN, ION_ASSET_ID)
-      .then(tileset => {
-        if (!isCancelled) {
-          setIonTileset(tileset);
-        }
-      })
-      .catch(error => {
-        if (!isCancelled) {
-          log.error('Failed to resolve Cesium ion tileset', error)();
-        }
-      });
-    return () => {
-      isCancelled = true;
-    };
+    // Resolves the tileset url of the ion asset and a credential for its endpoint
+    resolveCesiumIonTileset(ION_TOKEN, ION_ASSET_ID).then(setIonTileset, console.error);
   }, []);
 
   const onTilesetLoad = (tileset: Tileset3D) => {
