@@ -47,7 +47,7 @@ for (const interleaved of [false, true]) {
       if (device.type !== 'webgl') {
         return;
       }
-      overlay = new MapLibreOverlay({interleaved, layers: []});
+      overlay = new MapLibreOverlay({interleaved, layers: [], deviceProps: {type: 'webgl'}});
       map.addControl(overlay);
     });
 

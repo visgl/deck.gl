@@ -31,7 +31,12 @@ async function renderDeckGL(
   const loaded = new Promise<void>(resolve => {
     onLoad = resolve;
   });
-  const element = createElement(Component, {...SIZE, onLoad, ...props});
+  const element = createElement(Component, {
+    ...SIZE,
+    deviceProps: {type: 'webgl'},
+    onLoad,
+    ...props
+  });
   await act(() => root.render(strict ? createElement(StrictMode, null, element) : element));
   await loaded;
   const gl = container.querySelector('canvas')!.getContext('webgl2')!;

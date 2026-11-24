@@ -187,6 +187,7 @@ export default function App({onStatsChange, showStats = true}: TileDemoProps = {
       aria-label="Shared tileset comparison"
     >
       <DeckGL
+        deviceProps={{type: 'webgl'}}
         views={VIEWS}
         layers={layers}
         viewState={viewState}
