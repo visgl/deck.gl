@@ -70,7 +70,7 @@ var offsetWidth = 1.0;
   (*pathPosition).y *= offsetWidth;
   *pathLength *= offsetWidth;
   #ifdef DASH_ENABLED
-    *pathBounds *= offsetWidth;
+    *dashSegment *= offsetWidth;
   #endif
 #endif
 #ifdef DASH_ENABLED
@@ -107,14 +107,14 @@ var<private> pathStyle_subPixelBlend: f32;
         'wgsl:fs:#main-start': /* wgsl */ `
 let gap = pathStyle_dashArray.y;
 let unitLength = max(pathStyle_dashArray.x + gap, 0.0001);
-var fitLength = varyings.vPathLength;
+var fitLength = varyings.vDashSegment.y;
 #ifdef HIGH_PRECISION_DASH
   fitLength = pathStyle_dashPathLength;
 #endif
 let justified = pathStyle.dashAlignMode != 0.0;
 let period = select(unitLength, pathStyle_fitPeriod(fitLength, unitLength), justified);
 let solid = min(pathStyle_dashArray.x, period);
-let along = varyings.vPathPosition.y + pathStyle_dashOffset + select(0.0, solid * 0.5, justified);
+let along = varyings.vDashSegment.x + pathStyle_dashOffset + select(0.0, solid * 0.5, justified);
 let phase = pathStyle_mod(along, period);
 let filterWidth = max(fwidth(along), 0.0001);
 let gapDistance = min(phase - solid, period - phase);
