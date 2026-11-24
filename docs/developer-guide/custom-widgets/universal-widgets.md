@@ -110,7 +110,7 @@ Remarks:
 
 ### Updating Properties
 
-[`setProps(props: Partial<PropsT>)`](../../api-reference/core/widget.md#setprops) - Called whenever the application supplies new props, and by `useWidget` on every React render. The base implementation updates the root element's `className` and `style`, merges the new props into `this.props`, and calls `updateHTML()`.
+[`setProps(props: Partial<PropsT>)`](../../api-reference/core/widget.md#setprops) - Called whenever the application supplies new props, including on every render of a `@deck.gl/react` widget component. The base implementation updates the root element's `className` and `style`, merges the new props into `this.props`, and calls `updateHTML()`.
 
 Override it to sync any class members that mirror props, and call `super.setProps(props)`:
 
