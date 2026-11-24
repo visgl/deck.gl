@@ -6,7 +6,6 @@ const packageRoot = dirname(fileURLToPath(import.meta.url));
 const lumaModules = join(packageRoot, '../luma.gl/modules');
 
 const LUMA_ALIASES_LOCAL = {
-  '@luma.gl/constants': `${lumaModules}/constants/src`,
   '@luma.gl/core': `${lumaModules}/core/src`,
   '@luma.gl/engine': `${lumaModules}/engine/src`,
   '@luma.gl/core/webgl': `${lumaModules}/core/src/webgl`,

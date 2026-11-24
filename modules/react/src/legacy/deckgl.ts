@@ -231,7 +231,8 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     thisRef.deck = createDeckInstance(thisRef, DeckClass, {
       ...deckProps,
       parent: containerRef.current,
-      canvas: canvasRef.current
+      canvas: canvasRef.current,
+      deviceProps: {ownsHandle: true, ...deckProps.deviceProps}
     });
 
     return () => thisRef.deck?.finalize();

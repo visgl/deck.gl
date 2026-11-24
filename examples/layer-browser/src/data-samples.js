@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 
 /* load data samples for display */
 import allPoints from '../data/sf.bike.parking.json' with {type: 'json'};

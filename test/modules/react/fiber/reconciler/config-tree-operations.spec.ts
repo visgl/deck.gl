@@ -456,8 +456,23 @@ describe('config-tree-operations', () => {
         });
       });
 
-      it('omits views for an external overlay root that does not forward views', () => {
-        const {container, deckgl} = createViewsContainer(new MapView({id: 'prop'}), true);
+      it('sends only the views prop for an external overlay root that does not forward views', () => {
+        const propView = new MapView({id: 'prop'});
+        const {container, deckgl} = createViewsContainer(propView, true);
+
+        replaceContainerChildren(container, [createMockInstance(new MapView({id: 'jsx'}))]);
+
+        // The JSX view is not forwarded. The prop is sent, so that removing it later sends null.
+        expect(deckgl.setProps).toHaveBeenCalledExactlyOnceWith({
+          layers: [],
+          views: propView,
+          widgets: [],
+          effects: []
+        });
+      });
+
+      it('omits views for an external overlay root that has no views prop', () => {
+        const {container, deckgl} = createViewsContainer(undefined, true);
 
         replaceContainerChildren(container, [createMockInstance(new MapView({id: 'jsx'}))]);
 

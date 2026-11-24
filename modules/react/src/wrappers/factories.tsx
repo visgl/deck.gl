@@ -6,6 +6,7 @@ import 'client-only';
 import type {Effect, Layer, View} from '@deck.gl/core';
 import type {ReactElement, ReactNode} from 'react';
 
+import {markGeneratedEffectId} from '../shared/generated-effect-id';
 import type {AnyWidget} from '../types/jsx';
 
 /**
@@ -43,9 +44,13 @@ export function renderWidget(widget: AnyWidget): ReactElement {
   return <deckWidget widget={widget} />;
 }
 
-/** @internal */
+/**
+ * Every caller builds the effect it passes, so the effect is marked for an id from its path.
+ * deck.gl effects take no `id`; see `generated-effect-id.ts`.
+ * @internal
+ */
 export function renderEffect(effect: Effect): ReactElement {
-  return <deckEffect effect={effect} />;
+  return <deckEffect effect={markGeneratedEffectId(effect)} />;
 }
 
 /** Names the component after the class, so React DevTools shows `ScatterplotLayer`. */

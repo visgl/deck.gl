@@ -88,7 +88,8 @@ const deck = new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL, {SelectorWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import {SelectorWidget} from '@deck.gl/react/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
 type ViewLayout = 'single' | 'split-horizontal' | 'split-vertical';
