@@ -110,3 +110,29 @@ def test_layer_with_extension_raw_dict():
     layer_json = json.loads(Deck(test_layer).to_json())["layers"][0]
 
     assert layer_json["extensions"] == [{"@@type": "DataFilterExtension", "filterSize": 1}]
+
+
+def test_list_accessor_with_expressions_after_a_constant():
+    test_layer = Layer(
+        "ScatterplotLayer",
+        data=df,
+        get_fill_color=[255, "lng > 0 ? 255 : 88", "lng > 0 ? 255 : 88"],
+    )
+
+    layer_json = json.loads(Deck(test_layer).to_json())["layers"][0]
+
+    assert layer_json["getFillColor"] == "@@=[255, lng > 0 ? 255 : 88, lng > 0 ? 255 : 88]"
+
+
+def test_list_accessor_with_only_constants_is_unchanged():
+    test_layer = Layer(
+        "ScatterplotLayer",
+        data=df,
+        get_fill_color=[255, 0, 0, 140],
+        get_position=["lng", "lat"],
+    )
+
+    layer_json = json.loads(Deck(test_layer).to_json())["layers"][0]
+
+    assert layer_json["getFillColor"] == [255, 0, 0, 140]
+    assert layer_json["getPosition"] == "@@=[lng, lat]"
