@@ -159,7 +159,9 @@ new Deck({
 ```
 import React, {useCallback} from 'react';
 
-import DeckGL, {InfoWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+
+import {InfoWidget} from '@deck.gl/react/widgets';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 

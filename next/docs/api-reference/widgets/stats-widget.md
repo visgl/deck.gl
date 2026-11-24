@@ -60,7 +60,9 @@ new Deck({
 ```
 import React from 'react';
 
-import DeckGL, {_StatsWidget as StatsWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+
+import {_StatsWidget as StatsWidget} from '@deck.gl/react/widgets';
 
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -84,7 +86,9 @@ function App() {
 ```
 import React, {useState} from 'react';
 
-import DeckGL, {_StatsWidget as StatsWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+
+import {_StatsWidget as StatsWidget} from '@deck.gl/react/widgets';
 
 import '@deck.gl/widgets/stylesheet.css';
 

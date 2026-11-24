@@ -86,7 +86,9 @@ new Deck({
 ```
 import React from 'react';
 
-import DeckGL, {GimbalWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+
+import {GimbalWidget} from '@deck.gl/react/widgets';
 
 import {OrbitView} from '@deck.gl/core';
 
@@ -130,7 +132,9 @@ function App() {
 ```
 import React, {useState, useCallback} from 'react';
 
-import DeckGL, {GimbalWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+
+import {GimbalWidget} from '@deck.gl/react/widgets';
 
 import {OrbitView, type OrbitViewState} from '@deck.gl/core';
 

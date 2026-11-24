@@ -15,7 +15,7 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 
 // Types only.
 
-import type {DeckGLRef} from '@deck.gl/react';
+import type {DeckGLProps} from '@deck.gl/react';
 
 import type {GeoJsonLayerProps} from '@deck.gl/layers';
 ```

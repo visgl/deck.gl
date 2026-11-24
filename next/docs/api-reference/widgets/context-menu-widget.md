@@ -241,7 +241,9 @@ const deck = new Deck({
 ```
 import React, {useState, useCallback} from 'react';
 
-import DeckGL, {ContextMenuWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+
+import {ContextMenuWidget} from '@deck.gl/react/widgets';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 

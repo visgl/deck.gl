@@ -87,7 +87,9 @@ new Deck({
 ```
 import React from 'react';
 
-import DeckGL, {ToggleWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+
+import {ToggleWidget} from '@deck.gl/react/widgets';
 
 import '@deck.gl/widgets/stylesheet.css';
 

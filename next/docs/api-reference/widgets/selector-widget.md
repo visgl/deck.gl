@@ -137,7 +137,9 @@ const deck = new Deck({
 ```
 import React from 'react';
 
-import DeckGL, {SelectorWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+
+import {SelectorWidget} from '@deck.gl/react/widgets';
 
 import '@deck.gl/widgets/stylesheet.css';
 

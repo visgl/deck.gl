@@ -102,7 +102,9 @@ new Deck<OrbitView[]>({
 ```
 import React from 'react';
 
-import DeckGL, {_SplitterWidget as SplitterWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+
+import {_SplitterWidget as SplitterWidget} from '@deck.gl/react/widgets';
 
 import {OrbitView, type OrbitViewState} from '@deck.gl/core';
 
@@ -154,7 +156,9 @@ function App() {
 ```
 import React, {useState} from 'react';
 
-import DeckGL, {_SplitterWidget as SplitterWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+
+import {_SplitterWidget as SplitterWidget} from '@deck.gl/react/widgets';
 
 import {MapView, type MapViewState, type View} from '@deck.gl/core';
 

@@ -161,7 +161,9 @@ new Deck({
 ```
 import React from 'react';
 
-import DeckGL, {ScrollbarWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+
+import {ScrollbarWidget} from '@deck.gl/react/widgets';
 
 import {OrthographicView} from '@deck.gl/core';
 

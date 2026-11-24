@@ -58,7 +58,9 @@ new Deck({
 ```
 import React from 'react';
 
-import DeckGL, {ThemeWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+
+import {ThemeWidget} from '@deck.gl/react/widgets';
 
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -82,7 +84,9 @@ function App() {
 ```
 import React, {useState} from 'react';
 
-import DeckGL, {ThemeWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+
+import {ThemeWidget} from '@deck.gl/react/widgets';
 
 import '@deck.gl/widgets/stylesheet.css';
 
