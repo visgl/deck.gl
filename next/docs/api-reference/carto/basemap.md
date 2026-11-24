@@ -23,17 +23,31 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/carto
 ```
 
 ```
-import {DeckGL} from '@deck.gl/react';
+import {useState} from 'react';
 
-import {Map} from 'react-map-gl/maplibre';
+import {Map, type MapRef} from 'react-map-gl/maplibre';
+
+import {DeckGL} from '@deck.gl/react/maplibre';
 
 import {BASEMAP} from '@deck.gl/carto';
 
-<DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
 
-  <StaticMap mapStyle={BASEMAP.POSITRON} />
 
-</DeckGL>;
+function App() {
+
+  const [map, setMap] = useState<MapRef | null>(null);
+
+  return (
+
+    <Map ref={setMap} initialViewState={INITIAL_VIEW_STATE} mapStyle={BASEMAP.POSITRON}>
+
+      <DeckGL map={map} layers={layers} />
+
+    </Map>
+
+  );
+
+}
 ```
 
 ### Standalone[​](#standalone "Direct link to Standalone")

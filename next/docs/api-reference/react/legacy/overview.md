@@ -9,7 +9,7 @@ This module contains the following:
 * [\<DeckGL/>](https://deck.gl/next/docs/api-reference/react/legacy/deckgl.md)
 * Widgets in the [`@deck.gl/widgets`](https://deck.gl/next/docs/api-reference/widgets/overview.md) module are re-exported as React components in this module.
   <!-- -->
-  * e.g. `import { ZoomWidget } from '@deck.gl/react';`
+  * e.g. `import { ZoomWidget } from '@deck.gl/react/legacy';`
 
 ### React Hooks[​](#react-hooks "Direct link to React Hooks")
 
@@ -28,7 +28,7 @@ npm install @deck.gl/core @deck.gl/react
 ```
 
 ```
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 
 
 
@@ -50,7 +50,7 @@ Here's a typical example of how to switch from using pure-js widgets in the [`@d
 ```
 -import { ZoomWidget } from '@deck.gl/widgets';
 
-+import { ZoomWidget } from '@deck.gl/react';
++import { ZoomWidget } from '@deck.gl/react/legacy';
 
 
 

@@ -11,7 +11,7 @@ The `DeckGL` class is a React wrapper of the [Deck](https://deck.gl/next/docs/ap
 ```
 // Basic usage
 
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 
@@ -38,7 +38,7 @@ Like any React component, `DeckGL` can accept child components. Typical React co
 * [Widgets](https://deck.gl/next/docs/api-reference/react/legacy/overview.md#using-react-wrapped-widgets), which can display and control deck.gl state.
 
 ```
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 
 import {Map} from 'react-map-gl/maplibre';
 
@@ -87,7 +87,7 @@ A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) comp
 
 /// To use react-map-gl v7, see https://deck.gl/docs/api-reference/mapbox/mapbox-overlay
 
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 
 import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
 

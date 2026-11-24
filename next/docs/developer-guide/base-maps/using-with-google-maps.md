@@ -185,14 +185,14 @@ You can find full project setups in the [react get-started example](https://gith
 
 ### Example: reverse controlled[​](#example-reverse-controlled "Direct link to Example: reverse controlled")
 
-The reverse-controlled option is currently only supported in React when used with the `@visgl/react-google-maps` library.
+The reverse-controlled option is currently only supported in React when used with the `@visgl/react-google-maps` library. It needs `@deck.gl/react/legacy`; to add deck.gl to a map you create with `@deck.gl/react`, see [Using with maps](https://deck.gl/next/docs/developer-guide/react/using-with-maps.md).
 
 ```
 import React from 'react';
 
 import {APIProvider, Map} from '@vis.gl/react-google-maps';
 
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 
