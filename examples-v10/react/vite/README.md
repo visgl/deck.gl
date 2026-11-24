@@ -21,9 +21,9 @@ yarn
 npm start
 ```
 
-`@deck.gl/react` is the React renderer from deck.gl 10.0.0-alpha.2. Until that version is
-published, run the example against the deck.gl source with `yarn start-local`, after installing
-the root dependencies of a deck.gl checkout.
+`npm start` uses `@deck.gl/react` 10.0.0-alpha.2 or later from npm. To run the example against
+the deck.gl source instead, install the root dependencies of a deck.gl checkout, then run
+`yarn start-local` here.
 
 ### Data and basemap
 

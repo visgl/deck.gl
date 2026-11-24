@@ -11,11 +11,11 @@
     "serve": "next start"
   },
   "dependencies": {
-    "@deck.gl/core": "^10.0.0-alpha.1",
-    "@deck.gl/layers": "^10.0.0-alpha.1",
-    "@deck.gl/maplibre": "^10.0.0-alpha.1",
-    "@deck.gl/react": "^10.0.0-alpha.1",
-    "@deck.gl/widgets": "^10.0.0-alpha.1",
+    "@deck.gl/core": "^10.0.0-alpha.2",
+    "@deck.gl/layers": "^10.0.0-alpha.2",
+    "@deck.gl/maplibre": "^10.0.0-alpha.2",
+    "@deck.gl/react": "^10.0.0-alpha.2",
+    "@deck.gl/widgets": "^10.0.0-alpha.2",
     "babel-plugin-react-compiler": "^1.0.0",
     "client-only": "^0.0.1",
     "maplibre-gl": "^6.13.0",
