@@ -126,28 +126,12 @@ function App() {
     zoom: 2
   });
   const [ionTileset, setIonTileset] = useState<CesiumIonTilesetMetadata | null>(null);
-  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
     // Set up Ion account: https://cesium.com/docs/tutorials/getting-started/#your-first-app
     // Resolves the tileset url of the ion asset and a credential for its endpoint
-    resolveCesiumIonTileset('<ion_access_token_for_your_asset>', 43978)
-      .then(tileset => {
-        if (!cancelled) setIonTileset(tileset);
-      })
-      .catch((err: unknown) => {
-        // For example an invalid or expired access token
-        if (!cancelled) setError(err instanceof Error ? err : new Error(String(err)));
-      });
-    return () => {
-      cancelled = true;
-    };
+    resolveCesiumIonTileset('<ion_access_token_for_your_asset>', 43978).then(setIonTileset, console.error);
   }, []);
-
-  if (error) {
-    return <div>Could not load the Cesium ion tileset: {error.message}</div>;
-  }
 
   const layer = ionTileset && new Tile3DLayer({
     id: 'tile-3d-layer',
