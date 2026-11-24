@@ -6,6 +6,8 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
+Standalone Deck instances now prefer WebGPU. See [device selection and migration](./developer-guide/webgpu.md#device-selection-and-migration) for the WebGL2 override and backend-specific behavior.
+
 ### @deck.gl/react
 
 `@deck.gl/react` is now a React renderer for deck.gl: layers, views, widgets and effects are React elements. It requires React 19.2 or later.

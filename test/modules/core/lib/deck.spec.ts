@@ -94,7 +94,21 @@ webglTest('Deck#creates an explicitly requested WebGL device', async () => {
   }
 });
 
+webglTest('Deck#selects WebGL when the WebGPU adapter reports no support', async () => {
+  const support = vi.spyOn(webgpuAdapter, 'isSupported').mockReturnValue(false);
+  let deck: Deck | undefined;
+  try {
+    deck = new Deck({width: 1, height: 1, initialViewState: {longitude: 0, latitude: 0, zoom: 0}});
+    await waitForRender(deck);
+    expect(deck.device?.type).toBe('webgl');
+  } finally {
+    support.mockRestore();
+    if (deck) finalizeOwnedDeck(deck);
+  }
+});
+
 test.for([
+  {type: undefined, expected: 'premultiplied'},
   {type: 'webgpu', expected: 'premultiplied'},
   {type: 'best-available', expected: 'premultiplied'},
   {type: 'best-available', alphaMode: 'opaque', expected: 'opaque'}
@@ -105,7 +119,6 @@ test.for([
     height: 1,
     deviceProps: {
       type: options.type,
-      adapters: [webgpuAdapter],
       createCanvasContext: 'alphaMode' in options ? {alphaMode: options.alphaMode} : {}
     },
     initialViewState: {longitude: 0, latitude: 0, zoom: 0}

@@ -35,6 +35,15 @@ if (updatedConfig === config && !config.includes(`"webGPUEnabled": ${webGPUEnabl
 
 await writeFile(configPath, updatedConfig);
 
+// Select the runtime adapter alongside the shader transform so even CommonJS
+// consumers of the WebGL-only package avoid loading the WebGPU implementation.
+const adapterPath = join(import.meta.dirname, '../modules/core/src/lib/bundled-webgpu-adapter.ts');
+const adapterSource = await readFile(adapterPath, 'utf8');
+const adapterExport = webGPUEnabled === 'true'
+  ? "export {webgpuAdapter as bundledWebGPUAdapter} from '@luma.gl/core/webgpu';"
+  : 'export const bundledWebGPUAdapter = null;';
+await writeFile(adapterPath, adapterSource.replace(/^export .*;$/m, adapterExport));
+
 // TypeScript's incremental cache does not account for custom-transform options.
 // Delete every package's build info so changing `webGPUEnabled` always causes
 // JavaScript to be emitted again with the newly selected transform behavior.

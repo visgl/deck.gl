@@ -1,10 +1,6 @@
 # WebGPU
 
-:::caution
-WebGPU support in deck.gl v9 is still a work in progress and is not production ready.
-:::
-
-deck.gl is gradually adding support for running on WebGPU. Support is landing layer by layer and feature by feature.
+Standalone Deck v10 prefers WebGPU. The tables below describe support by layer, extension, and feature.
 
 This page is conservative and source-based:
 
@@ -14,20 +10,23 @@ This page is conservative and source-based:
 
 For composite and wrapper layers, statuses are based on their default or general rendering path, not on every possible custom sublayer configuration.
 
-## Enabling WebGPU
+## Device selection and migration
 
-deck.gl needs to be set up to use a luma.gl device that uses the luma.gl `webgpuAdapter`.
+When Deck creates its own device, it asks luma.gl for the best available adapter. The standard build includes WebGPU and WebGL2. luma.gl chooses WebGPU when its adapter reports support, otherwise it can choose WebGL2. If the selected adapter fails to initialize, device creation reports the error. An application-supplied device or WebGL context takes precedence.
+
+To request a specific backend, pass `deviceProps.type`:
 
 ```ts
-import {webgpuAdapter} from '@luma.gl/core/webgpu';
-
-new Deck({
-  deviceProps: {
-    type: 'webgpu',
-    adapters: [webgpuAdapter]
-  }
-});
+new Deck({deviceProps: {type: 'webgl'}}); // Request WebGL2
+new Deck({deviceProps: {type: 'webgpu'}}); // Require WebGPU
 ```
+
+The [WebGL-only build](./building-apps.md) defaults to WebGL2. Read `device.type` in `onDeviceInitialized` to see which backend a running application uses.
+
+- **Picking.** Use `await deck.pickObjectAsync(...)` for one object and `await deck.pickObjectsAsync(...)` for a rectangle. Applications that depend on synchronous or multi-depth picking can explicitly request WebGL2.
+- **Layers and effects.** Check the tables below for the layers, transitions and effects your application uses. Some CARTO layers, attribute transitions, shadows and postprocessing have backend-specific limitations.
+- **Custom shaders and binary data.** Custom layers need WGSL implementations and compatible extension hooks. Test application-supplied buffer layouts on WebGPU, especially external float64 buffers and packed attributes.
+- **Map integrations.** Separate-canvas overlays can use their own device. Interleaved integrations use the rendering context supplied by the host map.
 
 ## Layers
 
