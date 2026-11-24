@@ -23,6 +23,7 @@ map working together.
 Standalone applications built with the `@deck.gl/react` renderer, one per framework.
 
 * **[Vite](./react/vite)** An interleaved MapLibre map with layers as React components.
+* **[Next.js](./react/nextjs)** The same app on the Next.js App Router, with React Server Components.
 
 
 ### [Website Examples](./website)

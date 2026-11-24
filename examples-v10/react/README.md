@@ -5,3 +5,5 @@ framework's usual project layout. See the [`@deck.gl/react` docs](../../docs/get
 
 - **[Vite](./vite)**: a client-rendered app with an interleaved MapLibre map, layers as React
   components, and shared state between layers and DOM UI.
+- **[Next.js](./nextjs)**: the same app on the App Router, with data loaded in server components
+  and the renderer in client components.
