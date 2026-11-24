@@ -8,6 +8,15 @@
 npm install react react-dom @deck.gl/react @deck.gl/core @deck.gl/layers
 ```
 
+:::note
+Until deck.gl 10.0 is released, this installs deck.gl 9.4. To try the 10.0 prerelease, pin each deck.gl package to it, including `@deck.gl/mapbox` or `@deck.gl/maplibre` if you use one:
+
+```bash
+npm install react react-dom @deck.gl/react@10.0.0-alpha.2 @deck.gl/core@10.0.0-alpha.2 @deck.gl/layers@10.0.0-alpha.2
+```
+
+:::
+
 The renderer needs React 19.2 or later, and TypeScript 5.3 or later for its types. Each component subpath needs its deck.gl package, such as `@deck.gl/layers` for `@deck.gl/react/layers`. To add deck.gl to a Mapbox or MapLibre map, also install the matching deck.gl package and map library:
 
 ```bash
