@@ -28,10 +28,6 @@
         "title": "Soft Shadows"
       },
       {
-        "id": "globe-clouds",
-        "title": "Globe Clouds"
-      },
-      {
         "id": "city-scene",
         "title": "City Scene"
       },
@@ -66,10 +62,6 @@
       {
         "id": "depth-of-field",
         "title": "Depth of Field"
-      },
-      {
-        "id": "sketch-edges",
-        "title": "Sketch Edges"
       },
       {
         "id": "scene-buffers",

@@ -11,7 +11,9 @@ import {
   type PrecipitationProps,
   type SurfaceWeatherProps
 } from '@luma.gl/shaders';
-import {getMeterOffsetPosition, WeatherParticleLayer, SkyLayer} from '@deck.gl/proposals/layers';
+import {WeatherParticleLayer} from '@deck.gl-community/layers/effect-layers';
+import {SkyLayer} from '@deck.gl-community/layers/sky-layers';
+import {getMeterOffsetPosition} from '@deck.gl/proposals/layers';
 import {CITY_ORIGIN, makeCityFeatures, type CityFeature} from '../river-district-data';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {createSkyObserver, getMoonPosition, getSkyDirection} from '@math.gl/earth/sun';

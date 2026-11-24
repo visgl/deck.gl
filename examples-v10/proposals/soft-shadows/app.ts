@@ -3,7 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Deck, MapView, type MapViewState} from '@deck.gl/core';
-import {SunLayer, MoonLayer, CloudLayer, AtmosphereLayer} from '@deck.gl/proposals/layers';
+import {
+  SunLayer,
+  MoonLayer,
+  CloudLayer,
+  AtmosphereLayer
+} from '@deck.gl-community/layers/sky-layers';
 import type {CloudProps, AtmosphereProps} from '@luma.gl/shaders';
 import {getMoonPosition, getMoonIllumination, getSkyDirection} from '@math.gl/earth/sun';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';

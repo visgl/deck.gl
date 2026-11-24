@@ -6,7 +6,6 @@ import {expect, test, vi} from 'vitest';
 import {MapView, GlobeView} from '@deck.gl/core';
 import {createWeatherScene} from '../../../../examples-v10/proposals/weather/app';
 import {createRiverfrontSoftShadowScene} from '../../../../examples-v10/proposals/soft-shadows/app';
-import {createGlobeCloudScene} from '../../../../examples-v10/proposals/globe-clouds/app';
 import {createCityScene} from '../../../../examples-v10/proposals/city-scene/app';
 import {createRiverfrontLightingScene} from '../../../../examples-v10/proposals/riverfront-lighting-scene';
 import {
@@ -85,20 +84,6 @@ test('paused shadow scene does not queue layers on every draw', () => {
   scene.finalize();
 });
 
-test('globe pause disables continuous drawing and resume resets the clock', () => {
-  vi.stubGlobal('window', {matchMedia: () => ({matches: false})});
-  try {
-    const scene = createGlobeCloudScene({clientWidth: 800, clientHeight: 600} as HTMLDivElement);
-    scene.setAnimate(false);
-    expect(scene.deck.props._animate).toBe(false);
-    scene.setAnimate(true);
-    expect(scene.deck.props._animate).toBe(true);
-    scene.finalize();
-  } finally {
-    vi.unstubAllGlobals();
-  }
-});
-
 test('weather Center resets a moved camera and resize keeps an upward camera above ground', () => {
   vi.stubGlobal('document', {addEventListener: vi.fn(), removeEventListener: vi.fn()});
   try {
@@ -121,23 +106,20 @@ test('weather Center resets a moved camera and resize keeps an upward camera abo
   }
 });
 
-for (const kind of ['globe', 'city', 'lighting'] as const) {
+for (const kind of ['city', 'lighting'] as const) {
   test(kind + ' Center restores its current camera after controller movement', () => {
     vi.stubGlobal('window', {matchMedia: () => ({matches: false})});
     try {
       const parent = {clientWidth: 800, clientHeight: 600} as HTMLDivElement;
       const scene =
-        kind === 'globe'
-          ? createGlobeCloudScene(parent)
-          : kind === 'city'
-            ? createCityScene(parent)
-            : createRiverfrontLightingScene(parent, 'global-illumination');
+        kind === 'city'
+          ? createCityScene(parent)
+          : createRiverfrontLightingScene(parent, 'global-illumination');
       const initial = scene.deck.props.viewState as any;
       (scene.deck.props.onViewStateChange as any)({
         viewState: {...initial, longitude: initial.longitude + 5, zoom: initial.zoom - 1}
       });
-      if (kind === 'globe') (scene as ReturnType<typeof createGlobeCloudScene>).centerView();
-      else if (kind === 'city') (scene as ReturnType<typeof createCityScene>).setCamera('district');
+      if (kind === 'city') (scene as ReturnType<typeof createCityScene>).setCamera('district');
       else (scene as ReturnType<typeof createRiverfrontLightingScene>).center();
       expect(scene.deck.props.viewState).toEqual(initial);
       scene.finalize();

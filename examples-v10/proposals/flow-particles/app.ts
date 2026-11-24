@@ -4,7 +4,7 @@
 
 import {Deck, MapView} from '@deck.gl/core';
 import {assert, type Device} from '@luma.gl/core';
-import {FlowParticleLayer} from '@deck.gl/proposals/layers';
+import {FlowParticleLayer} from '@deck.gl-community/layers/effect-layers';
 import {
   FlowFieldAtlas,
   FlowParticleSimulation,

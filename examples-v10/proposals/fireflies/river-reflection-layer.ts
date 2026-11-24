@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {FireflyLayer, type GlowPointLayerProps} from '@deck.gl/proposals/layers';
+import {FireflyLayer, type GlowPointLayerProps} from '@deck.gl-community/layers/effect-layers';
 import {getSceneBufferCamera} from '@deck.gl/proposals/effects';
 import type {RenderPass} from '@luma.gl/core';
 import {waterMaterial, riverWaterMaterial, type ShaderModule} from '@luma.gl/shaders';

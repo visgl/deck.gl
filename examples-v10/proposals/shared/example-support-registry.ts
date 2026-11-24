@@ -1,7 +1,5 @@
 import type {ExampleSupportDefinition} from './example-support';
 import flowParticlesSupport from '../flow-particles/mobile-support';
-import sketchSupport from '../sketch-edges/mobile-support';
-import globeCloudsSupport from '../globe-clouds/mobile-support';
 import weatherSupport from '../weather/mobile-support';
 import patternSupport from '../pattern-fills/mobile-support';
 import firefliesSupport from '../fireflies/mobile-support';
@@ -39,9 +37,7 @@ export const EXAMPLE_SUPPORT_REGISTRY: Record<string, ExampleSupportDefinition> 
   'deck/luspatial-taxi': support82,
   'deck/gpu-graph-explorer': support83,
   'deck/gpu-culled-trace': support84,
-  'deck/sketch-edges': sketchSupport,
   'deck/weather': weatherSupport,
-  'deck/globe-clouds': globeCloudsSupport,
   'deck/pattern-fills': patternSupport,
   'deck/point-glow': pointGlowSupport,
   'deck/styled-paths': styledPathsSupport

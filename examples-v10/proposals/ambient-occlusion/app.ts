@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Deck, MapView, type Viewport} from '@deck.gl/core';
-import {WaterSurfaceLayer} from '@deck.gl/proposals/layers';
+import {WaterSurfaceLayer} from '@deck.gl-community/layers/effect-layers';
 import {SceneBufferEffect} from '@deck.gl/proposals/effects';
 import type {Buffer} from '@luma.gl/core';
 import type {CompositeShaderPass} from '@luma.gl/shaders';

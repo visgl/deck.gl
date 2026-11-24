@@ -3,11 +3,14 @@
 The single private workspace for experimental deck.gl layers and effects. This
 package is not published and is not a dependency of public deck.gl modules.
 
-- `@deck.gl/proposals/layers`: GPU-resident, Arrow, atmospheric, and particle layers.
+- `@deck.gl/proposals/layers`: GPU-resident and Arrow layers.
 - `@deck.gl/proposals/layers/path-layer`, `/polygon-layer`, `/solid-polygon-layer`,
   and `/text-layer`: focused GPU layer entry points.
 - `@deck.gl/proposals/effects`: scene buffers, shader passes, and GPU graph effects.
 - `@deck.gl/proposals/effects/query`: geographic query effects and diagnostics.
+
+Find the [sky and effect layers](../../docs/api-reference/proposals/gpu-layers.md#sky-and-effect-layers)
+in deck.gl-community.
 
 Implementations live in `src/layers` and `src/effects`; tests mirror that structure.
 Add new prototypes here instead of creating more private packages. The build checks
