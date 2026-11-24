@@ -8,7 +8,6 @@ import {CSVLoader} from '@loaders.gl/tables/csv';
 import {registerLoaders} from '@loaders.gl/core';
 
 // Avoid calling it GL - would be removed by babel-plugin-inline-webgl-constants
-import {GL as GLConstants} from '@luma.gl/core/webgl-constants';
 
 import makeTooltip from './widget-tooltip';
 
@@ -60,7 +59,7 @@ const JSON_CONVERTER_CONFIGURATION = {
   },
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
-    GL: GLConstants
+    GL: globalThis.WebGL2RenderingContext ?? {}
   }
 };
 

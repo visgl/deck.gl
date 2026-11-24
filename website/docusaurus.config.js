@@ -148,6 +148,10 @@ const config = {
           // Resolve dependencies through their package export maps, including subpaths.
           modules: [resolve('node_modules'), resolve('../node_modules')],
           alias: {
+            // The legacy Web Mercator package still imports the math.gl v4 root.
+            '@math.gl/core$': createRequire(require.resolve('@math.gl/web-mercator')).resolve(
+              '@math.gl/core'
+            ),
             // concaveman imports a UMD file from its nested robust-predicates 2.x dependency.
             'robust-predicates/umd/orient2d.min.js$': createRequire(
               require.resolve('concaveman')
