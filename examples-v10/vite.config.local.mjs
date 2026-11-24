@@ -1,6 +1,7 @@
 /* eslint-disable import/namespace */
 import {defineConfig} from 'vite';
 import {getOcularConfig} from '@vis.gl/dev-tools';
+import {readFileSync} from 'fs';
 import {join} from 'path';
 
 const rootDir = join(__dirname, '..');
@@ -13,6 +14,25 @@ function aliasScopedPackages(scope) {
   };
 }
 
+/**
+ * Maps each `@deck.gl/react` subpath to its source file. The package's exports don't mirror
+ * `src/`: `/maplibre` is `src/dom/maplibre.tsx` and `/layers` is `src/wrappers/layers.ts`, so the
+ * prefix alias for `@deck.gl/react` alone would resolve them to files that don't exist.
+ */
+function reactSubpathAliases() {
+  const {exports} = JSON.parse(readFileSync(join(rootDir, 'modules/react/package.json'), 'utf8'));
+  return Object.entries(exports)
+    .filter(([subpath]) => subpath.startsWith('./') && subpath !== './package.json')
+    .map(([subpath, target]) => ({
+      find: new RegExp(`^@deck\\.gl/react/${subpath.slice(2)}$`),
+      replacement: join(
+        rootDir,
+        'modules/react/src',
+        target.import.replace(/^\.\/dist\//, '').replace(/\.js$/, '')
+      )
+    }));
+}
+
 /** https://vitejs.dev/config/ */
 export default defineConfig(async () => {
   const {aliases} = await getOcularConfig({root: rootDir});
@@ -22,6 +42,7 @@ export default defineConfig(async () => {
       dedupe: ['apache-arrow', 'react', 'react-dom'],
 
       alias: [
+        ...reactSubpathAliases(),
         ...Object.entries(aliases).map(([find, replacement]) => ({find, replacement})),
         {
           find: '@deck.gl/proposals/layers',

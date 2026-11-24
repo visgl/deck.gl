@@ -29,7 +29,8 @@ import {VERSION} from './init';
 const CREATED_BY_DECK = '_createdByDeck';
 
 import {luma} from '@luma.gl/core';
-import {webgl2Adapter, type WebGLDevice} from '@luma.gl/core/webgl';
+import {attachWebGLContext, getDeviceAdapters} from './device-adapters';
+import type {WebGLDevice} from '@luma.gl/core/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import type {
@@ -481,7 +482,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         log.error('WebGL1 context not supported.')();
       }
       this._useCanvas(props.gl.canvas);
-      deviceOrPromise = webgl2Adapter.attach(props.gl, {
+      deviceOrPromise = attachWebGLContext(props.gl, {
         // Enable shader and pipeline caching for attached devices (matches _createDevice defaults)
         // Without this, interleaved mode (e.g., MapboxOverlay) creates new pipelines every frame
         _cacheShaders: true,
@@ -1535,22 +1536,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     const canvasContextProps =
       typeof canvasContextUserProps === 'object' ? canvasContextUserProps : undefined;
 
-    // In deck.gl v9, Deck always bundles and adds a webgl2Adapter.
-    // This behavior is expected to change in deck.gl v10 to support WebGPU only builds.
     const deviceProps = {
       _cacheShaders: true,
       _cachePipelines: true,
       ...props.deviceProps,
-      adapters: [...(props.deviceProps?.adapters ?? [])],
+      adapters: getDeviceAdapters(props.deviceProps?.adapters),
       debug: getDeviceDebug(props)
-    };
-    if (!deviceProps.adapters.includes(webgl2Adapter)) {
-      deviceProps.adapters.push(webgl2Adapter);
-    }
-
-    const defaultCanvasProps: CanvasContextProps = {
-      // we must use 'premultiplied' canvas for webgpu to enable transparency and match shaders
-      alphaMode: this.props.deviceProps?.type === 'webgpu' ? 'premultiplied' : undefined
     };
 
     const canvas = this._createDeviceCanvas(props);
@@ -1575,7 +1566,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       ...deviceProps,
       // In deck.gl v10 we may emphasize multi canvas support and unwind this prop wrapping
       createCanvasContext: {
-        ...defaultCanvasProps,
+        // Match the premultiplied colors produced by the WebGPU shaders.
+        alphaMode: deviceType === 'webgpu' ? 'premultiplied' : undefined,
         ...canvasContextProps,
         canvas,
         useDevicePixels: this.props.useDevicePixels,
