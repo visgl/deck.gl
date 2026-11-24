@@ -199,6 +199,10 @@ const commonPosition2 = layer.projectPosition(lnglat, {
 });
 ```
 
+### PathStyleExtension[​](#pathstyleextension "Direct link to PathStyleExtension")
+
+With [`PathStyleExtension`](https://deck.gl/next/docs/api-reference/extensions/path-style-extension.md) dashes on, `geometry.uv.y` in `PathLayer` shaders is now the geometric distance along the segment, the same as without dashes. Custom shader injections that need the dash coordinate, which also counts Z movement and the parts of the segment removed by camera clipping, should read `vDashSegment.x` (position) and `vDashSegment.y` (segment length) under `#ifdef DASH_ENABLED`.
+
 ### Deck props set to `undefined`[​](#deck-props-set-to-undefined "Direct link to deck-props-set-to-undefined")
 
 A [`Deck`](https://deck.gl/next/docs/api-reference/core/deck.md) prop set to `undefined`, in the constructor or in `setProps`, now uses its default value. In the constructor this is the same as leaving the prop out. In `setProps`, leaving a prop out still keeps its current value. Previously an explicit `undefined` replaced the default. For some props this threw an error or stopped rendering, such as a callback like `onAfterRender: debug ? callback : undefined`.
@@ -289,7 +293,7 @@ In rare cases, custom WebGL layer shaders may need an update if they explicitly 
 
 Pattern atlas orientation previously aligned with the orientation of common space (bottom-left origin for most viewports), result in vertically flipped patterns from the supplied image. They now align with the screen space.
 
-### PathStyleExtension[​](#pathstyleextension "Direct link to PathStyleExtension")
+### PathStyleExtension[​](#pathstyleextension-1 "Direct link to PathStyleExtension")
 
 `highPrecisionDash` is deprecated. Use `dashMode: 'path'` instead, which draws the same way:
 
