@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {Deck} from '@deck.gl/core';
+import {Deck, type DeckProps} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
 import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {device as testDevice} from '@deck.gl/test-utils/vitest';
@@ -12,9 +12,15 @@ import {device as testDevice} from '@deck.gl/test-utils/vitest';
 const SIZE = {width: 4, height: 4};
 
 /** Creates a Deck and resolves once its device is initialized. */
-function createDeck(props: Record<string, unknown> = {}): Promise<Deck> {
+function createDeck(props: DeckProps = {}): Promise<Deck> {
   return new Promise((resolve, reject) => {
-    const deck = new Deck({...SIZE, onLoad: () => resolve(deck), onError: reject, ...props});
+    const deck = new Deck({
+      ...SIZE,
+      onLoad: () => resolve(deck),
+      onError: reject,
+      ...props,
+      deviceProps: {...props.deviceProps, type: 'webgl'}
+    });
   });
 }
 
@@ -126,7 +132,7 @@ test('Deck#finalize keeps the context when a new Deck starts on the canvas', asy
 test('Deck#finalize waits for a device that is still initializing', async () => {
   const canvas = attachCanvas();
   const gl = canvas.getContext('webgl2')!;
-  const deck = new Deck({...SIZE, canvas, deviceProps: {ownsHandle: true}});
+  const deck = new Deck({...SIZE, canvas, deviceProps: {type: 'webgl', ownsHandle: true}});
 
   canvas.remove();
   deck.finalize();
