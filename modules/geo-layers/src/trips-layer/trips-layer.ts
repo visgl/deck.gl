@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {ArrowAccessorFunction} from '@deck.gl/core';
-import type {NumericArray} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 import {createIterable} from '@deck.gl/core';
 import type {AccessorFunction, Attribute, DefaultProps} from '@deck.gl/core';
 import {PathLayer, PathLayerProps} from '@deck.gl/layers';

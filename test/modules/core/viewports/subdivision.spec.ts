@@ -14,7 +14,7 @@ import {WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {OSM_TILE_CRS} from '@deck.gl/core/viewports/web-mercator-util';
 import {PathLayer} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {createTestCRS} from './test-crs';
 
 test('subdivision resolution defaults to zero and validates input', () => {

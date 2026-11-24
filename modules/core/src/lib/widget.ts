@@ -11,6 +11,7 @@ import type {WidgetManager, WidgetPlacement} from './widget-manager';
 import type {ViewOrViews} from './view-manager';
 import {deepEqual} from '../utils/deep-equal';
 import {applyStyles, removeStyles} from '../utils/apply-styles';
+import {createPropsWithDefaultId} from '../utils/props-with-default-id';
 
 export type WidgetProps = {
   id?: string;
@@ -63,11 +64,14 @@ export abstract class Widget<
   rootElement?: HTMLDivElement | null;
 
   constructor(props: PropsT) {
-    this.props = {
-      // @ts-expect-error `defaultProps` may not exist on constructor
-      ...(this.constructor.defaultProps as Required<PropsT>),
-      ...props
-    };
+    // @ts-expect-error `defaultProps` may not exist on constructor
+    const {id, ...defaultProps} = this.constructor.defaultProps as Required<PropsT>;
+    // A falsy id means the class default, as for views. Read only an own `id`: props from another
+    // widget keep their default on the prototype, and copying it would make it look app-supplied.
+    const ownId = props && Object.prototype.hasOwnProperty.call(props, 'id') ? props.id : undefined;
+    this.props = createPropsWithDefaultId<Required<PropsT>>(id, defaultProps, props, {
+      id: ownId || undefined
+    });
     // @ts-expect-error TODO(ib) - why is id considered optional even though we use Required<>
     this.id = this.props.id;
   }
@@ -90,6 +94,10 @@ export abstract class Widget<
     }
 
     Object.assign(this.props, props);
+    if (!this.props.id) {
+      // As in the constructor, a falsy id falls back to the default on the prototype
+      delete (this.props as {id?: string}).id;
+    }
 
     // Update the HTML to match the new props
     this.updateHTML();

@@ -24,10 +24,11 @@ export class ArrowSolidPolygonLayer extends CompositeLayer<ArrowSolidPolygonLaye
   static override layerName = 'ArrowSolidPolygonLayer';
 
   override renderLayers(): ArrowPolygonLayer {
-    const {getPolygon, getFillColor, ...props} = this.props;
+    const {data, getPolygon, getFillColor, ...props} = this.props;
     return new ArrowPolygonLayer({
       ...props,
-      id: `${this.props.id}-polygon`,
+      ...this.getSubLayerProps({id: 'polygon'}),
+      data,
       polygons: getPolygon,
       color: getFillColor
     } as ArrowPolygonLayerProps);

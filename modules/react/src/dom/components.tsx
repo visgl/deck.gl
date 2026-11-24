@@ -7,6 +7,7 @@ import 'client-only';
 import {assert, type Deck, type View} from '@deck.gl/core';
 import {
   createRoot,
+  roots,
   unmountAtNode,
   _RootErrorBoundary as RootErrorBoundary
 } from '../reconciler/index';
@@ -234,7 +235,12 @@ function createDeckGLComponent<Props, Instance extends DeckGLRenderer, MapT = ne
             config.parent ||
             (config.canvas ? (canvasElement.parentElement as HTMLDivElement) : wrapper.current),
           // The wrapper takes the size and style of an owned canvas, which fills it.
-          ...(config.canvas ? null : OWNED_CANVAS_PROPS)
+          ...(config.canvas
+            ? null
+            : {
+                ...OWNED_CANVAS_PROPS,
+                deviceProps: {ownsHandle: true, ...config.deviceProps}
+              })
         };
       }
 
@@ -263,8 +269,6 @@ function createDeckGLComponent<Props, Instance extends DeckGLRenderer, MapT = ne
       const rootElement = isExternalOverlay
         ? getDetachedRoot(detachedRoot, rootOptions)
         : getCanvasRoot(config.canvas, canvas, resolvedCanvas);
-      // Only the <canvas> this component rendered is known to be unused after unmount. A canvas
-      // the app passed as `canvas` stays under the app's control, so it may be reused later.
       if (rootElement) {
         return () => {
           try {

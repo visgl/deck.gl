@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {ShaderModule} from '@luma.gl/shaders';
-import type {NumberArray16} from '@math.gl/core';
+import type {NumberArray16} from '@math.gl/core/matrix';
 
 /** Object motion adapters supply both positions projected with the current camera.
  * The capture transforms the previous position into the preceding camera's clip space.

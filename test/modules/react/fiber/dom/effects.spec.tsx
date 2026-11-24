@@ -190,6 +190,7 @@ webglTest('<deckEffect> elements apply and remove effects alongside the effects 
   try {
     await renderAndWait(true);
     await waitFor(() => center.join() === '0,255,255,255');
+    // The effect takes the id `invert-pass` from its shader module. `<deckEffect>` keeps it.
     const [mounted] = getEffects(deck).filter(effect => effect.id === 'invert-pass');
     expect(mounted).toBeDefined();
     expect(getEffects(deck)).toContain(lighting);
