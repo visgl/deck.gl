@@ -91,7 +91,7 @@ function App() {
 }
 ```
 
-For more information on this syntax and its limitations, see [DeckGL API](../api-reference/react/deckgl.md).
+For more information on this syntax and its limitations, see [DeckGL API](../api-reference/react/legacy/deckgl.md).
 
 
 ## Performance Remarks

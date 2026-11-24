@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {MapView, _GlobeView} from '@deck.gl/core';
+import {MapView, GlobeView} from '@deck.gl/core';
 import {createWeatherScene} from '../../../../examples-v10/proposals/weather/app';
 import {createRiverfrontSoftShadowScene} from '../../../../examples-v10/proposals/soft-shadows/app';
 import {createGlobeCloudScene} from '../../../../examples-v10/proposals/globe-clouds/app';
@@ -36,7 +36,7 @@ test('weather preserves its sky field of view after a globe round trip', () => {
     const initial = scene.deck.props.views as MapView;
     expect(initial.props.fovy).toBe(SKY_FIELD_OF_VIEW);
     scene.setProjection('globe');
-    expect(scene.deck.props.views).toBeInstanceOf(_GlobeView);
+    expect(scene.deck.props.views).toBeInstanceOf(GlobeView);
     scene.setProjection('map');
     const restored = scene.deck.props.views as MapView;
     expect(restored).toBeInstanceOf(MapView);

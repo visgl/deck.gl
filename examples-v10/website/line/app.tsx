@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useMemo} from 'react';
+import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
-import {tableFromArrays} from 'apache-arrow';
+import {DeckGL} from '@deck.gl/react/legacy';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {isArrowTable} from '@math.gl/core/arrow';
+import {JSONTableLoader} from '@loaders.gl/tables/json';
 
 import type {PickingInfo, MapViewState, Widget} from '@deck.gl/core';
 import {Device} from '@luma.gl/core';
@@ -55,75 +56,73 @@ function getTooltip({object}: PickingInfo) {
 }
 
 export default function App({
-  airports,
-  flightPaths,
+  airports = DATA_URL.AIRPORTS,
+  flightPaths = DATA_URL.FLIGHT_PATHS,
   lineWidth = 3,
   mapStyle = MAP_STYLE,
   device,
-  widgets
+  widgets,
+  onDataLoad
 }: {
-  airports?: Airport[];
-  flightPaths?: FlightPath[];
+  airports?: string;
+  flightPaths?: string;
   lineWidth?: number;
   mapStyle?: string;
   device?: Device;
   widgets?: Widget[];
+  onDataLoad?: (count: number) => void;
 }) {
-  const airportTable = useMemo(
-    () =>
-      airports &&
-      tableFromArrays({
-        longitude: Float64Array.from(airports, airport => airport.coordinates[0]),
-        latitude: Float64Array.from(airports, airport => airport.coordinates[1]),
-        name: airports.map(airport => airport.name),
-        abbrev: airports.map(airport => airport.abbrev),
-        type: airports.map(airport => airport.type)
-      }),
-    [airports]
-  );
-  const flightTable = useMemo(
-    () =>
-      flightPaths &&
-      tableFromArrays({
-        start_longitude: Float64Array.from(flightPaths, flight => flight.start[0]),
-        start_latitude: Float64Array.from(flightPaths, flight => flight.start[1]),
-        start_altitude: Float64Array.from(flightPaths, flight => flight.start[2]),
-        end_longitude: Float64Array.from(flightPaths, flight => flight.end[0]),
-        end_latitude: Float64Array.from(flightPaths, flight => flight.end[1]),
-        end_altitude: Float64Array.from(flightPaths, flight => flight.end[2]),
-        name: flightPaths.map(flight => flight.name),
-        country: flightPaths.map(flight => flight.country)
-      }),
-    [flightPaths]
-  );
-
   const layers = [
-    airportTable &&
+    airports &&
       new ScatterplotLayer({
         id: 'airports',
-        data: airportTable,
+        // Sample row: {coordinates: [-0.4531566, 51.4709959], type: 'major', name: 'London Heathrow', abbrev: 'LHR'}
+        data: airports,
+        loaders: [JSONTableLoader],
         radiusScale: 20,
-        getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
+        getPosition: {sql: 'ARRAY[coordinates[1], coordinates[2]]'},
         getFillColor: [255, 140, 0],
         getRadius: {
           sql: "CASE WHEN type = 'major' THEN 100 WHEN type = 'small' THEN 30 ELSE 60 END"
         },
         pickable: true
       }),
-    flightTable &&
+    flightPaths &&
       new LineLayer({
         id: 'flight-paths',
-        data: flightTable,
+        // Sample row: {name: '0x342090', country: 'Spain', start: [-0.4855, 51.4727, 0], end: [-0.4592, 51.4776, 15.2]}
+        data: flightPaths,
+        loaders: [JSONTableLoader],
+        onDataLoad: table => {
+          if (isArrowTable(table)) {
+            onDataLoad?.(table.numRows);
+          }
+        },
         opacity: 0.8,
-        getSourcePosition: {sql: 'FLOAT64x3(start_longitude, start_latitude, start_altitude)'},
-        getTargetPosition: {sql: 'FLOAT64x3(end_longitude, end_latitude, end_altitude)'},
+        getSourcePosition: {
+          sql: `\
+            ARRAY[
+              start[1],
+              start[2],
+              start[3]
+            ]`
+        },
+        getTargetPosition: {
+          sql: `\
+            ARRAY[
+              "end"[1],
+              "end"[2],
+              "end"[3]
+            ]`
+        },
         getColor: {
-          sql: `RGBA8(
-            1 - start_altitude / 5000,
-            128 * start_altitude / (255 * 10000),
-            start_altitude / 10000,
-            1 - start_altitude / 10000
-          )`
+          sql: `\
+            RGBA8(
+              1 - start[3] / 5000,
+              128 * start[3] / (255 * 10000),
+              start[3] / 10000,
+              1 - start[3] / 10000
+            )`
         },
         getWidth: lineWidth,
         pickable: true
@@ -157,17 +156,7 @@ export default function App({
   );
 }
 
-/** Loads the standalone demo's source files in parallel. */
-async function loadFlightData(): Promise<{airports: Airport[]; flightPaths: FlightPath[]}> {
-  const [airports, flightPaths] = await Promise.all([
-    fetch(DATA_URL.AIRPORTS).then(response => response.json()),
-    fetch(DATA_URL.FLIGHT_PATHS).then(response => response.json())
-  ]);
-  return {airports, flightPaths};
-}
-
-/** Mounts the standalone demo with its loaded flight data. */
-export async function renderToDOM(container: HTMLDivElement) {
-  const data = await loadFlightData();
-  createRoot(container).render(<App {...data} />);
+/** Mounts the standalone demo. */
+export function renderToDOM(container: HTMLDivElement) {
+  createRoot(container).render(<App />);
 }

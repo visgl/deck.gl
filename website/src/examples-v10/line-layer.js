@@ -15,17 +15,6 @@ class LineDemo extends Component {
   /** Title shown above the example controls. */
   static title = 'Flights To And From London Heathrow Airport';
 
-  /** Data sources loaded before rendering the demo. */
-  static data = [
-    {
-      url: `${DATA_URI}/flight-path-data.txt`,
-      worker: '/workers/flight-path-data-decoder.js'
-    },
-    {
-      url: `${DATA_URI}/airports.json`
-    }
-  ];
-
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/line`;
 
@@ -70,7 +59,7 @@ class LineDemo extends Component {
   /** Renders the Arrow demo with the current controls and data. */
   render() {
     /** Provides params, data, ...other props for the example. */
-    const {params, data, ...otherProps} = this.props;
+    const {params, onStateChange, ...otherProps} = this.props;
     /** Provides widgets for the example. */
     const widgets = [new StatsWidget({type: 'device'})];
 
@@ -79,8 +68,8 @@ class LineDemo extends Component {
         {...otherProps}
         key={this.props.device?.type}
         device={this.props.device}
-        flightPaths={data && data[0]}
-        airports={data && data[1]}
+        airports={`${DATA_URI}/airports.json`}
+        onDataLoad={count => onStateChange({count})}
         lineWidth={params.width.value}
         widgets={widgets}
       />

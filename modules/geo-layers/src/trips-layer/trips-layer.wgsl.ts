@@ -5,7 +5,7 @@
 import type {ShaderPlugin} from '@luma.gl/shaders';
 import {tripsUniforms} from './trips-layer-uniforms';
 
-import type {NumericArray} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 
 /** Pack timestamps in the same padded instance order used by PathTesselator. */
 export function packTripTimestamps(

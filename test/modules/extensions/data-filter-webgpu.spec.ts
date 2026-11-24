@@ -3,13 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import type {ShaderPlugin} from '@luma.gl/shaders';
-import {beforeEach, expect, test} from 'vitest';
+import {beforeEach, expect, test, vi} from 'vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension, BrushingExtension, ClipExtension} from '@deck.gl/extensions';
 import {luma, Texture, Buffer} from '@luma.gl/core';
 import {webgpuAdapter} from '@luma.gl/core/webgpu';
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
 
 async function createFixture() {
   const container = document.createElement('div');
@@ -236,6 +237,53 @@ test.for([false, true])(
   }
 );
 
+test('DataFilterExtension#WebGPU composes with a custom layer shader plugin', async () => {
+  /** Halves the red channel to make the custom hook observable. */
+  const customColor: ShaderPlugin = {
+    name: 'customColor',
+    injections: {
+      'glsl:fs:DECKGL_FILTER_COLOR': 'color.r *= 0.5;',
+      'wgsl:fs:DECKGL_FILTER_COLOR': '(*color).r *= 0.5;'
+    }
+  };
+  /** Scatterplot fixture that contributes its own shader plugin. */
+  class CustomScatterplotLayer extends ScatterplotLayer {
+    /** Name used to identify this fixture in shader diagnostics. */
+    static layerName = 'CustomScatterplotLayer';
+
+    /** Adds the custom plugin alongside the extension plugins. */
+    getShaders() {
+      const shaders = super.getShaders();
+      return {...shaders, plugins: [...(shaders.plugins || []), customColor]};
+    }
+  }
+
+  const fixture = await createFixture();
+  try {
+    const layer = new CustomScatterplotLayer({
+      ...baseProps,
+      id: 'custom-filter',
+      data: {
+        length: 2,
+        attributes: {
+          getPosition: {value: new Float32Array([0, 0, 0, 30, 0, 0]), size: 3},
+          getFilterValue: new Float32Array([0, 1])
+        }
+      },
+      extensions: [new DataFilterExtension()],
+      filterRange: [0, 0]
+    });
+    const red = await fixture.render(layer);
+    expect(red(64)).toBeGreaterThanOrEqual(127);
+    expect(red(64)).toBeLessThanOrEqual(128);
+    expect(red(94)).toBe(0);
+    expect((await fixture.deck.pickObjectAsync({x: 64, y: 64}))?.index).toBe(0);
+    expect(await fixture.deck.pickObjectAsync({x: 94, y: 64})).toBeNull();
+  } finally {
+    await fixture.finalize();
+  }
+});
+
 test.each([true, false])(
   'DataFilterExtension#WebGPU primitive pipelines (instance=%s)',
   async clipByInstance => {
@@ -381,4 +429,86 @@ test.each([true, false])(
 // These regressions also run in the WebGL browser project.
 beforeEach(async context => {
   if (!(await getWebGPUTestDevice())) context.skip();
+});
+
+test.each([true, false])(
+  'DataFilterExtension restores filter attributes when an Arrow Scatterplot re-enters row mode (with rows: %s)',
+  async withRows => {
+    const fixture = await createFixture();
+    try {
+      const extensions = [new DataFilterExtension({filterSize: 1})];
+      const layer = new ScatterplotLayer({
+        ...baseProps,
+        data: withRows ? [{value: 0.5}, {value: 2}] : [],
+        getPosition: vectorFromArray(
+          [
+            [0, 0],
+            [30, 0]
+          ],
+          new FixedSizeList(2, new Field('values', new Float32(), false))
+        ),
+        getFilterValue: (_object, {index}) => (index === 0 ? 0.5 : 2),
+        filterRange: [0, 1],
+        extensions
+      });
+      const unfiltered = layer.clone({extensions: []});
+      const restored = unfiltered.clone({extensions});
+      for (const current of [layer, unfiltered, restored]) {
+        await fixture.render(current);
+        await vi.waitFor(() => expect(current.isLoaded).toBe(true));
+        const red = await fixture.render(current);
+        expect(current.getNumInstances()).toBe(2);
+        expect(red(64)).toBe(255);
+        if (current === unfiltered) {
+          expect(current.getAttributeManager()).toBeNull();
+          expect(red(94)).toBe(255);
+        } else {
+          expect(current.getAttributeManager()?.attributes.filterValues).toBeDefined();
+          expect(red(94)).toBe(0);
+          expect((await fixture.deck.pickObjectAsync({x: 64, y: 64}))?.index).toBe(0);
+          expect(await fixture.deck.pickObjectAsync({x: 94, y: 64})).toBeNull();
+        }
+      }
+    } finally {
+      await fixture.finalize();
+    }
+  }
+);
+
+test('DataFilterExtension waits for promised rows before calling Scatterplot accessors', async () => {
+  const fixture = await createFixture();
+  try {
+    const rows = [
+      {radius: 10, value: 0.5},
+      {radius: 10, value: 2}
+    ];
+    let resolveRows!: (data: typeof rows) => void;
+    const data = new Promise<typeof rows>(resolve => {
+      resolveRows = resolve;
+    });
+    const layer = new ScatterplotLayer({
+      ...baseProps,
+      data,
+      getPosition: vectorFromArray(
+        [
+          [0, 0],
+          [30, 0]
+        ],
+        new FixedSizeList(2, new Field('values', new Float32(), false))
+      ),
+      getRadius: row => row.radius,
+      getFilterValue: row => row.value,
+      filterRange: [0, 1],
+      extensions: [new DataFilterExtension({filterSize: 1})]
+    });
+    await fixture.render(layer);
+    expect(layer.getNumInstances()).toBe(0);
+    resolveRows(rows);
+    await vi.waitFor(() => expect(layer.isLoaded).toBe(true));
+    const red = await fixture.render(layer);
+    expect(red(64)).toBe(255);
+    expect(red(94)).toBe(0);
+  } finally {
+    await fixture.finalize();
+  }
 });

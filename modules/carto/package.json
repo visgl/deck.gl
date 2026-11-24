@@ -3,7 +3,7 @@
   "description": "CARTO official integration with Deck.gl. Build geospatial applications using CARTO and Deck.gl.",
   "license": "MIT",
   "type": "module",
-  "version": "10.0.0-alpha.1",
+  "version": "10.0.0-alpha.2",
   "publishConfig": {
     "access": "public"
   },
@@ -48,11 +48,11 @@
   },
   "dependencies": {
     "@carto/api-client": "^0.5.19",
-    "@loaders.gl/compression": "5.0.0-beta.10",
-    "@loaders.gl/core": "5.0.0-beta.10",
-    "@luma.gl/core": "10.0.0-alpha.15",
-    "@luma.gl/shaders": "10.0.0-alpha.15",
-    "@math.gl/web-mercator": "5.0.0-beta.10",
+    "@loaders.gl/compression": "5.0.0-rc.2",
+    "@loaders.gl/core": "5.0.0-rc.2",
+    "@luma.gl/core": "10.0.0-beta.3",
+    "@luma.gl/shaders": "10.0.0-beta.3",
+    "@math.gl/geospatial": "^5.0.0",
     "@types/d3-array": "^3.0.2",
     "@types/d3-color": "^3.1.3",
     "@types/d3-scale": "^3.0.0",
@@ -73,8 +73,8 @@
     "@deck.gl/extensions": "~10.0.0-alpha",
     "@deck.gl/geo-layers": "~10.0.0-alpha",
     "@deck.gl/layers": "~10.0.0-alpha",
-    "@loaders.gl/core": "5.0.0-beta.10",
-    "@luma.gl/core": "10.0.0-alpha.15"
+    "@loaders.gl/core": "5.0.0-rc.2",
+    "@luma.gl/core": "10.0.0-beta.3"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

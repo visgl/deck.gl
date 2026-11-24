@@ -15,18 +15,18 @@
  *    At the dash injection point, the pre-offset stroke half-width is in common units for a
  *    flat path but pixels for a billboarded path, whose conversion also includes
  *    `project.focalDistance`.
- * 3. **Half-widths along the path** — the units of `vPathPosition.y`, tested by the fragment
+ * 3. **Half-widths along the path** — the units of `vDashSegment.x`, tested by the fragment
  *    shader. One unit spans `dashWidthPixels` screen pixels.
  *
  * Convert explicitly whenever a value crosses these spaces. Mixing them directly makes dash
  * period or phase depend on billboard, elevation, or offset configuration.
  */
 export type Defines = {
-  // Defines passed externally
+  // Defines added to the assembled shader variants.
   /**
-   * Enable high precision dash rendering.
+   * Continue dash phase across the complete path.
    */
-  HIGH_PRECISION_DASH?: boolean;
+  DASH_MODE_PATH?: boolean;
   /**
    * Set whenever the dash shaders are injected. It guards PathLayer's additional arclength
    * varyings and the dash stage of the shared PathStyle pipeline.
@@ -56,7 +56,7 @@ export const pathStylePipelineInjections = {
   vPathPosition.y *= offsetWidth;
   vPathLength *= offsetWidth;
 #ifdef DASH_ENABLED
-  vPathBounds *= offsetWidth;
+  vDashSegment *= offsetWidth;
 #endif
 #endif
 
@@ -68,7 +68,7 @@ float strokeHalfWidth = width.x;
 strokeHalfWidth /= offsetWidth;
 #endif
 
-// How many screen pixels one unit of vPathPosition.y covers. Flat paths extrude in common space;
+// How many screen pixels one unit of vDashSegment.x covers. Flat paths extrude in common space;
 // billboarded paths extrude in clip space, whose conversion also includes focalDistance.
 float dashWidthPixels = path.billboard
   ? strokeHalfWidth * project.focalDistance
@@ -89,7 +89,7 @@ if (pathStyle.dashUnits == 1) {
 }
 pathStyle_dashArray = instanceDashArrays * (dashUnitPixels / dashWidthPixels);
 
-#ifdef HIGH_PRECISION_DASH
+#ifdef DASH_MODE_PATH
 // instanceDashOffsets accumulates common-space distance on the CPU. Convert it to pixels, then
 // divide by the pixel half-width so both extrusion branches use the same dash coordinate.
 vec2 dashOffsetAndLength = (instanceDashOffsets * project.scale) / dashWidthPixels;
@@ -97,7 +97,7 @@ pathStyle_dashPathLength = dashOffsetAndLength.y;
 
 // Reduce the phase into the first period here rather than in the fragment shader. On a long
 // path at high zoom the raw offset reaches into the millions, and adding the much smaller
-// vPathPosition.y to it in fp32 loses the latter entirely, freezing the pattern mid-segment.
+// vDashSegment.x to it in fp32 loses the latter entirely, freezing the pattern mid-segment.
 // The dash function is periodic, so this discards nothing - but it has to be reduced modulo
 // whichever period the fragment stage will actually test against, hence dashAlignMode here.
 float dashUnitLength = pathStyle_dashArray.x + pathStyle_dashArray.y;
@@ -169,6 +169,9 @@ layout(std140) uniform pathStyleUniforms {
   highp int dashUnits;
 } pathStyle;
 
+// [position along the source segment, complete source-segment length]
+in vec2 vDashSegment;
+
 // Integral of the dash square wave from 0 to position, i.e. how much solid stroke lies before it.
 float dashPatternIntegral(float position, float solidLength, float unitLength) {
   return floor(position / unitLength) * solidLength +
@@ -231,25 +234,25 @@ float dashPatternCoverage(
       // half a dash in so both ends finish on a joint. Rounding up to at least one period
       // matters - a run shorter than half a period used to round to zero, which made
       // unitLength infinite and rendered it solid.
-#ifdef HIGH_PRECISION_DASH
+#ifdef DASH_MODE_PATH
       // Justify across the entire path rather than each segment separately, so the gaps stay
       // even instead of being stretched by a different amount on every segment. pathStyle_dashOffset
       // already carries the distance to the start of this segment, reduced modulo this same
       // period in the vertex shader.
       unitLength = pathStyle_dashPathLength / max(round(pathStyle_dashPathLength / unitLength), 1.0);
 #else
-      unitLength = vPathLength / max(round(vPathLength / unitLength), 1.0);
+      unitLength = vDashSegment.y / max(round(vDashSegment.y / unitLength), 1.0);
 #endif
       // A short segment or path can make the fitted period shorter than the requested dash.
       // Bound the solid interval to that period so coverage and duty cycle remain valid.
       solidLength = min(solidLength, unitLength);
       offset = solidLength / 2.0;
-#ifdef HIGH_PRECISION_DASH
+#ifdef DASH_MODE_PATH
       offset += pathStyle_dashOffset;
 #endif
     }
 
-    float alongPath = vPathPosition.y + offset;
+    float alongPath = vDashSegment.x + offset;
     float unitOffset = mod(alongPath, unitLength);
     float filterWidth = max(fwidth(alongPath), 0.0001);
 

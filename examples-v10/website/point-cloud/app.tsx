@@ -5,9 +5,9 @@
 /* eslint-disable no-unused-vars */
 import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {createRoot} from 'react-dom/client';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import {OrbitView, LinearInterpolator} from '@deck.gl/core';
-import {isArrowTable} from '@math.gl/arrow';
+import {isArrowTable} from '@math.gl/core/arrow';
 import {PointCloudLayer} from '@deck.gl/layers';
 
 import {LASLoader} from '@loaders.gl/pointclouds/las';
@@ -97,13 +97,13 @@ export default function App({
       loaders: [LASLoader],
       _dataLoadOptions: 'batched',
       loadOptions: {
-        core: {worker: false, batchSize: 25000, batchDebounceMs: 180},
-        las: {shape: 'arrow-table', fp64: true, columns: ['POSITION']}
+        core: {batchSize: 25000, batchMaxRowsPerSecond: 50000},
+        las: {columns: ['POSITION', 'COLOR_0']}
       },
       getPosition: {sql: 'POSITION'},
       onDataProgress,
       getNormal: [0, 1, 0],
-      getColor: [255, 255, 255],
+      getColor: {sql: 'COLOR_0'},
       opacity: 0.5,
       pointSize: 0.5,
       // TODO (kaapp) currently webgpu requirement to ensure instanceColors are supplied

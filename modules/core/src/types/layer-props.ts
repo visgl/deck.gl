@@ -16,9 +16,13 @@ import type {Texture, TextureProps} from '@luma.gl/core';
 import type {Buffer, Parameters} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
-import type {Matrix4Like} from '@math.gl/core';
-import type {Expression} from '@math.gl/expressions';
-import type {SQLQuery} from '@math.gl/expressions/sql';
+import type {Matrix4Like} from '@math.gl/core/matrix';
+import type {Expression} from '@math.gl/sql/expressions';
+import type {SQLQuery} from '@math.gl/sql/parser';
+import type {ArrowTableFunction} from '@math.gl/sql/arrow';
+
+/** Additional Arrow functions available to SQL accessors. */
+export type SQLFunctions = readonly ArrowTableFunction[];
 
 /** Optional SQL parser methods supplied by the application to Deck. */
 export type SQLParser = {
@@ -73,13 +77,16 @@ export type AccessorFunction<In, Out> = (
 /** Either a uniform value for all objects, or a function that returns a value for each object. */
 export type Accessor<In, Out> = Out | AccessorFunction<In, Out>;
 
-/** A constant, row callback, Arrow column, or SQL expression on opted-in accessors.
- * GPUVector inputs are only supported by separate column props.
- */
-export type ArrowAccessor<In, Out, ArrowType extends DataType = DataType> =
-  | Accessor<In, Out>
+/** A row callback, Arrow column, or SQL expression on an opted-in accessor. */
+export type ArrowAccessorFunction<In, Out, ArrowType extends DataType = DataType> =
+  | AccessorFunction<In, Out>
   | Vector<ArrowType>
   | {readonly sql: string};
+
+/** A constant or a row, Arrow, or SQL accessor. Direct GPU vectors use separate column props. */
+export type ArrowAccessor<In, Out, ArrowType extends DataType = DataType> =
+  | Out
+  | ArrowAccessorFunction<In, Out, ArrowType>;
 
 /** A position in the format of `[lng, lat, alt?]` or `[x, y, z?]` depending on the coordinate system.
  * See https://deck.gl/docs/developer-guide/coordinate-systems#positions
@@ -153,6 +160,8 @@ export type LayerProps = {
   data?: unknown;
   /** SQL executed on an Arrow table or URL supplied to `data`. Requires a SQL parser. */
   query?: string | null;
+  /** Adds or overrides named Arrow functions for this layer’s SQL accessors. */
+  sqlFunctions?: SQLFunctions | null;
   /**
    * Experimental loading mode. Defaults to `auto`: load URLs completely and append supplied streams.
    * `batched` streams and appends data; `snapshots` streams and replaces data with each Arrow result.
@@ -278,12 +287,13 @@ export type LayerProps = {
    */
   highlightedObjectIndex?: number | null;
   /**
-   * The color of the highlight.
+   * The highlight color, in byte channels by default. Deck’s normalizedColors option
+   * selects 0–1 plain-array inputs for top-level layers.
    */
   highlightColor?: number[] | ((pickingInfo: PickingInfo) => number[]);
 
   /**
-   * Called when remote data is fetched and parsed.
+   * Called when a new data input resolves, after query evaluation and data transformation.
    */
   onDataLoad?:
     | (<LayerDataT = LayerData<unknown>>(

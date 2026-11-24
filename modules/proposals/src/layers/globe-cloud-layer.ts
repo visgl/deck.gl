@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Layer, picking, _GlobeViewport, type LayerContext, type LayerProps} from '@deck.gl/core';
+import {Layer, picking, GlobeViewport, type LayerContext, type LayerProps} from '@deck.gl/core';
 import type {RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {Matrix4, type NumberArray3} from '@math.gl/core';
+import {Matrix4, type NumberArray3} from '@math.gl/core/matrix';
 import {
   globeClouds,
   type CloudProps,
@@ -17,7 +17,7 @@ import {skyView, SKY_VERTEX_SOURCE, SKY_VERTEX_SHADER} from './sky-view';
 export type GlobeCloudLayerProps = LayerProps & CloudProps & GlobeCloudProps;
 
 /** Globe-centered camera and rays in planet-radius units, independent of map longitude/latitude. */
-export function getGlobeCloudViewUniforms(viewport: _GlobeViewport) {
+export function getGlobeCloudViewUniforms(viewport: GlobeViewport) {
   const commonRadius = Math.hypot(...viewport.projectPosition([0, 0, 0]));
   const inverseProjection = new Matrix4(viewport.projectionMatrix).invert();
   const inverseView = new Matrix4(viewport.viewMatrix).invert();
@@ -114,7 +114,7 @@ export class GlobeCloudLayer extends Layer<GlobeCloudLayerProps> {
   override draw({renderPass}: {renderPass: RenderPass}): void {
     const viewport = this.context.viewport;
     if (
-      !(viewport instanceof _GlobeViewport) ||
+      !(viewport instanceof GlobeViewport) ||
       viewport.projectionMatrix[15] !== 0 ||
       !this.props.cover
     )

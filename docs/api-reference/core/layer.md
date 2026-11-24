@@ -211,7 +211,7 @@ Requires `pickable` to be true.
 
 * Default: `[0, 0, 128, 128]`
 
-RGBA color to blend with the highlighted object (either the hovered over object if `autoHighlight: true`, or the object at the index specified by `highlightedObjectIndex`). When the value is a 3 component (RGB) array, a default alpha of 255 is applied.
+RGBA color to blend with the highlighted object (either the hovered over object if `autoHighlight: true`, or the object at the index specified by `highlightedObjectIndex`). Channels use 0–255 by default. With Deck’s [`normalizedColors`](./deck.md#normalizedcolors), plain-array constants and callback results on top-level layers use 0–1 channels. Omitted alpha is opaque in either mode. The built-in highlight and composite sublayer colors retain their byte interpretation.
 
 - If an array is supplied, it is used for the object that is currently highlighted.
 - If a function is supplied, it is called with a [pickingInfo](../../developer-guide/interactivity.md#the-pickinginfo-object) object when the hovered object changes. The return value is used as the highlight color for the picked object. Only works with `autoHighlight: true`.
@@ -337,14 +337,27 @@ applies to row chunks; transform Arrow chunks in the producer instead. See
 [Streaming Arrow data](../../developer-guide/using-with-arrow.md#streaming-arrow-data).
 
 
+#### `sqlFunctions` (SQLFunctions, optional) {#sqlfunctions}
+
+Additional math.gl Arrow functions for this layer's SQL accessors. Functions
+override matching [Deck functions](./deck.md#sqlfunctions) by name.
+
 #### `query` (string, optional) {#query}
 
-SQL to execute through loaders.gl when `data` is an Arrow table, a promise resolving
+SQL to execute when `data` is an Arrow table, a promise resolving
 to an Arrow table, or a URL. The result becomes the layer's loaded data and is
 available to accessor queries, accessors, and picking. The layer's data is the
 implicit source. `FROM data` is optional. Omit `query` to use the loaded data as-is.
 
-For URL inputs, provide a source-capable loader. Loaders that support query pushdown
+For an in-memory Arrow table, the default parser also supports relational SQL with
+an explicit `FROM data`, for example
+`SELECT hex, SUM(count) AS visits FROM data GROUP BY hex`.
+math.gl executes the grouped query across the whole table. Nullish data and empty
+row arrays render as empty layers until data arrives.
+
+For URL inputs, provide a source-capable loader. To group a URL-backed table, use
+`FROM data GROUP BY` with one grouping column selected first, followed by named
+`COUNT`, `SUM`, `AVG`, `MIN`, or `MAX` aggregates. Loaders that support query pushdown
 can optimize loading based on the supplied query. When the layer has a custom
 `fetch`, SQL runs on the Arrow table returned by that function. Deck loads the SQL
 parser on first use.
@@ -370,6 +383,18 @@ in the range 0–1, this packs them into an 8-bit RGBA color with full opacity.
 ```ts
 getFillColor: {sql: 'RGBA8(red, green, blue, 1)'}
 ```
+
+Accessors can use top-level SQL scales. Numeric accessors accept linear, square-root,
+logarithmic, power, and symmetric-log scales with a numeric `RANGE`. Color
+accessors accept sequential, cyclic, diverging, ordinal, quantile, quantize, and
+threshold scales.
+
+```ts
+getFillColor: {sql: "SCALE_COLOR(temperature, DOMAIN(temperature), PALETTE('viridis'))"}
+```
+
+The domain resolves against the complete loaded table. When data changes, existing
+rows can receive new colors. Missing values are transparent.
 
 #### `dataTransform` (Function, optional) {#datatransform}
 
@@ -637,7 +662,11 @@ streams do not publish subsequent progress, completion, or error callbacks.
 
 #### `onDataLoad` (Function, optional) {#ondataload}
 
-Called when remote data is fully loaded. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.
+Called when a new `data` input resolves. Direct inputs are reported after any
+`dataTransform` is applied. URL and promise inputs are reported after loading,
+query evaluation, and transformation. Async iterables report completion after
+the stream ends. The callback receives the same resolved value as `layer.props.data`
+and can pass it to the application UI.
 
 The function receives two arguments:
 
@@ -786,6 +815,15 @@ Used to propagate errors thrown in layers to the deck.gl error handling system. 
 
 - `error` (Error) - a JavaScript Error object
 - `message` (string, optional) - additional contextual description to amend the error message with
+
+#### `_getResolvedColorScales()` 🧪
+
+Returns a read-only map of accessor names to `ResolvedScale` objects. The type is
+available from `@deck.gl/core`. A scale descriptor provides the domain and color
+range, and `sample(value)` returns RGBA channels in `[0, 1]`. The method returns
+`undefined` before the first evaluation completes or on layers without SQL
+color accessors. During replacement, the method returns the scales for the
+previously applied colors. Call it after a deck redraw to read the latest scales.
 
 ### Layer Lifecycle Methods
 

@@ -19,7 +19,7 @@ import {
 } from '@deck.gl/core';
 import {GridCellLayer} from '@deck.gl/layers';
 import {Buffer} from '@luma.gl/core';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
 import {CustomTFContext} from '../tf-utils/tf-context';
 import {tensorToBuffer} from '../tf-utils/tensor-data';

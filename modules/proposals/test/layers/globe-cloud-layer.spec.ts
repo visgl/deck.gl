@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Deck, Layer, MapView, _GlobeView, type LayerContext} from '@deck.gl/core';
+import {Deck, Layer, MapView, GlobeView, type LayerContext} from '@deck.gl/core';
 import {luma, Buffer, Texture, type RenderPass} from '@luma.gl/core';
 import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {webgl2Adapter} from '@luma.gl/core/webgl';
@@ -92,7 +92,7 @@ test.each(['webgpu', 'webgl'] as const)(
       height: SIZE,
       useDevicePixels: false,
       _framebuffer: framebuffer,
-      views: new _GlobeView(),
+      views: new GlobeView(),
       initialViewState: {longitude: 0, latitude: 0, zoom: -1},
       layers: [],
       onError: error => errors.push(error),

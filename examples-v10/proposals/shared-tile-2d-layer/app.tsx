@@ -9,7 +9,7 @@ import {MapView} from '@deck.gl/core';
 import {Tileset2D} from '@deck.gl/geo-layers';
 import {Tile2DLayer} from '@deck.gl/proposals/layers';
 import {BitmapLayer} from '@deck.gl/layers';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import type {MapViewState, ViewStateChangeParameters} from '@deck.gl/core';
 import type {Tile2DLayerPickingInfo} from '@deck.gl/proposals/layers';
 import './style.css';

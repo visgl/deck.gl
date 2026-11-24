@@ -7,12 +7,12 @@ import {
   MapController,
   OrbitController,
   FirstPersonController,
-  _GlobeController as GlobeController,
+  GlobeController,
   OrbitViewport,
   OrthographicController,
   Viewport
 } from '@deck.gl/core';
-import {normalizeViewportProps} from '@math.gl/web-mercator';
+import {normalizeViewportProps} from '@math.gl/geospatial/web-mercator';
 
 const dummyMakeViewport = (props: any) => new Viewport(props);
 

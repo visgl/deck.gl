@@ -3,10 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 /* global fetch */
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {log} from '@deck.gl/core';
@@ -14,7 +14,7 @@ import {tableFromArrays} from 'apache-arrow';
 import sampleData from './all.json';
 
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
-import type {PickingInfo, MapViewState} from '@deck.gl/core';
+import type {PickingInfo, MapViewState, LayerData} from '@deck.gl/core';
 
 // Live data provided by the OpenSky Network, https://opensky-network.org.
 // The API may reject browser requests from other origins, so the bundled
@@ -76,7 +76,8 @@ type AircraftRow = {
 };
 
 /** Converts the OpenSky response to named columns and makes contact times relative. */
-function normalizeData({time, states}: {time: number; states: Aircraft[]}) {
+function normalizeData<LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT {
+  const {time, states} = source as {time: number; states: Aircraft[]};
   return tableFromArrays({
     callSign: states.map(aircraft => aircraft[1]),
     originCountry: states.map(aircraft => aircraft[2]),
@@ -87,20 +88,24 @@ function normalizeData({time, states}: {time: number; states: Aircraft[]}) {
     trueTrack: states.map(aircraft => aircraft[10]),
     verticalRate: states.map(aircraft => aircraft[11]),
     altitude: Float64Array.from(states, aircraft => aircraft[13] ?? 0)
-  });
+  }) as LayerDataT;
 }
 
 // https://github.com/visgl/deck.gl/pull/10465 updated the live OpenSky URL,
 // but the endpoint still rejects cross-origin browser requests. Start with this
 // bundled snapshot so the demo can render immediately and keep it as fallback.
-const DATA = normalizeData(sampleData as {time: number; states: Aircraft[]});
+const DATA = {
+  ...(sampleData as {time: number; states: Aircraft[]}),
+  length: sampleData.states.length
+};
 
 async function fetchData(signal: AbortSignal) {
   const response = await fetch(DATA_URL, {signal});
   if (!response.ok) {
     throw new Error(`OpenSky request failed with status ${response.status}`);
   }
-  return normalizeData((await response.json()) as {time: number; states: Aircraft[]});
+  const responseData = (await response.json()) as {time: number; states: Aircraft[]};
+  return {...responseData, length: responseData.states.length};
 }
 
 function getTooltip({object}: PickingInfo<AircraftRow>) {
@@ -127,16 +132,6 @@ export default function App({
   mapStyle?: string;
 }) {
   const [data, setData] = useState(DATA);
-  const onDataLoadRef = useRef(onDataLoad);
-
-  useEffect(() => {
-    onDataLoadRef.current = onDataLoad;
-  }, [onDataLoad]);
-
-  useEffect(() => {
-    onDataLoadRef.current?.(data.numRows);
-  }, [data]);
-
   useEffect(() => {
     const abortController = new AbortController();
     fetchData(abortController.signal)
@@ -152,20 +147,26 @@ export default function App({
   const layer = new ScenegraphLayer<AircraftRow>({
     id: 'scenegraph-layer',
     data,
+    dataTransform: normalizeData,
+    onDataLoad: () => onDataLoad?.(data.states.length),
     pickable: true,
     sizeScale,
     scenegraph: MODEL_URL,
     _animations: ANIMATIONS,
     sizeMinPixels: 0.1,
     sizeMaxPixels: 1.5,
-    getPosition: {sql: 'FLOAT64x3(longitude, latitude, altitude)'},
+    getPosition: {sql: 'ARRAY[longitude, latitude, altitude]'},
     getOrientation: ({verticalRate, velocity, trueTrack}) => {
       // -90 looking up, +90 looking down
       const pitch = (-Math.atan2(verticalRate ?? 0, velocity ?? 0) * 180) / Math.PI;
       return [pitch, -(trueTrack ?? 0), 90];
     },
-    getScale: ({lastContact}) => {
-      return lastContact < -DROP_IF_OLDER_THAN_SECONDS ? [0, 0, 0] : [1, 1, 1];
+    getScale: {
+      sql: `\
+        CASE WHEN lastContact < -${DROP_IF_OLDER_THAN_SECONDS}
+          THEN ARRAY_FLOAT32(0, 0, 0)
+          ELSE ARRAY_FLOAT32(1, 1, 1)
+        END`
     }
   });
 

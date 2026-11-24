@@ -11,6 +11,7 @@ import {Widget} from './widget';
 
 import {EVENT_HANDLERS} from './constants';
 import {deepEqual} from '../utils/deep-equal';
+import log from '../utils/log';
 
 const PLACEMENTS = {
   'top-left': {top: 0, left: 0},
@@ -97,7 +98,8 @@ export class WidgetManager {
     }
   }
 
-  onRedraw({viewports, layers}: {viewports: Viewport[]; layers: Layer[]}) {
+  /** Dispatches screen redraw state to widgets in each active view. */
+  onRedraw({viewports, layers, renderedLayers}: Parameters<Widget['onRedraw']>[0]) {
     const viewportsById: {[id: string]: Viewport} = viewports.reduce((acc, v) => {
       acc[v.id] = v;
       return acc;
@@ -112,7 +114,7 @@ export class WidgetManager {
           if (widget.onViewportChange) {
             widget.onViewportChange(viewport);
           }
-          widget.onRedraw?.({viewports: [viewport], layers});
+          widget.onRedraw?.({viewports: [viewport], layers, renderedLayers});
         }
       } else {
         // Not attached to a specific view
@@ -121,7 +123,7 @@ export class WidgetManager {
             widget.onViewportChange(viewport);
           }
         }
-        widget.onRedraw?.({viewports, layers});
+        widget.onRedraw?.({viewports, layers, renderedLayers});
       }
     }
     this.lastViewports = viewportsById;
@@ -194,11 +196,19 @@ export class WidgetManager {
 
     for (let widget of nextWidgets) {
       const oldWidget = oldWidgetMap[widget.id];
+      if (oldWidget === null) {
+        // null, rather than undefined, means a widget with this id was already matched in this
+        // pass. Mounting another one would leave two widgets that later updates cannot tell apart.
+        log.warn(`Multiple widgets with same id ${widget.id}`)();
+        continue;
+      }
       if (!oldWidget) {
         // Widget is new
         this._addWidget(widget);
       } else if (
-        // Widget placement changed
+        // Widget type or placement changed: replace the old widget, so the props of
+        // another widget type are never passed to it.
+        getWidgetType(oldWidget) !== getWidgetType(widget) ||
         oldWidget.viewId !== widget.viewId ||
         oldWidget.placement !== widget.placement
       ) {
@@ -323,4 +333,14 @@ export class WidgetManager {
       height: viewport.height
     };
   }
+}
+
+/**
+ * The type of a widget, used to decide whether a new widget with the same id can reuse
+ * the old instance. It is the class default id (`defaultProps.id`), which is unique per
+ * class. Comparing it instead of the constructor keeps widgets mounted across hot module
+ * reloads and works across duplicate copies of a package.
+ */
+function getWidgetType(widget: Widget): string | undefined {
+  return (widget.constructor as {defaultProps?: {id?: string}}).defaultProps?.id;
 }

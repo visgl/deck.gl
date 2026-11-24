@@ -6,8 +6,9 @@ import {test, expect} from 'vitest';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, testLayerAsync, generateLayerTests, device} from '@deck.gl/test-utils/vitest';
 import {LayerManager, MapView, _GPUVectorModel as GPUVectorModel} from '@deck.gl/core';
-import {Buffer} from '@luma.gl/core';
+import {Buffer, Texture} from '@luma.gl/core';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
+import {ClipExtension, DataFilterExtension} from '@deck.gl/extensions';
 import {default as TriangleLayer} from '@deck.gl/aggregation-layers/heatmap-layer/triangle-layer';
 import {
   maxWeightUniforms,
@@ -54,7 +55,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             props: {
               data: {attributes: {positions, texCoords}},
               vertexCount: 4,
-              colorDomain: [0, 1],
+              getColorDomain: () => [0, 1],
               aggregationMode: 0,
               threshold: 0,
               intensity: 1,
@@ -407,6 +408,42 @@ test('HeatmapLayer#binaryData', () => {
   });
 });
 
+test('HeatmapLayer counts current categories after loading on WebGPU', async ({skip}) => {
+  const gpu = await getWebGPUTestDevice();
+  if (!gpu) return skip();
+  const manager = new LayerManager(gpu, {viewport: viewport0});
+  const counts: number[] = [];
+  const errors: Error[] = [];
+  manager.setProps({onError: error => errors.push(error)});
+  const empty = new HeatmapLayer({
+    id: 'heatmap-category-count',
+    data: [] as {position: [number, number]; category: string}[],
+    getPosition: d => d.position,
+    extensions: [new DataFilterExtension({filterSize: 0, categorySize: 1, countItems: true})],
+    getFilterCategory: d => d.category,
+    filterCategories: ['a'],
+    onFilteredItemsChange: ({count}) => counts.push(count)
+  });
+  try {
+    manager.setLayers([empty]);
+    await expect.poll(() => counts.at(-1)).toBe(0);
+    const loaded = empty.clone({
+      data: [
+        {position: [-122.4, 37.8], category: 'a'},
+        {position: [-122.3, 37.7], category: 'b'},
+        {position: [-122.3, 37.75], category: 'b'}
+      ]
+    });
+    manager.setLayers([loaded]);
+    await expect.poll(() => counts.at(-1)).toBe(1);
+    manager.setLayers([loaded.clone({filterCategories: ['b']})]);
+    await expect.poll(() => counts.at(-1)).toBe(2);
+    expect(errors).toEqual([]);
+  } finally {
+    manager.finalize();
+  }
+});
+
 test('HeatmapLayer#WebGPU binary positions', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) {
@@ -526,5 +563,246 @@ test('Heatmap borrows GPU columns and updates row prefixes', async ({skip}) => {
     weights.destroy();
     buffer.destroy();
     expect(await webgpuDevice.handle.popErrorScope()).toBeNull();
+  }
+});
+
+test('Heatmap selects a blendable and filterable WebGPU accumulation format', () => {
+  for (const [blend, filter, half, expected] of [
+    [true, true, true, 'rgba32float'],
+    [true, false, true, 'rgba16float'],
+    [false, true, true, 'rgba16float'],
+    [false, false, false, 'rgba8unorm']
+  ] as const) {
+    let format: string | undefined;
+    HeatmapLayer.prototype._setupTextureParams.call({
+      context: {
+        device: {
+          type: 'webgpu',
+          limits: {maxTextureDimension2D: 1024},
+          getTextureFormatCapabilities: name =>
+            name === 'rgba32float'
+              ? {render: true, blend, filter}
+              : {render: true, blend: half, filter: half}
+        }
+      },
+      props: {weightsTextureSize: 512},
+      setState: state => {
+        format = state.format;
+      }
+    } as any);
+    expect(format).toBe(expected);
+  }
+});
+
+/** Allow tests to read the accumulation texture directly. */
+class ReadableHeatmapLayer extends HeatmapLayer {
+  /** Name used for the test layer lifecycle. */
+  static layerName = 'ReadableHeatmapLayer';
+
+  /** Add copy source usage to the weights texture before binding it to the transform. */
+  override _createTextures(): void {
+    super._createTextures();
+    const texture = this.state.weightsTexture!;
+    this.setState({
+      weightsTexture: this.context.device.createTexture({
+        ...texture.props,
+        usage: texture.props.usage! | Texture.COPY_SRC
+      })
+    });
+    texture.destroy();
+  }
+}
+
+/** Read the accumulated density texture in its native format. */
+async function readWeights(
+  gpu: NonNullable<Awaited<ReturnType<typeof getWebGPUTestDevice>>>,
+  current: ReadableHeatmapLayer
+) {
+  const texture = current.state.weightsTexture!;
+  const bytesPerRow =
+    texture.width *
+    (texture.format === 'rgba32float' ? 16 : texture.format === 'rgba16float' ? 8 : 4);
+  const readback = gpu.createBuffer({
+    byteLength: bytesPerRow * texture.height,
+    usage: Buffer.COPY_DST | Buffer.MAP_READ
+  });
+  try {
+    const encoder = gpu.createCommandEncoder();
+    encoder.copyTextureToBuffer({
+      sourceTexture: texture,
+      destinationBuffer: readback,
+      bytesPerRow,
+      width: texture.width,
+      height: texture.height
+    });
+    gpu.submit(encoder.finish());
+    return await readback.readAsync();
+  } finally {
+    readback.destroy();
+  }
+}
+
+for (const borrowed of [false, true]) {
+  test(`Heatmap clips ${borrowed ? 'borrowed' : 'accessor'} sources before accumulating density`, async ({
+    skip
+  }) => {
+    const gpu = await getWebGPUTestDevice();
+    if (!gpu) return skip();
+    const {GPUVector} = await import('@luma.gl/graph/gpu-data');
+    const points = [
+      [-122, 38, 0, 1],
+      [-121.98, 38, 0, 100]
+    ];
+    const buffer = gpu.createBuffer({
+      data: new Float32Array(points.flat()),
+      usage: Buffer.VERTEX
+    });
+    const positions = new GPUVector({
+      type: 'buffer',
+      name: 'positions',
+      format: 'float32x3',
+      length: 2,
+      byteStride: 16,
+      buffer,
+      ownsBuffer: false
+    });
+    const weights = new GPUVector({
+      type: 'buffer',
+      name: 'weights',
+      format: 'float32',
+      length: 2,
+      byteOffset: 12,
+      byteStride: 16,
+      buffer,
+      ownsBuffer: false
+    });
+    const manager = new LayerManager(gpu, {viewport: viewport0});
+    const errors: Error[] = [];
+    manager.setProps({onError: error => errors.push(error)});
+    const layer = new ReadableHeatmapLayer({
+      weightsTextureSize: 64,
+      radiusPixels: 8,
+      ...(borrowed
+        ? {positions, weights: [weights]}
+        : {
+            data: points,
+            getPosition: d => d.slice(0, 3),
+            getWeight: d => d[3]
+          }),
+      extensions: [new ClipExtension()],
+      clipBounds: [-122.01, 37.99, -121.99, 38.01]
+    });
+    gpu.handle.pushErrorScope('validation');
+    try {
+      manager.setLayers([layer]);
+      const clipped = await readWeights(gpu, layer);
+      expect(clipped.some(Boolean)).toBe(true);
+      const onePoint = layer.clone({numInstances: 1});
+      manager.setLayers([onePoint]);
+      expect(await readWeights(gpu, onePoint)).toEqual(clipped);
+      const outside = onePoint.clone({clipBounds: [-122.1, 38.1, -122.05, 38.2]});
+      manager.setLayers([outside]);
+      expect((await readWeights(gpu, outside)).some(Boolean)).toBe(false);
+      /** Get the retained display layer after changing the clipping mode. */
+      const display = () =>
+        manager.getLayers().find(layer => layer instanceof TriangleLayer) as TriangleLayer;
+      expect(display().state.model.shaderInputs.modules.clip).toBeUndefined();
+
+      const displayClipped = outside.clone({clipByInstance: false});
+      manager.setLayers([displayClipped]);
+      expect((await readWeights(gpu, displayClipped)).some(Boolean)).toBe(true);
+      expect(display().state.model.shaderInputs.modules.clip).toBeDefined();
+
+      const sourceClipped = displayClipped.clone({clipByInstance: true});
+      manager.setLayers([sourceClipped]);
+      expect((await readWeights(gpu, sourceClipped)).some(Boolean)).toBe(false);
+      expect(display().state.model.shaderInputs.modules.clip).toBeUndefined();
+      expect(errors).toEqual([]);
+    } finally {
+      manager.finalize();
+      positions.destroy();
+      weights.destroy();
+      buffer.destroy();
+      expect(await gpu.handle.popErrorScope()).toBeNull();
+    }
+  });
+}
+
+test('Heatmap accumulates weights using borrowed numeric DataFilter columns', async ({skip}) => {
+  const gpu = await getWebGPUTestDevice();
+  if (!gpu) return skip();
+  const {GPUVector} = await import('@luma.gl/graph/gpu-data');
+  const buffer = gpu.createBuffer({
+    data: new Float32Array([-122, 38, 0, 1, 2, -121.98, 38, 0, 100, 9]),
+    usage: Buffer.VERTEX
+  });
+  const positions = new GPUVector({
+    type: 'buffer',
+    name: 'positions',
+    format: 'float32x3',
+    length: 2,
+    byteStride: 20,
+    buffer,
+    ownsBuffer: false
+  });
+  const weights = new GPUVector({
+    type: 'buffer',
+    name: 'weights',
+    format: 'float32',
+    length: 2,
+    byteStride: 20,
+    byteOffset: 12,
+    buffer,
+    ownsBuffer: false
+  });
+  const filterValues = new GPUVector({
+    type: 'buffer',
+    name: 'filterValues',
+    format: 'float32',
+    length: 2,
+    byteStride: 20,
+    byteOffset: 16,
+    buffer,
+    ownsBuffer: false
+  });
+  const manager = new LayerManager(gpu, {viewport: viewport0});
+  const errors: Error[] = [];
+  manager.setProps({onError: error => errors.push(error)});
+  const layer = new ReadableHeatmapLayer({
+    weightsTextureSize: 64,
+    radiusPixels: 8,
+    positions,
+    weights: [weights],
+    extensionAttributes: {filterValues},
+    extensions: [new DataFilterExtension({filterSize: 1})],
+    filterRange: [0, 4]
+  });
+  gpu.handle.pushErrorScope('validation');
+  try {
+    manager.setLayers([layer]);
+    const filtered = await readWeights(gpu, layer);
+    expect(filtered.some(Boolean)).toBe(true);
+
+    const onePoint = layer.clone({numInstances: 1});
+    manager.setLayers([onePoint]);
+    expect(await readWeights(gpu, onePoint)).toEqual(filtered);
+
+    const outside = onePoint.clone({filterRange: [0, 1]});
+    manager.setLayers([outside]);
+    expect((await readWeights(gpu, outside)).some(Boolean)).toBe(false);
+
+    const replacement = outside.clone({
+      extensionAttributes: {filterValues: weights}
+    });
+    manager.setLayers([replacement]);
+    expect(await readWeights(gpu, replacement)).toEqual(filtered);
+    expect(errors).toEqual([]);
+  } finally {
+    manager.finalize();
+    positions.destroy();
+    weights.destroy();
+    filterValues.destroy();
+    buffer.destroy();
+    expect(await gpu.handle.popErrorScope()).toBeNull();
   }
 });

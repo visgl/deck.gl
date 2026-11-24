@@ -207,6 +207,9 @@ new GridLayer({
 
 Custom JavaScript callbacks and grids exceeding device limits use CPU aggregation.
 
+Previous cells remain visible and cannot be picked while new domains or scales are pending,
+as described for [HexagonLayer](./hexagon-layer.md#compute-aggregation).
+
 #### `cellSize` (number, optional) {#cellsize}
 
 * Default: `1000`
@@ -561,7 +564,7 @@ Notes:
 
 - The built-in WebGPU compute path requires buffers with `STORAGE` or `COPY_SRC` usage.
 - Use positions in the view's coordinate system for custom views.
-- The compute path requires a configuration without extensions or CPU position preprojection.
+- Positions must not require CPU preprojection. See [GPU column extensions](./aggregator.md#gpu-column-extensions) for supported extensions.
 
 ## Source
 
