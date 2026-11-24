@@ -506,7 +506,24 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       typedArrayManager.setOptions(props._typedArrayManagerProps);
     }
 
-    this.animationLoop.start();
+    const animationLoop = this.animationLoop;
+    if (deviceOrPromise instanceof Promise) {
+      // Deck may be finalized while the adapter is still creating the device.
+      deviceOrPromise.then(
+        () => {
+          if (this.animationLoop === animationLoop) {
+            animationLoop.start();
+          }
+        },
+        error => {
+          if (this.animationLoop === animationLoop) {
+            props.onError?.(error);
+          }
+        }
+      );
+    } else {
+      animationLoop.start();
+    }
   }
 
   /** Stop rendering and dispose all resources */
