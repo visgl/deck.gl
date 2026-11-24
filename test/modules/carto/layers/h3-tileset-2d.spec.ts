@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import H3Tileset2D from '@deck.gl/carto/layers/h3-tileset-2d';
 import {Viewport, WebMercatorViewport} from '@deck.gl/core';
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
 
 test('H3Tileset2D', async () => {
   const tileset = new H3Tileset2D({});

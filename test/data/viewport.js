@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {WebMercatorViewport} from 'deck.gl';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
 export const sampleViewport = new WebMercatorViewport({
   width: 1024,

@@ -411,7 +411,7 @@ Receives arguments:
 
 #### `onTileUnload` (Function, optional) {#ontileunload}
 
-`onTileUnload` called when a tile is cleared from cache.
+`onTileUnload` called when a tile is cleared from cache, including when the layer is removed. Use `onTileUnload` to release any resources created for the tile in `getTileData`. If a tile is cleared while it's still loading, `onTileUnload` is called again when its data arrives, instead of `onTileLoad`.
 
 - Default: `() => {}`
 

@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {normalizeArrowBatch, normalizeArrowSchema} from '../arrow/normalize-arrow-batch';
+import {isArrowTable} from '../arrow/upstream-math/is-arrow-table';
+import {unwrapLoaderArrowResult} from '../utils/loader-utils';
 import {isAsyncIterable} from '../utils/iterable-utils';
 import {
   COMPONENT_SYMBOL,
@@ -121,16 +124,22 @@ export default class ComponentState<ComponentT extends Component> {
     for (const propName in resolvedValues) {
       const value = resolvedValues[propName];
       this._createAsyncPropData(propName, defaultValues[propName]);
-      this._updateAsyncProp(propName, value);
-      // Use transformed value
+      /** Whether this input finished resolving without waiting for a promise or stream. */
+      const resolved = this._updateAsyncProp(propName, value);
+      // Use transformed value before notifying callbacks that read component props.
       resolvedValues[propName] = this.getAsyncProp(propName);
+      if (resolved) {
+        this._onResolve(propName, resolvedValues[propName]);
+      }
     }
 
     for (const propName in originalValues) {
       const value = originalValues[propName];
       // Makes sure a record exists for this prop
       this._createAsyncPropData(propName, defaultValues[propName]);
-      this._updateAsyncProp(propName, value);
+      if (this._updateAsyncProp(propName, value)) {
+        this._onResolve(propName, this.getAsyncProp(propName));
+      }
     }
   }
 
@@ -140,34 +149,52 @@ export default class ComponentState<ComponentT extends Component> {
     return null;
   }
 
+  /** Allows a URL-backed prop to reload when its loading options change. */
+  protected _didAsyncRequestChange(_propName: string, _value: unknown): boolean {
+    return false;
+  }
+
+  /** Prepares a non-URL input before resolving the async prop. */
+  protected _prepareAsyncInput(_propName: string, value: unknown): unknown {
+    return value;
+  }
+
+  /** Reports the accumulated value after an accepted streamed batch. */
+  protected _onProgress(propName: string, value: unknown) {} // eslint-disable-line @typescript-eslint/no-empty-function
+
   protected _onResolve(propName: string, value: any) {} // eslint-disable-line @typescript-eslint/no-empty-function
 
   protected _onError(propName: string, error: Error) {} // eslint-disable-line @typescript-eslint/no-empty-function
 
   // Intercept strings (URLs) and Promises and activates loading and prop rewriting
-  private _updateAsyncProp(propName: string, value: any) {
-    if (!this._didAsyncInputValueChange(propName, value)) {
-      return;
+  /** Updates a prop and reports whether it resolved synchronously. */
+  private _updateAsyncProp(propName: string, value: any): boolean {
+    const requestChanged = this._didAsyncRequestChange(propName, value);
+    if (!this._didAsyncInputValueChange(propName, value) && !requestChanged) {
+      return false;
     }
 
     // interpret value string as url and start a new load tracked by a promise
     if (typeof value === 'string') {
       value = this._fetch(propName, value);
+    } else {
+      value = this._prepareAsyncInput(propName, value);
     }
 
     // interprets promise and track the "loading"
     if (value instanceof Promise) {
       this._watchPromise(propName, value);
-      return;
+      return false;
     }
 
     if (isAsyncIterable(value)) {
       this._resolveAsyncIterable(propName, value); // eslint-disable-line @typescript-eslint/no-floating-promises
-      return;
+      return false;
     }
 
     // else, normal, non-async value. Just store value for now
     this._setPropValue(propName, value);
+    return true;
   }
 
   // Whenever async props are changing, we need to make a copy of oldProps
@@ -205,7 +232,10 @@ export default class ComponentState<ComponentT extends Component> {
 
     const asyncProp = this.asyncProps[propName];
     if (asyncProp) {
-      value = this._postProcessValue(asyncProp, value);
+      value = this._postProcessValue(
+        asyncProp,
+        propName === 'data' ? unwrapLoaderArrowResult(value) : value
+      );
       asyncProp.resolvedValue = value;
       asyncProp.pendingLoadCount++;
       asyncProp.resolvedLoadCount = asyncProp.pendingLoadCount;
@@ -241,19 +271,35 @@ export default class ComponentState<ComponentT extends Component> {
             // This component state has been finalized
             return;
           }
-          data = this._postProcessValue(asyncProp, data);
+          if (loadCount !== asyncProp.pendingLoadCount) {
+            // A newer request superseded this one. Discard this result before
+            // post processing, which would release the current value.
+            return;
+          }
+          if (propName === 'data' && isAsyncIterable(data)) {
+            return this._resolveAsyncIterable(propName, data, loadCount);
+          }
+          data = this._postProcessValue(
+            asyncProp,
+            propName === 'data' ? unwrapLoaderArrowResult(data) : data
+          );
           this._setAsyncPropValue(propName, data, loadCount);
-          this._onResolve(propName, data);
+          if (this.component && loadCount === asyncProp.pendingLoadCount) {
+            this._onResolve(propName, data);
+          }
         })
         .catch(error => {
-          this._onError(propName, error);
+          if (this.component && loadCount === asyncProp.pendingLoadCount) {
+            this._onError(propName, error);
+          }
         });
     }
   }
 
   private async _resolveAsyncIterable(
     propName: string,
-    iterable: AsyncIterable<any>
+    iterable: AsyncIterable<any>,
+    loadCount?: number
   ): Promise<void> {
     if (propName !== 'data') {
       // we only support data as async iterable
@@ -266,36 +312,112 @@ export default class ComponentState<ComponentT extends Component> {
       return;
     }
 
-    asyncProp.pendingLoadCount++;
-    const loadCount = asyncProp.pendingLoadCount;
+    loadCount ??= ++asyncProp.pendingLoadCount;
+    if (loadCount !== asyncProp.pendingLoadCount) {
+      return;
+    }
     let data: any[] = [];
     let count = 0;
+    let arrowBatches: import('apache-arrow').RecordBatch[] = [];
+    let lastResult: unknown = data;
+    let chunkKind: 'rows' | 'arrow' | undefined;
 
-    for await (const chunk of iterable) {
-      if (!this.component) {
-        // This component state has been finalized
-        return;
+    try {
+      for await (const chunk of iterable) {
+        if (!this.component || loadCount !== asyncProp.pendingLoadCount) {
+          // The layer was finalized or a newer data stream superseded this one.
+          return;
+        }
+
+        // loaders.gl can emit metadata independently of data batches.
+        if (chunk?.batchType === 'metadata' || chunk?.shape === 'metadata') {
+          continue;
+        }
+        // @ts-expect-error (2339) layer-only props are not declared on Component
+        const {dataTransform, _dataLoadOptions = 'auto'} = this.component.props;
+        // Arrow is an optional peer dependency. Import it only for Arrow inputs.
+        const arrow = unwrapLoaderArrowResult(chunk);
+        if (isArrowTable(arrow)) {
+          if (chunkKind === 'rows') {
+            throw new Error('Cannot mix Arrow and row chunks');
+          }
+          chunkKind = 'arrow';
+          const arrowRuntime = await import('apache-arrow');
+          const {Table, RecordBatch} = arrowRuntime;
+          if (!this.component || loadCount !== asyncProp.pendingLoadCount) {
+            return;
+          }
+          const batches = ('batches' in arrow ? arrow.batches : [arrow]).map(batch => {
+            // Arrow 21.2 recognizes batches from other runtimes through instanceof.
+            if (Object.getPrototypeOf(batch) === RecordBatch.prototype) {
+              return batch;
+            }
+            return normalizeArrowBatch(batch as import('apache-arrow').RecordBatch, arrowRuntime);
+          });
+          if (_dataLoadOptions === 'snapshots') {
+            arrowBatches = [...batches];
+          } else {
+            // Preserve Arrow columnar storage without converting to row objects.
+            arrowBatches.push(...batches);
+          }
+          const table = new Table(
+            batches[0]?.schema ?? normalizeArrowSchema(arrow.schema, arrowRuntime),
+            arrowBatches
+          );
+          lastResult = table;
+          this._setAsyncPropValue(propName, table, loadCount);
+          if (this.component && loadCount === asyncProp.pendingLoadCount) {
+            this._onProgress(propName, table);
+          }
+          continue;
+        }
+        if (_dataLoadOptions === 'snapshots') {
+          throw new Error('snapshots requires Arrow chunks');
+        }
+        if (chunkKind === 'arrow') {
+          throw new Error('Cannot mix Arrow and row chunks');
+        }
+        chunkKind = 'rows';
+        // Row-oriented loaders wrap their arrays in a table batch.
+        const rows =
+          (chunk?.shape === 'object-row-table' ||
+            chunk?.shape === 'array-row-table' ||
+            chunk?.shape === 'unknown') &&
+          Array.isArray(chunk.data)
+            ? chunk.data
+            : chunk;
+        if (dataTransform) {
+          data = dataTransform(rows, data) as any[];
+        } else {
+          data = data.concat(rows);
+        }
+
+        // Used by the default _dataDiff function
+        Object.defineProperty(data, '__diff', {
+          enumerable: false,
+          value: [{startRow: count, endRow: data.length}]
+        });
+
+        count = data.length;
+        lastResult = data;
+        this._setAsyncPropValue(propName, data, loadCount);
+        if (this.component && loadCount === asyncProp.pendingLoadCount) {
+          this._onProgress(propName, data);
+        }
       }
 
-      // @ts-expect-error (2339) dataTransform is not decared in base component props
-      const {dataTransform} = this.component.props;
-      if (dataTransform) {
-        data = dataTransform(chunk, data) as any[];
-      } else {
-        data = data.concat(chunk);
+      if (this.component && loadCount === asyncProp.pendingLoadCount && !chunkKind) {
+        // An empty replacement stream still clears old data and finishes loading.
+        this._setAsyncPropValue(propName, data, loadCount);
       }
-
-      // Used by the default _dataDiff function
-      Object.defineProperty(data, '__diff', {
-        enumerable: false,
-        value: [{startRow: count, endRow: data.length}]
-      });
-
-      count = data.length;
-      this._setAsyncPropValue(propName, data, loadCount);
+      if (this.component && loadCount === asyncProp.pendingLoadCount) {
+        this._onResolve(propName, lastResult);
+      }
+    } catch (error) {
+      if (this.component && loadCount === asyncProp.pendingLoadCount) {
+        this._onError(propName, error as Error);
+      }
     }
-
-    this._onResolve(propName, data);
   }
 
   // Give the app a chance to post process the loaded data

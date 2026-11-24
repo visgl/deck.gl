@@ -250,6 +250,14 @@ Remarks:
 
 ### Data Accessors
 
+#### `_projectionTolerance` (number, optional) {#_projectiontolerance}
+
+* Default: `0`
+
+> Note: This prop is experimental
+
+Maximum sampled boundary error in meters with a preprojecting viewport. Zero disables refinement. Requires `_normalize: true`, CPU-readable polygons and per-object fill colors, line colors and elevations. Interiors and extruded sides are not refined. See [Adaptive refinement](../core/custom-projection-view.md#adaptive-refinement).
+
 #### `getPolygon` ([Accessor&lt;PolygonGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpolygon}
 
 * Default: `object => object.polygon`
@@ -265,6 +273,11 @@ A polygon can be one of the following formats:
   - `positions` (number[] | TypedArray) - a flat array of coordinates. By default, each coordinate is assumed to contain 3 consecutive numbers. If each coordinate contains only two numbers (x, y), set the `positionFormat` prop of the layer to `XY`.
   - `holeIndices` (number[]) - the starting index of each hole in the `positions` array. The first ring is the exterior boundary and the successive rings are the holes.
 
+
+On top-level layers, Deck's [`normalizedColors`](../core/deck.md#normalizedcolors) option
+interprets plain-array `getFillColor` and `getLineColor` values and callback results as 0–1 channels.
+Omitted alpha is opaque. Byte typed arrays, binary attributes, and built-in defaults keep
+their existing encoding.
 
 #### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 

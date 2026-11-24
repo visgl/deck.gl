@@ -88,13 +88,15 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   output.vTexCoord = attributes.texCoords;
   output.vTexPos = vec2<f32>(0.0);
   output.pickingColor = geometry.pickingColor;
-  output.pickingDepth = output.position.z / output.position.w;
 
   if (bitmap.coordinateConversion < -0.5) {
     output.vTexPos = geometry.position.xy + project.commonOrigin.xy;
   } else if (bitmap.coordinateConversion > 0.5) {
     output.vTexPos = geometry.worldPosition.xy;
   }
+
+  DECKGL_FILTER_GL_POSITION(&output.position, geometry);
+  output.pickingDepth = output.position.z / output.position.w;
 
   return output;
 }
@@ -116,10 +118,18 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4<f32> {
 
   geometry.uv = uv;
 
+  fragmentGeometry.uv = geometry.uv;
+
   if (picking.isActive > 0.5) {
     if (picking.isAttribute > 0.5) {
+      var extensionColor = vec4<f32>(input.pickingDepth, 0.0, 0.0, 1.0);
+      DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+      // Color filters may discard, but must not alter the picking payload.
       return vec4<f32>(input.pickingDepth, 0.0, 0.0, 1.0);
     }
+    var extensionColor = vec4<f32>(packUVsIntoRGB(uv), 1.0);
+    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(packUVsIntoRGB(uv), 1.0);
   }
 
@@ -140,6 +150,7 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4<f32> {
     }
   }
 
+  DECKGL_FILTER_COLOR(&fragColor, fragmentGeometry);
   return deckgl_premultiplied_alpha(fragColor);
 }
 `;

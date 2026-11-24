@@ -88,3 +88,10 @@ export {
   CoordinatesGeocoder as _CoordinatesGeocoder,
   CurrentLocationGeocoder as _CurrentLocationGeocoder
 } from './lib/geocode/geocoders';
+
+export {
+  _LegendWidget,
+  _LegendWidget as _ColorScaleWidget,
+  type ColorScaleWidgetProps,
+  type ColorScaleWidgetProps as LegendWidgetProps
+} from './color-scale-widget';

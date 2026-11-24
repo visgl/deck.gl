@@ -3,12 +3,15 @@
 // Copyright (c) vis.gl contributors
 
 import {
+  ACCESSOR_QUERIES_SYMBOL,
+  ROW_ACCESSOR_COLUMNS_SYMBOL,
   COMPONENT_SYMBOL,
   PROP_TYPES_SYMBOL,
   ASYNC_ORIGINAL_SYMBOL,
   ASYNC_RESOLVED_SYMBOL,
   ASYNC_DEFAULTS_SYMBOL
 } from './constants';
+import type {Vector} from 'apache-arrow';
 import {PropType} from './prop-types';
 import {createProps} from './create-props';
 
@@ -17,6 +20,8 @@ let counter = 0;
 export type StatefulComponentProps<PropsT extends {}> = PropsT & {
   id: string;
   [COMPONENT_SYMBOL]: Component<PropsT>;
+  [ACCESSOR_QUERIES_SYMBOL]?: Record<string, {sql: string; column?: Vector}>;
+  [ROW_ACCESSOR_COLUMNS_SYMBOL]?: Record<string, Vector>;
   [PROP_TYPES_SYMBOL]: Record<string, PropType>;
   [ASYNC_DEFAULTS_SYMBOL]: Partial<PropsT>;
   [ASYNC_ORIGINAL_SYMBOL]: Partial<PropsT>;
@@ -57,8 +62,18 @@ export default class Component<PropsT extends {} = {}> {
       }
     }
 
+    const queries = props[ACCESSOR_QUERIES_SYMBOL];
+    for (const name in queries) {
+      asyncProps[name] = {sql: queries[name].sql};
+    }
+
     // Some custom layer implementation may not support multiple arguments in the constructor
     // @ts-ignore
-    return new this.constructor({...props, ...asyncProps, ...newProps});
+    return new this.constructor({
+      ...props,
+      ...props[ROW_ACCESSOR_COLUMNS_SYMBOL],
+      ...asyncProps,
+      ...newProps
+    });
   }
 }

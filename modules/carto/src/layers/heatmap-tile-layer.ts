@@ -14,6 +14,7 @@ import {
   CompositeLayer,
   CompositeLayerProps,
   _deepEqual as deepEqual,
+  _packNormalizedColor as packNormalizedColor,
   DefaultProps,
   Layer,
   UpdateParameters
@@ -71,12 +72,17 @@ function unitDensityForH3Cell(cellId: string) {
 /**
  * Converts a colorRange array to a flat array with 4 components per color
  */
-function colorRangeToFlatArray(colorRange: Color[]): Uint8Array {
+function colorRangeToFlatArray(colorRange: Color[], normalized: boolean): Uint8Array {
   const flatArray = new Uint8Array(colorRange.length * 4);
   let index = 0;
 
   for (let i = 0; i < colorRange.length; i++) {
     const color = colorRange[i];
+    if (normalized && Array.isArray(color)) {
+      packNormalizedColor(color, flatArray, index, 4);
+      index += 4;
+      continue;
+    }
     flatArray[index++] = color[0];
     flatArray[index++] = color[1];
     flatArray[index++] = color[2];
@@ -107,8 +113,13 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
 
   getShaders(type) {
     const shaders = super.getShaders(type);
-    shaders.inject = {
-      'vs:#main-end': `
+    shaders.plugins = [
+      ...(shaders.plugins || []),
+      {
+        name: 'density',
+        module: densityUniforms,
+        injections: {
+          'glsl:vs:#main-end': `
       // Value from getWeight accessor
   float weight = elevations;
 
@@ -126,8 +137,9 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
   weight = clamp(weight, 0.0, MAX_VAL);
   vColor = vec4(mod(vec3(weight, floor(weight / SHIFT.yz)), 256.0), 255.0) / 255.0;
 `
-    };
-    shaders.modules = [...shaders.modules, densityUniforms];
+        }
+      }
+    ];
     return shaders;
   }
 
@@ -199,6 +211,8 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
 
   state!: {
     colorTexture?: Texture;
+    /** Convention used to encode the current palette texture. */
+    normalizedPalette?: boolean;
     isLoaded: boolean;
     scheme: string | null;
     tiles: Set<Tile2DHeader>;
@@ -219,11 +233,16 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
     return changeFlags.somethingChanged;
   }
 
+  /** Refresh the palette texture when its colors or the Deck color convention change. */
   updateState(opts: UpdateParameters<this>) {
     const {props, oldProps} = opts;
     super.updateState(opts);
-    if (!deepEqual(props.colorRange, oldProps.colorRange, 2)) {
-      this._updateColorTexture(opts);
+    const normalizedPalette = this.usesNormalizedColors() && props.colorRange !== defaultColorRange;
+    if (
+      normalizedPalette !== this.state.normalizedPalette ||
+      !deepEqual(props.colorRange, oldProps.colorRange, 2)
+    ) {
+      this._updateColorTexture(opts, normalizedPalette);
     }
 
     const scheme = props.data && 'scheme' in props.data ? props.data.scheme : null;
@@ -371,10 +390,14 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
     );
   }
 
-  _updateColorTexture(opts) {
+  /**
+   * Replace the palette texture. If normalizedPalette is true, pack plain-array
+   * entries from 0–1 into the byte texture. Byte typed entries are copied as bytes.
+   */
+  _updateColorTexture(opts: UpdateParameters<this>, normalizedPalette: boolean) {
     const {colorRange} = opts.props;
     let {colorTexture} = this.state;
-    const colors = colorRangeToFlatArray(colorRange);
+    const colors = colorRangeToFlatArray(colorRange, normalizedPalette);
 
     colorTexture?.destroy();
     colorTexture = this.context.device.createTexture({
@@ -384,7 +407,7 @@ class HeatmapTileLayer<DataT = any, ExtraProps extends {} = {}> extends Composit
       height: 1
     });
 
-    this.setState({colorTexture});
+    this.setState({colorTexture, normalizedPalette});
   }
 }
 

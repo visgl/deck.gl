@@ -6,7 +6,7 @@ import React, {useMemo, useState} from 'react';
 import CodeBlock from '@theme/CodeBlock';
 import {useColorMode} from '@docusaurus/theme-common';
 
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import {PathLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {ResetViewWidget, DarkGlassTheme, LightGlassTheme} from '@deck.gl/widgets';

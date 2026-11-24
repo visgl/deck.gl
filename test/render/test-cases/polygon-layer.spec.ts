@@ -6,7 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {OrthographicView, GlobeView} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
 import {Fp64Extension, PathStyleExtension} from '@deck.gl/extensions';
 
@@ -37,7 +37,9 @@ const testCases = [
     goldenImage: './test/render/golden-images/polygon-lnglat.png'
   },
   {
+    // Golden: Red polygons with black outlines match the default Mercator projection.
     name: 'polygon-lnglat-64',
+    // WebGPU fp64 polygon rendering times out on software adapters.
     skip: ['webgpu'],
     viewState: {
       latitude: 37.751537058389985,

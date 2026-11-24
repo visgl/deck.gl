@@ -2,19 +2,82 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
-## Unreleased
+## deck.gl v10
 
-### deck.gl v10 examples (Experimental)
+Target release date: EOY 2026. Alpha releases available.
 
-The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples/v10/arrow-path-layer), [riverfront weather](/examples/v10/weather), and [GPU graph exploration](/examples/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
+v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, SQL expression powered big data library. It brings support for non-mercator projection and initial hooks for advanced GPU compute integration.
 
-### Custom projections (Experimental)
+> v10.0 is intended as a pre-release of the new v10 API for early adopters. We wanted to get the new capabilities into the hands of users as soon as possible, which means that some APIs have not yet settled and may change in v10.1.
 
-[`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/geospatial/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
+*The highlights below describe goals for v10. Some features are still in development.*
 
-### Layer source CRS (Experimental)
+### GPU
 
-Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
+- [**WebGPU**](./developer-guide/webgpu.md) 🚧 — WebGPU is now the default renderer with full feature support.
+- [**GPU vectors**](./developer-guide/using-with-arrow.md#direct-gpuvector-inputs) — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph.
+
+### Apache Arrow
+
+- [**Arrow data**](./api-reference/core/layer.md#data) — The Layer `data` prop now supports Arrow tables
+- [**Arrow loading**](./developer-guide/using-with-arrow.md#loading-and-updates) — `data` URLs now load Arrow tables instead of JS arrays.
+- [**Arrow streaming**](./developer-guide/using-with-arrow.md#streaming-arrow-data) — Layer data prop accepts `AsyncIterable<arrow.RecordBatch>` and incrementally transforms and renders RecordBatches as they arrive.
+- [**Arrow accessors**](./developer-guide/using-with-arrow.md#supplying-columns) — Layer accessors now support Arrow columns (`arrow.Vector`s)
+- [**GeoArrow**](./api-reference/proposals/arrow-layers.md) 🚧 — Full support for GeoArrow and GeoParquet source data and `geoarrow.union` and `geoarrow.wkb` rendering.
+
+### SQL
+
+- [**SQL table transforms**](./api-reference/core/layer.md#query) — Use SQL to transform Arrow tables after loading.
+- [**SQL accessors**](./api-reference/core/layer.md#sql-accessor-inputs) — Use SQL select expressions to extract layer attributes from your loaded data.
+- [**SQL query pushdowns**](./api-reference/core/layer.md#query) — data loaders skip work your query doesn’t need (such as loading unused columns, rows, etc from the source data)
+
+### Projections
+
+- **Non Web Mercator projections**  —  [`CustomProjectionView`](./api-reference/core/custom-projection-view.md) renders longitude/latitude data in a planar projection specified by an EPSG code or PROJ string.
+- [**Source data CRS**](./developer-guide/coordinate-systems.md#positions) is preserved during loading and projected automatically
+- **Curved geometry** — Set [`resolution`](./api-reference/core/view.md#resolution) to subdivide paths, polygons, and bitmaps so they follow the projection’s curves.
+
+### Colors
+
+- [**Normalized colors**](./developer-guide/using-layers.md#normalized-colors) — Set `normalizedColors` to use RGB values from 0 to 1.
+- [**Color scales**](./api-reference/core/layer.md#sql-accessor-inputs) — Map Arrow values to colors with SQL.
+- [`_LegendWidget`](./api-reference/widgets/color-scale-widget.md) 🧪 displays legends for SQL color scales on visible layers.
+
+### React
+
+The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, widgets and effects are React elements.
+
+- [**React components**](./api-reference/react/overview.md) 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
+- **Map integrations** 🚧 — Use dedicated React entry points for [Mapbox](./developer-guide/react/base-maps/using-with-mapbox.md), [MapLibre](./developer-guide/react/base-maps/using-with-maplibre.md), and [Google Maps](./developer-guide/react/base-maps/using-with-google-maps.md).
+- **Migration** — The previous React API stays available from [`@deck.gl/react/legacy`](./api-reference/react/legacy/overview.md). See the [upgrade guide](./upgrade-guide.md#deckglreact).
+
+### Views
+
+- [`GlobeView`](./api-reference/core/globe-view.md), [`GlobeViewport`](./api-reference/core/globe-viewport.md) and [`GlobeController`](./api-reference/core/globe-controller.md) are now officially supported and no longer experimental.
+
+### Extensions
+
+- [MaskExtension](./api-reference/extensions/mask-extension.md) now supports [GlobeView](./api-reference/core/globe-view.md).
+- [`MaskExtension`](./api-reference/extensions/mask-extension.md) now limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
+
+### Layers
+
+- [`TextLayer`](./api-reference/layers/text-layer.md) 🚧 uses `@luma.gl/text/fonts` for bitmap and SDF font atlas generation and glyph packing. Existing font settings and the custom font renderer hook remain supported.
+
+### Tile Layers
+
+- [`Tile2DLayer`](./api-reference/proposals/tile-2d-layer.md) and [`MVT2DLayer`](./api-reference/proposals/mvt-2d-layer.md) 🚧 can now share a [`Tileset2D`](./api-reference/proposals/tileset-2d.md) and reuse loaded tiles across layers and views.
+
+### Aggregation Layers
+
+- [GridLayer](./api-reference/aggregation-layers/grid-layer.md), [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md), [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md), and [ContourLayer](./api-reference/aggregation-layers/contour-layer.md) now accept [custom aggregators](./api-reference/aggregation-layers/aggregator.md) with GPUVector results.
+- The aggregation layers support clipping, brushing, and numeric filtering extensions with [GPUVector inputs](./api-reference/aggregation-layers/aggregator.md#gpu-column-extensions).
+
+### Examples
+
+- [Examples v10](/examples-v10) have been updated to use Arrow loading and SQL accessors.
+
+---
 
 ## deck.gl v9.4
 
@@ -57,11 +120,14 @@ deck.gl v9.4 brings numerous view and controller improvements on top of the subs
 [`GlobeView`](./api-reference/core/globe-view.md) continues to mature, including significantly expanded layer compatibility:
 
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now renders correctly on `GlobeView`, producing properly projected terrain meshes on the globe.
+- [`MaskExtension`](./api-reference/extensions/mask-extension.md) works in `GlobeView`; masks are evaluated in Web Mercator space, so the mask shape follows the same latitude stretch as the layers it masks.
 - [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
 - [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) renders correctly on `GlobeView`.
 - The [`project` shader module](./api-reference/core/project.md#project_common_position_to_flat) adds `project_common_position_to_flat` and its wrapped and continuous variants, so extensions and custom layers can test bounds or sample textures computed in flat Web Mercator space while rendering on the globe.
 - [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) dashes render the same in `GlobeView` as in `MapView`.
+- [IconLayer](./api-reference/layers/icon-layer.md), [TextLayer](./api-reference/layers/text-layer.md) and billboard [ScatterplotLayer](./api-reference/layers/scatterplot-layer.md) render on `GlobeView`: objects behind the globe are hidden, objects near the horizon are no longer clipped by the globe's surface, and objects with altitude stay visible past the ground horizon. The [`project` shader module](./api-reference/core/project.md#project_globe_is_occluded) exposes `project_globe_is_occluded` and `project_globe_billboard_clipspace` for custom billboard layers.
 - [`ClipExtension`](./api-reference/extensions/clip-extension.md) clips by geometry on `GlobeView`, and `clipBounds` may cross the antimeridian, e.g. `[170, -20, -170, 20]`.
+- [LineLayer](./api-reference/layers/line-layer.md) and [ArcLayer](./api-reference/layers/arc-layer.md) render on `GlobeView` with its default back-face culling; the `cullMode: 'none'` workaround is no longer needed.
 - [`GlobeController`](./api-reference/core/globe-controller.md) now supports bearing and pitch, including shift/right-click drag and multi-touch rotation, as well as inertial spinning after a fling gesture.
 
 **View management**
@@ -123,6 +189,7 @@ New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module is forked
 - [`PathLayer`](./api-reference/layers/path-layer.md), [`LineLayer`](./api-reference/layers/line-layer.md), [`ArcLayer`](./api-reference/layers/arc-layer.md), and [`PointCloudLayer`](./api-reference/layers/point-cloud-layer.md) now use analytic antialiasing for smooth edges without requiring MSAA. Composite layers that render paths, including `GeoJsonLayer`, `PolygonLayer`, and the geospatial cell layers, forward the new `antialiasing` prop to their path sublayers.
 - [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) adds `dashMode` to choose whether a dash pattern restarts at each segment or runs continuously across a complete path, and `dashUnits` to express dash lengths in stroke widths, pixels, meters, or common units. Dash rendering is also more robust for dense and 3D paths, billboarded or offset strokes, long paths, and subpixel patterns.
 - [`FillStyleExtension`](./api-reference/extensions/fill-style-extension.md) can generate hatch, cross-hatch, and dot patterns directly in the fragment shader without a texture atlas. It also adds `fillPatternSizeUnits` for ground- or screen-relative pattern sizing and `getFillPatternBackgroundColor` for compositing patterns over a per-object background color.
+- [`FillStyleExtension`](./api-reference/extensions/fill-style-extension.md) patterns now render in [GlobeView](./api-reference/core/globe-view.md).
 
 ### Other Improvements
 
@@ -295,7 +362,7 @@ Release date: October 7, 2025
   - [ThemeWidget](./api-reference/widgets/theme-widget.md)
   - [TimelineWidget](./api-reference/widgets/timeline-widget.md)
   - ViewSelectorWidget
-- Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package
+- Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/legacy/overview.md) package
 - Custom widgets in pydeck - via the `custom_libraries` parameter, Python users can integrate custom deck.gl widgets seamlessly
 - Documentation for styling and custom themes - see [Styling Widgets](./api-reference/widgets/styling)
 
@@ -367,8 +434,8 @@ deck.gl now works seamlessly with the MapLibre v5 [globe view](https://maplibre.
 ### React Widgets
 
 deck.gl v9.0 added support for widgets, with v9.1 users can now create React components with the same level of deep deck.gl integration. 
-- All the official deck.gl widgets can now be easily wrapped into React components with the new [`useWidget`](./api-reference/react/use-widget.md) hook.
-- Pre-wrapped React components for existing widget are available from the [`@deck.gl/react`](./api-reference/react/overview.md) package. 
+- All the official deck.gl widgets can now be easily wrapped into React components with the new [`useWidget`](./api-reference/react/legacy/use-widget.md) hook.
+- Pre-wrapped React components for existing widget are available from the [`@deck.gl/react`](./api-reference/react/legacy/overview.md) package. 
 - To try it out, check out our [React getting started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/basic) for using widgets in React.
 
 ##### Widgets Developer Guide

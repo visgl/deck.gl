@@ -179,11 +179,36 @@ In the right context, enabling GPU aggregation can significantly speed up your a
 CPU aggregation is used as fallback in the following cases:
 
 - The current browser does not support GPU aggregation
-- The layer is rendered with WebGPU, which does not support WebGL GPU aggregation
+- The compute aggregation requirements below are not met when using a WebGPU device
 - `gridAggregator` is defined
 - `getColorValue` is defined
 - `getElevationValue` is defined
 
+
+#### Compute aggregation
+
+On a WebGPU device, `GridLayer` uses compute aggregation when `gpuAggregation` is enabled. Color and elevation are aggregated
+independently using `SUM`, `MEAN`, `MIN`, `MAX`, or `COUNT`. Results remain in GPU buffers
+and are passed directly to the cell layer.
+
+```typescript
+new GridLayer({
+  data,
+  getPosition: d => d.position,
+  getColorWeight: d => d.colorWeight,
+  getElevationWeight: d => d.elevationWeight,
+  cellSize: 1000,
+  colorAggregation: 'SUM',
+  elevationAggregation: 'MEAN',
+  colorDomain: [0, 100],
+  elevationDomain: [0, 50]
+});
+```
+
+Custom JavaScript callbacks and grids exceeding device limits use CPU aggregation.
+
+Previous cells remain visible and cannot be picked while new domains or scales are pending,
+as described for [HexagonLayer](./hexagon-layer.md#compute-aggregation).
 
 #### `cellSize` (number, optional) {#cellsize}
 
@@ -524,6 +549,22 @@ The [PickingInfo.object](../../developer-guide/interactivity.md#the-pickinginfo-
 The GridLayer renders the following sublayers:
 
 * `cells` - a custom layer that extends the [ColumnLayer](../layers/column-layer.md).
+
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
+
+- `positions` – `float32x2` or `float32x3` – A single-chunk position vector.
+- `weights` – `float32` – Two matching single-chunk vectors, in color and elevation order.
+- `dataBounds` – `[min, max]` – Bounds in input coordinates.
+
+Notes:
+
+- The built-in WebGPU compute path requires buffers with `STORAGE` or `COPY_SRC` usage.
+- Use positions in the view's coordinate system for custom views.
+- Positions must not require CPU preprojection. See [GPU column extensions](./aggregator.md#gpu-column-extensions) for supported extensions.
 
 ## Source
 
