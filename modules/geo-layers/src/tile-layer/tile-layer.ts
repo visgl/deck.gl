@@ -231,14 +231,19 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   get isLoaded(): boolean {
+    const {internalState} = this;
+    const viewport = internalState?.viewport ?? this.context?.viewport;
+    const waitingForRender =
+      (internalState?.needsUpdate || internalState?.changeFlags.viewportChanged) &&
+      (!viewport || !this._isHiddenByZoom(viewport.zoom));
     return Boolean(
       this.state?.tileset?.selectedTiles?.every(
         tile =>
-          // Error / empty tiles resolve to `content === null`. Once Tile2DHeader marks those
-          // requests as loaded, do not wait for generated sublayers because there is nothing to
-          // render for that tile and `tile.layers` will remain null.
+          // Empty or failed tiles have nothing to render. Aggregate renderers may also leave
+          // tile.layers unset after the queued update has run.
           tile.isLoaded &&
-          (!tile.content || !tile.layers || tile.layers.every(layer => layer.isLoaded))
+          (!tile.content ||
+            (tile.layers ? tile.layers.every(layer => layer.isLoaded) : !waitingForRender))
       )
     );
   }
@@ -354,10 +359,9 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   _onTileLoad(tile: Tile2DHeader<DataT>): void {
-    this.props.onTileLoad(tile);
     tile.layers = null;
-
     this.setNeedsUpdate();
+    this.props.onTileLoad(tile);
   }
 
   _onTileError(error: any, tile: Tile2DHeader<DataT>) {
@@ -428,14 +432,18 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     info.sourceTileSubLayer.updateAutoHighlight(info);
   }
 
-  renderLayers(): Layer | null | LayersList {
+  /** Whether the configured zoom limits prevent tile rendering. */
+  private _isHiddenByZoom(zoom: number): boolean {
     const {visibleMinZoom, visibleMaxZoom, minZoom, extent} = this.props;
-    const zoom = this.context.viewport.zoom;
-    const hidden =
+    return (
       (visibleMinZoom != null && zoom < visibleMinZoom) ||
       (visibleMaxZoom != null && zoom > visibleMaxZoom) ||
-      (minZoom != null && !extent && zoom < minZoom);
-    if (hidden) {
+      (minZoom != null && !extent && zoom < minZoom)
+    );
+  }
+
+  renderLayers(): Layer | null | LayersList {
+    if (this._isHiddenByZoom(this.context.viewport.zoom)) {
       // Clear cached sublayer references so they are recreated when visible again
       for (const tile of this.state.tileset!.tiles) {
         tile.layers = null;

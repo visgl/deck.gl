@@ -3,9 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {LayerManager, MapView, WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils/vitest';
+import {device, generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils/vitest';
 import {TileLayer} from '@deck.gl/geo-layers';
 
 const DUMMY_DATA =
@@ -266,6 +266,126 @@ test('TileLayer#MapView:repeat', async () => {
     onError: err => expect(err).toBeFalsy()
   });
 });
+
+/** A tile renderer that combines the selected tiles into one layer. */
+class AggregateTileLayer extends TileLayer {
+  static layerName = 'AggregateTileLayer';
+
+  /** Render an aggregate without storing a separate sublayer on each tile. */
+  renderLayers() {
+    return this.state.tileset?.selectedTiles?.some(tile => tile.content)
+      ? new ScatterplotLayer({data: [{position: [0, 0]}]})
+      : null;
+  }
+}
+
+test.each([
+  {name: 'TileLayer', Layer: TileLayer},
+  {name: 'AggregateTileLayer', Layer: AggregateTileLayer}
+])('$name waits for sublayers after tile data resolves', async ({Layer}) => {
+  const viewport = new WebMercatorViewport({width: 100, height: 100, zoom: 0});
+  const layerManager = new LayerManager(device, {viewport});
+  const readinessAtLoad: boolean[] = [];
+  const layer = new Layer({
+    data: [],
+    getTileData: () => [{position: [0, 0]}],
+    renderSubLayers: props => new ScatterplotLayer(props),
+    onTileLoad: () => readinessAtLoad.push(layer.isLoaded)
+  });
+
+  try {
+    layerManager.setLayers([layer]);
+    const [tile] = layer.state.tileset!.selectedTiles!;
+    expect(tile.isLoaded).toBe(false);
+    expect(layer.isLoaded).toBe(false);
+
+    // Settle the request without advancing the layer manager to the next frame.
+    await tile.data;
+    expect(tile.isLoaded).toBe(true);
+    expect(tile.layers).toBeNull();
+    expect(layer.isLoaded).toBe(false);
+    expect(readinessAtLoad).toEqual([false]);
+
+    layerManager.updateLayers();
+    expect(layer.getSubLayers()).toHaveLength(1);
+    expect(layer.isLoaded).toBe(true);
+  } finally {
+    layerManager.finalize();
+  }
+});
+
+test.each([
+  {title: 'null tile content', props: {getTileData: () => null}, zoom: 0, loadedBeforeRender: true},
+  {
+    title: 'null sublayers',
+    props: {renderSubLayers: () => null},
+    zoom: 0,
+    loadedBeforeRender: false
+  },
+  {
+    title: 'empty sublayers',
+    props: {renderSubLayers: () => []},
+    zoom: 0,
+    loadedBeforeRender: false
+  },
+  {title: 'a rounded tile below minZoom', props: {minZoom: 2}, zoom: 1.75, loadedBeforeRender: true}
+])('TileLayer readiness with $title', async ({props, zoom, loadedBeforeRender}) => {
+  const viewportProps = {width: 100, height: 100, longitude: 45, latitude: 30};
+  const viewport = new WebMercatorViewport({...viewportProps, zoom});
+  const layerManager = new LayerManager(device, {viewport});
+  const layer = new TileLayer({
+    data: [],
+    getTileData: () => [{position: [0, 0]}],
+    renderSubLayers: () => null,
+    ...props
+  });
+
+  try {
+    layerManager.setLayers([layer]);
+    const tiles = layer.state.tileset!.selectedTiles!;
+    expect(tiles.length).toBeGreaterThan(0);
+    expect(layer.isLoaded).toBe(false);
+    await Promise.all(tiles.map(tile => tile.data));
+    expect(layer.isLoaded).toBe(loadedBeforeRender);
+
+    layerManager.updateLayers();
+    expect(layer.getSubLayers()).toHaveLength(0);
+    expect(layer.isLoaded).toBe(true);
+
+    if (props.minZoom != null) {
+      const view = new MapView({id: viewport.id});
+      const visibleViewport = new WebMercatorViewport({
+        ...viewportProps,
+        id: view.id,
+        zoom: props.minZoom
+      });
+      layerManager.setViewports([visibleViewport], [view]);
+      expect(layer.isLoaded).toBe(false);
+      layerManager.updateLayers();
+      expect(layer.isLoaded).toBe(true);
+    }
+  } finally {
+    layerManager.finalize();
+  }
+});
+
+test.each([{visibleMinZoom: 3}, {visibleMaxZoom: 1}])(
+  'TileLayer settles outside visible zoom limits %j',
+  props => {
+    const viewport = new WebMercatorViewport({width: 100, height: 100, zoom: 2});
+    const layerManager = new LayerManager(device, {viewport});
+    const layer = new TileLayer({data: [], ...props});
+
+    try {
+      layerManager.setLayers([layer]);
+      expect(layer.state.tileset?.selectedTiles).toEqual([]);
+      expect(layer.getSubLayers()).toHaveLength(0);
+      expect(layer.isLoaded).toBe(true);
+    } finally {
+      layerManager.finalize();
+    }
+  }
+);
 
 test('TileLayer#error tiles do not block isLoaded', async () => {
   let tileErrorCalled = 0;
