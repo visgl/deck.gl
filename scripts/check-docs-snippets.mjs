@@ -12,6 +12,11 @@
  * module that doesn't exist, or a name that a module doesn't export. Third-party packages that
  * the repository doesn't install are not reported.
  *
+ * Snippets that use `@deck.gl/react`, not `@deck.gl/react/legacy`, are also checked for patterns
+ * that only `/legacy` supports: deck.gl classes used as JSX, function or HTML children of `DeckGL`
+ * or a view, a react-map-gl `<Map>` child, `ref.current.deck`, and the `ContextProvider` and `Deck`
+ * props. Each finding names the migration guide section that explains the change.
+ *
  * What's new and the upgrade guide show past APIs on purpose, so they are skipped unless passed
  * as paths. To skip one code block, such as a "before" example, put `<!-- snippet-check: skip -->`
  * on the line before it.
@@ -197,7 +202,124 @@ function isImportError(diagnostic) {
 
 const program = ts.createProgram([...snippetsByFile.keys()], options, host);
 
+/** The migration guide, where each legacy pattern's replacement is explained. */
+const MIGRATION_GUIDE = 'docs/developer-guide/react/migrate-from-deckgl-react.md';
+
+/** Whether a snippet uses `@deck.gl/react` rather than `@deck.gl/react/legacy`. */
+function usesReactRenderer(sourceFile) {
+  const modules = sourceFile.statements
+    .filter(ts.isImportDeclaration)
+    .map(statement => statement.moduleSpecifier.text);
+  const react = modules.filter(
+    module => module === '@deck.gl/react' || module.startsWith('@deck.gl/react/')
+  );
+  return react.length > 0 && !react.includes('@deck.gl/react/legacy');
+}
+
+/** Maps each name a snippet imports from a deck.gl module other than `@deck.gl/react` to the module. */
+function getDeckClassImports(sourceFile) {
+  const names = new Map();
+  for (const statement of sourceFile.statements.filter(ts.isImportDeclaration)) {
+    const module = statement.moduleSpecifier.text;
+    if (!DECK_MODULE.test(module) || module.startsWith('@deck.gl/react')) {
+      continue;
+    }
+    for (const element of statement.importClause?.namedBindings?.elements ?? []) {
+      names.set(element.name.text, module);
+    }
+  }
+  return names;
+}
+
+/** The tag name of a JSX element, or `''` for a fragment. */
+function getTagName(node) {
+  const tag = ts.isJsxElement(node) ? node.openingElement.tagName : node.tagName;
+  return tag ? tag.getText() : '';
+}
+
+/** Whether a JSX tag is the `DeckGL` root or a view, whose children deck.gl renders. */
+function isDeckContainer(tagName) {
+  return tagName === 'DeckGL' || /View$/.test(tagName);
+}
+
+/** Finds the patterns that only `@deck.gl/react/legacy` supports, as `{node, message}` pairs. */
+function findLegacyPatterns(sourceFile) {
+  const findings = [];
+  const deckClasses = getDeckClassImports(sourceFile);
+  const visit = node => {
+    if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
+      const tagName = getTagName(node);
+      const module = deckClasses.get(tagName);
+      if (module) {
+        findings.push({
+          node,
+          message: `<${tagName}> is the deck.gl class from ${module}. Use its component from a @deck.gl/react subpath; see "Change the imports".`
+        });
+      }
+      const attributes = ts.isJsxElement(node) ? node.openingElement.attributes : node.attributes;
+      for (const attribute of attributes.properties) {
+        const name = attribute.name?.getText();
+        if (tagName === 'DeckGL' && (name === 'ContextProvider' || name === 'Deck')) {
+          findings.push({
+            node: attribute,
+            message: `The ${name} prop is /legacy only; see "Replace DeckGLRef" and "Remove unsupported children".`
+          });
+        }
+      }
+      if (ts.isJsxElement(node) && isDeckContainer(tagName)) {
+        for (const child of node.children) {
+          if (
+            ts.isJsxExpression(child) &&
+            child.expression &&
+            (ts.isArrowFunction(child.expression) || ts.isFunctionExpression(child.expression))
+          ) {
+            findings.push({
+              node: child,
+              message: `A function child of <${tagName}> is /legacy only; see "Remove unsupported children".`
+            });
+          } else if (ts.isJsxElement(child) || ts.isJsxSelfClosingElement(child)) {
+            const childTag = getTagName(child);
+            if (/^[a-z]/.test(childTag) && !childTag.startsWith('deck')) {
+              findings.push({
+                node: child,
+                message: `An HTML child (<${childTag}>) of <${tagName}> is /legacy only; see "Remove unsupported children".`
+              });
+            } else if (/^(Map|StaticMap|ReactMapGL)$/.test(childTag)) {
+              findings.push({
+                node: child,
+                message: `A react-map-gl <${childTag}> child is /legacy only; use a map root, see "Remove unsupported children".`
+              });
+            }
+          }
+        }
+      }
+    }
+    if (
+      ts.isPropertyAccessExpression(node) &&
+      node.name.text === 'deck' &&
+      /\.current\??$/.test(node.expression.getText())
+    ) {
+      findings.push({
+        node,
+        message: `The root's ref is the Deck instance: replace ${node.getText()} with ${node.expression.getText()}; see "Replace DeckGLRef".`
+      });
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return findings;
+}
+
+/** Prints one finding as `file:line  code  message`. */
+function report(snippet, sourceFile, position, code, message) {
+  const {line} = sourceFile.getLineAndCharacterOfPosition(position);
+  console.log(
+    `${path.relative(ROOT, snippet.markdownFile)}:${snippet.startLine + line}  ${code}  ${message}`
+  );
+}
+
 let errorCount = 0;
+let legacyCount = 0;
 for (const snippet of snippets) {
   const sourceFile = program.getSourceFile(snippet.fileName);
   const diagnostics = [
@@ -208,17 +330,20 @@ for (const snippet of snippets) {
     if (!reportAll && !isImportError(diagnostic)) {
       continue;
     }
-    const {line} = sourceFile.getLineAndCharacterOfPosition(diagnostic.start ?? 0);
     const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n').split('\n')[0];
-    console.log(
-      `${path.relative(ROOT, snippet.markdownFile)}:${snippet.startLine + line}  TS${diagnostic.code}  ${message}`
-    );
+    report(snippet, sourceFile, diagnostic.start ?? 0, `TS${diagnostic.code}`, message);
     errorCount++;
+  }
+  if (usesReactRenderer(sourceFile)) {
+    for (const {node, message} of findLegacyPatterns(sourceFile)) {
+      report(snippet, sourceFile, node.getStart(sourceFile), 'LEGACY', message);
+      legacyCount++;
+    }
   }
 }
 
 const kind = reportAll ? 'errors' : 'import errors';
 console.log(
-  `\nChecked ${snippets.length} snippets in ${markdownFiles.length} files: ${errorCount} ${kind}.`
+  `\nChecked ${snippets.length} snippets in ${markdownFiles.length} files: ${errorCount} ${kind}, ${legacyCount} /legacy patterns (see ${MIGRATION_GUIDE}).`
 );
-process.exitCode = errorCount ? 1 : 0;
+process.exitCode = errorCount || legacyCount ? 1 : 0;
