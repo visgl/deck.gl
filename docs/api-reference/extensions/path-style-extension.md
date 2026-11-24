@@ -65,6 +65,8 @@ The dash pattern to draw each path with: `[dashSize, gapSize]`, measured in [`da
 
 Source distances use the `'meters'` scale. Set `dashUnits: 'meters'` to specify dash and gap spacing in source metres. With `dashJustified` enabled, each row fits the pattern to its own end distance, so justified dashes can lose continuity across cuts. A distance count that differs from the tessellated vertex count for a row throws an error. Supply rows that already account for projection cuts and require no further splitting, subdivision, or loop padding.
 
+The GPU stores source distances as 32-bit floats. A distance `d` is stored with an error of up to `d × 2⁻²⁴`: about 6 cm at 1,000 km and 0.6 m at 10,000 km. Two rows that meet at a cut can thus store different distances for the same source point, and the dash phase can jump by up to that error. For example, the distances `2²⁴` and `2²⁴ + 1` store the same value. The jump is small when the dash period is long compared with this error. The phase is exact across a cut only when the distances of the two segments that meet at the cut are exact in 32 bits.
+
 #### `dashUnits` (string, optional) {#dashunits}
 
 * Default: `'widths'`
