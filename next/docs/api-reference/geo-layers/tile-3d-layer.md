@@ -24,7 +24,15 @@ import {Deck} from '@deck.gl/core';
 
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
-import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
+import {resolveCesiumIonTileset} from '@loaders.gl/tiles-3d/3d-tiles';
+
+
+
+// Set up Ion account: https://cesium.com/docs/tutorials/getting-started/#your-first-app
+
+// Resolves the tileset url of the ion asset and a credential for its endpoint
+
+const ionTileset = await resolveCesiumIonTileset('<ion_access_token_for_your_asset>', 43978);
 
 
 
@@ -34,15 +42,13 @@ const layer = new Tile3DLayer({
 
   // Tileset json file url
 
-  data: 'https://assets.cesium.com/43978/tileset.json',
-
-  loader: CesiumIonLoader,
+  data: ionTileset.url,
 
   loadOptions: {
 
-    // Set up Ion account: https://cesium.com/docs/tutorials/getting-started/#your-first-app
+    // Sends the endpoint access token with the tileset and tile requests
 
-    'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
+    core: {credentials: ionTileset.credentials}
 
   },
 
@@ -98,9 +104,17 @@ import {Deck} from '@deck.gl/core';
 
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
-import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
+import {resolveCesiumIonTileset} from '@loaders.gl/tiles-3d/3d-tiles';
 
 import type {Tileset3D} from '@loaders.gl/tiles-3d';
+
+
+
+// Set up Ion account: https://cesium.com/docs/tutorials/getting-started/#your-first-app
+
+// Resolves the tileset url of the ion asset and a credential for its endpoint
+
+const ionTileset = await resolveCesiumIonTileset('<ion_access_token_for_your_asset>', 43978);
 
 
 
@@ -110,15 +124,13 @@ const layer = new Tile3DLayer({
 
   // Tileset json file url
 
-  data: 'https://assets.cesium.com/43978/tileset.json',
-
-  loader: CesiumIonLoader,
+  data: ionTileset.url,
 
   loadOptions: {
 
-    // Set up Ion account: https://cesium.com/docs/tutorials/getting-started/#your-first-app
+    // Sends the endpoint access token with the tileset and tile requests
 
-    'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
+    core: {credentials: ionTileset.credentials}
 
   },
 
@@ -170,17 +182,19 @@ const deckInstance = new Deck({
 ```
 
 ```
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {DeckGL} from '@deck.gl/react';
 
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
-import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
+import {resolveCesiumIonTileset} from '@loaders.gl/tiles-3d/3d-tiles';
 
 import type {MapViewState} from '@deck.gl/core';
 
 import type {Tileset3D} from '@loaders.gl/tiles-3d';
+
+import type {CesiumIonTilesetMetadata} from '@loaders.gl/tiles-3d/3d-tiles';
 
 
 
@@ -196,23 +210,35 @@ function App() {
 
   });
 
+  const [ionTileset, setIonTileset] = useState<CesiumIonTilesetMetadata | null>(null);
 
 
-  const layer = new Tile3DLayer({
+
+  useEffect(() => {
+
+    // Set up Ion account: https://cesium.com/docs/tutorials/getting-started/#your-first-app
+
+    // Resolves the tileset url of the ion asset and a credential for its endpoint
+
+    resolveCesiumIonTileset('<ion_access_token_for_your_asset>', 43978).then(setIonTileset, console.error);
+
+  }, []);
+
+
+
+  const layer = ionTileset && new Tile3DLayer({
 
     id: 'tile-3d-layer',
 
     // Tileset json file url
 
-    data: 'https://assets.cesium.com/43978/tileset.json',
-
-    loader: CesiumIonLoader,
+    data: ionTileset.url,
 
     loadOptions: {
 
-      // Set up Ion account: https://cesium.com/docs/tutorials/getting-started/#your-first-app
+      // Sends the endpoint access token with the tileset and tile requests
 
-      'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
+      core: {credentials: ionTileset.credentials}
 
     },
 
@@ -292,7 +318,7 @@ const layer = new Tile3DLayer({
 
     // https://developers.google.com/maps/documentation/tile/3d-tiles
 
-    fetch: {headers: {'X-GOOG-API-KEY': '<google_maps_api_key>'}}
+    core: {fetch: {headers: {'X-GOOG-API-KEY': '<google_maps_api_key>'}}}
 
   }
 
@@ -371,21 +397,28 @@ Global radius of all points in pixels. This value is only applied when [tile for
 
 Default [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader)
 
-A loader which is used to decode the fetched tiles. Available options are [`CesiumIonLoader`](https://loaders.gl/docs/modules/3d-tiles/api-reference/cesium-ion-loader), [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader), [`I3SLoader`](https://loaders.gl/modules/i3s/docs/api-reference/i3s-loader).
+A loader which is used to decode the fetched tiles. Available options are [`Tiles3DLoader`](https://loaders.gl/modules/3d-tiles/docs/api-reference/tiles-3d-loader), [`I3SLoader`](https://loaders.gl/modules/i3s/docs/api-reference/i3s-loader).
+
+Cesium ion tilesets use the default `Tiles3DLoader`. Resolve the tileset url and endpoint credential with `resolveCesiumIonTileset` from `@loaders.gl/tiles-3d/3d-tiles`, then pass them as `data` and `loadOptions.core.credentials`, as in the [example](#load-3d-tiles-from-cesium-ion).
 
 #### `loadOptions` (object, Optional)[​](#loadoptions "Direct link to loadoptions")
 
 On top of the [default options](https://deck.gl/next/docs/api-reference/core/layer.md#loadoptions), also support the following keys:
 
-* `cesium-ion`: options for the `CesiumIonLoader`
+* `core.credentials`: credentials sent with the tileset and tile requests, such as the `credentials` returned by `resolveCesiumIonTileset`
+* `core.fetch`: fetch options, such as request headers
 * `3d-tiles`: options for the `Tiles3DLoader`
 * `i3s`: options for the `I3SLoader`.
 * `tileset`: Forward parameters to the [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1) instance after fetching the tileset metadata.
 
 ```
-import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
+import {resolveCesiumIonTileset} from '@loaders.gl/tiles-3d/3d-tiles';
 
 import {Tile3DLayer} from '@deck.gl/geo-layers';
+
+
+
+const ionTileset = await resolveCesiumIonTileset('<ion_access_token_for_your_asset>', 43978);
 
 
 
@@ -393,9 +426,7 @@ const layer = new Tile3DLayer({
 
   id: 'tile-3d-layer',
 
-  data: 'https://assets.cesium.com/43978/tileset.json',
-
-  loader: CesiumIonLoader,
+  data: ionTileset.url,
 
   loadOptions: {
 
@@ -405,7 +436,7 @@ const layer = new Tile3DLayer({
 
     },
 
-    'cesium-ion': {accessToken: '<ion_access_token_for_your_asset>'}
+    core: {credentials: ionTileset.credentials}
 
   }
 
