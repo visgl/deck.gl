@@ -147,7 +147,7 @@ The option changes how you supply colors for standard dynamic range rendering.
 
 ## Rendering Layers
 
-deck.gl allows you to render multiple layers using the same or different data sets. You simply provide an array of layer instances to the [Deck](../api-reference/core/deck.md) class (pure JS) or [DeckGL](../api-reference/react/legacy/deckgl.md) component (React) and they will be rendered in order.
+deck.gl allows you to render multiple layers using the same or different data sets. You simply provide an array of layer instances to the [Deck](../api-reference/core/deck.md) class (pure JS) or [DeckGL](../api-reference/react/deckgl.md) component (React) and they will be rendered in order.
 
 This allows you to compose visualizations using several primitive layers.
 

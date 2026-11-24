@@ -4,9 +4,9 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "vite --open",
+    "start": "vite --config ../../vite.config.local.mjs --open",
     "start-local": "vite --config ../../vite.config.local.mjs",
-    "build": "vite build"
+    "build": "vite build --config ../../vite.config.local.mjs"
   },
   "dependencies": {
     "apache-arrow": "^21.2.0",
@@ -20,7 +20,8 @@
     "react-dom": "^18.0.0",
     "react-map-gl": "^8.0.0",
     "@loaders.gl/core": "5.0.0-rc.2",
-    "@loaders.gl/tables": "5.0.0-rc.2"
+    "@loaders.gl/tables": "5.0.0-rc.2",
+    "@math.gl/core": "^5.0.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

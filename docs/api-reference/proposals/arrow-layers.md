@@ -38,6 +38,8 @@ when batch preparation fails. `ArrowTripsLayer` similarly converts aligned times
 delegating to the existing GPUVector path-storage model. `GeoArrowLayer` selects point,
 linestring, polygon, or multipolygon children from field extension metadata. Encoded and mixed
 geometry uses the GeoJSON renderer and picking returns the source Arrow row.
+Polygon extrusion, outlines, and extensions also use the standard GeoJSON renderer.
+Set `getElevation` to a constant or a source column for extruded polygons.
 
 To load a GeoJSON file directly, pass its URL and `GeoJSONLoader`. The loader converts the file to
 an Arrow table with a GeoArrow geometry column. Set
@@ -51,6 +53,13 @@ To render multiple geometry columns, pass the same table to several layers with 
 `getGeometry` values.
 A layer `query` can also project or alias a geometry field. Select the alias with `getGeometry`
 if the projected table still has multiple geometry columns.
+
+To render a derived geometry per source row, pass a SQL accessor such as
+`getGeometry: {sql: 'ST_PointOnSurface(footprint)'}`. Supply spatial functions with
+`sqlFunctions: POSTGIS_SPATIAL_FUNCTIONS` from `@math.gl/geospatial/st-functions`.
+Styling and picking refer to the source rows. The
+[spatial SQL example](https://github.com/visgl/deck.gl/tree/master/examples-v10/proposals/geoarrow-sql)
+shows centroid, interior point, and envelope expressions.
 
 ```ts
 import {GeoArrowLayer} from '@deck.gl/proposals/layers';
