@@ -103,7 +103,7 @@ layer and extension draws.
 
 ### loaders.gl and math.gl v5
 
-Update direct loaders.gl dependencies to `5.0.0-rc.2` and math.gl dependencies to `5.0.0`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+Update direct loaders.gl dependencies to `^5.0.0` and math.gl dependencies to `^5.0.3`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
 | Previous import | Replacement import |
 | --- | --- |
@@ -214,6 +214,10 @@ const commonPosition2 = layer.projectPosition(lnglat, {
   modelMatrix: null
 });
 ```
+
+### PathStyleExtension
+
+With [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) dashes on, `geometry.uv.y` in `PathLayer` shaders is now the geometric distance along the segment, the same as without dashes. Custom shader injections that need the dash coordinate, which also counts Z movement and the parts of the segment removed by camera clipping, should read `vDashSegment.x` (position) and `vDashSegment.y` (segment length) under `#ifdef DASH_ENABLED`.
 
 ### Deck props set to `undefined`
 
