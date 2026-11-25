@@ -48,4 +48,25 @@ export type Tileset2DAdapter<ViewStateT> = {
     context: Tileset2DTileContext<ViewStateT>,
     index: TileIndex
   ) => TileBoundingBox;
+  /** Returns the unique cache key for a tile index. */
+  getTileId?: (index: TileIndex) => string;
+  /** Returns the source zoom level for a tile index. */
+  getTileZoom?: (index: TileIndex) => number;
+  /** Returns a parent index at a strictly lower source zoom, or null if the tile has no parent. */
+  getParentIndex?: (index: TileIndex) => TileIndex | null;
+  /** Returns additional tile metadata to merge after the bounding box. */
+  getTileMetadata?: (
+    context: Tileset2DTileContext<ViewStateT>,
+    index: TileIndex
+  ) => Record<string, unknown>;
+  /**
+   * Returns a ring of [longitude, latitude] positions enclosing the tile for culling and request
+   * priority, or null if no outline is available.
+   * Longitudes may be normalized to [-180, 180] or continuous. deck.gl unwraps the ring across
+   * the antimeridian and falls back to bounding-box behavior for rings that encircle a pole.
+   */
+  getTileOutline?: (
+    context: Tileset2DTileContext<ViewStateT>,
+    index: TileIndex
+  ) => number[][] | null;
 };

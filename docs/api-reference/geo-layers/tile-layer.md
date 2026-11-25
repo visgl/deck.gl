@@ -238,6 +238,12 @@ getTileData: ({url, signal}) => {
 
 Tileset class that `TileLayer` uses for tile indexing. Extend [Tileset2D](#tileset2d) to implement a custom indexing scheme.
 
+#### `adapter` (object, optional) {#adapter}
+
+- Default: `null`
+
+A `Tileset2DAdapter` that the tileset uses for tile selection and tile bounds, for example for a tile grid in another CRS. See the adapter section of the [Tileset2D](../proposals/tileset-2d.md) page. A new adapter object creates a new tileset, so keep the same object between renders. When `null`, an adapter that a custom `TilesetClass` sets is kept.
+
 #### `tileSize` (number, optional) {#tilesize}
 
 The pixel dimension of the tiles, usually a power of 2.

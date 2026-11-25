@@ -8,7 +8,8 @@ import {Matrix4, equals, type NumericArray} from '@math.gl/core/matrix';
 import {memoize} from '../tileset-2d/memoize';
 import {STRATEGY_DEFAULT, Tile2DHeader, type Tileset2D} from '../tileset-2d/index';
 import {getCullBounds, tile2DDeckAdapter, transformBox} from '../tileset-2d/deck-tileset-adapter';
-import {canCullTileBoundingBox} from '../tileset-2d/utils';
+import type {TileBoundingBox} from './types';
+import {canCullTileBoundingBox, tileOutlineOverlapsBounds, unwrapTileOutline} from './utils';
 
 import {refineTileStates} from './refinement';
 
@@ -154,7 +155,12 @@ export class Tile2DView<DataT = any> {
       return false;
     }
 
-    if (!cullRect || !this._viewport || !canCullTileBoundingBox(this._viewport, tile.bbox)) {
+    if (!cullRect || !this._viewport) {
+      return true;
+    }
+    const outlineBounds = this._viewport.isGeospatial && unwrapTileOutline(tile.outline)?.bounds;
+    const bbox = tile.bbox;
+    if (!outlineBounds && !canCullTileBoundingBox(this._viewport, bbox)) {
       return true;
     }
     const boundsArr = this._getCullBounds({
@@ -162,7 +168,10 @@ export class Tile2DView<DataT = any> {
       z: this._zRange,
       cullRect
     });
-    return boundsArr.some(bounds => this._tileOverlapsBounds(tile, bounds, modelMatrix));
+    if (outlineBounds) {
+      return boundsArr.some(bounds => tileOutlineOverlapsBounds(outlineBounds, bounds));
+    }
+    return boundsArr.some(bounds => this._tileOverlapsBounds(bbox, bounds, modelMatrix));
   }
 
   /** Collects tiles currently marked visible for this view. */
@@ -235,11 +244,11 @@ export class Tile2DView<DataT = any> {
 
   /** Tests one tile against one culling bounds rectangle. */
   private _tileOverlapsBounds(
-    tile: Tile2DHeader<DataT>,
+    boundingBox: TileBoundingBox,
     [minX, minY, maxX, maxY]: [number, number, number, number],
     modelMatrix?: Matrix4 | null
   ): boolean {
-    const bbox = this._getTileBoundingBox(tile, modelMatrix);
+    const bbox = this._getTileBoundingBox(boundingBox, modelMatrix);
     if ('west' in bbox) {
       return bbox.west < maxX && bbox.east > minX && bbox.south < maxY && bbox.north > minY;
     }
@@ -249,8 +258,7 @@ export class Tile2DView<DataT = any> {
   }
 
   /** Applies model-matrix transforms to non-geospatial tile bounds when needed. */
-  private _getTileBoundingBox(tile: Tile2DHeader<DataT>, modelMatrix?: Matrix4 | null) {
-    const {bbox} = tile;
+  private _getTileBoundingBox(bbox: TileBoundingBox, modelMatrix?: Matrix4 | null) {
     if ('west' in bbox || !modelMatrix || Matrix4.IDENTITY.equals(modelMatrix)) {
       return bbox;
     }

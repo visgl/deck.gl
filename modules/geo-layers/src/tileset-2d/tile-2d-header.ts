@@ -48,6 +48,8 @@ export class Tile2DHeader<DataT = any> {
   userData?: Record<string, any>; // _may be_ assigned with result of `getTileMetadata`
   /** Bounds in the form [[minX, minY], [maxX, maxY]]. */
   boundingBox!: [min: number[], max: number[]]; // assigned _always_ with bbox from `getTileMetadata`
+  /** Geographic outline as [longitude, latitude] positions for culling and request priority only. */
+  declare outline?: number[][] | null;
 
   /** Abort controller for the current request. */
   private _abortController: AbortController | null;
