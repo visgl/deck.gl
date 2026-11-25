@@ -16,7 +16,7 @@ import {ClipExtension} from '@deck.gl/extensions';
 import type {ClipExtensionProps} from '@deck.gl/extensions';
 
 import {Matrix4, equals} from '@math.gl/core/matrix';
-import {MVTWorkerLoader} from '@loaders.gl/tiles/mvt';
+import {MVTLoader} from '@loaders.gl/tiles/mvt';
 import {convertBinaryFeatureCollectionToGeojson} from '@loaders.gl/core/geoarrow';
 
 import type {Loader} from '@loaders.gl/core/loader-utils';
@@ -48,7 +48,7 @@ const defaultProps: DefaultProps<MVTLayerProps> = {
   onDataLoad: {type: 'function', value: null, optional: true, compare: false},
   uniqueIdProperty: '',
   highlightedFeatureId: null,
-  loaders: [MVTWorkerLoader],
+  loaders: [MVTLoader],
   binary: true
 };
 
@@ -101,7 +101,7 @@ export type _MVTLayerProps<FeaturePropertiesT> = Omit<
   /**
    * Loaders used to transform tiles into `data` property passed to `renderSubLayers`.
    *
-   * @default [MVTWorkerLoader] from `@loaders.gl/tiles/mvt`
+   * @default [MVTLoader] from `@loaders.gl/tiles/mvt`
    */
   loaders?: Loader[];
 };

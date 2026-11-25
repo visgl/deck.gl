@@ -15,7 +15,7 @@ import {ClipExtension} from '@deck.gl/extensions';
 import {Matrix4} from '@math.gl/core/matrix';
 import {worldToLngLat} from '@math.gl/geospatial/web-mercator';
 import {load} from '@loaders.gl/core';
-import {MVTWorkerLoader} from '@loaders.gl/tiles/mvt';
+import {MVTLoader} from '@loaders.gl/tiles/mvt';
 import {Tile2DLayer, type Tile2DLayerProps} from '../tile-2d-layer/index';
 import type {Tile2DHeader, TileLoadProps} from '@deck.gl/geo-layers';
 import {_getURLFromTemplate as getURLFromTemplate} from '@deck.gl/geo-layers';
@@ -106,7 +106,7 @@ export class MVT2DLayer extends Tile2DLayer<
   static defaultProps: typeof Tile2DLayer.defaultProps = {
     ...GeoJsonLayer.defaultProps,
     ...Tile2DLayer.defaultProps,
-    loaders: [MVTWorkerLoader],
+    loaders: [MVTLoader],
     // External cache owners can load tiles before any consumer is initialized.
     fetch: (url, {layer, loadOptions, signal}) =>
       load(url, layer.props.loaders, {
