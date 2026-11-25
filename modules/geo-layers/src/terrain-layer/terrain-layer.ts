@@ -17,7 +17,7 @@ import {
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import type {MeshAttributes} from '@loaders.gl/core/schema';
-import {TerrainWorkerLoader} from '@loaders.gl/raster/terrain';
+import {TerrainLoader} from '@loaders.gl/raster/terrain';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
 import type {
   Bounds,
@@ -67,7 +67,7 @@ const defaultProps: DefaultProps<TerrainLayerProps> = {
   wireframe: false,
   material: true,
 
-  loaders: [TerrainWorkerLoader]
+  loaders: [TerrainLoader]
 };
 
 // Turns array of templates into a single string to work around shallow change

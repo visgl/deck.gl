@@ -9,6 +9,7 @@ import line from './line.json';
 import scatterplot from './scatterplot.json';
 import screenGrid from './screen-grid.json';
 import tagmap from './tagmap.json';
+import tile3DStHelens from './3d-tiles-st-helens.json';
 import tile3DRoyal from './3d-tiles-royal.json';
 import carto from './carto.json';
 import usMap from './us-map.json';
@@ -23,6 +24,7 @@ export default {
   'website/Scatterplot (ScatterplotLayer)': scatterplot,
   'website/Screen Grid (ScreenGridLayer)': screenGrid,
   'website/TagMap (TextLayer)': tagmap,
+  'website/3D Tiles (Tile3DLayer, St Helens)': tile3DStHelens,
   'website/3D Tiles (Tile3DLayer, Royal)': tile3DRoyal,
   'website/CARTO VectorTileLayer': carto,
   // GET STARTED EXAMPLES AS JSON PAYLOADS

@@ -2500,6 +2500,11 @@
   optionalDependencies:
     draco3d "1.5.7"
 
+"@loaders.gl/services@5.0.0-rc.2":
+  version "5.0.0-rc.2"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/services/-/services-5.0.0-rc.2.tgz#1539429cf3f53376c7210327befe718b2ac01a8b"
+  integrity sha512-ZD0W3zEy8tmad9b10qPT3Yo6X3VV3TltS6dzDZ1Jr45+tfNlvg7sfeOud9j3EYcgYvL6RnhaMZzMMySasCojcA==
+
 "@loaders.gl/tiles-3d@5.0.0-rc.2":
   version "5.0.0-rc.2"
   resolved "https://registry.npmjs.org/@loaders.gl/tiles-3d/-/tiles-3d-5.0.0-rc.2.tgz#b615d01e2ad6ce4a19fb62b622b598e1fc1664e0"
