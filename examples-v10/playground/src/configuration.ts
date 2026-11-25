@@ -15,7 +15,7 @@ import * as Widgets from '@deck.gl/widgets';
 
 import {registerLoaders} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {DracoWorkerLoader} from '@loaders.gl/scene';
+import {DracoLoader} from '@loaders.gl/scene';
 import {CesiumIonAuthentication} from '@loaders.gl/services/authentication';
 import {Tiles3DLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 
@@ -25,7 +25,7 @@ registerLoaders([
     ...CSVLoader,
     options: {...CSVLoader.options, csv: {...CSVLoader.options.csv, shape: 'object-row-table'}}
   },
-  DracoWorkerLoader
+  DracoLoader
 ]);
 
 export default {
