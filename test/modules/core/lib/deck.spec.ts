@@ -107,6 +107,21 @@ webglTest('Deck#selects WebGL when the WebGPU adapter reports no support', async
   }
 });
 
+test('Deck#renders with WebGL2 when WebGPU returns no adapter', async context => {
+  if (!navigator.gpu) return context.skip();
+  const requestAdapter = vi.spyOn(navigator.gpu, 'requestAdapter').mockResolvedValue(null);
+  let deck: Deck | undefined;
+  try {
+    deck = new Deck({width: 1, height: 1, initialViewState: {longitude: 0, latitude: 0, zoom: 0}});
+    await waitForRender(deck);
+    expect(requestAdapter).toHaveBeenCalledTimes(1);
+    expect(deck.device?.type).toBe('webgl');
+  } finally {
+    requestAdapter.mockRestore();
+    if (deck) finalizeOwnedDeck(deck);
+  }
+});
+
 test.for([
   {type: undefined, expected: 'premultiplied'},
   {type: 'webgpu', expected: 'premultiplied'},

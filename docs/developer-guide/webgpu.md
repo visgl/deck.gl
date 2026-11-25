@@ -12,7 +12,7 @@ For composite and wrapper layers, statuses are based on their default or general
 
 ## Device selection and migration
 
-When Deck creates its own device, it asks luma.gl for the best available adapter. The standard build includes WebGPU and WebGL2. luma.gl chooses WebGPU when its adapter reports support, otherwise it can choose WebGL2. If the selected adapter fails to initialize, device creation reports the error. An application-supplied device or WebGL context takes precedence.
+When Deck creates its own device, it asks luma.gl for the best available adapter. The standard build includes WebGPU and WebGL2. luma.gl prefers WebGPU and uses WebGL2 when the WebGPU API is unavailable or the browser returns no WebGPU adapter. An explicit WebGPU request reports the error if no adapter is available. Device creation errors after acquiring an adapter are reported for either selection mode. An application-supplied device or WebGL context takes precedence.
 
 To request a specific backend, pass `deviceProps.type`:
 
