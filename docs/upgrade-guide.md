@@ -12,6 +12,10 @@ If your application creates a standalone Deck without supplying a device or cont
 
 On WebGPU, use `onDeviceInitialized` in place of `onWebGLInitialized`. The `gl` argument to `onBeforeRender` and `onAfterRender` is undefined, and `pickAsync: 'sync'` reports an error. See [device selection and migration](./developer-guide/webgpu.md#device-selection-and-migration).
 
+If you use `ContextMenuWidget` or call `MVTLayer.getRenderedFeatures()`, request WebGL2 on the owning Deck. Both APIs use synchronous picking.
+
+`SnapshotTestRunner` and `InteractionTestRunner` also inherit Deck’s default. To preserve WebGL2 reference images or run GLSL-only layers, pass `deviceProps` in the runner’s Deck props, for example `new SnapshotTestRunner({deviceProps: {type: 'webgl'}})`.
+
 ### @deck.gl/react
 
 `@deck.gl/react` is now a React renderer for deck.gl: layers, views, widgets and effects are React elements. It requires React 19.2 or later.

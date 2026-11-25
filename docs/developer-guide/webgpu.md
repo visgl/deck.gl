@@ -24,7 +24,7 @@ new Deck({deviceProps: {type: 'webgpu'}}); // Require WebGPU
 The [WebGL-only build](./building-apps.md) defaults to WebGL2. Read `device.type` in `onDeviceInitialized` to see which backend a running application uses.
 
 - **Render callbacks.** Use `onDeviceInitialized` for either backend. WebGPU skips `onWebGLInitialized` and supplies no `gl` to `onBeforeRender` or `onAfterRender`.
-- **Picking.** WebGPU requires asynchronous picking and rejects `pickAsync: 'sync'`. Use `await deck.pickObjectAsync(...)` for one object and `await deck.pickObjectsAsync(...)` for a rectangle. Applications that depend on synchronous or multi-depth picking can explicitly request WebGL2.
+- **Picking.** WebGPU requires asynchronous picking and rejects `pickAsync: 'sync'`. Use `await deck.pickObjectAsync(...)` for one object and `await deck.pickObjectsAsync(...)` for a rectangle. Request WebGL2 for synchronous or multi-depth picking, including when using [ContextMenuWidget](../api-reference/widgets/context-menu-widget.md) or `MVTLayer.getRenderedFeatures()`.
 - **Layers and effects.** Check the tables below for the layers, transitions and effects your application uses. Some CARTO layers, attribute transitions, shadows and postprocessing have backend-specific limitations.
 - **Custom shaders and binary data.** Custom layers need WGSL implementations and compatible extension hooks. Test application-supplied buffer layouts on WebGPU, especially external float64 buffers and packed attributes.
 - **Map integrations.** Mapbox, MapLibre and Google Maps overlays default to WebGL2 when creating their own device to support synchronous picking. Interleaved integrations use the rendering context supplied by the host map.
@@ -65,7 +65,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `Tile3DLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `TerrainLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/geo-layers` | `MVTLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/geo-layers` | `MVTLayer` | ✅ | ✅ v9.4 for rendering. `getRenderedFeatures()` requires WebGL2. |
 | `@deck.gl/geo-layers` | `GeohashLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/carto` | `ClusterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `H3TileLayer` | ✅ | ❌ |
