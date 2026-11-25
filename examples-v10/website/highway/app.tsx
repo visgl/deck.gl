@@ -147,7 +147,7 @@ export default function App({
   const accidentTable = useMemo(async () => {
     const table = Array.isArray(accidents)
       ? tableFromJSON(accidents)
-      : (accidents ?? (await load(DATA_URL.ACCIDENTS, CSVLoader)));
+      : (accidents ?? (await load(DATA_URL.ACCIDENTS, CSVLoader, {core: {worker: false}})));
     if (!isArrowTable(table)) {
       throw new Error('Expected an Arrow accident table');
     }
