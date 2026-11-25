@@ -180,8 +180,8 @@ export default function App({
       onDataLoad: table => {
         onArcDataLoad?.(isArrowTable(table) ? table.numRows : 0);
       },
-      getSourcePosition: {sql: 'ARRAY[LIST_EXTRACT(origin, 1), LIST_EXTRACT(origin, 2)]'},
-      getTargetPosition: {sql: 'ARRAY[LIST_EXTRACT(target, 1), LIST_EXTRACT(target, 2)]'},
+      getSourcePosition: {sql: 'ARRAY[origin[1], origin[2]]'},
+      getTargetPosition: {sql: 'ARRAY[target[1], target[2]]'},
       getSourceColor: {sql: 'source_color'},
       getTargetColor: {sql: 'target_color'},
       getWidth: strokeWidth
