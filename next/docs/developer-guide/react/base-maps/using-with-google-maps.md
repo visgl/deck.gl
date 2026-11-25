@@ -40,7 +40,7 @@ Keep the map in React state, or read it from a hook that re-renders when it is r
 
 ### React Google Maps[​](#react-google-maps "Direct link to React Google Maps")
 
-The `@vis.gl/react-google-maps` `<Map>` component owns all Google map options. It does not expose the map through a ref; read it with `useMap()` in a component rendered inside `<Map>`. `useMap()` returns `null` until the map exists, and `DeckGL` attaches the overlay once it does.
+The `@vis.gl/react-google-maps` `<Map>` component owns all Google map options. It does not expose the map through a ref; read it with `useMap()`, which works anywhere inside `<APIProvider>` and, outside a `<Map>`, returns the map that has no `id`. It returns `null` until the map exists, and `DeckGL` attaches the overlay once it does.
 
 ```
 import {APIProvider, Map, useMap} from '@vis.gl/react-google-maps';
@@ -49,7 +49,9 @@ import {DeckGL} from '@deck.gl/react/google-maps';
 
 
 
-function DeckOverlay() {
+// Render inside <APIProvider>, usually near the root of the app
+
+export function GoogleMap({mapId}: {mapId: string}) {
 
   const map = useMap();
 
@@ -57,11 +59,25 @@ function DeckOverlay() {
 
   return (
 
-    <DeckGL map={map}>
+    <Map
 
-      {/* Layer components, such as <ScatterplotLayer /> */}
+      mapId={mapId}
 
-    </DeckGL>
+      defaultCenter={{lat: 37.8, lng: -122.4}}
+
+      defaultZoom={12}
+
+      style={{height: 500}}
+
+    >
+
+      <DeckGL map={map}>
+
+        {/* Layer components, such as <ScatterplotLayer /> */}
+
+      </DeckGL>
+
+    </Map>
 
   );
 
@@ -69,27 +85,13 @@ function DeckOverlay() {
 
 
 
-export function GoogleMap({apiKey, mapId}: {apiKey: string; mapId: string}) {
+export function App({apiKey, mapId}: {apiKey: string; mapId: string}) {
 
   return (
 
     <APIProvider apiKey={apiKey}>
 
-      <Map
-
-        mapId={mapId}
-
-        defaultCenter={{lat: 37.8, lng: -122.4}}
-
-        defaultZoom={12}
-
-        style={{height: 500}}
-
-      >
-
-        <DeckOverlay />
-
-      </Map>
+      <GoogleMap mapId={mapId} />
 
     </APIProvider>
 
