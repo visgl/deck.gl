@@ -67,6 +67,8 @@ export default defineConfig(async () => {
     },
     worker: {format: 'es'},
     optimizeDeps: {
+      // Preserve the codec modules' relative WASM URLs in development.
+      exclude: ['compress-utils'],
       esbuildOptions: {target: 'es2022'}
     }
   };
