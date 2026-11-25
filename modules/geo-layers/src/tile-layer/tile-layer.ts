@@ -262,6 +262,9 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       // A new adapter can change tile ids and bounds, so start with a new cache.
       tileset.finalize();
       tileset = null;
+      // The new tileset starts its own frame count, so compare its first update with empty state.
+      this.state.frameNumber = undefined;
+      this.state.isLoaded = false;
     }
     const propsChanged = changeFlags.propsOrDataChanged || changeFlags.updateTriggersChanged;
     const dataChanged =
