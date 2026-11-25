@@ -15,7 +15,7 @@ import {isArrowTable} from '@math.gl/core/arrow';
 import {ArcLayer} from '@deck.gl/layers';
 import {GeoArrowLayer} from '@deck.gl/proposals/layers';
 import {queryArrowSQL} from '@math.gl/sql/query';
-import {scaleQuantile} from 'd3-scale';
+import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 
@@ -63,19 +63,19 @@ type County = {
   centroid: Iterable<number>;
 };
 
-/** Pairs each quantile with the same colors used by the example legend. */
-function palette(first: Color[], second: Color[]): string {
-  const colors = [...first, ...second].map(color =>
+/** Uses the same magnitude domain for both directions. */
+function flowScale(colors: Color[]): string {
+  const palette = colors.map(color =>
     color
       .slice(0, 3)
       .map(channel => channel.toString(16).padStart(2, '0'))
       .join('')
   );
-  return `PALETTE(${colors.map(color => `'#${color}'`).join(', ')})`;
+  return `SCALE_QUANTILE(CASE WHEN value < 0 THEN -value ELSE value END, 7, PALETTE(${palette.map(color => `'#${color}'`).join(', ')}))`;
 }
 
-const FLOW_CLASS =
-  'CASE WHEN value > 0 THEN quantile ELSE quantile + 7 END, CATEGORIES(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)';
+const IN_FLOW_SCALE = flowScale(inFlowColors);
+const OUT_FLOW_SCALE = flowScale(outFlowColors);
 
 function getTooltip({object}: PickingInfo<County>) {
   return object && object.name;
@@ -136,21 +136,20 @@ export default function App({
         FROM selected c CROSS JOIN UNNEST(c.flows) AS u(key, value)`,
       new Map([['selected', counties.select(['centroid', 'flows']).slice(index, index + 1)]])
     );
-    const result = queryArrowSQL(
+    if (!flows.numRows) {
+      return null;
+    }
+    return queryArrowSQL(
       `\
-        SELECT f.origin, c.centroid AS target, f.value
+        SELECT f.origin, c.centroid AS target,
+          CASE WHEN f.value > 0 THEN ${IN_FLOW_SCALE} ELSE ${OUT_FLOW_SCALE} END AS source_color,
+          CASE WHEN f.value > 0 THEN ${OUT_FLOW_SCALE} ELSE ${IN_FLOW_SCALE} END AS target_color
         FROM flows f JOIN counties c ON f.destination = c.county_id`,
       new Map([
         ['flows', flows],
         ['counties', destinations]
-      ])
-    );
-    const magnitude = Float64Array.from(result.getChild('value')!, value =>
-      Math.abs(Number(value))
-    );
-    const scale = scaleQuantile().domain(magnitude).range([0, 1, 2, 3, 4, 5, 6]);
-    return result.assign(
-      tableFromArrays({quantile: Uint8Array.from(magnitude, value => scale(value))})
+      ]),
+      {functions: VISUALIZATION_FUNCTIONS}
     );
   }, [counties, destinations, selectedCounty, defaultCounty]);
 
@@ -183,12 +182,8 @@ export default function App({
       },
       getSourcePosition: {sql: 'ARRAY[LIST_EXTRACT(origin, 1), LIST_EXTRACT(origin, 2)]'},
       getTargetPosition: {sql: 'ARRAY[LIST_EXTRACT(target, 1), LIST_EXTRACT(target, 2)]'},
-      getSourceColor: {
-        sql: `SCALE_ORDINAL(${FLOW_CLASS}, ${palette(inFlowColors, outFlowColors)})`
-      },
-      getTargetColor: {
-        sql: `SCALE_ORDINAL(${FLOW_CLASS}, ${palette(outFlowColors, inFlowColors)})`
-      },
+      getSourceColor: {sql: 'source_color'},
+      getTargetColor: {sql: 'target_color'},
       getWidth: strokeWidth
     })
   ];
