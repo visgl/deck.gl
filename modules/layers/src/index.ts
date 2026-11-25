@@ -19,6 +19,8 @@ export {default as GeoJsonLayer} from './geojson-layer/geojson-layer';
 export {default as TextLayer} from './text-layer/text-layer';
 export {default as SolidPolygonLayer} from './solid-polygon-layer/solid-polygon-layer';
 
+export {_PointCloudSplatEffect} from './point-cloud-layer/point-cloud-splat-effect';
+
 // Experimental layer exports
 export {default as _MultiIconLayer} from './text-layer/multi-icon-layer/multi-icon-layer';
 export {default as _TextBackgroundLayer} from './text-layer/text-background-layer/text-background-layer';

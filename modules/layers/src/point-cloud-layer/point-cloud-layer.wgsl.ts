@@ -8,6 +8,7 @@ struct PointCloudUniforms {
   sizeUnits: i32,
   rowIndexOffset: u32,
   radiusMeters: f32,
+  splatPass: i32,
 };
 
 @group(0) @binding(0)

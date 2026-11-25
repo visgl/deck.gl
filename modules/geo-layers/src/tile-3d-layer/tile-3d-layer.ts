@@ -67,6 +67,7 @@ const defaultProps: DefaultProps<Tile3DLayerProps> = {
   getPointColor: {type: 'accessor', value: DEFAULT_POINT_COLOR},
   pointSize: 1.0,
   _adaptivePointSize: false,
+  _weightedSplatting: false,
 
   // Disable async data loading (handling it in _loadTileSet)
   data: '',
@@ -93,6 +94,9 @@ type _Tile3DLayerProps<DataT> = {
 
   /** Experimental. Project point tile geometric error into a bounded screen-space radius. */
   _adaptivePointSize?: boolean;
+
+  /** Experimental. Include point-cloud tiles in the weighted point-cloud effect. */
+  _weightedSplatting?: boolean;
 
   /** A loader which is used to decode the fetched tiles.
    * @deprecated Use `loaders` instead
@@ -380,7 +384,8 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     return new SubLayerClass(
       {
         pointSize,
-        _pointRadiusMeters: radiusMeters
+        _pointRadiusMeters: radiusMeters,
+        _weightedSplatting: this.props._weightedSplatting
       },
       this.getSubLayerProps({
         id: 'pointcloud',
