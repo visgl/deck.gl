@@ -235,6 +235,12 @@ The opacity of the layer. The same as defined in [layer](../core/layer.md).
 Global radius of all points in pixels.
 This value is only applied when [tile format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction) is `pnts`.
 
+#### `_adaptivePointSize` (boolean, optional)
+
+- Default `false`
+
+Experimental point sizing for 3D Tiles point clouds. Projects half the tile’s geometric error into a screen-space radius, with `pointSize` as the minimum and 4 pixels as the usual maximum. If `pointSize` exceeds 4 pixels, it is used for both bounds. Tiles without positive geometric error use fixed sizing. This setting affects rendering only.
+
 ### Data Properties
 
 #### `data` (string) {#data}

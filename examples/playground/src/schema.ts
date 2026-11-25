@@ -642,7 +642,7 @@ type H3HexagonLayer = Omit<ColumnLayer, '@@type'> &
   };
 
 type Tile3DLayer = Omit<BaseLayerProps, 'data'> &
-  Pick<Tile3DLayerProps, 'pointSize'> & {
+  Pick<Tile3DLayerProps, 'pointSize' | '_adaptivePointSize'> & {
     '@@type': 'Tile3DLayer';
     data?: any;
     getPointColor?: ColorValue | AccessorFunction;

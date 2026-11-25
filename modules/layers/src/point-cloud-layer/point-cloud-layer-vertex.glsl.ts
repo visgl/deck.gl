@@ -25,7 +25,14 @@ void main(void) {
   geometry.pickingColor = picking_getPickingColorFromIndex(uint(gl_InstanceID) + pointCloud.rowIndexOffset);
 
   // Find the center of the point and add the current vertex
-  vec3 offset = vec3(positions.xy * project_size_to_pixel(pointCloud.radiusPixels, pointCloud.sizeUnits), 0.0);
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.), geometry.position);
+  float radius = project_size_to_pixel(pointCloud.radiusPixels, pointCloud.sizeUnits);
+  float clipScale = 1.0;
+  if (pointCloud.radiusMeters > 0.0) {
+    clipScale = max(gl_Position.w / project.focalDistance, 0.0001);
+    radius = clamp(project_size_to_pixel(pointCloud.radiusMeters) / clipScale, radius, max(radius, 4.0));
+  }
+  vec3 offset = vec3(positions.xy * radius, 0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
 #ifdef ANTIALIASING
   float triangleRadiusPixels = length(offset.xy);
@@ -39,9 +46,8 @@ void main(void) {
   }
 #endif
 
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.), geometry.position);
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
-  gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
+  gl_Position.xy += project_pixel_size_to_clipspace(offset.xy) * clipScale;
 
   // Apply lighting
   vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);
