@@ -143,25 +143,63 @@ export function canCullTileBoundingBox(viewport: Viewport, bbox: TileBoundingBox
   return 'west' in bbox || !viewport.isGeospatial;
 }
 
-/** Returns the longitude and latitude bounds of a tile outline, if available. */
-export function getTileOutlineBounds(outline?: number[][] | null): GeoBoundingBox | null {
-  if (!outline?.length) {
+/** Shifts a longitude to the world copy within 180 degrees of the reference. */
+function unwrapLongitude(longitude: number, reference: number): number {
+  const delta = longitude - reference;
+  if (Math.abs(delta) <= 180) {
+    return longitude;
+  }
+  const wrappedDelta = delta % 360;
+  return Math.abs(wrappedDelta) > 180
+    ? reference + wrappedDelta - 360 * Math.sign(wrappedDelta)
+    : reference + wrappedDelta;
+}
+
+/** Unwraps a geographic ring and returns its bounds if it fits within one world. */
+export function unwrapTileOutline(
+  outline?: number[][] | null
+): {coordinates: number[][]; bounds: GeoBoundingBox} | null {
+  if (!outline || outline.length < 3) {
     return null;
   }
   let west = Infinity;
   let east = -Infinity;
   let south = Infinity;
   let north = -Infinity;
+  // Start in the base world so the bounds can be compared with adjacent copies.
+  let previousLongitude = 0;
+  const coordinates: number[][] = [];
   for (const [longitude, latitude] of outline) {
     if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
       return null;
     }
-    west = Math.min(west, longitude);
-    east = Math.max(east, longitude);
+    const unwrappedLongitude = unwrapLongitude(longitude, previousLongitude);
+    coordinates.push([unwrappedLongitude, latitude]);
+    previousLongitude = unwrappedLongitude;
+    west = Math.min(west, unwrappedLongitude);
+    east = Math.max(east, unwrappedLongitude);
     south = Math.min(south, latitude);
     north = Math.max(north, latitude);
   }
-  return {west, east, south, north};
+  const firstLongitude = coordinates[0][0];
+  const closingLongitude = unwrapLongitude(firstLongitude, previousLongitude);
+  // A ring that winds around a pole closes in a different world copy.
+  if (Math.abs(closingLongitude - firstLongitude) > 180 || east - west >= 360) {
+    return null;
+  }
+  return {coordinates, bounds: {west, east, south, north}};
+}
+
+/** Tests a geographic outline box and its adjacent world copies against culling bounds. */
+export function tileOutlineOverlapsBounds(
+  {west, east, south, north}: GeoBoundingBox,
+  [minX, minY, maxX, maxY]: Bounds
+): boolean {
+  return (
+    south < maxY &&
+    north > minY &&
+    [-360, 0, 360].some(offset => west + offset < maxX && east + offset > minX)
+  );
 }
 
 /** Get culling bounds in world space */

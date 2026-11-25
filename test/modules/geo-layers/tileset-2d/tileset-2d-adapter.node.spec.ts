@@ -98,6 +98,27 @@ test('Tileset2D uses adapter IDs, zoom, parents, and metadata in the cache', asy
   expect(root.isVisible).toBe(true);
 });
 
+test('Tileset2D stops walking default parents when adapter zoom stays constant', () => {
+  const tileset = new Tileset2D({
+    adapter: {
+      ...projectedAdapter,
+      getTileIndices: () => [
+        {x: 0, y: 0, z: 5},
+        {x: 1, y: 0, z: 6}
+      ],
+      getTileZoom: () => 5
+    },
+    getTileData: () => []
+  });
+  cleanups.push(() => tileset.finalize());
+
+  tileset.update(viewport);
+  expect(tileset.selectedTiles).toMatchObject([
+    {zoom: 5, parent: null, children: []},
+    {zoom: 5, parent: null, children: []}
+  ]);
+});
+
 test('Tileset2D subclass methods take precedence over adapter hooks', () => {
   /** Legacy subclass with its own tile identity and hierarchy. */
   class LegacyTileset extends Tileset2D {
@@ -187,4 +208,94 @@ test('Tileset2D and Tile2DView cull projected tiles using geographic outlines', 
   expect(tileset.isTileVisible(far, cullRect, modelMatrix)).toBe(false);
   expect(view.isTileVisible(center, cullRect, modelMatrix)).toBe(true);
   expect(view.isTileVisible(far, cullRect, modelMatrix)).toBe(false);
+});
+
+test.each([
+  {name: 'normalized', east: -179},
+  {name: 'continuous', east: 181}
+])('Tileset2D and Tile2DView wrap $name outlines at the antimeridian', ({east}) => {
+  const tileset = new Tileset2D({
+    adapter: {
+      ...projectedAdapter,
+      getTileIndices: () => [{x: 0, y: 0, z: 6}],
+      getTileOutline: () => [
+        [179, -1],
+        [east, -1],
+        [east, 1],
+        [179, 1]
+      ]
+    },
+    getTileData: () => [],
+    refinementStrategy: 'never'
+  });
+  const view = new Tile2DView(tileset);
+  cleanups.push(
+    () => view.finalize(),
+    () => tileset.finalize()
+  );
+
+  const cullRect = {x: 395, y: 295, width: 10, height: 10};
+  for (const longitude of [179.5, -179.5, 0]) {
+    const seamViewport = new WebMercatorViewport({
+      longitude,
+      latitude: 0,
+      zoom: 6,
+      width: 800,
+      height: 600
+    });
+    tileset.update(seamViewport);
+    view.update(seamViewport);
+
+    const [tile] = tileset.selectedTiles!;
+    const expectedVisible = longitude !== 0;
+    expect(tileset.isTileVisible(tile, cullRect)).toBe(expectedVisible);
+    expect(view.isTileVisible(tile, cullRect)).toBe(expectedVisible);
+    const priority = tileset['_getTileDistancePriority'](tile);
+    if (expectedVisible) {
+      expect(priority).toBe(0);
+    } else {
+      expect(priority).toBeGreaterThan(0);
+    }
+  }
+});
+
+test('Tileset2D and Tile2DView use bbox behavior for a polar outline', () => {
+  const polarViewport = new WebMercatorViewport({
+    longitude: 0,
+    latitude: 84.5,
+    zoom: 6,
+    width: 800,
+    height: 600
+  });
+  const tileset = new Tileset2D({
+    adapter: {
+      ...projectedAdapter,
+      getTileBoundingBox: () => ({left: 480000, top: 4320000, right: 520000, bottom: 4280000}),
+      getTileOutline: (_context, {x}) =>
+        x === 0 ? Array.from({length: 12}, (_, i) => [i * 30 - 180, 85]) : null
+    },
+    getTileData: () => [],
+    refinementStrategy: 'never'
+  });
+  const view = new Tile2DView(tileset);
+  cleanups.push(
+    () => view.finalize(),
+    () => tileset.finalize()
+  );
+  tileset.update(polarViewport);
+  view.update(polarViewport);
+
+  const [polarTile, tileWithoutOutline] = tileset.selectedTiles!;
+  const cullRect = {x: 395, y: 295, width: 10, height: 10};
+  expect(tileset.isTileVisible(tileWithoutOutline, cullRect)).toBe(true);
+  expect(tileset.isTileVisible(polarTile, cullRect)).toBe(
+    tileset.isTileVisible(tileWithoutOutline, cullRect)
+  );
+  expect(view.isTileVisible(tileWithoutOutline, cullRect)).toBe(true);
+  expect(view.isTileVisible(polarTile, cullRect)).toBe(
+    view.isTileVisible(tileWithoutOutline, cullRect)
+  );
+  expect(tileset['_getTileDistancePriority'](polarTile)).toBe(
+    tileset['_getTileDistancePriority'](tileWithoutOutline)
+  );
 });

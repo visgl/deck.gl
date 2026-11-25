@@ -9,7 +9,7 @@ import {memoize} from '../tileset-2d/memoize';
 import {STRATEGY_DEFAULT, Tile2DHeader, type Tileset2D} from '../tileset-2d/index';
 import {getCullBounds, tile2DDeckAdapter, transformBox} from '../tileset-2d/deck-tileset-adapter';
 import type {TileBoundingBox} from './types';
-import {canCullTileBoundingBox, getTileOutlineBounds} from '../tileset-2d/utils';
+import {canCullTileBoundingBox, tileOutlineOverlapsBounds, unwrapTileOutline} from './utils';
 
 import {refineTileStates} from './refinement';
 
@@ -158,9 +158,9 @@ export class Tile2DView<DataT = any> {
     if (!cullRect || !this._viewport) {
       return true;
     }
-    const outlineBounds = this._viewport.isGeospatial ? getTileOutlineBounds(tile.outline) : null;
-    const bbox = outlineBounds || tile.bbox;
-    if (!canCullTileBoundingBox(this._viewport, bbox)) {
+    const outlineBounds = this._viewport.isGeospatial && unwrapTileOutline(tile.outline)?.bounds;
+    const bbox = tile.bbox;
+    if (!outlineBounds && !canCullTileBoundingBox(this._viewport, bbox)) {
       return true;
     }
     const boundsArr = this._getCullBounds({
@@ -168,6 +168,9 @@ export class Tile2DView<DataT = any> {
       z: this._zRange,
       cullRect
     });
+    if (outlineBounds) {
+      return boundsArr.some(bounds => tileOutlineOverlapsBounds(outlineBounds, bounds));
+    }
     return boundsArr.some(bounds => this._tileOverlapsBounds(bbox, bounds, modelMatrix));
   }
 

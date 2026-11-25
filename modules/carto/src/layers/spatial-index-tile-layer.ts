@@ -94,11 +94,16 @@ export default class SpatialIndexTileLayer<
     let featureIndex: any = {[KEY]: featureId};
     let featureZoom = tileset.getTileZoom(featureIndex);
     while (!(featureZoom <= tileZoom)) {
-      featureIndex = tileset.getParentIndex(featureIndex);
-      if (featureIndex === null) {
+      const parentIndex = tileset.getParentIndex(featureIndex);
+      if (parentIndex === null) {
         return false;
       }
-      featureZoom = tileset.getTileZoom(featureIndex);
+      const parentZoom = tileset.getTileZoom(parentIndex);
+      if (!(parentZoom < featureZoom)) {
+        return false;
+      }
+      featureIndex = parentIndex;
+      featureZoom = parentZoom;
     }
 
     return featureIndex[KEY] === tile.index[KEY];

@@ -20,7 +20,8 @@ import {
   getTileIndices,
   tileToBoundingBox,
   getCullBounds,
-  getTileOutlineBounds,
+  tileOutlineOverlapsBounds,
+  unwrapTileOutline,
   transformBox
 } from './utils';
 import {Bounds, TileBoundingBox, TileIndex, ZRange} from './types';
@@ -497,14 +498,17 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     if (!cullRect || !this._viewport) {
       return true;
     }
-    const outlineBounds = this._viewport.isGeospatial ? getTileOutlineBounds(tile.outline) : null;
-    let bbox = outlineBounds || tile.bbox;
-    if (canCullTileBoundingBox(this._viewport, bbox)) {
+    const outlineBounds = this._viewport.isGeospatial && unwrapTileOutline(tile.outline)?.bounds;
+    let bbox = tile.bbox;
+    if (outlineBounds || canCullTileBoundingBox(this._viewport, bbox)) {
       const boundsArr = this._getCullBounds({
         viewport: this._viewport,
         z: this._zRange,
         cullRect
       });
+      if (outlineBounds) {
+        return boundsArr.some(bounds => tileOutlineOverlapsBounds(outlineBounds, bounds));
+      }
       for (const [minX, minY, maxX, maxY] of boundsArr) {
         let overlaps;
         if ('west' in bbox) {
@@ -706,11 +710,24 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     }
 
     try {
-      const outline = this._viewport.isGeospatial ? tile.outline : null;
-      const points = outline
-        ? this._projectTileCoordinates(outline)
-        : this._getTileScreenCorners(tile.bbox);
+      const outline = this._viewport.isGeospatial && unwrapTileOutline(tile.outline);
       const center: [number, number] = [width / 2, height / 2];
+      let points: [number, number][];
+      if (outline) {
+        const [centerLongitude] = this._viewport.unproject(center);
+        const {coordinates, bounds} = outline;
+        const outlineLongitude = (bounds.west + bounds.east) / 2;
+        const offset = Number.isFinite(centerLongitude)
+          ? 360 * Math.round((centerLongitude - outlineLongitude) / 360)
+          : 0;
+        points = this._projectTileCoordinates(
+          offset
+            ? coordinates.map(([longitude, latitude]) => [longitude + offset, latitude])
+            : coordinates
+        );
+      } else {
+        points = this._getTileScreenCorners(tile.bbox);
+      }
       if (points.length >= (outline ? 3 : 4)) {
         if (this._isPointInPolygon(center, points)) {
           return 0;
@@ -918,12 +935,18 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     const {_minZoom = 0} = this;
 
     let index = tile.index;
-    while (this.getTileZoom(index) > _minZoom) {
+    let zoom = this.getTileZoom(index);
+    while (zoom > _minZoom) {
       const parentIndex = this.getParentIndex(index);
       if (parentIndex === null) {
         return null;
       }
+      const parentZoom = this.getTileZoom(parentIndex);
+      if (!(parentZoom < zoom)) {
+        return null;
+      }
       index = parentIndex;
+      zoom = parentZoom;
       const parent = this._getTile(index);
       if (parent) {
         return parent;
