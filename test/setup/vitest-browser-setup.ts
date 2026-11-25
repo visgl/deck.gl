@@ -7,6 +7,11 @@
 
 import {registerTypedArrayEquality} from './typed-array-equality';
 
+// Chromium may expose navigator.gpu without a usable adapter on the WebGL runner.
+if (import.meta.env.RENDER_TEST_DEVICE === 'webgl') {
+  Object.defineProperty(navigator, 'gpu', {configurable: true, value: undefined});
+}
+
 // Register custom equality tester for typed arrays (tape compatibility)
 registerTypedArrayEquality();
 

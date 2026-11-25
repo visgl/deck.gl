@@ -1,10 +1,6 @@
 # WebGPU
 
-:::caution
-WebGPU support in deck.gl v9 is still a work in progress and is not production ready.
-:::
-
-deck.gl is gradually adding support for running on WebGPU. Support is landing layer by layer and feature by feature.
+Standalone Deck v10 prefers WebGPU. The tables below describe support by layer, extension, and feature.
 
 This page is conservative and source-based:
 
@@ -14,20 +10,24 @@ This page is conservative and source-based:
 
 For composite and wrapper layers, statuses are based on their default or general rendering path, not on every possible custom sublayer configuration.
 
-## Enabling WebGPU
+## Device selection and migration
 
-deck.gl needs to be set up to use a luma.gl device that uses the luma.gl `webgpuAdapter`.
+When Deck creates its own device, it asks luma.gl for the best available adapter. The standard build includes WebGPU and WebGL2. luma.gl prefers WebGPU and uses WebGL2 when the WebGPU API is unavailable or the browser returns no WebGPU adapter. An explicit WebGPU request reports the error if no adapter is available. Device creation errors after acquiring an adapter are reported for either selection mode. An application-supplied device or WebGL context takes precedence.
+
+To request a specific backend, pass `deviceProps.type`:
 
 ```ts
-import {webgpuAdapter} from '@luma.gl/core/webgpu';
-
-new Deck({
-  deviceProps: {
-    type: 'webgpu',
-    adapters: [webgpuAdapter]
-  }
-});
+new Deck({deviceProps: {type: 'webgl'}}); // Request WebGL2
+new Deck({deviceProps: {type: 'webgpu'}}); // Require WebGPU
 ```
+
+The [WebGL-only build](./building-apps.md) defaults to WebGL2. Read `device.type` in `onDeviceInitialized` to see which backend a running application uses.
+
+- **Render callbacks.** Use `onDeviceInitialized` for either backend. WebGPU skips `onWebGLInitialized` and supplies no `gl` to `onBeforeRender` or `onAfterRender`.
+- **Picking.** WebGPU requires asynchronous picking and rejects `pickAsync: 'sync'`. Use `await deck.pickObjectAsync(...)` for one object and `await deck.pickObjectsAsync(...)` for a rectangle. Request WebGL2 for synchronous or multi-depth picking, including when using [ContextMenuWidget](../api-reference/widgets/context-menu-widget.md) or `MVTLayer.getRenderedFeatures()`.
+- **Layers and effects.** Check the tables below for the layers, transitions and effects your application uses. Some CARTO layers, attribute transitions, shadows and postprocessing have backend-specific limitations.
+- **Custom shaders and binary data.** Custom layers need WGSL implementations and compatible extension hooks. Test application-supplied buffer layouts on WebGPU, especially external float64 buffers and packed attributes.
+- **Map integrations.** Mapbox, MapLibre and Google Maps overlays default to WebGL2 when creating their own device to support synchronous picking. Interleaved integrations use the rendering context supplied by the host map.
 
 ## Layers
 
@@ -65,7 +65,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `Tile3DLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `TerrainLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/geo-layers` | `MVTLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/geo-layers` | `MVTLayer` | ✅ | ✅ v9.4 for rendering. `getRenderedFeatures()` requires WebGL2. |
 | `@deck.gl/geo-layers` | `GeohashLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/carto` | `ClusterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `H3TileLayer` | ✅ | ❌ |

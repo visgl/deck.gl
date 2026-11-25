@@ -51,6 +51,7 @@ function mountDeck() {
       act(async () =>
         reactRoot.render(
           <DeckGL
+            deviceProps={{type: 'webgl'}}
             initialViewState={
               initialViewState as {latitude: number; longitude: number; zoom: number}
             }

@@ -111,6 +111,7 @@ export default class MapboxOverlay implements IControl {
       ...this._props,
       parent: container,
       deviceProps: {
+        type: 'webgl',
         ...this._props.deviceProps,
         createCanvasContext: {
           ...(typeof this._props.deviceProps?.createCanvasContext === 'object'

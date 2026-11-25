@@ -58,6 +58,7 @@ export function createDeckInstance(
     useDevicePixels: props.useDevicePixels ?? true,
     ...(!props.gl && {
       deviceProps: {
+        type: 'webgl',
         ...props.deviceProps,
         createCanvasContext: {
           ...(typeof props.deviceProps?.createCanvasContext === 'object'

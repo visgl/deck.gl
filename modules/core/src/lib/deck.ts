@@ -29,7 +29,7 @@ import {VERSION} from './init';
 const CREATED_BY_DECK = '_createdByDeck';
 
 import {luma} from '@luma.gl/core';
-import {attachWebGLContext, getDeviceAdapters} from './device-adapters';
+import {attachWebGLContext, defaultDeviceType, getDeviceAdapters} from './device-adapters';
 import type {WebGLDevice} from '@luma.gl/core/webgl';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
@@ -506,7 +506,24 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       typedArrayManager.setOptions(props._typedArrayManagerProps);
     }
 
-    this.animationLoop.start();
+    const animationLoop = this.animationLoop;
+    if (deviceOrPromise instanceof Promise) {
+      // Deck may be finalized while the adapter is still creating the device.
+      deviceOrPromise.then(
+        () => {
+          if (this.animationLoop === animationLoop) {
+            animationLoop.start();
+          }
+        },
+        error => {
+          if (this.animationLoop === animationLoop) {
+            props.onError?.(error);
+          }
+        }
+      );
+    } else {
+      animationLoop.start();
+    }
   }
 
   /** Stop rendering and dispose all resources */
@@ -1540,34 +1557,24 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       _cacheShaders: true,
       _cachePipelines: true,
       ...props.deviceProps,
-      adapters: getDeviceAdapters(props.deviceProps?.adapters),
       debug: getDeviceDebug(props)
     };
 
     const canvas = this._createDeviceCanvas(props);
     // Track who created the canvas directly, including canvases in a different document.
     const ownsCanvas = this._isMultiCanvasMode() || canvas === this._ownedCanvas;
-    const requestedType = deviceProps.type ?? 'webgl';
-    const deviceType =
-      requestedType === 'best-available'
-        ? luma.getBestAvailableAdapterType(deviceProps.adapters)
-        : requestedType;
-
+    const requestedType = deviceProps.type ?? defaultDeviceType;
     // Create the "best" device supported from the registered adapters
     const device = luma.createDevice({
       // luma by default throws if a device is already attached
       // asynchronous device creation could happen after finalize() is called
       // TODO - createDevice should support AbortController?
       _reuseDevices: true,
-      // A supplied WebGL canvas can outlive Deck. Destroy only its luma wrapper by default.
-      ownsHandle: ownsCanvas || deviceType !== 'webgl',
-      // tests can't handle WebGPU devices yet so we force WebGL2 unless overridden
-      type: 'webgl',
       ...deviceProps,
+      type: requestedType,
+      adapters: getDeviceAdapters(ownsCanvas, deviceProps.adapters),
       // In deck.gl v10 we may emphasize multi canvas support and unwind this prop wrapping
       createCanvasContext: {
-        // Match the premultiplied colors produced by the WebGPU shaders.
-        alphaMode: deviceType === 'webgpu' ? 'premultiplied' : undefined,
         ...canvasContextProps,
         canvas,
         useDevicePixels: this.props.useDevicePixels,

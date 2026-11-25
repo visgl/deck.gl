@@ -94,7 +94,51 @@ webglTest('Deck#creates an explicitly requested WebGL device', async () => {
   }
 });
 
+webglTest('Deck#selects WebGL when the WebGPU adapter reports no support', async () => {
+  const support = vi.spyOn(webgpuAdapter, 'isSupported').mockReturnValue(false);
+  let deck: Deck | undefined;
+  try {
+    deck = new Deck({width: 1, height: 1, initialViewState: {longitude: 0, latitude: 0, zoom: 0}});
+    await waitForRender(deck);
+    expect(deck.device?.type).toBe('webgl');
+  } finally {
+    support.mockRestore();
+    if (deck) finalizeOwnedDeck(deck);
+  }
+});
+
+test('Deck#preserves a supplied canvas after WebGPU falls back to WebGL2', async context => {
+  if (!navigator.gpu) return context.skip();
+  const canvas = document.createElement('canvas');
+  const requestAdapter = vi.spyOn(navigator.gpu, 'requestAdapter').mockResolvedValue(null);
+  let deck: Deck | undefined;
+  try {
+    deck = new Deck({
+      canvas,
+      width: 1,
+      height: 1,
+      deviceProps: {webgl: {premultipliedAlpha: false}},
+      initialViewState: {longitude: 0, latitude: 0, zoom: 0}
+    });
+    await waitForRender(deck);
+    expect(requestAdapter).toHaveBeenCalledTimes(1);
+    expect(deck.device?.type).toBe('webgl');
+    expect(deck.device?.ownsHandle).toBe(false);
+    const gl = canvas.getContext('webgl2')!;
+    expect(gl.getContextAttributes()?.premultipliedAlpha).toBe(false);
+    deck.finalize();
+    deck = undefined;
+    await sleep(20);
+    expect(gl.isContextLost()).toBe(false);
+  } finally {
+    requestAdapter.mockRestore();
+    deck?.finalize();
+    canvas.getContext('webgl2')?.getExtension('WEBGL_lose_context')?.loseContext();
+  }
+});
+
 test.for([
+  {type: undefined, expected: 'premultiplied'},
   {type: 'webgpu', expected: 'premultiplied'},
   {type: 'best-available', expected: 'premultiplied'},
   {type: 'best-available', alphaMode: 'opaque', expected: 'opaque'}
@@ -105,7 +149,6 @@ test.for([
     height: 1,
     deviceProps: {
       type: options.type,
-      adapters: [webgpuAdapter],
       createCanvasContext: 'alphaMode' in options ? {alphaMode: options.alphaMode} : {}
     },
     initialViewState: {longitude: 0, latitude: 0, zoom: 0}

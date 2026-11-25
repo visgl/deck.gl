@@ -14,7 +14,7 @@ v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, S
 
 ### GPU
 
-- [**WebGPU**](./developer-guide/webgpu.md) 🚧 — WebGPU is now the default renderer with full feature support.
+- Standalone Deck instances now prefer [**WebGPU**](./developer-guide/webgpu.md#device-selection-and-migration).
 - [**GPU vectors**](./developer-guide/using-with-arrow.md#direct-gpuvector-inputs) — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph.
 
 ### Apache Arrow

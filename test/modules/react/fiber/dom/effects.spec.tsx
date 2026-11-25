@@ -65,6 +65,7 @@ webglTest('the effects prop applies, keeps and removes deck.gl effects', async (
   const render = (effects: Effect[], radius = 2e6) =>
     reactRoot.render(
       <DeckGL
+        deviceProps={{type: 'webgl'}}
         effects={effects}
         initialViewState={{latitude: 0, longitude: 0, zoom: 0}}
         onAfterRender={({gl}) => {
@@ -156,6 +157,7 @@ webglTest('<deckEffect> elements apply and remove effects alongside the effects 
   const render = (invertInJsx: boolean) =>
     reactRoot.render(
       <DeckGL
+        deviceProps={{type: 'webgl'}}
         effects={[lighting]}
         initialViewState={{latitude: 0, longitude: 0, zoom: 0}}
         onAfterRender={({gl}) => {

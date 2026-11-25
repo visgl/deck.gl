@@ -29,6 +29,7 @@ const VIEW_STATE = {
 };
 
 const DECK_PROPS: DeckProps = {
+  deviceProps: {type: 'webgl'},
   width: 500,
   height: 550,
   viewState: VIEW_STATE,

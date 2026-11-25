@@ -75,7 +75,7 @@ When a `Device` is supplied, Deck does not destroy it when finalized. While the 
 
 #### `deviceProps` ([DeviceProps](https://luma.gl/docs/api-reference/core/device#deviceprops) | [WebGLDeviceProps](https://luma.gl/docs/api-reference/webgl/#webgldeviceprops)) {#deviceprops}
 
-Options used for creating a new luma.gl GPU [Device](https://luma.gl/docs/api-reference/core/device). 
+Options used for creating a new luma.gl GPU [Device](https://luma.gl/docs/api-reference/core/device). Standalone Deck uses the best available adapter by default, preferring WebGPU. See [device selection and migration](../../developer-guide/webgpu.md#device-selection-and-migration).
 
 Note that when using WebGL, `props.deviceProps.webgl` can be used to specify [WebGL context attributes](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext#contextattributes).
 
