@@ -133,6 +133,16 @@ function getBoundingBox(viewport: Viewport, zRange: number[] | null, extent: Bou
   ];
 }
 
+/**
+ * Tests whether `getCullBounds` returns bounds in the units of a tile bounding box.
+ * For a geospatial viewport, the cull bounds are longitude and latitude. A `{left, top, right,
+ * bottom}` box from a custom tileset is then in other units, for example projected meters, and
+ * cannot be compared with them.
+ */
+export function canCullTileBoundingBox(viewport: Viewport, bbox: TileBoundingBox): boolean {
+  return 'west' in bbox || !viewport.isGeospatial;
+}
+
 /** Get culling bounds in world space */
 export function getCullBounds({
   viewport,

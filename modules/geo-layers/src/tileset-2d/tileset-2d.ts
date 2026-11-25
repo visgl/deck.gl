@@ -15,7 +15,13 @@ import {Matrix4, equals, NumericArray} from '@math.gl/core/matrix';
 
 import {Tile2DHeader} from './tile-2d-header';
 
-import {getTileIndices, tileToBoundingBox, getCullBounds, transformBox} from './utils';
+import {
+  canCullTileBoundingBox,
+  getTileIndices,
+  tileToBoundingBox,
+  getCullBounds,
+  transformBox
+} from './utils';
 import {Bounds, TileBoundingBox, TileIndex, ZRange} from './types';
 import {TileLoadProps} from './types';
 import {memoize} from './memoize';
@@ -487,7 +493,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
       return false;
     }
 
-    if (cullRect && this._viewport) {
+    if (cullRect && this._viewport && canCullTileBoundingBox(this._viewport, tile.bbox)) {
       const boundsArr = this._getCullBounds({
         viewport: this._viewport,
         z: this._zRange,
