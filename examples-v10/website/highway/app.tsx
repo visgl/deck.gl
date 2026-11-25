@@ -6,13 +6,13 @@ import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map as MapLibre} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
-import {LoadingWidget} from '@deck.gl/widgets';
+import {LoadingWidget, _LegendWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 import type {Device} from '@luma.gl/core';
 import {isArrowTable} from '@math.gl/core/arrow';
 import {GeoArrowLayer} from '@deck.gl/proposals/layers';
 import {tableFromArrays, tableFromJSON, type Table} from 'apache-arrow';
-import {queryArrowSQL} from '@math.gl/sql/query';
+import {queryArrowSQL, queryArrowSQLWithMetadata} from '@math.gl/sql/query';
 import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 import {GeoParquetLoader} from '@loaders.gl/tables/parquet';
 import {CSVLoader} from '@loaders.gl/tables/csv';
@@ -28,8 +28,8 @@ const DATA_URL = {
     'https://media.githubusercontent.com/media/visgl/deck.gl-data/886cf5ab469bba3816aa5a32d4454835e0ce5951/examples/highway/roads.parquet'
 };
 
-export const COLOR_BREAKS = [0, 4, 8, 12, 20, 32, 52, 84, 136];
-export const COLOR_PALETTE = [
+const COLOR_BREAKS = [0, 4, 8, 12, 20, 32, 52, 84, 136];
+const COLOR_PALETTE = [
   '#1a9850',
   '#66bd63',
   '#a6d96a',
@@ -125,7 +125,8 @@ export default function App({
   /** Reports the loaded road feature count to the website controls. */
   onDataLoad?: (stats: {count: number}) => void;
 }) {
-  const widgets = useMemo(() => [new LoadingWidget()], []);
+  const legend = useMemo(() => new _LegendWidget({scales: {}, precision: 3}), []);
+  const widgets = useMemo(() => [new LoadingWidget(), legend], [legend]);
   const [hoverInfo, setHoverInfo] = useState<PickingInfo<Road>>();
   const roadTable = useMemo(async () => {
     const table = typeof roads === 'string' ? await load(roads, GeoParquetLoader) : roads;
@@ -145,19 +146,19 @@ export default function App({
     }
     return table;
   }, [accidents]);
-  const data = useMemo(async () => {
+  const result = useMemo(async () => {
     const [sources, records] = await Promise.all([roadTable, accidentTable]);
     if (!records.numRows || !Number.isFinite(year)) {
-      return sources.assign(fallbackStyle(sources.numRows));
+      return {table: sources.assign(fallbackStyle(sources.numRows)), columnMetadata: {color: []}};
     }
     const events = queryArrowSQL(
       `SELECT ${ROAD_KEY} AS road_key, incidents, fatalities FROM accidents WHERE year = ${year}`,
       new Map([['accidents', records]])
     );
     if (!events.numRows) {
-      return sources.assign(fallbackStyle(sources.numRows));
+      return {table: sources.assign(fallbackStyle(sources.numRows)), columnMetadata: {color: []}};
     }
-    return queryArrowSQL(
+    return queryArrowSQLWithMetadata(
       `\
           SELECT r.geometry, r.name, r.state, r.type, r.id,
             COALESCE(a.incidents, 0) AS incidents,
@@ -178,12 +179,20 @@ export default function App({
     );
   }, [roadTable, accidentTable, year]);
 
+  const data = useMemo(() => result.then(output => output.table), [result]);
+
   const layers = [
     new GeoArrowLayer({
       id: 'roads',
       data,
       onDataLoad: table => {
         if (isArrowTable(table)) {
+          void result.then(output => {
+            if (table === output.table) {
+              const color = output.columnMetadata.color?.[0];
+              legend.setProps({scales: color ? {'Fatalities per 1,000 miles': color.scale} : {}});
+            }
+          });
           onDataLoad?.({count: table.numRows});
         }
       },
