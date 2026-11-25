@@ -9,7 +9,7 @@ import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/geospatial/
 import Viewport, {type DistanceScales, type ProjectPositionOptions} from './viewport';
 import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import {mod} from '../utils/math-utils';
-import {GLOBE_CRS, GLOBE_EARTH_RADIUS as EARTH_RADIUS, zoomAdjust} from './globe-util';
+import {GLOBE_EARTH_RADIUS, getGlobeCRS, zoomAdjust} from './globe-util';
 
 export {zoomAdjust} from './globe-util';
 
@@ -41,8 +41,8 @@ function getEastNorthUpMatrix(longitude: number, latitude: number): Matrix4 {
   return new Matrix4([...east, 0, ...north, 0, ...up, 0, 0, 0, 0, 1]);
 }
 
-function getDistanceScales(): Partial<DistanceScales> {
-  const unitsPerMeter = GLOBE_RADIUS / EARTH_RADIUS;
+function getDistanceScales(radius: number): Partial<DistanceScales> {
+  const unitsPerMeter = GLOBE_RADIUS / radius;
   const unitsPerDegree = (Math.PI / 180) * GLOBE_RADIUS;
 
   return {
@@ -90,6 +90,16 @@ export type GlobeViewportOptions = {
   farZ?: number;
   /** Subdivision intervals around the earth. Default 0 disables subdivision. */
   resolution?: number;
+  /**
+   * Experimental. Project positions relative to the camera target in the shaders, with a float64
+   * origin, so that the globe keeps its precision at high zoom. Default `false`.
+   */
+  _cameraRelative?: boolean;
+  /**
+   * Experimental. Radius of the sphere in meters. Sets the size of altitudes and of sizes in
+   * meters relative to the sphere. Default `6370972`.
+   */
+  _radius?: number;
 };
 
 export default class GlobeViewport extends Viewport {
@@ -100,6 +110,14 @@ export default class GlobeViewport extends Viewport {
   bearing: number;
   pitch: number;
   fovy: number;
+  /** Positions are camera-relative in the shaders. See `GlobeViewportOptions._cameraRelative`. */
+  cameraRelative: boolean;
+
+  /** Radius of the sphere in meters. See `GlobeViewportOptions._radius`. */
+  get radius(): number {
+    // The CRS holds the radius: it is set before the Viewport constructor projects the center
+    return this.crs!.ellipsoid.semiMajorAxis;
+  }
 
   constructor(opts: GlobeViewportOptions = {}) {
     const {
@@ -110,8 +128,10 @@ export default class GlobeViewport extends Viewport {
       // Matches Maplibre defaults
       // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L632-L633
       nearZMultiplier = 0.5,
-      farZMultiplier = 1
+      farZMultiplier = 1,
+      _radius: radius = GLOBE_EARTH_RADIUS
     } = opts;
+    const crs = getGlobeCRS(radius);
 
     let {latitude = 0, height, altitude = 1.5, fovy} = opts;
 
@@ -158,7 +178,7 @@ export default class GlobeViewport extends Viewport {
 
     const viewportOptions = {
       ...opts,
-      crs: GLOBE_CRS,
+      crs,
       // x, y, width,
       height,
 
@@ -172,7 +192,7 @@ export default class GlobeViewport extends Viewport {
       modelMatrix: opts.position ? getEastNorthUpMatrix(longitude, latitude) : null,
 
       // projection matrix parameters
-      distanceScales: getDistanceScales(),
+      distanceScales: getDistanceScales(radius),
       fovy,
       focalDistance: altitude,
       near: nearZ,
@@ -186,6 +206,7 @@ export default class GlobeViewport extends Viewport {
     this.bearing = bearing;
     this.pitch = pitch;
     this.fovy = fovy;
+    this.cameraRelative = Boolean(opts._cameraRelative);
   }
 
   protected _getCenter(options: GlobeViewportOptions, position: number[]): number[] {
@@ -254,7 +275,7 @@ export default class GlobeViewport extends Viewport {
       1
     ]);
 
-    const radius = ((targetZ || 0) / EARTH_RADIUS + 1) * GLOBE_RADIUS;
+    const radius = ((targetZ || 0) / this.radius + 1) * GLOBE_RADIUS;
     const rayLengthSquared = vec3.sqrLen(vec3.sub([], rayStartPosition, rayEndPosition));
     const rayStartDistanceSquared = vec3.sqrLen(rayStartPosition);
     const rayEndDistanceSquared = vec3.sqrLen(rayEndPosition);
@@ -355,7 +376,7 @@ export default class GlobeViewport extends Viewport {
     const lambda = lng * DEGREES_TO_RADIANS;
     const phi = lat * DEGREES_TO_RADIANS;
     const cosPhi = Math.cos(phi);
-    const D = (Z / EARTH_RADIUS + 1) * GLOBE_RADIUS;
+    const D = (Z / this.radius + 1) * GLOBE_RADIUS;
 
     return [Math.sin(lambda) * cosPhi * D, -Math.cos(lambda) * cosPhi * D, Math.sin(phi) * D];
   }
@@ -368,7 +389,7 @@ export default class GlobeViewport extends Viewport {
 
     const lng = lambda * RADIANS_TO_DEGREES;
     const lat = phi * RADIANS_TO_DEGREES;
-    const Z = (D / GLOBE_RADIUS - 1) * EARTH_RADIUS;
+    const Z = (D / GLOBE_RADIUS - 1) * this.radius;
     return [lng, lat, Z];
   }
 

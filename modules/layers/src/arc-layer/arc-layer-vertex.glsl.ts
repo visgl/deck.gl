@@ -99,7 +99,7 @@ vec3 interpolateGreatCircle(vec3 source, vec3 target, vec3 source3D, vec3 target
     lngLat = degrees(vec2(atan(p.y, -p.x), atan(p.z, length(p.xy))));
   }
 
-  float z = paraboloid(angularDist * EARTH_RADIUS, source.z, target.z, t);
+  float z = paraboloid(angularDist * project.globeRadiusMeters, source.z, target.z, t);
 
   return vec3(lngLat, z);
 }

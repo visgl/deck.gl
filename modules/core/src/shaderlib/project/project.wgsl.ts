@@ -24,8 +24,17 @@ const TILE_SIZE: f32 = 512.0;
 const PI: f32 = 3.1415926536;
 const WORLD_SCALE: f32 = TILE_SIZE / (PI * 2.0);
 const ZERO_64_LOW: vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
-const EARTH_RADIUS: f32 = 6370972.0; // meters
+// The Earth's radius in meters. Globe code uses project.globeRadiusMeters, the radius of the view.
+const EARTH_RADIUS: f32 = 6370972.0;
 const GLOBE_RADIUS: f32 = 256.0;
+
+// Absolute globe position of a common position; see project.glsl.ts
+fn project_globe_absolute_(commonPosition: vec3<f32>) -> vec3<f32> {
+  if (project.globeRelative != 0) {
+    return commonPosition + project.commonOrigin;
+  }
+  return commonPosition;
+}
 
 // -----------------------------------------------------------------------------
 // Uniform block (converted from GLSL uniform block)
@@ -50,6 +59,11 @@ struct ProjectUniforms {
   pseudoMeters: i32,
   sizeScaleSize: i32,
   sizeScaleTransform: vec4<f32>,
+  globeRelative: i32,
+  globeOriginTrig: vec4<f32>,
+  globeLayerOffset: vec3<f32>,
+  globeLongitudeWrap: vec2<f32>,
+  globeRadiusMeters: f32,
 };
 
 @group(0) @binding(auto)
@@ -192,7 +206,7 @@ struct RotationResult {
 
 fn project_needs_rotation(commonPosition: vec3<f32>) -> RotationResult {
   if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
-    return RotationResult(true, project_get_orientation_matrix(commonPosition));
+    return RotationResult(true, project_get_orientation_matrix(project_globe_absolute_(commonPosition)));
   } else {
     return RotationResult(false, mat3x3<f32>());  // identity alternative if needed
   };
@@ -236,12 +250,66 @@ fn project_globe_(lnglatz: vec3<f32>) -> vec3<f32> {
   // Preserve longitude at the poles despite GPU cosine rounding to zero or negative.
   var cosPhi = cos(phi);
   if (abs(lnglatz.y) == 90.0) { cosPhi = max(abs(cosPhi), 1e-7); }
-  let D = (lnglatz.z / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
+  let D = (lnglatz.z / project.globeRadiusMeters + 1.0) * GLOBE_RADIUS;
   return vec3<f32>(
     sin(lambda) * cosPhi,
     -cos(lambda) * cosPhi,
     sin(phi)
   ) * D;
+}
+
+// sin and cos of a small angle; see project.glsl.ts
+fn project_sin_cos_small_(x: f32) -> vec2<f32> {
+  if (abs(x) > 0.1) {
+    return vec2<f32>(sin(x), cos(x));
+  }
+  let x2 = x * x;
+  return vec2<f32>(
+    x * (1.0 - x2 / 6.0 * (1.0 - x2 / 20.0 * (1.0 - x2 / 42.0))),
+    1.0 - x2 / 2.0 * (1.0 - x2 / 12.0 * (1.0 - x2 / 30.0))
+  );
+}
+
+// Camera-relative globe position relative to project.commonOrigin; see project.glsl.ts
+fn project_globe_relative_(lnglatz: vec3<f32>, lnglatz64Low: vec3<f32>) -> vec3<f32> {
+  var dLng = lnglatz.x - project.coordinateOrigin.x;
+  // Across the antimeridian, one subtraction from the origin minus or plus 360; see project.glsl.ts
+  if (dLng > 180.0) {
+    dLng = lnglatz.x - project.globeLongitudeWrap.y;
+  } else if (dLng < -180.0) {
+    dLng = lnglatz.x - project.globeLongitudeWrap.x;
+  }
+  let dLat = lnglatz.y - project.coordinateOrigin.y;
+  let hLambda = radians(dLng) * 0.5;
+  let hPhi = radians(dLat) * 0.5;
+  let scLambda = project_sin_cos_small_(hLambda);
+  let scPhi = project_sin_cos_small_(hPhi);
+  let sinHL = scLambda.x;
+  let cosHL = scLambda.y;
+  let sinHP = scPhi.x;
+  let cosHP = scPhi.y;
+  let sinLambda0 = project.globeOriginTrig.x;
+  let cosLambda0 = project.globeOriginTrig.y;
+  let sinPhi0 = project.globeOriginTrig.z;
+  let cosPhi0 = project.globeOriginTrig.w;
+
+  let dSinLambda = 2.0 * sinHL * (cosLambda0 * cosHL - sinLambda0 * sinHL);
+  let dCosLambda = -2.0 * sinHL * (sinLambda0 * cosHL + cosLambda0 * sinHL);
+  let dSinPhi = 2.0 * sinHP * (cosPhi0 * cosHP - sinPhi0 * sinHP);
+  let dCosPhi = -2.0 * sinHP * (sinPhi0 * cosHP + cosPhi0 * sinHP);
+
+  var dUnit = vec3<f32>(
+    (sinLambda0 + dSinLambda) * dCosPhi + cosPhi0 * dSinLambda,
+    -((cosLambda0 + dCosLambda) * dCosPhi + cosPhi0 * dCosLambda),
+    dSinPhi
+  );
+  // The low part enters after the trigonometry; see project.glsl.ts
+  dUnit += vec3<f32>(cosLambda0 * cosPhi0, sinLambda0 * cosPhi0, 0.0) * radians(lnglatz64Low.x) +
+    vec3<f32>(-sinLambda0 * sinPhi0, cosLambda0 * sinPhi0, cosPhi0) * radians(lnglatz64Low.y);
+  let unit0 = vec3<f32>(sinLambda0 * cosPhi0, -cosLambda0 * cosPhi0, sinPhi0);
+  let altitude = lnglatz.z + lnglatz64Low.z;
+  let D = (altitude / project.globeRadiusMeters + 1.0) * GLOBE_RADIUS;
+  return dUnit * D + unit0 * (altitude / project.globeRadiusMeters * GLOBE_RADIUS);
 }
 
 // Mercator y of project_mercator_'s latitude clamp: log(tan(PI / 4 + radians(89.9) / 2))
@@ -261,7 +329,7 @@ fn project_globe_to_mercator_(spherePos: vec3<f32>) -> vec2<f32> {
 // WGSL has no function overloading: pass position.xyz for a vec4. See project.glsl.ts.
 fn project_common_position_to_flat(commonPosition: vec3<f32>) -> vec2<f32> {
   if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
-    return project_globe_to_mercator_(commonPosition);
+    return project_globe_to_mercator_(project_globe_absolute_(commonPosition));
   }
   return commonPosition.xy;
 }
@@ -312,21 +380,30 @@ fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> v
     if (project.coordinateFrame == COORDINATE_SYSTEM_GEOCENTRIC) {
       // Globe-centered Cartesian XYZ are meters, not longitude/latitude.
       let position_low = project.modelMatrix * vec4<f32>(position64Low, 0.0);
-      return vec4<f32>(
-        position_world.xyz * project.commonUnitsPerMeter + position_low.xyz * project.commonUnitsPerMeter,
-        position_world.w
-      );
+      var position_common = position_world.xyz * project.commonUnitsPerMeter + position_low.xyz * project.commonUnitsPerMeter;
+      if (project.globeRelative != 0) {
+        position_common -= project.commonOrigin;
+      }
+      return vec4<f32>(position_common, position_world.w);
     }
     if (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC) {
+      if (project.globeRelative != 0) {
+        let position_low = project.modelMatrix * vec4<f32>(position64Low, 0.0);
+        return vec4<f32>(project_globe_relative_(position_world.xyz, position_low.xyz), position_world.w);
+      }
       return vec4<f32>(
         project_globe_(position_world.xyz),
         position_world.w
       );
     }
     if (project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS) {
-      let enuMatrix = project_get_orientation_matrix(project.commonOrigin);
+      var layerOrigin = project.commonOrigin;
+      if (project.globeRelative != 0) {
+        layerOrigin = project.globeLayerOffset;
+      }
+      let enuMatrix = project_get_orientation_matrix(project_globe_absolute_(layerOrigin));
       let offsetCommon = (enuMatrix * position_world.xyz) * project.commonUnitsPerMeter;
-      return vec4<f32>(project.commonOrigin + offsetCommon, position_world.w);
+      return vec4<f32>(layerOrigin + offsetCommon, position_world.w);
     }
   }
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
@@ -419,8 +496,8 @@ fn project_globe_is_occluded(commonPosition: vec3<f32>) -> bool {
   if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     return false;
   }
-  let eye = project.cameraPosition;
-  let ray = commonPosition - eye;
+  let eye = project_globe_absolute_(project.cameraPosition);
+  let ray = project_globe_absolute_(commonPosition) - eye;
   let rayLength2 = dot(ray, ray);
   if (rayLength2 == 0.0) {
     return false;
@@ -454,8 +531,8 @@ fn project_globe_billboard_clipspace(clipPosition: vec4<f32>, commonPosition: ve
   if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     return clipPosition;
   }
-  let eye = project.cameraPosition;
-  let ray = commonPosition - eye;
+  let eye = project_globe_absolute_(project.cameraPosition);
+  let ray = project_globe_absolute_(commonPosition) - eye;
   let anchorDistance = length(ray);
   if (anchorDistance == 0.0) {
     return clipPosition;

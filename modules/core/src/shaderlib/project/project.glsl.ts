@@ -40,6 +40,11 @@ layout(std140) uniform projectUniforms {
   bool pseudoMeters;
   int sizeScaleSize;
   vec4 sizeScaleTransform;
+  int globeRelative;
+  vec4 globeOriginTrig;
+  vec3 globeLayerOffset;
+  vec2 globeLongitudeWrap;
+  float globeRadiusMeters;
 } project;
 
 
@@ -47,8 +52,16 @@ const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
 const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
 const vec3 ZERO_64_LOW = vec3(0.0);
-const float EARTH_RADIUS = 6370972.0; // meters
+// The Earth's radius in meters. Globe code uses project.globeRadiusMeters, the radius of the view.
+const float EARTH_RADIUS = 6370972.0;
 const float GLOBE_RADIUS = 256.0;
+
+// Absolute globe position of a common position. Under a camera-relative globe, common positions
+// are relative to project.commonOrigin; this adds it back, in float32. Use it only for directions,
+// occlusion and texture lookups, never for the projected position.
+vec3 project_globe_absolute_(vec3 commonPosition) {
+  return project.globeRelative != 0 ? commonPosition + project.commonOrigin : commonPosition;
+}
 
 // returns an adjustment factor for uCommonUnitsPerMeter
 float project_size_at_latitude(float lat) {
@@ -165,7 +178,7 @@ mat3 project_get_orientation_matrix(vec3 up) {
 
 bool project_needs_rotation(vec3 commonPosition, out mat3 transform) {
   if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
-    transform = project_get_orientation_matrix(commonPosition);
+    transform = project_get_orientation_matrix(project_globe_absolute_(commonPosition));
     return true;
   }
   return false;
@@ -213,13 +226,76 @@ vec3 project_globe_(vec3 lnglatz) {
   float cosPhi = cos(phi);
   // Preserve longitude at the poles despite GPU cosine rounding to zero or negative.
   if (abs(lnglatz.y) == 90.0) cosPhi = max(abs(cosPhi), 1e-7);
-  float D = (lnglatz.z / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
+  float D = (lnglatz.z / project.globeRadiusMeters + 1.0) * GLOBE_RADIUS;
 
   return vec3(
     sin(lambda) * cosPhi,
     -cos(lambda) * cosPhi,
     sin(phi)
   ) * D;
+}
+
+// sin and cos of a small angle. GPU sin and cos have an absolute error bound near zero, which is
+// a large relative error for the small angle differences of a camera-relative globe.
+vec2 project_sin_cos_small_(float x) {
+  if (abs(x) > 0.1) {
+    return vec2(sin(x), cos(x));
+  }
+  float x2 = x * x;
+  return vec2(
+    x * (1.0 - x2 / 6.0 * (1.0 - x2 / 20.0 * (1.0 - x2 / 42.0))),
+    1.0 - x2 / 2.0 * (1.0 - x2 / 12.0 * (1.0 - x2 / 30.0))
+  );
+}
+
+// Camera-relative globe: position on the globe relative to project.commonOrigin, the projection of
+// project.coordinateOrigin. The high part minus the origin is exact near the origin. The
+// difference identities, for example sin(a) - sin(a0) = 2 sin(h) cos(a0 + h) with h = (a - a0) / 2,
+// multiply float32 trigonometry errors by small deltas only. The angle sums use the float64 origin
+// trigonometry. The low part enters after the trigonometry, through the derivative at the origin:
+// a GPU compiler may reassociate (high - origin) + low and lose the low part.
+// Across the antimeridian, the longitude is one subtraction from the origin minus or plus 360,
+// which is exact near the seam. Subtracting and then adding 360 rounds twice and loses a float32
+// step; so does any sum of three terms that the compiler is free to reassociate.
+vec3 project_globe_relative_(vec3 lnglatz, vec3 lnglatz64Low) {
+  float dLng = lnglatz.x - project.coordinateOrigin.x;
+  if (dLng > 180.0) {
+    dLng = lnglatz.x - project.globeLongitudeWrap.y;
+  } else if (dLng < -180.0) {
+    dLng = lnglatz.x - project.globeLongitudeWrap.x;
+  }
+  float dLat = lnglatz.y - project.coordinateOrigin.y;
+  float hLambda = radians(dLng) * 0.5;
+  float hPhi = radians(dLat) * 0.5;
+  vec2 scLambda = project_sin_cos_small_(hLambda);
+  vec2 scPhi = project_sin_cos_small_(hPhi);
+  float sinHL = scLambda.x;
+  float cosHL = scLambda.y;
+  float sinHP = scPhi.x;
+  float cosHP = scPhi.y;
+  float sinLambda0 = project.globeOriginTrig.x;
+  float cosLambda0 = project.globeOriginTrig.y;
+  float sinPhi0 = project.globeOriginTrig.z;
+  float cosPhi0 = project.globeOriginTrig.w;
+
+  float dSinLambda = 2.0 * sinHL * (cosLambda0 * cosHL - sinLambda0 * sinHL);
+  float dCosLambda = -2.0 * sinHL * (sinLambda0 * cosHL + cosLambda0 * sinHL);
+  float dSinPhi = 2.0 * sinHP * (cosPhi0 * cosHP - sinPhi0 * sinHP);
+  float dCosPhi = -2.0 * sinHP * (sinPhi0 * cosHP + cosPhi0 * sinHP);
+
+  // Unit sphere position minus the unit sphere position of the origin
+  vec3 dUnit = vec3(
+    (sinLambda0 + dSinLambda) * dCosPhi + cosPhi0 * dSinLambda,
+    -((cosLambda0 + dCosLambda) * dCosPhi + cosPhi0 * dCosLambda),
+    dSinPhi
+  );
+  dUnit += vec3(cosLambda0 * cosPhi0, sinLambda0 * cosPhi0, 0.0) * radians(lnglatz64Low.x) +
+    vec3(-sinLambda0 * sinPhi0, cosLambda0 * sinPhi0, cosPhi0) * radians(lnglatz64Low.y);
+  vec3 unit0 = vec3(sinLambda0 * cosPhi0, -cosLambda0 * cosPhi0, sinPhi0);
+  float altitude = lnglatz.z + lnglatz64Low.z;
+  float D = (altitude / project.globeRadiusMeters + 1.0) * GLOBE_RADIUS;
+  // The origin is at altitude 0: D - D0 = altitude / globeRadiusMeters * GLOBE_RADIUS
+  return dUnit * D + unit0 * (altitude / project.globeRadiusMeters * GLOBE_RADIUS);
 }
 
 // Mercator y of project_mercator_'s latitude clamp: log(tan(PI / 4 + radians(89.9) / 2))
@@ -240,7 +316,7 @@ vec2 project_globe_to_mercator_(vec3 spherePos) {
 // project.commonOrigin to a GLOBE result. Adding a non-flat projection mode: invert it here.
 vec2 project_common_position_to_flat(vec3 commonPosition) {
   if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
-    return project_globe_to_mercator_(commonPosition);
+    return project_globe_to_mercator_(project_globe_absolute_(commonPosition));
   }
   return commonPosition.xy;
 }
@@ -304,21 +380,28 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     if (project.coordinateFrame == COORDINATE_SYSTEM_GEOCENTRIC) {
       // Globe-centered Cartesian XYZ are meters, not longitude/latitude.
       vec4 position_low = project.modelMatrix * vec4(position64Low, 0.0);
-      return vec4(
-        position_world.xyz * project.commonUnitsPerMeter + position_low.xyz * project.commonUnitsPerMeter,
-        position_world.w
-      );
+      vec3 position_common = position_world.xyz * project.commonUnitsPerMeter + position_low.xyz * project.commonUnitsPerMeter;
+      if (project.globeRelative != 0) {
+        // Not camera-relative in float32 yet: the subtraction is in absolute common units
+        position_common -= project.commonOrigin;
+      }
+      return vec4(position_common, position_world.w);
     }
     if (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC) {
+      if (project.globeRelative != 0) {
+        vec4 position_low = project.modelMatrix * vec4(position64Low, 0.0);
+        return vec4(project_globe_relative_(position_world.xyz, position_low.xyz), position_world.w);
+      }
       return vec4(
         project_globe_(position_world.xyz),
         position_world.w
       );
     }
     if (project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS) {
-      mat3 enuMatrix = project_get_orientation_matrix(project.commonOrigin);
+      vec3 layerOrigin = project.globeRelative != 0 ? project.globeLayerOffset : project.commonOrigin;
+      mat3 enuMatrix = project_get_orientation_matrix(project_globe_absolute_(layerOrigin));
       vec3 offsetCommon = (enuMatrix * position_world.xyz) * project.commonUnitsPerMeter;
-      return vec4(project.commonOrigin + offsetCommon, position_world.w);
+      return vec4(layerOrigin + offsetCommon, position_world.w);
     }
   }
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
@@ -410,8 +493,9 @@ bool project_globe_is_occluded(vec3 commonPosition) {
   if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     return false;
   }
-  vec3 eye = project.cameraPosition;
-  vec3 ray = commonPosition - eye;
+  // The globe centre is at the absolute origin
+  vec3 eye = project_globe_absolute_(project.cameraPosition);
+  vec3 ray = project_globe_absolute_(commonPosition) - eye;
   float rayLength2 = dot(ray, ray);
   if (rayLength2 == 0.0) {
     return false;
@@ -449,8 +533,10 @@ vec4 project_globe_billboard_clipspace(vec4 clipPosition, vec3 commonPosition) {
   if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     return clipPosition;
   }
-  vec3 eye = project.cameraPosition;
-  vec3 ray = commonPosition - eye;
+  // The globe centre is at the absolute origin. The final shift is a translation, so it applies
+  // to the input position in its own (possibly camera-relative) frame.
+  vec3 eye = project_globe_absolute_(project.cameraPosition);
+  vec3 ray = project_globe_absolute_(commonPosition) - eye;
   float anchorDistance = length(ray);
   if (anchorDistance == 0.0) {
     return clipPosition;
