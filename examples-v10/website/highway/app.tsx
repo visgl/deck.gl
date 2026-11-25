@@ -12,14 +12,13 @@ import type {Device} from '@luma.gl/core';
 import {isArrowTable} from '@math.gl/core/arrow';
 import {GeoArrowLayer} from '@deck.gl/proposals/layers';
 import {tableFromArrays, tableFromJSON, type Table} from 'apache-arrow';
-import {scaleThreshold} from 'd3-scale';
 import {queryArrowSQL} from '@math.gl/sql/query';
 import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 import {GeoParquetLoader} from '@loaders.gl/tables/parquet';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {load} from '@loaders.gl/core';
 
-import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
+import type {PickingInfo, MapViewState} from '@deck.gl/core';
 
 // Full website geometry in GeoParquet; properties retain their original names.
 const DATA_URL = {
@@ -29,26 +28,19 @@ const DATA_URL = {
     'https://media.githubusercontent.com/media/visgl/deck.gl-data/886cf5ab469bba3816aa5a32d4454835e0ce5951/examples/highway/roads.parquet'
 };
 
-export const COLOR_SCALE = scaleThreshold<number, Color>()
-  .domain([0, 4, 8, 12, 20, 32, 52, 84, 136, 220])
-  .range([
-    [26, 152, 80],
-    [102, 189, 99],
-    [166, 217, 106],
-    [217, 239, 139],
-    [255, 255, 191],
-    [254, 224, 139],
-    [253, 174, 97],
-    [244, 109, 67],
-    [215, 48, 39],
-    [168, 0, 0]
-  ]);
-
-// D3 uses only as many thresholds as there are gaps between colors.
-const COLOR_BREAKS = COLOR_SCALE.domain().slice(0, COLOR_SCALE.range().length - 1);
-const COLOR_PALETTE = COLOR_SCALE.range()
-  .map(color => `'#${color.map(channel => channel.toString(16).padStart(2, '0')).join('')}'`)
-  .join(', ');
+export const COLOR_BREAKS = [0, 4, 8, 12, 20, 32, 52, 84, 136];
+export const COLOR_PALETTE = [
+  '#1a9850',
+  '#66bd63',
+  '#a6d96a',
+  '#d9ef8b',
+  '#ffffbf',
+  '#fee08b',
+  '#fdae61',
+  '#f46d43',
+  '#d73027',
+  '#a80000'
+];
 
 function fallbackStyle(count: number) {
   return tableFromArrays({
@@ -176,7 +168,7 @@ export default function App({
               ELSE 10 + 9950 * a.incidents / r.length
             END AS width,
             SCALE_THRESHOLD(COALESCE(a.fatalities, 0) * 1000 / r.length,
-              ARRAY[${COLOR_BREAKS}], PALETTE(${COLOR_PALETTE})) AS color
+              ARRAY[${COLOR_BREAKS}], PALETTE(${COLOR_PALETTE.map(color => `'${color}'`).join(', ')})) AS color
           FROM roads r LEFT JOIN events a ON r.road_key = a.road_key`,
       new Map([
         ['roads', sources],

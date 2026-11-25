@@ -5,7 +5,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../utils/format-utils';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
-import App, {COLOR_SCALE} from 'v10-website-examples/highway/app';
+import App, {COLOR_BREAKS, COLOR_PALETTE} from 'v10-website-examples/highway/app';
 
 import {makeExample} from '../components';
 
@@ -30,10 +30,9 @@ class HighwayDemo extends Component {
 
   /** Renders the description, legend, and data summary. */
   static renderInfo(meta) {
-    /** Provides legends for the example. */
-    const legends = COLOR_SCALE.domain();
+    const colors = COLOR_PALETTE.slice(1);
     /** Provides width for the example. */
-    const width = `${100 / legends.length}%`;
+    const width = `${100 / colors.length}%`;
 
     return (
       <div>
@@ -44,16 +43,16 @@ class HighwayDemo extends Component {
         </p>
         <p>Fatalities per 1,000 miles:</p>
         <div className="layout">
-          {legends.map((l, i) => (
+          {colors.map((color, i) => (
             <div
               key={i}
               className="legend"
-              style={{background: `rgb(${COLOR_SCALE(l).join(',')})`, width}}
+              style={{background: color, width}}
             />
           ))}
         </div>
         <p className="layout">
-          {legends.slice(0, -1).map((l, i) => (
+          {COLOR_BREAKS.map((l, i) => (
             <span key={i} style={{width}}>
               {l}
             </span>
