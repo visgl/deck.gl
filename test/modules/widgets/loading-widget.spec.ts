@@ -29,15 +29,14 @@ test('LoadingWidget', async () => {
 
   await testInstance.idle();
   // Spinner is shown
-  let spinner = testInstance.findElements('.deck-widget-spinner')[0];
+  const spinner = testInstance.findElements('.deck-widget-spinner')[0];
   expect(spinner).toBeTruthy();
+  expect(testInstance.findElements('[role="status"]')[0]?.textContent).toBe('Loading layer data');
+  expect(testInstance.findElements('.deck-widget-loading button')).toHaveLength(0);
 
   resolveDataLoader([]);
-  await vi.waitUntil(() => layer.isLoaded);
-  await testInstance.idle();
-  // Spinner is hidden
-  spinner = testInstance.findElements('.deck-widget-spinner')[0];
-  expect(spinner).toBeFalsy();
+  await vi.waitUntil(() => testInstance?.findElements('[role="status"]').length === 0);
+  expect(layer.isLoaded).toBe(true);
 });
 
 test('LoadingWidget - onRedraw calls onLoadingChange when loading state changes', () => {

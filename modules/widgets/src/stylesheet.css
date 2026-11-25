@@ -203,18 +203,38 @@
 }
 
 /* Loading styles */
-@keyframes spin {
+.deck-widget-loading-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--button-corner-radius, 8px);
+  background: var(--menu-background, #fff);
+  box-shadow: var(--button-shadow, 0 0 8px rgba(0, 0, 0, 0.25));
+  color: var(--menu-text, rgb(24, 24, 26));
+  font: 500 12px/1.4 system-ui, sans-serif;
+}
+
+.deck-widget-loading-status .deck-widget-spinner {
+  flex: 0 0 14px;
+  height: 14px;
+  background: var(--button-icon-idle, #616166);
+  mask-image: var(--loading-icon, svg-load("icons/loading.svg"));
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+@keyframes deck-widget-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-.deck-widget.deck-widget-loading button.deck-widget-spinner .deck-widget-icon {
-  animation: spin 1s linear infinite;
-}
-
-.deck-widget.deck-widget-loading button.deck-widget-spinner .deck-widget-icon {
-  mask-image: var(--loading-icon, svg-load("icons/loading.svg"));
+@media (prefers-reduced-motion: no-preference) {
+  .deck-widget-loading-status .deck-widget-spinner {
+    animation: deck-widget-spin 1s linear infinite;
+  }
 }
 
 /* Scale styles */
