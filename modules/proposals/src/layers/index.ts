@@ -19,29 +19,7 @@ export {
   type GPUBitmapLayerProps
 } from './gpu-bitmap-layer';
 export type {GPUVectorLayerPickingInfo} from './gpu-vector-layer-utils';
-export {FlowParticleLayer, type FlowParticleLayerProps} from './flow-particle-layer';
-export {surfaceBuffer} from './surface-buffer';
 export {getMeterOffsetPosition} from './projection/meter-offset-position';
-export {WaterSurfaceLayer, type WaterSurfaceLayerProps} from './water-surface-layer';
-export {SketchEdgeLayer, type SketchEdgeLayerProps} from './sketch-edge-layer';
-export {
-  WeatherParticleLayer,
-  type WeatherParticleLayerProps
-} from './weather-particle-layer';
-export {GlowPointLayer, type GlowPointLayerProps} from './glow-point-layer';
-export {SunLayer, type SunLayerProps} from './sun-layer';
-export {MoonLayer, type MoonLayerProps} from './moon-layer';
-export {CloudLayer, type CloudLayerProps} from './cloud-layer';
-export {AtmosphereLayer, type AtmosphereLayerProps} from './atmosphere-layer';
-export {motionBuffer} from './motion-buffer';
-export {FireflyLayer} from './firefly-layer';
-export {
-  GlobeCloudLayer,
-  getGlobeCloudViewUniforms,
-  type GlobeCloudLayerProps
-} from './globe-cloud-layer';
-export {SkyLayer, type SkyLayerProps} from './sky-layer';
-export {StarfieldLayer, type StarfieldLayerProps} from './starfield-layer';
 export {OrthographicView, type PickingInfo} from '@deck.gl/core';
 export {
   ArrowScatterplotLayer,

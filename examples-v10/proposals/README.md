@@ -30,43 +30,36 @@ requirements in `mobile-support.ts`; `gpu-graph-explorer` requires WebGPU.
 Private examples and tests remain opt-in.
 Visual smoke scripts beside the examples use Playwright and can be run with Node.
 The website embeds these examples under **Arrow Layers - deck.gl v10**,
-**Visual Effects - deck.gl v10**, and **GPU Graph Layers - deck.gl v10**.
+and **GPU Graph Layers - deck.gl v10**.
 `yarn test-website` builds their assets using the installed luma.gl packages. `yarn --cwd website start` also builds the
 embedded demos before starting the website. Their controls and device selectors
 remain available inside each example page.
 
 ## Examples
 
-- [ambient-occlusion](./ambient-occlusion/)
 - [arrow-path-layer](./arrow-path-layer/)
 - [arrow-polygon-layer](./arrow-polygon-layer/)
 - [arrow-text-layer](./arrow-text-layer/)
-- [city-scene](./city-scene/)
-- [depth-of-field](./depth-of-field/)
-- [fireflies](./fireflies/)
-- [flow-particles](./flow-particles/)
-- [global-illumination](./global-illumination/)
-- [globe-clouds](./globe-clouds/)
 - [gpu-culled-trace](./gpu-culled-trace/)
 - [gpu-graph-explorer](./gpu-graph-explorer/)
-- [hdr-night-lighting](./hdr-night-lighting/)
-- [light-shafts](./light-shafts/)
 - [luspatial-taxi](./luspatial-taxi/)
-- [pattern-fills](./pattern-fills/)
-- [point-glow](./point-glow/)
-- [scene-buffers](./scene-buffers/)
 - [shared-tile-2d-layer](./shared-tile-2d-layer/)
-- [sketch-edges](./sketch-edges/)
-- [soft-shadows](./soft-shadows/)
-- [styled-paths](./styled-paths/)
-- [weather](./weather/)
 
-## Current validation limits
+## Visual effects in deck.gl-community
 
-All 22 examples build and pass the shared TypeScript check. The opt-in browser
-suite currently has five failures: two scene-capture cases, firefly picking,
-meter-offset projection, and the restored graph rendering pipeline timeout.
-The styled-paths and city-scene visual smoke scripts also fail their WebGPU
-route-picking and roof-picking assertions, respectively.
-These tests remain enabled in the opt-in private suite; public test jobs exclude
-them. The website build bundles the demos using the published luma.gl packages.
+- [weather](https://visgl.github.io/deck.gl-community/examples/layers/weather)
+- [soft-shadows](https://visgl.github.io/deck.gl-community/examples/layers/soft-shadows)
+- [city-scene](https://visgl.github.io/deck.gl-community/examples/layers/city-scene)
+- [flow-particles](https://visgl.github.io/deck.gl-community/examples/layers/flow-particles)
+- [point-glow](https://visgl.github.io/deck.gl-community/examples/layers/point-glow)
+- [fireflies](https://visgl.github.io/deck.gl-community/examples/layers/fireflies)
+- [hdr-night-lighting](https://visgl.github.io/deck.gl-community/examples/layers/hdr-night-lighting)
+- [global-illumination](https://visgl.github.io/deck.gl-community/examples/layers/global-illumination)
+- [light-shafts](https://visgl.github.io/deck.gl-community/examples/layers/light-shafts)
+- [ambient-occlusion](https://visgl.github.io/deck.gl-community/examples/experimental/ambient-occlusion)
+- [depth-of-field](https://visgl.github.io/deck.gl-community/examples/layers/depth-of-field)
+- [scene-buffers](https://visgl.github.io/deck.gl-community/examples/layers/scene-buffers)
+- [pattern-fills](https://visgl.github.io/deck.gl-community/examples/layers/pattern-fills)
+- [styled-paths](https://visgl.github.io/deck.gl-community/examples/layers/styled-paths)
+- [globe-clouds](https://visgl.github.io/deck.gl-community/examples/layers/globe-clouds)
+- [sketch-edges](https://visgl.github.io/deck.gl-community/examples/layers/sketch-edges)
