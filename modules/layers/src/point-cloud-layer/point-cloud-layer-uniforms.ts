@@ -10,6 +10,7 @@ layout(std140) uniform pointCloudUniforms {
   highp int sizeUnits;
   highp uint rowIndexOffset;
   float radiusMeters;
+  highp int splatPass;
 } pointCloud;
 `;
 
@@ -18,6 +19,7 @@ export type PointCloudProps = {
   sizeUnits: number;
   rowIndexOffset: number;
   radiusMeters: number;
+  splatPass: number;
 };
 
 export const pointCloudUniforms = {
@@ -29,6 +31,7 @@ export const pointCloudUniforms = {
     radiusPixels: 'f32',
     sizeUnits: 'i32',
     rowIndexOffset: 'u32',
-    radiusMeters: 'f32'
+    radiusMeters: 'f32',
+    splatPass: 'i32'
   }
 } as const satisfies ShaderModule<PointCloudProps>;

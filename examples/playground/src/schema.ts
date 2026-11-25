@@ -642,7 +642,7 @@ type H3HexagonLayer = Omit<ColumnLayer, '@@type'> &
   };
 
 type Tile3DLayer = Omit<BaseLayerProps, 'data'> &
-  Pick<Tile3DLayerProps, 'pointSize' | '_adaptivePointSize'> & {
+  Pick<Tile3DLayerProps, 'pointSize' | '_adaptivePointSize' | '_weightedSplatting'> & {
     '@@type': 'Tile3DLayer';
     data?: any;
     getPointColor?: ColorValue | AccessorFunction;
@@ -903,4 +903,5 @@ export type DeckJson = Pick<
   views?: AnyView[];
   layers?: AnyLayer[];
   widgets?: AnyWidget[];
+  effects?: {'@@type': '_PointCloudSplatEffect'}[];
 };

@@ -44,6 +44,7 @@ const defaultProps: DefaultProps<PointCloudLayerProps> = {
   pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
   antialiasing: false,
   _pointRadiusMeters: 0,
+  _weightedSplatting: false,
 
   getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
   getNormal: {type: 'accessor', arrow: true, value: DEFAULT_NORMAL},
@@ -99,6 +100,9 @@ type _PointCloudLayerProps<DataT> = PointCloudColumnProps & {
 
   /** @internal World-space radius used for adaptive 3D Tiles point sizing. */
   _pointRadiusMeters?: number;
+
+  /** Experimental. Include this layer in the weighted point-cloud splat effect. */
+  _weightedSplatting?: boolean;
 
   /**
    * When enabled, computes edge coverage in the shader. When disabled, relies on render-target
@@ -186,12 +190,15 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   getShaders() {
-    const {antialiasing} = this.props;
+    const {antialiasing, _weightedSplatting} = this.props;
     return super.getShaders({
       vs,
       fs,
       source: shaderWGSL,
-      defines: antialiasing ? {ANTIALIASING: 1} : {},
+      defines: {
+        ...(antialiasing && {ANTIALIASING: 1}),
+        ...(_weightedSplatting && {WEIGHTED_SPLATTING: 1})
+      },
       modules: [project32, color, gouraudMaterial, picking, pointCloudUniforms]
     });
   }
@@ -243,7 +250,11 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     }
     const {changeFlags, props, oldProps} = params;
     super.updateState(params);
-    if (changeFlags.extensionsChanged || props.antialiasing !== oldProps.antialiasing) {
+    if (
+      changeFlags.extensionsChanged ||
+      props.antialiasing !== oldProps.antialiasing ||
+      props._weightedSplatting !== oldProps._weightedSplatting
+    ) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
@@ -267,7 +278,8 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (
       entering ||
       params.changeFlags.extensionsChanged ||
-      params.props.antialiasing !== params.oldProps.antialiasing
+      params.props.antialiasing !== params.oldProps.antialiasing ||
+      params.props._weightedSplatting !== params.oldProps._weightedSplatting
     ) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
@@ -293,13 +305,16 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     });
   }
 
-  draw({uniforms}) {
+  draw({shaderModuleProps}) {
+    const splatPass = shaderModuleProps?.pointCloud?.splatPass ?? 0;
+    if (splatPass === 3) return;
     const {pointSize, sizeUnits, _pointRadiusMeters} = this.props;
     const model = this.state.model!;
     const pointCloudProps: PointCloudProps = {
       sizeUnits: UNIT[sizeUnits],
       radiusPixels: pointSize,
       radiusMeters: _pointRadiusMeters,
+      splatPass,
       rowIndexOffset: 0
     };
     model.shaderInputs.setProps({pointCloud: pointCloudProps});

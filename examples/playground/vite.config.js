@@ -8,6 +8,7 @@ import path from 'path';
 const SCHEMA_FILE = 'schema.generated.json';
 
 export default {
+  worker: {format: 'es'},
   define: {
     'process.env.GoogleMapsAPIKey': JSON.stringify(process.env.GoogleMapsAPIKey)
   },
