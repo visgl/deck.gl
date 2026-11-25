@@ -19,9 +19,7 @@ export {
   type GPUBitmapLayerProps
 } from './gpu-bitmap-layer';
 export type {GPUVectorLayerPickingInfo} from './gpu-vector-layer-utils';
-export {surfaceBuffer} from './surface-buffer';
 export {getMeterOffsetPosition} from './projection/meter-offset-position';
-export {motionBuffer} from './motion-buffer';
 export {OrthographicView, type PickingInfo} from '@deck.gl/core';
 export {
   ArrowScatterplotLayer,

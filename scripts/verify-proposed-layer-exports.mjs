@@ -21,7 +21,7 @@ for (const [path, name] of [
 
 for (const [specifier, names] of [
   ['@deck.gl/proposals/layers', ['GPUScatterplotLayer', 'ArrowScatterplotLayer', 'Tile2DLayer', 'MVT2DLayer']],
-  ['@deck.gl/proposals/effects', ['SceneBufferEffect', 'ShaderPassEffect', 'GPUGraphDeckEffect']],
+  ['@deck.gl/proposals/effects', ['GPUGraphDeckEffect']],
   ['@deck.gl/proposals/effects/query', ['LuSpatialGeographicPointQueryEffect']]
 ]) {
   const esm = await import(specifier);

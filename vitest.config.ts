@@ -208,10 +208,6 @@ const projects = [
           name: 'node',
           environment: 'node',
           include: ['test/modules/**/*.node.spec.ts', ...privateNodeTests],
-          // Proposal examples use the same aliased Deck source as the tests.
-          ...(includePrivateModules
-            ? {server: {deps: {inline: ['@deck.gl-community/layers']}}}
-            : {}),
           globals: false,
           testTimeout: 30000,
           setupFiles: ['./test/setup/vitest-node-setup.ts'],
