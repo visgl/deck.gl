@@ -5,7 +5,7 @@
 import type {WidgetPlacement, Layer, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
 import {Widget} from '@deck.gl/core';
-import {IconButton} from './lib/components/icon-button';
+import {Tooltip} from './lib/components/tooltip';
 
 /** Properties for the LoadingWidget */
 export type LoadingWidgetProps = WidgetProps & {
@@ -13,9 +13,9 @@ export type LoadingWidgetProps = WidgetProps & {
   placement?: WidgetPlacement;
   /** View to attach to and interact with. Required when using multiple views */
   viewId?: string | null;
-  /** Tooltip message when loading */
+  /** Status label shown when loading */
   label?: string;
-  /** Custom tooltip content. Overrides label for tooltip display. */
+  /** Optional tooltip content. */
   tooltip?: string | HTMLElement | false;
   /**
    * Callback when the loading state changes.
@@ -54,18 +54,23 @@ export class LoadingWidget extends Widget<LoadingWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    render(
-      // TODO(ibgreen) - this should not be a button, but styling is so nested that it is easier to reuse this component.
-      this.loading && (
-        <IconButton
-          className="deck-widget-spinner"
-          label={this.props.label}
-          tooltip={this.props.tooltip}
-          onClick={this.handleClick.bind(this)}
-        />
-      ),
-      rootElement
+    if (!this.loading) {
+      render(null, rootElement);
+      return;
+    }
+
+    const {label, tooltip} = this.props;
+    const status = (
+      <div
+        className="deck-widget-loading-status"
+        role="status"
+        style={tooltip ? {pointerEvents: 'auto'} : undefined}
+      >
+        <span className="deck-widget-spinner" aria-hidden="true" />
+        {label}
+      </div>
     );
+    render(tooltip ? <Tooltip content={tooltip}>{status}</Tooltip> : status, rootElement);
   }
 
   onRedraw({layers}: {layers: Layer[]}): void {
@@ -79,7 +84,4 @@ export class LoadingWidget extends Widget<LoadingWidgetProps> {
       this.updateHTML();
     }
   }
-
-  // TODO(ibgreen) - this should not be a button, see above.
-  handleClick() {}
 }

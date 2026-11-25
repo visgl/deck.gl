@@ -72,19 +72,17 @@ new LoadingWidget({} satisfies LoadingWidgetProps);
 
 ### `LoadingWidgetProps` {#loadingwidgetprops}
 
-The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
+The `LoadingWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `label` (string, optional) {#label}
 
-* Default: `'Loading data'`
+* Default: `'Loading layer data'`
 
-Text used as the button's `aria-label` and displayed as a styled [tooltip](./tooltips.md) on hover/focus.
+Text displayed beside the loading spinner.
 
 #### `tooltip` (string | HTMLElement | false, optional) {#tooltip}
 
-* Default: value of `label`
-
-Custom tooltip content. Overrides the default label text in the tooltip. Pass `false` to disable.
+Optional [tooltip](./tooltips.md) content. Pass `false` to disable.
 
 #### `onLoadingChange` (Function, optional) {#onloadingchange}
 
