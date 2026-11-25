@@ -167,7 +167,7 @@ export type Tile2DLayerProps<DataT = unknown> = CompositeLayerProps & {
   maxRequests?: number;
   /**
    * Experimental. While a view state transition of a view runs, load the tiles of its end
-   * viewport first, without rendering them. Needs a view with a controller.
+   * viewport first, without selecting them. Needs a view with a controller.
    */
   _preloadTransitionTarget?: boolean;
   /** Debounce interval before issuing queued requests. */

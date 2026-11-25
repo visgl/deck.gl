@@ -325,3 +325,45 @@ test('Tileset2D preload: the preload set shrinks, best tiles first, when other v
   first.finalize();
   second.finalize();
 });
+
+test('Tileset2D preload: best-available shows a loaded preload tile as a placeholder', async () => {
+  // Zoom in: the target tiles are descendants of the selected tiles.
+  const current = new WebMercatorViewport({
+    width: 256,
+    height: 256,
+    longitude: 0,
+    latitude: 0,
+    zoom: 2
+  });
+  const target = new WebMercatorViewport({
+    width: 256,
+    height: 256,
+    longitude: 5,
+    latitude: 5,
+    zoom: 4
+  });
+  for (const refinementStrategy of ['best-available', 'no-overlap'] as const) {
+    const {tileset, requests} = makeTileset({maxRequests: 1, refinementStrategy});
+    const targetIds = getIds(tileset, target);
+    tileset.update(current, {zRange: null, modelMatrix: null, preloadViewport: target});
+    await settle();
+    // Load only the preload tiles. The selected tiles stay pending.
+    for (let i = 0; i < targetIds.length; i++) {
+      requests[i].resolve();
+      await settle();
+    }
+    tileset.update(current, {zRange: null, modelMatrix: null, preloadViewport: target});
+    const visible = tileset.tiles.filter(
+      tile => targetIds.includes(tile.id) && tileset.isTileVisible(tile)
+    );
+    expect(
+      tileset.selectedTiles!.every(tile => !tile.isLoaded),
+      refinementStrategy
+    ).toBe(true);
+    expect(visible.length, refinementStrategy).toBeGreaterThan(0);
+    expect(
+      visible.every(tile => !tile.isSelected),
+      refinementStrategy
+    ).toBe(true);
+  }
+});

@@ -155,7 +155,7 @@ type _TileLayerProps<DataT> = {
 
   /**
    * Experimental. While a view state transition of this layer's view runs, load the tiles of
-   * the transition's end viewport first, without rendering them. Needs a view with a controller.
+   * the transition's end viewport first, without selecting them. Needs a view with a controller.
    *
    * @default false
    */
