@@ -6,7 +6,7 @@ import {FireflyLayer, type GlowPointLayerProps} from '@deck.gl/proposals/layers'
 import {getSceneBufferCamera} from '@deck.gl/proposals/effects';
 import type {RenderPass} from '@luma.gl/core';
 import {waterMaterial, riverWaterMaterial, type ShaderModule} from '@luma.gl/shaders';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
 type ReflectionProps = GlowPointLayerProps & {
   surfaceHeight: number;

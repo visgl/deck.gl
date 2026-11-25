@@ -6,17 +6,16 @@ import {
   Field,
   FixedSizeList,
   Float64,
+  Schema,
   Table,
   Uint8,
   vectorFromArray,
+  type RecordBatch,
   type Vector
 } from 'apache-arrow';
-import {
-  compileArrowScale,
-  compileArrowScales,
-  parseSQLScaleAST,
-  type ResolvedScale
-} from '@math.gl/sql/scales';
+import {compileArrowScale, compileArrowScales} from '@math.gl/sql/scales';
+import {parseSQLScaleAST} from '@math.gl/sql/parser';
+import type {ResolvedScale} from '@math.gl/core/color';
 import type {SQLFunctions, SQLParser} from '../types/layer-props';
 import {evaluateColumnExpression} from './column-constructors';
 import {isArrowTableAppend} from './column-query-append';
@@ -55,10 +54,14 @@ export function evaluateAccessorQueries(
   },
   functions?: SQLFunctions
 ): {table: Table; scales: Readonly<Record<string, ResolvedScale>>} {
-  const data = unwrapLoaderArrowResult(source);
-  if (!isArrowTable(data)) {
+  const inputData = unwrapLoaderArrowResult(source);
+  if (!isArrowTable(inputData)) {
     throw new Error('SQL accessors require Arrow table data');
   }
+
+  const data = Array.isArray(inputData.batches)
+    ? inputData
+    : new Table(inputData.schema, [inputData as unknown as RecordBatch]);
 
   const entries = Object.entries(expressions);
   const parse = parseExpression ?? sqlParser.parseExpression;
@@ -132,6 +135,7 @@ export function evaluateAccessorQueries(
   const priorTable = previous?.table;
   const canAppend =
     isArrowTable(priorSource) &&
+    Array.isArray(priorSource.batches) &&
     priorTable &&
     previous.parseExpression === parseExpression &&
     deepEqual(previous.functions, functions, 1) &&
@@ -145,19 +149,32 @@ export function evaluateAccessorQueries(
     if (previousBatch && !scaleExpressions.length)
       return new Table(priorTable!.schema, [previousBatch]);
     const columns: Record<string, Vector> = Object.create(null);
+    const fields: Field[] = [];
     for (const {name, expression, isColorScale} of parsed) {
+      if (!isColorScale) {
+        const reused = previousBatch?.getChild(name);
+        const result = reused
+          ? {
+              column: reused,
+              metadata: priorTable?.schema.fields.find(field => field.name === name)?.metadata
+            }
+          : evaluateColumnExpression(expression, input, functions);
+        columns[name] = result.column;
+        fields.push(new Field(name, result.column.type, true, result.metadata));
+        continue;
+      }
       // A new domain can change the color of previously evaluated rows.
-      columns[name] = isColorScale
-        ? (compiled[name]?.evaluate(input) ??
-          (parsedScales.get(name)?.scale.range.type === 'numeric'
-            ? vectorFromArray(new Array(input.numRows).fill(null), new Float64())
-            : vectorFromArray(
-                Array.from({length: input.numRows}, () => [0, 0, 0, 0]),
-                new FixedSizeList(4, new Field('item', new Uint8(), false))
-              )))
-        : (previousBatch?.getChild(name) ?? evaluateColumnExpression(expression, input, functions));
+      columns[name] =
+        compiled[name]?.evaluate(input) ??
+        (parsedScales.get(name)?.scale.range.type === 'numeric'
+          ? vectorFromArray(new Array(input.numRows).fill(null), new Float64())
+          : vectorFromArray(
+              Array.from({length: input.numRows}, () => [0, 0, 0, 0]),
+              new FixedSizeList(4, new Field('item', new Uint8(), false))
+            ));
+      fields.push(new Field(name, columns[name].type, true));
     }
-    return new Table(columns);
+    return new Table(new Schema(fields), columns);
   };
   const table =
     data.batches.length <= 1

@@ -7,13 +7,16 @@ import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
-import {tableFromArrays} from 'apache-arrow';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+import {tableFromArrays, type Table} from 'apache-arrow';
 import type {Device} from '@luma.gl/core';
-import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
+import {isArrowTable} from '@math.gl/core/arrow';
+import {ArcLayer} from '@deck.gl/layers';
+import {GeoArrowLayer} from '@deck.gl/proposals/layers';
 import {scaleQuantile} from 'd3-scale';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
-import type {Feature, Polygon, MultiPolygon} from 'geojson';
 
 // Full website geometry in GeoParquet; properties retain their original names.
 const DATA_URL =
@@ -50,7 +53,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
 
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 
-type CountyProperties = {
+type County = {
   /** county name */
   name: string;
   /** county index -> net flow */
@@ -58,8 +61,6 @@ type CountyProperties = {
   /** geographical centroid */
   centroid: Iterable<number>;
 };
-
-type County = Feature<Polygon | MultiPolygon, CountyProperties>;
 
 type MigrationFlow = {
   source: County;
@@ -70,17 +71,11 @@ type MigrationFlow = {
 };
 
 /** Builds columnar arc endpoints and styling values for the selected county. */
-function makeArcTable(data: County[] | undefined, selectedCounty?: County) {
-  if (!data || !data.length) {
-    return null;
-  }
-  if (!selectedCounty) {
-    selectedCounty = data.find(f => f.properties.name === 'Los Angeles, CA')!;
-  }
-  const {flows} = selectedCounty.properties;
+function makeArcTable(data: Table, selectedCounty: County) {
+  const {flows} = selectedCounty;
 
   const arcs: MigrationFlow[] = Object.keys(flows).map(toId => {
-    const f = data[Number(toId)];
+    const f = data.get(Number(toId)) as County;
     return {
       source: selectedCounty,
       target: f,
@@ -98,17 +93,17 @@ function makeArcTable(data: County[] | undefined, selectedCounty?: County) {
   });
 
   return tableFromArrays({
-    source_longitude: Float64Array.from(arcs, arc => Array.from(arc.source.properties.centroid)[0]),
-    source_latitude: Float64Array.from(arcs, arc => Array.from(arc.source.properties.centroid)[1]),
-    target_longitude: Float64Array.from(arcs, arc => Array.from(arc.target.properties.centroid)[0]),
-    target_latitude: Float64Array.from(arcs, arc => Array.from(arc.target.properties.centroid)[1]),
+    source_longitude: Float64Array.from(arcs, arc => Array.from(arc.source.centroid)[0]),
+    source_latitude: Float64Array.from(arcs, arc => Array.from(arc.source.centroid)[1]),
+    target_longitude: Float64Array.from(arcs, arc => Array.from(arc.target.centroid)[0]),
+    target_latitude: Float64Array.from(arcs, arc => Array.from(arc.target.centroid)[1]),
     value: Float64Array.from(arcs, arc => arc.value),
     quantile: Uint8Array.from(arcs, arc => arc.quantile)
   });
 }
 
 function getTooltip({object}: PickingInfo<County>) {
-  return object && object.properties.name;
+  return object && object.name;
 }
 
 /* eslint-disable react/no-deprecated */
@@ -118,64 +113,83 @@ export default function App({
   strokeWidth = 1,
   mapStyle = MAP_STYLE,
   onSelectCounty,
-  onDataLoad
+  onDataLoad,
+  onArcDataLoad
 }: {
   device?: Device;
-  data?: string | County[];
+  data?: string | Table;
   strokeWidth?: number;
   mapStyle?: string;
   onSelectCounty?: (county: County) => void;
-  /** Reports county and directed flow counts to the website controls. */
-  onDataLoad?: (stats: {count: number; flowCount: number}) => void;
+  /** Reports the loaded county count to the website controls. */
+  onDataLoad?: (stats: {count: number}) => void;
+  /** Reports the number of arcs for the current county. */
+  onArcDataLoad?: (count: number) => void;
 }) {
-  const [selectedCounty, selectCounty] = useState<County>();
+  const widgets = useMemo(() => [new LoadingWidget()], []);
+  /** Index of the county selected by picking. */
+  const [selectedCounty, selectCounty] = useState<number>();
 
-  const [counties, setCounties] = useState<County[]>();
-  const arcs = useMemo(() => makeArcTable(counties, selectedCounty), [counties, selectedCounty]);
+  /** County table supplied by the geometry layer after loading. */
+  const [loadedCounties, setLoadedCounties] = useState<Table>();
+  /** County table used for the migration destination lookup. */
+  const counties = typeof data === 'string' ? loadedCounties : data;
+  /** Index of Los Angeles, or the first row when absent. */
+  const defaultCounty = useMemo(() => {
+    /** County names in source row order. */
+    const names = counties?.getChild('name');
+    return Math.max(0, names ? [...names].indexOf('Los Angeles, CA') : -1);
+  }, [counties]);
+  /** One source row whose identity changes with county selection. */
+  const arcSource = useMemo(() => {
+    /** Source row for the current selection. */
+    const index = selectedCounty ?? defaultCounty;
+    return counties && index < counties.numRows ? counties.slice(index, index + 1) : null;
+  }, [counties, selectedCounty, defaultCounty]);
 
   const layers = [
-    new GeoJsonLayer<CountyProperties>({
-      id: 'geojson',
+    new GeoArrowLayer({
+      id: 'counties',
       data,
       loaders: [GeoParquetLoader],
-      loadOptions: {parquet: {shape: 'geojson-table'}},
-      onDataLoad: loaded => {
-        const features: County[] = Array.isArray(loaded) ? loaded : loaded.features;
-        setCounties(features);
-        selectCounty(undefined);
-        onDataLoad?.({
-          count: features.length,
-          flowCount: features.reduce(
-            (sum, feature) => sum + Object.keys(feature.properties.flows).length,
-            0
-          )
-        });
+      onDataLoad: table => {
+        if (isArrowTable(table)) {
+          setLoadedCounties(table);
+          selectCounty(undefined);
+          onDataLoad?.({count: table.numRows});
+        }
       },
-      stroked: false,
-      filled: true,
       getFillColor: [0, 0, 0, 0],
-      onClick: ({object}) => {
+      onClick: ({object, index}) => {
         if (object) {
-          selectCounty(object);
+          selectCounty(index);
           onSelectCounty?.(object);
         }
       },
       pickable: true
     }),
-    arcs &&
-      new ArcLayer<MigrationFlow>({
-        id: 'arc',
-        data: arcs,
-        getSourcePosition: {sql: 'ARRAY[source_longitude, source_latitude]'},
-        getTargetPosition: {sql: 'ARRAY[target_longitude, target_latitude]'},
-        getSourceColor: d => (d.value > 0 ? inFlowColors : outFlowColors)[d.quantile],
-        getTargetColor: d => (d.value > 0 ? outFlowColors : inFlowColors)[d.quantile],
-        getWidth: strokeWidth
-      })
+    new ArcLayer<MigrationFlow>({
+      id: 'arc',
+      data: arcSource,
+      dataTransform: <LayerDataT,>(source: unknown): LayerDataT => {
+        /** Source county whose flow map supplies the arcs. */
+        const county = isArrowTable(source) ? source.get(0) : null;
+        return (counties && county ? makeArcTable(counties, county as County) : []) as LayerDataT;
+      },
+      onDataLoad: table => {
+        onArcDataLoad?.(isArrowTable(table) ? table.numRows : 0);
+      },
+      getSourcePosition: {sql: 'ARRAY[source_longitude, source_latitude]'},
+      getTargetPosition: {sql: 'ARRAY[target_longitude, target_latitude]'},
+      getSourceColor: d => (d.value > 0 ? inFlowColors : outFlowColors)[d.quantile],
+      getTargetColor: d => (d.value > 0 ? outFlowColors : inFlowColors)[d.quantile],
+      getWidth: strokeWidth
+    })
   ];
 
   return (
     <DeckGL
+      widgets={widgets}
       device={device}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}

@@ -10,9 +10,9 @@ import {
   project,
   _deepEqual as deepEqual
 } from '@deck.gl/core';
-import {vec3} from '@math.gl/core';
-import {vec4} from '@math.gl/core';
-import type {NumericArray, TypedArray} from '@math.gl/core';
+import {vec3} from '@math.gl/core/matrix';
+import {vec4} from '@math.gl/core/matrix';
+import type {NumericArray, TypedArray} from '@math.gl/core/matrix';
 import {
   dashInjections,
   Defines,

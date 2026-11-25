@@ -7,8 +7,7 @@
 import type {Device, Texture, Framebuffer} from '@luma.gl/core';
 import {Deck} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {GL} from '@luma.gl/core/webgl-constants';
-import {WebGLDevice} from '@luma.gl/core/webgl';
+import {WebGLDevice, withDeviceParameters} from '@luma.gl/core/webgl';
 
 interface Renderer {
   redraw: () => void;
@@ -98,6 +97,7 @@ void main(void) {
     parameters: {
       depthWriteEnabled: false,
       depthCompare: 'always',
+      blend: true,
       blendColorSrcFactor: 'one',
       blendColorDstFactor: 'one-minus-src-alpha',
       blendAlphaSrcFactor: 'one',
@@ -134,14 +134,18 @@ void main(void) {
         // that blend state and write alpha=0 into the FBO, making the composite
         // shader output (0,0,0,0) everywhere. Reset to standard premultiplied-alpha
         // blend so the FBO stores correct RGBA for the composite pass.
-        const glCtx = (device as WebGLDevice).gl;
-        glCtx.blendFuncSeparate(
-          glCtx.ONE,
-          glCtx.ONE_MINUS_SRC_ALPHA,
-          glCtx.ONE,
-          glCtx.ONE_MINUS_SRC_ALPHA
+        withDeviceParameters(
+          device,
+          {
+            blendColorOperation: 'add',
+            blendColorSrcFactor: 'one',
+            blendColorDstFactor: 'one-minus-src-alpha',
+            blendAlphaOperation: 'add',
+            blendAlphaSrcFactor: 'one',
+            blendAlphaDstFactor: 'one-minus-src-alpha'
+          },
+          () => deckInstance._drawLayers(redrawReason)
         );
-        deckInstance._drawLayers(redrawReason);
       } else {
         this.redraw();
       }
@@ -170,7 +174,9 @@ export function render(
   const device = model.device;
   if (device instanceof WebGLDevice) {
     // @ts-ignore device.getParametersWebGL should return `any` not `void`?
-    const rawScreenFbo: WebGLFramebuffer | null = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
+    const rawScreenFbo: WebGLFramebuffer | null = device.getParametersWebGL(
+      device.gl.FRAMEBUFFER_BINDING
+    );
     const {width, height, views, viewState, ...defaultViewState} = viewport;
 
     /* global window */
@@ -206,24 +212,6 @@ export function render(
     // redraw deck immediately into deckFbo
     deck.redraw('arcgis');
 
-    // We overlay the texture on top of the map using the full-screen quad.
-    const {gl} = device;
-
-    // drawBuffers is per-FBO state not tracked by luma's state cache;
-    // restore it for the screen FBO after rendering to the offscreen FBO.
-    if (rawScreenFbo) {
-      gl.bindFramebuffer(GL.FRAMEBUFFER, rawScreenFbo);
-      gl.drawBuffers([GL.COLOR_ATTACHMENT0]);
-    } else {
-      gl.drawBuffers([GL.BACK]);
-    }
-
-    // The model sets blend factors but not blend:true, so
-    // setDeviceParameters won't enable blending on its own.
-    gl.enable(GL.BLEND);
-    gl.blendFuncSeparate(GL.ONE, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA);
-    gl.blendEquationSeparate(GL.FUNC_ADD, GL.FUNC_ADD);
-
     // luma's WEBGLRenderPass duck-types the framebuffer prop, reading `.handle`, `.width`,
     // `.height`, and `.colorAttachments`. A raw WebGLFramebuffer has none of those, which
     // breaks viewport auto-setup and draw-buffer selection. Build a minimal adapter that
@@ -235,17 +223,20 @@ export function render(
       colorAttachments: [null]
     };
 
-    const textureToScreenPass = device.beginRenderPass({
-      framebuffer: screenFboAdapter as any,
-      parameters: {viewport: [0, 0, pixelWidth, pixelHeight]},
-      clearColor: false,
-      clearDepth: false
+    // The render pass selects draw buffers for the currently bound framebuffer.
+    device.withParametersWebGL({framebuffer: screenFboAdapter}, () => {
+      const textureToScreenPass = device.beginRenderPass({
+        framebuffer: screenFboAdapter as unknown as Framebuffer,
+        parameters: {viewport: [0, 0, pixelWidth, pixelHeight]},
+        clearColor: false,
+        clearDepth: false
+      });
+      try {
+        model.draw(textureToScreenPass);
+      } finally {
+        textureToScreenPass.end();
+      }
     });
-    try {
-      model.draw(textureToScreenPass);
-    } finally {
-      textureToScreenPass.end();
-    }
   }
 }
 

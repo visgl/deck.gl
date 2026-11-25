@@ -4,7 +4,7 @@
 
 import {convertGeoArrowVectorCellToGeoJSON} from '@loaders.gl/core/geoarrow';
 import type {RecordBatch, Table} from 'apache-arrow';
-import type {Color} from '@deck.gl/core';
+import {_isArrowVector as isArrowVector, type Color} from '@deck.gl/core';
 import type {Feature, Geometry} from 'geojson';
 import type {GeoArrowLayerGeometryType} from './resolve-geoarrow-geometry';
 
@@ -55,15 +55,10 @@ export function makeGeoArrowFeatureAccessor<Value extends Color | number>(
   }
   /** Resolved Arrow vector. */
   const column = typeof source === 'string' ? data.getChild(source) : source;
-  if (
-    !column ||
-    typeof column !== 'object' ||
-    !('get' in column) ||
-    typeof column.get !== 'function'
-  ) {
+  if (!isArrowVector(column)) {
     throw new Error('Encoded and mixed GeoArrow geometry requires CPU-readable styling columns');
   }
-  if (!('length' in column) || column.length !== data.numRows) {
+  if (column.length !== data.numRows) {
     throw new Error('GeoArrow styling column length must match source rows');
   }
   return feature => {
@@ -72,6 +67,9 @@ export function makeGeoArrowFeatureAccessor<Value extends Color | number>(
     if (value == null) {
       return nullValue;
     }
-    return typeof fallback === 'number' ? (Number(value) as Value) : (Array.from(value) as Value);
+    if (typeof fallback === 'number') {
+      return Number(value) as Value;
+    }
+    return Array.from<number>(value) as unknown as Value;
   };
 }
