@@ -17,7 +17,8 @@ import {
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
 
-import type {TileLoadProps, ZRange} from '../tileset-2d/index';
+import type {TileLoadProps, ZRange, Tileset2DAdapter} from '../tileset-2d/index';
+import type {Viewport} from '@deck.gl/core';
 import {
   Tileset2D,
   Tile2DHeader,
@@ -45,6 +46,7 @@ const renderGeoJsonTile = (props: {id: string; data: unknown; _normalizedTileCol
 
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
+  adapter: {type: 'object', optional: true, value: null, compare: false},
   data: {type: 'data', value: []},
   dataComparator: urlType.equal,
   renderSubLayers: {type: 'function', value: renderGeoJsonTile},
@@ -80,6 +82,13 @@ type _TileLayerProps<DataT> = {
    * Optionally implement a custom indexing scheme.
    */
   TilesetClass?: typeof Tileset2D;
+  /**
+   * Optional tile traversal adapter, passed to the tileset, for example for a tile grid in
+   * another CRS. A new adapter creates a new tileset. When `null`, an adapter that a custom
+   * `TilesetClass` sets is kept.
+   * @default null
+   */
+  adapter?: Tileset2DAdapter<Viewport> | null;
   /**
    * Renders one or an array of Layer instances. The default GeoJsonLayer renderer forwards
    * color accessors using the Deck color convention.
@@ -247,8 +256,13 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return changeFlags.somethingChanged;
   }
 
-  updateState({changeFlags}: UpdateParameters<this>) {
+  updateState({props, oldProps, changeFlags}: UpdateParameters<this>) {
     let {tileset} = this.state;
+    if (tileset && props.adapter !== oldProps.adapter) {
+      // A new adapter can change tile ids and bounds, so start with a new cache.
+      tileset.finalize();
+      tileset = null;
+    }
     const propsChanged = changeFlags.propsOrDataChanged || changeFlags.updateTriggersChanged;
     const dataChanged =
       changeFlags.dataChanged ||
@@ -302,6 +316,8 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     } = this.props;
 
     return {
+      // Pass the adapter only when it is set, so that a custom TilesetClass can set its own.
+      ...(this.props.adapter ? {adapter: this.props.adapter} : {}),
       maxCacheSize,
       maxCacheByteSize,
       maxZoom,

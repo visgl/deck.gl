@@ -6,7 +6,7 @@ import {test, expect} from 'vitest';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils/vitest';
-import {TileLayer} from '@deck.gl/geo-layers';
+import {TileLayer, Tileset2D} from '@deck.gl/geo-layers';
 
 const DUMMY_DATA =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/test-data/geojson-point.json';
@@ -426,3 +426,68 @@ function sleep(ms) {
     setTimeout(resolve, ms);
   });
 }
+
+test('TileLayer#adapter', async () => {
+  const testViewport = new WebMercatorViewport({width: 400, height: 400, zoom: 2});
+  /** Adapter that selects one fixed tile, so each adapter gives a different tile id. */
+  const makeAdapter = (x: number) => ({
+    getTileIndices: () => [{x, y: 0, z: 3}],
+    getTileBoundingBox: () => ({west: 0, south: 0, east: 1, north: 1})
+  });
+  const adapterA = makeAdapter(1);
+  const adapterB = makeAdapter(2);
+  const injected = makeAdapter(3);
+  class InjectingTileset extends Tileset2D {
+    constructor(opts) {
+      super({...opts, adapter: injected});
+    }
+  }
+  let firstTileset;
+  const testCases = [
+    {
+      title: 'adapter prop',
+      props: {adapter: adapterA, getTileData: () => null},
+      onAfterUpdate: ({layer}) => {
+        firstTileset = layer.state.tileset;
+        expect(firstTileset.opts.adapter, 'passes the adapter to the tileset').toBe(adapterA);
+        expect(firstTileset.selectedTiles.map(tile => tile.id)).toEqual(['1-0-3']);
+      }
+    },
+    {
+      title: 'new adapter',
+      updateProps: {adapter: adapterB},
+      onAfterUpdate: ({layer}) => {
+        expect(layer.state.tileset, 'creates a new tileset').not.toBe(firstTileset);
+        expect(layer.state.tileset.selectedTiles.map(tile => tile.id)).toEqual(['2-0-3']);
+      }
+    },
+    {
+      title: 'null adapter keeps an adapter set by TilesetClass',
+      props: {
+        id: 'tile-layer-injected',
+        TilesetClass: InjectingTileset,
+        adapter: null,
+        getTileData: () => null
+      },
+      onAfterUpdate: ({layer}) => {
+        expect(layer.state.tileset.opts.adapter).toBe(injected);
+        expect(layer.state.tileset.selectedTiles.map(tile => tile.id)).toEqual(['3-0-3']);
+      }
+    },
+    {
+      title: 'other prop change keeps the TilesetClass adapter',
+      updateProps: {maxRequests: 3},
+      onAfterUpdate: ({layer}) => {
+        expect(layer.state.tileset.opts.adapter).toBe(injected);
+      }
+    }
+  ];
+  testLayer({
+    Layer: TileLayer,
+    viewport: testViewport,
+    testCases,
+    onError: err => {
+      throw err;
+    }
+  });
+});
