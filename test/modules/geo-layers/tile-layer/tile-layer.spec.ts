@@ -443,10 +443,17 @@ test('TileLayer#adapter', async () => {
     }
   }
   let firstTileset;
+  let onViewportLoadCount = 0;
   const testCases = [
     {
       title: 'adapter prop',
-      props: {adapter: adapterA, getTileData: () => null},
+      props: {
+        adapter: adapterA,
+        getTileData: () => null,
+        onViewportLoad: () => {
+          onViewportLoadCount++;
+        }
+      },
       onAfterUpdate: ({layer}) => {
         firstTileset = layer.state.tileset;
         expect(firstTileset.opts.adapter, 'passes the adapter to the tileset').toBe(adapterA);
@@ -456,7 +463,13 @@ test('TileLayer#adapter', async () => {
     {
       title: 'new adapter',
       updateProps: {adapter: adapterB},
+      onBeforeUpdate: () => {
+        onViewportLoadCount = 0;
+      },
       onAfterUpdate: ({layer}) => {
+        if (layer.isLoaded) {
+          expect(onViewportLoadCount, 'calls onViewportLoad for the new tileset').toBe(1);
+        }
         expect(layer.state.tileset, 'creates a new tileset').not.toBe(firstTileset);
         expect(layer.state.tileset.selectedTiles.map(tile => tile.id)).toEqual(['2-0-3']);
       }
@@ -482,7 +495,7 @@ test('TileLayer#adapter', async () => {
       }
     }
   ];
-  testLayer({
+  await testLayerAsync({
     Layer: TileLayer,
     viewport: testViewport,
     testCases,
