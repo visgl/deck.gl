@@ -5,9 +5,9 @@
 import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect, vi} from 'vitest';
 
-import {GlobeViewport} from '@deck.gl/core';
+import {GlobeViewport, WebMercatorViewport, type Viewport} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
-import {device, testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
+import {device, testLayer, testLayerAsync, testInitializeLayer} from '@deck.gl/test-utils/vitest';
 import {Timeline} from '@luma.gl/engine';
 import createMesh from '@deck.gl/layers/bitmap-layer/create-mesh';
 
@@ -305,6 +305,133 @@ test('adaptive bitmap mesh preserves bilinear UVs, altitude and seed indices', (
     expect(value * 0.3048).toBeCloseTo(mesh.projectedPositions![index], 6)
   );
 });
+
+test('adaptive bitmap mesh stores packed positions when measured in another space', () => {
+  const bounds = [
+    [0, 0, 2],
+    [0, 2, 4],
+    [2, 2, 6],
+    [2, 0, 4]
+  ];
+  const transform = ([x, y, z]: number[]) => [x + 1, y - 1, z / 2];
+  const measure = ([x, y, z]: number[]) => [x, y + x * x, z];
+  const scale: [number, number, number] = [2, 3, 4];
+  const tolerance = 0.05;
+  const mesh = createMesh(bounds, 0, {transform, measure, scale, tolerance});
+  const measuredMesh = createMesh(bounds, 0, {
+    transform: point => measure(transform(point)),
+    scale,
+    tolerance
+  });
+
+  expect(mesh.vertexCount).toBeGreaterThan(6);
+  expect(mesh.vertexCount).toBe(mesh.indices.length);
+  expect(mesh.indices).toEqual(measuredMesh.indices);
+  expect(mesh.positions).toEqual(measuredMesh.positions);
+  expect(mesh.texCoords).toEqual(measuredMesh.texCoords);
+  expect(mesh.projectedPositions).toHaveLength(mesh.positions.length);
+  for (let i = 0; i < mesh.texCoords.length / 2; i++) {
+    const x = mesh.texCoords[2 * i] * 2;
+    const y = (1 - mesh.texCoords[2 * i + 1]) * 2;
+    const source = [x, y, 2 + x + y];
+    expect(Array.from(mesh.positions.subarray(i * 3, i * 3 + 3))).toEqual(source);
+    expect(Array.from(mesh.projectedPositions!.subarray(i * 3, i * 3 + 3))).toEqual(
+      transform(source)
+    );
+  }
+});
+
+/** Sample the error between rendered triangles and exact projected source points. */
+function getMaxBitmapError(
+  layer: BitmapLayer,
+  viewport: Viewport,
+  [left, bottom, right, top]: [number, number, number, number]
+) {
+  const {indices, texCoords} = layer.state.mesh;
+  const packed = layer.getAttributeManager()!.attributes.positions.value!;
+  const preproject = layer.state.preproject!;
+  const projectSource = (u: number, v: number) =>
+    preproject([left + u * (right - left), bottom + v * (top - bottom), 0]);
+  const scale = viewport.getDistanceScales(projectSource(0.5, 0.5)).metersPerUnit;
+  const common = Array.from({length: packed.length / 3}, (_, i) =>
+    viewport.projectPosition([packed[i * 3], packed[i * 3 + 1], packed[i * 3 + 2]])
+  );
+  let maxError = 0;
+  const sampleSteps = 8;
+  for (let i = 0; i < indices.length; i += 3) {
+    const vertices = [indices[i], indices[i + 1], indices[i + 2]];
+    for (let a = 1; a < sampleSteps - 1; a++) {
+      for (let b = 1; b < sampleSteps - a; b++) {
+        const weights = [a / sampleSteps, b / sampleSteps, (sampleSteps - a - b) / sampleSteps];
+        const u = vertices.reduce((sum, index, j) => sum + weights[j] * texCoords[2 * index], 0);
+        const v = vertices.reduce(
+          (sum, index, j) => sum + weights[j] * (1 - texCoords[2 * index + 1]),
+          0
+        );
+        const exact = viewport.projectPosition(projectSource(u, v));
+        const error = exact.map((value, axis) => {
+          const interpolated = vertices.reduce(
+            (sum, index, j) => sum + weights[j] * common[index][axis],
+            0
+          );
+          return (value - interpolated) * scale[axis];
+        });
+        maxError = Math.max(maxError, Math.hypot(...error));
+      }
+    }
+  }
+  return maxError;
+}
+
+for (const ViewportType of [WebMercatorViewport, GlobeViewport]) {
+  test(`adaptive bitmap bounds projection error in ${ViewportType.name}`, async () => {
+    const options = {longitude: -27, latitude: 38.9, zoom: 5, width: 800, height: 600};
+    const viewport = new ViewportType(options);
+    const bounds: [number, number, number, number] = [285000, 4120000, 1399000, 4583000];
+    const tolerance = 100;
+
+    await testLayerAsync({
+      Layer: BitmapLayer,
+      viewport,
+      draw: false,
+      testCases: [
+        {
+          title: 'Unrefined UTM quad',
+          props: {coordinateSystem: 'EPSG:32626', bounds, _projectionTolerance: 0},
+          onAfterUpdate({layer}) {
+            if (!layer.isLoaded) return;
+            expect(layer.state.packedCrs?.signature).toBe('WGS84');
+            expect(layer.state.mesh.vertexCount).toBe(6);
+            expect(layer.state.mesh.positions).toHaveLength(12);
+            const error = getMaxBitmapError(layer, viewport, bounds);
+            expect(error, `unrefined error: ${error} m`).toBeGreaterThan(tolerance * 10);
+          }
+        },
+        {
+          title: 'Refined UTM mesh',
+          updateProps: {_projectionTolerance: tolerance},
+          onAfterUpdate({layer}) {
+            expect(layer.state.mesh.vertexCount).toBeGreaterThan(6);
+            const error = getMaxBitmapError(layer, viewport, bounds);
+            expect(error, `refined error: ${error} m`).toBeLessThan(tolerance * 2);
+
+            const {mesh} = layer.state;
+            const movedViewport = new ViewportType({
+              ...options,
+              longitude: -25,
+              latitude: 42,
+              zoom: 7
+            });
+            layer.context.layerManager.activateViewport(movedViewport);
+            layer.activateViewport(movedViewport);
+            expect(layer.state.mesh).toBe(mesh);
+            expect(getMaxBitmapError(layer, movedViewport, bounds)).toBe(error);
+          }
+        }
+      ]
+    });
+  });
+}
 
 test('adaptive bitmap rebuilds on modelMatrix changes and disabling refinement', () => {
   const viewport = createTestViewport({

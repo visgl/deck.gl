@@ -24,7 +24,7 @@ import type {SamplerProps, Texture} from '@luma.gl/core';
 import {normalizeByteColor3, normalizeByteColor4} from '@luma.gl/shaders';
 import {lngLatToWorld} from '@math.gl/geospatial/web-mercator';
 
-import createMesh from './create-mesh';
+import createMesh, {interpolateQuad} from './create-mesh';
 import {getMetersPerUnit} from '../utils';
 
 import {bitmapUniforms, BitmapProps} from './bitmap-layer-uniforms';
@@ -79,7 +79,8 @@ type _BitmapLayerProps = {
    */
   bounds?: BitmapBoundingBox;
 
-  /** Sampled mesh error in map meters for a preprojecting viewport. Zero disables refinement.
+  /** Sampled mesh error in meters for a preprojecting viewport. Zero disables refinement.
+   * MapView and GlobeView measure in common space using the scale at the bitmap center.
    * Preserves bilinear bounds-to-UV mapping and refines the existing resolution grid.
    * Requires finite geometry away from projection seams. Throws if refinement limits are exhausted.
    * @experimental
@@ -282,6 +283,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
+  /** Build the bitmap mesh, measuring adaptive refinement error in meters. */
   protected _createMesh() {
     const {bounds} = this.props;
 
@@ -304,19 +306,34 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     }
 
     const tolerance = this.props._projectionTolerance;
+    const resolution = this.getSubdivisionStep();
+    if (!tolerance) return createMesh(normalizedBounds, resolution);
+
     const transform = this.usePositionTransforms().transform?.bind(this);
-    if (tolerance && !transform) {
+    if (!transform) {
       throw new Error('_projectionTolerance requires a preprojecting viewport');
     }
-    const projectionToleranceScale = tolerance ? getMetersPerUnit(this.state.packedCrs) : null;
-    if (tolerance && !projectionToleranceScale) {
+    const {packedCrs} = this.state;
+    const linearScale = getMetersPerUnit(packedCrs);
+    if (linearScale) {
+      return createMesh(normalizedBounds, resolution, {transform, tolerance, scale: linearScale});
+    }
+    if (tolerance <= 0 || packedCrs?.coordinateFrame !== 'geographic') {
       throw new Error('_projectionTolerance requires projected coordinates with linear units');
     }
-    return createMesh(
-      normalizedBounds,
-      this.getSubdivisionStep(),
-      tolerance ? {transform: transform!, tolerance, scale: projectionToleranceScale!} : undefined
-    );
+
+    const {viewport} = this.context;
+    const center = interpolateQuad(normalizedBounds, 0.5, 0.5);
+    const centerLngLat = transform([center[0], center[1], center[2] ?? 0]);
+    // GlobeViewport uses a fixed sphere and scale. By default, WebMercatorViewport projects
+    // each point independently and samples scale at the bitmap center. Neither metric changes
+    // on pan or zoom. Mercator's deprecated legacyMeterSizes uses camera latitude for altitude.
+    return createMesh(normalizedBounds, resolution, {
+      transform,
+      measure: viewport.projectPosition,
+      tolerance,
+      scale: viewport.getDistanceScales(centerLngLat).metersPerUnit
+    });
   }
 
   protected _getModel(): Model {
