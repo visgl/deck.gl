@@ -5,16 +5,9 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
-import App, {inFlowColors, outFlowColors} from 'v10-website-examples/arc/app';
+import App from 'v10-website-examples/arc/app';
 
 import {makeExample} from '../components';
-
-/** Provides color ramp for the example. */
-const colorRamp = inFlowColors
-  .slice()
-  .reverse()
-  .concat(outFlowColors)
-  .map(color => `rgb(${color.join(',')})`);
 
 /** Connects the Arrow arc example to the website controls. */
 class ArcDemo extends Component {
@@ -35,26 +28,12 @@ class ArcDemo extends Component {
   /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.LIGHT;
 
-  /** Renders the description, legend, and data summary. */
+  /** Renders the description and data summary. */
   static renderInfo(meta) {
     return (
       <>
         <p>
           People moving in and out of <b>{meta.sourceName}</b> between 2009-2013
-        </p>
-
-        <div className="layout">
-          {colorRamp.map((c, i) => (
-            <div
-              key={i}
-              className="legend"
-              style={{background: c, width: `${100 / colorRamp.length}%`}}
-            />
-          ))}
-        </div>
-        <p className="layout">
-          <span className="col-1-2">Net gain</span>
-          <span className="col-1-2 text-right">Net loss</span>
         </p>
 
         <p>

@@ -7,14 +7,14 @@ import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map as MapLibre} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
-import {LoadingWidget} from '@deck.gl/widgets';
+import {LoadingWidget, _LegendWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 import {tableFromArrays, type Table} from 'apache-arrow';
 import type {Device} from '@luma.gl/core';
 import {isArrowTable} from '@math.gl/core/arrow';
 import {ArcLayer} from '@deck.gl/layers';
 import {GeoArrowLayer} from '@deck.gl/proposals/layers';
-import {queryArrowSQL} from '@math.gl/sql/query';
+import {queryArrowSQL, queryArrowSQLWithMetadata} from '@math.gl/sql/query';
 import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
@@ -23,7 +23,7 @@ import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 const DATA_URL =
   'https://media.githubusercontent.com/media/visgl/deck.gl-data/886cf5ab469bba3816aa5a32d4454835e0ce5951/examples/arc/counties.parquet'; // eslint-disable-line
 
-export const inFlowColors: Color[] = [
+const inFlowColors: Color[] = [
   [255, 255, 204],
   [199, 233, 180],
   [127, 205, 187],
@@ -33,7 +33,7 @@ export const inFlowColors: Color[] = [
   [12, 44, 132]
 ];
 
-export const outFlowColors: Color[] = [
+const outFlowColors: Color[] = [
   [255, 255, 178],
   [254, 217, 118],
   [254, 178, 76],
@@ -101,7 +101,7 @@ export default function App({
   /** Reports the number of arcs for the current county. */
   onArcDataLoad?: (count: number) => void;
 }) {
-  const widgets = useMemo(() => [new LoadingWidget()], []);
+  const loading = useMemo(() => new LoadingWidget(), []);
   /** Index of the county selected by picking. */
   const [selectedCounty, selectCounty] = useState<number>();
 
@@ -139,7 +139,7 @@ export default function App({
     if (!flows.numRows) {
       return null;
     }
-    return queryArrowSQL(
+    return queryArrowSQLWithMetadata(
       `\
         SELECT f.origin, c.centroid AS target,
           CASE WHEN f.value > 0 THEN ${IN_FLOW_SCALE} ELSE ${OUT_FLOW_SCALE} END AS source_color,
@@ -152,6 +152,16 @@ export default function App({
       {functions: VISUALIZATION_FUNCTIONS}
     );
   }, [counties, destinations, selectedCounty, defaultCounty]);
+
+  const widgets = useMemo(() => {
+    const [gain, loss] = arcs?.columnMetadata.source_color ?? [];
+    return [
+      loading,
+      new _LegendWidget({
+        scales: gain && loss ? {'Net gain': gain.scale, 'Net loss': loss.scale} : {}
+      })
+    ];
+  }, [loading, arcs]);
 
   const layers = [
     new GeoArrowLayer({
@@ -176,7 +186,7 @@ export default function App({
     }),
     new ArcLayer({
       id: 'arc',
-      data: arcs,
+      data: arcs?.table ?? null,
       onDataLoad: table => {
         onArcDataLoad?.(isArrowTable(table) ? table.numRows : 0);
       },
