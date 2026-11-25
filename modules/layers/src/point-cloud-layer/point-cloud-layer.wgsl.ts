@@ -7,6 +7,7 @@ struct PointCloudUniforms {
   radiusPixels: f32,
   sizeUnits: i32,
   rowIndexOffset: u32,
+  radiusMeters: f32,
 };
 
 @group(0) @binding(0)
@@ -49,15 +50,13 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex + pointCloudUniforms.rowIndexOffset);
 
   // Find the center of the point and add the current vertex
-#ifdef ANTIALIASING
-  var offset = vec3<f32>(
-#else
-  var offset = vec3<f32>(
-#endif
-    attributes.positions.xy *
-      project_unit_size_to_pixel(pointCloudUniforms.radiusPixels, pointCloudUniforms.sizeUnits),
-    0.0
-  );
+  var radius = project_unit_size_to_pixel(pointCloudUniforms.radiusPixels, pointCloudUniforms.sizeUnits);
+  var clipScale = 1.0;
+  if (pointCloudUniforms.radiusMeters > 0.0) {
+    clipScale = max(centerResult.clipPosition.w / project.focalDistance, 0.0001);
+    radius = clamp(project_unit_size_to_pixel(pointCloudUniforms.radiusMeters, UNIT_METERS) / clipScale, radius, max(radius, 4.0));
+  }
+  var offset = vec3<f32>(attributes.positions.xy * radius, 0.0);
   DECKGL_FILTER_SIZE(&offset, geometry);
 #ifdef ANTIALIASING
   let triangleRadiusPixels = length(offset.xy);
@@ -73,7 +72,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   varyings.position = centerResult.clipPosition;
   // DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
-  let clipPixels = project_pixel_size_to_clipspace(offset.xy);
+  let clipPixels = project_pixel_size_to_clipspace(offset.xy) * clipScale;
   varyings.position.x += clipPixels.x;
   varyings.position.y += clipPixels.y;
 

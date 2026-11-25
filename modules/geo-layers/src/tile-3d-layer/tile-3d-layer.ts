@@ -66,6 +66,7 @@ const getDefaultMeshColor = (): Color => [255, 255, 255];
 const defaultProps: DefaultProps<Tile3DLayerProps> = {
   getPointColor: {type: 'accessor', value: DEFAULT_POINT_COLOR},
   pointSize: 1.0,
+  _adaptivePointSize: false,
 
   // Disable async data loading (handling it in _loadTileSet)
   data: '',
@@ -89,6 +90,9 @@ type _Tile3DLayerProps<DataT> = {
 
   /** Global radius of all points in pixels. **/
   pointSize?: number;
+
+  /** Experimental. Project point tile geometric error into a bounded screen-space radius. */
+  _adaptivePointSize?: boolean;
 
   /** A loader which is used to decode the fetched tiles.
    * @deprecated Use `loaders` instead
@@ -357,7 +361,14 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       }
     };
 
-    const {pointSize, getPointColor} = this.props;
+    const {pointSize, _adaptivePointSize, getPointColor} = this.props;
+    const geometricError = tileHeader.lodMetricValue;
+    const radiusMeters =
+      _adaptivePointSize &&
+      tileHeader.lodMetricType === 'geometricError' &&
+      Number.isFinite(geometricError)
+        ? Math.max(0, geometricError * 0.5)
+        : 0;
     let color = getPointColor;
     if (!constantRGBA && getPointColor !== DEFAULT_POINT_COLOR && this.usesNormalizedColors()) {
       color =
@@ -368,7 +379,8 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const SubLayerClass = this.getSubLayerClass('pointcloud', PointCloudLayer);
     return new SubLayerClass(
       {
-        pointSize
+        pointSize,
+        _pointRadiusMeters: radiusMeters
       },
       this.getSubLayerProps({
         id: 'pointcloud',

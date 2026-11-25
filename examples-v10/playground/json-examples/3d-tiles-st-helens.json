@@ -22,6 +22,7 @@
     {
       "@@type": "Tile3DLayer",
       "id": "tiles-st-helens",
+      "_adaptivePointSize": true,
       "data": "https://assets.ion.cesium.com/33301/tileset.json",
       "loadOptions": {
         "core": {

@@ -43,6 +43,7 @@ const defaultProps: DefaultProps<PointCloudLayerProps> = {
   sizeUnits: 'pixels',
   pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
   antialiasing: false,
+  _pointRadiusMeters: 0,
 
   getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
   getNormal: {type: 'accessor', arrow: true, value: DEFAULT_NORMAL},
@@ -95,6 +96,9 @@ type _PointCloudLayerProps<DataT> = PointCloudColumnProps & {
    * @default 10
    */
   pointSize?: number;
+
+  /** @internal World-space radius used for adaptive 3D Tiles point sizing. */
+  _pointRadiusMeters?: number;
 
   /**
    * When enabled, computes edge coverage in the shader. When disabled, relies on render-target
@@ -290,11 +294,12 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   draw({uniforms}) {
-    const {pointSize, sizeUnits} = this.props;
+    const {pointSize, sizeUnits, _pointRadiusMeters} = this.props;
     const model = this.state.model!;
     const pointCloudProps: PointCloudProps = {
       sizeUnits: UNIT[sizeUnits],
       radiusPixels: pointSize,
+      radiusMeters: _pointRadiusMeters,
       rowIndexOffset: 0
     };
     model.shaderInputs.setProps({pointCloud: pointCloudProps});
