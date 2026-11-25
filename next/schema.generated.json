@@ -13641,6 +13641,14 @@
           "$ref": "#/definitions/StencilOperation",
           "description": "The StencilOperation performed if the fragment stencil comparison test passes but the depth comparison described by depthCompare fails."
         },
+        "stencilFront": {
+          "$ref": "#/definitions/StencilFaceState",
+          "description": "Overrides individual stencil settings for front-facing primitives."
+        },
+        "stencilBack": {
+          "$ref": "#/definitions/StencilFaceState",
+          "description": "Overrides individual stencil settings for back-facing primitives."
+        },
         "cullMode": {
           "$ref": "#/definitions/CullMode",
           "description": "Defines which polygon orientation will be culled, if any. Only applies to triangle topologies/"
@@ -13791,6 +13799,28 @@
         "decrement-wrap"
       ],
       "description": "Types of operations that can be performed on stencil buffers when various tests pass"
+    },
+    "StencilFaceState": {
+      "type": "object",
+      "properties": {
+        "compare": {
+          "$ref": "#/definitions/CompareFunction",
+          "description": "Comparison of the masked reference against the masked stored value."
+        },
+        "failOp": {
+          "$ref": "#/definitions/StencilOperation",
+          "description": "Operation on stencil failure."
+        },
+        "depthFailOp": {
+          "$ref": "#/definitions/StencilOperation",
+          "description": "Operation on stencil success followed by depth failure."
+        },
+        "passOp": {
+          "$ref": "#/definitions/StencilOperation",
+          "description": "Operation when both tests pass."
+        }
+      },
+      "description": "Comparison and operations for one stencil face. Omitted fields inherit the flat parameters."
     },
     "CullMode": {
       "type": "string",
