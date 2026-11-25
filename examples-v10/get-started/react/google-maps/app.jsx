@@ -23,50 +23,47 @@ function onClick(info) {
   }
 }
 
-function DeckOverlay() {
+function Root() {
+  // The map rendered by <Map> below; useMap works anywhere inside <APIProvider>
   const map = useMap();
 
   return (
-    <DeckGL map={map}>
-      <GeoJsonLayer
-        id="airports"
-        data={AIR_PORTS}
-        // Styles
-        filled={true}
-        pointRadiusMinPixels={2}
-        pointRadiusScale={2000}
-        getPointRadius={f => 11 - f.properties.scalerank}
-        getFillColor={[200, 0, 80, 180]}
-        // Interactive props
-        pickable={true}
-        autoHighlight={true}
-        onClick={onClick}
-      />
-      <ArcLayer
-        id="arcs"
-        data={AIR_PORTS}
-        dataTransform={d => d.features.filter(f => f.properties.scalerank < 4)}
-        // Styles
-        getSourcePosition={f => [-0.4531566, 51.4709959]} // London
-        getTargetPosition={f => f.geometry.coordinates}
-        getSourceColor={[0, 128, 200]}
-        getTargetColor={[200, 0, 80]}
-        getWidth={1}
-      />
-    </DeckGL>
-  );
-}
-
-function Root() {
-  return (
-    <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
-      <Map defaultCenter={{lat: 51.47, lng: 0.45}} defaultZoom={4} mapId={GOOGLE_MAP_ID}>
-        <DeckOverlay />
-      </Map>
-    </APIProvider>
+    <Map defaultCenter={{lat: 51.47, lng: 0.45}} defaultZoom={4} mapId={GOOGLE_MAP_ID}>
+      <DeckGL map={map}>
+        <GeoJsonLayer
+          id="airports"
+          data={AIR_PORTS}
+          // Styles
+          filled={true}
+          pointRadiusMinPixels={2}
+          pointRadiusScale={2000}
+          getPointRadius={f => 11 - f.properties.scalerank}
+          getFillColor={[200, 0, 80, 180]}
+          // Interactive props
+          pickable={true}
+          autoHighlight={true}
+          onClick={onClick}
+        />
+        <ArcLayer
+          id="arcs"
+          data={AIR_PORTS}
+          dataTransform={d => d.features.filter(f => f.properties.scalerank < 4)}
+          // Styles
+          getSourcePosition={f => [-0.4531566, 51.4709959]} // London
+          getTargetPosition={f => f.geometry.coordinates}
+          getSourceColor={[0, 128, 200]}
+          getTargetColor={[200, 0, 80]}
+          getWidth={1}
+        />
+      </DeckGL>
+    </Map>
   );
 }
 
 /* global document */
 const container = document.getElementById('app');
-createRoot(container).render(<Root />);
+createRoot(container).render(
+  <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
+    <Root />
+  </APIProvider>
+);
