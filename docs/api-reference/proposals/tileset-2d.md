@@ -143,6 +143,8 @@ Legacy `update(viewport, {zRange, modelMatrix})` drives one default consumer and
 
 Standard applications do not need a custom adapter. `Tileset2DAdapter<ViewStateT>` is useful when a source has a different tile pyramid or an application uses a non-deck view representation. Its `getTileIndices(context)` selects indices, and `getTileBoundingBox(context, index)` supplies geographic or planar bounds. The public `tile2DDeckAdapter` delegates to the same traversal utility as the compatibility layers.
 
+Adapters can optionally provide `getTileId(index)` for the cache key, `getTileZoom(index)` for the source zoom level, and `getParentIndex(index)` for the parent index. Return `null` for a tile without a parent. `getTileMetadata(context, index)` merges additional fields after `bbox`. `getTileOutline(context, index)` can return a ring of `[longitude, latitude]` positions or `null`. The ring is used only for geospatial culling and viewport-center request priority.
+
 Low-level `attachConsumer(id)`, `updateConsumer(id, selectedTiles, visibleTiles)`, and `detachConsumer(id)` control retention for custom consumers. `getTile(index, true)` starts or reuses a request; `prepareTiles()` synchronizes the tile tree before refinement. Normal `Tile2DLayer` applications must not call these methods themselves.
 
 See the [shared-tileset example](/examples-v10/shared-tile-2d-layer) for ownership, subscriptions, and multiple consumers in one application.

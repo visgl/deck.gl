@@ -20,6 +20,7 @@ import {
   getTileIndices,
   tileToBoundingBox,
   getCullBounds,
+  getTileOutlineBounds,
   transformBox
 } from './utils';
 import {Bounds, TileBoundingBox, TileIndex, ZRange} from './types';
@@ -493,13 +494,17 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
       return false;
     }
 
-    if (cullRect && this._viewport && canCullTileBoundingBox(this._viewport, tile.bbox)) {
+    if (!cullRect || !this._viewport) {
+      return true;
+    }
+    const outlineBounds = this._viewport.isGeospatial ? getTileOutlineBounds(tile.outline) : null;
+    let bbox = outlineBounds || tile.bbox;
+    if (canCullTileBoundingBox(this._viewport, bbox)) {
       const boundsArr = this._getCullBounds({
         viewport: this._viewport,
         z: this._zRange,
         cullRect
       });
-      let {bbox} = tile;
       for (const [minX, minY, maxX, maxY] of boundsArr) {
         let overlaps;
         if ('west' in bbox) {
@@ -593,29 +598,36 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     });
   }
 
-  /** Returns unique string key for a tile index */
-  getTileId(index: TileIndex) {
-    return `${index.x}-${index.y}-${index.z}`;
+  /** Returns the adapter's tile ID or the default x-y-z cache key. */
+  getTileId(index: TileIndex): string {
+    return this.opts.adapter?.getTileId?.(index) ?? `${index.x}-${index.y}-${index.z}`;
   }
 
-  /** Returns a zoom level for a tile index */
-  getTileZoom(index: TileIndex) {
-    return index.z;
+  /** Returns the adapter's source zoom level or the index's z coordinate. */
+  getTileZoom(index: TileIndex): number {
+    return this.opts.adapter?.getTileZoom?.(index) ?? index.z;
   }
 
-  /** Returns additional metadata to add to tile, bbox by default */
+  /** Returns tile bounds and any additional metadata and outline supplied by the adapter. */
   getTileMetadata(index: TileIndex): Record<string, any> {
-    const {tileSize} = this.opts;
+    const {adapter, tileSize} = this.opts;
     const viewport = this._tileViewport || this._viewport!;
+    if (!adapter) {
+      return {bbox: tileToBoundingBox(viewport, index.x, index.y, index.z, tileSize)};
+    }
+    const context = {viewState: viewport as ViewStateT, tileSize};
     return {
-      bbox: this.opts.adapter
-        ? this.opts.adapter.getTileBoundingBox({viewState: viewport as ViewStateT, tileSize}, index)
-        : tileToBoundingBox(viewport, index.x, index.y, index.z, tileSize)
+      bbox: adapter.getTileBoundingBox(context, index),
+      ...adapter.getTileMetadata?.(context, index),
+      ...(adapter.getTileOutline && {outline: adapter.getTileOutline(context, index)})
     };
   }
 
-  /** Returns index of the parent tile */
-  getParentIndex(index: TileIndex) {
+  /** Returns the parent index, or null if the tile has no parent. */
+  getParentIndex(index: TileIndex): TileIndex | null {
+    if (this.opts.adapter?.getParentIndex) {
+      return this.opts.adapter.getParentIndex(index);
+    }
     const x = Math.floor(index.x / 2);
     const y = Math.floor(index.y / 2);
     const z = index.z - 1;
@@ -694,9 +706,12 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     }
 
     try {
-      const points = this._getTileScreenCorners(tile.bbox);
+      const outline = this._viewport.isGeospatial ? tile.outline : null;
+      const points = outline
+        ? this._projectTileCoordinates(outline)
+        : this._getTileScreenCorners(tile.bbox);
       const center: [number, number] = [width / 2, height / 2];
-      if (points.length === 4) {
+      if (points.length >= (outline ? 3 : 4)) {
         if (this._isPointInPolygon(center, points)) {
           return 0;
         }
@@ -732,6 +747,11 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
             [bbox.left, bbox.bottom]
           ];
 
+    return this._projectTileCoordinates(coordinates);
+  }
+
+  /** Projects tile coordinates into the default view and keeps finite screen positions. */
+  private _projectTileCoordinates(coordinates: number[][]): [number, number][] {
     return coordinates
       .map(coordinate => this._viewport!.project(coordinate))
       .filter(([x, y]) => Number.isFinite(x) && Number.isFinite(y)) as [number, number][];
@@ -899,7 +919,11 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
 
     let index = tile.index;
     while (this.getTileZoom(index) > _minZoom) {
-      index = this.getParentIndex(index);
+      const parentIndex = this.getParentIndex(index);
+      if (parentIndex === null) {
+        return null;
+      }
+      index = parentIndex;
       const parent = this._getTile(index);
       if (parent) {
         return parent;

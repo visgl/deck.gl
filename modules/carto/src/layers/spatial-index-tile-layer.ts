@@ -95,6 +95,9 @@ export default class SpatialIndexTileLayer<
     let featureZoom = tileset.getTileZoom(featureIndex);
     while (!(featureZoom <= tileZoom)) {
       featureIndex = tileset.getParentIndex(featureIndex);
+      if (featureIndex === null) {
+        return false;
+      }
       featureZoom = tileset.getTileZoom(featureIndex);
     }
 

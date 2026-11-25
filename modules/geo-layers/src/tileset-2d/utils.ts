@@ -143,6 +143,27 @@ export function canCullTileBoundingBox(viewport: Viewport, bbox: TileBoundingBox
   return 'west' in bbox || !viewport.isGeospatial;
 }
 
+/** Returns the longitude and latitude bounds of a tile outline, if available. */
+export function getTileOutlineBounds(outline?: number[][] | null): GeoBoundingBox | null {
+  if (!outline?.length) {
+    return null;
+  }
+  let west = Infinity;
+  let east = -Infinity;
+  let south = Infinity;
+  let north = -Infinity;
+  for (const [longitude, latitude] of outline) {
+    if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
+      return null;
+    }
+    west = Math.min(west, longitude);
+    east = Math.max(east, longitude);
+    south = Math.min(south, latitude);
+    north = Math.max(north, latitude);
+  }
+  return {west, east, south, north};
+}
+
 /** Get culling bounds in world space */
 export function getCullBounds({
   viewport,
