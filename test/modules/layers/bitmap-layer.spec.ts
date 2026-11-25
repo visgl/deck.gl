@@ -5,7 +5,7 @@
 import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect, vi} from 'vitest';
 
-import {GlobeViewport, WebMercatorViewport, type Viewport} from '@deck.gl/core';
+import {GlobeViewport, WebMercatorViewport, log, type Viewport} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import {device, testLayer, testLayerAsync, testInitializeLayer} from '@deck.gl/test-utils/vitest';
 import {Timeline} from '@luma.gl/engine';
@@ -264,6 +264,26 @@ test('BitmapLayer#picking', async () => {
       }
     ]
   });
+});
+
+test('adaptive bitmap mesh coarsens a tolerance that exceeds the vertex limit', () => {
+  const warn = vi.spyOn(log, 'warn').mockReturnValue(() => {});
+  try {
+    const bounds = [
+      [0, 0, 0],
+      [0, 1000, 0],
+      [1000, 1000, 0],
+      [1000, 0, 0]
+    ];
+    const transform = ([x, y, z]) => [x, y + (x * x) / 1000, z];
+    const mesh = createMesh(bounds, 0, {transform, tolerance: 1e-4, scale: [1, 1, 1]});
+    expect(mesh.positions.length / 3).toBeGreaterThan(4);
+    expect(mesh.positions.length / 3).toBeLessThanOrEqual(65536);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toMatch(/_projectionTolerance 0.0001 needs too many vertices/);
+  } finally {
+    warn.mockRestore();
+  }
 });
 
 test('adaptive bitmap mesh preserves bilinear UVs, altitude and seed indices', () => {

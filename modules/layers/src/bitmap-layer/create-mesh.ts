@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {log} from '@deck.gl/core';
 import {lerp} from '@math.gl/core/matrix';
 import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
 
@@ -107,6 +108,9 @@ export function interpolateQuad(quad, ut: number, vt: number) {
   return lerp(lerp(quad[0], quad[1], vt), lerp(quad[3], quad[2], vt), ut);
 }
 
+/** Number of times to coarsen the tolerance (4x each) after a mesh exceeds its limits. */
+const MAX_TOLERANCE_RETRIES = 16;
+
 /** Refine in UV space so arbitrary quads retain their bilinear position mapping. */
 function createProjectedMesh(
   bounds,
@@ -116,20 +120,38 @@ function createProjectedMesh(
   const seed = createMesh(bounds, resolution);
   const uv = Float64Array.from(seed.texCoords);
   for (let i = 1; i < uv.length; i += 2) uv[i] = 1 - uv[i];
-  const refined = subdivideTriangleMesh(
-    {positions: uv, indices: seed.indices},
-    {
-      size: 2,
-      targetSize: 3,
-      tolerance,
-      transform: position => {
-        const point = interpolateQuad(bounds, position[0], position[1]);
-        const packed = transform([point[0], point[1], point[2] ?? 0]);
-        const measured = measure ? measure(packed) : packed;
-        return measured.map((value, axis) => value * scale[axis]);
+  const subdivide = (effectiveTolerance: number) =>
+    subdivideTriangleMesh(
+      {positions: uv, indices: seed.indices},
+      {
+        size: 2,
+        targetSize: 3,
+        tolerance: effectiveTolerance,
+        transform: position => {
+          const point = interpolateQuad(bounds, position[0], position[1]);
+          const packed = transform([point[0], point[1], point[2] ?? 0]);
+          const measured = measure ? measure(packed) : packed;
+          return measured.map((value, axis) => value * scale[axis]);
+        }
       }
+    );
+  // A tolerance that needs more than the vertex or triangle limit falls back to a coarser
+  // mesh, so the bitmap still draws.
+  let effectiveTolerance = tolerance;
+  let refined: ReturnType<typeof subdivideTriangleMesh> | null = null;
+  for (let attempt = 0; !refined; attempt++) {
+    try {
+      refined = subdivide(effectiveTolerance);
+    } catch (error) {
+      if (!(error instanceof RangeError) || attempt >= MAX_TOLERANCE_RETRIES) throw error;
+      effectiveTolerance *= 4;
     }
-  );
+  }
+  if (effectiveTolerance !== tolerance) {
+    log.warn(
+      `BitmapLayer: _projectionTolerance ${tolerance} needs too many vertices; using ${effectiveTolerance}`
+    )();
+  }
   const vertexCount = refined.sourcePositions.length / 2;
   const positions = new Float64Array(vertexCount * 3);
   const texCoords = new Float32Array(vertexCount * 2);
