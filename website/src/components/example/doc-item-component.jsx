@@ -4,9 +4,12 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import {ExampleLayoutContext} from './layout-context';
 
 const DemoContainer = styled.div`
   position: absolute;
+  display: flex;
+  flex-direction: column;
   overflow: hidden !important;
   left: 0;
   right: 0;
@@ -33,7 +36,9 @@ export default function DocItem({content}) {
 
   return (
     <DemoContainer key="demo">
-      <MDXComponent />
+      <ExampleLayoutContext.Provider value={true}>
+        <MDXComponent />
+      </ExampleLayoutContext.Provider>
     </DemoContainer>
   );
 }

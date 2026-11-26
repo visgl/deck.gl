@@ -2,141 +2,272 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React from 'react';
-import {Home} from '../components';
+import React, {useEffect, useRef, useState} from 'react';
+import Link from '@docusaurus/Link';
+import {PageMetadata} from '@docusaurus/theme-common';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import styled from 'styled-components';
+import CodeBlock from '@theme/CodeBlock';
 import Layout from '@theme/Layout';
+import HeroMap from '../components/home/hero-map';
 
-import HeroExample from '../examples/home-demo';
+import styles from './index.module.css';
 
-const FeatureImage = styled.div`
-  position: absolute;
-  height: 100%;
-  width: 50%;
-  top: 0;
-  right: 0;
-  z-index: -1;
-  border-top: solid 200px transparent;
-  background-image: url(${props => props.src});
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: right top;
+const heroImage = '/images/header-bg.jpg';
+const description =
+  'Build interactive maps, globes, and 3D visualizations with deck.gl, an open-source GPU framework for large datasets.';
 
-  @media screen and (max-width: 768px) {
-    display: none;
+const examples = [
+  {
+    title: 'Find road crash hotspots',
+    description: 'Aggregate road collision records from Great Britain into 3D hexagons.',
+    layer: 'HexagonLayer',
+    image: 'hexagon-layer.webp',
+    href: '/examples/hexagon-layer'
+  },
+  {
+    title: 'Follow flights around the world',
+    description: 'Explore global air traffic on a 3D globe.',
+    layer: 'GlobeView',
+    image: 'globe-view.webp',
+    href: '/examples/globe-view'
+  },
+  {
+    title: 'Explore Mount St. Helens',
+    description: 'Drape satellite imagery over elevation data to see the volcano in 3D.',
+    layer: 'TerrainLayer',
+    image: 'terrain-layer.webp',
+    href: '/examples/terrain-layer'
   }
-`;
+];
 
-const TextContainer = styled.div`
-  max-width: 800px;
-  padding: 64px 112px;
-  width: 70%;
-  font-size: 14px;
+const scatterplotCode = `import {Deck} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
 
-  h2 {
-    font: bold 32px/48px;
-    margin: 24px 0 16px;
-    position: relative;
-  }
-  h3 {
-    font: bold 16px/24px;
-    margin: 16px 0 0;
-    position: relative;
-  }
-  h3 > img {
-    position: absolute;
-    top: -4px;
-    width: 36px;
-    left: -48px;
-  }
-  hr {
-    border: none;
-    background: #e1e8f0;
-    height: 1px;
-    margin: 24px 0 0;
-    width: 32px;
-    height: 2px;
-  }
-  @media screen and (max-width: 768px) {
-    max-width: 100%;
-    width: 100%;
-    padding: 48px 48px 48px 80px;
-  }
-`;
+new Deck({
+  initialViewState: {longitude: -74, latitude: 40.71, zoom: 12},
+  controller: true,
+  layers: [
+    new ScatterplotLayer({
+      id: 'locations',
+      data: [{position: [-74, 40.71]}],
+      getPosition: point => point.position,
+      getRadius: 200,
+      getFillColor: [0, 185, 155]
+    })
+  ]
+});`;
 
-const EventBanner = styled.div`
-  position: sticky;
-  width: 100%;
-  top: var(--ifm-navbar-height);
-  background: #a01000;
-  padding: 12px;
-  color: #fff !important;
-`;
+function Arrow({diagonal = false}) {
+  return <span aria-hidden="true">{diagonal ? '↗' : '→'}</span>;
+}
 
-export default function IndexPage() {
-  const baseUrl = useBaseUrl('/');
+function Hero() {
+  const previewUrl = useBaseUrl('/examples-v10');
+  const quickstartUrl = useBaseUrl('/docs/get-started/getting-started');
 
   return (
-    <Layout title="Home" description="deck.gl">
-      <EventBanner >
-        Open Visualization Collaborators Summit 2026: September 9-10 @ Zurich
-        <a href="https://deck.gl/events/zurich-summit-2026/"> sign up</a>
-      </EventBanner>
-      <Home HeroExample={HeroExample}>
-        <div style={{position: 'relative'}}>
-          <FeatureImage src={`${baseUrl}images/maps.jpg`} />
-          <TextContainer>
-            <h2>
-              deck.gl is a GPU-powered framework for visual exploratory data analysis of large
-              datasets.
-            </h2>
-            <hr className="short" />
-
-            <h3>
-              <img src={`${baseUrl}images/icon-layers.svg`} />A Layered Approach to Data
-              Visualization
-            </h3>
-            <p>
-              deck.gl allows complex visualizations to be constructed by composing existing layers,
-              and makes it easy to package and share new visualizations as reusable layers. We
-              already offer a{' '}
-              <a href={`${baseUrl}docs/api-reference/layers`}>catalog of proven layers</a> and we
-              have many more in the works.
-            </p>
-
-            <h3>
-              <img src={`${baseUrl}images/icon-high-precision.svg`} />
-              High-Precision Computations in the GPU
-            </h3>
-            <p>
-              By emulating 64 bit floating point computations in the GPU, deck.gl renders datasets
-              with unparalleled accuracy and performance.
-            </p>
-
-            <h3>
-              <img src={`${baseUrl}images/icon-react.svg`} />
-              React Friendly
-            </h3>
-            <p>
-              deck.gl APIs are designed to reflect the reactive programming paradigm. Whether using
-              Vanilla JS or the React interface, it can handle efficient WebGL2/WebGPU rendering under heavy
-              data load.
-            </p>
-
-            <h3>
-              <img src={`${baseUrl}images/icon-basemap.webp`} />
-              Integration with Base Map Providers
-            </h3>
-            <p>
-              While deck.gl works standalone without a base map, it plays nicely with your favorite
-              base map libraries such as Google Maps, Mapbox, ArcGIS, MapLibre, and more. Where the base map
-              library permits, deck.gl may interleave with 3D map layers to create seamless
-              visualizations.
-            </p>
-          </TextContainer>
+    <section className={styles.hero} aria-labelledby="home-title">
+      <div className={styles.heroCopy}>
+        <a className={styles.previewLink} href={previewUrl}>
+          deck.gl v10 preview <Arrow />
+        </a>
+        <h1 id="home-title">
+          Make big data <span>explorable.</span>
+        </h1>
+        <p>{description}</p>
+        <div className={styles.actions}>
+          <a className={styles.primaryButton} href={quickstartUrl}>
+            Get started <Arrow />
+          </a>
+          <a className={styles.secondaryButton} href="#home-examples">
+            Explore examples
+          </a>
         </div>
-      </Home>
+      </div>
+      <HeroMap />
+    </section>
+  );
+}
+
+function ExampleScreenshot({src, width, height}) {
+  const placeholder = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!('IntersectionObserver' in window)) {
+      setVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      {rootMargin: '160px'}
+    );
+    observer.observe(placeholder.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const image = (
+    <img
+      src={src}
+      alt=""
+      width={width}
+      height={height}
+      loading="lazy"
+      decoding="async"
+      fetchpriority="low"
+    />
+  );
+
+  return (
+    <div className={styles.screenshot} ref={placeholder}>
+      {visible && image}
+      <noscript>{image}</noscript>
+    </div>
+  );
+}
+
+function ExampleCard({title, description, layer, image, href}) {
+  const imageUrl = useBaseUrl(`/images/home/examples/${image}`);
+
+  return (
+    <li>
+      <Link className={styles.exampleCard} to={href}>
+        <ExampleScreenshot src={imageUrl} width={704} height={396} />
+        <div className={styles.cardCopy}>
+          <span className={styles.layerName}>{layer}</span>
+          <h3>{title}</h3>
+          <p>{description}</p>
+          <span className={styles.cardArrow}>
+            <Arrow diagonal />
+          </span>
+        </div>
+      </Link>
+    </li>
+  );
+}
+
+function Examples() {
+  return (
+    <section id="home-examples" className={styles.examples} aria-labelledby="examples-title">
+      <div className={styles.wrap}>
+        <div className={styles.sectionHeading}>
+          <h2 id="examples-title">See what you can build.</h2>
+          <Link className={styles.textLink} to="/examples">
+            Browse all examples <Arrow />
+          </Link>
+        </div>
+        <ul className={styles.exampleGrid}>
+          {examples.map(example => (
+            <ExampleCard key={example.layer} {...example} />
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function Quickstart() {
+  return (
+    <section className={styles.quickstart} aria-labelledby="quickstart-title">
+      <div className={`${styles.wrap} ${styles.quickstartGrid}`}>
+        <div>
+          <h2 id="quickstart-title">Start with one layer.</h2>
+          <p>
+            Map your data to positions, colors, and sizes. Combine layers for paths, polygons,
+            terrain, and more in the same view.
+          </p>
+          <code className={styles.installCommand}>npm install @deck.gl/core @deck.gl/layers</code>
+          <div className={styles.guideLinks}>
+            <Link className={styles.textLink} to="/docs/get-started/using-standalone">
+              JavaScript quickstart <Arrow />
+            </Link>
+            <Link className={styles.textLink} to="/docs/get-started/using-with-react">
+              Use with React <Arrow />
+            </Link>
+          </div>
+          <p className={styles.basemaps}>
+            Use deck.gl on its own or{' '}
+            <Link to="/docs/get-started/using-with-map">add a basemap</Link> from MapLibre, Mapbox,
+            Google Maps, or ArcGIS.
+          </p>
+        </div>
+        <div className={styles.codeSample}>
+          <CodeBlock language="js" title="app.js">
+            {scatterplotCode}
+          </CodeBlock>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ReleasePreview() {
+  const imageUrl = useBaseUrl('/images/examples/v10/gpu-graph-explorer.jpg');
+
+  return (
+    <section className={styles.release} aria-labelledby="release-title">
+      <div className={`${styles.wrap} ${styles.releasePanel}`}>
+        <div className={styles.releaseCopy}>
+          <h2 id="release-title">Preview deck.gl v10.</h2>
+          <p>
+            Stream Apache Arrow data as it arrives, shape it with SQL, and try new WebGPU compute
+            workflows. Explore these capabilities in the experimental v10 gallery.
+          </p>
+          <div className={styles.actions}>
+            <Link className={styles.primaryButton} to="/examples-v10">
+              Explore v10 examples <Arrow />
+            </Link>
+            <Link className={styles.secondaryButton} to="/docs/whats-new">
+              Read what’s new
+            </Link>
+          </div>
+        </div>
+        <Link className={styles.releaseDemo} to="/examples-v10/v10/gpu-graph-explorer">
+          <ExampleScreenshot src={imageUrl} width={1280} height={720} />
+          <div className={styles.releaseCaption}>
+            <span>
+              GPU Graph Explorer <small>WebGPU required</small>
+            </span>
+            <Arrow diagonal />
+          </div>
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+export default function IndexPage() {
+  const showcaseUrl = useBaseUrl('/showcase');
+
+  return (
+    <Layout title="GPU-powered maps and data visualization" description={description}>
+      <PageMetadata image={heroImage} />
+      <main className={styles.home}>
+        <Hero />
+        <section className={styles.proof} aria-labelledby="proof-title">
+          <div className={`${styles.wrap} ${styles.proofRow}`}>
+            <h2 id="proof-title">Built with deck.gl</h2>
+            <ul className={styles.projects}>
+              <li>Kepler.gl</li>
+              <li>SandDance</li>
+              <li>Flowmap.blue</li>
+              <li>ProPublica’s The Bad Bet</li>
+            </ul>
+            <a className={styles.textLink} href={showcaseUrl}>
+              See the showcase <Arrow />
+            </a>
+          </div>
+        </section>
+        <Examples />
+        <Quickstart />
+        <ReleasePreview />
+      </main>
     </Layout>
   );
 }

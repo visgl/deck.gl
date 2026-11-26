@@ -1,0 +1,229 @@
+/* deck.gl
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) vis.gl contributors
+ */
+
+.scene {
+  --taxi-poster: var(--taxi-still-wide);
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 63% 36%, #142e37, #09171f 76%);
+}
+
+.scene::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(90deg, #07101499 0%, #07101480 40%, #07101420 67%, transparent);
+  content: '';
+  pointer-events: none;
+}
+
+.preview,
+.preview img,
+.canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.preview img {
+  object-fit: cover;
+  object-position: center;
+  visibility: var(--taxi-preview-visibility, inherit);
+}
+
+.preview {
+  z-index: 1;
+  background-image: var(--taxi-still, none);
+  background-position: center;
+  background-size: cover;
+  pointer-events: none;
+}
+
+.playbackToggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scene:is([data-preview-paused], :not([data-state='ready']):has(.playbackToggle:not(:checked))) {
+    --taxi-still: var(--taxi-poster);
+    --taxi-preview-visibility: hidden;
+  }
+}
+
+.canvas {
+  visibility: hidden;
+}
+
+.scene[data-state='ready'] .preview {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 400ms ease-in-out,
+    visibility 0s linear 400ms;
+}
+
+.scene[data-state='ready'] .canvas {
+  visibility: visible;
+}
+
+.canvas:focus-visible {
+  outline: 2px solid var(--hero-accent);
+  outline-offset: -3px;
+}
+
+.caption {
+  position: absolute;
+  z-index: 2;
+  inset: auto 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  padding: 4.25rem max(3rem, calc((100vw - 80rem) / 2)) 1.4rem;
+  background: linear-gradient(transparent, #081217 64%);
+  pointer-events: none;
+}
+
+.caption strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.instructions,
+.attribution {
+  color: var(--hero-muted);
+  font-size: 0.8rem;
+}
+
+.instructions {
+  min-height: 1.2rem;
+}
+
+.attribution {
+  margin-top: 0.2rem;
+  font-size: 0.7rem;
+}
+
+.caption a,
+.caption button,
+.caption label {
+  pointer-events: auto;
+}
+
+.attribution a {
+  color: inherit;
+}
+
+.touchHint {
+  display: none;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.controls a,
+.controls button,
+.playbackLabel {
+  display: inline-flex;
+  min-height: 2.45rem;
+  align-items: center;
+  gap: 0.45rem;
+  padding-inline: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--hero-muted);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.playbackLabel {
+  border-color: var(--hero-border);
+  background: #12232aaa;
+}
+
+.playbackLabel::before {
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  content: '';
+}
+
+.playbackToggle:checked ~ .caption .playbackLabel {
+  color: var(--hero-ink);
+}
+
+.playbackToggle:checked ~ .caption .playbackLabel::before {
+  border-color: var(--hero-accent);
+  background: var(--hero-accent);
+}
+
+.controls a:hover,
+.controls button:hover,
+.playbackLabel:hover {
+  color: var(--hero-accent);
+}
+
+.caption button:focus-visible,
+.playbackToggle:focus-visible ~ .caption .playbackLabel {
+  outline: 2px solid var(--hero-accent);
+  outline-offset: 4px;
+}
+
+@media (max-width: 760px) {
+  .scene {
+    --taxi-poster: var(--taxi-still-mobile);
+  }
+
+  .scene::after {
+    background: linear-gradient(#071014a0, #07101478 49%, transparent 75%);
+  }
+
+  .caption {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-inline: 1.125rem;
+  }
+}
+
+@media (hover: none) {
+  .pointerHint {
+    display: none;
+  }
+
+  .touchHint {
+    display: inline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene:not([data-state='ready']) .playbackToggle,
+  .scene:not([data-state='ready']) .playbackLabel {
+    display: none;
+  }
+
+  .scene[data-state='ready'] .preview {
+    transition: none;
+  }
+}

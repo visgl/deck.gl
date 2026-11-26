@@ -2,15 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  Children,
-  isValidElement,
-  cloneElement
-} from 'react';
+import React, {useState, useEffect, useCallback, useMemo, useContext} from 'react';
 import styled from 'styled-components';
 import InfoPanel from '../info-panel';
 import {loadData, joinPath} from '../../utils/data-utils';
@@ -19,8 +11,9 @@ import {cloneMapStyle, MAPBOX_STYLES} from '../../constants/defaults';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import {DeviceTabs} from '../device-tabs';
 import {useStore} from '../../store/device-store';
+import {ExampleLayoutContext} from './layout-context';
 
-// Stacks the device tabs above the demo, so the demo fills the remaining height
+// Embedded examples need their own column when the gallery does not provide one.
 const ExampleLayout = styled.div`
   display: flex;
   flex-direction: column;
@@ -100,7 +93,8 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
 
   const defaultData = Array.isArray(DemoComponent.data) ? DemoComponent.data.map(_ => null) : null;
 
-  return function () {
+  return function Example() {
+    const hasExampleLayout = useContext(ExampleLayoutContext);
     const [data, setData] = useState(defaultData);
     const [params, setParams] = useState(defaultParams);
     const [meta, setMeta] = useState({});
@@ -171,8 +165,8 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
       }
     };
 
-    return (
-      <ExampleLayout>
+    const example = (
+      <>
         {DemoComponent.hasDeviceTabs && <DeviceTabs />}
         <DemoContainer style={style}>
           {/*
@@ -206,7 +200,9 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
 
           {isInteractive && mapStyle && <MapTip>Hold down shift to rotate</MapTip>}
         </DemoContainer>
-      </ExampleLayout>
+      </>
     );
+
+    return hasExampleLayout ? example : <ExampleLayout>{example}</ExampleLayout>;
   };
 }
