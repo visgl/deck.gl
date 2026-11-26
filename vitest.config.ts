@@ -60,11 +60,11 @@ const rootDir = import.meta.dirname;
 // These prototypes require locally linked, unpublished luma.gl peers.
 const includePrivateModules = process.env.DECK_GL_PRIVATE_MODULES === 'true';
 const privateNodeTests = includePrivateModules
-  ? ['modules/proposals/test/layers/**/*.node.spec.ts']
+  ? ['examples-v10/proposals/gpu-graph-explorer/test/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts']
   : [];
 const privateBrowserTests = includePrivateModules
   ? ['examples-v10/proposals/gpu-graph-explorer/test/**/*.spec.ts', 'modules/proposals/test/layers/**/*.spec.ts']
-  : renderTestDevice === 'webgpu' ? ['examples-v10/proposals/gpu-graph-explorer/test/**/*.spec.ts'] : [];
+  : [];
 
 // Tests that were commented out or never imported in the original test suite
 // These need to be fixed before being included
@@ -206,7 +206,7 @@ const projects = [
         test: {
           name: 'node',
           environment: 'node',
-          include: ['test/modules/**/*.node.spec.ts', 'examples-v10/proposals/gpu-graph-explorer/test/**/*.node.spec.ts', ...privateNodeTests],
+          include: ['test/modules/**/*.node.spec.ts', ...privateNodeTests],
           globals: false,
           testTimeout: 30000,
           setupFiles: ['./test/setup/vitest-node-setup.ts'],
