@@ -114,10 +114,10 @@ The table below covers the public extensions in `@deck.gl/extensions`. All liste
 
 The table below covers the public effect classes exported by `@deck.gl/core`.
 
-| Module          | Effect              | WebGL | WebGPU | Notes                                                                                                                                        |
-| --------------- | ------------------- | ----- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@deck.gl/core` | `LightingEffect`    | ✅    | 🚧     | Material lighting modules have WGSL support, but the shadow path still depends on the GLSL-only `shadow` shader module.                      |
-| `@deck.gl/core` | `PostProcessEffect` | ✅    | ❌     | The current screen-pass chain is still generated from GLSL fragment shader templates and is not WebGPU-ready as a supported deck.gl feature. |
+| Module          | Effect              | WebGL | WebGPU | Notes                                                                                                                   |
+| --------------- | ------------------- | ----- | ------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `@deck.gl/core` | `LightingEffect`    | ✅    | 🚧     | Material lighting modules have WGSL support, but the shadow path still depends on the GLSL-only `shadow` shader module. |
+| `@deck.gl/core` | `PostProcessEffect` | ✅    | ✅     | WebGPU requires shader passes with WGSL source.                                                                         |
 
 ## Features[​](#features "Direct link to Features")
 

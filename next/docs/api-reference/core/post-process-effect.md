@@ -15,6 +15,8 @@ Parameters:
 * `shaderModule`(object) - a shader module wraps a screen space effect. For supported effects see [luma.gl shader modules](https://luma.gl/docs/api-reference/shadertools/shader-passes/image-processing).
 * `props`(object) - parameters to replace the default values in shader module.
 
+WebGPU requires a shader module with WGSL source. Dual-backend passes such as `zoomBlur` and `vignette` from `@luma.gl/engine/effects` work on both WebGPU and WebGL.
+
 ## Example[​](#example "Direct link to Example")
 
 ```
