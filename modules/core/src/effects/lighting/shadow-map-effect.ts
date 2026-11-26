@@ -15,6 +15,7 @@ import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import type {Effect, EffectContext, PreRenderOptions} from '../../lib/effect';
 import type Layer from '../../lib/layer';
 import LayersPass from '../../passes/layers-pass';
+import project from '../../shaderlib/project/project';
 import type Viewport from '../../viewports/viewport';
 
 const shadowMap = {
@@ -30,7 +31,7 @@ struct DeckShadowMapUniforms {
 };
 @group(0) @binding(auto) var<uniform> deckShadowMap: DeckShadowMapUniforms;
 `,
-  dependencies: [shadow],
+  dependencies: [project, shadow],
   uniformTypes: {
     caster: 'i32',
     matrix: 'mat4x4<f32>',
@@ -54,8 +55,13 @@ if (geometry.position.w != 0.0 && deckShadowMap.unitsPerMeter > 0.0) {
   let centeredPosition = geometry.position.xyz + (project.commonOrigin - deckShadowMap.commonOrigin);
   deckShadowMap_position = vec4f(centeredPosition / deckShadowMap.unitsPerMeter, 1.0);
   deckShadowMap_normal = geometry.normal;
-  if (deckShadowMap.caster != 0) {
+}
+if (deckShadowMap.caster != 0) {
+  // Vertices without a common-space position must not cast in camera clip space.
+  if (deckShadowMap_position.w > 0.0) {
     *position = deckShadowMap.matrix * deckShadowMap_position;
+  } else {
+    *position = vec4f(0.0, 0.0, 2.0, 1.0);
   }
 }
 `,
@@ -90,11 +96,9 @@ export class ShadowMapEffect implements Effect {
   private renderer?: ShadowMapRenderer;
   private fallbackRenderer?: ShadowMapRenderer;
   private isPicking = false;
-  private passes?: CascadeCasterPass;
+  private casterPass?: CascadeCasterPass;
   private emptyShadowProps?: ShadowShaderProps;
-  private shadowProps?: ShadowShaderProps;
-  private camera?: ShadowCamera;
-  private viewport?: Viewport;
+  private frame?: {shadow: ShadowShaderProps; camera: ShadowCamera; viewport: Viewport};
 
   constructor(public props: ShadowMapEffectProps) {}
 
@@ -121,12 +125,13 @@ export class ShadowMapEffect implements Effect {
       camera: {viewMatrix: new Matrix4(), projectionMatrix: new Matrix4(), near: 0.1, far: 1},
       drawShadowCasters: () => {}
     });
-    this.passes = new CascadeCasterPass(device);
+    this.casterPass = new CascadeCasterPass(device);
     deck._addDefaultShaderPlugin(plugin);
   }
 
   setProps(props: ShadowMapEffectProps): void {
     this.props = props;
+    this.frame = undefined;
     this.renderer?.setProps({quality: props.quality});
   }
 
@@ -134,34 +139,34 @@ export class ShadowMapEffect implements Effect {
     const viewport = options.viewports[0];
     this.isPicking = Boolean(options.isPicking);
     if (this.isPicking || !this.renderer) return;
-    if (!viewport || options.viewports.length !== 1 || viewport.subViewports?.length) {
-      this.shadowProps = undefined;
-      return;
-    }
+    this.frame = undefined;
+    if (!viewport || options.viewports.length !== 1 || viewport.subViewports?.length) return;
 
     const camera = getCamera(viewport);
-    this.camera = camera;
-    this.viewport = viewport;
+    if (!camera) return;
     const [x, y, z] = this.props.direction;
     const {device} = this.renderer;
-    this.shadowProps = this.renderer.render({
+    const shadowProps = this.renderer.render({
       camera,
       directionalLights: [{direction: [-x, -y, -z]}],
       // Layers update the same uniform buffers for every cascade.
       prepareShadowCasters: () => device.submit(),
-      drawShadowCasters: view => this.passes!.draw(view, viewport, options, this.emptyShadowProps!)
+      drawShadowCasters: view =>
+        this.casterPass!.draw(view, viewport, options, this.emptyShadowProps!)
     });
     device.submit();
+    this.frame = {shadow: shadowProps, camera, viewport};
   }
 
   getShaderModuleProps() {
+    const frame = this.isPicking ? undefined : this.frame;
     return {
-      shadow: (this.isPicking ? undefined : this.shadowProps) ?? this.emptyShadowProps,
+      shadow: frame?.shadow ?? this.emptyShadowProps,
       deckShadowMap: {
         caster: 0,
-        viewMatrix: this.camera?.viewMatrix,
+        viewMatrix: frame?.camera.viewMatrix,
         color: this.props.shadowColor ?? [0, 0, 0, 0.6],
-        ...getCommonSpace(this.viewport)
+        ...getCommonSpace(frame?.viewport)
       }
     };
   }
@@ -170,10 +175,9 @@ export class ShadowMapEffect implements Effect {
     this.renderer?.destroy();
     this.fallbackRenderer?.destroy();
     this.renderer = this.fallbackRenderer = undefined;
-    this.passes = undefined;
-    this.emptyShadowProps = this.shadowProps = undefined;
-    this.camera = undefined;
-    this.viewport = undefined;
+    this.casterPass = undefined;
+    this.emptyShadowProps = undefined;
+    this.frame = undefined;
     deck._removeDefaultShaderPlugin(plugin);
   }
 }
@@ -220,7 +224,7 @@ function getCommonSpace(viewport?: Viewport) {
   };
 }
 
-function getCamera(viewport: Viewport): ShadowCamera {
+function getCamera(viewport: Viewport): ShadowCamera | null {
   const {viewMatrix, projectionMatrix} = viewport;
   const {unitsPerMeter, commonOrigin} = getCommonSpace(viewport);
   const viewUnitsPerMeter =
@@ -228,6 +232,12 @@ function getCamera(viewport: Viewport): ShadowCamera {
   const depth = projectionMatrix[10];
   const translation = projectionMatrix[14];
   const perspective = projectionMatrix[11] !== 0;
+  const near =
+    (perspective ? translation / (depth - 1) : (translation + 1) / depth) / viewUnitsPerMeter;
+  const far =
+    (perspective ? translation / (depth + 1) : (translation - 1) / depth) / viewUnitsPerMeter;
+  // Luma fits cascades only for a positive, finite camera depth range.
+  if (!(near > 0 && far > near && Number.isFinite(far))) return null;
   return {
     viewMatrix: new Matrix4()
       .scale(1 / viewUnitsPerMeter)
@@ -235,7 +245,7 @@ function getCamera(viewport: Viewport): ShadowCamera {
       .translate(commonOrigin)
       .scale(unitsPerMeter),
     projectionMatrix: new Matrix4(projectionMatrix).scale(viewUnitsPerMeter),
-    near: (perspective ? translation / (depth - 1) : (translation + 1) / depth) / viewUnitsPerMeter,
-    far: (perspective ? translation / (depth + 1) : (translation - 1) / depth) / viewUnitsPerMeter
+    near,
+    far
   };
 }

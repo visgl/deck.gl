@@ -22,4 +22,4 @@ const deck = new Deck({
 - `quality` is `'low'`, `'balanced'`, or `'cinematic'`. Higher quality increases the shadow-map resolution and sampling cost. The default is `'balanced'`.
 - `shadowColor` is a normalized RGBA tint. The default is `[0, 0, 0, 0.6]`.
 
-The effect currently supports one WebGPU viewport. Set `shadowEnabled: false` on a layer that should receive shadows without casting them. Leave the experimental `DirectionalLight._shadow` option disabled when using this effect, since that option selects the shadow pass built into `LightingEffect`.
+The effect renders shadows for one WebGPU viewport with a finite, positive camera depth range. Set `repeat: false` when using a map view with world wrapping. Set `shadowEnabled: false` on a layer that should receive shadows without casting them. Leave the experimental `DirectionalLight._shadow` option disabled when using this effect, since that option selects the shadow pass built into `LightingEffect`.

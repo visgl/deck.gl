@@ -19,7 +19,7 @@ import {MaskExtension} from '@deck.gl/extensions';
 
 import {CubeGeometry} from '@luma.gl/engine';
 import {polygons} from 'deck.gl-test/data';
-import {describe} from 'vitest';
+import {describe, expect} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import {expandViewMatrix} from '../view-presets';
 import type {TestCase} from '../deck-test-utils';
@@ -438,10 +438,19 @@ runRenderTestSuite(
       name: 'cascaded-shadow-map',
       goldenImage: './test/render/golden-images/cascaded-shadow-map.png',
       layers: baseShadowTest.layers.map(layer =>
-        layer.id === 'ground' && layer instanceof SimpleMeshLayer
-          ? layer.clone({shadowEnabled: false})
+        layer instanceof SimpleMeshLayer
+          ? layer.clone({shadowEnabled: layer.id !== 'ground', pickable: layer.id === 'box'})
           : layer
       ),
+      onAfterRender: async ({deck, done}) => {
+        try {
+          const [x, y] = deck.getViewports()[0].project([-122.4, 37.74, 80]);
+          const picked = await deck.pickObjectAsync({x, y});
+          expect(picked?.layer?.id).toBe('box');
+        } finally {
+          done();
+        }
+      },
       effects: [
         new LightingEffect({
           ambientLight: new AmbientLight({intensity: 1}),
