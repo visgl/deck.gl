@@ -41,10 +41,6 @@ export {
   type ArrowTripsLayerProps
 } from './arrow-trips-layer';
 export {
-  ArrowSolidPolygonLayer,
-  type ArrowSolidPolygonLayerProps
-} from './arrow-solid-polygon-layer';
-export {
   GeoArrowLayer,
   resolveGeoArrowGeometry,
   type GeoArrowLayerGeometryType,
