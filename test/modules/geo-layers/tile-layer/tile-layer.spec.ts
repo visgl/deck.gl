@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {LayerManager, MapView, WebMercatorViewport} from '@deck.gl/core';
+import {CompositeLayer, LayerManager, MapView, WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {device, generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils/vitest';
 import {TileLayer} from '@deck.gl/geo-layers';
@@ -267,14 +267,24 @@ test('TileLayer#MapView:repeat', async () => {
   });
 });
 
+/** A composite sublayer with data that can settle separately from the tile request. */
+class AsyncTileSubLayer extends CompositeLayer {
+  static layerName = 'AsyncTileSubLayer';
+
+  /** No draw layers are needed to exercise async data loading. */
+  renderLayers() {
+    return null;
+  }
+}
+
 /** A tile renderer that combines the selected tiles into one layer. */
-class AggregateTileLayer extends TileLayer {
+class AggregateTileLayer extends TileLayer<unknown, {aggregateSubLayer?: CompositeLayer | null}> {
   static layerName = 'AggregateTileLayer';
 
   /** Render an aggregate without storing a separate sublayer on each tile. */
   renderLayers() {
     return this.state.tileset?.selectedTiles?.some(tile => tile.content)
-      ? new ScatterplotLayer({data: [{position: [0, 0]}]})
+      ? (this.props.aggregateSubLayer ?? null)
       : null;
   }
 }
@@ -282,15 +292,22 @@ class AggregateTileLayer extends TileLayer {
 test.each([
   {name: 'TileLayer', Layer: TileLayer},
   {name: 'AggregateTileLayer', Layer: AggregateTileLayer}
-])('$name waits for sublayers after tile data resolves', async ({Layer}) => {
+])('$name waits for async sublayers after tile data resolves', async ({Layer}) => {
   const viewport = new WebMercatorViewport({width: 100, height: 100, zoom: 0});
   const layerManager = new LayerManager(device, {viewport});
-  const readinessAtLoad: boolean[] = [];
+  let resolveSublayerData!: (data: object[]) => void;
+  const sublayerData = new Promise<object[]>(resolve => {
+    resolveSublayerData = resolve;
+  });
+  const readinessAtTileLoad: boolean[] = [];
+  const readinessAtViewportLoad: boolean[] = [];
   const layer = new Layer({
     data: [],
     getTileData: () => [{position: [0, 0]}],
-    renderSubLayers: props => new ScatterplotLayer(props),
-    onTileLoad: () => readinessAtLoad.push(layer.isLoaded)
+    renderSubLayers: ({id}) => new AsyncTileSubLayer({id, data: sublayerData}),
+    aggregateSubLayer: new AsyncTileSubLayer({id: 'aggregate', data: sublayerData}),
+    onTileLoad: () => readinessAtTileLoad.push(layer.isLoaded),
+    onViewportLoad: () => readinessAtViewportLoad.push(layer.isLoaded)
   });
 
   try {
@@ -304,10 +321,42 @@ test.each([
     expect(tile.isLoaded).toBe(true);
     expect(tile.layers).toBeNull();
     expect(layer.isLoaded).toBe(false);
-    expect(readinessAtLoad).toEqual([false]);
+    expect(readinessAtTileLoad).toEqual([false]);
 
     layerManager.updateLayers();
     expect(layer.getSubLayers()).toHaveLength(1);
+    expect(layer.getSubLayers()[0].isLoaded).toBe(false);
+    expect(layer.isLoaded).toBe(false);
+    expect(readinessAtViewportLoad).toEqual([false]);
+
+    resolveSublayerData([]);
+    await sublayerData;
+    layerManager.updateLayers();
+    expect(layer.getSubLayers()[0].isLoaded).toBe(true);
+    expect(layer.isLoaded).toBe(true);
+    expect(readinessAtViewportLoad).toEqual([false]);
+  } finally {
+    layerManager.finalize();
+  }
+});
+
+test('TileLayer readiness with deliberately empty aggregate output', async () => {
+  const viewport = new WebMercatorViewport({width: 100, height: 100, zoom: 0});
+  const layerManager = new LayerManager(device, {viewport});
+  const layer = new AggregateTileLayer({
+    data: [],
+    getTileData: () => [{position: [0, 0]}]
+  });
+
+  try {
+    layerManager.setLayers([layer]);
+    const [tile] = layer.state.tileset!.selectedTiles!;
+    await tile.data;
+    expect(layer.isLoaded).toBe(false);
+
+    layerManager.updateLayers();
+    expect(tile.layers).toBeNull();
+    expect(layer.getSubLayers()).toHaveLength(0);
     expect(layer.isLoaded).toBe(true);
   } finally {
     layerManager.finalize();

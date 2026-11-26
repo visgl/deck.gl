@@ -236,6 +236,14 @@ A few props behaved differently with `undefined`. To keep that behavior, pass th
 
 `null` is unchanged. Props without a default are also unchanged.
 
+### TileLayer readiness
+
+`TileLayer.isLoaded` now waits for visible tiles to finish creating and loading their sublayers.
+The [onViewportLoad](./api-reference/geo-layers/tile-layer.md#onviewportload) callback still runs
+when tile data has loaded, so `isLoaded` can be `false` when it fires. If you use this callback to
+trigger a screenshot or another action that needs the rendered tiles, check `isLoaded` in a
+later [Deck `onAfterRender`](./api-reference/core/deck.md#onafterrender) callback.
+
 ## Upgrading to v9.4
 
 ### GlobeView meter offsets

@@ -97,7 +97,10 @@ type _TileLayerProps<DataT> = {
    */
   getTileData?: ((props: TileLoadProps) => Promise<DataT> | DataT) | null;
 
-  /** Called when all tiles in the current viewport are loaded. */
+  /**
+   * Called when tile data in the current viewport has loaded.
+   * Sublayers can still be pending when this callback runs.
+   */
   onViewportLoad?: ((tiles: Tile2DHeader<DataT>[]) => void) | null;
 
   /** Called when a tile successfully loads. */
@@ -230,22 +233,41 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     this.state?.tileset?.finalize();
   }
 
+  /** Returns true after selected tiles and their required sublayers have loaded. */
   get isLoaded(): boolean {
+    const selectedTiles = this.state?.tileset?.selectedTiles;
+    if (!selectedTiles) {
+      return false;
+    }
+
     const {internalState} = this;
     const viewport = internalState?.viewport ?? this.context?.viewport;
+    const visible = !viewport || !this._isHiddenByZoom(viewport.zoom);
     const waitingForRender =
-      (internalState?.needsUpdate || internalState?.changeFlags.viewportChanged) &&
-      (!viewport || !this._isHiddenByZoom(viewport.zoom));
-    return Boolean(
-      this.state?.tileset?.selectedTiles?.every(
-        tile =>
-          // Empty or failed tiles have nothing to render. Aggregate renderers may also leave
-          // tile.layers unset after the queued update has run.
-          tile.isLoaded &&
-          (!tile.content ||
-            (tile.layers ? tile.layers.every(layer => layer.isLoaded) : !waitingForRender))
-      )
-    );
+      internalState?.needsUpdate || internalState?.changeFlags.viewportChanged;
+    let hasAggregateOutput = false;
+
+    for (const tile of selectedTiles) {
+      if (!tile.isLoaded) {
+        return false;
+      }
+      if (!tile.content) {
+        continue;
+      }
+      if (tile.layers) {
+        if (!tile.layers.every(layer => layer.isLoaded)) {
+          return false;
+        }
+      } else if (visible) {
+        if (waitingForRender) {
+          return false;
+        }
+        // Aggregate renderers leave tile.layers unset after rendering.
+        hasAggregateOutput = true;
+      }
+    }
+
+    return !hasAggregateOutput || this.getSubLayers().every(layer => layer.isLoaded);
   }
 
   shouldUpdateState({changeFlags}): boolean {

@@ -383,10 +383,13 @@ Affects both rendering and tile fetching to produce a transformed tile layer.  N
 
 #### `onViewportLoad` (Function, optional) {#onviewportload}
 
-`onViewportLoad` is a function that is called when all tiles in the current viewport are loaded. An array of loaded [Tile](#tile) instances are passed as argument to this function
+Called when tile data for the current viewport has loaded. The callback receives an array of loaded [Tile](#tile) instances.
 
+`TileLayer.isLoaded` can still be `false` during this callback while visible tiles await their
+sublayers. For work that depends on rendering, such as taking a screenshot, check `isLoaded`
+in a later [Deck `onAfterRender`](../core/deck.md#onafterrender) callback.
 
-- Default: `data => null`
+- Default: `null`
 
 
 #### `onTileLoad` (Function, optional) {#ontileload}
