@@ -40,7 +40,7 @@ Array of [DirectionalLight](./directional-light.md) source which emits from a sp
 | 1            | [255, 255, 255] | 1.0       | [-1, -3, -1] |   false  |
 | 2            | [255, 255, 255] | 0.9       | [1, 8, -2.5] |   false  |
 
-* For rendering experimental shadow effect, `_shadow` prop of [DirectionalLight](./directional-light.md) must be set to `true`. The effect can be toggled on and off for a layer by setting layer's `shadowEnabled` prop.
+* To render experimental directional shadows on WebGL or WebGPU, `_shadow` prop of [DirectionalLight](./directional-light.md) must be set to `true`. The effect can be toggled on and off for a layer by setting layer's `shadowEnabled` prop.
 
 #### `pointLights` (PointLight[], optional) {#pointlights}
 

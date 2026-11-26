@@ -285,11 +285,43 @@ function createShadowUniforms(
   return uniforms;
 }
 
+const source = /* wgsl */ `
+struct ShadowUniforms {
+  drawShadowMap: f32,
+  useShadowMap: f32,
+  color: vec4f,
+  lightId: i32,
+  lightCount: f32,
+  viewProjectionMatrix0: mat4x4f,
+  viewProjectionMatrix1: mat4x4f,
+  projectCenter0: vec4f,
+  projectCenter1: vec4f,
+};
+@group(0) @binding(auto) var<uniform> shadow: ShadowUniforms;
+@group(0) @binding(auto) var shadow_uShadowMap0: texture_2d<f32>;
+@group(0) @binding(auto) var shadow_uShadowMap0Sampler: sampler;
+@group(0) @binding(auto) var shadow_uShadowMap1: texture_2d<f32>;
+@group(0) @binding(auto) var shadow_uShadowMap1Sampler: sampler;
+
+const shadow_packShift = vec3f(1.0, 255.0, 65025.0);
+
+fn shadow_getMapPosition(clipPosition: vec4f) -> vec3f {
+  let ndc = clipPosition.xyz / clipPosition.w;
+  return vec3f(ndc.x * 0.5 + 0.5, 0.5 - ndc.y * 0.5, ndc.z);
+}
+
+fn shadow_getWeight(position: vec3f, map: texture_2d<f32>, mapSampler: sampler) -> f32 {
+  let depth = dot(textureSampleLevel(map, mapSampler, position.xy, 0.0).rgb, 1.0 / shadow_packShift);
+  return smoothstep(0.001, 0.01, position.z - depth);
+}
+`;
+
 const shadowModule = {
   name: 'shadow',
   dependencies: [project],
   vs,
   fs,
+  source,
 
   getUniforms: createShadowUniforms,
   uniformTypes: {
@@ -330,7 +362,45 @@ type NumberArray16 = [
 export const shadowPlugin: ShaderPlugin = {
   name: 'shadow',
   module: shadowModule,
+  interStageVariables: {
+    shadow_position0: {type: 'vec3<f32>'},
+    shadow_position1: {type: 'vec3<f32>'}
+  },
   injections: {
+    'wgsl:vs:DECKGL_FILTER_GL_POSITION': /* wgsl */ `
+if (shadow.drawShadowMap != 0.0 || shadow.useShadowMap != 0.0) {
+  let lightPosition0 = project_common_position_to_clipspace_with_projection(
+    geometry.position, shadow.viewProjectionMatrix0, shadow.projectCenter0);
+  shadow_position0 = shadow_getMapPosition(lightPosition0);
+  if (shadow.drawShadowMap != 0.0 && shadow.lightId == 0) {
+    *position = lightPosition0;
+  }
+  if (shadow.lightCount > 1.0) {
+    let lightPosition1 = project_common_position_to_clipspace_with_projection(
+      geometry.position, shadow.viewProjectionMatrix1, shadow.projectCenter1);
+    shadow_position1 = shadow_getMapPosition(lightPosition1);
+    if (shadow.drawShadowMap != 0.0 && shadow.lightId == 1) {
+      *position = lightPosition1;
+      shadow_position0 = shadow_position1;
+    }
+  }
+}
+`,
+    'wgsl:fs:DECKGL_FILTER_COLOR': /* wgsl */ `
+if (shadow.drawShadowMap != 0.0) {
+  let packedDepth = fract(min(shadow_position0.z, 0.999999) * shadow_packShift);
+  // WGSL layers premultiply their output. Keep alpha opaque so RGB retains the packed depth.
+  *color = vec4f(packedDepth - vec3f(packedDepth.gb, 0.0) / 255.0, 1.0);
+} else if (shadow.useShadowMap != 0.0) {
+  var weight = shadow_getWeight(shadow_position0, shadow_uShadowMap0, shadow_uShadowMap0Sampler);
+  if (shadow.lightCount > 1.0) {
+    weight += shadow_getWeight(shadow_position1, shadow_uShadowMap1, shadow_uShadowMap1Sampler);
+  }
+  let shadowAlpha = weight * shadow.color.a / shadow.lightCount;
+  let alpha = shadowAlpha + (*color).a * (1.0 - shadowAlpha);
+  *color = vec4f(mix((*color).rgb, shadow.color.rgb, shadowAlpha / max(alpha, 1e-6)), alpha);
+}
+`,
     'glsl:vs:DECKGL_FILTER_GL_POSITION': `
     position = shadow_setVertexPosition(geometry.position);
     `,

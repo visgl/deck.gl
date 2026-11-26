@@ -33,7 +33,11 @@ export default class ShadowPass extends LayersPass {
       // mipmaps: true
     });
 
-    const depthBuffer = device.createTexture({format: 'depth16unorm', width: 1, height: 1});
+    const depthBuffer = device.createTexture({
+      format: device.type === 'webgpu' ? 'depth24plus' : 'depth16unorm',
+      width: 1,
+      height: 1
+    });
 
     this.fbo = device.createFramebuffer({
       id: 'shadowmap',

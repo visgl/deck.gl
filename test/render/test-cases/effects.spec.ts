@@ -413,10 +413,13 @@ describe.each([
   runRenderTestSuite(testCases as TestCase[], deviceType);
 });
 
-// Golden: WebGPU masking matches the WebGL map and globe images.
+// Compare WebGPU masking and directional shadows to the WebGL goldens.
 describe('webgpu', () => {
   runRenderTestSuite(
-    (testCases as TestCase[]).filter(testCase => testCase.name.startsWith('mask-effect')),
+    (testCases as TestCase[]).filter(
+      testCase =>
+        testCase.name.startsWith('mask-effect') || testCase.name.startsWith('shadow-effect')
+    ),
     'webgpu'
   );
 });
