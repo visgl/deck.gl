@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {type GPUGraphDeckEffect, type GPUGraphDeckEffectStats} from '@deck.gl/proposals/effects';
+import {type GraphExplorerEffect, type GraphExplorerEffectStats} from './graph-explorer-effect';
 import {
   GRAPH_EXPLORER_LINEAR_LAYOUT_VERTEX_COUNT,
   GRAPH_EXPLORER_MAXIMUM_EXACT_VERTEX_COUNT,
@@ -21,8 +21,8 @@ export type GraphExplorerControls = {
 };
 
 export type GraphExplorerControlProps = {
-  getEffect: () => GPUGraphDeckEffect | null;
-  getStats: () => GPUGraphDeckEffectStats | null;
+  getEffect: () => GraphExplorerEffect | null;
+  getStats: () => GraphExplorerEffectStats | null;
   getPendingVertexCount: () => number | null;
   getLoadingStatus: () => string | null;
   getEdgesVisible: () => boolean;

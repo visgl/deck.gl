@@ -90,23 +90,23 @@ adapts existing GPU results to real deck.gl layers; it does not replace the unde
 
 ## Graph effects and layers
 
-`GPUGraphDeckEffect` composes topology, vertex degree, PageRank, weak components, deterministic
+The graph explorer example’s local `GraphExplorerEffect` composes topology, vertex degree, PageRank, weak components, deterministic
 communities, neighborhood search, and progressive force layout inside deck.gl's existing frame.
 Deck owns queue submission; the effect retains original source and target edge partitions,
 including empty batches, without staging or reading graph data back to the CPU.
 
 ```ts
 import {GPUGraphEdgeLayer, GPUGraphNodeLayer} from '@deck.gl/proposals/layers';
-import {GPUGraphDeckEffect, type GPUGraphDeckDataset} from '@deck.gl/proposals/effects';
+import {GraphExplorerEffect, type GraphExplorerDataset} from './graph-explorer-effect';
 
-const dataset: GPUGraphDeckDataset = {
+const dataset: GraphExplorerDataset = {
   vertexCount,
   sourceChunks,
   targetChunks,
   positions,
   velocities
 };
-const effect = new GPUGraphDeckEffect(device, dataset);
+const effect = new GraphExplorerEffect(device, dataset);
 ```
 
 `GPUGraphNodeLayer` consumes the exact progressive position allocation alongside resident community,
@@ -122,7 +122,7 @@ keeps all 1,048,576 source vertices and 2,097,343 directed edges resident while 
 vertex and bounding visible edges to 65,536.
 
 ```ts
-const sampledEffect = new GPUGraphDeckEffect(device, dataset, {
+const sampledEffect = new GraphExplorerEffect(device, dataset, {
   layoutMode: 'sampled',
   addSampledLayoutToGraph: addApplicationOwnedSampledLayout
 });

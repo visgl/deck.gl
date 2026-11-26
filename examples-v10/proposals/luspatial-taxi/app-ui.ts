@@ -4,10 +4,10 @@
 
 import type {PickingInfo} from '@deck.gl/core';
 import {
-  LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS,
-  LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_GRAPH_IDS,
-  type LuSpatialGeographicPointQueryStats
-} from '@deck.gl/proposals/effects/query';
+  GEOGRAPHIC_POINT_QUERY_COUNTER_IDS,
+  GEOGRAPHIC_POINT_QUERY_GRAPH_IDS,
+  type GeographicPointQueryStats
+} from '@deck.gl/proposals/layers/filtered-scatterplot-layer/geographic-point-query-effect';
 import {GPUCommandGraphInspectorPanel} from '../shared/gpu-command-graph-inspector-panel';
 import {
   getTaxiPoint,
@@ -50,7 +50,7 @@ export type TaxiControlPanel = {
   setCustomZone: () => void;
   setLoadingProgress: (processedPointCount: number, totalPointCount: number) => void;
   updateSourceStatus: (status: {corpusPointCount?: number; message: string}) => void;
-  updateStats: (stats: LuSpatialGeographicPointQueryStats) => void;
+  updateStats: (stats: GeographicPointQueryStats) => void;
 };
 
 export type TaxiLoadingIndicator = {
@@ -240,16 +240,16 @@ export function createControlPanel(
   const graphInspectorElement = root.querySelector<HTMLElement>('[data-graph-inspector]')!;
   const graphInspectorPanel = new GPUCommandGraphInspectorPanel(graphInspectorElement, {
     graphLabels: {
-      [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_GRAPH_IDS.build]: 'luProj projection + grid build',
-      [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_GRAPH_IDS.query]: 'Viewport + radius queries'
+      [GEOGRAPHIC_POINT_QUERY_GRAPH_IDS.build]: 'luProj projection + grid build',
+      [GEOGRAPHIC_POINT_QUERY_GRAPH_IDS.query]: 'Viewport + radius queries'
     },
     counterLabels: {
-      [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.viewportIntersectedCells]: 'Viewport cells',
-      [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.viewportCandidates]: 'Viewport candidates',
-      [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.viewportMatches]: 'Viewport matches',
-      [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.selectionIntersectedCells]: 'Selection cells',
-      [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.selectionCandidates]: 'Selection candidates',
-      [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.selectionMatches]: 'Selection matches'
+      [GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.viewportIntersectedCells]: 'Viewport cells',
+      [GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.viewportCandidates]: 'Viewport candidates',
+      [GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.viewportMatches]: 'Viewport matches',
+      [GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.selectionIntersectedCells]: 'Selection cells',
+      [GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.selectionCandidates]: 'Selection candidates',
+      [GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.selectionMatches]: 'Selection matches'
     }
   });
 
@@ -381,10 +381,7 @@ export function createControlPanel(
       visibleElement.textContent = formatCount(stats.visiblePointCount);
       selectedElement.textContent = formatCount(stats.selectedPointCount);
       queryTimeElement.textContent = `${stats.queryEncodingMilliseconds.toFixed(2)} ms`;
-      graphInspectorPanel.update(
-        stats.inspectorSnapshot,
-        LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_GRAPH_IDS.query
-      );
+      graphInspectorPanel.update(stats.inspectorSnapshot, GEOGRAPHIC_POINT_QUERY_GRAPH_IDS.query);
     }
   };
 }

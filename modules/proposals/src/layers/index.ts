@@ -5,7 +5,7 @@
 export {
   FilteredScatterplotLayer,
   type FilteredScatterplotLayerProps
-} from './filtered-scatterplot-layer';
+} from './filtered-scatterplot-layer/filtered-scatterplot-layer';
 export {GPUScatterplotLayer, type GPUScatterplotLayerProps} from './gpu-scatterplot-layer';
 export {GPUIconLayer, type GPUIconLayerProps} from './gpu-icon-layer';
 export type {GPUVectorLayerPickingInfo} from './gpu-vector-layer-utils';

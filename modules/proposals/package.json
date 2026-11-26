@@ -35,15 +35,10 @@
       "import": "./dist/layers/text-layer/text-layer.js",
       "require": "./dist/layers/text-layer/text-layer.cjs"
     },
-    "./effects": {
-      "types": "./dist/effects/index.d.ts",
-      "import": "./dist/effects/index.js",
-      "require": "./dist/effects/index.cjs"
-    },
-    "./effects/query": {
-      "types": "./dist/effects/query/index.d.ts",
-      "import": "./dist/effects/query/index.js",
-      "require": "./dist/effects/query/index.cjs"
+    "./layers/filtered-scatterplot-layer/geographic-point-query-effect": {
+      "types": "./dist/layers/filtered-scatterplot-layer/geographic-point-query-effect.d.ts",
+      "import": "./dist/layers/filtered-scatterplot-layer/geographic-point-query-effect.js",
+      "require": "./dist/layers/filtered-scatterplot-layer/geographic-point-query-effect.cjs"
     }
   },
   "files": [

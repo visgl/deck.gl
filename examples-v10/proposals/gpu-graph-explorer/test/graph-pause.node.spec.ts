@@ -3,10 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {GPUGraphDeckEffect} from '../../../src/effects/gpu-graph/gpu-graph-effect';
+import {GraphExplorerEffect} from '../graph-explorer-effect';
 
 test('paused graph draws do not advance layout while selection still updates', () => {
-  const effect = Object.create(GPUGraphDeckEffect.prototype);
+  const effect = Object.create(GraphExplorerEffect.prototype);
   Object.assign(effect, {
     destroyed: false,
     layoutPaused: true,

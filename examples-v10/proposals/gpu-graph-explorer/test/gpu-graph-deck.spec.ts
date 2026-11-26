@@ -4,7 +4,7 @@
 
 import type {EffectContext} from '@deck.gl/core';
 import {GPUGraphEdgeLayer, GPUGraphNodeLayer} from '@deck.gl/proposals/layers';
-import {GPUGraphDeckEffect} from '@deck.gl/proposals/effects';
+import {GraphExplorerEffect} from '../graph-explorer-effect';
 import {Buffer} from '@luma.gl/core';
 import type {GPUVector} from '@luma.gl/graph/gpu-data';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
@@ -12,7 +12,7 @@ import {expect, it} from 'vitest';
 import {vi} from 'vitest';
 import {userEvent} from 'vitest/browser';
 
-import {createGPUGraphExplorerDeck} from '../../../../examples-v10/proposals/gpu-graph-explorer/app';
+import {createGPUGraphExplorerDeck} from '../app';
 import {
   getGraphExplorerGridSize,
   GRAPH_EXPLORER_VERTEX_COUNTS,
@@ -28,11 +28,11 @@ it('GPU Graph deck.gl effect composes actual GPU analytics, zero-copy selection,
     return;
   }
 
-  let effect: GPUGraphDeckEffect | undefined;
+  let effect: GraphExplorerEffect | undefined;
   const submitSpy = vi.spyOn(device, 'submit');
   try {
     const dataset = makeGraphExplorerDataset();
-    effect = new GPUGraphDeckEffect(device, dataset);
+    effect = new GraphExplorerEffect(device, dataset);
     expect(submitSpy.mock.calls.length, 'effect construction never submits hidden GPU work').toBe(
       0
     );
@@ -165,10 +165,10 @@ it('GPU Graph Deck effect executes real spatial indexing and community analytics
   }
 
   const dataset = makeGraphExplorerDataset(32);
-  let effect: GPUGraphDeckEffect | undefined;
+  let effect: GraphExplorerEffect | undefined;
   const submitSpy = vi.spyOn(device, 'submit');
   try {
-    effect = new GPUGraphDeckEffect(device, dataset, {
+    effect = new GraphExplorerEffect(device, dataset, {
       layoutMode: 'spatial',
       addSampledLayoutToGraph: addGraphExplorerSampledLayoutToGraph
     });
@@ -244,9 +244,9 @@ it('GPU Graph Deck preserves every original GPU vertex and edge while sampling o
   }
 
   const dataset = makeGraphExplorerDataset(32);
-  let effect: GPUGraphDeckEffect | undefined;
+  let effect: GraphExplorerEffect | undefined;
   try {
-    effect = new GPUGraphDeckEffect(device, dataset, {
+    effect = new GraphExplorerEffect(device, dataset, {
       layoutMode: 'sampled',
       pointMode: true,
       maxVisibleEdges: 4,
@@ -394,10 +394,10 @@ it('GPU Graph deck.gl renders real source-chunk layers and asynchronously picks 
 
     const effect = deck.props.effects?.[0];
     expect(
-      Boolean(effect instanceof GPUGraphDeckEffect),
+      Boolean(effect instanceof GraphExplorerEffect),
       'actual Deck owns a real resident graph effect'
     ).toBe(true);
-    if (!(effect instanceof GPUGraphDeckEffect)) {
+    if (!(effect instanceof GraphExplorerEffect)) {
       throw new Error('Deck did not initialize its GPU Graph WebGPU effect');
     }
 
@@ -595,7 +595,7 @@ it('GPU Graph deck.gl renders real source-chunk layers and asynchronously picks 
       ).toBe('1');
       await waitForReplacementDeckEffect(deck, effect, 256);
       const resizedEffect = deck.props.effects?.[0];
-      if (!(resizedEffect instanceof GPUGraphDeckEffect)) {
+      if (!(resizedEffect instanceof GraphExplorerEffect)) {
         throw new Error('The real Deck graph slider did not replace its GPU effect');
       }
       expect(
@@ -714,7 +714,7 @@ it('GPU Graph deck.gl renders real source-chunk layers and asynchronously picks 
       ).toBe('2');
       await waitForReplacementDeckEffect(deck, resizedEffect, 512);
       const keyboardEffect = deck.props.effects?.[0];
-      if (!(keyboardEffect instanceof GPUGraphDeckEffect)) {
+      if (!(keyboardEffect instanceof GraphExplorerEffect)) {
         throw new Error('A genuine keyboard action did not rebuild the actual WebGPU graph');
       }
       expect(
@@ -760,7 +760,7 @@ it('GPU Graph deck.gl renders real source-chunk layers and asynchronously picks 
       ).toBe('0');
       await waitForReplacementDeckEffect(deck, keyboardEffect, 128);
       const pointerEffect = deck.props.effects?.[0];
-      if (!(pointerEffect instanceof GPUGraphDeckEffect)) {
+      if (!(pointerEffect instanceof GraphExplorerEffect)) {
         throw new Error('A genuine pointer click did not rebuild the actual WebGPU graph');
       }
       expect(
@@ -809,7 +809,7 @@ async function waitForDeckEffect(
   deck: ReturnType<typeof createGPUGraphExplorerDeck>
 ): Promise<void> {
   const deadline = performance.now() + 5_000;
-  while (!(deck.props.effects?.[0] instanceof GPUGraphDeckEffect)) {
+  while (!(deck.props.effects?.[0] instanceof GraphExplorerEffect)) {
     if (performance.now() >= deadline) {
       throw new Error('The real WebGPU Deck did not finish initializing its GPU Graph effect');
     }
@@ -819,12 +819,12 @@ async function waitForDeckEffect(
 
 async function waitForReplacementDeckEffect(
   deck: ReturnType<typeof createGPUGraphExplorerDeck>,
-  previous: GPUGraphDeckEffect,
+  previous: GraphExplorerEffect,
   expectedVertexCount: number
 ): Promise<void> {
   const deadline = performance.now() + 5_000;
   while (
-    !(deck.props.effects?.[0] instanceof GPUGraphDeckEffect) ||
+    !(deck.props.effects?.[0] instanceof GraphExplorerEffect) ||
     deck.props.effects[0] === previous ||
     // An intermediate debounced resize may finish while trusted keyboard input is delivered.
     deck.props.effects[0].graph.vertexCount !== expectedVertexCount
