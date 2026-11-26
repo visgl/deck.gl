@@ -80,7 +80,7 @@ export default function App({
         data: airports,
         loaders: [JSONTableLoader],
         radiusScale: 20,
-        getPosition: {sql: 'ARRAY[coordinates[1], coordinates[2]]'},
+        getPosition: {sql: 'coordinates::ARRAY[2]'},
         getFillColor: [255, 140, 0],
         getRadius: {
           sql: "CASE WHEN type = 'major' THEN 100 WHEN type = 'small' THEN 30 ELSE 60 END"
