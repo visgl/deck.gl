@@ -118,7 +118,10 @@ Update direct loaders.gl dependencies to `^5.0.1` and math.gl dependencies to `^
 | `@loaders.gl/gltf`, `@loaders.gl/obj` | `@loaders.gl/scene/gltf`, `@loaders.gl/scene/obj` |
 | `@loaders.gl/las`, `@loaders.gl/ply` | Corresponding subpaths of `@loaders.gl/pointclouds` |
 | `@loaders.gl/mvt` | `@loaders.gl/tiles/mvt` |
-| `@loaders.gl/tiles` (3D tiles types and sources) | `@loaders.gl/tiles-3d` |
+| `@loaders.gl/tiles` or `@loaders.gl/tiles-3d` (3D tiles types and sources) | `@loaders.gl/tiles-3d/tileset`, `@loaders.gl/tiles-3d/tiles-3d-source`, `@loaders.gl/tiles-3d/i3s-source` |
+| `ImageLoader` from `@loaders.gl/images` | `@loaders.gl/images/image/bundled` for the bundled parser |
+| `DracoWorkerLoader` from `@loaders.gl/scene` | `DracoLoader` from `@loaders.gl/scene/draco` |
+| `ImageSource`, `WMSSource` from `@loaders.gl/ogc/wms` | `@loaders.gl/ogc/wms/bundled` for runtime values |
 | `@loaders.gl/3d-tiles`, `@loaders.gl/i3s` | Corresponding subpaths of `@loaders.gl/tiles-3d` |
 | `@loaders.gl/terrain`, `@loaders.gl/wms` | `@loaders.gl/raster/terrain`, `@loaders.gl/ogc/wms` |
 | `@math.gl/types` | `@math.gl/core/types` |
