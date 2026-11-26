@@ -17,8 +17,8 @@ import {Buffer, type RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import type {DrawCommandBuffer} from '@luma.gl/graph/gpu-core';
 
-/** Properties accepted by {@link LuSpatialPointLayer}. */
-export type LuSpatialPointLayerProps = Omit<LayerProps, 'data'> & {
+/** Properties accepted by {@link FilteredScatterplotLayer}. */
+export type FilteredScatterplotLayerProps = Omit<LayerProps, 'data'> & {
   /** Caller-owned packed `vec2<f32>` rows in the layer's Deck coordinate system. */
   positions: Buffer;
   /**
@@ -48,14 +48,14 @@ export type LuSpatialPointLayerProps = Omit<LayerProps, 'data'> & {
   highlightRadiusScale?: number;
   /**
    * Keeps initialized resources out of render and picking passes until
-   * {@link LuSpatialPointLayer.reveal} is called.
+   * {@link FilteredScatterplotLayer.reveal} is called.
    */
   staged?: boolean;
   /** Called synchronously after this layer has created all of its owned render resources. */
   onResourcesReady?: () => void;
 };
 
-type LuSpatialPointLayerState = {
+type FilteredScatterplotLayerState = {
   model: Model | null;
   styleUniforms: Buffer | null;
   staged: boolean;
@@ -72,7 +72,7 @@ const POINT_BLEND_PARAMETERS = {
   blendAlphaDstFactor: 'one-minus-src-alpha'
 } as const;
 
-const LUSPATIAL_POINT_SHADER = /* wgsl */ `
+const FILTERED_SCATTERPLOT_SHADER = /* wgsl */ `
 struct PointStyleUniforms {
   color: vec4<f32>,
   radiusPixels: f32,
@@ -181,8 +181,8 @@ fn blendHighlightColor(color: vec4<f32>) -> vec4<f32> {
  *
  * The position, ID, and command buffers are borrowed. Finalizing the layer never destroys them.
  */
-export class LuSpatialPointLayer extends Layer<LuSpatialPointLayerProps> {
-  static override layerName = 'LuSpatialPointLayer';
+export class FilteredScatterplotLayer extends Layer<FilteredScatterplotLayerProps> {
+  static override layerName = 'FilteredScatterplotLayer';
   static override defaultProps = {
     data: {type: 'object', value: null, optional: true},
     commandIndex: 0,
@@ -199,7 +199,7 @@ export class LuSpatialPointLayer extends Layer<LuSpatialPointLayerProps> {
 
   override initializeState({device}: LayerContext): void {
     if (device.type !== 'webgpu') {
-      throw new Error('LuSpatialPointLayer requires WebGPU');
+      throw new Error('FilteredScatterplotLayer requires WebGPU');
     }
     assertNonIndexedDrawCommands(this.props.drawCommands);
 
@@ -212,7 +212,7 @@ export class LuSpatialPointLayer extends Layer<LuSpatialPointLayerProps> {
         usage: Buffer.UNIFORM | Buffer.COPY_DST
       });
       model = new Model(device, {
-        ...this.getShaders({modules: [project32, picking], source: LUSPATIAL_POINT_SHADER}),
+        ...this.getShaders({modules: [project32, picking], source: FILTERED_SCATTERPLOT_SHADER}),
         id: `${this.id}-model`,
         topology: 'triangle-list',
         isInstanced: true,
@@ -230,7 +230,7 @@ export class LuSpatialPointLayer extends Layer<LuSpatialPointLayerProps> {
         model,
         styleUniforms,
         staged: Boolean(this.props.staged)
-      } satisfies LuSpatialPointLayerState);
+      } satisfies FilteredScatterplotLayerState);
     } catch (error) {
       model?.destroy();
       styleUniforms?.destroy();
@@ -244,7 +244,7 @@ export class LuSpatialPointLayer extends Layer<LuSpatialPointLayerProps> {
     if (props.drawCommands !== oldProps.drawCommands) {
       assertNonIndexedDrawCommands(props.drawCommands);
     }
-    const {model} = this.state as LuSpatialPointLayerState;
+    const {model} = this.state as FilteredScatterplotLayerState;
     if (model && (props.positions !== oldProps.positions || props.pointIds !== oldProps.pointIds)) {
       model.setBindings({positions: props.positions, pointIds: props.pointIds});
     }
@@ -259,7 +259,7 @@ export class LuSpatialPointLayer extends Layer<LuSpatialPointLayerProps> {
 
   /** Reveals a staged layer after every layer in a related resource revision is ready. */
   reveal(): void {
-    if (!(this.state as LuSpatialPointLayerState).staged) {
+    if (!(this.state as FilteredScatterplotLayerState).staged) {
       return;
     }
     this.setState({staged: false});
@@ -267,7 +267,7 @@ export class LuSpatialPointLayer extends Layer<LuSpatialPointLayerProps> {
   }
 
   override getModels(): Model[] {
-    const model = (this.state as LuSpatialPointLayerState).model;
+    const model = (this.state as FilteredScatterplotLayerState).model;
     return model ? [model] : [];
   }
 
@@ -278,7 +278,7 @@ export class LuSpatialPointLayer extends Layer<LuSpatialPointLayerProps> {
     renderPass: RenderPass;
     shaderModuleProps?: {picking?: {isActive?: number | boolean}};
   }): void {
-    const {model, styleUniforms, staged} = this.state as LuSpatialPointLayerState;
+    const {model, styleUniforms, staged} = this.state as FilteredScatterplotLayerState;
     if (staged) {
       return;
     }
@@ -314,20 +314,20 @@ export class LuSpatialPointLayer extends Layer<LuSpatialPointLayerProps> {
   }
 
   override finalizeState(context: LayerContext): void {
-    const state = this.state as LuSpatialPointLayerState;
+    const state = this.state as FilteredScatterplotLayerState;
     state.model?.destroy();
     state.styleUniforms?.destroy();
     this.setState({
       model: null,
       styleUniforms: null,
       staged: false
-    } satisfies LuSpatialPointLayerState);
+    } satisfies FilteredScatterplotLayerState);
     super.finalizeState(context);
   }
 }
 
 function assertNonIndexedDrawCommands(drawCommands: DrawCommandBuffer): void {
   if (drawCommands.type !== 'draw') {
-    throw new Error('LuSpatialPointLayer requires non-indexed draw commands');
+    throw new Error('FilteredScatterplotLayer requires non-indexed draw commands');
   }
 }

@@ -9,7 +9,7 @@ import {
   type Viewport,
   type ViewStateChangeParameters
 } from '@deck.gl/core';
-import {LuSpatialPointLayer} from '@deck.gl/proposals/layers';
+import {FilteredScatterplotLayer} from '@deck.gl/proposals/layers';
 import {LuSpatialGeographicPointQueryEffect} from '@deck.gl/proposals/effects/query';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -105,7 +105,7 @@ export function createGPUSpatialTaxiDeck(
   let queryEffect: LuSpatialGeographicPointQueryEffect | null = null;
   let latestSelectionCenter: readonly [number, number] = initialZone.center;
   let stagingQueryEffect: LuSpatialGeographicPointQueryEffect | null = null;
-  let activeLayers: LuSpatialPointLayer[] = [];
+  let activeLayers: FilteredScatterplotLayer[] = [];
   let queryRadiusKilometres = 0.35;
   let taxiDataRevision = 0;
 
@@ -234,7 +234,7 @@ export function createGPUSpatialTaxiDeck(
         return new Promise<void>((resolve, reject) => {
           let settled = false;
           const readyLayerIndexes = new Set<number>();
-          let stagedLayers: LuSpatialPointLayer[] = [];
+          let stagedLayers: FilteredScatterplotLayer[] = [];
 
           const rejectActivation = (error: Error): void => {
             if (settled) return;
@@ -448,9 +448,9 @@ function makeTaxiLayers(
   queryEffect: LuSpatialGeographicPointQueryEffect,
   taxiDataRevision: number,
   options: TaxiLayerStagingOptions = {}
-): LuSpatialPointLayer[] {
+): FilteredScatterplotLayer[] {
   return [
-    new LuSpatialPointLayer({
+    new FilteredScatterplotLayer({
       id: `luspatial-taxi-context-${taxiDataRevision}`,
       data: [],
       pickable: true,
@@ -469,7 +469,7 @@ function makeTaxiLayers(
         return Boolean(options.onLayerError);
       }
     }),
-    new LuSpatialPointLayer({
+    new FilteredScatterplotLayer({
       id: `luspatial-taxi-selection-${taxiDataRevision}`,
       data: [],
       pickable: true,

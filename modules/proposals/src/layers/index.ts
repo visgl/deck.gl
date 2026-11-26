@@ -3,9 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 export {
-  LuSpatialPointLayer,
-  type LuSpatialPointLayerProps
-} from './luspatial-point-layer';
+  FilteredScatterplotLayer,
+  type FilteredScatterplotLayerProps
+} from './filtered-scatterplot-layer';
 export {GPUScatterplotLayer, type GPUScatterplotLayerProps} from './gpu-scatterplot-layer';
 export {GPULineLayer, type GPULineLayerProps} from './gpu-line-layer';
 export {GPUIconLayer, type GPUIconLayerProps} from './gpu-icon-layer';
