@@ -5,16 +5,17 @@
 import {GeoParquetLoader} from '@loaders.gl/tables/parquet';
 import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl/maplibre';
+import {Map as MapLibre} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
-import {LoadingWidget} from '@deck.gl/widgets';
+import {LoadingWidget, _LegendWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 import {tableFromArrays, type Table} from 'apache-arrow';
 import type {Device} from '@luma.gl/core';
 import {isArrowTable} from '@math.gl/core/arrow';
 import {ArcLayer} from '@deck.gl/layers';
 import {GeoArrowLayer} from '@deck.gl/proposals/layers';
-import {scaleQuantile} from 'd3-scale';
+import {queryArrowSQL, queryArrowSQLWithMetadata} from '@math.gl/sql/query';
+import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 
@@ -22,7 +23,7 @@ import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 const DATA_URL =
   'https://media.githubusercontent.com/media/visgl/deck.gl-data/886cf5ab469bba3816aa5a32d4454835e0ce5951/examples/arc/counties.parquet'; // eslint-disable-line
 
-export const inFlowColors: Color[] = [
+const inFlowColors: Color[] = [
   [255, 255, 204],
   [199, 233, 180],
   [127, 205, 187],
@@ -32,7 +33,7 @@ export const inFlowColors: Color[] = [
   [12, 44, 132]
 ];
 
-export const outFlowColors: Color[] = [
+const outFlowColors: Color[] = [
   [255, 255, 178],
   [254, 217, 118],
   [254, 178, 76],
@@ -62,45 +63,19 @@ type County = {
   centroid: Iterable<number>;
 };
 
-type MigrationFlow = {
-  source: County;
-  target: County;
-  /** Number of migrants */
-  value: number;
-  quantile: number;
-};
-
-/** Builds columnar arc endpoints and styling values for the selected county. */
-function makeArcTable(data: Table, selectedCounty: County) {
-  const {flows} = selectedCounty;
-
-  const arcs: MigrationFlow[] = Object.keys(flows).map(toId => {
-    const f = data.get(Number(toId)) as County;
-    return {
-      source: selectedCounty,
-      target: f,
-      value: flows[toId],
-      quantile: 0
-    };
-  });
-
-  const scale = scaleQuantile()
-    .domain(arcs.map(a => Math.abs(a.value)))
-    .range(inFlowColors.map((c, i) => i));
-
-  arcs.forEach(a => {
-    a.quantile = scale(Math.abs(a.value));
-  });
-
-  return tableFromArrays({
-    source_longitude: Float64Array.from(arcs, arc => Array.from(arc.source.centroid)[0]),
-    source_latitude: Float64Array.from(arcs, arc => Array.from(arc.source.centroid)[1]),
-    target_longitude: Float64Array.from(arcs, arc => Array.from(arc.target.centroid)[0]),
-    target_latitude: Float64Array.from(arcs, arc => Array.from(arc.target.centroid)[1]),
-    value: Float64Array.from(arcs, arc => arc.value),
-    quantile: Uint8Array.from(arcs, arc => arc.quantile)
-  });
+/** Uses the same magnitude domain for both directions. */
+function flowScale(colors: Color[]): string {
+  const palette = colors.map(color =>
+    color
+      .slice(0, 3)
+      .map(channel => channel.toString(16).padStart(2, '0'))
+      .join('')
+  );
+  return `SCALE_QUANTILE(CASE WHEN value < 0 THEN -value ELSE value END, 7, PALETTE(${palette.map(color => `'#${color}'`).join(', ')}))`;
 }
+
+const IN_FLOW_SCALE = flowScale(inFlowColors);
+const OUT_FLOW_SCALE = flowScale(outFlowColors);
 
 function getTooltip({object}: PickingInfo<County>) {
   return object && object.name;
@@ -126,7 +101,7 @@ export default function App({
   /** Reports the number of arcs for the current county. */
   onArcDataLoad?: (count: number) => void;
 }) {
-  const widgets = useMemo(() => [new LoadingWidget()], []);
+  const loading = useMemo(() => new LoadingWidget(), []);
   /** Index of the county selected by picking. */
   const [selectedCounty, selectCounty] = useState<number>();
 
@@ -140,12 +115,53 @@ export default function App({
     const names = counties?.getChild('name');
     return Math.max(0, names ? [...names].indexOf('Los Angeles, CA') : -1);
   }, [counties]);
-  /** One source row whose identity changes with county selection. */
-  const arcSource = useMemo(() => {
-    /** Source row for the current selection. */
+  /** Flow map keys are destination row indices in the source Parquet table. */
+  const destinations = useMemo(
+    () =>
+      counties?.select(['centroid']).assign(
+        tableFromArrays({
+          county_id: Int32Array.from({length: counties.numRows}, (_, index) => index)
+        })
+      ),
+    [counties]
+  );
+  const arcs = useMemo(() => {
     const index = selectedCounty ?? defaultCounty;
-    return counties && index < counties.numRows ? counties.slice(index, index + 1) : null;
-  }, [counties, selectedCounty, defaultCounty]);
+    if (!counties || !destinations || index >= counties.numRows) {
+      return null;
+    }
+    const flows = queryArrowSQL(
+      `\
+        SELECT c.centroid AS origin, CAST(u.key AS INTEGER) AS destination, u.value AS value
+        FROM selected c CROSS JOIN UNNEST(c.flows) AS u(key, value)`,
+      new Map([['selected', counties.select(['centroid', 'flows']).slice(index, index + 1)]])
+    );
+    if (!flows.numRows) {
+      return null;
+    }
+    return queryArrowSQLWithMetadata(
+      `\
+        SELECT f.origin, c.centroid AS target,
+          CASE WHEN f.value > 0 THEN ${IN_FLOW_SCALE} ELSE ${OUT_FLOW_SCALE} END AS source_color,
+          CASE WHEN f.value > 0 THEN ${OUT_FLOW_SCALE} ELSE ${IN_FLOW_SCALE} END AS target_color
+        FROM flows f JOIN counties c ON f.destination = c.county_id`,
+      new Map([
+        ['flows', flows],
+        ['counties', destinations]
+      ]),
+      {functions: VISUALIZATION_FUNCTIONS}
+    );
+  }, [counties, destinations, selectedCounty, defaultCounty]);
+
+  const widgets = useMemo(() => {
+    const [gain, loss] = arcs?.columnMetadata.source_color ?? [];
+    return [
+      loading,
+      new _LegendWidget({
+        scales: gain && loss ? {'Net gain': gain.scale, 'Net loss': loss.scale} : {}
+      })
+    ];
+  }, [loading, arcs]);
 
   const layers = [
     new GeoArrowLayer({
@@ -168,21 +184,16 @@ export default function App({
       },
       pickable: true
     }),
-    new ArcLayer<MigrationFlow>({
+    new ArcLayer({
       id: 'arc',
-      data: arcSource,
-      dataTransform: <LayerDataT,>(source: unknown): LayerDataT => {
-        /** Source county whose flow map supplies the arcs. */
-        const county = isArrowTable(source) ? source.get(0) : null;
-        return (counties && county ? makeArcTable(counties, county as County) : []) as LayerDataT;
-      },
+      data: arcs?.table ?? null,
       onDataLoad: table => {
         onArcDataLoad?.(isArrowTable(table) ? table.numRows : 0);
       },
-      getSourcePosition: {sql: 'ARRAY[source_longitude, source_latitude]'},
-      getTargetPosition: {sql: 'ARRAY[target_longitude, target_latitude]'},
-      getSourceColor: d => (d.value > 0 ? inFlowColors : outFlowColors)[d.quantile],
-      getTargetColor: d => (d.value > 0 ? outFlowColors : inFlowColors)[d.quantile],
+      getSourcePosition: {sql: 'ARRAY[origin[1], origin[2]]'},
+      getTargetPosition: {sql: 'ARRAY[target[1], target[2]]'},
+      getSourceColor: {sql: 'source_color'},
+      getTargetColor: {sql: 'target_color'},
       getWidth: strokeWidth
     })
   ];
@@ -196,7 +207,7 @@ export default function App({
       controller={true}
       getTooltip={getTooltip}
     >
-      <Map reuseMaps mapStyle={mapStyle} />
+      <MapLibre reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );
 }

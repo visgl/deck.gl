@@ -13,7 +13,7 @@ import {render} from 'preact';
 import {createPortal} from 'preact/compat';
 import {useState} from 'preact/hooks';
 
-/** Options for the experimental automatic SQL color legend. */
+/** Options for the experimental color legend. */
 export type ColorScaleWidgetProps = WidgetProps & {
   /** Widget placement. Defaults to bottom-right. */
   placement?: WidgetPlacement;
@@ -21,6 +21,8 @@ export type ColorScaleWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Accessible heading for the legend. */
   label?: string;
+  /** Resolved scales keyed by display label. When supplied, replaces automatic discovery. */
+  scales?: Readonly<Record<string, ResolvedScale>>;
   /** Starting significant digits for numeric labels (1–21). Defaults to 2. */
   precision?: number;
   /** Layout of categorical swatches. Defaults to a vertical list. */
@@ -328,7 +330,7 @@ function ColorLegend({
   );
 }
 
-/** Experimental widget that shows SQL color scales for currently visible layers. */
+/** Experimental widget for supplied scales or SQL color scales on visible layers. */
 export class _LegendWidget extends Widget<ColorScaleWidgetProps> {
   /** Default identifier and accessible heading. */
   static defaultProps = {
@@ -352,7 +354,7 @@ export class _LegendWidget extends Widget<ColorScaleWidgetProps> {
 
   /** Attaches the legend to its configured view. */
   constructor(props: ColorScaleWidgetProps = {}) {
-    super(props);
+    super({...props, scales: props.scales});
     this.viewId = this.props.viewId;
   }
 
@@ -372,7 +374,7 @@ export class _LegendWidget extends Widget<ColorScaleWidgetProps> {
   /** Discovers scales in the screen views associated with the widget. */
   override onRedraw({viewports, renderedLayers}: Parameters<Widget['onRedraw']>[0]): void {
     const layers = new Set<Layer>();
-    for (const viewport of viewports) {
+    for (const viewport of this.props.scales ? [] : viewports) {
       for (const layer of renderedLayers?.get(viewport) ?? []) {
         // A composite may declare a scale that its drawable children inherit.
         for (
@@ -424,8 +426,16 @@ export class _LegendWidget extends Widget<ColorScaleWidgetProps> {
 
   /** Renders each discovered layer accessor legend. */
   override onRenderHTML(rootElement: HTMLElement): void {
+    const entries = this.props.scales
+      ? Object.entries(this.props.scales).map(([label, scale]) => ({
+          layerId: '',
+          accessor: label,
+          label,
+          scale
+        }))
+      : this.entries;
     render(
-      this.entries.length ? (
+      entries.length ? (
         <section
           aria-label={this.props.label}
           style={{
@@ -445,7 +455,7 @@ export class _LegendWidget extends Widget<ColorScaleWidgetProps> {
               {this.props.label}
               <span className="deck-color-scale-caret" aria-hidden="true" />
             </summary>
-            {this.entries.map(({layerId, accessor, label, scale}) => (
+            {entries.map(({layerId, accessor, label, scale}) => (
               <div className="deck-color-scale-entry" key={JSON.stringify([layerId, accessor])}>
                 <div className="deck-color-scale-heading">
                   <span>{label}</span>

@@ -6,7 +6,7 @@ import {expect, test, vi} from 'vitest';
 import {CompositeLayer, OrthographicView} from '@deck.gl/core';
 import {tableFromArrays} from 'apache-arrow';
 import {PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
-import {_ColorScaleWidget} from '@deck.gl/widgets';
+import {_ColorScaleWidget, _LegendWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
 
 /** Builds a drawable layer with a resolved SQL color scale. */
@@ -262,6 +262,26 @@ test('_ColorScaleWidget keeps all quantile colors visible with long labels', asy
         labels[index].getBoundingClientRect().left
       );
     }
+  } finally {
+    tester.destroy();
+  }
+});
+
+test('_LegendWidget uses supplied scales in place of discovery', async () => {
+  const layer = makeReadings();
+  const widget = new _ColorScaleWidget({scales: {}});
+  const tester = new WidgetTester({layers: [layer], widgets: [widget]});
+  const legend = () => tester.findElements('.deck-widget-color-scale section')[0];
+  try {
+    await vi.waitFor(() => expect(layer._getResolvedColorScales()).toBeDefined());
+    expect(legend()).toBeUndefined();
+    const scale = layer._getResolvedColorScales()!.getFillColor!;
+    widget.setProps({scales: {'Sensor readings': scale}});
+    expect(legend()?.textContent).toContain('Sensor readings');
+    widget.setProps({scales: {}});
+    expect(legend()).toBeUndefined();
+    tester.setProps({widgets: [new _ColorScaleWidget()]});
+    await vi.waitFor(() => expect(legend()?.textContent).toContain('readings'));
   } finally {
     tester.destroy();
   }
