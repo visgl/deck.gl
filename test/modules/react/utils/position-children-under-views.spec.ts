@@ -126,6 +126,28 @@ test('positionChildrenUnderViews#map goes before the canvas', () => {
   expect(otherChildren[2].props.id, 'Function child stays in the view').toBe('test-function-map');
 });
 
+test('positionChildrenUnderViews#map style stays on the map', () => {
+  const {maps, children} = positionChildrenUnderViews({
+    children: [
+      createElement(
+        View,
+        {id: 'map'},
+        createElement('div', {id: 'test-map', mapStyle: 'https://map/style.json'}),
+        props => createElement('div', {id: 'test-overlay', ...props})
+      )
+    ],
+    deck: {viewManager: dummyViewManager, canvas: document.createElement('canvas')}
+  });
+
+  expect(
+    maps[0].props.children.props.children.props.id,
+    'Only the map goes before the canvas'
+  ).toBe('test-map');
+  const otherChildren = children[0].props.children.props.children;
+  expect(otherChildren[1].props.id, 'Sibling stays in the view').toBe('test-overlay');
+  expect(otherChildren[1].props.style, 'Sibling does not get the map style').toBeUndefined();
+});
+
 test('positionChildrenUnderViews#override ContextProvider', () => {
   const context = React.createContext();
 

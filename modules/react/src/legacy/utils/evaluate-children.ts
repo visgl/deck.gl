@@ -22,8 +22,7 @@ export default function evaluateChildren(
     // Special treatment for react-map-gl's Map component
     // to support shorthand use case <DeckGL><StaticMap /></DeckGL>
     if (isReactMap(children)) {
-      childProps.style = MAP_STYLE;
-      return cloneElement(children, childProps);
+      return cloneElement(children, {...childProps, style: MAP_STYLE});
     }
     if (needsDeckGLViewProps(children)) {
       return cloneElement(children, childProps);
