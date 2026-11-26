@@ -9,7 +9,7 @@ import {
   TRACE_GROUPS,
   TRACE_SPAN_RECORD_WORD_LENGTH,
   type TraceGroupName
-} from '../../experimental/gpu-trace-viewer/trace-data';
+} from './generate-trace-data';
 
 export type DeckTraceData = {
   count: number;

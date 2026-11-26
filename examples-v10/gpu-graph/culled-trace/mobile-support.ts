@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {ExampleSupportDefinition} from '../shared/example-support';
+import type {ExampleSupportDefinition} from '../../proposals/shared/example-support';
 
 const exampleSupport = {
-  id: 'deck/gpu-graph-explorer',
+  id: 'deck/gpu-culled-trace',
   mobileMode: 'reduced',
   mobileProfile: 'large-data',
   requirements: {backends: ['webgpu']}

@@ -60,10 +60,10 @@ const rootDir = import.meta.dirname;
 // These prototypes require locally linked, unpublished luma.gl peers.
 const includePrivateModules = process.env.DECK_GL_PRIVATE_MODULES === 'true';
 const privateNodeTests = includePrivateModules
-  ? ['examples-v10/proposals/gpu-graph-explorer/test/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts']
+  ? ['examples-v10/gpu-graph/graph-explorer/test/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts']
   : [];
 const privateBrowserTests = includePrivateModules
-  ? ['examples-v10/proposals/gpu-graph-explorer/test/**/*.spec.ts', 'modules/proposals/test/layers/**/*.spec.ts']
+  ? ['examples-v10/gpu-graph/graph-explorer/test/**/*.spec.ts', 'modules/proposals/test/layers/**/*.spec.ts']
   : [];
 
 // Tests that were commented out or never imported in the original test suite
@@ -285,7 +285,7 @@ const projects = [
           exclude: [
             ...excludedTests,
             'test/modules/**/*.node.spec.ts',
-            'examples-v10/proposals/gpu-graph-explorer/test/**/*.node.spec.ts',
+            'examples-v10/gpu-graph/graph-explorer/test/**/*.node.spec.ts',
             'modules/proposals/test/layers/**/*.node.spec.ts'
           ],
           globals: false,
@@ -321,7 +321,7 @@ const projects = [
         test: {
           name: 'browser',
           include: ['test/modules/**/*.spec.ts', 'test/modules/react/**/*.spec.tsx', 'test/interaction/**/*.spec.ts', ...privateBrowserTests],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'examples-v10/proposals/gpu-graph-explorer/test/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
+          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'examples-v10/gpu-graph/graph-explorer/test/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
           isolate: false,

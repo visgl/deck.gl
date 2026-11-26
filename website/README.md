@@ -9,7 +9,7 @@ Demo implementations live in the repository's corresponding `examples/` and
 `examples-v10/` directories. Shared website components provide layout and controls.
 
 The catalog configuration is in `scripts/example-catalogs.cjs`. The v10 catalog's manifest
-selects embedded demos from `examples-v10/proposals/`.
+selects embedded demos from `examples-v10/proposals/` and `examples-v10/gpu-graph/`.
 
 The homepage, Playground, Pydeck, and scripting gallery use `examples/`.
 Run `yarn test-website` from the repository root to validate both catalogs.

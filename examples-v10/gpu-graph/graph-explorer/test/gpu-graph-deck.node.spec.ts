@@ -24,8 +24,8 @@ import {
   GRAPH_EXPLORER_SHOWCASE_DEFAULT_VERTEX_COUNT,
   GRAPH_EXPLORER_VERTEX_COUNTS,
   makeGraphExplorerDataset
-} from '../../../../examples/experimental/gpu-graph-explorer/graph-data';
-import {getExampleSupportDefinition} from '../../shared/example-support-registry';
+} from '../graph-data';
+import {getExampleSupportDefinition} from '../../../proposals/shared/example-support-registry';
 
 describe('optional GPU Graph deck.gl integration package isolation', () => {
   test('keeps deck.gl entirely outside graph production imports and dependencies', () => {
@@ -251,7 +251,7 @@ describe('GPU Graph standalone example metadata', () => {
     expect(getExampleSupportDefinition('deck/gpu-graph-explorer')?.requirements?.backends).toEqual([
       'webgpu'
     ]);
-    const readme = readFileSync(new URL('../../README.md', import.meta.url), 'utf8');
+    const readme = readFileSync(new URL('../../../proposals/README.md', import.meta.url), 'utf8');
     expect(readme).toContain('gpu-graph-explorer');
     expect(readme).toContain('yarn build-private-examples');
   });

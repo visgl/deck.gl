@@ -17,8 +17,8 @@ import {
   getGraphExplorerGridSize,
   GRAPH_EXPLORER_VERTEX_COUNTS,
   makeGraphExplorerDataset
-} from '../../../../examples/experimental/gpu-graph-explorer/graph-data';
-import {addGraphExplorerSampledLayoutToGraph} from '../../../../examples/experimental/gpu-graph-explorer/graph-scale-layout';
+} from '../graph-data';
+import {addGraphExplorerSampledLayoutToGraph} from '../graph-scale-layout';
 
 it('GPU Graph deck.gl effect composes actual GPU analytics, zero-copy selection, and pinned layout', async () => {
   const device = await getWebGPUTestDevice();
