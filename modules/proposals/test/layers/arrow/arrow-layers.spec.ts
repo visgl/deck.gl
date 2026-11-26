@@ -4,11 +4,7 @@
 
 import {Deck, OrthographicView, type Layer, type PickingInfo} from '@deck.gl/core';
 import {
-  ArrowArcLayer,
-  ArrowColumnLayer,
-  ArrowLineLayer,
   ArrowPathLayer,
-  ArrowPointCloudLayer,
   ArrowPolygonLayer,
   ArrowScatterplotLayer,
   ArrowTextLayer,
@@ -54,7 +50,7 @@ afterAll(() => {
   finalizeSharedStorageDeck();
 });
 
-it('GPUVector-first Arrow fixed-width adapters create direct WebGPU models', async () => {
+it('ArrowScatterplotLayer creates a direct WebGPU model', async () => {
   const device = await getWebGPUTestDevice('core');
   if (!device || isSoftwareBackedDevice(device)) {
     void 0;
@@ -65,22 +61,12 @@ it('GPUVector-first Arrow fixed-width adapters create direct WebGPU models', asy
     2,
     new Float32Array([-20, -10, 0, 20, 20, -10])
   );
-  const targets = makeArrowFixedSizeListVector(
-    new Float32(),
-    2,
-    new Float32Array([0, 20, 20, -10, -20, -10])
-  );
-  const positions3 = makeArrowFixedSizeListVector(
-    new Float32(),
-    3,
-    new Float32Array([-20, -10, 0, 0, 20, 2, 20, -10, 4])
-  );
   const colors = makeArrowFixedSizeListVector(
     new Uint8(),
     4,
     new Uint8Array([255, 80, 40, 255, 40, 180, 255, 255, 120, 255, 80, 255])
   );
-  const data = new Table({positions, positions3, targets, colors});
+  const data = new Table({positions, colors});
   const scatterplot = new ArrowScatterplotLayer({
     id: 'gpu-vector-arrow-scatterplot',
     data,
@@ -88,41 +74,10 @@ it('GPUVector-first Arrow fixed-width adapters create direct WebGPU models', asy
     getRadius: 4,
     getFillColor: 'colors'
   });
-  const lines = new ArrowLineLayer({
-    id: 'gpu-vector-arrow-lines',
-    data,
-    getSourcePosition: 'positions',
-    getTargetPosition: 'targets',
-    getColor: 'colors'
-  });
-  const arcs = new ArrowArcLayer({
-    id: 'gpu-vector-arrow-arcs',
-    data,
-    getSourcePosition: 'positions',
-    getTargetPosition: 'targets',
-    getSourceColor: 'colors',
-    getWidth: 2,
-    getHeight: 5
-  });
-  const columns = new ArrowColumnLayer({
-    id: 'gpu-vector-arrow-columns',
-    data,
-    getPosition: 'positions',
-    getFillColor: 'colors',
-    getRadius: 4,
-    getElevation: 5
-  });
-  const pointCloud = new ArrowPointCloudLayer({
-    id: 'gpu-vector-arrow-point-cloud',
-    data,
-    getPosition: 'positions3',
-    getColor: 'colors',
-    pointSize: 4
-  });
   const {deck, parent} = createTestDeck(device);
   try {
     await waitForDeckInitialization(deck);
-    const layers = [scatterplot, lines, arcs, columns, pointCloud];
+    const layers = [scatterplot];
     deck.setProps({layers});
     const models = await waitForCompositeModels(layers);
     await Promise.all(models.map(waitForPipeline));

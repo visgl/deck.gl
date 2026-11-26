@@ -10,8 +10,7 @@ The GPU layer family defines the rendering ABI below Arrow, classic JavaScript, 
 inputs. It consumes caller-owned GPU data, does not import Apache Arrow, and never destroys input
 vectors.
 
-The fixed-width primitives are `GPUArcLayer`, `GPUColumnLayer`, `GPUGridCellLayer`, `GPUIconLayer`,
-`GPULineLayer`, `GPUPointCloudLayer`, and `GPUScatterplotLayer`. They consume row-aligned
+The fixed-width primitives are `GPUIconLayer` and `GPUScatterplotLayer`. They consume row-aligned
 `GPUVector` objects. Each layer owns one `GPUVectorModel`, which preserves every physical chunk as
 a separate draw call without creating a model or deck child layer per chunk. `GPUBitmapLayer`
 accepts an already loaded `Texture`; a bitmap has no tabular column to convert.
