@@ -8,7 +8,7 @@ The layers intentionally do not use deck.gl `AttributeManager` for Arrow columns
 
 ## GPUVector-first core family[​](#gpuvector-first-core-family "Direct link to GPUVector-first core family")
 
-Arc, Column, GridCell, Icon, Line, PointCloud, and Scatterplot follow a two-level contract:
+Icon and Scatterplot follow a two-level contract:
 
 1. `@deck.gl/proposals/layers` renders aligned, batched, caller-owned GPUVectors.
 2. This package resolves Arrow columns, uploads adapter-owned GPUVectors, and releases them when the Arrow layer changes or finalizes.

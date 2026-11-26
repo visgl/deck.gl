@@ -15,7 +15,8 @@ v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, S
 ### GPU[​](#gpu "Direct link to GPU")
 
 * [**WebGPU**](https://deck.gl/next/docs/developer-guide/webgpu.md) 🚧 — WebGPU is now the default renderer with full feature support.
-* [**GPU vectors**](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#direct-gpuvector-inputs) — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph.
+* [**Arc height**](https://deck.gl/next/docs/api-reference/layers/arc-layer.md#heightmode) — ArcLayer supports a fixed midpoint rise independent of endpoint separation.
+* [**GPU vectors**](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#direct-gpuvector-inputs) — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph. Arc, Line, Column, and GridCell accept packed XY position buffers.
 
 ### Apache Arrow[​](#apache-arrow "Direct link to Apache Arrow")
 

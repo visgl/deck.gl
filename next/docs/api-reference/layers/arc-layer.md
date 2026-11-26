@@ -297,6 +297,10 @@ Inherits from all [Base Layer](https://deck.gl/next/docs/api-reference/core/laye
 
 ### Render Options[​](#render-options "Direct link to Render Options")
 
+#### `heightMode` ('relative' | 'absolute', optional)[​](#heightmode "Direct link to heightmode")
+
+Default: `'relative'`. In relative mode, `getHeight` scales the arc height with endpoint separation. In absolute mode, `getHeight` sets the midpoint rise above the linearly interpolated endpoint elevations before tilt, in meters for geographic coordinates or coordinate units for Cartesian data. Negative values bend the arc downward.
+
 #### `greatCircle` (boolean, optional)[​](#greatcircle "Direct link to greatcircle")
 
 * Default: `false`
@@ -398,7 +402,7 @@ An Arrow vector supplies one value per object. See [scalar columns](https://deck
 
 * Default: `1`
 
-Multiplier of layer height. `0` will make the layer flat.
+Height multiplier in relative mode, or signed midpoint rise in absolute mode.
 
 An Arrow vector supplies one value per object. See [scalar columns](https://deck.gl/next/docs/developer-guide/using-with-arrow.md#scalars) for requirements.
 
@@ -420,8 +424,8 @@ An Arrow vector supplies one value per object. See [scalar columns](https://deck
 
 GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
 
-* `sourcePositions` – `float32x3` – Source positions in XYZ order.
-* `targetPositions` – `float32x3` – Target positions in XYZ order.
+* `sourcePositions` – `float32x2` or `float32x3` – XY or XYZ positions. Packed XY positions have zero elevation.
+* `targetPositions` – `float32x2` or `float32x3` – XY or XYZ positions. Packed XY positions have zero elevation.
 * `sourceColors` – `unorm8x4` – Packed RGBA colors at source positions.
 * `targetColors` – `unorm8x4` – Packed RGBA colors at target positions.
 * `widths` – `float32`
