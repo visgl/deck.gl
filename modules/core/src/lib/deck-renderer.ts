@@ -183,7 +183,10 @@ export default class DeckRenderer {
         renderBuffers.push(
           this.device.createFramebuffer({
             id: `deck-renderbuffer-${i}`,
-            colorAttachments: [texture]
+            colorAttachments: [texture],
+            ...(this.device.type === 'webgpu'
+              ? {depthStencilAttachment: 'depth24plus' as const}
+              : {})
           })
         );
       });
