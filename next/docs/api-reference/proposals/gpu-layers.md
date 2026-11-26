@@ -36,7 +36,7 @@ GeoJSON and GeoArrow are source formats rather than rendering primitives. Their 
 
 The command buffer must use the non-indexed `draw` layout. Its selected record keeps `vertexCount: 6` and `firstVertex: 0`; GPU queries normally update only `instanceCount`.
 
-The root layer entry point deliberately does not import Arrow, GeoArrow, or the luSpatial query algorithms. Applications can produce the fixed-width buffers with any ingestion and query pipeline; the optional query entry point described below supplies one reusable geographic workflow.
+The root layer entry point deliberately does not import Arrow, GeoArrow, or the geographic query algorithms. Applications can produce the fixed-width buffers with any ingestion and query pipeline; the optional query entry point described below supplies one reusable geographic workflow.
 
 ```
 import {FilteredScatterplotLayer} from '@deck.gl/proposals/layers';
@@ -74,16 +74,16 @@ Deck's RGB24 picking reserves zero for “no object,” so indices through `16_7
 
 ## Geographic point queries[​](#geographic-point-queries "Direct link to Geographic point queries")
 
-The optional `@deck.gl/proposals/effects/query` subpath adds a WebGPU Deck effect that projects WGS84 longitude/latitude rows into local kilometres, builds a flat uniform-grid index once, and runs viewport-bounds plus local-radius queries before each draw. It keeps result IDs and clamped counts on the GPU; the two `outputs` objects can be passed directly to `FilteredScatterplotLayer`.
+The optional `@deck.gl/proposals/layers/filtered-scatterplot-layer/geographic-point-query-effect` subpath adds a WebGPU Deck effect that projects WGS84 longitude/latitude rows into local kilometres, builds a flat uniform-grid index once, and runs viewport-bounds plus local-radius queries before each draw. It keeps result IDs and clamped counts on the GPU; the two `outputs` objects can be passed directly to `FilteredScatterplotLayer`.
 
 ```
 import {FilteredScatterplotLayer} from '@deck.gl/proposals/layers';
 
-import {LuSpatialGeographicPointQueryEffect} from '@deck.gl/proposals/effects/query';
+import {GeographicPointQueryEffect} from '@deck.gl/proposals/layers/filtered-scatterplot-layer/geographic-point-query-effect';
 
 
 
-const queryEffect = new LuSpatialGeographicPointQueryEffect(device, {
+const queryEffect = new GeographicPointQueryEffect(device, {
 
   longitudeLatitudes,
 

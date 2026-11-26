@@ -367,7 +367,6 @@ For first-time deck.gl developers, it is helpful to read the following pages bef
 #### proposals
 
 - [Arrow layers](https://deck.gl/next/docs/api-reference/proposals/arrow-layers.md): Overview
-- [Proposed effects](https://deck.gl/next/docs/api-reference/proposals/effects.md): Private home for experimental deck.gl effects. This package is not published.
 - [GPU layers](https://deck.gl/next/docs/api-reference/proposals/gpu-layers.md): Reusable deck.gl layers for geographic rendering that consume caller-owned GPU buffers.
 - [Proposed layers](https://deck.gl/next/docs/api-reference/proposals/layers.md): Private home for experimental GPU-resident, Arrow, atmospheric, and particle layers. Import these from @deck.gl/proposals/layers; the following focused GPU layer entry points remain available.
 - [MVT2DLayer](https://deck.gl/next/docs/api-reference/proposals/mvt-2d-layer.md): This layer is available from the private @deck.gl/proposals/layers module in a source checkout.

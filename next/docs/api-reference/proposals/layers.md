@@ -9,4 +9,4 @@ Private home for experimental GPU-resident, Arrow, atmospheric, and particle lay
 
 Inputs are borrowed. Paths use storage buffers; polygon fills currently use vertex attributes. Text rendering depends on the supplied luma.gl text strategy.
 
-Each subpath also exports `GPUVectorLayerPickingInfo` for the picking provenance exposed by these layers. The former private GPU and Arrow packages are consolidated here. Effects now live in `@deck.gl/proposals/effects`. See [GPU layers](https://deck.gl/next/docs/api-reference/proposals/gpu-layers.md) and [Arrow layers](https://deck.gl/next/docs/api-reference/proposals/arrow-layers.md) for the experimental APIs.
+Each subpath also exports `GPUVectorLayerPickingInfo` for the picking provenance exposed by these layers. The former private GPU and Arrow packages are consolidated here. See [GPU layers](https://deck.gl/next/docs/api-reference/proposals/gpu-layers.md) and [Arrow layers](https://deck.gl/next/docs/api-reference/proposals/arrow-layers.md) for the experimental APIs.
