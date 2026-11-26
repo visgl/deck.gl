@@ -12,8 +12,7 @@ vectors.
 
 The fixed-width primitives are `GPUIconLayer` and `GPUScatterplotLayer`. They consume row-aligned
 `GPUVector` objects. Each layer owns one `GPUVectorModel`, which preserves every physical chunk as
-a separate draw call without creating a model or deck child layer per chunk. `GPUBitmapLayer`
-accepts an already loaded `Texture`; a bitmap has no tabular column to convert.
+a separate draw call without creating a model or deck child layer per chunk.
 `GPUIconLayer.getSize` is the icon height in pixels, matching the standard IconLayer
 default. Atlas frame dimensions and anchor offsets scale relative to that height.
 
@@ -38,7 +37,7 @@ features into these GPU cores. The same rule applies to future classic JavaScrip
 binary compatibility: each input family converts or borrows GPUVectors and delegates to the same
 renderer.
 
-`LuSpatialPointLayer` binds caller-owned position and point-ID buffers directly and replays a
+`FilteredScatterplotLayer` binds caller-owned position and point-ID buffers directly and replays a
 caller-owned `DrawCommandBuffer`. The layer owns only its render model and style-uniform buffer;
 query results, indirect commands, and source positions remain owned by the application.
 
@@ -50,9 +49,9 @@ algorithms. Applications can produce the fixed-width buffers with any ingestion 
 the optional query entry point described below supplies one reusable geographic workflow.
 
 ```ts
-import {LuSpatialPointLayer} from '@deck.gl/proposals/layers';
+import {FilteredScatterplotLayer} from '@deck.gl/proposals/layers';
 
-const layer = new LuSpatialPointLayer({
+const layer = new FilteredScatterplotLayer({
   id: 'selected-points',
   pickable: true,
   positions,
@@ -80,10 +79,10 @@ resident row indices and keep any global corpus-ID mapping in the application.
 The optional `@deck.gl/proposals/effects/query` subpath adds a WebGPU Deck effect that projects
 WGS84 longitude/latitude rows into local kilometres, builds a flat uniform-grid index once, and
 runs viewport-bounds plus local-radius queries before each draw. It keeps result IDs and clamped
-counts on the GPU; the two `outputs` objects can be passed directly to `LuSpatialPointLayer`.
+counts on the GPU; the two `outputs` objects can be passed directly to `FilteredScatterplotLayer`.
 
 ```ts
-import {LuSpatialPointLayer} from '@deck.gl/proposals/layers';
+import {FilteredScatterplotLayer} from '@deck.gl/proposals/layers';
 import {LuSpatialGeographicPointQueryEffect} from '@deck.gl/proposals/effects/query';
 
 const queryEffect = new LuSpatialGeographicPointQueryEffect(device, {
@@ -97,11 +96,11 @@ const queryEffect = new LuSpatialGeographicPointQueryEffect(device, {
   onStats: stats => updateInspector(stats.inspectorSnapshot)
 });
 
-const contextLayer = new LuSpatialPointLayer({
+const contextLayer = new FilteredScatterplotLayer({
   id: 'context-points',
   ...queryEffect.outputs.viewport
 });
-const selectionLayer = new LuSpatialPointLayer({
+const selectionLayer = new FilteredScatterplotLayer({
   id: 'selected-points',
   ...queryEffect.outputs.selection
 });

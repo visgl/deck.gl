@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Deck, OrthographicView, type Layer} from '@deck.gl/core';
-import {LuSpatialPointLayer} from '@deck.gl/proposals/layers';
+import {FilteredScatterplotLayer} from '@deck.gl/proposals/layers';
 import {Buffer, type Device} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import {DrawCommandBuffer} from '@luma.gl/graph/gpu-core';
@@ -15,7 +15,7 @@ const TEST_VIEWPORT_SIZE = 64;
 const TEST_TIMEOUT_MILLISECONDS = 10_000;
 type TestDeck = Deck<OrthographicView>;
 
-it('LuSpatialPointLayer links and submits a caller-owned indirect draw', async () => {
+it('FilteredScatterplotLayer links and submits a caller-owned indirect draw', async () => {
   const device = await getWebGPUTestDevice();
   if (!device) {
     void 0;
@@ -41,7 +41,7 @@ it('LuSpatialPointLayer links and submits a caller-owned indirect draw', async (
   const drawSpy = vi.spyOn(drawCommands, 'draw');
   let layerError: Error | null = null;
   let deckError: Error | null = null;
-  const layer = new LuSpatialPointLayer({
+  const layer = new FilteredScatterplotLayer({
     id: 'luspatial-browser-test-layer',
     data: [],
     positions,
@@ -175,7 +175,7 @@ async function waitForIndirectDraw(
   }
   throwIfError(getError());
   if (drawSpy.mock.calls.length === 0) {
-    throw new Error('LuSpatialPointLayer did not submit its indirect draw');
+    throw new Error('FilteredScatterplotLayer did not submit its indirect draw');
   }
 }
 

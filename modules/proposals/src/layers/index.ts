@@ -3,16 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 export {
-  LuSpatialPointLayer,
-  type LuSpatialPointLayerProps
-} from './luspatial-point-layer';
+  FilteredScatterplotLayer,
+  type FilteredScatterplotLayerProps
+} from './filtered-scatterplot-layer';
 export {GPUScatterplotLayer, type GPUScatterplotLayerProps} from './gpu-scatterplot-layer';
 export {GPUIconLayer, type GPUIconLayerProps} from './gpu-icon-layer';
-export {
-  GPUBitmapLayer,
-  type GPUBitmapBounds,
-  type GPUBitmapLayerProps
-} from './gpu-bitmap-layer';
 export type {GPUVectorLayerPickingInfo} from './gpu-vector-layer-utils';
 export {getMeterOffsetPosition} from './projection/meter-offset-position';
 export {OrthographicView, type PickingInfo} from '@deck.gl/core';
@@ -29,10 +24,6 @@ export {
   ArrowTripsLayer,
   type ArrowTripsLayerProps
 } from './arrow-trips-layer';
-export {
-  ArrowSolidPolygonLayer,
-  type ArrowSolidPolygonLayerProps
-} from './arrow-solid-polygon-layer';
 export {
   GeoArrowLayer,
   resolveGeoArrowGeometry,

@@ -88,7 +88,7 @@ export type LuSpatialGeographicPointSelection = {
   radiusKilometres: number;
 };
 
-/** One query result ready to bind to the package's `LuSpatialPointLayer`. */
+/** One query result ready to bind to the package's `FilteredScatterplotLayer`. */
 export type LuSpatialGeographicPointQueryOutput = {
   readonly positions: Buffer;
   readonly pointIds: Buffer;
