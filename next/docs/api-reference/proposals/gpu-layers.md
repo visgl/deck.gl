@@ -157,4 +157,4 @@ luma.gl alpha.6 publishes the required integrations, including Arrow and text un
 
 ## Examples and integration tests[​](#examples-and-integration-tests "Direct link to Examples and integration tests")
 
-The original standalone examples and their shared fixtures are available in [`examples-v10/proposals`](https://github.com/visgl/deck.gl/tree/master/examples-v10/proposals). Run `yarn build-private-examples` after installing workspace dependencies. `yarn test-private` includes the copied example integration tests alongside the module tests.
+The original standalone examples and their shared fixtures are available in [`examples-v10/proposals`](https://github.com/visgl/deck.gl/tree/master/examples-v10/proposals) and [`examples-v10/gpu-graph`](https://github.com/visgl/deck.gl/tree/master/examples-v10/gpu-graph). Run `yarn build-private-examples` after installing workspace dependencies. `yarn test-private` includes the copied example integration tests alongside the module tests.
