@@ -406,6 +406,12 @@ const testCases = [
   }
 ];
 
+// The sampler and filter passes share a golden across both backends.
+runRenderTestSuite(
+  (testCases as TestCase[]).filter(testCase => testCase.name === 'post-process-effects'),
+  'webgpu'
+);
+
 describe.each([
   'webgl'
   // 'webgpu'
