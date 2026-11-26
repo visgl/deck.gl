@@ -5,6 +5,7 @@
 import {
   PostProcessEffect,
   LightingEffect,
+  ShadowMapEffect,
   AmbientLight,
   DirectionalLight,
   GlobeView
@@ -426,3 +427,29 @@ describe('webgpu', () => {
     'webgpu'
   );
 });
+
+const baseShadowTest = (testCases as TestCase[]).find(
+  testCase => testCase.name === 'shadow-effect-simple-mesh'
+)!;
+runRenderTestSuite(
+  [
+    {
+      ...baseShadowTest,
+      name: 'cascaded-shadow-map',
+      goldenImage: './test/render/golden-images/cascaded-shadow-map.png',
+      layers: baseShadowTest.layers.map(layer =>
+        layer.id === 'ground' && layer instanceof SimpleMeshLayer
+          ? layer.clone({shadowEnabled: false})
+          : layer
+      ),
+      effects: [
+        new LightingEffect({
+          ambientLight: new AmbientLight({intensity: 1}),
+          directionalLight: new DirectionalLight({direction: [1, -0.5, -1], intensity: 1})
+        }),
+        new ShadowMapEffect({direction: [1, -0.5, -1]})
+      ]
+    }
+  ],
+  'webgpu'
+);
