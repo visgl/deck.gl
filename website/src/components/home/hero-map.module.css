@@ -44,6 +44,8 @@
   background-image: var(--taxi-still, none);
   background-position: center;
   background-size: cover;
+  mask-position: 0 0;
+  mask-size: 400% 100%;
   pointer-events: none;
 }
 
@@ -70,8 +72,15 @@
   opacity: 0;
   visibility: hidden;
   transition:
-    opacity 400ms ease-in-out,
-    visibility 0s linear 400ms;
+    mask-position 520ms ease-out,
+    opacity 520ms ease-in,
+    visibility 0s linear 520ms;
+}
+
+.scene[data-state='ready']:not([data-preview-paused]) .preview {
+  /* Reveal the live trails first on the open side of the map, feathered across the scene. */
+  mask-image: linear-gradient(90deg, #000 25%, transparent 70%);
+  mask-position: 100% 0;
 }
 
 .scene[data-state='ready'] .canvas {

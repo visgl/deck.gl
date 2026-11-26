@@ -4,7 +4,7 @@
 
 import {Deck, MapView} from '@deck.gl/core';
 import {TripsLayer} from '@deck.gl/geo-layers';
-import {PathLayer, PolygonLayer} from '@deck.gl/layers';
+import {PathLayer, PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {luma} from '@luma.gl/core';
 import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {tripLoopLength, tripTrailLength} from './taxi-data';
@@ -24,6 +24,44 @@ const initialViewState = {
 const playbackSpeed = 60;
 // The still used for paused playback was captured at this point in the trip loop.
 const previewStartTime = 840;
+const yellowTripColor = [255, 210, 122];
+const greenTripColor = [145, 255, 230];
+
+function getTripColor({vendor}) {
+  return vendor === 0 ? yellowTripColor : greenTripColor;
+}
+
+function getTripHeads(trips, time) {
+  const heads = [];
+  for (const {path, timestamps, vendor} of trips) {
+    let start = 0;
+    let end = timestamps.length - 1;
+    if (time < timestamps[start] || time > timestamps[end]) {
+      continue;
+    }
+    while (end - start > 1) {
+      const middle = (start + end) >> 1;
+      if (timestamps[middle] <= time) {
+        start = middle;
+      } else {
+        end = middle;
+      }
+    }
+    const duration = timestamps[end] - timestamps[start];
+    const fraction = duration > 0 ? (time - timestamps[start]) / duration : 1;
+    const from = path[start];
+    const to = path[end];
+    heads.push({
+      position: [
+        from[0] + (to[0] - from[0]) * fraction,
+        from[1] + (to[1] - from[1]) * fraction,
+        from[2] + (to[2] - from[2]) * fraction
+      ],
+      vendor
+    });
+  }
+  return heads;
+}
 
 function isNewYorkTrip({path, timestamps}) {
   return (
@@ -87,7 +125,7 @@ export async function createTaxiScene({
     id: 'taxi-map-trips',
     data: animatedTrips,
     getPath: trip => trip.path,
-    getColor: trip => (trip.vendor === 0 ? [255, 210, 122] : [145, 255, 230]),
+    getColor: getTripColor,
     trailLength: tripTrailLength,
     widthMinPixels: 3.3,
     capRounded: true,
@@ -101,6 +139,15 @@ export async function createTaxiScene({
     parameters: {depthWriteEnabled: false},
     widthMinPixels: 7.5
   });
+  // TripsLayer clips the moving end within a segment, beyond the reach of capRounded.
+  const headLayer = new ScatterplotLayer({
+    id: 'taxi-map-trip-heads',
+    billboard: true,
+    radiusUnits: 'pixels',
+    getRadius: 2.35,
+    getFillColor: getTripColor,
+    parameters: {depthWriteEnabled: false}
+  });
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let playing = !reducedMotion.matches && !isPaused();
   let spotlightVisible = false;
@@ -110,13 +157,20 @@ export async function createTaxiScene({
   let inView = false;
   let ready = false;
   let deck;
+  let headTime;
+  let timedHeadLayer;
 
   function getLayers() {
+    if (headTime !== currentTime) {
+      headTime = currentTime;
+      timedHeadLayer = headLayer.clone({data: getTripHeads(animatedTrips, currentTime)});
+    }
     return [
       buildingLayer,
       routeLayer,
       haloLayer.clone({currentTime, brushingEnabled: spotlightVisible}),
-      tripsLayer.clone({currentTime})
+      tripsLayer.clone({currentTime}),
+      timedHeadLayer
     ];
   }
 
