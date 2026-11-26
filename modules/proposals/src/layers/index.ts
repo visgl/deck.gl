@@ -13,11 +13,6 @@ export {GPUArcLayer, type GPUArcLayerProps} from './gpu-arc-layer';
 export {GPUPointCloudLayer, type GPUPointCloudLayerProps} from './gpu-point-cloud-layer';
 export {GPUColumnLayer, type GPUColumnLayerProps} from './gpu-column-layer';
 export {GPUGridCellLayer, type GPUGridCellLayerProps} from './gpu-grid-cell-layer';
-export {
-  GPUBitmapLayer,
-  type GPUBitmapBounds,
-  type GPUBitmapLayerProps
-} from './gpu-bitmap-layer';
 export type {GPUVectorLayerPickingInfo} from './gpu-vector-layer-utils';
 export {getMeterOffsetPosition} from './projection/meter-offset-position';
 export {OrthographicView, type PickingInfo} from '@deck.gl/core';
