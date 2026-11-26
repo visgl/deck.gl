@@ -44,7 +44,7 @@ query results, indirect commands, and source positions remain owned by the appli
 The command buffer must use the non-indexed `draw` layout. Its selected record keeps
 `vertexCount: 6` and `firstVertex: 0`; GPU queries normally update only `instanceCount`.
 
-The root layer entry point deliberately does not import Arrow, GeoArrow, or the luSpatial query
+The root layer entry point deliberately does not import Arrow, GeoArrow, or the geographic query
 algorithms. Applications can produce the fixed-width buffers with any ingestion and query pipeline;
 the optional query entry point described below supplies one reusable geographic workflow.
 
@@ -76,16 +76,16 @@ resident row indices and keep any global corpus-ID mapping in the application.
 
 ## Geographic point queries
 
-The optional `@deck.gl/proposals/effects/query` subpath adds a WebGPU Deck effect that projects
+The optional `@deck.gl/proposals/layers/filtered-scatterplot-layer/geographic-point-query-effect` subpath adds a WebGPU Deck effect that projects
 WGS84 longitude/latitude rows into local kilometres, builds a flat uniform-grid index once, and
 runs viewport-bounds plus local-radius queries before each draw. It keeps result IDs and clamped
 counts on the GPU; the two `outputs` objects can be passed directly to `FilteredScatterplotLayer`.
 
 ```ts
 import {FilteredScatterplotLayer} from '@deck.gl/proposals/layers';
-import {LuSpatialGeographicPointQueryEffect} from '@deck.gl/proposals/effects/query';
+import {GeographicPointQueryEffect} from '@deck.gl/proposals/layers/filtered-scatterplot-layer/geographic-point-query-effect';
 
-const queryEffect = new LuSpatialGeographicPointQueryEffect(device, {
+const queryEffect = new GeographicPointQueryEffect(device, {
   longitudeLatitudes,
   sourceBounds: [-74.1, 40.65, -73.84, 40.85],
   projectionOrigin: [-73.97, 40.75],

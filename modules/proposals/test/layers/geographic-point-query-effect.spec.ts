@@ -3,12 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {Effect, EffectContext} from '@deck.gl/core';
-import {LuSpatialGeographicPointQueryEffect} from '@deck.gl/proposals/effects/query';
+import {GeographicPointQueryEffect} from '@deck.gl/proposals/layers/filtered-scatterplot-layer/geographic-point-query-effect';
 import type {Device} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {expect, test} from 'vitest';
 
-test('LuSpatialGeographicPointQueryEffect validates props before browser GPU allocation', () => {
+test('GeographicPointQueryEffect validates props before browser GPU allocation', () => {
   const props = {
     longitudeLatitudes: new Float32Array([-73.97, 40.75]),
     sourceBounds: [-74, 40.72, -73.94, 40.78] as const,
@@ -17,7 +17,7 @@ test('LuSpatialGeographicPointQueryEffect validates props before browser GPU all
   };
   expect(
     () =>
-      new LuSpatialGeographicPointQueryEffect({type: 'webgpu'} as Device, {
+      new GeographicPointQueryEffect({type: 'webgpu'} as Device, {
         ...props,
         viewportProjectionPaddingKilometres: -1
       })
@@ -30,16 +30,16 @@ test('LuSpatialGeographicPointQueryEffect validates props before browser GPU all
       throw new Error(allocationSentinel);
     }
   } as unknown as Device;
-  expect(() => new LuSpatialGeographicPointQueryEffect(device, props)).toThrow(allocationSentinel);
+  expect(() => new GeographicPointQueryEffect(device, props)).toThrow(allocationSentinel);
 });
 
-test('LuSpatialGeographicPointQueryEffect supports a browser WebGPU lifecycle on hardware', async () => {
+test('GeographicPointQueryEffect supports a browser WebGPU lifecycle on hardware', async () => {
   const device = await getWebGPUTestDevice();
   // Constructing this graph compiles its integer-fp64 pipelines and leaves SwiftShader busy for
   // minutes during browser teardown. Real hardware still covers the lifecycle and submitted results.
   if (!device || isSoftwareBackedDevice(device)) return;
   const publishedStats: unknown[] = [];
-  const effect = new LuSpatialGeographicPointQueryEffect(device, {
+  const effect = new GeographicPointQueryEffect(device, {
     id: 'luspatial-geographic-query-hardware-lifecycle-test',
     longitudeLatitudes: new Float32Array([-73.97, 40.75, -73.99, 40.74]),
     sourceBounds: [-74, 40.72, -73.94, 40.78],
@@ -120,14 +120,14 @@ test('LuSpatialGeographicPointQueryEffect supports a browser WebGPU lifecycle on
   effect.preRender({viewports: []} as unknown as Parameters<NonNullable<Effect['preRender']>>[0]);
 });
 
-test('LuSpatialGeographicPointQueryEffect builds and updates real hardware WebGPU queries', async () => {
+test('GeographicPointQueryEffect builds and updates real hardware WebGPU queries', async () => {
   const device = await getWebGPUTestDevice();
   // The precise radius kernel uses integer fp64 emulation and is intentionally not exercised on
   // SwiftShader. Its focused geospatial tests apply the same exclusion; hardware coverage below
   // still verifies the complete projection, index, mutable query, and indirect-draw path.
   if (!device || isSoftwareBackedDevice(device)) return;
 
-  const effect = new LuSpatialGeographicPointQueryEffect(device, {
+  const effect = new GeographicPointQueryEffect(device, {
     id: 'luspatial-geographic-query-browser-test',
     longitudeLatitudes: new Float32Array([
       -73.97, 40.75, -73.971, 40.75, -73.99, 40.75, -74.2, 40.75

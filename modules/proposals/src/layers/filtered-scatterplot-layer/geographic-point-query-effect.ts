@@ -34,7 +34,7 @@ const KILOMETRES_PER_DEGREE = 40_000 / 360;
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
 /** Stable counter IDs recorded on the query graph inspector. */
-export const LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS = {
+export const GEOGRAPHIC_POINT_QUERY_COUNTER_IDS = {
   viewportIntersectedCells: 'viewport-intersected-cells',
   viewportCandidates: 'viewport-candidates',
   viewportMatches: 'viewport-matches',
@@ -44,13 +44,13 @@ export const LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS = {
 } as const;
 
 /** Stable graph IDs used by inspector snapshots. */
-export const LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_GRAPH_IDS = {
+export const GEOGRAPHIC_POINT_QUERY_GRAPH_IDS = {
   build: 'luspatial-geographic-point-query-build-graph',
   query: 'luspatial-geographic-point-query-graph'
 } as const;
 
 /** Aligned byte offsets used by the optional sparse query-counter readback. */
-export const LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS = {
+export const GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS = {
   viewportIntersectedCellCount: 0,
   viewportCandidateCount: STORAGE_BUFFER_OFFSET_ALIGNMENT,
   selectionIntersectedCellCount: STORAGE_BUFFER_OFFSET_ALIGNMENT * 2,
@@ -58,13 +58,12 @@ export const LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS = {
 } as const;
 
 const QUERY_DIAGNOSTIC_BUFFER_BYTE_LENGTH =
-  LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.selectionCandidateCount +
-  UINT32_BYTE_LENGTH;
+  GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.selectionCandidateCount + UINT32_BYTE_LENGTH;
 
 type DestroyableResource = {destroy(): void};
 
 /** Exact work and result counts sampled from the two GPU spatial queries. */
-export type LuSpatialGeographicPointQueryCounters = {
+export type GeographicPointQueryCounters = {
   viewportIntersectedCellCount: number;
   viewportCandidateCount: number;
   visiblePointCount: number;
@@ -74,7 +73,7 @@ export type LuSpatialGeographicPointQueryCounters = {
 };
 
 /** One immutable telemetry snapshot from the build and frame query graphs. */
-export type LuSpatialGeographicPointQueryStats = LuSpatialGeographicPointQueryCounters & {
+export type GeographicPointQueryStats = GeographicPointQueryCounters & {
   residentPointCount: number;
   graphNodeCount: number;
   buildEncodingMilliseconds: number;
@@ -83,13 +82,13 @@ export type LuSpatialGeographicPointQueryStats = LuSpatialGeographicPointQueryCo
 };
 
 /** Geographic center and local radius used by the selection query. */
-export type LuSpatialGeographicPointSelection = {
+export type GeographicPointSelection = {
   center: readonly [number, number];
   radiusKilometres: number;
 };
 
 /** One query result ready to bind to the package's `FilteredScatterplotLayer`. */
-export type LuSpatialGeographicPointQueryOutput = {
+export type GeographicPointQueryOutput = {
   readonly positions: Buffer;
   readonly pointIds: Buffer;
   readonly drawCommands: DrawCommandBuffer;
@@ -97,13 +96,13 @@ export type LuSpatialGeographicPointQueryOutput = {
 };
 
 /** Viewport and local-radius outputs produced by the effect. */
-export type LuSpatialGeographicPointQueryOutputs = {
-  readonly viewport: LuSpatialGeographicPointQueryOutput;
-  readonly selection: LuSpatialGeographicPointQueryOutput;
+export type GeographicPointQueryOutputs = {
+  readonly viewport: GeographicPointQueryOutput;
+  readonly selection: GeographicPointQueryOutput;
 };
 
 /** Immutable construction properties for a geographic point-query effect. */
-export type LuSpatialGeographicPointQueryEffectProps = {
+export type GeographicPointQueryEffectProps = {
   /** Stable effect identity for this resident data revision. */
   id?: string;
   /** Packed WGS84 longitude/latitude rows in degrees. */
@@ -117,7 +116,7 @@ export type LuSpatialGeographicPointQueryEffectProps = {
   /** Two-dimensional index resolution. Defaults to `[256, 256]`. */
   gridSize?: Extract<GPUGridIndexSize, readonly [number, number]>;
   /** Initial local-radius query. Defaults to the projection origin and one kilometre. */
-  initialSelection?: LuSpatialGeographicPointSelection;
+  initialSelection?: GeographicPointSelection;
   /** Inclusive radius range enforced by the selection mutators. */
   selectionRadiusRangeKilometres?: readonly [number, number];
   /** Deck viewport ID to query. The first viewport is used when omitted. */
@@ -125,7 +124,7 @@ export type LuSpatialGeographicPointQueryEffectProps = {
   /** Conservative projected viewport expansion. Defaults to the documented 20 metre envelope. */
   viewportProjectionPaddingKilometres?: number;
   /** Receives bounded asynchronous diagnostics without blocking rendering. */
-  onStats?: (stats: LuSpatialGeographicPointQueryStats) => void;
+  onStats?: (stats: GeographicPointQueryStats) => void;
   /** Enables asynchronous counter and timing readbacks. Defaults to whether `onStats` is set. */
   enableDiagnostics?: boolean;
   /** Maximum inspector history retained per graph. Defaults to 120 samples. */
@@ -139,12 +138,12 @@ export type LuSpatialGeographicPointQueryEffectProps = {
  * inputs, writes both result counts into indirect draw records, and leaves rendering synchronized
  * entirely on the GPU.
  */
-export class LuSpatialGeographicPointQueryEffect implements Effect {
+export class GeographicPointQueryEffect implements Effect {
   readonly id: string;
-  readonly props: Readonly<LuSpatialGeographicPointQueryEffectProps>;
+  readonly props: Readonly<GeographicPointQueryEffectProps>;
   readonly useInPicking = true;
   readonly longitudeLatitudes: Buffer;
-  readonly outputs: LuSpatialGeographicPointQueryOutputs;
+  readonly outputs: GeographicPointQueryOutputs;
   readonly drawCommands: DrawCommandBuffer;
   readonly inspector: GPUCommandGraphInspector;
 
@@ -178,7 +177,7 @@ export class LuSpatialGeographicPointQueryEffect implements Effect {
   private readonly queryGraph: CompiledGPUCommandGraph<void>;
   private readonly buildGraphObservation: GPUCommandGraphInspectorObservation<void>;
   private readonly queryGraphObservation: GPUCommandGraphInspectorObservation<void>;
-  private readonly onStats?: (stats: LuSpatialGeographicPointQueryStats) => void;
+  private readonly onStats?: (stats: GeographicPointQueryStats) => void;
   private deck: EffectContext['deck'] | null = null;
   private selectionCenter: readonly [number, number];
   private selectionRadiusKilometres: number;
@@ -201,14 +200,14 @@ export class LuSpatialGeographicPointQueryEffect implements Effect {
   private destroyed = false;
   private readonly ownedResources: DestroyableResource[] = [];
 
-  constructor(device: Device, props: LuSpatialGeographicPointQueryEffectProps) {
+  constructor(device: Device, props: GeographicPointQueryEffectProps) {
     if (device.type !== 'webgpu') {
-      throw new Error('LuSpatialGeographicPointQueryEffect requires WebGPU');
+      throw new Error('GeographicPointQueryEffect requires WebGPU');
     }
     validateProps(props);
     this.device = device;
     this.props = props;
-    this.id = props.id ?? 'luspatial-geographic-point-query-effect';
+    this.id = props.id ?? 'geographic-point-query-effect';
     this.pointCount = props.longitudeLatitudes.length / 2;
     this.projectionOrigin = props.projectionOrigin;
     this.projectionPlan = compileProjectionPlan({
@@ -435,7 +434,7 @@ export class LuSpatialGeographicPointQueryEffect implements Effect {
   }
 
   /** Returns the current geographic center and clamped local radius. */
-  getSelection(): LuSpatialGeographicPointSelection {
+  getSelection(): GeographicPointSelection {
     return {
       center: this.selectionCenter,
       radiusKilometres: this.selectionRadiusKilometres
@@ -568,7 +567,7 @@ export class LuSpatialGeographicPointQueryEffect implements Effect {
     this.selectionCandidateCount = 0;
     this.selectedPointCount = 0;
     this.queryGraphObservation.recordCounters(
-      makeLuSpatialGeographicPointQueryInspectorCounters({
+      makeGeographicPointQueryInspectorCounters({
         viewportIntersectedCellCount: 0,
         viewportCandidateCount: 0,
         visiblePointCount: 0,
@@ -582,7 +581,7 @@ export class LuSpatialGeographicPointQueryEffect implements Effect {
 
   private createBuildGraph(): CompiledGPUCommandGraph<void> {
     const graph = new GPUCommandGraph<void>(this.device, {
-      id: LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_GRAPH_IDS.build
+      id: GEOGRAPHIC_POINT_QUERY_GRAPH_IDS.build
     });
     const sourceBuffer = importBuffer(graph, 'longitude-latitudes', this.longitudeLatitudes);
     const projectedBuffer = importBuffer(graph, 'projected-positions', this.projectedPositions);
@@ -635,7 +634,7 @@ export class LuSpatialGeographicPointQueryEffect implements Effect {
 
   private createQueryGraph(): CompiledGPUCommandGraph<void> {
     const graph = new GPUCommandGraph<void>(this.device, {
-      id: LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_GRAPH_IDS.query
+      id: GEOGRAPHIC_POINT_QUERY_GRAPH_IDS.query
     });
     const projectedBuffer = importBuffer(graph, 'projected-positions', this.projectedPositions);
     const cellOffsetsBuffer = importBuffer(graph, 'cell-offsets', this.cellOffsets);
@@ -709,24 +708,22 @@ export class LuSpatialGeographicPointQueryEffect implements Effect {
     const viewportIntersectedCellCount = graph.createDataView(queryDiagnosticsBuffer, {
       format: 'uint32',
       length: 1,
-      byteOffset:
-        LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.viewportIntersectedCellCount
+      byteOffset: GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.viewportIntersectedCellCount
     });
     const viewportCandidateCount = graph.createDataView(queryDiagnosticsBuffer, {
       format: 'uint32',
       length: 1,
-      byteOffset: LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.viewportCandidateCount
+      byteOffset: GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.viewportCandidateCount
     });
     const selectionIntersectedCellCount = graph.createDataView(queryDiagnosticsBuffer, {
       format: 'uint32',
       length: 1,
-      byteOffset:
-        LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.selectionIntersectedCellCount
+      byteOffset: GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.selectionIntersectedCellCount
     });
     const selectionCandidateCount = graph.createDataView(queryDiagnosticsBuffer, {
       format: 'uint32',
       length: 1,
-      byteOffset: LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.selectionCandidateCount
+      byteOffset: GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.selectionCandidateCount
     });
 
     new GPUPointSpatialQuery({
@@ -797,14 +794,10 @@ export class LuSpatialGeographicPointQueryEffect implements Effect {
         this.queryDiagnostics.readAsync()
       ]);
       if (this.destroyed || queryGeneration !== this.queryGeneration) return;
-      const counters = decodeLuSpatialGeographicPointQueryCounters(
-        drawCommandBytes,
-        queryDiagnosticBytes,
-        {
-          viewportInstanceCountByteOffset: this.drawCommands.getInstanceCountByteOffset(0),
-          selectionInstanceCountByteOffset: this.drawCommands.getInstanceCountByteOffset(1)
-        }
-      );
+      const counters = decodeGeographicPointQueryCounters(drawCommandBytes, queryDiagnosticBytes, {
+        viewportInstanceCountByteOffset: this.drawCommands.getInstanceCountByteOffset(0),
+        selectionInstanceCountByteOffset: this.drawCommands.getInstanceCountByteOffset(1)
+      });
       this.viewportIntersectedCellCount = counters.viewportIntersectedCellCount;
       this.viewportCandidateCount = counters.viewportCandidateCount;
       this.visiblePointCount = counters.visiblePointCount;
@@ -812,7 +805,7 @@ export class LuSpatialGeographicPointQueryEffect implements Effect {
       this.selectionCandidateCount = counters.selectionCandidateCount;
       this.selectedPointCount = counters.selectedPointCount;
       this.queryGraphObservation.recordCounters(
-        makeLuSpatialGeographicPointQueryInspectorCounters(counters)
+        makeGeographicPointQueryInspectorCounters(counters)
       );
       this.publishStats();
     } catch {
@@ -856,22 +849,22 @@ export class LuSpatialGeographicPointQueryEffect implements Effect {
 }
 
 /** Decodes one pair of sparse GPU query-counter and indirect-draw readbacks. */
-export function decodeLuSpatialGeographicPointQueryCounters(
+export function decodeGeographicPointQueryCounters(
   drawCommandBytes: Uint8Array,
   queryDiagnosticBytes: Uint8Array,
   drawCommandLayout: {
     viewportInstanceCountByteOffset: number;
     selectionInstanceCountByteOffset: number;
   }
-): LuSpatialGeographicPointQueryCounters {
+): GeographicPointQueryCounters {
   return {
     viewportIntersectedCellCount: readUint32AtByteOffset(
       queryDiagnosticBytes,
-      LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.viewportIntersectedCellCount
+      GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.viewportIntersectedCellCount
     ),
     viewportCandidateCount: readUint32AtByteOffset(
       queryDiagnosticBytes,
-      LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.viewportCandidateCount
+      GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.viewportCandidateCount
     ),
     visiblePointCount: readUint32AtByteOffset(
       drawCommandBytes,
@@ -879,11 +872,11 @@ export function decodeLuSpatialGeographicPointQueryCounters(
     ),
     selectionIntersectedCellCount: readUint32AtByteOffset(
       queryDiagnosticBytes,
-      LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.selectionIntersectedCellCount
+      GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.selectionIntersectedCellCount
     ),
     selectionCandidateCount: readUint32AtByteOffset(
       queryDiagnosticBytes,
-      LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.selectionCandidateCount
+      GEOGRAPHIC_POINT_QUERY_DIAGNOSTIC_BYTE_OFFSETS.selectionCandidateCount
     ),
     selectedPointCount: readUint32AtByteOffset(
       drawCommandBytes,
@@ -893,20 +886,18 @@ export function decodeLuSpatialGeographicPointQueryCounters(
 }
 
 /** Maps an exact query sample onto stable inspector counter identifiers. */
-export function makeLuSpatialGeographicPointQueryInspectorCounters(
-  counters: LuSpatialGeographicPointQueryCounters
+export function makeGeographicPointQueryInspectorCounters(
+  counters: GeographicPointQueryCounters
 ): Readonly<Record<string, number>> {
   return {
-    [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.viewportIntersectedCells]:
+    [GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.viewportIntersectedCells]:
       counters.viewportIntersectedCellCount,
-    [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.viewportCandidates]:
-      counters.viewportCandidateCount,
-    [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.viewportMatches]: counters.visiblePointCount,
-    [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.selectionIntersectedCells]:
+    [GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.viewportCandidates]: counters.viewportCandidateCount,
+    [GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.viewportMatches]: counters.visiblePointCount,
+    [GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.selectionIntersectedCells]:
       counters.selectionIntersectedCellCount,
-    [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.selectionCandidates]:
-      counters.selectionCandidateCount,
-    [LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.selectionMatches]: counters.selectedPointCount
+    [GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.selectionCandidates]: counters.selectionCandidateCount,
+    [GEOGRAPHIC_POINT_QUERY_COUNTER_IDS.selectionMatches]: counters.selectedPointCount
   };
 }
 
@@ -938,7 +929,7 @@ function projectLongitudeLatitude(
   ];
 }
 
-function validateProps(props: LuSpatialGeographicPointQueryEffectProps): void {
+function validateProps(props: GeographicPointQueryEffectProps): void {
   if (props.longitudeLatitudes.length === 0 || props.longitudeLatitudes.length % 2 !== 0) {
     throw new Error('longitudeLatitudes must contain one or more packed coordinate pairs');
   }

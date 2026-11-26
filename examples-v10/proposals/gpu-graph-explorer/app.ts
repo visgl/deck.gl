@@ -8,7 +8,7 @@ import {
   OrthographicView,
   type PickingInfo
 } from '@deck.gl/proposals/layers';
-import {GPUGraphDeckEffect, type GPUGraphDeckEffectStats} from '@deck.gl/proposals/effects';
+import {GraphExplorerEffect, type GraphExplorerEffectStats} from './graph-explorer-effect';
 import {Buffer, type Device} from '@luma.gl/core';
 import {ArrowDeck} from '../arrow-deck';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
@@ -60,9 +60,9 @@ export function createGPUGraphExplorerDeck(
   const container = parent ?? createStandaloneContainer();
   if (getComputedStyle(container).position === 'static') container.style.position = 'relative';
 
-  let effect: GPUGraphDeckEffect | null = null;
+  let effect: GraphExplorerEffect | null = null;
   let activeDevice: Device | null = null;
-  let latestStats: GPUGraphDeckEffectStats | null = null;
+  let latestStats: GraphExplorerEffectStats | null = null;
   let currentLayoutMode = initialLayoutMode;
   let currentColorMode: GraphExplorerColorMode = 'community';
   let currentNodeSizeMode: GraphExplorerNodeSizeMode = 'pagerank';
@@ -226,7 +226,7 @@ export function createGPUGraphExplorerDeck(
     if (nextDataset.vertexCount >= GRAPH_EXPLORER_LINEAR_LAYOUT_VERTEX_COUNT) {
       edgesVisible = false;
     }
-    const nextEffect = new GPUGraphDeckEffect(activeDevice, nextDataset, {
+    const nextEffect = new GraphExplorerEffect(activeDevice, nextDataset, {
       layoutMode: currentLayoutMode,
       pointMode,
       maxVisibleEdges,
@@ -259,7 +259,7 @@ export function createGPUGraphExplorerDeck(
   }
 
   function createLayers(
-    graphEffect: GPUGraphDeckEffect
+    graphEffect: GraphExplorerEffect
   ): (GPUGraphEdgeLayer | GPUGraphNodeLayer)[] {
     const nonemptyChunkCount = graphEffect.graph.sourceVertices.data.filter(
       chunk => chunk.length > 0
@@ -317,13 +317,13 @@ export function createGPUGraphExplorerDeck(
 }
 
 /** Updates the same float32x2 allocation bound directly by the node layer's instance attribute. */
-function updateDraggedVertex(effect: GPUGraphDeckEffect, vertex: number, info: PickingInfo): void {
+function updateDraggedVertex(effect: GraphExplorerEffect, vertex: number, info: PickingInfo): void {
   const coordinate = info.coordinate;
   if (!coordinate || coordinate.length < 2) return;
   effect.setVertexPosition(vertex, [coordinate[0], coordinate[1]]);
 }
 
-function getVertexTooltip(info: PickingInfo, effect: GPUGraphDeckEffect | null): string | null {
+function getVertexTooltip(info: PickingInfo, effect: GraphExplorerEffect | null): string | null {
   if (!info.picked || info.index < 0 || !effect) return null;
   const state = effect.isVertexPinned(info.index) ? 'pinned' : 'movable';
   return `Vertex ${info.index} · ${state}\nGPU communities · PageRank · neighborhood`;

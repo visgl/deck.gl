@@ -10,12 +10,12 @@ import {
   GPUGraphEdgeLayer,
   GPUGraphNodeLayer
 } from '@deck.gl/proposals/layers';
-import {GPUGraphDeckEffect} from '@deck.gl/proposals/effects';
+import {GraphExplorerEffect} from '../graph-explorer-effect';
 import * as experimentalModule from '@luma.gl/graph';
 import * as gpuGraphModule from '@luma.gl/graph/gpu-graph-algorithms';
 import {describe, expect, test} from 'vitest';
 
-import {createGPUGraphExplorerDeck} from '../../../../examples-v10/proposals/gpu-graph-explorer/app';
+import {createGPUGraphExplorerDeck} from '../app';
 import {
   GRAPH_EXPLORER_LINEAR_LAYOUT_VERTEX_COUNT,
   GRAPH_EXPLORER_MAXIMUM_EXACT_VERTEX_COUNT,
@@ -25,7 +25,7 @@ import {
   GRAPH_EXPLORER_VERTEX_COUNTS,
   makeGraphExplorerDataset
 } from '../../../../examples/experimental/gpu-graph-explorer/graph-data';
-import {getExampleSupportDefinition} from '../../../../examples-v10/proposals/shared/example-support-registry';
+import {getExampleSupportDefinition} from '../../shared/example-support-registry';
 
 describe('optional GPU Graph deck.gl integration package isolation', () => {
   test('keeps deck.gl entirely outside graph production imports and dependencies', () => {
@@ -49,15 +49,15 @@ describe('optional GPU Graph deck.gl integration package isolation', () => {
         false
       );
     }
-    expect('GPUGraphDeckEffect' in experimentalModule).toBe(false);
-    expect('GPUGraphDeckEffect' in gpuGraphModule).toBe(false);
+    expect('GraphExplorerEffect' in experimentalModule).toBe(false);
+    expect('GraphExplorerEffect' in gpuGraphModule).toBe(false);
     expect('GPUGraphNodeLayer' in gpuGraphModule).toBe(false);
     expect('GPUGraphEdgeLayer' in gpuGraphModule).toBe(false);
   });
 
   test('keeps deck.gl and GPU graph dependencies inside the existing private layers package', () => {
     const packageJson = JSON.parse(
-      readFileSync(new URL('../../package.json', import.meta.url), 'utf8')
+      readFileSync(new URL('../../../../modules/proposals/package.json', import.meta.url), 'utf8')
     ) as {
       private?: boolean;
       version?: string;
@@ -66,31 +66,26 @@ describe('optional GPU Graph deck.gl integration package isolation', () => {
     };
 
     expect(packageJson.private).toBe(true);
-    expect(packageJson.dependencies?.['@deck.gl/core']).toBe('10.0.0-alpha.1');
-    expect(packageJson.dependencies?.['@luma.gl/graph']).toContain('10.0.0-beta.2');
+    expect(packageJson.dependencies?.['@deck.gl/core']).toBe(packageJson.version);
+    expect(packageJson.dependencies?.['@luma.gl/graph']).toBe(
+      packageJson.dependencies?.['@luma.gl/core']
+    );
     expect(packageJson.dependencies?.['@luma.gl/gpgpu']).toBeUndefined();
     expect(packageJson.dependencies?.['@luma.gl/tables']).toBeUndefined();
   });
 
   test('loads deck.gl graph adapters through the private package boundary', () => {
-    const exampleSource = readFileSync(
-      new URL('../../../../examples-v10/proposals/gpu-graph-explorer/app.ts', import.meta.url),
-      'utf8'
-    );
+    const exampleSource = readFileSync(new URL('../app.ts', import.meta.url), 'utf8');
 
     expect(exampleSource).toContain("from '@deck.gl/proposals/layers'");
-    expect(exampleSource).toContain("from '@deck.gl/proposals/effects'");
+    expect(exampleSource).toContain("from './graph-explorer-effect'");
     expect(exampleSource).not.toContain('@deck.gl/core');
   });
 
   test('provides a standalone entry without creating an example workspace', () => {
-    expect(
-      existsSync(
-        new URL('../../../../examples-v10/proposals/gpu-graph-explorer/index.html', import.meta.url)
-      )
-    ).toBe(true);
+    expect(existsSync(new URL('../index.html', import.meta.url))).toBe(true);
     expect(typeof createGPUGraphExplorerDeck).toBe('function');
-    expect(typeof GPUGraphDeckEffect).toBe('function');
+    expect(typeof GraphExplorerEffect).toBe('function');
   });
 });
 
@@ -137,7 +132,7 @@ describe('GPU Graph native deck.gl resident layers', () => {
     expect(GRAPH_EXPLORER_MAX_VISIBLE_EDGES).toBe(65_536);
 
     const effectSource = readFileSync(
-      new URL('../../src/effects/gpu-graph/gpu-graph-effect.ts', import.meta.url),
+      new URL('../graph-explorer-effect.ts', import.meta.url),
       'utf8'
     );
     expect(effectSource).toContain('GPUGraphAlgorithmsDegree');
@@ -172,8 +167,8 @@ describe('GPU Graph native deck.gl resident layers', () => {
 
   test('rebinds same-ID Deck node and edge models after replacing graph allocations', () => {
     for (const path of [
-      '../../src/layers/gpu-graph/gpu-graph-node-layer.ts',
-      '../../src/layers/gpu-graph/gpu-graph-edge-layer.ts'
+      '../../../../modules/proposals/src/layers/gpu-graph/gpu-graph-node-layer.ts',
+      '../../../../modules/proposals/src/layers/gpu-graph/gpu-graph-edge-layer.ts'
     ]) {
       const source = readFileSync(new URL(path, import.meta.url), 'utf8');
 
@@ -183,10 +178,7 @@ describe('GPU Graph native deck.gl resident layers', () => {
   });
 
   test('renders accessible graph scale, truthful GPU diagnostics, and real analytic controls', () => {
-    const source = [
-      '../../../../examples-v10/proposals/gpu-graph-explorer/app.ts',
-      '../../../../examples-v10/proposals/gpu-graph-explorer/app-ui.ts'
-    ]
+    const source = ['../app.ts', '../app-ui.ts']
       .map(path => readFileSync(new URL(path, import.meta.url), 'utf8'))
       .join('\n');
 
@@ -227,10 +219,7 @@ describe('GPU Graph native deck.gl resident layers', () => {
   });
 
   test('disables exact and spatial layout controls at their actual execution boundaries', () => {
-    const source = readFileSync(
-      new URL('../../../../examples-v10/proposals/gpu-graph-explorer/app-ui.ts', import.meta.url),
-      'utf8'
-    );
+    const source = readFileSync(new URL('../app-ui.ts', import.meta.url), 'utf8');
 
     expect(source).toContain('option[value="exact"]');
     expect(source).toMatch(
@@ -248,7 +237,7 @@ describe('GPU Graph native deck.gl resident layers', () => {
     expect(GPU_GRAPH_DECK_EDGE_SHADER).toContain('positions: array<vec2<f32>>');
 
     const effectSource = readFileSync(
-      new URL('../../src/effects/gpu-graph/gpu-graph-effect.ts', import.meta.url),
+      new URL('../graph-explorer-effect.ts', import.meta.url),
       'utf8'
     );
     expect(effectSource).toContain('this.device.commandEncoder');
@@ -262,10 +251,7 @@ describe('GPU Graph standalone example metadata', () => {
     expect(getExampleSupportDefinition('deck/gpu-graph-explorer')?.requirements?.backends).toEqual([
       'webgpu'
     ]);
-    const readme = readFileSync(
-      new URL('../../../../examples-v10/proposals/README.md', import.meta.url),
-      'utf8'
-    );
+    const readme = readFileSync(new URL('../../README.md', import.meta.url), 'utf8');
     expect(readme).toContain('gpu-graph-explorer');
     expect(readme).toContain('yarn build-private-examples');
   });

@@ -19,7 +19,7 @@ import {
 } from '@luma.gl/graph/gpu-graph-algorithms';
 import {GPUData, GPUVector} from '@luma.gl/graph/gpu-data';
 /** Caller-owned graph input preserving original edge partitions and vertex allocations. */
-export type GPUGraphDeckDataset = {
+export type GraphExplorerDataset = {
   /** Number of stable zero-based graph vertices. */
   vertexCount: number;
   /** Original directed source-edge batches, including any empty partitions. */
@@ -45,10 +45,10 @@ const SPATIAL_DRAG_MARGIN = 0.1;
 type ScalarFormat = 'uint32' | 'float32';
 
 /** Selects exact forces, a flat spatial grid, or a caller-provided sampled layout. */
-export type GPUGraphDeckLayoutMode = 'auto' | 'exact' | 'spatial' | 'sampled';
+export type GraphExplorerLayoutMode = 'auto' | 'exact' | 'spatial' | 'sampled';
 
 /** Immediately available encoding, memory, and frame measurements; no graph data is read. */
-export type GPUGraphDeckEffectStats = {
+export type GraphExplorerEffectStats = {
   vertexCount: number;
   edgeCount: number;
   renderedVertexCount: number;
@@ -73,11 +73,11 @@ export type GPUGraphDeckEffectStats = {
 };
 
 /** Optional bounded layout selection and CPU-only diagnostic callback. */
-export type GPUGraphDeckEffectOptions = {
-  layoutMode?: GPUGraphDeckLayoutMode;
+export type GraphExplorerEffectOptions = {
+  layoutMode?: GraphExplorerLayoutMode;
   pointMode?: boolean;
   maxVisibleEdges?: number;
-  onStats?: (stats: GPUGraphDeckEffectStats) => void;
+  onStats?: (stats: GraphExplorerEffectStats) => void;
   /** Adds an explicitly provided O(E + 4V) contributor without importing application code. */
   addSampledLayoutToGraph?: (
     commandGraph: GPUCommandGraph<void>,
@@ -93,12 +93,12 @@ export type GPUGraphDeckEffectOptions = {
  * edge layers. The first ordinary frame encodes topology, PageRank, and weak components once;
  * every ordinary frame then encodes bounded neighborhood search and force integration.
  */
-export class GPUGraphDeckEffect implements Effect {
+export class GraphExplorerEffect implements Effect {
   readonly id = 'gpu-graph-deck-effect';
   readonly props = {};
   readonly useInPicking = false;
   readonly device: Device;
-  readonly dataset: GPUGraphDeckDataset;
+  readonly dataset: GraphExplorerDataset;
   readonly graph: GPUGraphAlgorithmsData;
   readonly topology: GPUGraphAlgorithmsTopology;
   readonly degree: GPUGraphAlgorithmsDegree;
@@ -126,7 +126,7 @@ export class GPUGraphDeckEffect implements Effect {
   private readonly pinned: GPUVector<'uint32'>;
   private readonly reset: GPUVector<'uint32'>;
   private readonly pinnedVertices = new Set<number>();
-  private readonly onStats?: (stats: GPUGraphDeckEffectStats) => void;
+  private readonly onStats?: (stats: GraphExplorerEffectStats) => void;
   private readonly analysisStages: CompiledGPUCommandGraph<void>[];
   private selectedVertex: number | null = 0;
   private neighborhoodDepth = DEFAULT_NEIGHBORHOOD_DEPTH;
@@ -140,10 +140,10 @@ export class GPUGraphDeckEffect implements Effect {
 
   constructor(
     device: Device,
-    dataset: GPUGraphDeckDataset,
-    options: GPUGraphDeckEffectOptions = {}
+    dataset: GraphExplorerDataset,
+    options: GraphExplorerEffectOptions = {}
   ) {
-    if (device.type !== 'webgpu') throw new Error('GPUGraphDeckEffect requires WebGPU');
+    if (device.type !== 'webgpu') throw new Error('GraphExplorerEffect requires WebGPU');
     this.device = device;
     this.dataset = dataset;
     this.onStats = options.onStats;

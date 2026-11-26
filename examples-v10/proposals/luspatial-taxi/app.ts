@@ -10,7 +10,7 @@ import {
   type ViewStateChangeParameters
 } from '@deck.gl/core';
 import {FilteredScatterplotLayer} from '@deck.gl/proposals/layers';
-import {LuSpatialGeographicPointQueryEffect} from '@deck.gl/proposals/effects/query';
+import {GeographicPointQueryEffect} from '@deck.gl/proposals/layers/filtered-scatterplot-layer/geographic-point-query-effect';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {loadTaxiPointResidentWindow} from '../shared/showcase/billion-point-spatial-atlas/taxi-resident-window';
@@ -102,9 +102,9 @@ export function createGPUSpatialTaxiDeck(
     minZoom: 9,
     maxZoom: 20
   };
-  let queryEffect: LuSpatialGeographicPointQueryEffect | null = null;
+  let queryEffect: GeographicPointQueryEffect | null = null;
   let latestSelectionCenter: readonly [number, number] = initialZone.center;
-  let stagingQueryEffect: LuSpatialGeographicPointQueryEffect | null = null;
+  let stagingQueryEffect: GeographicPointQueryEffect | null = null;
   let activeLayers: FilteredScatterplotLayer[] = [];
   let queryRadiusKilometres = 0.35;
   let taxiDataRevision = 0;
@@ -209,9 +209,9 @@ export function createGPUSpatialTaxiDeck(
         const previousQueryEffect = queryEffect;
         const previousLayers = activeLayers;
         const nextTaxiDataRevision = taxiDataRevision + 1;
-        let nextQueryEffect: LuSpatialGeographicPointQueryEffect;
+        let nextQueryEffect: GeographicPointQueryEffect;
         try {
-          nextQueryEffect = new LuSpatialGeographicPointQueryEffect(device, {
+          nextQueryEffect = new GeographicPointQueryEffect(device, {
             id: `luspatial-taxi-query-effect-${nextTaxiDataRevision}`,
             longitudeLatitudes: nextTaxiData.longitudeLatitudes,
             sourceBounds: nextTaxiData.sourceBounds,
@@ -424,8 +424,8 @@ async function closeTaxiPointSource(source: TaxiPointSource | null): Promise<voi
 
 function retirePreviousQueryEffect(
   deck: ArrowDeck<MapView>,
-  previousQueryEffect: LuSpatialGeographicPointQueryEffect | null,
-  nextQueryEffect: LuSpatialGeographicPointQueryEffect,
+  previousQueryEffect: GeographicPointQueryEffect | null,
+  nextQueryEffect: GeographicPointQueryEffect,
   shouldSkip: () => boolean
 ): void {
   if (!previousQueryEffect) return;
@@ -445,7 +445,7 @@ type TaxiLayerStagingOptions = {
 };
 
 function makeTaxiLayers(
-  queryEffect: LuSpatialGeographicPointQueryEffect,
+  queryEffect: GeographicPointQueryEffect,
   taxiDataRevision: number,
   options: TaxiLayerStagingOptions = {}
 ): FilteredScatterplotLayer[] {
