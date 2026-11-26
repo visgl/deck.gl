@@ -95,7 +95,6 @@ export class ShadowMapEffect implements Effect {
   readonly useInPicking = true;
   private renderer?: ShadowMapRenderer;
   private fallbackRenderer?: ShadowMapRenderer;
-  private isPicking = false;
   private casterPass?: CascadeCasterPass;
   private emptyShadowProps?: ShadowShaderProps;
   private frame?: {shadow: ShadowShaderProps; camera: ShadowCamera; viewport: Viewport};
@@ -137,8 +136,7 @@ export class ShadowMapEffect implements Effect {
 
   preRender(options: PreRenderOptions): void {
     const viewport = options.viewports[0];
-    this.isPicking = Boolean(options.isPicking);
-    if (this.isPicking || !this.renderer) return;
+    if (options.isPicking || !this.renderer) return;
     this.frame = undefined;
     if (!viewport || options.viewports.length !== 1 || viewport.subViewports?.length) return;
 
@@ -158,8 +156,13 @@ export class ShadowMapEffect implements Effect {
     this.frame = {shadow: shadowProps, camera, viewport};
   }
 
-  getShaderModuleProps() {
-    const frame = this.isPicking ? undefined : this.frame;
+  /** Bind the shadow maps during screen draws and neutral textures for auxiliary passes. */
+  getShaderModuleProps(
+    _layer: Layer,
+    _otherShaderModuleProps: Record<string, unknown>,
+    pass = 'screen'
+  ) {
+    const frame = pass === 'screen' ? this.frame : undefined;
     return {
       shadow: frame?.shadow ?? this.emptyShadowProps,
       deckShadowMap: {

@@ -564,7 +564,7 @@ export default class LayersPass extends Pass {
       for (const effect of effects) {
         mergeModuleParameters(
           shaderModuleProps,
-          effect.getShaderModuleProps?.(layer, shaderModuleProps)
+          effect.getShaderModuleProps?.(layer, shaderModuleProps, pass)
         );
       }
     }
