@@ -7,12 +7,7 @@ export {
   type LuSpatialPointLayerProps
 } from './luspatial-point-layer';
 export {GPUScatterplotLayer, type GPUScatterplotLayerProps} from './gpu-scatterplot-layer';
-export {GPULineLayer, type GPULineLayerProps} from './gpu-line-layer';
 export {GPUIconLayer, type GPUIconLayerProps} from './gpu-icon-layer';
-export {GPUArcLayer, type GPUArcLayerProps} from './gpu-arc-layer';
-export {GPUPointCloudLayer, type GPUPointCloudLayerProps} from './gpu-point-cloud-layer';
-export {GPUColumnLayer, type GPUColumnLayerProps} from './gpu-column-layer';
-export {GPUGridCellLayer, type GPUGridCellLayerProps} from './gpu-grid-cell-layer';
 export {
   GPUBitmapLayer,
   type GPUBitmapBounds,
@@ -25,17 +20,6 @@ export {
   ArrowScatterplotLayer,
   type ArrowScatterplotLayerProps
 } from './arrow-scatterplot-layer';
-export {ArrowLineLayer, type ArrowLineLayerProps} from './arrow-line-layer';
-export {ArrowArcLayer, type ArrowArcLayerProps} from './arrow-arc-layer';
-export {
-  ArrowPointCloudLayer,
-  type ArrowPointCloudLayerProps
-} from './arrow-point-cloud-layer';
-export {ArrowColumnLayer, type ArrowColumnLayerProps} from './arrow-column-layer';
-export {
-  ArrowGridCellLayer,
-  type ArrowGridCellLayerProps
-} from './arrow-grid-cell-layer';
 export {
   ArrowIconLayer,
   type ArrowIconLayerProps,
