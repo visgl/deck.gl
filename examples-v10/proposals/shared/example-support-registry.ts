@@ -3,8 +3,8 @@ import support79 from '../arrow-path-layer/mobile-support';
 import support80 from '../arrow-polygon-layer/mobile-support';
 import support81 from '../arrow-text-layer/mobile-support';
 import support82 from '../luspatial-taxi/mobile-support';
-import support83 from '../gpu-graph-explorer/mobile-support';
-import support84 from '../gpu-culled-trace/mobile-support';
+import support83 from '../../gpu-graph/graph-explorer/mobile-support';
+import support84 from '../../gpu-graph/culled-trace/mobile-support';
 
 export const EXAMPLE_SUPPORT_REGISTRY: Record<string, ExampleSupportDefinition> = {
   'deck/arrow-path-layer': support79,

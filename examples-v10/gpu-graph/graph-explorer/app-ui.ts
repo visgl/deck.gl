@@ -11,7 +11,7 @@ import {
   type GraphExplorerColorMode,
   type GraphExplorerLayoutMode,
   type GraphExplorerNodeSizeMode
-} from '../../experimental/gpu-graph-explorer/graph-data';
+} from './graph-data';
 
 export const DEFAULT_NEIGHBORHOOD_DEPTH = 2;
 

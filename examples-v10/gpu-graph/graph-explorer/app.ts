@@ -10,8 +10,11 @@ import {
 } from '@deck.gl/proposals/layers';
 import {GraphExplorerEffect, type GraphExplorerEffectStats} from './graph-explorer-effect';
 import {Buffer, type Device} from '@luma.gl/core';
-import {ArrowDeck} from '../arrow-deck';
-import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
+import {ArrowDeck} from '../../proposals/arrow-deck';
+import {
+  getDeckExampleProps,
+  type DeckExampleDeviceOptions
+} from '../../proposals/deck-example-device';
 import {
   GRAPH_EXPLORER_LINEAR_LAYOUT_VERTEX_COUNT,
   GRAPH_EXPLORER_MAX_VISIBLE_EDGES,
@@ -21,8 +24,8 @@ import {
   type GraphExplorerDataset,
   type GraphExplorerLayoutMode,
   type GraphExplorerNodeSizeMode
-} from '../../experimental/gpu-graph-explorer/graph-data';
-import {addGraphExplorerSampledLayoutToGraph} from '../../experimental/gpu-graph-explorer/graph-scale-layout';
+} from './graph-data';
+import {addGraphExplorerSampledLayoutToGraph} from './graph-scale-layout';
 import {
   createExplorerControls,
   createStandaloneContainer,

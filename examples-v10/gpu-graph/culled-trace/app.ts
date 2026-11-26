@@ -4,8 +4,11 @@
 
 import {OrthographicView, type ViewStateChangeParameters} from '@deck.gl/core';
 import {buildSdfFontAtlas} from '@luma.gl/engine/text';
-import {ArrowDeck} from '../arrow-deck';
-import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
+import {ArrowDeck} from '../../proposals/arrow-deck';
+import {
+  getDeckExampleProps,
+  type DeckExampleDeviceOptions
+} from '../../proposals/deck-example-device';
 import {GPUCulledArrowTextLayer} from './gpu-culled-arrow-text-layer';
 import {GPUCulledTraceLayer} from './gpu-culled-trace-layer';
 import {GPUTraceCullingEffect, type GPUTraceCullingStats} from './gpu-trace-culling-effect';

@@ -25,10 +25,12 @@
       },
       {
         "id": "gpu-graph-explorer",
+        "source": "gpu-graph/graph-explorer",
         "title": "GPU Graph: Network Explorer"
       },
       {
         "id": "gpu-culled-trace",
+        "source": "gpu-graph/culled-trace",
         "title": "GPU Culled Trace"
       }
     ]

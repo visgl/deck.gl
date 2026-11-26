@@ -40,8 +40,8 @@ remain available inside each example page.
 - [arrow-path-layer](./arrow-path-layer/)
 - [arrow-polygon-layer](./arrow-polygon-layer/)
 - [arrow-text-layer](./arrow-text-layer/)
-- [gpu-culled-trace](./gpu-culled-trace/)
-- [gpu-graph-explorer](./gpu-graph-explorer/)
+- [gpu-culled-trace](../gpu-graph/culled-trace/)
+- [gpu-graph-explorer](../gpu-graph/graph-explorer/)
 - [luspatial-taxi](./luspatial-taxi/)
 - [shared-tile-2d-layer](./shared-tile-2d-layer/)
 

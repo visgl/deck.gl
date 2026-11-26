@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {PickingInfo} from '@deck.gl/core';
-import {ArrowExamplePanelManager} from '../shared/arrow/arrow-example-panels';
-import {makeHtmlCustomPanel} from '../shared/example-panels';
+import {ArrowExamplePanelManager} from '../../proposals/shared/arrow/arrow-example-panels';
+import {makeHtmlCustomPanel} from '../../proposals/shared/example-panels';
 import type {GPUTraceCullingStats} from './gpu-trace-culling-effect';
 import {getTraceRow, type makeDeckTraceData} from './trace-data';
 
