@@ -5,7 +5,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../utils/format-utils';
 import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
-import App, {COLOR_SCALE} from 'v10-website-examples/highway/app';
+import App from 'v10-website-examples/highway/app';
 
 import {makeExample} from '../components';
 
@@ -28,36 +28,14 @@ class HighwayDemo extends Component {
   /** Base map style used by the demo. */
   static mapStyle = MAPBOX_STYLES.DARK;
 
-  /** Renders the description, legend, and data summary. */
+  /** Renders the description and data summary. */
   static renderInfo(meta) {
-    /** Provides legends for the example. */
-    const legends = COLOR_SCALE.domain();
-    /** Provides width for the example. */
-    const width = `${100 / legends.length}%`;
-
     return (
       <div>
         <p>
           Fatal accidents on U.S. highways
           <br />
           (1990 - 2015)
-        </p>
-        <p>Fatalities per 1,000 miles:</p>
-        <div className="layout">
-          {legends.map((l, i) => (
-            <div
-              key={i}
-              className="legend"
-              style={{background: `rgb(${COLOR_SCALE(l).join(',')})`, width}}
-            />
-          ))}
-        </div>
-        <p className="layout">
-          {legends.slice(0, -1).map((l, i) => (
-            <span key={i} style={{width}}>
-              {l}
-            </span>
-          ))}
         </p>
         <p>
           Data source:

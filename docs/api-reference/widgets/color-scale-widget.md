@@ -4,7 +4,7 @@ import {ColorScaleWidgetDemo} from '@site/src/doc-demos/widgets';
 
 <ColorScaleWidgetDemo />
 
-Displays experimental legends for SQL color accessors on visible layers. The widget discovers
+Displays experimental legends for supplied scales and SQL color accessors on visible layers. The widget discovers
 scales from drawable layers and their composite parents in the widget's view. It
 updates after accessor evaluation completes. The legend appears when a scale resolves. It shows category swatches, numeric intervals,
 or a continuous ramp with labels beside the scales. Hover over a ramp or quantile bin to see its value or range, color, and scale type.
@@ -50,6 +50,13 @@ Position of the legend within its view.
 * Default: `null`
 
 Limits the legend to the specified view. Use `null` to include scales from all views.
+
+#### `scales` (Readonly<Record<string, ResolvedScale>>, optional) {#scales}
+
+Resolved color scales keyed by display label. Supply this prop to display scales
+from a query or another source. For example, `queryArrowSQLWithMetadata` returns
+resolved scales in its per-column metadata. An empty record hides the legend.
+Omit the prop to discover scales from visible layers.
 
 #### `precision` (number, optional) {#precision}
 

@@ -10,10 +10,8 @@
   },
   "dependencies": {
     "@loaders.gl/tables": "^5.0.0",
-    "@types/d3-scale": "^4.0.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
-    "d3-scale": "^4.0.0",
     "deck.gl": "^10.0.0-alpha.1",
     "maplibre-gl": "^5.0.0",
     "react": "^18.0.0",
@@ -21,6 +19,7 @@
     "react-map-gl": "^8.0.0",
     "@loaders.gl/core": "^5.0.0",
     "@math.gl/core": "^5.0.3",
+    "@math.gl/sql": "^5.0.3",
     "apache-arrow": "^21.2.0"
   },
   "devDependencies": {

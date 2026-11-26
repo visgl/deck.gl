@@ -2,22 +2,23 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState, useMemo, useEffect} from 'react';
+import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl/maplibre';
+import {Map as MapLibre} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
-import {LoadingWidget} from '@deck.gl/widgets';
+import {LoadingWidget, _LegendWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 import type {Device} from '@luma.gl/core';
 import {isArrowTable} from '@math.gl/core/arrow';
 import {GeoArrowLayer} from '@deck.gl/proposals/layers';
-import {Field, FixedSizeList, Float32, Uint8, vectorFromArray, type Table} from 'apache-arrow';
-import {scaleLinear, scaleThreshold} from 'd3-scale';
+import {tableFromArrays, tableFromJSON, type Table} from 'apache-arrow';
+import {queryArrowSQL, queryArrowSQLWithMetadata} from '@math.gl/sql/query';
+import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 import {GeoParquetLoader} from '@loaders.gl/tables/parquet';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {load} from '@loaders.gl/core';
 
-import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
+import type {PickingInfo, MapViewState} from '@deck.gl/core';
 
 // Full website geometry in GeoParquet; properties retain their original names.
 const DATA_URL = {
@@ -27,22 +28,26 @@ const DATA_URL = {
     'https://media.githubusercontent.com/media/visgl/deck.gl-data/886cf5ab469bba3816aa5a32d4454835e0ce5951/examples/highway/roads.parquet'
 };
 
-export const COLOR_SCALE = scaleThreshold<number, Color>()
-  .domain([0, 4, 8, 12, 20, 32, 52, 84, 136, 220])
-  .range([
-    [26, 152, 80],
-    [102, 189, 99],
-    [166, 217, 106],
-    [217, 239, 139],
-    [255, 255, 191],
-    [254, 224, 139],
-    [253, 174, 97],
-    [244, 109, 67],
-    [215, 48, 39],
-    [168, 0, 0]
-  ]);
+const COLOR_BREAKS = [0, 4, 8, 12, 20, 32, 52, 84, 136];
+const COLOR_PALETTE = [
+  '#1a9850',
+  '#66bd63',
+  '#a6d96a',
+  '#d9ef8b',
+  '#ffffbf',
+  '#fee08b',
+  '#fdae61',
+  '#f46d43',
+  '#d73027',
+  '#a80000'
+];
 
-const WIDTH_SCALE = scaleLinear().clamp(true).domain([0, 200]).range([10, 2000]);
+function fallbackStyle(count: number) {
+  return tableFromArrays({
+    color: Array.from({length: count}, () => [200, 200, 200, 255]),
+    width: new Float32Array(count).fill(10)
+  });
+}
 
 const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 38,
@@ -71,48 +76,17 @@ type RoadProperties = {
   length: number;
 };
 
-type Road = RoadProperties;
+type Road = RoadProperties & {incidents?: number; fatalities?: number};
 
-function getKey({state, type, id}: Accident | RoadProperties) {
-  return `${state}-${type}-${id}`;
-}
+const ROAD_KEY = "CONCAT(state, '-', type, '-', id)";
 
-function aggregateAccidents(accidents?: Accident[] | Table) {
-  const incidents: {[year: number]: Record<string, number>} = {};
-  const fatalities: {[year: number]: Record<string, number>} = {};
-
-  if (accidents) {
-    for (const a of accidents as Iterable<Accident>) {
-      const r = (incidents[a.year] = incidents[a.year] || {});
-      const f = (fatalities[a.year] = fatalities[a.year] || {});
-      const key = getKey(a);
-      r[key] = a.incidents;
-      f[key] = a.fatalities;
-    }
-  }
-  return {incidents, fatalities};
-}
-
-function renderTooltip({
-  fatalities,
-  incidents,
-  year,
-  hoverInfo
-}: {
-  fatalities: {[year: number]: Record<string, number>};
-  incidents: {[year: number]: Record<string, number>};
-  year: number;
-  hoverInfo?: PickingInfo<Road>;
-}) {
-  if (!hoverInfo?.object || !incidents[year] || !fatalities[year]) {
+function renderTooltip(hoverInfo: PickingInfo<Road> | undefined, year: number) {
+  if (!hoverInfo?.object || hoverInfo.object.incidents === undefined) {
     return null;
   }
 
-  const {object, x, y} = hoverInfo;
-  const props = object;
-  const key = getKey(props);
-  const f = fatalities[year][key];
-  const r = incidents[year][key];
+  const {object: props, x, y} = hoverInfo;
+  const {fatalities: f, incidents: r} = props;
 
   const content = r ? (
     <div>
@@ -151,78 +125,79 @@ export default function App({
   /** Reports the loaded road feature count to the website controls. */
   onDataLoad?: (stats: {count: number}) => void;
 }) {
-  const widgets = useMemo(() => [new LoadingWidget()], []);
+  const legend = useMemo(() => new _LegendWidget({scales: {}, precision: 3}), []);
+  const widgets = useMemo(() => [new LoadingWidget(), legend], [legend]);
   const [hoverInfo, setHoverInfo] = useState<PickingInfo<Road>>();
-  /** Road table supplied by the geometry layer after loading. */
-  const [loadedRoads, setLoadedRoads] = useState<Table>();
-  /** Source rows used to build the per-road styles. */
-  const roadTable = typeof roads === 'string' ? loadedRoads : roads;
-  /** Accident records loaded as a native Arrow table. */
-  const [loadedAccidents, setLoadedAccidents] = useState<Table>();
-  useEffect(() => {
-    if (accidents) {
-      return;
+  const roadTable = useMemo(async () => {
+    const table = typeof roads === 'string' ? await load(roads, GeoParquetLoader) : roads;
+    if (!isArrowTable(table)) {
+      throw new Error('Expected an Arrow road table');
     }
-    let active = true;
-    load(DATA_URL.ACCIDENTS, CSVLoader).then(table => {
-      if (active && isArrowTable(table)) {
-        setLoadedAccidents(table);
-      }
-    });
-    return () => {
-      active = false;
-    };
+    return table.assign(
+      queryArrowSQL(`SELECT ${ROAD_KEY} AS road_key FROM roads`, new Map([['roads', table]]))
+    );
+  }, [roads]);
+  const accidentTable = useMemo(async () => {
+    const table = Array.isArray(accidents)
+      ? tableFromJSON(accidents)
+      : (accidents ?? (await load(DATA_URL.ACCIDENTS, CSVLoader, {core: {worker: false}})));
+    if (!isArrowTable(table)) {
+      throw new Error('Expected an Arrow accident table');
+    }
+    return table;
   }, [accidents]);
-  const {incidents, fatalities} = useMemo(
-    () => aggregateAccidents(accidents || loadedAccidents),
-    [accidents, loadedAccidents]
-  );
+  const result = useMemo(async () => {
+    const [sources, records] = await Promise.all([roadTable, accidentTable]);
+    if (!records.numRows || !Number.isFinite(year)) {
+      return {table: sources.assign(fallbackStyle(sources.numRows)), columnMetadata: {color: []}};
+    }
+    const events = queryArrowSQL(
+      `SELECT ${ROAD_KEY} AS road_key, incidents, fatalities FROM accidents WHERE year = ${year}`,
+      new Map([['accidents', records]])
+    );
+    if (!events.numRows) {
+      return {table: sources.assign(fallbackStyle(sources.numRows)), columnMetadata: {color: []}};
+    }
+    return queryArrowSQLWithMetadata(
+      `\
+          SELECT r.geometry, r.name, r.state, r.type, r.id,
+            COALESCE(a.incidents, 0) AS incidents,
+            COALESCE(a.fatalities, 0) AS fatalities,
+            CASE
+              WHEN a.incidents IS NULL OR a.incidents <= 0 THEN 10
+              WHEN a.incidents >= r.length / 5 THEN 2000
+              ELSE 10 + 9950 * a.incidents / r.length
+            END AS width,
+            SCALE_THRESHOLD(COALESCE(a.fatalities, 0) * 1000 / r.length,
+              ARRAY[${COLOR_BREAKS}], PALETTE(${COLOR_PALETTE.map(color => `'${color}'`).join(', ')})) AS color
+          FROM roads r LEFT JOIN events a ON r.road_key = a.road_key`,
+      new Map([
+        ['roads', sources],
+        ['events', events]
+      ]),
+      {functions: VISUALIZATION_FUNCTIONS}
+    );
+  }, [roadTable, accidentTable, year]);
 
-  /** Arrow color and width columns in the source road order. */
-  const styles = useMemo(() => {
-    if (!roadTable) {
-      return null;
-    }
-    /** RGBA bytes for each road. */
-    const colors: number[][] = [];
-    /** Road widths in meters for the selected year. */
-    const widths = new Float32Array(roadTable.numRows);
-    /** Fatality totals keyed by road for the selected year. */
-    const roadFatalities = fatalities[year];
-    /** Crash counts keyed by road for the selected year. */
-    const roadIncidents = incidents[year];
-    let index = 0;
-    for (const road of roadTable) {
-      /** Road key shared by the geometry and accident datasets. */
-      const key = getKey(road);
-      /** Road color based on fatalities per 1,000 miles. */
-      const color = roadFatalities
-        ? COLOR_SCALE(((roadFatalities[key] || 0) / road.length) * 1000)
-        : [200, 200, 200];
-      colors.push([color[0], color[1], color[2], 255]);
-      widths[index++] = roadIncidents
-        ? WIDTH_SCALE(((roadIncidents[key] || 0) / road.length) * 1000)
-        : 10;
-    }
-    return {
-      colors: vectorFromArray(colors, new FixedSizeList(4, new Field('channel', new Uint8()))),
-      widths: vectorFromArray(widths, new Float32())
-    };
-  }, [roadTable, year, fatalities, incidents]);
+  const data = useMemo(() => result.then(output => output.table), [result]);
 
   const layers = [
     new GeoArrowLayer({
       id: 'roads',
-      data: roads,
-      loaders: [GeoParquetLoader],
+      data,
       onDataLoad: table => {
         if (isArrowTable(table)) {
-          setLoadedRoads(table);
+          void result.then(output => {
+            if (table === output.table) {
+              const color = output.columnMetadata.color?.[0];
+              legend.setProps({scales: color ? {'Fatalities per 1,000 miles': color.scale} : {}});
+            }
+          });
           onDataLoad?.({count: table.numRows});
         }
       },
-      colors: styles?.colors ?? [200, 200, 200, 255],
-      widths: styles?.widths ?? 10,
+      colors: 'color',
+      widths: 'width',
       widthUnits: 'meters',
       widthMinPixels: 0.5,
       transitions: {getLineColor: 1000, getLineWidth: 1000},
@@ -240,9 +215,9 @@ export default function App({
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
     >
-      <Map reuseMaps mapStyle={mapStyle} />
+      <MapLibre reuseMaps mapStyle={mapStyle} />
 
-      {renderTooltip({incidents, fatalities, year, hoverInfo})}
+      {renderTooltip(hoverInfo, year)}
     </DeckGL>
   );
 }
