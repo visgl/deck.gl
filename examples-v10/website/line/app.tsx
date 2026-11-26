@@ -99,22 +99,8 @@ export default function App({
           }
         },
         opacity: 0.8,
-        getSourcePosition: {
-          sql: `\
-            ARRAY[
-              start[1],
-              start[2],
-              start[3]
-            ]`
-        },
-        getTargetPosition: {
-          sql: `\
-            ARRAY[
-              "end"[1],
-              "end"[2],
-              "end"[3]
-            ]`
-        },
+        getSourcePosition: {sql: 'start::ARRAY[3]'},
+        getTargetPosition: {sql: '"end"::ARRAY[3]'},
         getColor: {
           sql: `\
             RGBA8(
