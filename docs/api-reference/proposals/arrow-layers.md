@@ -133,8 +133,7 @@ the supplied graph and existing layout; it does not transfer ownership or add an
 dependency to this package. Omitting the optional configuration retains the regular exact-layout
 constructor shown above.
 
-The graph algorithms remain in `@luma.gl/graph/gpu-graph-algorithms`; only this existing private adapter
-package depends on deck.gl. Its diagnostics report actual resident populations, visible edge
+The graph explorer uses algorithms from `@luma.gl/graph/gpu-graph-algorithms`. Its diagnostics report resident populations, visible edge
 detail, CPU encoding, and frame cadence without inventing GPU timings or claiming convergence for
 a fixed iteration budget.
 

@@ -64,7 +64,7 @@ const privateNodeTests = includePrivateModules
   : [];
 const privateBrowserTests = includePrivateModules
   ? ['examples-v10/proposals/gpu-graph-explorer/test/**/*.spec.ts', 'modules/proposals/test/layers/**/*.spec.ts']
-  : [];
+  : renderTestDevice === 'webgpu' ? ['examples-v10/proposals/gpu-graph-explorer/test/**/*.spec.ts'] : [];
 
 // Tests that were commented out or never imported in the original test suite
 // These need to be fixed before being included

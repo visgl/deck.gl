@@ -75,6 +75,7 @@ it('GPU Graph deck.gl effect composes actual GPU analytics, zero-copy selection,
     effect.setNeighborhoodDepth(2);
     const firstEncoder = device.createCommandEncoder({id: 'gpu-graph-deck-effect-real-analysis'});
     effect.analysisGraph.encode(firstEncoder, {parameters: undefined});
+    effect.searchGraph!.encode(firstEncoder, {parameters: undefined});
     effect.frameGraph.encode(firstEncoder, {parameters: undefined});
     device.submit(firstEncoder.finish());
 
@@ -139,6 +140,7 @@ it('GPU Graph deck.gl effect composes actual GPU analytics, zero-copy selection,
     effect.setSelectedVertex(64);
     effect.setNeighborhoodDepth(1);
     const secondEncoder = device.createCommandEncoder({id: 'gpu-graph-deck-effect-selected-root'});
+    effect.searchGraph!.encode(secondEncoder, {parameters: undefined});
     effect.frameGraph.encode(secondEncoder, {parameters: undefined});
     device.submit(secondEncoder.finish());
     const [updatedDistances, updatedMask] = await Promise.all([
@@ -502,7 +504,7 @@ it('GPU Graph deck.gl renders real source-chunk layers and asynchronously picks 
       'second edge model binds the untouched third source partition'
     ).toBe(effect.graph.sourceVertices.data[2].buffer);
 
-    await waitForDeckLayerModels([nodeLayer, ...edgeLayers]);
+    await waitForDeckLayerModels(deck, [nodeLayer, ...edgeLayers]);
     effect.setPinnedVertex(0, true);
     effect.setVertexPosition(0, [0, 0]);
     const positionsReadSpy = vi.spyOn(effect.positions, 'readAsync');
@@ -630,7 +632,7 @@ it('GPU Graph deck.gl renders real source-chunk layers and asynchronously picks 
       if (!(resizedNodeLayer instanceof GPUGraphNodeLayer)) {
         throw new Error('The resized Deck showcase lost its real node layer');
       }
-      await waitForDeckLayerModels([resizedNodeLayer, ...resizedEdgeLayers]);
+      await waitForDeckLayerModels(deck, [resizedNodeLayer, ...resizedEdgeLayers]);
       expect(resizedNodeLayer.id, 'the original node-layer identity stays stable').toBe(
         'gpu-graph-nodes'
       );
@@ -738,7 +740,7 @@ it('GPU Graph deck.gl renders real source-chunk layers and asynchronously picks 
       if (!(keyboardNodeLayer instanceof GPUGraphNodeLayer)) {
         throw new Error('A real trusted keyboard resize lost the Deck point layer');
       }
-      await waitForDeckLayerModels([keyboardNodeLayer, ...keyboardEdgeLayers]);
+      await waitForDeckLayerModels(deck, [keyboardNodeLayer, ...keyboardEdgeLayers]);
       expect(
         keyboardNodeLayer.getNumInstances(),
         'the same-ID GPU point layer consumes every freshly resized original vertex'
@@ -775,7 +777,7 @@ it('GPU Graph deck.gl renders real source-chunk layers and asynchronously picks 
         (layer): layer is GPUGraphNodeLayer | GPUGraphEdgeLayer =>
           layer instanceof GPUGraphNodeLayer || layer instanceof GPUGraphEdgeLayer
       );
-      await waitForDeckLayerModels(pointerLayers);
+      await waitForDeckLayerModels(deck, pointerLayers);
       expect(
         Boolean(!/GPU\s+(?:frame|execution|duration)\s*[:=]\s*\d/i.test(status?.textContent ?? '')),
         'the Deck dashboard never invents GPU timing or convergence samples'
@@ -837,6 +839,7 @@ async function waitForReplacementDeckEffect(
 }
 
 async function waitForDeckLayerModels(
+  deck: ReturnType<typeof createGPUGraphExplorerDeck>,
   layers: Array<GPUGraphNodeLayer | GPUGraphEdgeLayer>
 ): Promise<void> {
   const deadline = performance.now() + 5_000;
@@ -847,6 +850,7 @@ async function waitForDeckLayerModels(
     await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
   }
   while (layers.some(layer => getDeckLayerModelState(layer)?.pipeline?.linkStatus === 'pending')) {
+    deck.redraw('finish graph pipeline initialization');
     if (performance.now() >= deadline) {
       throw new Error('The real WebGPU graph node and edge pipelines did not finish linking');
     }
