@@ -106,7 +106,7 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 import {resolveCesiumIonTileset} from '@loaders.gl/tiles-3d/3d-tiles';
 
-import type {Tileset3D} from '@loaders.gl/tiles-3d';
+import type {Tileset3D} from '@loaders.gl/tiles-3d/tileset';
 
 
 
@@ -192,7 +192,7 @@ import {resolveCesiumIonTileset} from '@loaders.gl/tiles-3d/3d-tiles';
 
 import type {MapViewState} from '@deck.gl/core';
 
-import type {Tileset3D} from '@loaders.gl/tiles-3d';
+import type {Tileset3D} from '@loaders.gl/tiles-3d/tileset';
 
 import type {CesiumIonTilesetMetadata} from '@loaders.gl/tiles-3d/3d-tiles';
 

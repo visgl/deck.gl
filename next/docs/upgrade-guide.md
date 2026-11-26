@@ -65,32 +65,35 @@ Register `ShaderInjectionTarget` descriptors with `addShaderInjectionTarget`, us
 
 ### loaders.gl and math.gl v5[​](#loadersgl-and-mathgl-v5 "Direct link to loaders.gl and math.gl v5")
 
-Update direct loaders.gl dependencies to `^5.0.0` and math.gl dependencies to `^5.0.3`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+Update direct loaders.gl dependencies to `^5.0.1` and math.gl dependencies to `^5.0.4`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
-| Previous import                                                           | Replacement import                                       |
-| ------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `@math.gl/web-mercator`                                                   | `@math.gl/geospatial/web-mercator`                       |
-| `@math.gl/arrow`                                                          | `@math.gl/core/arrow`                                    |
-| `@math.gl/expressions`                                                    | `@math.gl/sql/expressions`                               |
-| `@math.gl/expressions/sql`                                                | `@math.gl/sql/parser`                                    |
-| `@math.gl/expressions/arrow`                                              | `@math.gl/sql/arrow`                                     |
-| `@loaders.gl/arrow`                                                       | `@loaders.gl/tables/arrow`                               |
-| `@loaders.gl/loader-utils`, `@loaders.gl/schema`, `@loaders.gl/polyfills` | Corresponding subpaths of `@loaders.gl/core`             |
-| `@loaders.gl/csv`, `@loaders.gl/json`                                     | `@loaders.gl/tables/csv`, `@loaders.gl/tables/json`      |
-| `@loaders.gl/gltf`, `@loaders.gl/obj`                                     | `@loaders.gl/scene/gltf`, `@loaders.gl/scene/obj`        |
-| `@loaders.gl/las`, `@loaders.gl/ply`                                      | Corresponding subpaths of `@loaders.gl/pointclouds`      |
-| `@loaders.gl/mvt`                                                         | `@loaders.gl/tiles/mvt`                                  |
-| `@loaders.gl/tiles` (3D tiles types and sources)                          | `@loaders.gl/tiles-3d`                                   |
-| `@loaders.gl/3d-tiles`, `@loaders.gl/i3s`                                 | Corresponding subpaths of `@loaders.gl/tiles-3d`         |
-| `@loaders.gl/terrain`, `@loaders.gl/wms`                                  | `@loaders.gl/raster/terrain`, `@loaders.gl/ogc/wms`      |
-| `@math.gl/types`                                                          | `@math.gl/core/types`                                    |
-| `@math.gl/core` (matrix and vector APIs)                                  | `@math.gl/core/matrix`                                   |
-| `@math.gl/sql`                                                            | `@math.gl/sql/query`                                     |
-| `@loaders.gl/core/scan`                                                   | `@loaders.gl/core/query`                                 |
-| `@math.gl/geospatial/projection/core`                                     | `@math.gl/geospatial/projection-core`                    |
-| `@math.gl/polygon`, `@math.gl/culling`                                    | `@math.gl/geometry/polygon`, `@math.gl/geometry/culling` |
-| `@math.gl/projection`                                                     | `@math.gl/geospatial/projection`                         |
-| `@math.gl/sun`                                                            | `@math.gl/earth/sun`                                     |
+| Previous import                                                            | Replacement import                                                                                        |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `@math.gl/web-mercator`                                                    | `@math.gl/geospatial/web-mercator`                                                                        |
+| `@math.gl/arrow`                                                           | `@math.gl/core/arrow`                                                                                     |
+| `@math.gl/expressions`                                                     | `@math.gl/sql/expressions`                                                                                |
+| `@math.gl/expressions/sql`                                                 | `@math.gl/sql/parser`                                                                                     |
+| `@math.gl/expressions/arrow`                                               | `@math.gl/sql/arrow`                                                                                      |
+| `@loaders.gl/arrow`                                                        | `@loaders.gl/tables/arrow`                                                                                |
+| `@loaders.gl/loader-utils`, `@loaders.gl/schema`, `@loaders.gl/polyfills`  | Corresponding subpaths of `@loaders.gl/core`                                                              |
+| `@loaders.gl/csv`, `@loaders.gl/json`                                      | `@loaders.gl/tables/csv`, `@loaders.gl/tables/json`                                                       |
+| `@loaders.gl/gltf`, `@loaders.gl/obj`                                      | `@loaders.gl/scene/gltf`, `@loaders.gl/scene/obj`                                                         |
+| `@loaders.gl/las`, `@loaders.gl/ply`                                       | Corresponding subpaths of `@loaders.gl/pointclouds`                                                       |
+| `@loaders.gl/mvt`                                                          | `@loaders.gl/tiles/mvt`                                                                                   |
+| `@loaders.gl/tiles` or `@loaders.gl/tiles-3d` (3D tiles types and sources) | `@loaders.gl/tiles-3d/tileset`, `@loaders.gl/tiles-3d/tiles-3d-source`, `@loaders.gl/tiles-3d/i3s-source` |
+| `ImageLoader` from `@loaders.gl/images`                                    | `@loaders.gl/images/image/bundled` for the bundled parser                                                 |
+| `DracoWorkerLoader` from `@loaders.gl/scene`                               | `DracoLoader` from `@loaders.gl/scene/draco`                                                              |
+| `ImageSource`, `WMSSource` from `@loaders.gl/ogc/wms`                      | `@loaders.gl/ogc/wms/bundled` for runtime values                                                          |
+| `@loaders.gl/3d-tiles`, `@loaders.gl/i3s`                                  | Corresponding subpaths of `@loaders.gl/tiles-3d`                                                          |
+| `@loaders.gl/terrain`, `@loaders.gl/wms`                                   | `@loaders.gl/raster/terrain`, `@loaders.gl/ogc/wms`                                                       |
+| `@math.gl/types`                                                           | `@math.gl/core/types`                                                                                     |
+| `@math.gl/core` (matrix and vector APIs)                                   | `@math.gl/core/matrix`                                                                                    |
+| `@math.gl/sql`                                                             | `@math.gl/sql/query`                                                                                      |
+| `@loaders.gl/core/scan`                                                    | `@loaders.gl/core/query`                                                                                  |
+| `@math.gl/geospatial/projection/core`                                      | `@math.gl/geospatial/projection-core`                                                                     |
+| `@math.gl/polygon`, `@math.gl/culling`                                     | `@math.gl/geometry/polygon`, `@math.gl/geometry/culling`                                                  |
+| `@math.gl/projection`                                                      | `@math.gl/geospatial/projection`                                                                          |
+| `@math.gl/sun`                                                             | `@math.gl/earth/sun`                                                                                      |
 
 Import vector and matrix namespaces such as `vec3` and `mat4` from `@math.gl/core/matrix`; their old subpaths are removed. Replace `WINDING.CLOCKWISE` and `WINDING.COUNTER_CLOCKWISE` with `'clockwise'` and `'counter-clockwise'`.
 
