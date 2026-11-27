@@ -8,7 +8,7 @@ import {test, expect} from 'vitest';
 import {generateLayerTests, testInitializeLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
-import {WMSImageSource} from '@loaders.gl/ogc/wms';
+import {WMSImageSource} from '@loaders.gl/ogc/wms/bundled';
 import type {ImageSource} from '@loaders.gl/ogc/wms';
 import type {
   GetImageParameters,

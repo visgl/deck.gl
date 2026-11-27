@@ -7,7 +7,6 @@ import {
   type ArrowExpression,
   type ArrowTableFunction
 } from '@math.gl/sql/arrow';
-import {SQRT} from '@math.gl/sql/math-functions';
 import type {Expression} from '@math.gl/sql/expressions';
 import {
   Field,
@@ -63,7 +62,7 @@ function constructorFor(expression: Expression) {
 export function evaluateColumnExpression(
   expression: Expression,
   input: Table,
-  sqlFunctions: readonly ArrowTableFunction[] = []
+  functions: readonly ArrowTableFunction[] = []
 ): {column: Vector; metadata?: Map<string, string>} {
   if (expression.type === 'Identifier') {
     const column = input.getChild(expression.name);
@@ -75,9 +74,6 @@ export function evaluateColumnExpression(
       metadata: input.schema.fields.find(field => field.name === expression.name)?.metadata
     };
   }
-  const functions = sqlFunctions.some(fn => fn.name.toUpperCase() === 'SQRT')
-    ? [...sqlFunctions]
-    : [SQRT, ...sqlFunctions];
   const compile = (value: ArrowExpression) => {
     const compiled = compileArrowExpression(value, {inputSchema: input.schema, functions});
     return {column: compiled.evaluateTable(input), metadata: compiled.outputField.metadata};

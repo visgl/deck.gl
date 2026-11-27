@@ -9,6 +9,9 @@
  * when a source passed one. Wrappers such as React renderers rely on this to tell an id the app
  * passed from a class default, so the default must stay off the object itself.
  *
+ * View and Widget both treat a falsy `id` (`undefined`, `null` or `''`) as not passed: they pass
+ * `{id: ownId || undefined}` as the last source, so the default shows through.
+ *
  * @param defaultId The id to use when none is passed
  * @param sources Objects to copy, in order. An `id` of `undefined` doesn't hide the default.
  */

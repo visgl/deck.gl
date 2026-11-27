@@ -1,0 +1,1 @@
+{"extends": "../../proposals/tsconfig.json", "include": ["*.ts"], "exclude": ["dist"]}
