@@ -63,7 +63,7 @@ class LineDemo extends Component {
     /** Provides widgets for the example. */
     const widgets = [
       new StatsWidget({type: 'device'}),
-      new _LegendWidget({label: 'Flight altitude', placement: 'bottom-right'})
+      new _LegendWidget({label: 'Flight altitude', placement: 'bottom-left'})
     ];
 
     return (
