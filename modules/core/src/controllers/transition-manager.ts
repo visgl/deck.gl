@@ -42,6 +42,14 @@ export type TransitionProps = {
 const DEFAULT_EASING = t => t;
 const DEFAULT_INTERRUPTION = TRANSITION_EVENTS.BREAK;
 
+/** Destination of an active view state transition. Experimental. */
+export type TransitionTarget = {
+  /** View state at the end of the transition, normalized like the view states that it emits. */
+  viewState: Record<string, any>;
+  /** Milliseconds of timeline time until the transition ends. */
+  remainingTime: number;
+};
+
 type TransitionSettings = BaseTransitionSettings & {
   interpolator: TransitionInterpolator;
   easing: (t: number) => number;
@@ -85,6 +93,20 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
   // Returns current transitioned viewport.
   getViewportInTransition(): Record<string, any> | null {
     return this.propsInTransition;
+  }
+
+  /** Experimental. The destination of the active transition, or null when none runs. */
+  getTransitionTarget(): TransitionTarget | null {
+    const {transition} = this;
+    if (!transition.inProgress) {
+      return null;
+    }
+    const {endProps, duration} = transition.settings as unknown as TransitionSettings;
+    const viewState = this.getControllerState(
+      {...this.props, ...endProps},
+      PRESERVE_CONSTRAINT_CONTEXT
+    ).getViewportProps();
+    return {viewState, remainingTime: Math.max(0, duration - transition.time)};
   }
 
   // Process the vewiport change, either ignore or trigger a new transition.

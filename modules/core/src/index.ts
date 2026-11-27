@@ -160,6 +160,7 @@ export type {
   ViewStateChangeParameters,
   InteractionState
 } from './controllers/controller';
+export type {TransitionTarget as _TransitionTarget} from './controllers/transition-manager';
 
 // INTERNAL, DO NOT USE
 export {default as _GPUVectorModel} from './lib/luma-upstream/gpu-vector-model';

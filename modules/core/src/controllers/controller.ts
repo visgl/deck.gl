@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable max-statements, complexity */
-import TransitionManager, {TransitionProps} from './transition-manager';
+import TransitionManager, {TransitionProps, type TransitionTarget} from './transition-manager';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {IViewState, type ConstraintContext} from './view-state';
 import type {MaxBoundsPadding} from './utils';
@@ -458,6 +458,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
 
   updateTransition() {
     this.transitionManager.updateTransition();
+  }
+
+  /** Experimental. The destination of the active view state transition, or null. */
+  getTransitionTarget(): TransitionTarget | null {
+    return this.transitionManager.getTransitionTarget();
   }
 
   toggleEvents(eventNames, enabled) {

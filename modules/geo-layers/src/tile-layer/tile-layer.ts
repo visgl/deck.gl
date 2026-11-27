@@ -64,6 +64,7 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   refinementStrategy: STRATEGY_DEFAULT,
   zRange: null,
   maxRequests: 6,
+  _preloadTransitionTarget: false,
   debounceTime: 0,
   zoomOffset: 0,
   visibleMinZoom: null,
@@ -151,6 +152,14 @@ type _TileLayerProps<DataT> = {
    * @default 6
    */
   maxRequests?: number;
+
+  /**
+   * Experimental. While a view state transition of this layer's view runs, load the tiles of
+   * the transition's end viewport first, without selecting them. Needs a view with a controller.
+   *
+   * @default false
+   */
+  _preloadTransitionTarget?: boolean;
 
   /**
    * Queue tile requests until no new tiles have been requested for at least `debounceTime` milliseconds.
@@ -324,8 +333,12 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   private _updateTileset(): void {
     const tileset = this.state.tileset!;
-    const {zRange, modelMatrix} = this.props;
-    const frameNumber = tileset.update(this.context.viewport, {zRange, modelMatrix});
+    const {zRange, modelMatrix, _preloadTransitionTarget} = this.props;
+    const {viewport, deck} = this.context;
+    const preloadViewport = _preloadTransitionTarget
+      ? deck?._getTransitionTarget(viewport.id)?.viewport
+      : null;
+    const frameNumber = tileset.update(viewport, {zRange, modelMatrix, preloadViewport});
     const {isLoaded} = tileset;
 
     const loadingStateChanged = this.state.isLoaded !== isLoaded;

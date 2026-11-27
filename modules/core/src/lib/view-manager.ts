@@ -9,6 +9,7 @@ import {matchById, warnDuplicates} from './match-by-id';
 
 import type Controller from '../controllers/controller';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
+import type {TransitionTarget} from '../controllers/transition-manager';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type {CanvasContext, PresentationContext} from '@luma.gl/core';
@@ -270,6 +271,21 @@ export default class ViewManager<ViewsT extends View[]> {
 
   getViewport(viewId: string): Viewport | undefined {
     return this._viewportMap[viewId];
+  }
+
+  /**
+   * Experimental. Returns the destination of the active view state transition of a view.
+   * @param viewId - Id of a view with a controller.
+   * @returns The end view state, its viewport and the remaining time in milliseconds, or null
+   * when the view has no controller or no transition runs.
+   */
+  getTransitionTarget(viewId: string): (TransitionTarget & {viewport: Viewport}) | null {
+    const view = this.getView(viewId);
+    const target = view && this.controllers[viewId]?.getTransitionTarget();
+    const viewport =
+      target &&
+      view.makeViewport({viewState: target.viewState, ...this._getCanvasDimensions(view)});
+    return viewport ? {...target, viewport} : null;
   }
 
   /**

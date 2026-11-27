@@ -114,6 +114,8 @@ Receives the loaded tile payload as `props.data` and the shared tile header as `
 
 Owned tilesets accept the same core tile options as `TileLayer`: `extent`, `tileSize`, `maxZoom`, `minZoom`, `maxCacheSize`, `maxCacheByteSize`, `zRange`, `maxRequests`, `debounceTime`, `zoomOffset`, `visibleMinZoom`, and `visibleMaxZoom`.
 
+The experimental `_preloadTransitionTarget` prop works as in `TileLayer`, once for each enabled view: each view preloads the end viewport of its own transition into the shared cache.
+
 `refinementStrategy` supports `'best-available'`, `'no-overlap'`, `'never'`, and custom callbacks. Callbacks receive view-local tile facades: changes to `isVisible` affect only that view, while content and load state come from the common cache.
 
 ### Callbacks
