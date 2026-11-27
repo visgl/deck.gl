@@ -19,6 +19,10 @@ export type GlobeViewState = {
   latitude: number;
   /** Zoom level */
   zoom: number;
+  /** Bearing in degrees, clockwise from north. Default `0` */
+  bearing?: number;
+  /** Pitch in degrees. Default `0` */
+  pitch?: number;
   /** Min zoom, default `0` */
   minZoom?: number;
   /** Max zoom, default `20` */

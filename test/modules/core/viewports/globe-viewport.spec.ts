@@ -4,6 +4,7 @@
 
 import {test, expect} from 'vitest';
 import {GlobeView} from '@deck.gl/core';
+import type {GlobeViewState} from '@deck.gl/core';
 import GlobeViewport from '@deck.gl/core/viewports/globe-viewport';
 import {equals, config} from '@math.gl/core/matrix';
 
@@ -341,4 +342,12 @@ test('GlobeViewport exposes a local geocentric CRS while preserving its sphere',
     expect(crs.converter.WGS84.from(source, output)).toBe(output);
     expect(Array.from(output)).toEqual(target);
   }
+});
+
+test('GlobeView#view state accepts pitch and bearing', () => {
+  // A type error here means GlobeViewState lost the fields that GlobeViewport reads.
+  const viewState: GlobeViewState = {longitude: 0, latitude: 0, zoom: 1, pitch: 30, bearing: 10};
+  const viewport = new GlobeView({id: 'globe'}).makeViewport({width: 100, height: 100, viewState});
+  expect(viewport.pitch).toBe(30);
+  expect(viewport.bearing).toBe(10);
 });
