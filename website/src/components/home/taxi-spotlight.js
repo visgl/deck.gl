@@ -30,14 +30,16 @@ const spotlightPlugin = {
   }
 };
 
-// Keep the brushing extension's pointer redraw handling and use a feathered screen-space glow.
+/** Adds a feathered glow and reuses the brushing extension's pointer redraw handling. */
 export default class TaxiSpotlightExtension extends BrushingExtension {
   static extensionName = 'TaxiSpotlightExtension';
 
+  /** Supplies the shader that brightens the trail halo around the pointer. */
   getShaders() {
     return {plugins: [spotlightPlugin]};
   }
 
+  /** Converts the pointer position into the framebuffer coordinates used by the shader. */
   draw({context: {device, mousePosition, viewport}}) {
     if (!this.props.brushingEnabled || !mousePosition || !viewport.containsPixel(mousePosition)) {
       this.setShaderModuleProps({taxiSpotlight: {enabled: 0}});

@@ -89,6 +89,7 @@ function Hero() {
   );
 }
 
+/** Defers gallery artwork until its reserved space approaches the viewport. */
 function ExampleScreenshot({src, width, height}) {
   const placeholder = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -242,6 +243,7 @@ function ReleasePreview() {
   );
 }
 
+/** Renders the homepage hero, quickstart, and featured examples. */
 export default function IndexPage() {
   const showcaseUrl = useBaseUrl('/showcase');
 

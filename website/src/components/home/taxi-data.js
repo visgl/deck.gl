@@ -2,11 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/** Length of the loop in trip timestamp units. */
 export const tripLoopLength = 1800;
+/** Visible duration of a trail in trip timestamp units. */
 export const tripTrailLength = 120;
+/** Trip fixture path relative to the website base URL. */
 export const tripDataPath = 'data/home/trips-data-s.txt';
+/** Building fixture path relative to the website base URL. */
 export const buildingDataPath = 'data/home/building-data-s.txt';
 
+/** Fetches a fixture and collects its decoded records from a short-lived worker. */
 function loadData(dataUrl, workerUrl, signal) {
   signal.throwIfAborted();
 
@@ -54,6 +59,7 @@ function loadData(dataUrl, workerUrl, signal) {
   });
 }
 
+/** Loads the decoded trips and building footprints in parallel. */
 export function loadTaxiData(baseUrl, signal) {
   return Promise.all([
     loadData(

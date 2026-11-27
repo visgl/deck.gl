@@ -13,7 +13,7 @@ import {DeviceTabs} from '../device-tabs';
 import {useStore} from '../../store/device-store';
 import {ExampleLayoutContext} from './layout-context';
 
-// Embedded examples need their own column when the gallery does not provide one.
+/** Supplies the vertical layout when a demo is embedded outside the gallery. */
 const ExampleLayout = styled.div`
   display: flex;
   flex-direction: column;
@@ -84,6 +84,7 @@ function useSharedDeviceCanvas(device) {
   }, [device]);
 }
 
+/** Wraps a demo with website controls, data loading, and the surrounding example layout. */
 export default function makeExample(DemoComponent, {isInteractive = true, style} = {}) {
   const {parameters = {}, mapStyle} = DemoComponent;
   const defaultParams = Object.keys(parameters).reduce((acc, name) => {

@@ -5,11 +5,13 @@
 const {readFile, writeFile} = require('node:fs/promises');
 const {join} = require('node:path');
 
+/** Adds preload hints for the live taxi scene to the generated homepage. */
 module.exports = function homeTaxiPreload() {
   let sceneScripts = [];
 
   return {
     name: 'home-taxi-preload',
+    /** Records the client files emitted for the taxi scene chunk group. */
     configureWebpack(_config, isServer) {
       if (!isServer) {
         return {
@@ -26,6 +28,7 @@ module.exports = function homeTaxiPreload() {
         };
       }
     },
+    /** Uses the build's base URL so preloads work at both / and /next/. */
     async postBuild({outDir, baseUrl}) {
       if (sceneScripts.length) {
         const homepage = join(outDir, 'index.html');

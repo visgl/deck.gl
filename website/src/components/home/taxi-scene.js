@@ -10,6 +10,7 @@ import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {tripLoopLength, tripTrailLength} from './taxi-data';
 import TaxiSpotlightExtension from './taxi-spotlight';
 
+/** Camera shared by the desktop capture and the live scene. */
 const initialViewState = {
   longitude: -73.986,
   latitude: 40.726,
@@ -21,16 +22,19 @@ const initialViewState = {
   maxPitch: 60
 };
 
+/** Trip timestamp units advanced per second of playback. */
 const playbackSpeed = 60;
-// The still used for paused playback was captured at this point in the trip loop.
+/** Point in the trip loop used for the paused captures. */
 const previewStartTime = 840;
 const yellowTripColor = [255, 210, 122];
 const greenTripColor = [145, 255, 230];
 
+/** Gives each trip and its head the color of its taxi vendor. */
 function getTripColor({vendor}) {
   return vendor === 0 ? yellowTripColor : greenTripColor;
 }
 
+/** Locates each active trip head by interpolating between its adjacent timed positions. */
 function getTripHeads(trips, time) {
   const heads = [];
   for (const {path, timestamps, vendor} of trips) {
@@ -63,6 +67,7 @@ function getTripHeads(trips, time) {
   return heads;
 }
 
+/** Checks that a decoded trip has timed positions inside the scene bounds. */
 function isNewYorkTrip({path, timestamps}) {
   return (
     path.length > 1 &&
@@ -75,6 +80,7 @@ function isNewYorkTrip({path, timestamps}) {
   );
 }
 
+/** Creates the homepage's WebGL scene and returns its playback and cleanup controls. */
 export async function createTaxiScene({
   canvas,
   data,
@@ -160,6 +166,7 @@ export async function createTaxiScene({
   let headTime;
   let timedHeadLayer;
 
+  /** Updates the animated layers and reuses head data on pointer-only redraws. */
   function getLayers() {
     if (headTime !== currentTime) {
       headTime = currentTime;
@@ -185,6 +192,7 @@ export async function createTaxiScene({
     scheduleAnimation();
   }
 
+  /** Advances trip playback only while the scene is visible. */
   function scheduleAnimation() {
     if (playing && ready && inView && !document.hidden) {
       if (!animationFrame) {
@@ -209,11 +217,11 @@ export async function createTaxiScene({
     }
   }
 
+  /** Matches the centered cover crop of the recorded camera. */
   function getStartingViewProps() {
     const {width: captureWidth, height: captureHeight} = getCaptureSize();
     const width = canvas.clientWidth || captureWidth;
     const height = canvas.clientHeight || captureHeight;
-    // Match the centered object-fit cover crop of the recorded camera.
     const scale = Math.max(width / captureWidth, height / captureHeight);
     const captureZoom = initialViewState.zoom + Math.min(0, Math.log2(captureWidth / 650));
     return {

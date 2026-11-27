@@ -10,9 +10,12 @@ import styles from './hero-map.module.css';
 const mobileViewport = '(max-width: 760px)';
 const desktopViewport = '(width > 760px)';
 const motionQuery = '(prefers-reduced-motion: no-preference)';
+/** Reference viewport for the narrow capture and its live camera crop. */
 const mobileCapture = {width: 420, height: 656};
+/** Reference viewport for the wide capture and its live camera crop. */
 const desktopCapture = {width: 1440, height: 648};
 
+/** Shows the captured taxi scene until the interactive map draws its first frame. */
 export default function HeroMap() {
   const canvasRef = useRef(null);
   const playbackRef = useRef(null);
@@ -38,6 +41,7 @@ export default function HeroMap() {
     let scene;
     setStatus('loading');
 
+    /** Releases the live scene if startup completed before cleanup. */
     function dispose() {
       if (scene) {
         if (sceneRef.current === scene) {
@@ -48,6 +52,7 @@ export default function HeroMap() {
       }
     }
 
+    /** Restores the preview if loading or rendering the map fails. */
     function reportFailure() {
       if (!signal.aborted) {
         controller.abort();
@@ -57,6 +62,7 @@ export default function HeroMap() {
       }
     }
 
+    /** Loads and initializes the live scene without blocking the preview. */
     async function start() {
       try {
         const [{createTaxiScene}, data] = await Promise.all([
