@@ -6,6 +6,7 @@ import {test, expect} from 'vitest';
 import {Layer, LayerExtension} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils/vitest';
+import {Model} from '@luma.gl/engine';
 
 class MockExtension extends LayerExtension {
   getShaders() {
@@ -212,4 +213,114 @@ test('LayerExtension#CompositeLayer passthrough', () => {
   });
 
   expect(MockExtension.finalizeCalled, 'finalizeState called').toBe(2);
+});
+
+test('LayerExtension#legacy inject fields reach the assembled shader', () => {
+  const TINT = 'color.rgb = vec3(1.0, 0.0, 0.0);';
+  const FADE = 'color.a *= 0.5;';
+
+  class LegacyInjectExtension extends LayerExtension {
+    static extensionName = 'LegacyInjectExtension';
+
+    getShaders() {
+      return {
+        modules: [{name: 'legacy-tint', inject: {'fs:DECKGL_FILTER_COLOR': TINT}}],
+        inject: {'fs:DECKGL_FILTER_COLOR': FADE}
+      };
+    }
+  }
+
+  testLayer({
+    Layer: ScatterplotLayer,
+    testCases: [
+      {
+        props: {
+          id: 'legacy-inject-layer',
+          data: [0, 1, 2],
+          getPosition: d => [d, 0],
+          extensions: [new LegacyInjectExtension()]
+        },
+        onAfterUpdate: ({layer}) => {
+          const {source} = layer.getModels()[0].pipeline.fs;
+          expect(source, 'module inject is assembled').toContain(TINT);
+          expect(source, 'getShaders inject is assembled').toContain(FADE);
+        }
+      }
+    ]
+  });
+});
+
+test('LayerExtension#ordered legacy inject entries survive the merge with the layer inject', () => {
+  const FADE = 'fragColor.a *= 0.5;';
+  const TINT = 'fragColor.rgb = vec3(1.0, 0.0, 0.0);';
+  const FLATTEN = 'gl_Position.z = 0.0;';
+
+  // A deck.gl 9 style layer: it passes `inject` to Layer.getShaders
+  class LegacyInjectLayer extends Layer {
+    static layerName = 'LegacyInjectLayer';
+
+    initializeState() {
+      this.setState({
+        model: new Model(this.context.device, {...this.getShaders(), vertexCount: 3})
+      });
+    }
+
+    getShaders() {
+      return super.getShaders({
+        vs: `\
+#version 300 es
+void main() {
+  gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+}
+`,
+        fs: `\
+#version 300 es
+precision highp float;
+out vec4 fragColor;
+void main(void) {
+  fragColor = vec4(1.0);
+}
+`,
+        inject: {'fs:#main-end': FADE}
+      });
+    }
+  }
+
+  class OrderedInjectExtension extends LayerExtension {
+    static extensionName = 'OrderedInjectExtension';
+
+    getShaders() {
+      return {
+        inject: {
+          // The same key as the layer, and a key that only the extension has
+          'fs:#main-end': {injection: TINT, order: -1},
+          'vs:#main-end': {injection: FLATTEN, order: 1}
+        }
+      };
+    }
+  }
+
+  testLayer({
+    Layer: LegacyInjectLayer,
+    testCases: [
+      {
+        props: {
+          id: 'ordered-inject-layer',
+          data: [],
+          extensions: [new OrderedInjectExtension()]
+        },
+        onAfterUpdate: ({layer}) => {
+          const {vs, fs} = layer.state.model.pipeline;
+          expect(fs.source, 'no object is written as text').not.toContain('[object Object]');
+          expect(vs.source, 'no object is written as text').not.toContain('[object Object]');
+          expect(fs.source, 'layer inject is assembled').toContain(FADE);
+          expect(fs.source, 'ordered extension inject is assembled').toContain(TINT);
+          expect(vs.source, 'extension-only inject is assembled').toContain(FLATTEN);
+          expect(fs.source.indexOf(TINT), 'order -1 is before order 0').toBeLessThan(
+            fs.source.indexOf(FADE)
+          );
+        }
+      }
+    ]
+  });
 });

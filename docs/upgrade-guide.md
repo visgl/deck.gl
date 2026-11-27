@@ -79,6 +79,13 @@ return {
 };
 ```
 
+`Layer.getShaders` converts a remaining `inject` field on a shader module to a GLSL-only plugin
+and logs a deprecation warning. luma.gl does not assemble this field. It also converts the
+named targets (`vs:NAME`, `fs:NAME`, `#decl`, `#main-start`, `#main-end`) of an `inject` field
+on its result, for each layer and extension, so that `{injection, order}` entries keep their
+order. Other keys of that field stay in `inject`. Models constructed outside `Layer.getShaders`
+do not get this conversion.
+
 Register `ShaderInjectionTarget` descriptors with `addShaderInjectionTarget`, using
 `{name, stage, glsl: {parameters}, wgsl: {parameters}}` instead of signature strings.
 Declare plugin targets in `injectionTargets`.
