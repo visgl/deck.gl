@@ -256,6 +256,8 @@ Remarks:
 
 Maximum sampled projection error in meters when a preprojecting view bends the image. Zero retains the `resolution` grid. Requires CPU preprojection and does not support `coordinateSystem: 'cartesian'`. See [Adaptive refinement](../core/custom-projection-view.md#adaptive-refinement).
 
+In `MapView` and `GlobeView`, the error is measured in rendered (common) space, in meters at the bitmap center. Set a positive `_projectionTolerance` to avoid visible bowing when rendering a bitmap with a projected `coordinateSystem`. With the default tolerance of `0` and no `resolution` grid, the bitmap draws as one quad.
+
 #### `loadOptions` (object, optional) {#loadoptions}
 
 On top of the [default options](../core/layer.md#loadoptions), also accepts options for the following loaders:

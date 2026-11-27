@@ -2,11 +2,24 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {log} from '@deck.gl/core';
 import {lerp} from '@math.gl/core/matrix';
 import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
 
 const DEFAULT_INDICES = new Uint32Array([0, 2, 1, 0, 3, 2]);
 const DEFAULT_TEX_COORDS = new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]);
+
+/** Projection and metric for adaptive bitmap subdivision. */
+type MeshProjection = {
+  /** Convert a source position to the coordinates stored in the vertex attribute. */
+  transform: (position: number[]) => number[];
+  /** Convert packed positions to the space where the interpolation error is measured. */
+  measure?: (packed: number[]) => number[];
+  /** Maximum sampled interpolation error in meters. */
+  tolerance: number;
+  /** Meters per unit on each measurement axis. */
+  scale: [number, number, number];
+};
 
 /*
   1 ---- 2
@@ -15,15 +28,8 @@ const DEFAULT_TEX_COORDS = new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]);
   0 ---- 3
 */
 /* eslint-disable max-statements */
-export default function createMesh(
-  bounds,
-  resolution,
-  projection?: {
-    transform: (position: number[]) => number[];
-    tolerance: number;
-    scale: [number, number, number];
-  }
-) {
+/** Build a bitmap mesh with optional uniform and adaptive subdivision. */
+export default function createMesh(bounds, resolution, projection?: MeshProjection) {
   if (projection) return createProjectedMesh(bounds, resolution, projection);
   if (!resolution) {
     return createQuad(bounds);
@@ -97,54 +103,74 @@ function createQuad(bounds) {
   };
 }
 
-function interpolateQuad(quad, ut, vt) {
+/** Interpolate a source position from the four bitmap corners. */
+export function interpolateQuad(quad, ut: number, vt: number) {
   return lerp(lerp(quad[0], quad[1], vt), lerp(quad[3], quad[2], vt), ut);
 }
+
+/** Number of times to coarsen the tolerance (4x each) after a mesh exceeds its limits. */
+const MAX_TOLERANCE_RETRIES = 16;
 
 /** Refine in UV space so arbitrary quads retain their bilinear position mapping. */
 function createProjectedMesh(
   bounds,
   resolution,
-  {
-    transform,
-    tolerance,
-    scale
-  }: {
-    transform: (position: number[]) => number[];
-    tolerance: number;
-    scale: [number, number, number];
-  }
+  {transform, measure, tolerance, scale}: MeshProjection
 ) {
   const seed = createMesh(bounds, resolution);
   const uv = Float64Array.from(seed.texCoords);
   for (let i = 1; i < uv.length; i += 2) uv[i] = 1 - uv[i];
-  const refined = subdivideTriangleMesh(
-    {positions: uv, indices: seed.indices},
-    {
-      size: 2,
-      targetSize: 3,
-      tolerance,
-      transform: position => {
-        const point = interpolateQuad(bounds, position[0], position[1]);
-        const projected = transform([point[0], point[1], point[2] ?? 0]);
-        return projected.map((value, axis) => value * scale[axis]);
+  const subdivide = (effectiveTolerance: number) =>
+    subdivideTriangleMesh(
+      {positions: uv, indices: seed.indices},
+      {
+        size: 2,
+        targetSize: 3,
+        tolerance: effectiveTolerance,
+        transform: position => {
+          const point = interpolateQuad(bounds, position[0], position[1]);
+          const packed = transform([point[0], point[1], point[2] ?? 0]);
+          const measured = measure ? measure(packed) : packed;
+          return measured.map((value, axis) => value * scale[axis]);
+        }
       }
+    );
+  // A tolerance that needs more than the vertex or triangle limit falls back to a coarser
+  // mesh, so the bitmap still draws.
+  let effectiveTolerance = tolerance;
+  let refined: ReturnType<typeof subdivideTriangleMesh> | null = null;
+  for (let attempt = 0; !refined; attempt++) {
+    try {
+      refined = subdivide(effectiveTolerance);
+    } catch (error) {
+      if (!(error instanceof RangeError) || attempt >= MAX_TOLERANCE_RETRIES) throw error;
+      effectiveTolerance *= 4;
     }
-  );
+  }
+  if (effectiveTolerance !== tolerance) {
+    log.warn(
+      `BitmapLayer: _projectionTolerance ${tolerance} needs too many vertices; using ${effectiveTolerance}`
+    )();
+  }
   const vertexCount = refined.sourcePositions.length / 2;
   const positions = new Float64Array(vertexCount * 3);
   const texCoords = new Float32Array(vertexCount * 2);
+  const projectedPositions = measure
+    ? new Float64Array(vertexCount * 3)
+    : refined.positions.map((value, index) => value / scale[index % 3]);
   for (let i = 0; i < vertexCount; i++) {
     const u = refined.sourcePositions[i * 2];
     const v = refined.sourcePositions[i * 2 + 1];
     const point = interpolateQuad(bounds, u, v);
-    positions.set([point[0], point[1], point[2] ?? 0], i * 3);
+    const source = [point[0], point[1], point[2] ?? 0];
+    positions.set(source, i * 3);
+    if (measure) projectedPositions.set(transform(source), i * 3);
     texCoords.set([u, 1 - v], i * 2);
   }
   return {
     vertexCount: refined.indices.length,
     positions,
-    projectedPositions: refined.positions.map((value, index) => value / scale[index % 3]),
+    projectedPositions,
     indices: refined.indices,
     texCoords
   };
