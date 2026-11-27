@@ -72,20 +72,24 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   }
 
   /** Release fullscreen and detach listeners when the widget is removed. */
-  onRemove() {
+  async onRemove() {
     if (this.pending) this.pending.cancelled = true;
     this.ownerDocument?.removeEventListener('fullscreenchange', this.handleNativeChange);
     this.ownerDocument = null;
     const native = this.nativeTarget;
     this.nativeTarget = null;
-    if (native && native.ownerDocument.fullscreenElement === native) {
-      void native.ownerDocument.exitFullscreen().catch(() => {});
-    }
     this.restoreFallback?.();
     this.restoreFallback = null;
     this.fullscreen = false;
     if (this.root) render(null, this.root);
     this.root = null;
+    if (native && native.ownerDocument.fullscreenElement === native) {
+      try {
+        await native.ownerDocument.exitFullscreen();
+      } catch {
+        // Removing the container can exit fullscreen before this request completes.
+      }
+    }
   }
 
   /** Render the toggle button and listen for native fullscreen changes. */
@@ -99,8 +103,12 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     const isFullscreen = this.getFullscreen();
     render(
       <IconButton
-        onClick={() => {
-          this.handleClick().catch(err => log.error(err)());
+        onClick={async () => {
+          try {
+            await this.handleClick();
+          } catch (error) {
+            log.error(String(error))();
+          }
         }}
         label={isFullscreen ? this.props.exitLabel : this.props.enterLabel}
         tooltip={isFullscreen ? this.props.exitTooltip : this.props.enterTooltip}
@@ -113,11 +121,19 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   /** Apply new widget props and exit fullscreen if the target changes. */
   setProps(props: Partial<FullscreenWidgetProps>) {
     if ('container' in props && props.container !== this.props.container) {
-      void this.exitFullscreen().catch(err => log.error(err)());
+      void this.exitForContainerChange();
     }
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
+  }
+
+  private async exitForContainerChange() {
+    try {
+      await this.exitFullscreen();
+    } catch (error) {
+      log.error(String(error))();
+    }
   }
 
   getContainer() {
@@ -153,9 +169,10 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     }
   }
 
-  /** Toggle fullscreen or cancel a request that is still settling. */
+  /** Toggle fullscreen once the previous entry request has settled. */
   async handleClick() {
-    if (this.fullscreen || this.pending) await this.exitFullscreen();
+    if (this.pending) return;
+    if (this.fullscreen) await this.exitFullscreen();
     else await this.requestFullscreen();
   }
 
@@ -169,21 +186,19 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     const request = {cancelled: false};
     this.pending = request;
     try {
-      if (container.requestFullscreen) {
-        try {
-          await container.requestFullscreen({navigationUI: 'hide'});
-        } catch {
-          // A browser can expose the API but deny fullscreen for this element.
-        }
-        if (request.cancelled) {
-          if (doc.fullscreenElement === container) await doc.exitFullscreen();
-          return;
-        }
-        if (doc.fullscreenElement === container) {
-          this.nativeTarget = container;
-          this.setFullscreen(true);
-          return;
-        }
+      try {
+        if (container.requestFullscreen) await container.requestFullscreen({navigationUI: 'hide'});
+      } catch {
+        // A browser can expose the API but deny fullscreen for this element.
+      }
+      if (request.cancelled) {
+        if (doc.fullscreenElement === container) await doc.exitFullscreen();
+        return;
+      }
+      if (doc.fullscreenElement === container) {
+        this.nativeTarget = container;
+        this.setFullscreen(true);
+        return;
       }
       if (container.isConnected && !doc.fullscreenElement) this.openFallback(container);
     } finally {
@@ -228,15 +243,11 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   /** Expand the container in place and register its keyboard and cleanup handlers. */
   private openFallback(container: HTMLElement) {
     const doc = container.ownerDocument;
-    const view = doc.defaultView;
     fallbackOwners.get(doc)?.closeFallback();
     fallbackOwners.set(doc, this);
 
     const previousFocus = doc.activeElement as HTMLElement | null;
-    const scrollX = view?.scrollX ?? 0;
-    const scrollY = view?.scrollY ?? 0;
-    const hadClass = container.classList.contains(FALLBACK_CLASS);
-    const locks = [doc.documentElement, doc.body].filter(el => !el.classList.contains(SCROLL_LOCK));
+    const locks = [doc.documentElement, doc.body];
     for (const element of locks) element.classList.add(SCROLL_LOCK);
     container.classList.add(FALLBACK_CLASS);
 
@@ -257,33 +268,18 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
         this.closeFallback();
       }
     };
-    const onToggle = (event: Event) => {
-      if (
-        popover &&
-        (event as Event & {newState?: string}).newState === 'closed' &&
-        !container.matches(':popover-open')
-      )
-        this.closeFallback();
-    };
-
     container.addEventListener('keydown', onKey);
-    container.addEventListener('toggle', onToggle);
     this.restoreFallback = () => {
       const restoreFocus = container.contains(doc.activeElement) || doc.activeElement === doc.body;
       container.removeEventListener('keydown', onKey);
-      container.removeEventListener('toggle', onToggle);
       if (popover) {
         if (container.matches(':popover-open')) container.hidePopover();
         container.removeAttribute('popover');
       }
-      if (!hadClass) container.classList.remove(FALLBACK_CLASS);
+      container.classList.remove(FALLBACK_CLASS);
       for (const element of locks) element.classList.remove(SCROLL_LOCK);
       fallbackOwners.delete(doc);
-      if (container.isConnected) {
-        view?.scrollTo({left: scrollX, top: scrollY, behavior: 'instant'});
-        if (restoreFocus && previousFocus?.isConnected)
-          previousFocus.focus?.({preventScroll: true});
-      }
+      if (restoreFocus && previousFocus?.isConnected) previousFocus.focus({preventScroll: true});
     };
     this.setFullscreen(true);
     if (fallbackOwners.get(doc) === this) {

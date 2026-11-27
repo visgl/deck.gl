@@ -43,31 +43,6 @@ test('FullscreenWidget - pseudo-fullscreen toggles state and calls callback', ()
   expect(container.classList.contains('deck-pseudo-fullscreen')).toBe(false);
 });
 
-test('FullscreenWidget - onFullscreenChange event updates state and calls callback', () => {
-  const onFullscreenChange = vi.fn();
-  const widget = new FullscreenWidget({onFullscreenChange});
-
-  const container = document.createElement('div');
-  vi.spyOn(widget, 'getContainer').mockReturnValue(container);
-
-  widget.fullscreen = true;
-  widget.onFullscreenChange();
-
-  expect(onFullscreenChange).toHaveBeenCalledWith(false);
-  expect(widget.fullscreen).toBe(false);
-});
-
-test('FullscreenWidget - onFullscreenChange does not fire callback when state unchanged', () => {
-  const onFullscreenChange = vi.fn();
-  const widget = new FullscreenWidget({onFullscreenChange});
-
-  const container = document.createElement('div');
-  vi.spyOn(widget, 'getContainer').mockReturnValue(container);
-
-  widget.onFullscreenChange();
-  expect(onFullscreenChange).not.toHaveBeenCalled();
-});
-
 test('FullscreenWidget - rejected native request uses viewport fallback and exits by mode', async () => {
   const target = document.createElement('div');
   const root = document.createElement('div');
@@ -235,6 +210,7 @@ test('FullscreenWidget - native fullscreen follows browser exit events', async (
     fullscreenElement = null;
     document.dispatchEvent(new Event('fullscreenchange'));
     expect(widget.getFullscreen()).toBe(false);
+    document.dispatchEvent(new Event('fullscreenchange'));
     expect(changed.mock.calls).toEqual([[true], [false]]);
   } finally {
     fullscreenElement = null;
