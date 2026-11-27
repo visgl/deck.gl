@@ -97,7 +97,10 @@ type _TileLayerProps<DataT> = {
    */
   getTileData?: ((props: TileLoadProps) => Promise<DataT> | DataT) | null;
 
-  /** Called when all tiles in the current viewport are loaded. */
+  /**
+   * Called when tile data in the current viewport has loaded.
+   * Sublayers can still be pending when this callback runs.
+   */
   onViewportLoad?: ((tiles: Tile2DHeader<DataT>[]) => void) | null;
 
   /** Called when a tile successfully loads. */
@@ -230,17 +233,41 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     this.state?.tileset?.finalize();
   }
 
+  /** Returns true after selected tiles and their required sublayers have loaded. */
   get isLoaded(): boolean {
-    return Boolean(
-      this.state?.tileset?.selectedTiles?.every(
-        tile =>
-          // Error / empty tiles resolve to `content === null`. Once Tile2DHeader marks those
-          // requests as loaded, do not wait for generated sublayers because there is nothing to
-          // render for that tile and `tile.layers` will remain null.
-          tile.isLoaded &&
-          (!tile.content || !tile.layers || tile.layers.every(layer => layer.isLoaded))
-      )
-    );
+    const selectedTiles = this.state?.tileset?.selectedTiles;
+    if (!selectedTiles) {
+      return false;
+    }
+
+    const {internalState} = this;
+    const viewport = internalState?.viewport ?? this.context?.viewport;
+    const visible = !viewport || !this._isHiddenByZoom(viewport.zoom);
+    const waitingForRender =
+      internalState?.needsUpdate || internalState?.changeFlags.viewportChanged;
+    let hasAggregateOutput = false;
+
+    for (const tile of selectedTiles) {
+      if (!tile.isLoaded) {
+        return false;
+      }
+      if (!tile.content) {
+        continue;
+      }
+      if (tile.layers) {
+        if (!tile.layers.every(layer => layer.isLoaded)) {
+          return false;
+        }
+      } else if (visible) {
+        if (waitingForRender) {
+          return false;
+        }
+        // Aggregate renderers leave tile.layers unset after rendering.
+        hasAggregateOutput = true;
+      }
+    }
+
+    return !hasAggregateOutput || this.getSubLayers().every(layer => layer.isLoaded);
   }
 
   shouldUpdateState({changeFlags}): boolean {
@@ -354,10 +381,9 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   _onTileLoad(tile: Tile2DHeader<DataT>): void {
-    this.props.onTileLoad(tile);
     tile.layers = null;
-
     this.setNeedsUpdate();
+    this.props.onTileLoad(tile);
   }
 
   _onTileError(error: any, tile: Tile2DHeader<DataT>) {
@@ -428,14 +454,18 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     info.sourceTileSubLayer.updateAutoHighlight(info);
   }
 
-  renderLayers(): Layer | null | LayersList {
+  /** Whether the configured zoom limits prevent tile rendering. */
+  private _isHiddenByZoom(zoom: number): boolean {
     const {visibleMinZoom, visibleMaxZoom, minZoom, extent} = this.props;
-    const zoom = this.context.viewport.zoom;
-    const hidden =
+    return (
       (visibleMinZoom != null && zoom < visibleMinZoom) ||
       (visibleMaxZoom != null && zoom > visibleMaxZoom) ||
-      (minZoom != null && !extent && zoom < minZoom);
-    if (hidden) {
+      (minZoom != null && !extent && zoom < minZoom)
+    );
+  }
+
+  renderLayers(): Layer | null | LayersList {
+    if (this._isHiddenByZoom(this.context.viewport.zoom)) {
       // Clear cached sublayer references so they are recreated when visible again
       for (const tile of this.state.tileset!.tiles) {
         tile.layers = null;
