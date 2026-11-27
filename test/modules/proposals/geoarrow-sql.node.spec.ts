@@ -42,7 +42,9 @@ test('spatial SQL accessors preserve source row order and geometry field metadat
 
   expect(table.numRows).toBe(2);
   for (const resultField of table.schema.fields) {
-    expect(resultField.metadata.get('ARROW:extension:name')).toBe('geoarrow.wkb');
+    expect(resultField.metadata.get('ARROW:extension:name')).toBe(
+      resultField.name === 'anchor' ? 'geoarrow.point' : 'geoarrow.wkb'
+    );
     expect(JSON.parse(resultField.metadata.get('ARROW:extension:metadata')!).crs).toBe('EPSG:4326');
     expect(table.getChild(resultField.name)?.get(1)).toBeNull();
   }
@@ -53,7 +55,7 @@ test('spatial SQL accessors preserve source row order and geometry field metadat
     coordinates: [4, 2]
   });
   expect(
-    convertGeoArrowVectorCellToGeoJSON(table.getChild('anchor')!, 0, 'geoarrow.wkb')
+    convertGeoArrowVectorCellToGeoJSON(table.getChild('anchor')!, 0, 'geoarrow.point')
   ).toMatchObject({
     type: 'Point'
   });

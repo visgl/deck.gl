@@ -213,6 +213,7 @@ test('ViewManager#duplicate view ids', () => {
 
     viewManager.setProps({views: makeViews(), width: 300, height: 100});
     expect(controllers, 'the controller is reused').toHaveLength(1);
+    expect(warn, 'unchanged views do not warn again').not.toHaveBeenCalled();
 
     // The same view instance passed twice is drawn twice but controlled once
     const view = new MapView({id: 'shared', controller: true});

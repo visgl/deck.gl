@@ -48,13 +48,14 @@ jobs:
       - name: Run tape backward compatibility smoke test
         run: yarn test-tape-compat
 
-      - name: Coveralls
-        uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2.3.8
+      - name: Upload webgl-unit coverage
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          fail-on-error: false
-          parallel: true
-          flag-name: webgl-unit
+          name: coverage-webgl-unit
+          path: coverage/lcov.info
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 7
 
   test-webgpu:
     runs-on: ubuntu-22.04
@@ -114,13 +115,14 @@ jobs:
           RENDER_TEST_DEVICE: webgl
         run: yarn test-render --coverage
 
-      - name: Coveralls
-        uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2.3.8
+      - name: Upload webgl-render coverage
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          fail-on-error: false
-          parallel: true
-          flag-name: webgl-render
+          name: coverage-webgl-render
+          path: coverage/lcov.info
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 7
 
       - name: Run WebGPU render tests
         env:
@@ -150,13 +152,26 @@ jobs:
           RESULTS: ${{ join(needs.*.result, ',') }}
         run: test "$RESULTS" = success,success
 
-      - name: Finish Coveralls parallel build
-        if: always()
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download WebGL coverage reports
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: coverage-webgl-*
+          path: coverage
+
+      - name: Require both LCOV reports
+        run: |
+          test -s coverage/coverage-webgl-unit/lcov.info
+          test -s coverage/coverage-webgl-render/lcov.info
+
+      # Publish once so Coveralls evaluates the complete suite in its status checks.
+      - name: Publish combined coverage to Coveralls
         uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2.3.8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fail-on-error: false
-          parallel-finished: true
+          files: coverage/coverage-webgl-unit/lcov.info coverage/coverage-webgl-render/lcov.info
 
   test-website:
     runs-on: ubuntu-22.04

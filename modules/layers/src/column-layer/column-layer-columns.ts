@@ -19,6 +19,7 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     accessor: 'getPosition',
     arrowAccessor: true,
     semantic: 'position',
+    allowPackedXY: true,
     size: 3
   },
   elevations: {
@@ -57,8 +58,8 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
 
 /** Experimental GPU-resident columns. CPU columns are supplied through accessors. */
 export type ColumnLayerColumnProps = {
-  /** @experimental GPU-resident column. */
-  positions?: GPUVector | null;
+  /** @experimental Borrowed XY or XYZ positions. XY implies zero elevation. */
+  positions?: GPUVector<'float32x2' | 'float32x3'> | null;
   /** @experimental GPU-resident column. */
   elevations?: GPUVector | null;
   /** @experimental GPU-resident column. */
