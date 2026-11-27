@@ -30,7 +30,8 @@ Releases and associated GitHub PRs for pydeck are documented here.
 - Embed the deck JSON in ``to_html`` output compactly to reduce file size
 - Fix ``register_library`` adding a duplicate entry when a name is registered again (#10949)
 - Fix list accessors that start with a number, like ``get_fill_color=[255, "lng > 0 ? 255 : 88", 0]``,
-  ignoring the expressions after it (#6837)
+  ignoring the expressions after it, and write ``None``/``True``/``False`` items in list accessors as
+  ``null``/``true``/``false`` (#6837)
 
 0.9.3 - Jul 2026
 ^^^^^^^^^^^^^^^^^^^

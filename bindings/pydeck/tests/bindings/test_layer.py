@@ -136,3 +136,29 @@ def test_list_accessor_with_only_constants_is_unchanged():
 
     assert layer_json["getFillColor"] == [255, 0, 0, 140]
     assert layer_json["getPosition"] == "@@=[lng, lat]"
+
+
+def test_list_accessor_writes_none_and_bools_as_js():
+    test_layer = Layer(
+        "ScatterplotLayer",
+        data=df,
+        get_position=[None, "lat"],
+        get_filter_value=[True, "lng > 0", False],
+    )
+
+    layer_json = json.loads(Deck(test_layer).to_json())["layers"][0]
+
+    assert layer_json["getPosition"] == "@@=[null, lat]"
+    assert layer_json["getFilterValue"] == "@@=[true, lng > 0, false]"
+
+
+def test_list_accessor_keeps_numpy_numbers():
+    test_layer = Layer(
+        "ScatterplotLayer",
+        data=df,
+        get_fill_color=[np.int64(255), "lng > 0 ? 255 : 88", np.float64(0.5)],
+    )
+
+    layer_json = json.loads(Deck(test_layer).to_json())["layers"][0]
+
+    assert layer_json["getFillColor"] == "@@=[255, lng > 0 ? 255 : 88, 0.5]"
