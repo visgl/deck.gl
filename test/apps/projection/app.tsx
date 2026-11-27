@@ -7,7 +7,7 @@ import {
   PickingInfo,
   MapView,
   MapViewState,
-  _GlobeView as GlobeView,
+  GlobeView,
   GlobeViewState,
   OrthographicView,
   OrthographicViewState

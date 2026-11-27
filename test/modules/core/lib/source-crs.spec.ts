@@ -9,12 +9,12 @@ import {
   Viewport,
   MapView,
   WebMercatorViewport,
-  _GlobeViewport as GlobeViewport
+  GlobeViewport
 } from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 import {projectionEngine} from '@math.gl/geospatial/projection';
-import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
-import {Matrix4} from '@math.gl/core';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection-core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {addMetersToLngLat} from '@math.gl/geospatial/web-mercator';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import {resolveCRS, WGS84_CRS} from '@deck.gl/core/utils/crs';

@@ -443,3 +443,20 @@ test('resolved color scales remain available while SQL accessors refresh', async
     device.destroy();
   }
 });
+
+test('SQL accessors resolve numeric, cyclic, and threshold scales', () => {
+  const data = tableFromArrays({value: [1, 2, 4]});
+  const {table, scales} = evaluateAccessorQueries(
+    data,
+    {
+      getRadius: 'SCALE_LINEAR(value, DOMAIN(1, 4), RANGE(10, 40))',
+      getLineColor: "SCALE_CYCLIC(value, DOMAIN(0, 4), PALETTE('#ff0000', '#0000ff'))",
+      getFillColor: "SCALE_THRESHOLD(value, ARRAY[2], PALETTE('#000000', '#ffffff'))"
+    },
+    undefined
+  );
+  expect(Array.from(table.getChild('getRadius')!)).toEqual([10, 20, 40]);
+  expect(scales.getLineColor.descriptor.type).toBe('cyclic');
+  expect(Array.from(table.getChild('getFillColor')!.get(0))).toEqual([0, 0, 0, 255]);
+  expect(Array.from(table.getChild('getFillColor')!.get(2))).toEqual([255, 255, 255, 255]);
+});

@@ -20,7 +20,6 @@ import {device} from '@deck.gl/test-utils/vitest';
 import {Buffer, Texture} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {getGLParameters} from '@luma.gl/core/webgl';
-import {GL} from '@luma.gl/core/webgl-constants';
 import type {CanvasContext} from '@luma.gl/core';
 
 class TestLayer extends Layer {

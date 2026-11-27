@@ -11,7 +11,7 @@ import {BufferTransform} from '@luma.gl/engine';
 import {WGSLShaderAssembler} from '@luma.gl/shaders';
 import {Computation} from '@luma.gl/engine';
 import {Buffer} from '@luma.gl/core';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import ProjectionScaleResources from '@deck.gl/core/lib/projection-scale-resources';
 import {getWorldPosition} from './project-glsl-test-utils';

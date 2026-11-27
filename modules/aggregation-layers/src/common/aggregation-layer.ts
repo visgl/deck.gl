@@ -16,10 +16,10 @@ import {
   Attribute,
   AttributeManager,
   Viewport,
-  _GlobeViewport,
+  GlobeViewport,
   _deepEqual as deepEqual
 } from '@deck.gl/core';
-import {vec4TransformMat4 as transformMat4} from '@math.gl/core';
+import {vec4TransformMat4 as transformMat4} from '@math.gl/core/matrix';
 import type {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import type {Aggregator} from './aggregator/aggregator';
 import type {WebGPUAggregatorOptions} from './aggregator/webgpu-aggregator/webgpu-aggregator';
@@ -387,7 +387,7 @@ export default abstract class AggregationLayer<
       this.state.aggregatorViewport &&
       !this.state.clipByInstance &&
       // Globe clipping already uses camera-independent Mercator bounds from ClipExtension.
-      !(this.state.aggregatorViewport instanceof _GlobeViewport)
+      !(this.state.aggregatorViewport instanceof GlobeViewport)
     ) {
       const bounds = (this.props as this['props'] & {clipBounds: number[]}).clipBounds;
       if (bounds) {

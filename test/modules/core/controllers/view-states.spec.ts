@@ -7,7 +7,7 @@ import {
   MapController,
   OrbitController,
   FirstPersonController,
-  _GlobeController as GlobeController,
+  GlobeController,
   OrbitViewport,
   OrthographicController,
   Viewport

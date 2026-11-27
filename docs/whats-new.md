@@ -8,26 +8,15 @@ Target release date: EOY 2026. Alpha releases available.
 
 v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, SQL expression powered big data library. It brings support for non-mercator projection and initial hooks for advanced GPU compute integration.
 
-_v10.0 should be thought of as a pre-release. We wanted to get the new capabilities into the hands of users as soon as possible, which means that some APIs have not yet settled and may change in v10.1._
+> v10.0 is intended as a pre-release of the new v10 API for early adopters. We wanted to get the new capabilities into the hands of users as soon as possible, which means that some APIs have not yet settled and may change in v10.1.
 
-*These highlights describe goals for v10. Some features are still in development.*
-
-### Heatmap filtering
-
-- [`ClipExtension`](./api-reference/extensions/clip-extension.md) filters HeatmapLayer source points on WebGPU, including borrowed GPUVectors.
-
-- [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) filters the points that contribute to `HeatmapLayer` on WebGPU.
-- [`MaskExtension`](./api-reference/extensions/mask-extension.md) limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
-
-
-### ContourLayer
-
-- The experimental [`gpuGeometry` option](./api-reference/aggregation-layers/contour-layer.md#compute-aggregation) generates and renders isolines on WebGPU without reading back the bins.
+*The highlights below describe goals for v10. Some features are still in development.*
 
 ### GPU
 
 - [**WebGPU**](./developer-guide/webgpu.md) 🚧 — WebGPU is now the default renderer with full feature support.
-- [**GPU vectors**](./developer-guide/using-with-arrow.md#direct-gpuvector-inputs) — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph.
+- [**Arc height**](./api-reference/layers/arc-layer.md#heightmode) — ArcLayer supports a fixed midpoint rise independent of endpoint separation.
+- [**GPU vectors**](./developer-guide/using-with-arrow.md#direct-gpuvector-inputs) — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph. Arc, Line, Column, and GridCell accept packed XY position buffers.
 
 ### Apache Arrow
 
@@ -53,15 +42,24 @@ _v10.0 should be thought of as a pre-release. We wanted to get the new capabilit
 
 - [**Normalized colors**](./developer-guide/using-layers.md#normalized-colors) — Set `normalizedColors` to use RGB values from 0 to 1.
 - [**Color scales**](./api-reference/core/layer.md#sql-accessor-inputs) — Map Arrow values to colors with SQL.
-- [`_ColorScaleWidget`](./api-reference/widgets/color-scale-widget.md) 🧪 displays legends for SQL color scales on visible layers.
+- [`_LegendWidget`](./api-reference/widgets/color-scale-widget.md) 🧪 displays legends for SQL color scales on visible layers.
 
 ### React
 
-The `@deck.gl/react` module is now a deep React Fiber integration.
+The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, widgets and effects are React elements.
 
 - [**React components**](./api-reference/react/overview.md) 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
-- **Map integrations** 🚧 — Use dedicated React entry points for [Mapbox](./developer-guide/base-maps/using-with-mapbox.md), [MapLibre](./developer-guide/base-maps/using-with-maplibre.md), and [Google Maps](./developer-guide/base-maps/using-with-google-maps.md).
-- **Migration** — The previous React API is available from [`@deck.gl/react/legacy`](./api-reference/react/overview.md#deckglreactlegacy), so apps can move to it before the package root changes.
+- **Map integrations** 🚧 — Use dedicated React entry points for [Mapbox](./developer-guide/react/base-maps/using-with-mapbox.md), [MapLibre](./developer-guide/react/base-maps/using-with-maplibre.md), and [Google Maps](./developer-guide/react/base-maps/using-with-google-maps.md).
+- **Migration** — The previous React API stays available from [`@deck.gl/react/legacy`](./api-reference/react/legacy/overview.md). See the [upgrade guide](./upgrade-guide.md#deckglreact).
+
+### Views
+
+- [`GlobeView`](./api-reference/core/globe-view.md), [`GlobeViewport`](./api-reference/core/globe-viewport.md) and [`GlobeController`](./api-reference/core/globe-controller.md) are now officially supported and no longer experimental.
+
+### Extensions
+
+- [MaskExtension](./api-reference/extensions/mask-extension.md) now supports [GlobeView](./api-reference/core/globe-view.md).
+- [`MaskExtension`](./api-reference/extensions/mask-extension.md) now limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
 
 ### Layers
 
@@ -74,15 +72,13 @@ The `@deck.gl/react` module is now a deep React Fiber integration.
 ### Aggregation Layers
 
 - [GridLayer](./api-reference/aggregation-layers/grid-layer.md), [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md), [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md), and [ContourLayer](./api-reference/aggregation-layers/contour-layer.md) now accept [custom aggregators](./api-reference/aggregation-layers/aggregator.md) with GPUVector results.
-- These layers now support clipping, brushing, and numeric filtering with [GPUVector inputs](./api-reference/aggregation-layers/aggregator.md#gpu-column-extensions).
-
-### Extensions
-
-- [MaskExtension](./api-reference/extensions/mask-extension.md) now supports [GlobeView](./api-reference/core/globe-view.md).
+- The aggregation layers support clipping, brushing, and numeric filtering extensions with [GPUVector inputs](./api-reference/aggregation-layers/aggregator.md#gpu-column-extensions).
 
 ### Examples
 
 - [Examples v10](/examples-v10) have been updated to use Arrow loading and SQL accessors.
+
+---
 
 ## deck.gl v9.4
 
@@ -367,7 +363,7 @@ Release date: October 7, 2025
   - [ThemeWidget](./api-reference/widgets/theme-widget.md)
   - [TimelineWidget](./api-reference/widgets/timeline-widget.md)
   - ViewSelectorWidget
-- Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package
+- Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/legacy/overview.md) package
 - Custom widgets in pydeck - via the `custom_libraries` parameter, Python users can integrate custom deck.gl widgets seamlessly
 - Documentation for styling and custom themes - see [Styling Widgets](./api-reference/widgets/styling)
 
@@ -439,8 +435,8 @@ deck.gl now works seamlessly with the MapLibre v5 [globe view](https://maplibre.
 ### React Widgets
 
 deck.gl v9.0 added support for widgets, with v9.1 users can now create React components with the same level of deep deck.gl integration. 
-- All the official deck.gl widgets can now be easily wrapped into React components with the new [`useWidget`](./api-reference/react/use-widget.md) hook.
-- Pre-wrapped React components for existing widget are available from the [`@deck.gl/react`](./api-reference/react/overview.md) package. 
+- All the official deck.gl widgets can now be easily wrapped into React components with the new [`useWidget`](./api-reference/react/legacy/use-widget.md) hook.
+- Pre-wrapped React components for existing widget are available from the [`@deck.gl/react`](./api-reference/react/legacy/overview.md) package. 
 - To try it out, check out our [React getting started example](https://github.com/visgl/deck.gl/tree/master/examples/get-started/react/basic) for using widgets in React.
 
 ##### Widgets Developer Guide

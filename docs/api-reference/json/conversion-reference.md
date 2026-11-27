@@ -217,50 +217,29 @@ Often deck.gl visualizations require access to particular enumerations. For this
  object can also contain a map of enumerations that should be made available to the @deck.gl/json string
 resolver. The `@@#` prefix on an enumeration triggers this lookup.
 
-For example, when this configuration is passed to the `JSONConverter`–
+For example, supply a named set of radius units in the `JSONConverter` configuration.
 
 ```js
-import {GL} from '@luma.gl/core/webgl-constants';
+import {ScatterplotLayer} from '@deck.gl/layers';
 
 const configuration = {
-  ...
+  classes: {ScatterplotLayer},
   enumerations: {
-    GL
+    RadiusUnits: {METERS: 'meters', PIXELS: 'pixels'}
   }
 };
 ```
 
-and used to resolve this JSON object–
+The following JSON creates a scatterplot with `radiusUnits` set to `'meters'`.
 
 ```json
 {
   "layers": [
     {
       "@@type": "ScatterplotLayer",
-      "data": ...,
-      "coordinateSystem": "meter-offsets",
-      "parameters": {
-        "blend": true,
-        "blendFunc": ["@@#GL.ONE", "@@#GL.ZERO", "@@#GL.SRC_ALPHA", "@@#GL.DST_ALPHA"]
-      }
+      "data": [],
+      "radiusUnits": "@@#RadiusUnits.METERS"
     }
-  ]
-}
-```
-
-the `@@#<enum-name>.<enum-value>` will be resolved to values in the `enumerations` config:
-
-```js
-{
-  layers: [
-    new ScatterplotLayer({
-      data: ...,
-      coordinateSystem: "meter-offsets",
-      parameters: {
-        blend: true,
-        blendFunc: [1, 0, 770, 772]
-      }
-    })
   ]
 }
 ```

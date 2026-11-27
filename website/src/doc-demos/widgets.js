@@ -2,7 +2,7 @@ import OpenFreeMapAttribution from '../components/openfreemap-attribution';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import CodeBlock from '@theme/CodeBlock';
 import {
-  _ColorScaleWidget,
+  _LegendWidget,
   ScreenshotWidget,
   FullscreenWidget,
   CompassWidget,
@@ -608,7 +608,7 @@ export function ColorScaleWidgetDemo() {
       pickable: true
     })
   ], []);
-  const widgets = useMemo(() => [new _ColorScaleWidget({categoricalLayout: 'wrap'})], []);
+  const widgets = useMemo(() => [new _LegendWidget({categoricalLayout: 'wrap'})], []);
   return <NonGeoDemoBase
     views={new OrthographicView()}
     layers={layers}

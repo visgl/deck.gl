@@ -10,7 +10,7 @@ import {
 } from '@deck.gl/aggregation-layers';
 import {GridCellLayer} from '@deck.gl/layers';
 import type {Accessor, Color, DefaultProps, UpdateParameters} from '@deck.gl/core';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import type {ShaderModule} from '@luma.gl/shaders';
 
 export type HistogramLayerProps<DataT = unknown> = {

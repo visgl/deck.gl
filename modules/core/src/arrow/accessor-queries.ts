@@ -2,13 +2,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Field, FixedSizeList, Table, Uint8, vectorFromArray, type Vector} from 'apache-arrow';
 import {
-  compileArrowScale,
-  compileArrowScales,
-  parseSQLScaleAST,
-  type ResolvedScale
-} from '@math.gl/sql/scales';
+  Field,
+  FixedSizeList,
+  Float64,
+  Schema,
+  Table,
+  Uint8,
+  vectorFromArray,
+  type RecordBatch,
+  type Vector
+} from 'apache-arrow';
+import {compileArrowScale, compileArrowScales} from '@math.gl/sql/scales';
+import {parseSQLScaleAST} from '@math.gl/sql/parser';
+import type {ResolvedScale} from '@math.gl/core/color';
 import type {SQLFunctions, SQLParser} from '../types/layer-props';
 import {evaluateColumnExpression} from './column-constructors';
 import {isArrowTableAppend} from './column-query-append';
@@ -17,8 +24,15 @@ import {isArrowTable} from './upstream-math/is-arrow-table';
 import {sqlParser} from './upstream-math/sql-parser';
 import {deepEqual} from '../utils/deep-equal';
 
-/** SQL functions that produce SDR color accessor columns. */
-const COLOR_SCALE_FUNCTIONS = new Set([
+/** SQL scale functions exposed by the math.gl parser. */
+const SCALE_FUNCTIONS = new Set([
+  'SCALE_LINEAR',
+  'SCALE_SQRT',
+  'SCALE_LOG',
+  'SCALE_POWER',
+  'SCALE_SYMLOG',
+  'SCALE_CYCLIC',
+  'SCALE_THRESHOLD',
   'SCALE_COLOR',
   'SCALE_DIVERGING',
   'SCALE_ORDINAL',
@@ -40,10 +54,14 @@ export function evaluateAccessorQueries(
   },
   functions?: SQLFunctions
 ): {table: Table; scales: Readonly<Record<string, ResolvedScale>>} {
-  const data = unwrapLoaderArrowResult(source);
-  if (!isArrowTable(data)) {
+  const inputData = unwrapLoaderArrowResult(source);
+  if (!isArrowTable(inputData)) {
     throw new Error('SQL accessors require Arrow table data');
   }
+
+  const data = Array.isArray(inputData.batches)
+    ? inputData
+    : new Table(inputData.schema, [inputData as unknown as RecordBatch]);
 
   const entries = Object.entries(expressions);
   const parse = parseExpression ?? sqlParser.parseExpression;
@@ -54,7 +72,7 @@ export function evaluateAccessorQueries(
       expression.type === 'CallExpression' &&
       expression.callee?.type === 'Identifier' &&
       typeof expression.callee.name === 'string' &&
-      COLOR_SCALE_FUNCTIONS.has(expression.callee.name.toUpperCase()) &&
+      SCALE_FUNCTIONS.has(expression.callee.name.toUpperCase()) &&
       !customFunctions.has(expression.callee.name.toUpperCase());
     return {name, expression, isColorScale};
   });
@@ -62,8 +80,16 @@ export function evaluateAccessorQueries(
     .filter(({isColorScale}) => isColorScale)
     .map(({name, expression}) => {
       const {value, scale} = parseSQLScaleAST(expression);
-      return [name, {value, scale: {...scale, nullColor: [0, 0, 0, 0] as const}}] as const;
+      return [
+        name,
+        {
+          value,
+          scale:
+            scale.range.type === 'numeric' ? scale : {...scale, nullColor: [0, 0, 0, 0] as const}
+        }
+      ] as const;
     });
+  const parsedScales = new Map(scaleExpressions);
   const compiled = compileArrowScales(
     data,
     Object.fromEntries(
@@ -109,6 +135,7 @@ export function evaluateAccessorQueries(
   const priorTable = previous?.table;
   const canAppend =
     isArrowTable(priorSource) &&
+    Array.isArray(priorSource.batches) &&
     priorTable &&
     previous.parseExpression === parseExpression &&
     deepEqual(previous.functions, functions, 1) &&
@@ -122,17 +149,32 @@ export function evaluateAccessorQueries(
     if (previousBatch && !scaleExpressions.length)
       return new Table(priorTable!.schema, [previousBatch]);
     const columns: Record<string, Vector> = Object.create(null);
+    const fields: Field[] = [];
     for (const {name, expression, isColorScale} of parsed) {
+      if (!isColorScale) {
+        const reused = previousBatch?.getChild(name);
+        const result = reused
+          ? {
+              column: reused,
+              metadata: priorTable?.schema.fields.find(field => field.name === name)?.metadata
+            }
+          : evaluateColumnExpression(expression, input, functions);
+        columns[name] = result.column;
+        fields.push(new Field(name, result.column.type, true, result.metadata));
+        continue;
+      }
       // A new domain can change the color of previously evaluated rows.
-      columns[name] = isColorScale
-        ? (compiled[name]?.evaluate(input) ??
-          vectorFromArray(
-            Array.from({length: input.numRows}, () => [0, 0, 0, 0]),
-            new FixedSizeList(4, new Field('item', new Uint8(), false))
-          ))
-        : (previousBatch?.getChild(name) ?? evaluateColumnExpression(expression, input, functions));
+      columns[name] =
+        compiled[name]?.evaluate(input) ??
+        (parsedScales.get(name)?.scale.range.type === 'numeric'
+          ? vectorFromArray(new Array(input.numRows).fill(null), new Float64())
+          : vectorFromArray(
+              Array.from({length: input.numRows}, () => [0, 0, 0, 0]),
+              new FixedSizeList(4, new Field('item', new Uint8(), false))
+            ));
+      fields.push(new Field(name, columns[name].type, true));
     }
-    return new Table(columns);
+    return new Table(new Schema(fields), columns);
   };
   const table =
     data.batches.length <= 1

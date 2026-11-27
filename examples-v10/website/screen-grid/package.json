@@ -16,8 +16,8 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-map-gl": "^8.0.0",
-    "@loaders.gl/tables": "5.0.0-beta.12",
-    "@math.gl/core": "5.0.0-beta.12"
+    "@loaders.gl/tables": "^5.0.1",
+    "@math.gl/core": "^5.0.4"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

@@ -7,7 +7,7 @@ import {
   LightingEffect,
   AmbientLight,
   DirectionalLight,
-  _GlobeView as GlobeView
+  GlobeView
 } from '@deck.gl/core';
 import {zoomBlur, vignette} from '@luma.gl/engine/effects';
 import {hexagons, points} from 'deck.gl-test/data';
@@ -405,6 +405,12 @@ const testCases = [
     goldenImage: './test/render/golden-images/post-process-effects.png'
   }
 ];
+
+// The sampler and filter passes share a golden across both backends.
+runRenderTestSuite(
+  (testCases as TestCase[]).filter(testCase => testCase.name === 'post-process-effects'),
+  'webgpu'
+);
 
 describe.each([
   'webgl'

@@ -1,4 +1,4 @@
-# _ColorScaleWidget 🧪
+# _LegendWidget 🧪
 
 import {ColorScaleWidgetDemo} from '@site/src/doc-demos/widgets';
 
@@ -10,10 +10,10 @@ updates after accessor evaluation completes. The legend appears when a scale res
 or a continuous ramp with labels beside the scales. Hover over a ramp or quantile bin to see its value or range, color, and scale type.
 
 ```ts
-import {_ColorScaleWidget} from '@deck.gl/widgets';
+import {_LegendWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
-const widgets = [new _ColorScaleWidget()];
+const widgets = [new _LegendWidget()];
 ```
 
 Pass `widgets` to Deck or DeckGL alongside layers using SQL color scales.
@@ -22,9 +22,9 @@ The legend starts expanded. Select its heading to collapse or reopen it.
 ## Constructor
 
 ```ts
-import {_ColorScaleWidget, type ColorScaleWidgetProps} from '@deck.gl/widgets';
+import {_LegendWidget, type LegendWidgetProps} from '@deck.gl/widgets';
 
-new _ColorScaleWidget({categoricalLayout: 'wrap'} satisfies ColorScaleWidgetProps);
+new _LegendWidget({categoricalLayout: 'wrap'} satisfies LegendWidgetProps);
 ```
 
 ## Types
