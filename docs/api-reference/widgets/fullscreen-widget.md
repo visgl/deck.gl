@@ -8,7 +8,7 @@ import TabItem from '@theme/TabItem';
 
 <FullscreenWidgetDemo />
 
-This widget enlarges deck.gl to fill the full screen. Click the widget to enter or exit full screen. When native fullscreen is unavailable or the browser rejects the request, such as on iPhone, the widget expands the existing container to fill the visible viewport. Browser controls remain visible. Use the same button or press Escape while focused inside the expanded container to return to the original layout.
+This widget enlarges deck.gl to fill the full screen. Click the widget to enter or exit full screen. When native fullscreen is unavailable or the browser rejects the request, such as on iPhone, the widget expands the existing container to fill the visible viewport. Browser controls remain visible. Use the same button to return to the original layout.
 
 Place the widget inside the fullscreen container so the exit button stays visible. On browsers without popover support, use a container outside transformed or clipping ancestors.
 

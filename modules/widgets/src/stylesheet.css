@@ -119,11 +119,6 @@
   mask-image: var(--icon-fullscreen-exit, svg-load("icons/fullscreen-exit.svg"));
 }
 
-.deck-fullscreen-scroll-lock {
-  overflow: hidden !important;
-  overscroll-behavior: none !important;
-}
-
 .deck-pseudo-fullscreen {
   position: fixed !important;
   inset: 0 !important;

@@ -48,17 +48,14 @@ test('FullscreenWidget - rejected native request uses viewport fallback and exit
   const root = document.createElement('div');
   root.className = 'deck-widget deck-widget-fullscreen';
   const canvas = document.createElement('canvas');
-  const opener = document.createElement('button');
-  const appControl = document.createElement('button');
   const ancestor = document.createElement('div');
   ancestor.style.cssText = 'transform: translateX(30px); overflow: hidden; width: 120px';
   ancestor.append(target);
   target.append(canvas, root);
-  document.body.append(opener, ancestor, appControl);
+  document.body.append(ancestor);
   const styles = document.createElement('style');
   styles.textContent = widgetStyles;
   document.head.append(styles);
-  opener.focus();
   const request = vi.fn().mockRejectedValue(new Error('Denied'));
   const exit = vi.fn().mockResolvedValue(undefined);
   const restoreRequest = mockFullscreenProperty(target, 'requestFullscreen', {value: request});
@@ -67,7 +64,9 @@ test('FullscreenWidget - rejected native request uses viewport fallback and exit
   const widget = new FullscreenWidget({container: target, onFullscreenChange: changed});
   try {
     widget.onRenderHTML(root);
-    await widget.requestFullscreen();
+    const originalBounds = target.getBoundingClientRect().toJSON();
+    root.querySelector('button')!.click();
+    await vi.waitFor(() => expect(widget.getFullscreen()).toBe(true));
     expect(request).toHaveBeenCalledOnce();
     expect(target.matches(':popover-open')).toBe(true);
     const bounds = target.getBoundingClientRect();
@@ -75,7 +74,6 @@ test('FullscreenWidget - rejected native request uses viewport fallback and exit
     expect(bounds.top).toBe(0);
     expect(bounds.width).toBe(window.innerWidth);
     expect(bounds.height).toBe(window.innerHeight);
-    expect(getComputedStyle(document.documentElement).overflow).toBe('hidden');
     expect(target.querySelector('canvas')).toBe(canvas);
     const button = root.querySelector('button')!;
     const frame = root.querySelector('.deck-widget-button')!;
@@ -90,25 +88,20 @@ test('FullscreenWidget - rejected native request uses viewport fallback and exit
     }
     expect(frameBounds.width).toBeGreaterThan(buttonBounds.width);
     expect(frameBounds.height).toBeGreaterThan(buttonBounds.height);
-    expect(document.activeElement).toBe(button);
-    expect(document.documentElement.classList.contains('deck-fullscreen-scroll-lock')).toBe(true);
-    appControl.focus();
-    expect(document.activeElement).toBe(appControl);
-    button.focus();
     document.dispatchEvent(new Event('fullscreenchange'));
     expect(widget.getFullscreen()).toBe(true);
-    await widget.exitFullscreen();
+    button.click();
+    await vi.waitFor(() => expect(widget.getFullscreen()).toBe(false));
+    expect(target.hasAttribute('popover')).toBe(false);
+    expect(target.getBoundingClientRect().toJSON()).toEqual(originalBounds);
+    expect(canvas.parentElement).toBe(target);
     expect(exit).not.toHaveBeenCalled();
     expect(changed.mock.calls).toEqual([[true], [false]]);
-    expect(document.activeElement).toBe(opener);
-    expect(document.documentElement.classList.contains('deck-fullscreen-scroll-lock')).toBe(false);
   } finally {
     widget.onRemove();
     restoreRequest();
     restoreExit();
     styles.remove();
-    opener.remove();
-    appControl.remove();
     ancestor.remove();
   }
 });
@@ -159,7 +152,7 @@ test.each(['resolve', 'reject'] as const)(
   }
 );
 
-test('FullscreenWidget - Escape and removal release fallback without a native API', async () => {
+test('FullscreenWidget - removal releases fallback without a native API', async () => {
   const target = document.createElement('div');
   const root = target.appendChild(document.createElement('div'));
   document.body.append(target);
@@ -169,17 +162,9 @@ test('FullscreenWidget - Escape and removal release fallback without a native AP
     widget.onRenderHTML(root);
     await widget.handleClick();
     expect(widget.getFullscreen()).toBe(true);
-    root
-      .querySelector('button')!
-      .dispatchEvent(
-        new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true})
-      );
-    expect(widget.getFullscreen()).toBe(false);
-    await widget.handleClick();
     widget.onRemove();
     expect(target.hasAttribute('popover')).toBe(false);
     expect(target.classList.contains('deck-pseudo-fullscreen')).toBe(false);
-    expect(document.body.classList.contains('deck-fullscreen-scroll-lock')).toBe(false);
   } finally {
     widget.onRemove();
     target.remove();

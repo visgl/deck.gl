@@ -8,11 +8,6 @@ import {IconButton} from './lib/components/icon-button';
 
 /** Class that expands a container to the viewport. */
 const FALLBACK_CLASS = 'deck-pseudo-fullscreen';
-/** Class that prevents the background page from scrolling. */
-const SCROLL_LOCK = 'deck-fullscreen-scroll-lock';
-/** Active fallback per document, so only one widget owns its scroll lock. */
-const fallbackOwners = new WeakMap<Document, FullscreenWidget>();
-
 export type FullscreenWidgetProps = WidgetProps & {
   id?: string;
   /** Widget positioning within the view. Default 'top-left'. */
@@ -55,7 +50,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   className = 'deck-widget-fullscreen';
   placement: WidgetPlacement = 'top-left';
   fullscreen: boolean = false;
-  /** Mounted widget root used to render and focus the fullscreen button. */
+  /** Mounted widget root used to render the fullscreen button. */
   private root: HTMLElement | null = null;
   /** Document on which the widget listens for native fullscreen changes. */
   private ownerDocument: Document | null = null;
@@ -182,7 +177,6 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     if (!container?.isConnected || this.fullscreen || this.pending) return;
 
     const doc = container.ownerDocument;
-    fallbackOwners.get(doc)?.closeFallback();
     const request = {cancelled: false};
     this.pending = request;
     try {
@@ -240,17 +234,9 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     this.setFullscreen(false);
   }
 
-  /** Expand the container in place and register its keyboard and cleanup handlers. */
+  /** Expand the existing container, using the top layer to escape clipping ancestors. */
   private openFallback(container: HTMLElement) {
-    const doc = container.ownerDocument;
-    fallbackOwners.get(doc)?.closeFallback();
-    fallbackOwners.set(doc, this);
-
-    const previousFocus = doc.activeElement as HTMLElement | null;
-    const locks = [doc.documentElement, doc.body];
-    for (const element of locks) element.classList.add(SCROLL_LOCK);
     container.classList.add(FALLBACK_CLASS);
-
     let popover = false;
     if (typeof container.showPopover === 'function' && !container.hasAttribute('popover')) {
       container.setAttribute('popover', 'manual');
@@ -262,29 +248,13 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
       }
     }
 
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !event.defaultPrevented) {
-        event.preventDefault();
-        this.closeFallback();
-      }
-    };
-    container.addEventListener('keydown', onKey);
     this.restoreFallback = () => {
-      const restoreFocus = container.contains(doc.activeElement) || doc.activeElement === doc.body;
-      container.removeEventListener('keydown', onKey);
       if (popover) {
-        if (container.matches(':popover-open')) container.hidePopover();
+        container.hidePopover();
         container.removeAttribute('popover');
       }
       container.classList.remove(FALLBACK_CLASS);
-      for (const element of locks) element.classList.remove(SCROLL_LOCK);
-      fallbackOwners.delete(doc);
-      if (restoreFocus && previousFocus?.isConnected) previousFocus.focus({preventScroll: true});
     };
     this.setFullscreen(true);
-    if (fallbackOwners.get(doc) === this) {
-      const button = this.root?.querySelector('button');
-      if (button && container.contains(button)) button.focus({preventScroll: true});
-    }
   }
 }
