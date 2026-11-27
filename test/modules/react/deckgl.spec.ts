@@ -5,6 +5,7 @@
 /* eslint-disable no-unused-vars */
 import {test, expect, vi} from 'vitest';
 import {
+  StrictMode,
   createElement,
   createRef,
   forwardRef,
@@ -886,9 +887,13 @@ test('DeckGL#shared device canvas stays above a react-map-gl Map', async () => {
   act(() => {
     root.render(
       createElement(
-        DeckGL,
-        {device, initialViewState: TEST_VIEW_STATE, ref, onAfterRender},
-        createElement(MockMap, {mapStyle: 'https://map/style.json'})
+        StrictMode,
+        null,
+        createElement(
+          DeckGL,
+          {device, initialViewState: TEST_VIEW_STATE, ref, onAfterRender},
+          createElement(MockMap, {mapStyle: 'https://map/style.json'})
+        )
       )
     );
   });
@@ -903,8 +908,12 @@ test('DeckGL#shared device canvas stays above a react-map-gl Map', async () => {
   ).toBeTruthy();
   const wrapperLeft = document.getElementById('deckgl-wrapper')!.getBoundingClientRect().left;
   expect(canvas.getBoundingClientRect().left, 'canvas is not offset').toBe(wrapperLeft);
+  const placeholder = document.getElementById('deckgl-overlay')!;
+  expect(placeholder.nextElementSibling, 'canvas takes the place of the placeholder').toBe(canvas);
+  expect(placeholder.style.display, 'placeholder is hidden').toBe('none');
 
   act(() => root.unmount());
+  expect(canvas.isConnected, 'canvas is removed on unmount').toBe(false);
   device.loseDevice();
   device.destroy();
   container.remove();

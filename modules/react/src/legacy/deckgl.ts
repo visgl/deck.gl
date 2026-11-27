@@ -148,7 +148,7 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   const thisRef = _thisRef.current;
   // DOM refs
   const containerRef = useRef(null);
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // extract any deck.gl layers masquerading as react elements from props.children
   const jsxProps = useMemo(
@@ -225,6 +225,18 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     return forwardProps;
   }, [props]);
 
+  // A shared device draws to its own canvas instead of `canvasRef`. Put that canvas where the
+  // hidden placeholder is, so that it stacks between the maps and the other children.
+  useIsomorphicLayoutEffect(() => {
+    const deviceCanvas = props.device?.getDefaultCanvasContext().canvas;
+    const placeholder = canvasRef.current;
+    if (!(deviceCanvas instanceof HTMLCanvasElement) || !placeholder) {
+      return undefined;
+    }
+    placeholder.after(deviceCanvas);
+    return () => deviceCanvas.remove();
+  }, [props.device]);
+
   useEffect(() => {
     const DeckClass = props.Deck || Deck;
 
@@ -291,7 +303,8 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       key: 'canvas',
       id: id || 'deckgl-overlay',
       ref: canvasRef,
-      style: canvasStyle
+      // With a shared device, the placeholder only marks where the device canvas goes
+      style: props.device ? {...canvasStyle, display: 'none'} : canvasStyle
     });
 
     const eventRoot = createElement(
