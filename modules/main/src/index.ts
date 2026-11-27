@@ -61,6 +61,7 @@ export {
   FlyToInterpolator,
   LightingEffect,
   PostProcessEffect,
+  ShadowMapEffect,
   AmbientLight,
   PointLight,
   DirectionalLight,
@@ -202,7 +203,8 @@ export type {
   PickingInfo,
   GetPickingInfoParams,
   BinaryAttribute,
-  Effect
+  Effect,
+  ShadowMapEffectProps
 } from '@deck.gl/core';
 
 export type {

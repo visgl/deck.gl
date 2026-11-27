@@ -255,7 +255,8 @@
         "label": "Effects",
         "items": [
           "api-reference/core/lighting-effect",
-          "api-reference/core/post-process-effect"
+          "api-reference/core/post-process-effect",
+          "api-reference/core/shadow-map-effect"
         ]
       },
       {
