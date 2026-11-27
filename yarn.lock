@@ -1402,14 +1402,7 @@
     "@loaders.gl/compression" "5.0.2"
     "@loaders.gl/crypto" "5.0.2"
 
-"@loaders.gl/compression@5.0.2":
-  version "5.0.2"
-  resolved "https://registry.npmjs.org/@loaders.gl/compression/-/compression-5.0.2.tgz#c68689bdb6875f98216c2ad4ac27da5c66cfad8d"
-  integrity sha512-xEjPYT03TuHc5qJONzWWedCSJ+opYE3PkLCJeBpCeyWF8g72wSIbQ/6PbOBQzjU6GRQI6EBslaLGhmAdZEGIuA==
-  dependencies:
-    compress-utils "^0.12.0"
-
-"@loaders.gl/compression@^5.0.2":
+"@loaders.gl/compression@5.0.2", "@loaders.gl/compression@^5.0.2":
   version "5.0.2"
   resolved "https://registry.npmjs.org/@loaders.gl/compression/-/compression-5.0.2.tgz#c68689bdb6875f98216c2ad4ac27da5c66cfad8d"
   integrity sha512-xEjPYT03TuHc5qJONzWWedCSJ+opYE3PkLCJeBpCeyWF8g72wSIbQ/6PbOBQzjU6GRQI6EBslaLGhmAdZEGIuA==
@@ -1441,15 +1434,7 @@
   resolved "https://registry.npmjs.org/@loaders.gl/documents/-/documents-5.0.2.tgz#c3f318189c3e73143c4e5de29dd5c032048ace0d"
   integrity sha512-9CJ0pd256gf3r5Ow019QT5cxPBRoSbaub8uI5W2BvpElFvJ3dpExws4htyNMT7pt0eeB9o4w3Br2Ryba11+lmg==
 
-"@loaders.gl/images@5.0.2":
-  version "5.0.2"
-  resolved "https://registry.npmjs.org/@loaders.gl/images/-/images-5.0.2.tgz#3e534e03bf328640fd03c3bc9f1f4d0ad5dbb627"
-  integrity sha512-nwRtqGKkMktSssfRo1Z0YP9jBp/D4i/E3pYyoGcicCmq8FXVrclBPJW4/rADV1DKEzf+EVQjACZ0g3wHFECjGw==
-  dependencies:
-    "@math.gl/core" "^5.0.4"
-    zod "^4.1.12"
-
-"@loaders.gl/images@^5.0.2":
+"@loaders.gl/images@5.0.2", "@loaders.gl/images@^5.0.2":
   version "5.0.2"
   resolved "https://registry.npmjs.org/@loaders.gl/images/-/images-5.0.2.tgz#3e534e03bf328640fd03c3bc9f1f4d0ad5dbb627"
   integrity sha512-nwRtqGKkMktSssfRo1Z0YP9jBp/D4i/E3pYyoGcicCmq8FXVrclBPJW4/rADV1DKEzf+EVQjACZ0g3wHFECjGw==
@@ -1476,7 +1461,7 @@
     "@math.gl/geospatial" "^5.0.4"
     apache-arrow ">= 17.0.0"
 
-"@loaders.gl/raster@5.0.2":
+"@loaders.gl/raster@5.0.2", "@loaders.gl/raster@^5.0.2":
   version "5.0.2"
   resolved "https://registry.npmjs.org/@loaders.gl/raster/-/raster-5.0.2.tgz#2756e7872b19bfd8616a85e454ba9c44bdf2dfef"
   integrity sha512-fYVsc/C8JVGK/0/Ieflp2/xUD4Rbh8nSD4Eo6WZUIix4wy+mSSLR/RJB/9/RSA47wnhqTytX7FsFylNKLwKpMw==
@@ -1485,16 +1470,7 @@
     "@loaders.gl/images" "5.0.2"
     "@math.gl/geospatial" "^5.0.4"
 
-"@loaders.gl/raster@^5.0.2":
-  version "5.0.2"
-  resolved "https://registry.npmjs.org/@loaders.gl/raster/-/raster-5.0.2.tgz#2756e7872b19bfd8616a85e454ba9c44bdf2dfef"
-  integrity sha512-fYVsc/C8JVGK/0/Ieflp2/xUD4Rbh8nSD4Eo6WZUIix4wy+mSSLR/RJB/9/RSA47wnhqTytX7FsFylNKLwKpMw==
-  dependencies:
-    "@loaders.gl/documents" "5.0.2"
-    "@loaders.gl/images" "5.0.2"
-    "@math.gl/geospatial" "^5.0.4"
-
-"@loaders.gl/scene@5.0.2":
+"@loaders.gl/scene@5.0.2", "@loaders.gl/scene@^5.0.2":
   version "5.0.2"
   resolved "https://registry.npmjs.org/@loaders.gl/scene/-/scene-5.0.2.tgz#c61954155e9e1f18550e56e7f4c8b648e082b462"
   integrity sha512-YME+8wBr5C4jrdOo/5OQTP+L70a1py++RVJMQKwfpoSfakw6gWKraex8ydBQDJr5744VKcqibESpu66/zPQOrQ==
@@ -1504,17 +1480,8 @@
     "@math.gl/core" "^5.0.4"
     "@math.gl/geometry" "^5.0.4"
     zod "^4.1.12"
-
-"@loaders.gl/scene@^5.0.2":
-  version "5.0.2"
-  resolved "https://registry.npmjs.org/@loaders.gl/scene/-/scene-5.0.2.tgz#c61954155e9e1f18550e56e7f4c8b648e082b462"
-  integrity sha512-YME+8wBr5C4jrdOo/5OQTP+L70a1py++RVJMQKwfpoSfakw6gWKraex8ydBQDJr5744VKcqibESpu66/zPQOrQ==
-  dependencies:
-    "@loaders.gl/documents" "5.0.2"
-    "@loaders.gl/images" "5.0.2"
-    "@math.gl/core" "^5.0.4"
-    "@math.gl/geometry" "^5.0.4"
-    zod "^4.1.12"
+  optionalDependencies:
+    draco3d "1.5.7"
 
 "@loaders.gl/schema@^4.3.3":
   version "4.4.1"
@@ -1524,7 +1491,7 @@
     "@types/geojson" "^7946.0.7"
     apache-arrow ">= 17.0.0"
 
-"@loaders.gl/tables@5.0.2":
+"@loaders.gl/tables@5.0.2", "@loaders.gl/tables@^5.0.2":
   version "5.0.2"
   resolved "https://registry.npmjs.org/@loaders.gl/tables/-/tables-5.0.2.tgz#3f285361b63f7434c8fec5233918d382a8a30aaf"
   integrity sha512-n5sp4epH3dB9EL38J2pSdtIjzW2yYp+zURXgxpVORI0bBZgj0TDRnn1QZVe+Kn6e70GA+jNSq3I249uOjGmEug==
@@ -1536,37 +1503,7 @@
     apache-arrow ">= 17.0.0"
     probe.gl "^5.0.0"
 
-"@loaders.gl/tables@^5.0.2":
-  version "5.0.2"
-  resolved "https://registry.npmjs.org/@loaders.gl/tables/-/tables-5.0.2.tgz#3f285361b63f7434c8fec5233918d382a8a30aaf"
-  integrity sha512-n5sp4epH3dB9EL38J2pSdtIjzW2yYp+zURXgxpVORI0bBZgj0TDRnn1QZVe+Kn6e70GA+jNSq3I249uOjGmEug==
-  dependencies:
-    "@loaders.gl/compression" "5.0.2"
-    "@loaders.gl/documents" "5.0.2"
-    "@math.gl/core" "^5.0.4"
-    "@math.gl/geospatial" "^5.0.4"
-    apache-arrow ">= 17.0.0"
-    probe.gl "^5.0.0"
-
-"@loaders.gl/tiles-3d@5.0.2":
-  version "5.0.2"
-  resolved "https://registry.npmjs.org/@loaders.gl/tiles-3d/-/tiles-3d-5.0.2.tgz#10e8fe9be27b0cb22802d8e605c21ce510e78228"
-  integrity sha512-JmID/tmySwfsmgnOeosxejsEIDiQKpcXZlTW2EU+8uq5VjeeEuZZfzlZP/SRWULomwFEMoiUFSndMGdfIUe/fQ==
-  dependencies:
-    "@loaders.gl/archives" "5.0.2"
-    "@loaders.gl/compression" "5.0.2"
-    "@loaders.gl/images" "5.0.2"
-    "@loaders.gl/pointclouds" "5.0.2"
-    "@loaders.gl/scene" "5.0.2"
-    "@math.gl/core" "^5.0.4"
-    "@math.gl/dggs" "^5.0.4"
-    "@math.gl/earth" "^5.0.4"
-    "@math.gl/geometry" "^5.0.4"
-    "@math.gl/geospatial" "^5.0.4"
-    probe.gl "^5.0.0"
-    zod "^4.1.12"
-
-"@loaders.gl/tiles-3d@^5.0.2":
+"@loaders.gl/tiles-3d@5.0.2", "@loaders.gl/tiles-3d@^5.0.2":
   version "5.0.2"
   resolved "https://registry.npmjs.org/@loaders.gl/tiles-3d/-/tiles-3d-5.0.2.tgz#10e8fe9be27b0cb22802d8e605c21ce510e78228"
   integrity sha512-JmID/tmySwfsmgnOeosxejsEIDiQKpcXZlTW2EU+8uq5VjeeEuZZfzlZP/SRWULomwFEMoiUFSndMGdfIUe/fQ==
@@ -4608,11 +4545,6 @@ dotignore@^0.1.2:
   integrity sha512-UGGGWfSauusaVJC+8fgV+NVvBXkCTmVv7sk6nojDZZvuOUNGUy0Zk4UpHQD6EDjS0jpBwcACvH4eofvyzBcRDw==
   dependencies:
     minimatch "^3.0.4"
-
-draco3d@1.5.7:
-  version "1.5.7"
-  resolved "https://registry.yarnpkg.com/draco3d/-/draco3d-1.5.7.tgz#94f9bce293eb8920c159dc91a4ce9124a9e899e0"
-  integrity sha512-m6WCKt/erDXcw+70IJXnG7M3awwQPAsZvJGX5zY7beBqpELw6RDGkYVU0W43AFxye4pDZ5i2Lbyc/NNGqwjUVQ==
 
 dunder-proto@1.0.1, dunder-proto@^1.0.0, dunder-proto@^1.0.1:
   version "1.0.1"

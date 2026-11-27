@@ -2479,7 +2479,7 @@
     "@math.gl/core" "^5.0.4"
     zod "^4.1.12"
 
-"@loaders.gl/pointclouds@5.0.2":
+"@loaders.gl/pointclouds@5.0.2", "@loaders.gl/pointclouds@^5.0.2":
   version "5.0.2"
   resolved "https://registry.npmjs.org/@loaders.gl/pointclouds/-/pointclouds-5.0.2.tgz#8b2a20a673bcd18f3d0d60fc0e145764b3404a21"
   integrity sha512-08EoPyaImf5i1NYcW11FDC2Rj0TdAjeatxOx8Vqw5fpN2lf4uZq880E7KFkQ2mbazoQongZfooAwA7p5JT01wA==
@@ -2487,15 +2487,7 @@
     "@math.gl/geospatial" "^5.0.4"
     apache-arrow ">= 17.0.0"
 
-"@loaders.gl/pointclouds@^5.0.2":
-  version "5.0.2"
-  resolved "https://registry.npmjs.org/@loaders.gl/pointclouds/-/pointclouds-5.0.2.tgz#8b2a20a673bcd18f3d0d60fc0e145764b3404a21"
-  integrity sha512-08EoPyaImf5i1NYcW11FDC2Rj0TdAjeatxOx8Vqw5fpN2lf4uZq880E7KFkQ2mbazoQongZfooAwA7p5JT01wA==
-  dependencies:
-    "@math.gl/geospatial" "^5.0.4"
-    apache-arrow ">= 17.0.0"
-
-"@loaders.gl/scene@5.0.2":
+"@loaders.gl/scene@5.0.2", "@loaders.gl/scene@^5.0.2":
   version "5.0.2"
   resolved "https://registry.npmjs.org/@loaders.gl/scene/-/scene-5.0.2.tgz#c61954155e9e1f18550e56e7f4c8b648e082b462"
   integrity sha512-YME+8wBr5C4jrdOo/5OQTP+L70a1py++RVJMQKwfpoSfakw6gWKraex8ydBQDJr5744VKcqibESpu66/zPQOrQ==
@@ -2505,17 +2497,8 @@
     "@math.gl/core" "^5.0.4"
     "@math.gl/geometry" "^5.0.4"
     zod "^4.1.12"
-
-"@loaders.gl/scene@^5.0.2":
-  version "5.0.2"
-  resolved "https://registry.npmjs.org/@loaders.gl/scene/-/scene-5.0.2.tgz#c61954155e9e1f18550e56e7f4c8b648e082b462"
-  integrity sha512-YME+8wBr5C4jrdOo/5OQTP+L70a1py++RVJMQKwfpoSfakw6gWKraex8ydBQDJr5744VKcqibESpu66/zPQOrQ==
-  dependencies:
-    "@loaders.gl/documents" "5.0.2"
-    "@loaders.gl/images" "5.0.2"
-    "@math.gl/core" "^5.0.4"
-    "@math.gl/geometry" "^5.0.4"
-    zod "^4.1.12"
+  optionalDependencies:
+    draco3d "1.5.7"
 
 "@loaders.gl/services@^5.0.2":
   version "5.0.2"
@@ -7145,11 +7128,6 @@ dot-prop@^6.0.1:
   integrity sha512-tE7ztYzXHIeyvc7N+hR3oi7FIbf/NIjVP9hmAt3yMXzrQ072/fpjGLx2GxNxGxUl5V73MEqYzioOMoVhGMJ5cA==
   dependencies:
     is-obj "^2.0.0"
-
-draco3d@1.5.7:
-  version "1.5.7"
-  resolved "https://registry.yarnpkg.com/draco3d/-/draco3d-1.5.7.tgz#94f9bce293eb8920c159dc91a4ce9124a9e899e0"
-  integrity sha512-m6WCKt/erDXcw+70IJXnG7M3awwQPAsZvJGX5zY7beBqpELw6RDGkYVU0W43AFxye4pDZ5i2Lbyc/NNGqwjUVQ==
 
 dunder-proto@^1.0.1:
   version "1.0.1"
