@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, MapView} from '@deck.gl/core';
+import {Deck, FlyToInterpolator, MapView, WebMercatorViewport} from '@deck.gl/core';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {PathLayer, PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {luma} from '@luma.gl/core';
@@ -22,14 +22,25 @@ const initialViewState = {
   maxPitch: 60
 };
 
+/** Frame each data encoding around the areas it emphasizes. */
+const viewCameras = {
+  trails: initialViewState,
+  connections: {focus: [-73.989, 40.722], zoom: 12.15, pitch: 47, bearing: -29},
+  pickups: {focus: [-73.986, 40.727], zoom: 13.05, pitch: 58, bearing: -48}
+};
+
 /** Trip timestamp units advanced per second of playback. */
 const playbackSpeed = 60;
 /** Point in the trip loop used for the paused captures. */
 const previewStartTime = 840;
 const yellowTripColor = [255, 210, 122];
 const greenTripColor = [145, 255, 230];
+const yellowHeadColor = [255, 244, 204];
+const greenHeadColor = [198, 255, 245];
+const yellowHeadStroke = [206, 131, 56];
+const greenHeadStroke = [41, 166, 156];
 
-/** Gives each trip and its head the color of its taxi vendor. */
+/** Gives each trail the color of its taxi vendor. */
 function getTripColor({vendor}) {
   return vendor === 0 ? yellowTripColor : greenTripColor;
 }
@@ -146,12 +157,17 @@ export async function createTaxiScene({
     widthMinPixels: 7.5
   });
   // TripsLayer clips the moving end within a segment, beyond the reach of capRounded.
+  // A contrasting rim keeps the head distinct from the trail and its halo in the captures.
   const headLayer = new ScatterplotLayer({
     id: 'taxi-map-trip-heads',
     billboard: true,
     radiusUnits: 'pixels',
-    getRadius: 2.35,
-    getFillColor: getTripColor,
+    getRadius: 4.6,
+    stroked: true,
+    lineWidthUnits: 'pixels',
+    getLineWidth: 1.15,
+    getFillColor: ({vendor}) => (vendor === 0 ? yellowHeadColor : greenHeadColor),
+    getLineColor: ({vendor}) => (vendor === 0 ? yellowHeadStroke : greenHeadStroke),
     parameters: {depthWriteEnabled: false}
   });
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -165,9 +181,15 @@ export async function createTaxiScene({
   let deck;
   let headTime;
   let timedHeadLayer;
+  let activeView = 'trails';
+  let overlays;
+  let viewRequest = 0;
 
   /** Updates the animated layers and reuses head data on pointer-only redraws. */
   function getLayers() {
+    if (activeView !== 'trails') {
+      return [buildingLayer, routeLayer, ...overlays[activeView]];
+    }
     if (headTime !== currentTime) {
       headTime = currentTime;
       timedHeadLayer = headLayer.clone({data: getTripHeads(animatedTrips, currentTime)});
@@ -194,7 +216,7 @@ export async function createTaxiScene({
 
   /** Advances trip playback only while the scene is visible. */
   function scheduleAnimation() {
-    if (playing && ready && inView && !document.hidden) {
+    if (playing && activeView === 'trails' && ready && inView && !document.hidden) {
       if (!animationFrame) {
         animationFrame = requestAnimationFrame(animate);
       }
@@ -217,17 +239,59 @@ export async function createTaxiScene({
     }
   }
 
-  /** Matches the centered cover crop of the recorded camera. */
+  /** Matches the recorded cover crop or frames a data overlay beside the headline. */
   function getStartingViewProps() {
     const {width: captureWidth, height: captureHeight} = getCaptureSize();
     const width = canvas.clientWidth || captureWidth;
     const height = canvas.clientHeight || captureHeight;
     const scale = Math.max(width / captureWidth, height / captureHeight);
-    const captureZoom = initialViewState.zoom + Math.min(0, Math.log2(captureWidth / 650));
+    const {focus, ...camera} = viewCameras[activeView];
+    const captureZoom = camera.zoom + Math.min(0, Math.log2(captureWidth / 650));
+    const altitude = (1.5 * scale * captureHeight) / height;
+    const viewState = {...initialViewState, ...camera, zoom: captureZoom + Math.log2(scale)};
+    if (focus) {
+      const viewport = new WebMercatorViewport({...viewState, width, height, altitude});
+      const compact = captureWidth < 650;
+      // Offset the featured data into the open map area at either screen size.
+      const focalPoint = [width * (compact ? 0.52 : 0.66), height * (compact ? 0.69 : 0.59)];
+      Object.assign(viewState, viewport.panByPosition(focus, focalPoint));
+    }
     return {
-      views: new MapView({altitude: (1.5 * scale * captureHeight) / height}),
-      viewState: {...initialViewState, zoom: captureZoom + Math.log2(scale)}
+      views: new MapView({altitude}),
+      viewState
     };
+  }
+
+  /** Loads the analytical layers on demand and applies only the latest view request. */
+  async function setView(view) {
+    const request = ++viewRequest;
+    if (view !== 'trails' && !overlays) {
+      const {createTaxiOverlays} = await import(
+        /* webpackChunkName: "home-taxi-overlays" */ './taxi-overlays'
+      );
+      if (signal.aborted || request !== viewRequest) {
+        return false;
+      }
+      overlays = createTaxiOverlays(routes);
+    }
+    if (signal.aborted) {
+      return false;
+    }
+    if (view !== activeView) {
+      activeView = view;
+      const {views, viewState} = getStartingViewProps();
+      deck.setProps({
+        views,
+        layers: getLayers(),
+        viewState: {
+          ...viewState,
+          transitionDuration: reducedMotion.matches ? 0 : 820,
+          transitionInterpolator: new FlyToInterpolator()
+        }
+      });
+      scheduleAnimation();
+    }
+    return true;
   }
 
   try {
@@ -285,6 +349,7 @@ export async function createTaxiScene({
 
   return {
     setPlaying,
+    setView,
     reset() {
       deck.setProps(getStartingViewProps());
     },

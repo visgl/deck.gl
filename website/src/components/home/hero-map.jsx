@@ -15,24 +15,52 @@ const mobileCapture = {width: 420, height: 656};
 /** Reference viewport for the wide capture and its live camera crop. */
 const desktopCapture = {width: 1440, height: 648};
 
+/** Caption and reference link for each live map view. */
+const taxiViews = {
+  trails: {
+    label: 'Trails',
+    title: 'New York City taxi trips',
+    link: 'Full map',
+    path: '/examples/trips-layer'
+  },
+  connections: {
+    label: 'Connections',
+    title: 'Taxi connections',
+    description: 'A sample of pickup and drop-off links.',
+    link: 'ArcLayer',
+    path: '/docs/api-reference/layers/arc-layer'
+  },
+  pickups: {
+    label: 'Pickups',
+    title: 'Taxi pickup hotspots',
+    description: 'Taller columns mark more pickups.',
+    link: 'ColumnLayer',
+    path: '/docs/api-reference/layers/column-layer'
+  }
+};
+
 /** Shows the captured taxi scene until the interactive map draws its first frame. */
 export default function HeroMap() {
   const canvasRef = useRef(null);
   const playbackRef = useRef(null);
   const sceneRef = useRef(null);
+  const viewRequestRef = useRef(0);
   const [status, setStatus] = useState('preview');
   const [pausedAtHandoff, setPausedAtHandoff] = useState(false);
+  const [activeView, setActiveView] = useState('trails');
+  const [pendingView, setPendingView] = useState(null);
+  const [viewError, setViewError] = useState(false);
+  const ready = status === 'ready';
   const baseUrl = useBaseUrl('/');
   const artworkUrl = useBaseUrl('/images/home/');
-  const demoUrl = useBaseUrl('/examples/trips-layer');
+  const view = taxiViews[ready ? activeView : 'trails'];
+  const viewUrl = useBaseUrl(view.path);
   const desktopPoster = `${artworkUrl}taxi-wide.webp`;
   const mobilePoster = `${artworkUrl}taxi-mobile.webp`;
   const desktopIntro = `${artworkUrl}taxi-intro-wide.avif`;
   const mobileIntro = `${artworkUrl}taxi-intro-mobile.avif`;
   const desktopMotion = `${desktopViewport} and ${motionQuery}`;
   const mobileMotion = `${mobileViewport} and ${motionQuery}`;
-  const ready = status === 'ready';
-
   useEffect(() => {
     const controller = new AbortController();
     const {signal} = controller;
@@ -107,10 +135,35 @@ export default function HeroMap() {
     };
   }, [baseUrl]);
 
+  /** Reflects a view selection after its layers have loaded. */
+  async function selectView(nextView) {
+    const scene = sceneRef.current;
+    if (!scene) {
+      return;
+    }
+    const request = ++viewRequestRef.current;
+    setPendingView(nextView);
+    setViewError(false);
+    try {
+      if ((await scene.setView(nextView)) && request === viewRequestRef.current) {
+        setActiveView(nextView);
+      }
+    } catch {
+      if (request === viewRequestRef.current) {
+        setViewError(true);
+      }
+    } finally {
+      if (request === viewRequestRef.current) {
+        setPendingView(null);
+      }
+    }
+  }
+
   return (
     <figure
       className={styles.scene}
       data-state={status}
+      data-view={ready ? activeView : 'trails'}
       data-preview-paused={ready && pausedAtHandoff ? '' : undefined}
       aria-labelledby="hero-map-title"
       style={{
@@ -167,21 +220,26 @@ export default function HeroMap() {
         className={styles.canvas}
         ref={canvasRef}
         tabIndex={ready ? 0 : -1}
-        aria-label="Interactive map of New York City taxi routes"
+        aria-label={`${view.title} interactive map`}
         aria-describedby="hero-map-instructions"
       />
       <figcaption className={styles.caption}>
         <div>
-          <strong id="hero-map-title">New York City taxi trips</strong>
+          <strong id="hero-map-title">{view.title}</strong>
           <div id="hero-map-instructions" className={styles.instructions} aria-live="polite">
-            {ready && (
-              <>
-                <span className={styles.pointerHint}>
-                  Move to highlight trails. Drag or use arrow keys to pan.
-                </span>
-                <span className={styles.touchHint}>Swipe sideways to pan. Pinch to zoom.</span>
-              </>
-            )}
+            {ready && viewError && 'That map view could not load. Try again.'}
+            {ready && pendingView && `Loading ${taxiViews[pendingView].label.toLowerCase()}…`}
+            {ready &&
+              !viewError &&
+              !pendingView &&
+              (view.description || (
+                <>
+                  <span className={styles.pointerHint}>
+                    Move to highlight trails. Drag or use arrow keys to pan.
+                  </span>
+                  <span className={styles.touchHint}>Swipe sideways to pan. Pinch to zoom.</span>
+                </>
+              ))}
           </div>
           <div className={styles.attribution}>
             <a href="https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page">NYC TLC</a>
@@ -192,17 +250,37 @@ export default function HeroMap() {
           </div>
         </div>
         <div className={styles.controls}>
-          <label className={styles.playbackLabel} htmlFor="hero-map-playback">
-            Animate trips
-          </label>
           {ready && (
-            <button type="button" onClick={() => sceneRef.current?.reset()}>
-              Reset view
-            </button>
+            <fieldset
+              className={styles.views}
+              aria-label="Map view"
+              aria-busy={Boolean(pendingView)}
+            >
+              {Object.entries(taxiViews).map(([id, option]) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-pressed={activeView === id}
+                  onClick={() => selectView(id)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </fieldset>
           )}
-          <a href={demoUrl}>
-            Full map <span aria-hidden="true">↗</span>
-          </a>
+          <div className={styles.actions}>
+            <label className={styles.playbackLabel} htmlFor="hero-map-playback">
+              Animate trips
+            </label>
+            {ready && (
+              <button type="button" onClick={() => sceneRef.current?.reset()}>
+                Reset view
+              </button>
+            )}
+            <a href={viewUrl}>
+              {view.link} <span aria-hidden="true">↗</span>
+            </a>
+          </div>
         </div>
       </figcaption>
     </figure>

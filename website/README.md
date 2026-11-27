@@ -24,6 +24,9 @@ and starting camera aligned with the live scene when replacing these images. The
 WebP frames support reduced motion. The [fixture notes](static/data/home/README.md) record
 the sources and licenses of the trip and building data.
 
+The view switcher derives connection arcs and pickup columns from the same trip fixture.
+It loads those layers when a visitor selects either view.
+
 Run `yarn test-website` from the repository root to build the homepage and both catalogs.
 Check that the homepage plays and pauses its previews, reveals the live map, and still
 shows a preview when WebGL is unavailable.
