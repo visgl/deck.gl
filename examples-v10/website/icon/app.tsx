@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState, useCallback} from 'react';
+import React, {useMemo, useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
 import {tableFromJSON, type Table} from 'apache-arrow';
@@ -97,6 +99,7 @@ export default function App({
   iconAtlas?: string;
   mapStyle?: string;
 }) {
+  const widgets = useMemo(() => [new LoadingWidget()], []);
   const [hoverInfo, setHoverInfo] = useState<IconClusterLayerPickingInfo<Meteorite> | null>(null);
 
   const hideTooltip = useCallback(() => {
@@ -143,9 +146,7 @@ export default function App({
           (typeof data === 'string' && Array.isArray(source) && source.length > 0
             ? tableFromJSON(source)
             : source) as LayerDataT,
-        getPosition: Array.isArray(data)
-          ? layerProps.getPosition
-          : {sql: 'ARRAY_FLOAT64(coordinates[1], coordinates[2])'},
+        getPosition: Array.isArray(data) ? layerProps.getPosition : {sql: 'coordinates::ARRAY[2]'},
         getIcon: () => 'marker',
         sizeUnits: 'meters',
         sizeScale: 2000,
@@ -153,6 +154,7 @@ export default function App({
       });
   return (
     <DeckGL
+      widgets={widgets}
       device={device}
       layers={[layer]}
       views={MAP_VIEW}

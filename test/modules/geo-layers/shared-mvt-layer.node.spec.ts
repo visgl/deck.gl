@@ -227,7 +227,7 @@ it('retains independent hover highlights for consumers of the same data', () => 
 });
 
 it('decodes a real MVT feature into the canonical tile-local array', async () => {
-  const {encodeSync} = await import('@loaders.gl/core');
+  const {encode} = await import('@loaders.gl/core');
   const {MVTLoader, MVTWriter} = await import('@loaders.gl/tiles/mvt');
   const feature = {
     type: 'Feature',
@@ -235,7 +235,7 @@ it('decodes a real MVT feature into the canonical tile-local array', async () =>
     properties: {name: 'test'},
     geometry: {type: 'Point', coordinates: [0.5, 0.5]}
   };
-  const bytes = encodeSync({type: 'FeatureCollection', features: [feature]}, MVTWriter, {
+  const bytes = await encode({type: 'FeatureCollection', features: [feature]}, MVTWriter, {
     mvt: {tileIndex: {x: 0, y: 0, z: 0}}
   });
   const url = `data:application/x-protobuf;base64,${Buffer.from(bytes).toString('base64')}`;

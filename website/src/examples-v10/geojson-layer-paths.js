@@ -68,10 +68,7 @@ class HighwayDemo extends Component {
         </p>
         <div className="layout">
           <div className="stat col-1-2">
-            No. of Paths<b>{readableInteger(meta.count) || 0}</b>
-          </div>
-          <div className="stat col-1-2">
-            No. of Vertices<b>{readableInteger(meta.vertexCount || 0)}</b>
+            Road features<b>{readableInteger(meta.count) || 0}</b>
           </div>
         </div>
       </div>

@@ -6,8 +6,8 @@ The `useWidget` hook is used to create React wrappers for normal (non-React) dec
 
 ```tsx
 // React wrapper usage
-import DeckGL, {useWidget} from '@deck.gl/react';
-import {CompassWidget as UniversalCompassWidget, type CompassWidgetProps} from '@deck.gl/react';
+import {DeckGL, useWidget} from '@deck.gl/react/legacy';
+import {CompassWidget as UniversalCompassWidget, type CompassWidgetProps} from '@deck.gl/widgets';
 
 const CompassWidget = (props: CompassWidgetProps) => {
   const widget = useWidget(UniversalCompassWidget, props);
@@ -24,7 +24,7 @@ For a custom widget, React can be used to implement the UI itself. A widget clas
 ```tsx
 import React, {useMemo} from 'react';
 import type {Widget} from '@deck.gl/core';
-import DeckGL, {useWidget} from '@deck.gl/react';
+import {DeckGL, useWidget} from '@deck.gl/react/legacy';
 import {createPortal} from 'react-dom';
 
 class MyWidget implements Widget {

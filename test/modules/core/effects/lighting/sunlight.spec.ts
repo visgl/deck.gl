@@ -6,7 +6,7 @@
 import {test, expect} from 'vitest';
 import {WebMercatorViewport, GlobeViewport, PolygonLayer} from 'deck.gl';
 import {_SunLight as SunLight} from '@deck.gl/core';
-import {vec3} from '@math.gl/core';
+import {vec3} from '@math.gl/core/matrix';
 
 test('Sunlight#Constructor', () => {
   const sunLight = new SunLight({

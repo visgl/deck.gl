@@ -21,6 +21,7 @@ const SRC = resolve(PACKAGE_ROOT, 'src');
 const STATELESS_SHARED_MODULES = [
   'dom/attach-control.ts',
   'shared/constants.ts',
+  'shared/generated-effect-id.ts',
   'shared/utils.ts',
   'wrappers/factories.tsx'
 ];

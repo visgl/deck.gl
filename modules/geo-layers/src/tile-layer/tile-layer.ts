@@ -26,7 +26,7 @@ import {
   Tileset2DProps
 } from '../tileset-2d/index';
 import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d/index';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
 /** GeoJSON tile renderer that forwards the top-level application's color convention. */
 class TileGeoJsonLayer extends GeoJsonLayer<any, {_normalizedTileColors?: boolean}> {

@@ -396,6 +396,16 @@ getFillColor: {sql: "SCALE_COLOR(temperature, DOMAIN(temperature), PALETTE('viri
 The domain resolves against the complete loaded table. When data changes, existing
 rows can receive new colors. Missing values are transparent.
 
+For a fixed color scale, pass numeric stops to `DOMAIN` and one hex color
+per stop to `PALETTE`, in the same order. Each stop maps to its corresponding
+color, and values between stops interpolate between the adjacent colors.
+
+```ts
+getFillColor: {sql: "SCALE_COLOR(SQRT(count), DOMAIN(1, 3, 10), PALETTE('#edf8b1', '#7fcdbb', '#2c7fb8'))"}
+```
+
+In this example, counts of 1, 9, and 100 map to the three palette colors.
+
 #### `dataTransform` (Function, optional) {#datatransform}
 
 Executed to manipulate remote data when it's fetched. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.

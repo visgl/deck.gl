@@ -19,7 +19,7 @@ import {
   GlobeViewport,
   _deepEqual as deepEqual
 } from '@deck.gl/core';
-import {vec4TransformMat4 as transformMat4} from '@math.gl/core';
+import {vec4TransformMat4 as transformMat4} from '@math.gl/core/matrix';
 import type {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import type {Aggregator} from './aggregator/aggregator';
 import type {WebGPUAggregatorOptions} from './aggregator/webgpu-aggregator/webgpu-aggregator';

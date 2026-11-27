@@ -7,7 +7,6 @@ import {
   type ArrowExpression,
   type ArrowTableFunction
 } from '@math.gl/sql/arrow';
-import {SQRT} from '@math.gl/sql/math-functions';
 import type {Expression} from '@math.gl/sql/expressions';
 import {
   Field,
@@ -63,20 +62,22 @@ function constructorFor(expression: Expression) {
 export function evaluateColumnExpression(
   expression: Expression,
   input: Table,
-  sqlFunctions: readonly ArrowTableFunction[] = []
-): Vector {
+  functions: readonly ArrowTableFunction[] = []
+): {column: Vector; metadata?: Map<string, string>} {
   if (expression.type === 'Identifier') {
     const column = input.getChild(expression.name);
     if (!column) {
       throw new Error(`Unknown Arrow column: ${expression.name}`);
     }
-    return column;
+    return {
+      column,
+      metadata: input.schema.fields.find(field => field.name === expression.name)?.metadata
+    };
   }
-  const functions = sqlFunctions.some(fn => fn.name.toUpperCase() === 'SQRT')
-    ? [...sqlFunctions]
-    : [SQRT, ...sqlFunctions];
-  const compile = (value: ArrowExpression) =>
-    compileArrowExpression(value, {inputSchema: input.schema, functions}).evaluateTable(input);
+  const compile = (value: ArrowExpression) => {
+    const compiled = compileArrowExpression(value, {inputSchema: input.schema, functions});
+    return {column: compiled.evaluateTable(input), metadata: compiled.outputField.metadata};
+  };
   const call = expression as FunctionCall;
   if (
     call.type === 'CallExpression' &&
@@ -99,7 +100,7 @@ export function evaluateColumnExpression(
     return compile(expression);
   }
 
-  const components = call.arguments.map(compile);
+  const components = call.arguments.map(argument => compile(argument as ArrowExpression).column);
   const rows: (number[] | null)[] = new Array(input.numRows);
   for (let row = 0; row < input.numRows; row++) {
     const values: number[] = [];
@@ -122,8 +123,10 @@ export function evaluateColumnExpression(
     // One null channel invalidates the entire vector, rather than producing NaN sentinels.
     rows[row] = nullValue ? null : values;
   }
-  return vectorFromArray(
-    rows,
-    new FixedSizeList(constructor.width, new Field('item', constructor.type(), true))
-  );
+  return {
+    column: vectorFromArray(
+      rows,
+      new FixedSizeList(constructor.width, new Field('item', constructor.type(), true))
+    )
+  };
 }

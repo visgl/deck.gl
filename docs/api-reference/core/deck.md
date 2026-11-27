@@ -2,7 +2,7 @@
 
 `Deck` is a class that takes deck.gl layer instances and viewport parameters, renders those layers as a transparent overlay, and handles events.
 
-If you are using React, you should not use this class directly. Instead you should be rendering the [DeckGL](../react/legacy/deckgl.md) React component.
+If you are using React, you should not use this class directly. Instead you should be rendering the [DeckGL](../react/deckgl.md) React component.
 
 
 ## Usage
@@ -47,6 +47,8 @@ The following properties are used to initialize a `Deck` instance. Any custom va
 #### `canvas` (HTMLCanvasElement | String, optional) {#canvas}
 
 The canvas to render into. It can be either a HTMLCanvasElement or the element id, and will be auto-created if not supplied.
+
+When Deck creates a WebGL device for a supplied canvas, finalizing the last Deck using it disposes of the device wrapper and its resize observers. By default the WebGL context stays available for reuse. Pass `deviceProps.ownsHandle: true` if Deck should also release the context when the canvas is removed during finalization.
 
 #### `_canvases` ((HTMLCanvasElement | String)[], optional) {#_canvases}
 

@@ -60,10 +60,10 @@ const rootDir = import.meta.dirname;
 // These prototypes require locally linked, unpublished luma.gl peers.
 const includePrivateModules = process.env.DECK_GL_PRIVATE_MODULES === 'true';
 const privateNodeTests = includePrivateModules
-  ? ['modules/proposals/test/effects/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts']
+  ? ['examples-v10/gpu-graph/graph-explorer/test/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts']
   : [];
 const privateBrowserTests = includePrivateModules
-  ? ['modules/proposals/test/effects/**/*.spec.ts', 'modules/proposals/test/layers/**/*.spec.ts']
+  ? ['examples-v10/gpu-graph/graph-explorer/test/**/*.spec.ts', 'modules/proposals/test/layers/**/*.spec.ts']
   : [];
 
 // Tests that were commented out or never imported in the original test suite
@@ -89,9 +89,8 @@ const aliases = {
   '@deck.gl/proposals/layers/polygon-layer': resolve(rootDir, 'modules/proposals/src/layers/polygon-layer/polygon-layer.ts'),
   '@deck.gl/proposals/layers/solid-polygon-layer': resolve(rootDir, 'modules/proposals/src/layers/solid-polygon-layer/solid-polygon-layer.ts'),
   '@deck.gl/proposals/layers/text-layer': resolve(rootDir, 'modules/proposals/src/layers/text-layer/text-layer.ts'),
-  '@deck.gl/proposals/effects/query': resolve(rootDir, 'modules/proposals/src/effects/query'),
+  '@deck.gl/proposals/layers/filtered-scatterplot-layer/geographic-point-query-effect': resolve(rootDir, 'modules/proposals/src/layers/filtered-scatterplot-layer/geographic-point-query-effect'),
   '@deck.gl/proposals/layers': resolve(rootDir, 'modules/proposals/src/layers'),
-  '@deck.gl/proposals/effects': resolve(rootDir, 'modules/proposals/src/effects'),
   // Explicit vitest entry point (must come before @deck.gl/test-utils)
   '@deck.gl/test-utils/vitest': resolve(rootDir, 'modules/test-utils/src/vitest.ts'),
   '@deck.gl/aggregation-layers': resolve(rootDir, 'modules/aggregation-layers/src'),
@@ -150,11 +149,12 @@ const optimizeDepsConfig = {
     '@luma.gl/core/webgl',
     '@luma.gl/shaders',
     '@luma.gl/engine/effects',
+    '@luma.gl/engine/lighting',
     '@luma.gl/graph/gpu-graph',
     'maplibre-gl-v4',
     'maplibre-gl-v5',
     // loaders.gl dependencies
-    '@loaders.gl/core/scan',
+    '@loaders.gl/core/query',
     '@math.gl/sql/arrow',
     '@math.gl/sql/parser',
     '@loaders.gl/core/polyfills',
@@ -286,13 +286,8 @@ const projects = [
           exclude: [
             ...excludedTests,
             'test/modules/**/*.node.spec.ts',
-            'modules/proposals/test/effects/**/*.node.spec.ts',
-            'modules/proposals/test/layers/**/*.node.spec.ts',
-            // Temporarily excluded until #11221 merges: finalized Decks don't release their WebGL
-            // context yet, and the renderer's specs push the shared page past Chromium's context
-            // limit, which loses the test device for every later file. They still run in the
-            // `browser` project.
-            'test/modules/react/fiber/**/*.spec.{ts,tsx}'
+            'examples-v10/gpu-graph/graph-explorer/test/**/*.node.spec.ts',
+            'modules/proposals/test/layers/**/*.node.spec.ts'
           ],
           globals: false,
           testTimeout: 30000,
@@ -327,7 +322,7 @@ const projects = [
         test: {
           name: 'browser',
           include: ['test/modules/**/*.spec.ts', 'test/modules/react/**/*.spec.tsx', 'test/interaction/**/*.spec.ts', ...privateBrowserTests],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/proposals/test/effects/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
+          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'examples-v10/gpu-graph/graph-explorer/test/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
           isolate: false,
