@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {_GlobeViewport, type Viewport} from '@deck.gl/core';
+import {GlobeViewport, type Viewport} from '@deck.gl/core';
 
 /** Converts common-space positions to Deck's local east/north/up metre-offset frame.
  * Matches the globe tangent frame and the map shader's second-order distance scales.
@@ -20,7 +20,7 @@ export function getMeterOffsetPosition(
   ]);
   const relative = commonPosition.map((value, index) => value - origin[index]);
   const scales = viewport.getDistanceScales([...coordinateOrigin]);
-  if (viewport instanceof _GlobeViewport) {
+  if (viewport instanceof GlobeViewport) {
     const radius = Math.hypot(...origin);
     const up = origin.map(value => value / radius);
     const horizontalLength = Math.hypot(up[0], up[1]);

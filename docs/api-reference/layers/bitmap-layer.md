@@ -239,6 +239,8 @@ The color to use for transparent pixels, in `[r, g, b, a]`. Each component is in
 
 The color to tint the bitmap by, in `[r, g, b]`. Each component is in the `[0, 255]` range.
 
+With Deck's [`normalizedColors`](../core/deck.md#normalizedcolors), plain arrays for `transparentColor` and `tintColor` on a top-level layer use 0–1 channels. Built-in defaults and byte typed arrays retain their byte encoding.
+
 ## Pixel Picking
 
 The [picking info](../../developer-guide/interactivity.md#the-pickinginfo-object) passed to callbacks (`onHover`, `onClick`, etc.) provides information on which pixel was picked. It contains an additional `bitmap` field if applicable:

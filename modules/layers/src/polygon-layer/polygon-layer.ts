@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor, ArrowAccessorFunction} from '@deck.gl/core';
 import {
   Accessor,
   AccessorFunction,
@@ -22,6 +23,14 @@ import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
 import {replaceInRange} from '../utils';
+
+/** Marks converted color callbacks without nesting shallow-compared trigger values. */
+function getColorUpdateTrigger(trigger: unknown, converted: boolean): unknown {
+  if (!converted) return trigger;
+  if (Array.isArray(trigger)) return [true, ...trigger];
+  if (trigger && typeof trigger === 'object') return {...trigger, _normalizedColors: true};
+  return [true, trigger];
+}
 
 /**
  * All properties supported by `PolygonLayer`.
@@ -140,28 +149,28 @@ type _PolygonLayerProps<DataT = unknown> = {
   lineDashJustified?: boolean;
 
   /** Called on each object in the data stream to retrieve its corresponding polygon. */
-  getPolygon?: AccessorFunction<DataT, any>;
+  getPolygon?: ArrowAccessorFunction<DataT, any>;
 
   /**
    * Fill collor value or accessor.
    *
    * @default [0, 0, 0, 255]
    */
-  getFillColor?: Accessor<DataT, Color>;
+  getFillColor?: ArrowAccessor<DataT, Color>;
 
   /**
    * Line color value or accessor.
    *
    * @default [0, 0, 0, 255]
    */
-  getLineColor?: Accessor<DataT, Color>;
+  getLineColor?: ArrowAccessor<DataT, Color>;
 
   /**
    * Line width value or accessor.
    *
    * @default 1
    */
-  getLineWidth?: Accessor<DataT, number>;
+  getLineWidth?: ArrowAccessor<DataT, number>;
 
   /**
    * Elevation valur or accessor.
@@ -170,7 +179,7 @@ type _PolygonLayerProps<DataT = unknown> = {
    *
    * @default 1000
    */
-  getElevation?: Accessor<DataT, number>;
+  getElevation?: ArrowAccessor<DataT, number>;
 
   /**
    * This property has been moved to `PathStyleExtension`.
@@ -234,15 +243,15 @@ const defaultProps: DefaultProps<PolygonLayerProps> = {
   lineMiterLimit: 4,
   lineAntialiasing: false,
 
-  getPolygon: {type: 'accessor', value: (f: any) => f.polygon},
+  getPolygon: {type: 'accessor', arrow: 'row', value: (f: any) => f.polygon},
   // Polygon fill color
-  getFillColor: {type: 'accessor', value: defaultFillColor},
+  getFillColor: {type: 'accessor', arrow: 'row-color', value: defaultFillColor},
   // Point, line and polygon outline color
-  getLineColor: {type: 'accessor', value: defaultLineColor},
+  getLineColor: {type: 'accessor', arrow: 'row-color', value: defaultLineColor},
   // Line and polygon outline accessors
-  getLineWidth: {type: 'accessor', value: 1},
+  getLineWidth: {type: 'accessor', arrow: 'row', value: 1},
   // Polygon extrusion accessor
-  getElevation: {type: 'accessor', value: 1000},
+  getElevation: {type: 'accessor', arrow: 'row', value: 1000},
 
   // Optional material for 'lighting' shader module
   material: true
@@ -310,7 +319,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
-      let polygon = getPolygon(object, objectInfo);
+      let polygon = (getPolygon as AccessorFunction<DataT, any>)(object, objectInfo);
       if (_normalize) {
         polygon = Polygon.normalize(polygon, positionSize);
       }
@@ -375,6 +384,44 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
 
     const {paths, pathsDiff} = this.state;
 
+    /** Number of color channels configured for the fill child. */
+    const fillColorSize = this.props._subLayerProps?.fill?.colorFormat === 'RGB' ? 3 : 4;
+    /** Number of color channels configured for the stroke child. */
+    const strokeColorSize = this.props._subLayerProps?.stroke?.colorFormat === 'RGB' ? 3 : 4;
+    /** Fill accessor encoded for the fill child's attribute. */
+    const fillColor = this.getSubLayerColorAccessor(
+      getFillColor as Accessor<DataT, Color>,
+      defaultFillColor,
+      fillColorSize
+    );
+    /** Wireframe accessor encoded for the fill child's attribute. */
+    const wireframeColor = this.getSubLayerColorAccessor(
+      getLineColor as Accessor<DataT, Color>,
+      defaultLineColor,
+      fillColorSize
+    );
+    /** Stroke accessor encoded for the path child's attribute. */
+    const strokeColor = this.getSubLayerColorAccessor(
+      getLineColor as Accessor<DataT, Color>,
+      defaultLineColor,
+      strokeColorSize
+    );
+    /** Child fill-color dependencies. */
+    const fillColorTrigger = getColorUpdateTrigger(
+      updateTriggers?.getFillColor,
+      fillColor !== getFillColor
+    );
+    /** Child wireframe-color dependencies. */
+    const wireframeColorTrigger = getColorUpdateTrigger(
+      updateTriggers?.getLineColor,
+      wireframeColor !== getLineColor
+    );
+    /** Child stroke-color dependencies. */
+    const strokeColorTrigger = getColorUpdateTrigger(
+      updateTriggers?.getLineColor,
+      strokeColor !== getLineColor
+    );
+
     const FillLayer = this.getSubLayerClass('fill', SolidPolygonLayer);
     const StrokeLayer = this.getSubLayerClass('stroke', PathLayer);
 
@@ -395,8 +442,8 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           _windingOrder,
 
           getElevation,
-          getFillColor,
-          getLineColor: extruded && wireframe ? getLineColor : defaultLineColor,
+          getFillColor: fillColor,
+          getLineColor: extruded && wireframe ? wireframeColor : defaultLineColor,
 
           material,
           transitions
@@ -406,11 +453,11 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           updateTriggers: updateTriggers && {
             getPolygon: updateTriggers.getPolygon,
             getElevation: updateTriggers.getElevation,
-            getFillColor: updateTriggers.getFillColor,
+            getFillColor: fillColorTrigger,
             // using a legacy API to invalid lineColor attributes
             // if (extruded && wireframe) has changed
             lineColors: extruded && wireframe,
-            getLineColor: updateTriggers.getLineColor
+            getLineColor: wireframeColorTrigger
           }
         }),
         {
@@ -448,7 +495,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
             getPath: transitions.getPolygon
           },
 
-          getColor: this.getSubLayerAccessor(getLineColor),
+          getColor: this.getSubLayerAccessor(strokeColor),
           getWidth: this.getSubLayerAccessor(getLineWidth),
           getDashArray: this.getSubLayerAccessor(getLineDashArray)
         },
@@ -456,7 +503,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           id: 'stroke',
           updateTriggers: updateTriggers && {
             getWidth: updateTriggers.getLineWidth,
-            getColor: updateTriggers.getLineColor,
+            getColor: strokeColorTrigger,
             getDashArray: updateTriggers.getLineDashArray
           }
         }),

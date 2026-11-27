@@ -3,10 +3,16 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {WidgetManager} from '@deck.gl/core/lib/widget-manager';
-import {Widget, WebMercatorViewport, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
+import {
+  Widget,
+  WebMercatorViewport,
+  log,
+  type WidgetProps,
+  type WidgetPlacement
+} from '@deck.gl/core';
 
 type TestWidgetProps = WidgetProps & {
   placement?: WidgetPlacement;
@@ -115,6 +121,42 @@ test('WidgetManager#setProps', () => {
   widgetManager.setProps({widgets: []});
   expect(widgetManager.getWidgets().length, 'all widgets are removed').toBe(0);
   expect(widgetB2.isVisible, 'widget.onRemove is called').toBeFalsy();
+});
+
+test('WidgetManager#setProps#duplicate ids', () => {
+  const container = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement: container});
+  const warn = vi.spyOn(log, 'warn').mockReturnValue(() => {});
+
+  try {
+    // Re-render several times with two new instances that share an id each time
+    for (let version = 1; version <= 3; version++) {
+      widgetManager.setProps({
+        widgets: [
+          new TestWidget({id: 'A', version}),
+          new TestWidget({id: 'A', version: version + 10})
+        ]
+      });
+
+      expect(widgetManager.getWidgets(), 'only one widget is mounted').toHaveLength(1);
+      expect(
+        container.querySelectorAll('.deck-test-widget'),
+        'only one widget element is in the DOM'
+      ).toHaveLength(1);
+      expect(widgetManager.getWidgets()[0].props.version, 'the first widget wins').toBe(version);
+    }
+    expect(warn).toHaveBeenCalledWith('Multiple widgets with same id A');
+
+    widgetManager.setProps({widgets: []});
+    expect(widgetManager.getWidgets(), 'all widgets are removed').toHaveLength(0);
+    expect(
+      container.querySelectorAll('.deck-test-widget'),
+      'no widget element is left'
+    ).toHaveLength(0);
+  } finally {
+    warn.mockRestore();
+    widgetManager.finalize();
+  }
 });
 
 test('WidgetManager#finalize', () => {
@@ -566,6 +608,50 @@ test('WidgetManager#onHover, onEvent#viewId', () => {
 
   expect(onHoverCalledCount, 'widget.onHover is not called').toBe(1);
   expect(onClickCalledCount, 'widget.onClick is not called').toBe(2);
+
+  widgetManager.finalize();
+});
+
+test('WidgetManager#setProps#replaces a widget of another class with the same id', () => {
+  class OtherTestWidget extends TestWidget {
+    static defaultProps = {...TestWidget.defaultProps, id: 'other-test-widget'};
+  }
+
+  const container = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement: container});
+
+  const widget = new TestWidget({id: 'shared', version: 1});
+  widgetManager.setProps({widgets: [widget]});
+
+  const otherWidget = new OtherTestWidget({id: 'shared', version: 2});
+  widgetManager.setProps({widgets: [otherWidget]});
+  expect(widgetManager.getWidgets(), 'the new class is used').toEqual([otherWidget]);
+  expect(widget.isVisible, 'old widget is removed').toBe(false);
+  expect(widget.props.version, 'old widget keeps its own props').toBe(1);
+  expect(otherWidget.isVisible, 'new widget is added').toBe(true);
+
+  widgetManager.finalize();
+});
+
+test('WidgetManager#setProps#reuses a widget when only the class identity changes', () => {
+  // A hot module reload, or a second copy of a package, creates a new class with the same
+  // default id. The widget is the same type, so the old instance is kept.
+  class ReloadedTestWidget extends TestWidget {
+    static defaultProps = {...TestWidget.defaultProps};
+  }
+
+  const container = document.createElement('div');
+  const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement: container});
+
+  const widget = new TestWidget({id: 'shared', version: 1});
+  widgetManager.setProps({widgets: [widget]});
+
+  const reloadedWidget = new ReloadedTestWidget({id: 'shared', version: 2});
+  widgetManager.setProps({widgets: [reloadedWidget]});
+  expect(widgetManager.getWidgets(), 'the old instance is kept').toEqual([widget]);
+  expect(widget.isVisible, 'old widget stays mounted').toBe(true);
+  expect(widget.props.version, 'old widget takes the new props').toBe(2);
+  expect(reloadedWidget.isVisible, 'new instance is not added').toBe(false);
 
   widgetManager.finalize();
 });

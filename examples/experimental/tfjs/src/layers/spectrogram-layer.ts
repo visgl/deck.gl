@@ -5,7 +5,6 @@
 import * as tf from '@tensorflow/tfjs';
 
 import {UpdateParameters, Layer, CompositeLayer, LayersList} from '@deck.gl/core';
-import {GL} from '@luma.gl/webgl/constants';
 
 import {Tensor2DLayer} from './tensor-2d-layer';
 import {CustomTFContext} from '../tf-utils/tf-context';
@@ -127,6 +126,7 @@ function computeSpectrogram({
 }): Texture2D | null {
   let result: Texture2D | null = null;
 
+  const {gl} = context;
   context.tidy(() => {
     const {fftHopLength, nfft, fftWindowSize} = settings;
 
@@ -151,8 +151,8 @@ function computeSpectrogram({
       width: w,
       height: h,
       parameters: {
-        [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-        [GL.TEXTURE_MAG_FILTER]: GL.LINEAR
+        [gl.TEXTURE_MIN_FILTER]: gl.LINEAR,
+        [gl.TEXTURE_MAG_FILTER]: gl.LINEAR
       }
     });
   });

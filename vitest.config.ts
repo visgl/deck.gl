@@ -60,10 +60,10 @@ const rootDir = import.meta.dirname;
 // These prototypes require locally linked, unpublished luma.gl peers.
 const includePrivateModules = process.env.DECK_GL_PRIVATE_MODULES === 'true';
 const privateNodeTests = includePrivateModules
-  ? ['modules/proposals/test/effects/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts']
+  ? ['examples-v10/gpu-graph/graph-explorer/test/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts']
   : [];
 const privateBrowserTests = includePrivateModules
-  ? ['modules/proposals/test/effects/**/*.spec.ts', 'modules/proposals/test/layers/**/*.spec.ts']
+  ? ['examples-v10/gpu-graph/graph-explorer/test/**/*.spec.ts', 'modules/proposals/test/layers/**/*.spec.ts']
   : [];
 
 // Tests that were commented out or never imported in the original test suite
@@ -89,14 +89,14 @@ const aliases = {
   '@deck.gl/proposals/layers/polygon-layer': resolve(rootDir, 'modules/proposals/src/layers/polygon-layer/polygon-layer.ts'),
   '@deck.gl/proposals/layers/solid-polygon-layer': resolve(rootDir, 'modules/proposals/src/layers/solid-polygon-layer/solid-polygon-layer.ts'),
   '@deck.gl/proposals/layers/text-layer': resolve(rootDir, 'modules/proposals/src/layers/text-layer/text-layer.ts'),
-  '@deck.gl/proposals/effects/query': resolve(rootDir, 'modules/proposals/src/effects/query'),
+  '@deck.gl/proposals/layers/filtered-scatterplot-layer/geographic-point-query-effect': resolve(rootDir, 'modules/proposals/src/layers/filtered-scatterplot-layer/geographic-point-query-effect'),
   '@deck.gl/proposals/layers': resolve(rootDir, 'modules/proposals/src/layers'),
-  '@deck.gl/proposals/effects': resolve(rootDir, 'modules/proposals/src/effects'),
   // Explicit vitest entry point (must come before @deck.gl/test-utils)
   '@deck.gl/test-utils/vitest': resolve(rootDir, 'modules/test-utils/src/vitest.ts'),
   '@deck.gl/aggregation-layers': resolve(rootDir, 'modules/aggregation-layers/src'),
   '@deck.gl/arcgis': resolve(rootDir, 'modules/arcgis/src'),
   '@deck.gl/carto': resolve(rootDir, 'modules/carto/src'),
+  '@deck.gl/core/sql': resolve(rootDir, 'modules/core/src/arrow/upstream-math/sql-parser.ts'),
   '@deck.gl/core/arrow': resolve(rootDir, 'modules/core/src/arrow/upstream-luma/arrow-converter.ts'),
   '@deck.gl/core': resolve(rootDir, 'modules/core/src'),
   '@deck.gl/extensions': resolve(rootDir, 'modules/extensions/src'),
@@ -108,6 +108,7 @@ const aliases = {
   '@deck.gl/mapbox': resolve(rootDir, 'modules/mapbox/src'),
   '@deck.gl/maplibre': resolve(rootDir, 'modules/maplibre/src'),
   '@deck.gl/mesh-layers': resolve(rootDir, 'modules/mesh-layers/src'),
+  '@deck.gl/react/legacy': resolve(rootDir, 'modules/react/src/legacy'),
   '@deck.gl/react': resolve(rootDir, 'modules/react/src'),
   '@deck.gl/test-utils': resolve(rootDir, 'modules/test-utils/src'),
   '@deck.gl/widgets': resolve(rootDir, 'modules/widgets/src'),
@@ -148,13 +149,29 @@ const optimizeDepsConfig = {
     '@luma.gl/core/webgl',
     '@luma.gl/shaders',
     '@luma.gl/engine/effects',
+    '@luma.gl/graph/gpu-graph',
     'maplibre-gl-v4',
     'maplibre-gl-v5',
     // loaders.gl dependencies
+    '@loaders.gl/core/query',
+    '@math.gl/sql/arrow',
+    '@math.gl/sql/parser',
     '@loaders.gl/core/polyfills',
     '@loaders.gl/core',
     '@loaders.gl/images',
-    'd3-hexbin'
+    'd3-hexbin',
+    // React renderer dependencies, used by the @deck.gl/react browser tests
+    'react',
+    'react-dom/client',
+    'react/jsx-dev-runtime',
+    'react/jsx-runtime',
+    'react-reconciler',
+    'react-reconciler/constants.js',
+    'its-fine',
+    'client-only',
+    'fast-check',
+    'mapbox-gl',
+    'maplibre-gl'
   ],
   // MapLibre v6 is native ESM. Add future ESM-only major aliases here.
   exclude: ['maplibre-gl-v6']
@@ -198,6 +215,27 @@ const projects = [
         },
       },
 
+      // React project - the React renderer's unit tests (`*.test.ts(x)`) in jsdom, plus its type
+      // tests (`*.test-d.ts(x)`). Each file is isolated because these tests mock modules. The
+      // renderer's browser tests are `*.spec.tsx` files in the headless project.
+      {
+        extends: true,
+        resolve: {alias: aliases},
+        test: {
+          name: 'react',
+          environment: 'jsdom',
+          include: ['test/modules/react/fiber/**/*.test.{ts,tsx}'],
+          globals: false,
+          testTimeout: 30000,
+          typecheck: {
+            enabled: true,
+            include: ['test/modules/react/fiber/**/*.test-d.{ts,tsx}'],
+            tsconfig: './test/modules/react/fiber/tsconfig.json'
+          },
+          sequence: {groupOrder: 1}
+        }
+      },
+
       // Scripts project - codemod and build tool tests
       // Used by test-scripts
       {
@@ -232,6 +270,7 @@ const projects = [
       // Used by test-headless and test-ci
       {
         extends: true,
+        define: {...renderTestDefine},
         resolve: {alias: browserAliases, dedupe: includePrivateModules ? linkedPeerDedupe : []},
         optimizeDeps: optimizeDepsConfig,
         assetsInclude: assetsIncludeConfig,
@@ -242,8 +281,13 @@ const projects = [
           // automated runs. These browser-input tests have become flaky across
           // headless and render, so keep them in `browser` only for manual
           // debugging until the shared interaction harness is reworked.
-          include: ['test/modules/**/*.spec.ts', ...privateBrowserTests],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/proposals/test/effects/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
+          include: ['test/modules/**/*.spec.ts', 'test/modules/react/**/*.spec.tsx', ...privateBrowserTests],
+          exclude: [
+            ...excludedTests,
+            'test/modules/**/*.node.spec.ts',
+            'examples-v10/gpu-graph/graph-explorer/test/**/*.node.spec.ts',
+            'modules/proposals/test/layers/**/*.node.spec.ts'
+          ],
           globals: false,
           testTimeout: 30000,
           // Disable isolation and file parallelism to avoid:
@@ -276,8 +320,8 @@ const projects = [
         server: serverConfig,
         test: {
           name: 'browser',
-          include: ['test/modules/**/*.spec.ts', 'test/interaction/**/*.spec.ts', ...privateBrowserTests],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/proposals/test/effects/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
+          include: ['test/modules/**/*.spec.ts', 'test/modules/react/**/*.spec.tsx', 'test/interaction/**/*.spec.ts', ...privateBrowserTests],
+          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'examples-v10/gpu-graph/graph-explorer/test/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
           isolate: false,

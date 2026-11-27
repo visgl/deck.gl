@@ -61,7 +61,8 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL, {GimbalWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import {GimbalWidget} from '@deck.gl/react/widgets';
 import {OrbitView} from '@deck.gl/core';
 import '@deck.gl/widgets/stylesheet.css';
 
@@ -88,7 +89,8 @@ function App() {
 
 ```tsx
 import React, {useState, useCallback} from 'react';
-import DeckGL, {GimbalWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import {GimbalWidget} from '@deck.gl/react/widgets';
 import {OrbitView, type OrbitViewState} from '@deck.gl/core';
 import '@deck.gl/widgets/stylesheet.css';
 

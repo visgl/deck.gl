@@ -38,7 +38,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     let model: Model | undefined;
     const props = {
       id: 'scene',
-      positions: arrowPositions,
+      getPosition: arrowPositions,
       scenegraph: new GroupNode([]),
       _lighting: 'flat' as const,
       getColor: [255, 0, 0, 255] as [number, number, number, number],
@@ -87,7 +87,11 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       await expect.poll(() => layer.isLoaded).toBe(true);
       expect((await deck.pickObjectAsync({x: 100, y: 64}))?.index).toBe(1);
       expect((await deck.pickObjectAsync({x: 84, y: 64}))?.index).toBe(1);
-      layer = new ScenegraphLayer({...props, positions: null, data: [{position: [0, 0, 0]}]});
+      layer = new ScenegraphLayer({
+        ...props,
+        getPosition: row => row.position,
+        data: [{position: [0, 0, 0]}]
+      });
       deck.setProps({layers: [layer]});
       await expect.poll(() => layer.getNumInstances()).toBe(1);
       expect(model).toBe(firstModel);

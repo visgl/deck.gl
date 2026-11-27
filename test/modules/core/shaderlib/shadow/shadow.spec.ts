@@ -6,8 +6,8 @@ import {test, expect} from 'vitest';
 import {MapView, OrbitView} from '@deck.gl/core';
 import project from '@deck.gl/core/shaderlib/project/project';
 import shadow from '@deck.gl/core/shaderlib/shadow/shadow';
-import {Matrix4, Vector3} from '@math.gl/core';
-import {pixelsToWorld} from '@math.gl/web-mercator';
+import {Matrix4, Vector3} from '@math.gl/core/matrix';
+import {pixelsToWorld} from '@math.gl/geospatial/web-mercator';
 
 const TEST_VIEWPORT1 = new MapView().makeViewport({
   width: 800,

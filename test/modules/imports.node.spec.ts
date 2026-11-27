@@ -88,6 +88,15 @@ describe('Top-level imports', () => {
     }
   });
 
+  test('GlobeView exports', () => {
+    for (const exports of [core, deck]) {
+      for (const name of ['GlobeView', 'GlobeViewport', 'GlobeController']) {
+        expect(exports[name], `${name} is exported`).toBeTruthy();
+        expect(exports[`_${name}`], `_${name} is a deprecated alias`).toBe(exports[name]);
+      }
+    }
+  });
+
   test('deck.gl default import', () => {
     expect(DeckGL, 'DeckGL symbol imported from /react').toBeTruthy();
   });

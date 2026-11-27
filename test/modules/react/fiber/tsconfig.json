@@ -1,0 +1,99 @@
+// The React renderer's tests use the automatic JSX runtime. `include` lists the type tests, which
+// the `react` vitest project type-checks.
+{
+  "extends": "../../../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "paths": {
+      "@luma.gl/graph/gpu-simple-graph/webgpu": [
+        "../../../../node_modules/@luma.gl/graph/dist/gpu-simple-graph/operations/webgpu/index"
+      ],
+      "@deck.gl/proposals/layers/path-layer": [
+        "../../../../modules/proposals/src/layers/path-layer/path-layer.ts"
+      ],
+      "@deck.gl/proposals/layers/polygon-layer": [
+        "../../../../modules/proposals/src/layers/polygon-layer/polygon-layer.ts"
+      ],
+      "@deck.gl/proposals/layers/solid-polygon-layer": [
+        "../../../../modules/proposals/src/layers/solid-polygon-layer/solid-polygon-layer.ts"
+      ],
+      "@deck.gl/proposals/layers/text-layer": [
+        "../../../../modules/proposals/src/layers/text-layer/text-layer.ts"
+      ],
+      "@deck.gl/proposals/layers": [
+        "../../../../modules/proposals/src/layers"
+      ],
+      "@deck.gl/proposals/layers/filtered-scatterplot-layer/geographic-point-query-effect": [
+        "../../../../modules/proposals/src/layers/filtered-scatterplot-layer/geographic-point-query-effect"
+      ],
+      "@deck.gl/aggregation-layers": [
+        "../../../../modules/aggregation-layers/src"
+      ],
+      "@deck.gl/arcgis": [
+        "../../../../modules/arcgis/src"
+      ],
+      "@deck.gl/carto": [
+        "../../../../modules/carto/src"
+      ],
+      "@deck.gl/core/sql": [
+        "../../../../modules/core/src/arrow/upstream-math/sql-parser"
+      ],
+      "@deck.gl/core/arrow": [
+        "../../../../modules/core/src/arrow/upstream-luma/arrow-converter"
+      ],
+      "@deck.gl/core": [
+        "../../../../modules/core/src"
+      ],
+      "@deck.gl/extensions": [
+        "../../../../modules/extensions/src"
+      ],
+      "@deck.gl/geo-layers": [
+        "../../../../modules/geo-layers/src"
+      ],
+      "@deck.gl/google-maps": [
+        "../../../../modules/google-maps/src"
+      ],
+      "@deck.gl/json": [
+        "../../../../modules/json/src"
+      ],
+      "@deck.gl/jupyter-widget": [
+        "../../../../modules/jupyter-widget/src"
+      ],
+      "@deck.gl/layers": [
+        "../../../../modules/layers/src"
+      ],
+      "deck.gl": [
+        "../../../../modules/main/src"
+      ],
+      "@deck.gl/mapbox": [
+        "../../../../modules/mapbox/src"
+      ],
+      "@deck.gl/maplibre": [
+        "../../../../modules/maplibre/src"
+      ],
+      "@deck.gl/mesh-layers": [
+        "../../../../modules/mesh-layers/src"
+      ],
+      "@deck.gl/react/legacy": [
+        "../../../../modules/react/src/legacy"
+      ],
+      "@deck.gl/react": [
+        "../../../../modules/react/src"
+      ],
+      "@deck.gl/test-utils": [
+        "../../../../modules/test-utils/src"
+      ],
+      "deck.gl-test/*": [
+        "../../../../test/*"
+      ],
+      "@deck.gl/react/*": [
+        "../../../../modules/react/src/*"
+      ]
+    }
+  },
+  "include": [
+    "./**/*.test-d.ts",
+    "./**/*.test-d.tsx"
+  ]
+}
