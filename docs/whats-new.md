@@ -75,7 +75,7 @@ The `@deck.gl/react` module is now a deep React Fiber integration.
 
 ### Performance
 
-- **Idle rendering** — `Deck` stops requesting animation frames while nothing needs a redraw. Prop changes, data loading, transitions, interaction and canvas resizes resume the loop. Set `_animate` to redraw every frame.
+- **Idle rendering** — `Deck` stops requesting animation frames while nothing needs a redraw. Prop changes, data loading, transitions, interaction and canvas resizes resume the loop. Set `_animate` to redraw every frame. If `getCursor` reads state outside deck.gl, call `deck.setProps({getCursor})` after that state changes.
 
 ### Examples
 

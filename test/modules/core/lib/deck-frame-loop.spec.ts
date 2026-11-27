@@ -291,3 +291,96 @@ test('Deck#_animate keeps requesting frames', async () => {
   await expectIdle(frames);
   deck.finalize();
 });
+
+test('Deck#setProps alone wakes the idle loop', async () => {
+  const {deck, frames} = await createIdleDeck({getCursor: () => 'grab'});
+  expect(deck.getCanvas()!.style.cursor).toBe('grab');
+
+  // Only the frame reads `getCursor`, no other dirty flag is set
+  deck.setProps({getCursor: () => 'crosshair'});
+  await sleep(50);
+  expect(deck.getCanvas()!.style.cursor, 'cursor follows the new prop').toBe('crosshair');
+
+  await expectIdle(frames);
+  deck.finalize();
+});
+
+test('LayerManager#setNeedsRedraw wakes the idle loop', async () => {
+  const {deck, draws, frames} = await createIdleDeck();
+
+  // @ts-expect-error protected member
+  deck.layerManager.setNeedsRedraw('test');
+  await sleep(50);
+  expect(draws.count, 'layers are redrawn').toBe(1);
+
+  await expectIdle(frames);
+  deck.finalize();
+});
+
+test('Uncontrolled view state changes wake the idle loop', async () => {
+  const {deck, draws, frames} = await createIdleDeck({
+    viewState: undefined,
+    initialViewState: VIEW_STATE,
+    controller: true
+  });
+  const viewId = deck.getViewports()[0].id;
+
+  // A controller drag reaches the ViewManager without calling Deck#setProps
+  // @ts-expect-error testing private method
+  deck._onViewStateChange({
+    viewId,
+    viewState: {...VIEW_STATE, zoom: 3},
+    interactionState: {isDragging: true}
+  });
+  await sleep(50);
+  expect(deck.getViewports()[0].zoom, 'viewport follows the view state').toBe(3);
+  expect(draws.count, 'new view state is drawn').toBeGreaterThan(0);
+
+  await expectIdle(frames);
+  deck.finalize();
+});
+
+test('A view state transition started after a long idle period is animated', async () => {
+  const zooms: number[] = [];
+  const {deck, frames} = await createIdleDeck({
+    controller: true,
+    onViewStateChange: ({viewState}) => {
+      zooms.push(viewState.zoom);
+    }
+  });
+  // Longer than the transition, so counting idle time as elapsed would skip to the end
+  await sleep(600);
+
+  const transitionEnd = new Promise<void>(resolve => {
+    deck.setProps({
+      viewState: {
+        ...VIEW_STATE,
+        zoom: 2,
+        transitionDuration: 300,
+        transitionInterpolator: new LinearInterpolator(),
+        onTransitionEnd: () => resolve()
+      }
+    });
+  });
+  await expect(Promise.race([transitionEnd, sleep(1500).then(() => 'timeout')])).resolves.toBe(
+    undefined
+  );
+  const intermediateZooms = zooms.filter(zoom => zoom > 1 && zoom < 2);
+  expect(intermediateZooms.length, 'transition is animated').toBeGreaterThan(2);
+
+  await expectIdle(frames);
+  deck.finalize();
+});
+
+test('Deck stops requesting frames while the canvas has no size', async () => {
+  const {deck, draws, frames} = await createIdleDeck({width: 0, height: 0});
+  await expectIdle(frames);
+
+  deck.setProps({width: 1, height: 1});
+  await sleep(50);
+  expect(draws.count, 'canvas with a size is drawn').toBeGreaterThan(0);
+  expect(deck.getViewports().length, 'viewport is created').toBe(1);
+
+  await expectIdle(frames);
+  deck.finalize();
+});

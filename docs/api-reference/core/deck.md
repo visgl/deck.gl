@@ -417,6 +417,7 @@ A valid [CSS cursor](https://developer.mozilla.org/en-US/docs/Web/CSS/cursor) st
 Remarks:
 
 * It is worth noting that when supplying a custom image for the cursor icon, Chrome requires a fallback option to be supplied, otherwise the custom image will not be loaded; e.g. `getCursor={() => 'url(images/custom.png), auto'}`
+* The cursor updates on pointer events, drag state changes and `setProps`. If `getCursor` reads other state, call `deck.setProps({getCursor})` after that state changes.
 
 #### `getTooltip` (Function) {#gettooltip}
 
@@ -639,7 +640,7 @@ Receives arguments:
 
 #### `_onMetrics` (Function) {#_onmetrics}
 
-(Experimental) Called once every second with performance metrics. Not called while no animation frames are requested.
+(Experimental) Called once every second with performance metrics. Not called while no animation frames are requested, so `metrics` and the [StatsWidget](../widgets/stats-widget.md) keep their last values while idle.
 
 Receives arguments:
 

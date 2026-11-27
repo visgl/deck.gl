@@ -1978,7 +1978,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
     return Boolean(
       this.needsRedraw({clearRedrawFlags: false}) ||
-        this.layerManager.needsUpdate() ||
+        // `updateLayers` skips layers without a viewport, e.g. on a zero-size canvas.
+        // The resize wake restarts the loop once the viewport exists.
+        (this.layerManager.context.viewport && this.layerManager.needsUpdate()) ||
         this._pickRequest.event ||
         Object.values(this.viewManager.controllers).some(controller =>
           controller?.isTransitioning()
