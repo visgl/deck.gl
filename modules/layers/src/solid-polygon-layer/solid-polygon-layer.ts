@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor, ArrowAccessorFunction} from '@deck.gl/core';
 import {
   Layer,
   _GPUVectorModel as GPUVectorModel,
@@ -83,19 +84,19 @@ type _SolidPolygonLayerProps<DataT> = {
   elevationScale?: number;
 
   /** Polygon geometry accessor. */
-  getPolygon?: AccessorFunction<DataT, PolygonGeometry>;
+  getPolygon?: ArrowAccessorFunction<DataT, PolygonGeometry>;
   /** Extrusion height accessor.
    * @default 1000
    */
-  getElevation?: Accessor<DataT, number>;
+  getElevation?: ArrowAccessor<DataT, number>;
   /** Fill color accessor.
    * @default [0, 0, 0, 255]
    */
-  getFillColor?: Accessor<DataT, Color>;
+  getFillColor?: ArrowAccessor<DataT, Color>;
   /** Stroke color accessor.
    * @default [0, 0, 0, 255]
    */
-  getLineColor?: Accessor<DataT, Color>;
+  getLineColor?: ArrowAccessor<DataT, Color>;
 
   /**
    * Material settings for lighting effect. Applies if `extruded: true`
@@ -122,10 +123,10 @@ const defaultProps: DefaultProps<SolidPolygonLayerProps> = {
 
   elevationScale: {type: 'number', min: 0, value: 1},
 
-  getPolygon: {type: 'accessor', value: (f: any) => f.polygon},
-  getElevation: {type: 'accessor', value: 1000},
-  getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getPolygon: {type: 'accessor', arrow: 'row', value: (f: any) => f.polygon},
+  getElevation: {type: 'accessor', arrow: 'row', value: 1000},
+  getFillColor: {type: 'accessor', arrow: 'row-color', value: DEFAULT_COLOR},
+  getLineColor: {type: 'accessor', arrow: 'row-color', value: DEFAULT_COLOR},
 
   material: true
 };
@@ -237,6 +238,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'solid-polygon-instance-data'
       },
@@ -247,6 +249,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'solid-polygon-instance-data'
       },
@@ -401,7 +404,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         normalize: props._normalize,
         geometryBuffer: buffers.getPolygon,
         buffers,
-        getGeometry: props.getPolygon,
+        getGeometry: props.getPolygon as AccessorFunction<DataT, PolygonGeometry>,
         transform: this.usePositionTransforms().transform?.bind(this),
         // Triangulate where the shader draws the polygon, including layer transforms.
         // CPU-preprojected positions already contain those transforms.

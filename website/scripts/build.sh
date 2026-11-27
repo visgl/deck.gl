@@ -22,11 +22,11 @@ OUTPUT_DIR=build
 
 # generate playground schema and publish it as a static website asset
 (
-  cd ../examples/playground
+  cd "../examples/playground"
   yarn
   yarn generate-schema
 )
-cp ../examples/playground/schema.generated.json ./static/schema.generated.json
+cp "../examples/playground/schema.generated.json" ./static/schema.generated.json
 
 # Build the embedded v10 examples and their unpublished luma.gl peers.
 yarn build-v10-examples
@@ -49,13 +49,13 @@ node ./scripts/check-llm-output.mjs
 
 # transpile workers
 BABEL_ENV=es5 npx babel ./static/workers --out-dir ./$OUTPUT_DIR/workers
-BABEL_ENV=esm npx babel ../examples/pydeck/src/pyodide-worker.ts --out-file ./$OUTPUT_DIR/workers/pyodide-worker.mjs
+BABEL_ENV=esm npx babel "../examples/pydeck/src/pyodide-worker.ts" --out-file ./$OUTPUT_DIR/workers/pyodide-worker.mjs
 
 # build gallery (scripting) examples
 (
-  cd ../examples/gallery
+  cd "../examples/gallery"
   yarn
   yarn build
 )
 mkdir $OUTPUT_DIR/gallery
-cp -r ../examples/gallery/dist/* $OUTPUT_DIR/gallery/
+cp -r "../examples/gallery/dist/"* $OUTPUT_DIR/gallery/

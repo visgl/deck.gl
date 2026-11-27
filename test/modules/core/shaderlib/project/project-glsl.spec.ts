@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 
 import {WebMercatorViewport, OrthographicViewport, project, ProjectProps} from '@deck.gl/core';
-import {Matrix4, Vector3, config, equals, NumericArray, NumberArray3} from '@math.gl/core';
+import {Matrix4, Vector3, config, equals, NumericArray, NumberArray3} from '@math.gl/core/matrix';
 import {fp64} from '@luma.gl/shaders';
 const {fp64LowPart} = fp64;
 

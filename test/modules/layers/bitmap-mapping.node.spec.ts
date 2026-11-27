@@ -3,7 +3,15 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Field, FixedSizeList, Float64, Uint32, makeVector, vectorFromArray} from 'apache-arrow';
+import {
+  Field,
+  FixedSizeList,
+  Float64,
+  Int64,
+  Uint32,
+  makeVector,
+  vectorFromArray
+} from 'apache-arrow';
 import {createMappedBitmapMesh} from '../../../modules/layers/src/bitmap-layer/bitmap-layer-mapping';
 
 const geographic = '+proj=longlat +datum=WGS84';
@@ -49,6 +57,35 @@ test('Bitmap mapping preserves manual segmentation and non-indexed topology', ()
   expect(createMappedBitmapMesh({bounds, positions, imageMapping: mapping}).indices).toBeNull();
 });
 
+test('Bitmap mapping accepts Int64 position components and preserves null validation', () => {
+  const type = new FixedSizeList(2, new Field('value', new Int64(), true));
+  const positions = vectorFromArray(
+    [
+      [0n, 0n],
+      [1n, 0n],
+      [0n, 1n]
+    ],
+    type
+  );
+  const result = createMappedBitmapMesh({bounds, positions, imageMapping: mapping});
+  expect(values(result.texCoords)).toEqual([
+    [0, 1],
+    [1, 1],
+    [0, 0]
+  ]);
+  const nullPositions = vectorFromArray(
+    [
+      [0n, null],
+      [1n, 0n],
+      [0n, 1n]
+    ],
+    type
+  );
+  expect(() =>
+    createMappedBitmapMesh({bounds, positions: nullPositions, imageMapping: mapping})
+  ).toThrow('Bitmap positions must be finite');
+});
+
 test('Bitmap mapping uses the explicit image CRS for Mercator and equal-area imagery', () => {
   for (const imageCRS of [mercator, '+proj=cea +lat_ts=0 +datum=WGS84 +units=m']) {
     const result = createMappedBitmapMesh({
@@ -73,7 +110,7 @@ test('Bitmap mapping uses the explicit image CRS for Mercator and equal-area ima
 });
 
 test('Bitmap explicit subdivision refines triangles and preserves duplicated seams', () => {
-  const result = createMappedBitmapMesh({bounds, imageMapping: mapping, meshMaxEdgeLength: 0.6});
+  const result = createMappedBitmapMesh({bounds, imageMapping: {...mapping, maxEdgeLength: 0.6}});
   const points = values(result.positions) as number[][];
   const indices = Array.from(makeVector(result.indices!.data)) as number[];
   expect(points.length).toBeGreaterThan(4);
@@ -89,8 +126,7 @@ test('Bitmap explicit subdivision refines triangles and preserves duplicated sea
   }
   const seam = createMappedBitmapMesh({
     bounds,
-    imageMapping: mapping,
-    meshMaxEdgeLength: 0.6,
+    imageMapping: {...mapping, maxEdgeLength: 0.6},
     positions: column([
       [0, 0],
       [1, 0],
@@ -108,9 +144,9 @@ test('Bitmap explicit subdivision refines triangles and preserves duplicated sea
 test('Bitmap mapping rejects invalid inputs and exhausted refinement limits', () => {
   for (const changes of [
     {texCoords: column([[0, 0]])},
-    {meshMaxEdgeLength: 0},
-    {meshMaxEdgeLength: Infinity},
-    {meshMaxEdgeLength: 1e-20},
+    {imageMapping: {...mapping, maxEdgeLength: 0}},
+    {imageMapping: {...mapping, maxEdgeLength: Infinity}},
+    {imageMapping: {...mapping, maxEdgeLength: 1e-20}},
     {imageMapping: {...mapping, bounds: [0, 0, 0, 1]}},
     {
       positions: column([

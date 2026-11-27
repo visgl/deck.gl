@@ -92,9 +92,9 @@ testCases.push({
       imageMapping: {
         bounds: [-122.45, 37.7, -122.35, 37.8],
         positionCRS: '+proj=longlat +datum=WGS84',
-        imageCRS: '+proj=longlat +datum=WGS84'
-      },
-      meshMaxEdgeLength: 0.03
+        imageCRS: '+proj=longlat +datum=WGS84',
+        maxEdgeLength: 0.03
+      }
     })
   ]
 });

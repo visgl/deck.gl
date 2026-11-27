@@ -7,7 +7,7 @@
 import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import DeckGL from '@deck.gl/react';
+import DeckGL from '@deck.gl/react/legacy';
 import {HeatmapTileLayer, ClusterTileLayer, colorBins, colorContinuous} from '@deck.gl/carto';
 
 import {getColorRange} from './palette-utils';

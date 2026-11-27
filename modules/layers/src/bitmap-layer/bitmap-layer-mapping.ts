@@ -2,19 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {subdivideTriangleMesh} from '@math.gl/geometry';
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
 import {projectionEngine} from '@math.gl/geospatial/projection';
-import type {ReadonlyCRSDefinition} from '@math.gl/geospatial';
+import type {CRSInput, ReadonlyCRSDefinition} from '@math.gl/geospatial/crs';
 import {GPUVector} from '@luma.gl/graph/gpu-data';
-import {
-  DataType,
-  Field,
-  FixedSizeList,
-  Float64,
-  Float32,
-  makeVector,
-  vectorFromArray
-} from 'apache-arrow';
+import {DataType, Field, FixedSizeList, Float64, Float32, makeData, makeVector} from 'apache-arrow';
 import type {BitmapBoundingBox} from './bitmap-layer';
 import type {BitmapMeshProps, BitmapMeshSource} from './bitmap-layer-mesh';
 import createMesh from './create-mesh';
@@ -25,16 +17,16 @@ export type BitmapImageMapping = {
   bounds: [number, number, number, number];
   /** Explicit CRS of the image rectangle. */
   imageCRS: ReadonlyCRSDefinition;
-  /** Explicit CRS of mesh positions before deck.gl transforms. */
-  positionCRS: ReadonlyCRSDefinition;
+  /** CRS of mesh positions before deck.gl transforms. Defaults to the layer's absolute source CRS for untransformed positions. */
+  positionCRS?: CRSInput;
+  /** Positive maximum edge length in source position units. */
+  maxEdgeLength?: number;
 };
 
 /** Optional CPU UV generation and source-space triangle refinement. */
 export type BitmapMappingProps = {
   /** Generates UVs instead of accepting explicit texCoords. */
   imageMapping?: BitmapImageMapping | null;
-  /** Positive maximum source-space edge length; omitted preserves input segmentation. */
-  meshMaxEdgeLength?: number | null;
 };
 
 /** Generates UVs for a CPU-readable mesh, optionally refining its source-space triangles. */
@@ -42,20 +34,16 @@ export function createMappedBitmapMesh(
   props: BitmapMeshProps & BitmapMappingProps & {bounds: BitmapBoundingBox},
   resolution?: number
 ): BitmapMeshProps {
-  const {imageMapping: mapping, meshMaxEdgeLength} = props;
+  const mapping = props.imageMapping;
   if (!mapping) throw new Error('Bitmap subdivision requires imageMapping');
+  const {maxEdgeLength} = mapping;
   if (props.texCoords) throw new Error('Bitmap imageMapping cannot be combined with texCoords');
   const [left, bottom, right, top] = mapping.bounds;
-  if (
-    !mapping.bounds.every(Number.isFinite) ||
-    right <= left ||
-    top <= bottom ||
-    !mapping.positionCRS ||
-    !mapping.imageCRS
-  )
+  if (!mapping.bounds.every(Number.isFinite) || right <= left || top <= bottom || !mapping.imageCRS)
     throw new Error('Invalid bitmap imageMapping');
-  if (meshMaxEdgeLength != null && (!Number.isFinite(meshMaxEdgeLength) || meshMaxEdgeLength <= 0))
-    throw new Error('Bitmap meshMaxEdgeLength must be positive');
+  if (!mapping.positionCRS) throw new Error('Bitmap imageMapping requires a positionCRS');
+  if (maxEdgeLength != null && (!Number.isFinite(maxEdgeLength) || maxEdgeLength <= 0))
+    throw new Error('Bitmap imageMapping.maxEdgeLength must be positive');
   let positions: Float64Array;
   let indices: Uint32Array | null;
   if (props.positions) {
@@ -67,8 +55,9 @@ export function createMappedBitmapMesh(
       const row = source.get(i);
       if (!row) throw new Error('Bitmap positions cannot contain nulls');
       for (let component = 0; component < source.type.listSize; component++) {
-        const value = row.get(component);
-        if (typeof value !== 'number' || !Number.isFinite(value))
+        const input = row.get(component);
+        const value = Number(input);
+        if ((typeof input !== 'number' && typeof input !== 'bigint') || !Number.isFinite(value))
           throw new Error('Bitmap positions must be finite');
         positions[i * 3 + component] = value;
       }
@@ -105,7 +94,7 @@ export function createMappedBitmapMesh(
   }
   if ((indices?.length ?? positions.length / 3) % 3)
     throw new Error('Bitmap meshes require complete triangles');
-  if (meshMaxEdgeLength != null && positions.length) {
+  if (maxEdgeLength != null && positions.length) {
     const refined = subdivideTriangleMesh(
       {
         positions,
@@ -116,7 +105,7 @@ export function createMappedBitmapMesh(
         transform: position => position,
         size: 3,
         targetSize: 3,
-        maxEdgeLength: meshMaxEdgeLength
+        maxEdgeLength
       }
     );
     positions = refined.sourcePositions;
@@ -126,24 +115,33 @@ export function createMappedBitmapMesh(
     from: mapping.positionCRS,
     to: mapping.imageCRS
   });
-  const rows: number[][] = [];
-  const uvRows: number[][] = [];
-  for (let i = 0; i < positions.length; i += 3) {
-    const position = Array.from(positions.subarray(i, i + 3));
+  const vertexCount = positions.length / 3;
+  const uvs = new Float32Array(vertexCount * 2);
+  for (let i = 0; i < vertexCount; i++) {
+    const offset = i * 3;
+    const position = [positions[offset], positions[offset + 1], positions[offset + 2]];
     const projected = projection.projectSync(position);
     if (!position.every(Number.isFinite) || !projected.every(Number.isFinite))
       throw new Error('Bitmap mapping is outside the projection domain');
-    rows.push(position);
-    uvRows.push([(projected[0] - left) / (right - left), (top - projected[1]) / (top - bottom)]);
+    uvs[i * 2] = (projected[0] - left) / (right - left);
+    uvs[i * 2 + 1] = (top - projected[1]) / (top - bottom);
   }
+  const positionType = new Float64();
+  const uvType = new Float32();
   return {
-    positions: vectorFromArray(
-      rows,
-      new FixedSizeList(3, new Field('value', new Float64(), false))
+    positions: makeVector(
+      makeData({
+        type: new FixedSizeList(3, new Field('value', positionType, false)),
+        length: vertexCount,
+        child: makeData({type: positionType, data: positions})
+      })
     ),
-    texCoords: vectorFromArray(
-      uvRows,
-      new FixedSizeList(2, new Field('value', new Float32(), false))
+    texCoords: makeVector(
+      makeData({
+        type: new FixedSizeList(2, new Field('value', uvType, false)),
+        length: vertexCount,
+        child: makeData({type: uvType, data: uvs})
+      })
     ),
     indices: indices ? makeVector(indices) : null
   };

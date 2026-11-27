@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor} from '@deck.gl/core';
 import {WebGPUScreenGridAggregator} from './webgpu-screen-grid-aggregator';
 
 import {
@@ -21,15 +22,15 @@ import AggregationLayer, {type AggregationLayerProps} from '../common/aggregatio
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 import {defaultColorRange} from '../common/utils/color-utils';
-import {worldToPixels} from '@math.gl/web-mercator';
+import {worldToPixels} from '@math.gl/geospatial/web-mercator';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   cellSizePixels: {type: 'number', value: 100, min: 1},
   cellMarginPixels: {type: 'number', value: 2, min: 0},
   colorRange: defaultColorRange,
   colorScaleType: 'linear',
-  getPosition: {type: 'accessor', value: (d: any) => d.position},
-  getWeight: {type: 'accessor', value: 1},
+  getPosition: {type: 'accessor', arrow: 'row', value: (d: any) => d.position},
+  getWeight: {type: 'accessor', arrow: 'row', value: 1},
 
   gpuAggregation: true,
   aggregation: 'SUM'
@@ -63,6 +64,7 @@ export type _ScreenGridLayerProps<DataT> = {
    * Specified as an array of colors [color1, color2, ...].
    *
    * @default `6-class YlOrRd` - [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6)
+   * Custom plain-array entries are 0–1 when Deck normalizedColors is enabled.
    */
   colorRange?: Color[];
 
@@ -78,14 +80,14 @@ export type _ScreenGridLayerProps<DataT> = {
    *
    * @default d => d.position
    */
-  getPosition?: Accessor<DataT, Position>;
+  getPosition?: ArrowAccessor<DataT, Position>;
 
   /**
    * The weight of each object.
    *
    * @default 1
    */
-  getWeight?: Accessor<DataT, number>;
+  getWeight?: ArrowAccessor<DataT, number>;
 
   /**
    * Perform aggregation is performed on GPU.
@@ -127,13 +129,7 @@ export default class ScreenGridLayer<
   static defaultProps = defaultProps;
 
   getAggregatorType(): string {
-    if (
-      this.props.gpuAggregation &&
-      this.context.device.type === 'webgpu' &&
-      this.props.colorDomain &&
-      !this.props.extensions.length &&
-      !this.props.pickable
-    ) {
+    if (this.props.gpuAggregation && this.context.device.type === 'webgpu') {
       if (
         (!this.props.positions &&
           !WebGPUScreenGridAggregator.supportsData(this.props.data, [
@@ -170,14 +166,18 @@ export default class ScreenGridLayer<
   }
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUScreenGridAggregator {
-    if (type === 'webgpu') return new WebGPUScreenGridAggregator(this.context.device);
+    if (type === 'webgpu')
+      return new WebGPUScreenGridAggregator(
+        this.context.device,
+        this.getComputeAggregatorOptions()
+      );
     if (type === 'cpu' || !WebGLAggregator.isSupported(this.context.device)) {
       return new CPUAggregator({
         dimensions: 2,
         getBin: {
           sources: ['positions'],
           getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
-            const layer = this.getCurrentLayer()!;
+            const layer = this.getCurrentLayer()! as this;
             const viewport = layer.context.viewport;
             const commonPosition = this.projectPositionFromAttribute(positions, viewport);
             const p = worldToPixels(commonPosition, viewport.pixelProjectionMatrix);
@@ -243,6 +243,10 @@ export default class ScreenGridLayer<
 
     const {props, oldProps, changeFlags} = params;
     const {cellSizePixels, aggregation} = props;
+    this.state.aggregator.setProps({
+      readback: !props.colorDomain || Boolean(props.pickable),
+      onUpdate: () => this.getCurrentLayer()?.setState({})
+    });
     if (
       aggregatorChanged ||
       changeFlags.dataChanged ||
@@ -326,6 +330,7 @@ export default class ScreenGridLayer<
 
   renderLayers(): LayersList | Layer | null {
     const {aggregator} = this.state;
+    if (aggregator.isLoaded === false) return null;
     const CellLayerClass = this.getSubLayerClass('cells', ScreenGridCellLayer);
     const binAttribute = aggregator.getBins();
     const weightAttribute = aggregator.getResult(0);
@@ -337,6 +342,8 @@ export default class ScreenGridLayer<
       }),
       {
         numInstances: aggregator.binCount,
+        normalizedColorRange:
+          this.usesNormalizedColors() && this.props.colorRange !== defaultColorRange,
         data: {
           length: aggregator.binCount,
           attributes: {

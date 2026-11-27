@@ -1,0 +1,34 @@
+{
+  "name": "deckgl-examples-geojson",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../../vite.config.local.mjs",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@types/d3-scale": "^4.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "d3-scale": "^4.0.0",
+    "deck.gl": "^10.0.0-alpha.1",
+    "maplibre-gl": "^5.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-map-gl": "^8.0.0",
+    "@loaders.gl/core": "^5.0.1",
+    "@loaders.gl/tables": "^5.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.0",
+    "vite": "^7.3.3"
+  },
+  "resolutions": {
+    "@loaders.gl/core": "^5.0.1"
+  },
+  "overrides": {
+    "@loaders.gl/core": "^5.0.1"
+  }
+}

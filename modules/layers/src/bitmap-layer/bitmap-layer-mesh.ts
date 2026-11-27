@@ -15,9 +15,9 @@ export type BitmapMeshSource = ColumnSource | GPUVector;
 
 /** Triangle mesh inputs with explicit texture coordinates or a CPU image mapping. */
 export type BitmapMeshProps = BitmapMappingProps & {
-  /** Arrow XY/XYZ lists or float32x2/float32x3 GPUVector positions, replacing bounds. */
+  /** Mesh positions replacing the bounds quad. Accepts Arrow XY/XYZ lists or float32x2/float32x3 GPUVector. Set bounds for view fitting with GPU-only positions. */
   positions?: BitmapMeshSource | null;
-  /** Two texture coordinates per vertex, with (0, 0) at the image's top left. */
+  /** Texture coordinates per vertex, with (0, 0) at the image's top left. Supply with positions. */
   texCoords?: BitmapMeshSource | null;
   /** Optional uint16/uint32 triangle indices. Otherwise every three vertices form a triangle. */
   indices?: BitmapMeshSource | null;
@@ -25,13 +25,7 @@ export type BitmapMeshProps = BitmapMappingProps & {
 
 /** Detects explicit mesh inputs, including incomplete inputs that need validation. */
 export function hasBitmapMesh(props: BitmapMeshProps): boolean {
-  return Boolean(
-    props.positions ||
-      props.texCoords ||
-      props.indices ||
-      props.imageMapping ||
-      props.meshMaxEdgeLength != null
-  );
+  return Boolean(props.positions || props.texCoords || props.indices || props.imageMapping);
 }
 
 /** Owns only converted Arrow allocations; supplied GPU vectors remain caller-owned. */
@@ -62,7 +56,7 @@ export class BitmapLayerMesh {
     this.loading = true;
     const resources: {destroy(): void}[] = [];
     try {
-      if (props.imageMapping || props.meshMaxEdgeLength != null) {
+      if (props.imageMapping) {
         const {createMappedBitmapMesh} = await import('./bitmap-layer-mapping');
         props = createMappedBitmapMesh(
           {...props, bounds: props.bounds ?? [1, 0, 0, 1]},
@@ -116,7 +110,9 @@ export class BitmapLayerMesh {
           });
           resources.push(result);
           attributes[name] = result.vector;
-          if (result.residualVector) attributes.positions64Low = result.residualVector;
+          if (name === 'positions' && result.residualVector) {
+            attributes.positions64Low = result.residualVector;
+          }
         }
       }
       attributes.positions64Low ??= new GPUConstant({
@@ -200,6 +196,7 @@ export class BitmapLayerMesh {
       if (version === this.version) {
         this.loading = false;
         failed(error as Error);
+        if (version === this.version) changed();
       }
     }
   }

@@ -128,6 +128,23 @@ new deck.BitmapLayer({});
 ```
 
 
+### Render an image on a triangle mesh
+
+Pair [`positions`](#positions) with [`texCoords`](#texcoords) to map an image onto a custom mesh.
+
+```ts
+import {BitmapLayer} from '@deck.gl/layers';
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+
+const xy = new FixedSizeList(2, new Field('value', new Float32(), false));
+const layer = new BitmapLayer({
+  id: 'image-triangle',
+  image: '/image.png',
+  positions: vectorFromArray([[-122, 37], [-121, 37], [-122, 38]], xy),
+  texCoords: vectorFromArray([[0, 1], [1, 1], [0, 0]], xy)
+});
+```
+
 ## Properties
 
 ### Data
@@ -148,8 +165,8 @@ The image data will be converted to a [Texture](https://luma.gl/docs/api-referen
 
 #### `bounds` (number[4] | Position[4]) {#bounds}
 
-When `positions` is supplied, it defines the rendered mesh. For GPU-only positions, `bounds`
-provides the footprint for view fitting.
+When supplied, `positions` replaces the quad from `bounds`. With GPU-only positions,
+`bounds` still sets the footprint for view fitting.
 
 Supported formats:
 
@@ -182,38 +199,54 @@ These coordinates take precedence over `_imageCoordinateSystem`.
 Optional `uint16` or `uint32` triangle indices. Without indices, every three vertices form
 a triangle. Removing all mesh props restores the quad from `bounds`.
 
-Remarks:
+Remarks for `positions`, `texCoords` and `indices`:
 
 * Each input must be a single Arrow chunk or GPU buffer.
 * GPUVector inputs remain owned by the application. Keep them alive while the layer uses them.
 * GPU-only positions require a view that does not convert positions on the CPU.
 * Mesh inputs cannot be async iterables, and mesh changes do not transition.
 * Mesh inputs cannot be combined with a positive `_projectionTolerance`.
-* See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates) for updates.
+* Pass a new Arrow vector to update the mesh. See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates).
 
 #### `imageMapping` (object, optional) {#imagemapping}
 
 * Default: `null`
 
-Use when the image and mesh use different projections. The object contains `bounds`
-(`[left, bottom, right, top]` in the image CRS), `imageCRS`, and `positionCRS`.
-Both CRS fields accept math.gl CRS definitions such as PROJ strings. Keep `positionCRS`
-consistent with the layer's `coordinateSystem`. Without `positions`, the layer uses its
-`bounds` footprint and the view's subdivision step.
+Use `imageMapping` when the image and mesh use different projections, such as a Web Mercator
+image draped on a longitude/latitude mesh. The layer computes `texCoords` for each vertex.
+
+- `bounds` is the image rectangle `[left, bottom, right, top]` in `imageCRS` units.
+- `imageCRS` describes the image rectangle, for example a PROJ string for Web Mercator.
+- `positionCRS` describes the raw mesh positions. Omit it to use the layer's absolute
+  [`coordinateSystem`](../core/layer.md#coordinatesystem) when it has no model matrix or coordinate
+  offset. Keep an explicit `positionCRS` consistent with the rendered positions.
+- `maxEdgeLength` optionally splits edges longer than this positive length in source position
+  units. Edge length includes Z. Omit it to keep the supplied triangles.
+
+Without `positions`, the layer builds the mesh from its [`bounds`](#bounds), using the view's
+subdivision step. Coordinates outside the image rectangle sample according to
+[`textureParameters`](#textureparameters).
+
+```ts
+new BitmapLayer({
+  image,
+  positions, // Arrow longitude/latitude positions in degrees
+  coordinateSystem: 'lnglat',
+  imageMapping: {
+    bounds: [left, bottom, right, top], // Web Mercator meters
+    imageCRS: '+proj=merc +a=6378137 +b=6378137 +units=m'
+  }
+});
+```
 
 Remarks:
 
-* Replaces `texCoords` and `_imageCoordinateSystem`. Setting `texCoords` too raises an error.
+* `imageMapping` replaces `texCoords` and the experimental `_imageCoordinateSystem` for this mesh.
+  The experimental setting remains available for bounds-only rendering without a mapping.
 * Positions must be CPU-readable Arrow columns. GPU-only meshes require explicit `texCoords`.
 * Split projection seams and clip to the image CRS's valid area before supplying the mesh.
-
-#### `meshMaxEdgeLength` (number, optional) {#meshmaxedgelength}
-
-* Default: `null`
-
-Requires `imageMapping`. Splits triangles with edges longer than this length in position units.
-Use it when a coarse mesh visibly bends the image. XYZ positions must use one unit on all axes.
-Very small values can exceed refinement limits and raise an error.
+* Cannot be combined with a positive `_projectionTolerance`.
+* Very small `maxEdgeLength` values can exceed refinement limits and raise an error.
 
 #### `_projectionTolerance` (number, optional) {#_projectiontolerance}
 
@@ -297,6 +330,8 @@ The color to use for transparent pixels, in `[r, g, b, a]`. Each component is in
 - Default `[255, 255, 255]`
 
 The color to tint the bitmap by, in `[r, g, b]`. Each component is in the `[0, 255]` range.
+
+With Deck's [`normalizedColors`](../core/deck.md#normalizedcolors), plain arrays for `transparentColor` and `tintColor` on a top-level layer use 0–1 channels. Built-in defaults and byte typed arrays retain their byte encoding.
 
 ## Pixel Picking
 

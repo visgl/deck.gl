@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>deck.gl Example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {margin: 0; font-family: sans-serif; width: 100vw; height: 100vh; overflow: hidden;}
+    .selected-feature-info {position: absolute; font-size: 12px; left: 4px; top: 4px; white-space: pre-wrap; background: #000; color: #fff; padding: 8px; box-shadow: 2px 2px 4px rgba(0,0,0,0.2);}
+  </style>
+</head>
+<body>
+<div id="app"></div>
+</body>
+<script type="module">
+  import {renderToDOM} from './app.tsx';
+  renderToDOM(document.getElementById('app'));
+</script>
+</html>

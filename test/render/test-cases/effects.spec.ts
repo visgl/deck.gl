@@ -5,9 +5,10 @@
 import {
   PostProcessEffect,
   LightingEffect,
+  ShadowMapEffect,
   AmbientLight,
   DirectionalLight,
-  _GlobeView as GlobeView
+  GlobeView
 } from '@deck.gl/core';
 import {zoomBlur, vignette} from '@luma.gl/engine/effects';
 import {hexagons, points} from 'deck.gl-test/data';
@@ -18,7 +19,7 @@ import {MaskExtension} from '@deck.gl/extensions';
 
 import {CubeGeometry} from '@luma.gl/engine';
 import {polygons} from 'deck.gl-test/data';
-import {describe} from 'vitest';
+import {describe, expect} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import {expandViewMatrix} from '../view-presets';
 import type {TestCase} from '../deck-test-utils';
@@ -284,7 +285,8 @@ const testCases = [
     ],
     goldenImage: './test/render/golden-images/shadow-effect-high-pitch.png'
   },
-  // -> mask-effect, mask-effect-globe, mask-effect-inverted, mask-effect-inverted-globe
+  // Mask polygons per fragment and points by their anchor in map/globe views.
+  // Golden: green polygons and blue circles appear inside (or outside) the red mask.
   ...[true, false].flatMap(maskInverted =>
     expandViewMatrix(
       {
@@ -333,7 +335,8 @@ const testCases = [
     )
   ),
   {
-    // Most of the globe is visible: the mask must still only hide points inside the quad
+    // Most of the globe is visible.
+    // Golden: blue grid points appear only inside the translucent mask quad.
     name: 'mask-effect-globe-world',
     views: new GlobeView(),
     viewState: {longitude: -100, latitude: 40, zoom: 0.5},
@@ -404,9 +407,58 @@ const testCases = [
   }
 ];
 
+// The sampler and filter passes share a golden across both backends.
+runRenderTestSuite(
+  (testCases as TestCase[]).filter(testCase => testCase.name === 'post-process-effects'),
+  'webgpu'
+);
+
 describe.each([
   'webgl'
   // 'webgpu'
 ] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
 });
+
+// Golden: WebGPU masking matches the WebGL map and globe images.
+describe('webgpu', () => {
+  runRenderTestSuite(
+    (testCases as TestCase[]).filter(testCase => testCase.name.startsWith('mask-effect')),
+    'webgpu'
+  );
+});
+
+const baseShadowTest = (testCases as TestCase[]).find(
+  testCase => testCase.name === 'shadow-effect-simple-mesh'
+)!;
+runRenderTestSuite(
+  [
+    {
+      ...baseShadowTest,
+      name: 'cascaded-shadow-map',
+      goldenImage: './test/render/golden-images/cascaded-shadow-map.png',
+      layers: baseShadowTest.layers.map(layer =>
+        layer instanceof SimpleMeshLayer
+          ? layer.clone({shadowEnabled: layer.id !== 'ground', pickable: layer.id === 'box'})
+          : layer
+      ),
+      onAfterRender: async ({deck, done}) => {
+        try {
+          const [x, y] = deck.getViewports()[0].project([-122.4, 37.74, 80]);
+          const picked = await deck.pickObjectAsync({x, y});
+          expect(picked?.layer?.id).toBe('box');
+        } finally {
+          done();
+        }
+      },
+      effects: [
+        new LightingEffect({
+          ambientLight: new AmbientLight({intensity: 1}),
+          directionalLight: new DirectionalLight({direction: [1, -0.5, -1], intensity: 1})
+        }),
+        new ShadowMapEffect({direction: [1, -0.5, -1]})
+      ]
+    }
+  ],
+  'webgpu'
+);

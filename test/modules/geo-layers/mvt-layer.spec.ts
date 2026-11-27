@@ -13,7 +13,7 @@ import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow
 import {MVTLoader} from '@loaders.gl/tiles/mvt';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {WebMercatorViewport, _GlobeViewport as GlobeViewport, log} from '@deck.gl/core';
+import {WebMercatorViewport, GlobeViewport, log} from '@deck.gl/core';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 
 import {testPickingLayer} from '../layers/test-picking-layer';

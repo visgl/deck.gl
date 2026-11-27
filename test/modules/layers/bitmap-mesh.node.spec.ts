@@ -52,7 +52,13 @@ test('Bitmap mesh converts positions and bounds and retains the last valid repla
   const indexBuffer = (mesh as any).indices.data[0].buffer;
   expect(indexBuffer.indexType).toBe('uint16');
   expect(indexBuffer.usage & Buffer.INDEX).toBeTruthy();
+  changed.mockClear();
+  changed.mockImplementationOnce(() => {
+    expect(mesh.loading).toBe(false);
+    expect((mesh as any).attributes).toBe(previous);
+  });
   await mesh.update({...props(), texCoords: column([[0, 0]])}, {}, changed, failed);
+  expect(changed).toHaveBeenCalledOnce();
   expect(failed).toHaveBeenCalledOnce();
   expect((mesh as any).attributes).toBe(previous);
   expect(buffer.destroyed).toBe(false);
@@ -63,6 +69,41 @@ test('Bitmap mesh converts positions and bounds and retains the last valid repla
   mesh.destroy();
   device.destroy();
 });
+
+test.each([false, true])(
+  'Float64 UVs preserve the position residual binding (fp64: %s)',
+  async fp64 => {
+    const device = new NullDevice({});
+    const mesh = new BitmapLayerMesh(device);
+    const failed = vi.fn();
+    try {
+      await mesh.update(
+        {
+          positions: column([
+            [-122.42, 37.77],
+            [-122.41, 37.77],
+            [-122.42, 37.78]
+          ]),
+          texCoords: column([
+            [0.1, 0.2],
+            [0.3, 0.4],
+            [0.5, 0.6]
+          ])
+        },
+        {fp64},
+        () => {},
+        failed
+      );
+      expect(failed).not.toHaveBeenCalled();
+      const residual = (mesh as any).attributes.positions64Low;
+      expect(residual.format).toBe('float32x3');
+      expect(residual.name).not.toBe('texCoords');
+    } finally {
+      mesh.destroy();
+      device.destroy();
+    }
+  }
+);
 
 test('Bitmap mesh rejects incomplete inputs, invalid indices, and chunked columns', async () => {
   const device = new NullDevice({});

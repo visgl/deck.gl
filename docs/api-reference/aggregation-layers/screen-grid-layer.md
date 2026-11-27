@@ -157,11 +157,12 @@ visuals when used with the right data set can be quite effective.
 
 ## Compute aggregation
 
-On a WebGPU device, `gpuAggregation: true` uses compute aggregation when
-`colorDomain` is explicit, `pickable` is false, and no extensions are enabled.
-All five aggregation operations are supported. Bin IDs and values remain in GPU
-buffers through cell rendering. Automatic color domains, picking, and extensions
-use CPU aggregation.
+On a WebGPU device, `gpuAggregation: true` uses compute aggregation for all five operations.
+Bin IDs and values remain in GPU buffers through cell rendering. Automatic color domains,
+picking metadata, and accessor-based compatible extensions are supported. Automatic domains
+and picking use asynchronous snapshots of completed results; stale snapshots are discarded.
+An explicit `colorDomain` with picking disabled keeps the result path entirely on the GPU.
+Extension hooks filter input points before reduction.
 
 ```ts
 new ScreenGridLayer({
@@ -174,12 +175,7 @@ new ScreenGridLayer({
 });
 ```
 
-This path also accepts `positions` and `weights` GPUVectors without a custom
-aggregator. Positions must be single-chunk `float32x2` or `float32x3`, and weights
-must be a single-chunk `float32` vector. Buffers need `STORAGE` or `COPY_SRC` usage;
-non-storage inputs are copied on the GPU. Custom views require GPU positions in
-the view's coordinate system. Accessor inputs use the normal position conversion.
-For GPU-only inputs, keep the compute conditions above or supply a custom aggregator.
+Unsupported binary input formats retain CPU aggregation for accessor-backed data.
 
 
 ## Installation
@@ -313,6 +309,22 @@ The [PickingInfo.object](../../developer-guide/interactivity.md#the-pickinginfo-
 - `pointIndices` (number[]) - Indices of the data objects in the picked cell. Only available if using CPU aggregation.
 - `points` (object[]) - The data objects in the picked cell. Only available if using CPU aggregation and layer data is an array.
 
+
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
+
+- `positions` – `float32x2` or `float32x3` – A single-chunk position vector.
+- `weights` – `float32` – An array containing one matching single-chunk weight vector.
+
+Notes:
+
+- The built-in WebGPU compute path accepts buffers with `STORAGE` or `COPY_SRC` usage.
+- Use positions in the view's coordinate system for custom views.
+- Borrowed columns require positions that do not need CPU preprojection.
+- See [GPU column extensions](./aggregator.md#gpu-column-extensions) for clipping, brushing, and numeric filtering.
 
 ## Source
 

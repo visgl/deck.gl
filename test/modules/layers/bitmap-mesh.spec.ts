@@ -69,12 +69,13 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           },
           {updateProps: {opacity: 0.5}},
           {updateProps: {indices: null}},
+          {updateProps: {extensions: [new DataFilterExtension()]}},
           {updateProps: {positions: null, texCoords: null}}
         ].map((testCase, index) => ({
           ...testCase,
           onAfterUpdate: async ({layer}) => {
             if (!layer.isLoaded) return;
-            if (index === 3) {
+            if (index === 4) {
               expect(layer.getAttributeManager()).not.toBeNull();
               expect(oldBuffer.destroyed).toBe(true);
             } else {
@@ -99,6 +100,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
                 expect(mesh.attributes.positions.data[0].buffer).toBe(oldBuffer);
                 expect(layer.state.model).toBe(previousModel);
               }
+              if (index === 3) expect(layer.state.model).not.toBe(previousModel);
               expect(layer.getBounds()).toEqual([
                 [0, 0, 0],
                 [1, 1, 0]
@@ -279,6 +281,10 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     if (!testDevice) return skip();
     const image = testDevice.createTexture({width: 8, height: 8, format: 'rgba8unorm'});
     let oldBuffer;
+    const mapping = {
+      bounds: [0, 0, 1, 1] as [number, number, number, number],
+      imageCRS: '+proj=longlat +datum=WGS84'
+    };
     try {
       await testLayerAsync({
         Layer: BitmapLayer,
@@ -292,20 +298,23 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             props: {
               image,
               bounds: [0, 0, 1, 1],
-              imageMapping: {
-                bounds: [0, 0, 1, 1],
-                positionCRS: '+proj=longlat +datum=WGS84',
-                imageCRS: '+proj=longlat +datum=WGS84'
-              }
+              coordinateSystem: 'lnglat',
+              imageMapping: mapping
             }
           },
-          {updateProps: {meshMaxEdgeLength: 0.5}},
-          {updateProps: {imageMapping: null, meshMaxEdgeLength: null}}
+          {
+            updateProps: {
+              bounds: [0, 0, 1, 1],
+              imageMapping: {...mapping, bounds: [...mapping.bounds]}
+            }
+          },
+          {updateProps: {imageMapping: {...mapping, maxEdgeLength: 0.5}}},
+          {updateProps: {imageMapping: null}}
         ].map((testCase, index) => ({
           ...testCase,
           onAfterUpdate: async ({layer}) => {
             if (!layer.isLoaded) return;
-            if (index === 2) {
+            if (index === 3) {
               expect(layer.getAttributeManager()).not.toBeNull();
               expect(oldBuffer.destroyed).toBe(true);
               return;
@@ -317,6 +326,8 @@ for (const backend of ['webgl', 'webgpu'] as const) {
               expect(Array.from(new Float32Array(bytes.buffer, bytes.byteOffset, 8))).toEqual([
                 0, 1, 0, 0, 1, 0, 1, 1
               ]);
+            } else if (index === 1) {
+              expect(mesh.attributes.texCoords.data[0].buffer).toBe(oldBuffer);
             } else {
               expect(oldBuffer.destroyed).toBe(true);
               oldBuffer = mesh.attributes.texCoords.data[0].buffer;

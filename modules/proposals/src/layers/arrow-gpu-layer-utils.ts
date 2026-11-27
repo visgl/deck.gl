@@ -5,7 +5,7 @@
 import {getArrowVectorByPath, makeGPUVectorFromArrow} from '@luma.gl/graph/arrow';
 import type {Device} from '@luma.gl/core';
 import type {GPUVector, GPUVectorFormat} from '@luma.gl/graph/gpu-data';
-import {DataType, Float32, RecordBatch, Table, Uint8, Vector} from 'apache-arrow';
+import {DataType, Float32, type RecordBatch, type Table, Uint8, Vector} from 'apache-arrow';
 
 /** Materialized Arrow sources accepted by synchronous GPUVector adapters. */
 export type ArrowGPUVectorLayerData = Table | RecordBatch;
@@ -21,10 +21,7 @@ export function makeLayerGPUVectorFromArrow<FormatT extends GPUVectorFormat>(
   selector: ArrowGPUVectorColumnSelector,
   options: {name: string; id: string; format: FormatT}
 ): GPUVector<FormatT> {
-  const vector =
-    selector instanceof Vector
-      ? selector
-      : getArrowVectorByPath(data instanceof Table ? data : new Table([data]), selector);
+  const vector = selector instanceof Vector ? selector : getArrowVectorByPath(data, selector);
   if (!vector) throw new Error(`Arrow GPU layer column "${String(selector)}" is missing`);
   if (vector.data.some(chunk => chunk.nullCount > 0)) {
     throw new Error(`Arrow GPU layer column "${options.name}" contains null rows`);
