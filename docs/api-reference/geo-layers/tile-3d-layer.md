@@ -227,6 +227,8 @@ To use pre-bundled scripts:
 new deck.Tile3DLayer({});
 ```
 
+For data below the WGS84 ellipsoid, set [`MapView.minimumElevation`](../core/map-view.md#minimumelevation) to the lowest elevation you need to see in top-down views.
+
 ## Properties
 
 Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/composite-layer.md) properties.
