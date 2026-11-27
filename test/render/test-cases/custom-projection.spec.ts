@@ -4,7 +4,8 @@
 
 import {describe, expect} from 'vitest';
 import {MapView, GlobeView, _CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
-import {GeoJsonLayer, PathLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, PathLayer, PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
+import type {Position} from '@deck.gl/core';
 import {ContourLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 import {
   projectionGrid,
@@ -339,6 +340,96 @@ testCases.push(
       })
     ],
     goldenImage: './test/render/golden-images/custom-projection-antarctica-globe.png'
+  }
+);
+
+testCases.push(
+  {
+    // Golden: A solid polar disk and a short Ross Sea wedge with source outlines.
+    name: 'custom-projection-epsg3031-geographic-clip',
+    views: new CustomProjectionView({
+      crs: '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
+      resolution: 10
+    }),
+    viewState: {center: [0, -90, 0], zoom: 2.1},
+    layers: [
+      new PolygonLayer<{polygon: Position[]; rossSea?: boolean}>({
+        id: 'antarctic-polygons',
+        data: [
+          {polygon: Array.from({length: 36}, (_, i) => [-180 + i * 10, -60])},
+          {
+            polygon: [
+              [160, -72],
+              [-150, -72],
+              [-150, -80],
+              [160, -80]
+            ],
+            rossSea: true
+          }
+        ],
+        _geographicClip: {enclosedPole: 'south'},
+        positionFormat: 'XY',
+        filled: true,
+        stroked: true,
+        parameters: {depthCompare: 'always', depthWriteEnabled: false},
+        getFillColor: feature => (feature.rossSea ? [86, 158, 204] : [215, 229, 237]),
+        getLineColor: [35, 48, 61],
+        getLineWidth: 2,
+        lineWidthUnits: 'pixels'
+      })
+    ],
+    goldenImage: './test/render/golden-images/custom-projection-epsg3031-geographic-clip.png'
+  },
+  {
+    // Golden: Both polygons and the path end at opposite chart edges with a clear center.
+    name: 'custom-projection-equal-earth-antimeridian',
+    views: new CustomProjectionView({crs: '+proj=eqearth +lon_0=0 +datum=WGS84 +units=m'}),
+    viewState: {center: [0, -15, 0], zoom: 0.65},
+    layers: [
+      new PolygonLayer<{polygon: Position[]}>({
+        id: 'antimeridian-polygons',
+        data: [
+          {
+            polygon: [
+              [170, 10],
+              [-170, 10],
+              [-170, 30],
+              [170, 30]
+            ]
+          },
+          {
+            polygon: [
+              [170, -70],
+              [-170, -70],
+              [-170, -80],
+              [170, -80]
+            ]
+          }
+        ],
+        _geographicClip: {},
+        positionFormat: 'XY',
+        getFillColor: [86, 158, 204],
+        getLineColor: [35, 48, 61],
+        getLineWidth: 2,
+        lineWidthUnits: 'pixels'
+      }),
+      new PathLayer<Position[]>({
+        id: 'antimeridian-path',
+        data: [
+          [
+            [165, -25],
+            [-165, -25]
+          ]
+        ],
+        _geographicClip: {},
+        positionFormat: 'XY',
+        getPath: path => path,
+        getColor: [228, 100, 71],
+        getWidth: 3,
+        widthUnits: 'pixels'
+      })
+    ],
+    goldenImage: './test/render/golden-images/custom-projection-equal-earth-antimeridian.png'
   }
 );
 

@@ -142,6 +142,49 @@ test('position opt-in invalidates on projection and matrix changes, not navigati
   }
 });
 
+test('polygon fills project each vertex once and triangulate the packed positions', () => {
+  const calls = {forward: 0, inverse: 0};
+  const viewport = createTestViewport({
+    ...options,
+    converter: {
+      forward: ([x, y, z = 0]) => {
+        calls.forward++;
+        return [x * 3, y * 2, z];
+      },
+      inverse: ([x, y, z = 0]) => {
+        calls.inverse++;
+        return [x / 3, y / 2, z];
+      }
+    }
+  });
+  const manager = new LayerManager(device, {viewport});
+  manager.setProps({
+    onError: error => {
+      throw error;
+    }
+  });
+  const ring = [
+    [0, 0],
+    [4, 0],
+    [4, 4],
+    [2, 1],
+    [0, 4],
+    [0, 0]
+  ];
+  try {
+    const layer = new SolidPolygonLayer({id: 'fill', data: [ring], getPolygon: p => p});
+    calls.forward = calls.inverse = 0;
+    manager.setLayers([layer]);
+    // One forward conversion per vertex. Triangulation scales the packed positions.
+    expect(calls).toEqual({forward: ring.length, inverse: 0});
+    // A concave ring: the triangles stay those of the WGS84 round trip.
+    const {polygonTesselator} = layer.state;
+    expect(Array.from(polygonTesselator.get('indices')!)).toEqual([4, 3, 2, 2, 1, 5, 5, 4, 2]);
+  } finally {
+    manager.finalize();
+  }
+});
+
 test('generated paths and polygon fills project without mutating input geometry', () => {
   const data = [
     [

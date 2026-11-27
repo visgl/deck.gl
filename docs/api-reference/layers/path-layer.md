@@ -251,6 +251,18 @@ When normalization is disabled, paths must be specified in the format of flat ar
 
 Maximum sampled edge error in meters with a preprojecting viewport. Zero disables refinement. Requires `_pathType: null`, CPU-readable paths and per-object width and color. See [Adaptive refinement](../core/custom-projection-view.md#adaptive-refinement).
 
+#### `_geographicClip` (object, optional) {#_geographicclip}
+
+* Default `null`
+
+> Experimental
+
+Clips CPU-preprojected WGS84 paths in [`_CustomProjectionView`](../core/custom-projection-view.md). Edges follow the shortest longitude interval. Pass an empty object to clip with the defaults.
+
+* `seamLongitude` is the right edge of the 360° longitude chart in degrees. Defaults to `180`.
+* `latitudeRange` is the inclusive `[south, north]` band in degrees. Defaults to `[-90, 90]`.
+* `enclosedPole` is used by polygon fills. Paths are clipped as lines, including loop paths.
+
 #### `getPath` ([Accessor&lt;PathGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpath}
 
 * Default: `object => object.path`

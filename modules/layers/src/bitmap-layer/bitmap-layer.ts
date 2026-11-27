@@ -269,13 +269,18 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     if (leavingMesh || changeFlags.extensionsChanged) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
+      // A kept mesh does not go through the rebuild below: give the new model its count.
+      if (this.state.mesh) {
+        this.state.model.setVertexCount(this.state.mesh.vertexCount);
+      }
       attributeManager.invalidateAll();
     }
 
     const subdivisionStep = this.getSubdivisionStep();
     if (
       leavingMesh ||
-      props.bounds !== oldProps.bounds ||
+      // Bounds compare by value: projected meshes are costly, and callers often pass new arrays.
+      !deepEqual(props.bounds, oldProps.bounds, 2) ||
       changeFlags.projectionChanged ||
       this.state.subdivisionStep !== subdivisionStep ||
       props._projectionTolerance !== oldProps._projectionTolerance ||

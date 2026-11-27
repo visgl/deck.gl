@@ -41,6 +41,7 @@ import type {
   Viewport
 } from '@deck.gl/core';
 import type {PathGeometry} from './path';
+import type {GeographicClip} from '../utils/geographic-clip';
 
 type _PathLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
@@ -52,6 +53,11 @@ type _PathLayerProps<DataT> = {
    * @default 0
    */
   _projectionTolerance?: number;
+  /** Clip CPU-preprojected WGS84 paths at the specified seam and latitude band.
+   * @experimental
+   * @default null
+   */
+  _geographicClip?: GeographicClip | null;
   /** Avoid grid splitting when a closed polygon outline is adaptively refined. @internal */
   _projectionNoCut?: boolean;
   /** The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`
@@ -144,6 +150,7 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   billboard: false,
   _pathType: null,
   _projectionTolerance: {type: 'number', value: 0, min: 0},
+  _geographicClip: {type: 'object', value: null, compare: 2},
   _projectionNoCut: false,
 
   getPath: {type: 'accessor', arrow: 'row', value: (object: any) => object.path},
@@ -405,6 +412,9 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const getPathChanged =
       changeFlags.updateTriggersChanged &&
       (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPath);
+    const geographicSource = this.state.sourceCrs?.signature === 'WGS84';
+    const canGeographicClip = this.state.preproject && geographicSource;
+    const geographicClip = canGeographicClip ? props._geographicClip : undefined;
     const geometryConfigurationChanged =
       changeFlags.projectionChanged ||
       (this.state.preproject &&
@@ -412,6 +422,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1))) ||
       getPathChanged ||
       props._projectionTolerance !== oldProps._projectionTolerance ||
+      (canGeographicClip && !deepEqual(geographicClip, oldProps._geographicClip, 2)) ||
       props._projectionNoCut !== oldProps._projectionNoCut ||
       props._pathType !== oldProps._pathType ||
       props.positionFormat !== oldProps.positionFormat ||
@@ -446,10 +457,8 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         transform: this.usePositionTransforms().transform?.bind(this),
         positionFormat: props.positionFormat,
         // Longitude cutting assumes geographic input and cannot run on preprojected coordinates.
-        wrapLongitude:
-          props.wrapLongitude &&
-          !this.state.preproject &&
-          this.state.sourceCrs?.signature === 'WGS84',
+        wrapLongitude: props.wrapLongitude && !this.state.preproject && geographicSource,
+        geographicClip,
         // Subdivision runs in accessor coordinates before the source CRS transform.
         resolution: props._projectionNoCut ? 0 : this.getSubdivisionStep(),
         projectionTolerance: props._projectionTolerance,

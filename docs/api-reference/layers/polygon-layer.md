@@ -296,6 +296,20 @@ The proper value depends on the source of your data. Most geometry formats [enfo
 
 Maximum sampled boundary error in meters with a preprojecting viewport. Zero disables refinement. Requires `_normalize: true` and per-object styling. Applies to fill and outline; interiors and extruded sides are not refined. See [Adaptive refinement](../core/custom-projection-view.md#adaptive-refinement).
 
+#### `_geographicClip` (object, optional) {#_geographicclip}
+
+* Default `null`
+
+> Experimental
+
+Clips CPU-preprojected WGS84 polygon fills and outlines in [`_CustomProjectionView`](../core/custom-projection-view.md). Edges follow the shortest longitude interval. Pass an empty object to clip with the defaults.
+
+* `seamLongitude` is the right edge of the 360° longitude chart in degrees. Defaults to `180`.
+* `latitudeRange` is the inclusive `[south, north]` band in degrees. Defaults to `[-90, 90]`.
+* `enclosedPole` must be `'north'` or `'south'` for a ring that winds once around a pole.
+
+Outlines follow the retained source edges.
+
 #### `getPolygon` ([Accessor&lt;PolygonGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpolygon}
 
 * default: `object => object.polygon`
