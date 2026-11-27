@@ -115,21 +115,24 @@ export const terrainWGSLFragmentInjection = /* wgsl */ `
   }
 `;
 
-/** Composites the premultiplied terrain cover, including encoded picking colors. */
+/** Composites a premultiplied terrain cover over a straight-alpha surface. */
+export const terrainWGSLCoverInjection = /* wgsl */ `
+  if (terrain.mode == TERRAIN_MODE_USE_COVER) {
+    let uv = (terrainMercPosWGSL - terrain.bounds.xy) / terrain.bounds.zw;
+    let pixel = textureSampleLevel(terrain_map, terrain_mapSampler, vec2<f32>(uv.x, 1.0 - uv.y), 0.0);
+    let alpha = pixel.a + (*color).a * (1.0 - pixel.a);
+    let premultiplied = pixel.rgb + (*color).rgb * (*color).a * (1.0 - pixel.a);
+    *color = vec4<f32>(premultiplied / max(alpha, 0.000001), alpha);
+  }
+`;
+
+/** Writes cover IDs and composites covers on shaders without a lighting hook. */
 export const terrainWGSLColorInjection = /* wgsl */ `
   if (terrain.isPickingCover > 0.5) {
     if (!picking_isColorValid(terrainPickingColorWGSL)) { discard; }
     *color = vec4<f32>(terrainPickingColorWGSL, 1.0);
   }
-  if (terrain.mode == TERRAIN_MODE_USE_COVER || terrain.mode == TERRAIN_MODE_USE_COVER_ONLY) {
-    let uv = (terrainMercPosWGSL - terrain.bounds.xy) / terrain.bounds.zw;
-    let pixel = textureSampleLevel(terrain_map, terrain_mapSampler, vec2<f32>(uv.x, 1.0 - uv.y), 0.0);
-    if (terrain.mode == TERRAIN_MODE_USE_COVER_ONLY) {
-      *color = pixel;
-    } else {
-      let alpha = pixel.a + (*color).a * (1.0 - pixel.a);
-      let premultiplied = pixel.rgb + (*color).rgb * (*color).a * (1.0 - pixel.a);
-      *color = vec4<f32>(select(vec3<f32>(0.0), premultiplied / max(alpha, 0.000001), alpha > 0.0), alpha);
-    }
-  }
+#ifndef TERRAIN_COVER_BEFORE_LIGHTING
+  ${terrainWGSLCoverInjection}
+#endif
 `;

@@ -35,6 +35,7 @@ import type {
   LayerProps,
   LayerDataSource,
   ArrowAccessor,
+  ArrowAccessorFunction,
   AccessorFunction,
   Position,
   Color,
@@ -102,7 +103,7 @@ type _IconLayerProps<DataT> = {
    * Should return the icon id if using pre-packed icons (`iconAtlas` + `iconMapping`).
    * Return an object that defines the icon if using auto-packing.
    */
-  getIcon?: AccessorFunction<DataT, string> | AccessorFunction<DataT, UnpackedIcon>;
+  getIcon?: ArrowAccessorFunction<DataT, string | UnpackedIcon>;
   /** Icon color accessor.
    * Accepts a constant, row callback, or numeric Arrow column.
    * @default [0, 0, 0, 255]
@@ -220,7 +221,7 @@ const defaultProps: DefaultProps<IconLayerProps> = {
     constantTypes: ['array'],
     value: (x: any) => x.position
   },
-  getIcon: {type: 'accessor', value: (x: any) => x.icon},
+  getIcon: {type: 'accessor', arrow: 'row', value: (x: any) => x.icon},
   getColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   getSize: {type: 'accessor', arrow: true, value: 1},
   getAngle: {type: 'accessor', arrow: true, value: 0},
@@ -442,7 +443,9 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
     type IconAccessor = AccessorFunction<DataT, string | UnpackedIcon>;
     const getDefinition = (row: DataT, info: Parameters<IconAccessor>[1]) =>
-      this.getInstanceIconDef(props.getIcon(row, info));
+      this.getInstanceIconDef(
+        (props.getIcon as AccessorFunction<DataT, string | UnpackedIcon>)(row, info)
+      );
     const accessors = {
       iconOffset: (row: DataT, info: Parameters<IconAccessor>[1]) =>
         getDefinition(row, info).slice(0, 2),

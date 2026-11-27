@@ -4,7 +4,7 @@
 
 import Viewport from '../viewports/viewport';
 
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {pixelsToWorld, fovyToAltitude} from '@math.gl/geospatial/web-mercator';
 import {getProjectionParameters} from '../utils/math-utils';
 

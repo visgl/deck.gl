@@ -97,9 +97,11 @@ export function watchFlightData(
       clearInterval(replayTimer);
       replayTimer = undefined;
       onSnapshot(snapshot, 'live');
-    } catch {
+    } catch (error) {
       if (controller.signal.aborted) return;
       startReplay();
+      // Browser fetch rejects network and CORS failures with TypeError.
+      if (error instanceof TypeError) return;
     }
     pollTimer = setTimeout(poll, 60000);
   };

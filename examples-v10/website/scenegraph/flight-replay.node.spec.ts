@@ -29,3 +29,19 @@ test('flight fallback advances twice, loops, and stops when live polling recover
     vi.useRealTimers();
   }
 });
+
+test('network or CORS errors stop polling while replay continues', async () => {
+  vi.useFakeTimers();
+  const fetchData = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+  const frames = vi.fn();
+  const stop = watchFlightData(snapshot as FlightSnapshot, fetchData, frames);
+  try {
+    await vi.advanceTimersByTimeAsync(120000);
+    expect(fetchData).toHaveBeenCalledOnce();
+    expect(frames.mock.calls.length).toBeGreaterThan(1);
+    expect(frames.mock.lastCall?.[1]).toBe('replay');
+  } finally {
+    stop();
+    vi.useRealTimers();
+  }
+});

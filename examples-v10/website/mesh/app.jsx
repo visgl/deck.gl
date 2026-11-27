@@ -4,7 +4,7 @@
 
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import {tableFromArrays} from 'apache-arrow';
 import {OrbitView, DirectionalLight, LightingEffect, AmbientLight} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
@@ -73,9 +73,9 @@ export default function App({device}) {
       mesh: MESH_URL,
       loadOptions: {obj: {shape: 'mesh'}},
       coordinateSystem: 'cartesian',
-      getPosition: {sql: 'ARRAY_FLOAT64(x, y)'},
+      getPosition: {sql: 'ARRAY[x, y]'},
       getColor: {sql: 'RGBA8(red, 0.5, blue, 1)'},
-      getOrientation: d => [d.yaw, 0, -90]
+      getOrientation: {sql: 'ARRAY_FLOAT32(yaw, 0, -90)'}
     }),
     // only needed when using shadows - a plane for shadows to drop on
     new SolidPolygonLayer({

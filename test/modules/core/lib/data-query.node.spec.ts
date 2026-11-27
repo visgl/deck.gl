@@ -43,6 +43,21 @@ test('query reloads a URL only when its query changes', async () => {
   expect(fetch).toHaveBeenCalledTimes(2 * initialFetchCount);
 });
 
+test('layer query groups URL data through the loaders.gl scan', async () => {
+  const layer = new QueryLayer({
+    data: 'https://example.test/visits.csv',
+    loaders: [CSVLoader],
+    loadOptions: {core: {fetch: async () => new Response('hex,count\na,2\nb,7\na,3\n')}},
+    query: 'SELECT hex, SUM(count) AS visits FROM data GROUP BY hex'
+  });
+  Object.assign(layer, {context: {}});
+  const state = new LayerState({attributeManager: null, layer});
+  state.setAsyncProps(layer.props);
+  await vi.waitFor(() =>
+    expect(Array.from(state.getAsyncProp('data').getChild('visits'))).toEqual([5, 7])
+  );
+});
+
 test.each([false, true])('query works with Arrow table data (promised: %s)', async promised => {
   const table = tableFromArrays({value: [1, 2], label: ['first', 'second']});
   const data = promised ? Promise.resolve(table) : table;

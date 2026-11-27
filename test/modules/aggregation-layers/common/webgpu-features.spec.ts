@@ -390,10 +390,10 @@ test('Grid geometry clipping uses the aggregation coordinate frame', async ({ski
 test('Grid globe clipping supplies flat Mercator bounds', async ({skip}) => {
   const device = await getWebGPUTestDevice();
   if (!device) return skip();
-  const {LayerManager, _GlobeViewport, WebMercatorViewport} = await import('@deck.gl/core');
+  const {LayerManager, GlobeViewport, WebMercatorViewport} = await import('@deck.gl/core');
   const {ClipExtension} = await import('@deck.gl/extensions');
   const manager = new LayerManager(device, {
-    viewport: new _GlobeViewport({width: 100, height: 100, longitude: 10, latitude: 20, zoom: 0})
+    viewport: new GlobeViewport({width: 100, height: 100, longitude: 10, latitude: 20, zoom: 0})
   });
   const layer = new GridLayer({
     data: [[10, 20]],

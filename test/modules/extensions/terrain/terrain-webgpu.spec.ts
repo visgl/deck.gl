@@ -18,7 +18,7 @@ import {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {registerLoaders} from '@loaders.gl/core';
 import {GLTFLoader} from '@loaders.gl/scene/gltf';
 import {Geometry} from '@luma.gl/engine';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {
   PathLayer,
   ScatterplotLayer,
@@ -240,7 +240,7 @@ function createTerrain(height: (x: number, y: number) => number, draw = false, o
     _instanced: false,
     getPosition: [0, 0, 0],
     getColor: [0, 0, 0],
-    material: false,
+    material: {ambient: 1, diffuse: 0, specularColor: [0, 0, 0]},
     operation: operation ?? (draw ? 'terrain+draw' : 'terrain'),
     parameters: {depthWriteEnabled: true, cullMode: 'none'}
   });
@@ -361,6 +361,20 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
         terrain
       );
       expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
+    });
+
+  if (backend === 'webgpu')
+    it('applies terrain opacity to the draped cover', async () => {
+      const terrain = createTerrain(() => 40, true);
+      const props = {
+        extensions: [new TerrainExtension()],
+        terrainDrawMode: 'drape' as const
+      };
+      const opaque = await renderFrame(props, false, 0, terrain);
+      const faded = await renderFrame(props, false, 0, terrain.clone({opacity: 0.5}));
+      const brightness = totalBrightness(opaque);
+      expect(brightness).toBeGreaterThan(1000);
+      expect(totalBrightness(faded) / brightness).toBeCloseTo(Math.pow(0.5, 1 / 2.2), 2);
     });
 
   it('encodes terrain picking only when the terrain is pickable', async () => {

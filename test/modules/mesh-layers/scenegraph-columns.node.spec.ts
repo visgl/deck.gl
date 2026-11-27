@@ -191,7 +191,7 @@ test('SQL transform columns preserve matrix precedence and null matrix fallbacks
   expect(layer.props.getScale).toEqual([1, 1, 1]);
   expect(layer.props.getTranslation).toEqual([0, 0, 0]);
   expect(layer.props.getTransformMatrix).toEqual([]);
-  const table = evaluateAccessorQueries(data, expressions, undefined);
+  const {table} = evaluateAccessorQueries(data, expressions, undefined);
   const columns = Object.fromEntries(
     Object.keys(expressions).map(name => [name, table.getChild(name)])
   );

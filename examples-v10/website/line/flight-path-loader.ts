@@ -4,7 +4,7 @@
 
 import {Table, Utf8, vectorFromArray} from 'apache-arrow';
 import type {LoaderWithParser} from '@loaders.gl/core/loader-utils';
-import {decodePolyline, positionVector} from './polyline-arrow-loader';
+import {decodePolyline, positionVector} from './polyline';
 
 /** Decodes the example's tab-separated metadata and paired polyline streams. */
 function parseFlightPaths(text: string): Table {

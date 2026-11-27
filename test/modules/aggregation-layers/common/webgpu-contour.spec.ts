@@ -305,7 +305,7 @@ test('Contour compute updates bins when the data filter range changes', async ({
   });
 });
 
-test('Contour keeps rendering extensions on CPU contour lines', async ({skip}) => {
+test('Contour keeps rendering extensions on contour lines with GPU binning', async ({skip}) => {
   const device = await getWebGPUTestDevice();
   if (!device) return skip();
   const extension = new PathStyleExtension({dash: true});
@@ -329,8 +329,9 @@ test('Contour keeps rendering extensions on CPU contour lines', async ({skip}) =
           contours: [{threshold: 0.5}],
           extensions: [extension]
         },
-        onAfterUpdate({layer}) {
-          expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+        async onAfterUpdate({layer}) {
+          expect(layer.state.aggregator).toBeInstanceOf(WebGPUAggregator);
+          await vi.waitFor(() => expect(layer.state.aggregator.isLoaded).toBe(true));
           const [lines] = ContourLayer.prototype.renderLayers.call(layer) as any[];
           expect(lines.props.extensions).toEqual([extension]);
         }

@@ -31,7 +31,7 @@ const deckOverlay = new DeckOverlay({
       // Sample row: Sahnewal (LUH), scalerank 9, longitude 75.95707224036518, latitude 30.850359856170176
       data: AIRPORTS,
       loaders: [JSONTableLoader],
-      getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
+      getPosition: {sql: 'ARRAY[longitude, latitude]'},
       getRadius: {sql: 'FLOAT32(11 - scalerank)'},
       radiusMinPixels: 2,
       radiusScale: 2000,
@@ -48,7 +48,7 @@ const deckOverlay = new DeckOverlay({
       data: AIRPORTS,
       loaders: [JSONTableLoader],
       query: 'SELECT * WHERE scalerank < 4',
-      getTargetPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
+      getTargetPosition: {sql: 'ARRAY[longitude, latitude]'},
       getSourcePosition: [-0.4531566, 51.4709959],
       getSourceColor: [0, 128, 200],
       getTargetColor: [200, 0, 80],

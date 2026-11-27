@@ -205,7 +205,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
-      const text = getIcon(object, objectInfo) as string; // forwarded getText
+      const text = (getIcon as AccessorFunction<DataT, string>)(object, objectInfo); // forwarded getText
       const offsets = getIconOffsets(object, objectInfo); // text length x 2
       if (text) {
         let j = 0;

@@ -5,7 +5,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {isArrowTable} from '@math.gl/core/arrow';
 import type {Table} from 'apache-arrow';
@@ -82,7 +82,7 @@ export default function App({
         data: airports,
         loaders: [JSONTableLoader],
         radiusScale: 20,
-        getPosition: {sql: 'ARRAY[coordinates[1], coordinates[2]]'},
+        getPosition: {sql: 'coordinates::ARRAY[2]'},
         getFillColor: [255, 140, 0],
         getRadius: {
           sql: "CASE WHEN type = 'major' THEN 100 WHEN type = 'small' THEN 30 ELSE 60 END"
@@ -101,12 +101,8 @@ export default function App({
           }
         },
         opacity: 0.8,
-        getSourcePosition: {
-          sql: 'start'
-        },
-        getTargetPosition: {
-          sql: '"end"'
-        },
+        getSourcePosition: {sql: 'start::ARRAY[3]'},
+        getTargetPosition: {sql: '"end"::ARRAY[3]'},
         getColor: {
           sql: `\
             RGBA8(

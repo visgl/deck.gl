@@ -297,7 +297,7 @@ For arrays and callback results, the rgba color is in the format of `[r, g, b, [
 An Arrow vector supplies one value per object. See [color columns](../../developer-guide/using-with-arrow.md#colors) for requirements.
 
 
-#### `getOrientation` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getorientation}
+#### `getOrientation` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors) | arrow.Vector, optional) {#getorientation}
 
 - Default: `[0, 0, 0]`
 
@@ -305,10 +305,10 @@ Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in de
 
 * If an array is provided, it is used as the orientation for all objects.
 * If a function is provided, it is called on each object to retrieve its orientation.
-* An Arrow fixed-size list vector supplies three numeric components per object.
-* With Arrow data, `{sql: 'FLOAT32x3(pitch, heading, roll)'}` evaluates an orientation per row.
+* See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column accessors.
+* With Arrow data, `{sql: 'FLOAT32x3(pitch, yaw, roll)'}` evaluates an orientation per row.
 
-#### `getScale` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getscale}
+#### `getScale` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors) | arrow.Vector, optional) {#getscale}
 
 - Default: `[1, 1, 1]`
 
@@ -316,13 +316,10 @@ Scaling factor on the mesh along each axis.
 
 * If an array is provided, it is used as the scale for all objects.
 * If a function is provided, it is called on each object to retrieve its scale.
-* An Arrow fixed-size list vector supplies three numeric components per object.
+* See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column accessors.
 * With Arrow data, `{sql: 'FLOAT32x3(size, size, size)'}` evaluates a scale per row.
 
-Transform vectors must match the data length. Null rows or components use the
-accessor default. `getTransformMatrix` continues to override both accessors.
-
-#### `getTranslation` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettranslation}
+#### `getTranslation` ([Accessor&lt;number[3]&gt;](../../developer-guide/using-layers.md#accessors) | arrow.Vector, optional) {#gettranslation}
 
 - Default: `[0, 0, 0]`
 
@@ -330,9 +327,10 @@ Translation of the mesh along each axis. Offset from the center position given b
 
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.
+* See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column accessors.
 * An Arrow triple or `{sql: 'FLOAT32x3(dx, dy, dz)'}` supplies a translation per row.
 
-#### `getTransformMatrix` ([Accessor&lt;number[16]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettransformmatrix}
+#### `getTransformMatrix` ([Accessor&lt;number[16]&gt;](../../developer-guide/using-layers.md#accessors) | arrow.Vector, optional) {#gettransformmatrix}
 
 - Default: `null`
 
@@ -342,7 +340,9 @@ Explicitly define a 4x4 column-major model matrix for the mesh. If provided, wil
 * If an array is provided, it is used as the transform matrix for all objects.
 * If a function is provided, it is called on each object to retrieve its transform matrix.
 
-Arrow fixed-size lists of 16 numeric components and SQL expressions are supported. Matrices
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column accessors.
+Transform columns must match the data length. Orientation, scale, and translation use triples, with
+null rows or components using the accessor default. Transform matrices use 16 numeric components. Matrices
 use column-major order, for example:
 
 ```typescript

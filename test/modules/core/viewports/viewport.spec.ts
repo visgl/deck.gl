@@ -5,13 +5,8 @@
 import {test, expect, vi} from 'vitest';
 import {createTestCRS} from './test-crs';
 import {vecNormalized} from '../../../utils/utils';
-import {
-  OrthographicViewport,
-  Viewport,
-  WebMercatorViewport,
-  _GlobeViewport as GlobeViewport
-} from 'deck.gl';
-import {Matrix4, Vector3} from '@math.gl/core';
+import {OrthographicViewport, Viewport, WebMercatorViewport, GlobeViewport} from 'deck.gl';
+import {Matrix4, Vector3} from '@math.gl/core/matrix';
 
 /* eslint-disable */
 const TEST_VIEWPORTS = [
