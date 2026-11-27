@@ -12,8 +12,6 @@ const FALLBACK_CLASS = 'deck-pseudo-fullscreen';
 const SCROLL_LOCK = 'deck-fullscreen-scroll-lock';
 /** Active fallback per document, so only one widget owns its scroll lock. */
 const fallbackOwners = new WeakMap<Document, FullscreenWidget>();
-/** Candidates for keyboard focus inside the expanded container. */
-const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex]';
 
 export type FullscreenWidgetProps = WidgetProps & {
   id?: string;
@@ -61,10 +59,8 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   private root: HTMLElement | null = null;
   /** Document on which the widget listens for native fullscreen changes. */
   private ownerDocument: Document | null = null;
-  /** Invalidates earlier native requests when the widget exits or is removed. */
-  private generation = 0;
-  /** Whether a native fullscreen request is still settling. */
-  private pending = false;
+  /** Cancelled on exit or removal so a native request that settles later cannot enter fullscreen. */
+  private pending: {cancelled: boolean} | null = null;
   /** Container this widget successfully put into native fullscreen. */
   private nativeTarget: HTMLElement | null = null;
   /** Cleanup for the active fallback, or null outside fallback. */
@@ -77,7 +73,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
 
   /** Release fullscreen and detach listeners when the widget is removed. */
   onRemove() {
-    ++this.generation;
+    if (this.pending) this.pending.cancelled = true;
     this.ownerDocument?.removeEventListener('fullscreenchange', this.handleNativeChange);
     this.ownerDocument = null;
     const native = this.nativeTarget;
@@ -144,6 +140,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
       this.closeFallback();
     }
     if (!native) this.nativeTarget = null;
+    if (native && this.pending?.cancelled) return;
     this.setFullscreen(native);
   }
 
@@ -169,8 +166,8 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
 
     const doc = container.ownerDocument;
     fallbackOwners.get(doc)?.closeFallback();
-    const generation = ++this.generation;
-    this.pending = true;
+    const request = {cancelled: false};
+    this.pending = request;
     try {
       if (container.requestFullscreen) {
         try {
@@ -178,7 +175,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
         } catch {
           // A browser can expose the API but deny fullscreen for this element.
         }
-        if (generation !== this.generation) {
+        if (request.cancelled) {
           if (doc.fullscreenElement === container) await doc.exitFullscreen();
           return;
         }
@@ -190,13 +187,13 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
       }
       if (container.isConnected && !doc.fullscreenElement) this.openFallback(container);
     } finally {
-      this.pending = false;
+      this.pending = null;
     }
   }
 
   /** Exit the active fullscreen mode and cancel pending entry. */
   async exitFullscreen() {
-    ++this.generation;
+    if (this.pending) this.pending.cancelled = true;
     if (this.restoreFallback) {
       this.closeFallback();
       return;
@@ -240,24 +237,12 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     const scrollY = view?.scrollY ?? 0;
     const hadClass = container.classList.contains(FALLBACK_CLASS);
     const locks = [doc.documentElement, doc.body].filter(el => !el.classList.contains(SCROLL_LOCK));
-    const attributes = new Map<string, string | null>();
-    const setAttribute = (name: string, value: string) => {
-      attributes.set(name, container.getAttribute(name));
-      container.setAttribute(name, value);
-    };
-
     for (const element of locks) element.classList.add(SCROLL_LOCK);
     container.classList.add(FALLBACK_CLASS);
-    setAttribute('role', 'dialog');
-    setAttribute('aria-modal', 'true');
-    setAttribute('tabindex', '-1');
-    if (!container.hasAttribute('aria-label') && !container.hasAttribute('aria-labelledby')) {
-      setAttribute('aria-label', 'Fullscreen view');
-    }
 
     let popover = false;
     if (typeof container.showPopover === 'function' && !container.hasAttribute('popover')) {
-      setAttribute('popover', 'manual');
+      container.setAttribute('popover', 'manual');
       try {
         container.showPopover();
         popover = true;
@@ -266,36 +251,10 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
       }
     }
 
-    const focusable = () =>
-      Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-        element =>
-          element.tabIndex >= 0 &&
-          !element.matches(':disabled') &&
-          !element.closest('[inert]') &&
-          element.getClientRects().length > 0 &&
-          view?.getComputedStyle(element).visibility === 'visible'
-      );
-    const focusInside = () => (focusable()[0] || container).focus({preventScroll: true});
-    const onFocus = (event: FocusEvent) => {
-      if (!container.contains(event.target as Node)) focusInside();
-    };
     const onKey = (event: KeyboardEvent) => {
-      if (event.defaultPrevented) return;
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape' && !event.defaultPrevented) {
         event.preventDefault();
         this.closeFallback();
-      } else if (event.key === 'Tab') {
-        const elements = focusable();
-        const first = elements[0];
-        const last = elements[elements.length - 1];
-        if (
-          !first ||
-          doc.activeElement === container ||
-          doc.activeElement === (event.shiftKey ? first : last)
-        ) {
-          event.preventDefault();
-          ((event.shiftKey ? last : first) || container).focus({preventScroll: true});
-        }
       }
     };
     const onToggle = (event: Event) => {
@@ -307,31 +266,29 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
         this.closeFallback();
     };
 
-    doc.addEventListener('keydown', onKey);
-    doc.addEventListener('focusin', onFocus);
+    container.addEventListener('keydown', onKey);
     container.addEventListener('toggle', onToggle);
     this.restoreFallback = () => {
-      doc.removeEventListener('keydown', onKey);
-      doc.removeEventListener('focusin', onFocus);
+      const restoreFocus = container.contains(doc.activeElement) || doc.activeElement === doc.body;
+      container.removeEventListener('keydown', onKey);
       container.removeEventListener('toggle', onToggle);
-      if (popover && container.matches(':popover-open')) container.hidePopover();
+      if (popover) {
+        if (container.matches(':popover-open')) container.hidePopover();
+        container.removeAttribute('popover');
+      }
       if (!hadClass) container.classList.remove(FALLBACK_CLASS);
       for (const element of locks) element.classList.remove(SCROLL_LOCK);
-      for (const [name, value] of attributes) {
-        if (value === null) container.removeAttribute(name);
-        else container.setAttribute(name, value);
-      }
       fallbackOwners.delete(doc);
       if (container.isConnected) {
         view?.scrollTo({left: scrollX, top: scrollY, behavior: 'instant'});
-        if (previousFocus?.isConnected) previousFocus.focus?.({preventScroll: true});
+        if (restoreFocus && previousFocus?.isConnected)
+          previousFocus.focus?.({preventScroll: true});
       }
     };
     this.setFullscreen(true);
     if (fallbackOwners.get(doc) === this) {
       const button = this.root?.querySelector('button');
       if (button && container.contains(button)) button.focus({preventScroll: true});
-      else focusInside();
     }
   }
 }

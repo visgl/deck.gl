@@ -143,14 +143,16 @@
   z-index: 2147483647;
 }
 
-.deck-widget-fullscreen .deck-widget-button {
-  min-width: 46px;
-  min-height: 46px;
-}
+@media (pointer: coarse) {
+  .deck-widget-fullscreen .deck-widget-button {
+    min-width: 46px;
+    min-height: 46px;
+  }
 
-.deck-widget-fullscreen .deck-widget-icon-button {
-  min-width: 44px;
-  min-height: 44px;
+  .deck-widget-fullscreen .deck-widget-icon-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 /* Zoom styles */
