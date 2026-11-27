@@ -216,6 +216,8 @@ To use pre-bundled scripts:
 new deck.TerrainLayer({});
 ```
 
+For data below the WGS84 ellipsoid, set [`MapView.minimumElevation`](https://deck.gl/next/docs/api-reference/core/map-view.md#minimumelevation) to the lowest elevation you need to see in top-down views.
+
 ## Properties[​](#properties "Direct link to Properties")
 
 When in Tiled Mode, inherits from all [TileLayer](https://deck.gl/next/docs/api-reference/geo-layers/tile-layer.md) properties. Forwards `wireframe` property to [SimpleMeshLayer](https://deck.gl/next/docs/api-reference/mesh-layers/simple-mesh-layer.md).

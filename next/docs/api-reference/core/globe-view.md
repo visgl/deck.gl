@@ -55,6 +55,10 @@ Scaler for the near plane, 1 unit equals to the height of the viewport. Default 
 
 Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default to `2`. Overwrites the `far` parameter.
 
+#### `minimumElevation` (number, optional)[​](#minimumelevation "Direct link to minimumelevation")
+
+Lowest visible elevation in meters when `GlobeView` switches to Web Mercator above zoom 12. See [`MapView.minimumElevation`](https://deck.gl/next/docs/api-reference/core/map-view.md#minimumelevation) for defaults and clipping behavior.
+
 #### `parameters` (object, optional)[​](#parameters "Direct link to parameters")
 
 `GlobeView` enables back-face culling by default with `parameters: {cullMode: 'back'}`. To override this behavior, supply the desired GPU parameters to the constructor:

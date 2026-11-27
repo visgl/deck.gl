@@ -54,6 +54,8 @@ The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, 
 
 ### Views[​](#views "Direct link to Views")
 
+* [`MapView`](https://deck.gl/next/docs/api-reference/core/map-view.md#minimumelevation) adds `minimumElevation` to keep below-ellipsoid terrain and 3D Tiles visible in top-down views. Below-ellipsoid camera targets also extend the automatic far plane.
+
 * [`GlobeView`](https://deck.gl/next/docs/api-reference/core/globe-view.md), [`GlobeViewport`](https://deck.gl/next/docs/api-reference/core/globe-viewport.md) and [`GlobeController`](https://deck.gl/next/docs/api-reference/core/globe-controller.md) are now officially supported and no longer experimental.
 
 ### Extensions[​](#extensions "Direct link to Extensions")
