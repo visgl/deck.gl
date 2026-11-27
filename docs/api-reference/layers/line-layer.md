@@ -160,38 +160,6 @@ const layer = new LineLayer({
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
-
-  <TabItem value="query" label="Query">
-
-```js
-import {Deck} from '@deck.gl/core';
-import {sqlParser} from '@deck.gl/core/sql';
-import {LineLayer} from '@deck.gl/layers';
-import {tableFromArrays} from 'apache-arrow';
-
-const data = tableFromArrays({
-  sourceLongitude: [-122.4],
-  sourceLatitude: [37.74],
-  targetLongitude: [-122.41],
-  targetLatitude: [37.75]
-});
-
-new Deck({
-  sqlParser,
-  layers: [
-    new LineLayer({
-      data,
-      getSourcePosition: {sql: 'FLOAT64x2(sourceLongitude, sourceLatitude)'},
-      getTargetPosition: {sql: 'FLOAT64x2(targetLongitude, targetLatitude)'}
-    })
-  ]
-});
-```
-
-See [Querying Arrow data](../../developer-guide/using-with-arrow.md#querying-arrow-data)
-for filtering rows and writing accessor expressions.
-
-  </TabItem>
 </Tabs>
 
 
@@ -319,8 +287,8 @@ An Arrow vector supplies one value per object. See [scalar columns](../../develo
 
 GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
 
-- `sourcePositions` – `float32x3` – Source positions in XYZ order.
-- `targetPositions` – `float32x3` – Target positions in XYZ order.
+- `sourcePositions` – `float32x2` or `float32x3` – XY or XYZ positions. Packed XY positions have zero elevation.
+- `targetPositions` – `float32x2` or `float32x3` – XY or XYZ positions. Packed XY positions have zero elevation.
 - `colors` – `unorm8x4` – Packed RGBA colors.
 - `widths` – `float32`
 

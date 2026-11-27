@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Accessor, Layer, LayerContext, LayerExtension} from '@deck.gl/core';
+import {type ArrowAccessor, Layer, LayerContext, LayerExtension} from '@deck.gl/core';
 import {collisionPlugin} from './shader-module';
 import CollisionFilterEffect from './collision-filter-effect';
 
 const defaultProps = {
-  getCollisionPriority: {type: 'accessor', value: 0},
+  getCollisionPriority: {type: 'accessor', arrow: 'row', value: 0},
   collisionEnabled: true,
   collisionGroup: {type: 'string', value: 'default'},
   collisionTestProps: {}
@@ -15,9 +15,9 @@ const defaultProps = {
 
 export type CollisionFilterExtensionProps<DataT = any> = {
   /**
-   * Accessor for collision priority. Must return a number in the range -1000 -> 1000. Features with higher values are shown preferentially.
+   * Collision priority as a constant, callback, Arrow column, or SQL expression. Values must be in the range -1000 -> 1000. Features with higher values are shown preferentially.
    */
-  getCollisionPriority?: Accessor<DataT, number>;
+  getCollisionPriority?: ArrowAccessor<DataT, number>;
 
   /**
    * Enable/disable collisions. If collisions are disabled, all objects are rendered.

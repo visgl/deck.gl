@@ -124,16 +124,22 @@ export default class ComponentState<ComponentT extends Component> {
     for (const propName in resolvedValues) {
       const value = resolvedValues[propName];
       this._createAsyncPropData(propName, defaultValues[propName]);
-      this._updateAsyncProp(propName, value);
-      // Use transformed value
+      /** Whether this input finished resolving without waiting for a promise or stream. */
+      const resolved = this._updateAsyncProp(propName, value);
+      // Use transformed value before notifying callbacks that read component props.
       resolvedValues[propName] = this.getAsyncProp(propName);
+      if (resolved) {
+        this._onResolve(propName, resolvedValues[propName]);
+      }
     }
 
     for (const propName in originalValues) {
       const value = originalValues[propName];
       // Makes sure a record exists for this prop
       this._createAsyncPropData(propName, defaultValues[propName]);
-      this._updateAsyncProp(propName, value);
+      if (this._updateAsyncProp(propName, value)) {
+        this._onResolve(propName, this.getAsyncProp(propName));
+      }
     }
   }
 
@@ -161,10 +167,11 @@ export default class ComponentState<ComponentT extends Component> {
   protected _onError(propName: string, error: Error) {} // eslint-disable-line @typescript-eslint/no-empty-function
 
   // Intercept strings (URLs) and Promises and activates loading and prop rewriting
-  private _updateAsyncProp(propName: string, value: any) {
+  /** Updates a prop and reports whether it resolved synchronously. */
+  private _updateAsyncProp(propName: string, value: any): boolean {
     const requestChanged = this._didAsyncRequestChange(propName, value);
     if (!this._didAsyncInputValueChange(propName, value) && !requestChanged) {
-      return;
+      return false;
     }
 
     // interpret value string as url and start a new load tracked by a promise
@@ -177,16 +184,17 @@ export default class ComponentState<ComponentT extends Component> {
     // interprets promise and track the "loading"
     if (value instanceof Promise) {
       this._watchPromise(propName, value);
-      return;
+      return false;
     }
 
     if (isAsyncIterable(value)) {
       this._resolveAsyncIterable(propName, value); // eslint-disable-line @typescript-eslint/no-floating-promises
-      return;
+      return false;
     }
 
     // else, normal, non-async value. Just store value for now
     this._setPropValue(propName, value);
+    return true;
   }
 
   // Whenever async props are changing, we need to make a copy of oldProps
@@ -346,20 +354,22 @@ export default class ComponentState<ComponentT extends Component> {
             }
             return normalizeArrowBatch(batch as import('apache-arrow').RecordBatch, arrowRuntime);
           });
-          if (_dataLoadOptions === 'snapshots') {
-            arrowBatches = [...batches];
+          const schema = batches[0]?.schema ?? normalizeArrowSchema(arrow.schema, arrowRuntime);
+          if (dataTransform) {
+            lastResult = dataTransform(new Table(schema, batches), lastResult);
           } else {
-            // Preserve Arrow columnar storage without converting to row objects.
-            arrowBatches.push(...batches);
+            if (_dataLoadOptions === 'snapshots') {
+              arrowBatches = batches;
+            } else {
+              // Preserve Arrow columnar storage without converting to row objects.
+              arrowBatches.push(...batches);
+            }
+            lastResult = new Table(schema, arrowBatches);
           }
-          const table = new Table(
-            batches[0]?.schema ?? normalizeArrowSchema(arrow.schema, arrowRuntime),
-            arrowBatches
-          );
-          lastResult = table;
-          this._setAsyncPropValue(propName, table, loadCount);
+          if (!this.component || loadCount !== asyncProp.pendingLoadCount) return;
+          this._setAsyncPropValue(propName, lastResult, loadCount);
           if (this.component && loadCount === asyncProp.pendingLoadCount) {
-            this._onProgress(propName, table);
+            this._onProgress(propName, lastResult);
           }
           continue;
         }

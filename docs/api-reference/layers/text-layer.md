@@ -257,7 +257,7 @@ Advance options for fine tuning the appearance and performance of the generated 
 Options:
 
 * `fontSize` (number): Font size in pixels. Default is `64`. This option is only applied for generating `fontAtlas`, it does not impact the size of displayed text labels. Larger `fontSize` will give you a sharper look when rendering text labels with very large font sizes. But larger `fontSize` requires more time and space to generate the `fontAtlas`.
-* `buffer` (number): Whitespace buffer around each side of the character. Default is `4`. In general, bigger `fontSize` requires bigger `buffer`. Increase `buffer` will add more space between each character when layout `characterSet` in `fontAtlas`. This option could be tuned to provide sufficient space for drawing each character and avoiding overlapping of neighboring characters.
+* `buffer` (number): Whitespace buffer around each side of the character. Default is `4`. In general, bigger `fontSize` requires bigger `buffer`. Increase `buffer` will add more space between each character when layout `characterSet` in `fontAtlas`. This option could be tuned to provide sufficient space for drawing each character and avoiding overlapping of neighboring characters. With `sdf: true`, padding is at least `ceil(radius * (1 - cutoff))` pixels (9 with the defaults), so the distance field is not clipped.
 * `sdf` (boolean): Flag to enable / disable `sdf`. Default is `false`. [`sdf` (Signed Distance Fields)](http://cs.brown.edu/people/pfelzens/papers/dt-final.pdf) will provide a sharper look when rendering with very large or small font sizes. `TextLayer` integrates with [`TinySDF`](https://github.com/mapbox/tiny-sdf) which implements the `sdf` algorithm.
 * `radius` (number): How many pixels around the glyph shape to use for encoding distance. Default is `12`. Bigger radius yields higher quality outcome. Only applies when `sdf: true`.
 * `cutoff` (number): How much of the radius (relative) is used for the inside part the glyph. Default is `0.25`. Bigger `cutoff` makes character thinner. Smaller `cutoff` makes character look thicker. Only applies when `sdf: true`.
@@ -355,6 +355,12 @@ Width of outline around the text, relative to the font size. Only effective if `
 
 Color of outline around the text, in `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
+
+With Deck's [`normalizedColors`](../core/deck.md#normalizedcolors), plain arrays for `outlineColor` on a top-level layer use 0–1 channels. Built-in defaults and byte typed arrays retain their byte encoding.
+
+On top-level TextLayer, Deck's [`normalizedColors`](../core/deck.md#normalizedcolors)
+also applies to plain arrays and callback results for glyph, background, and border colors.
+Omitted alpha is opaque.
 
 ### Data Accessors
 
@@ -702,7 +708,10 @@ TextLayer.fontAtlasCacheLimit = 10;
 // ... rest of the application
 ```
 
-It is recommended to set `fontAtlasCacheLimit` once in your application since it recreates the cache which removes existing cached `fontAtlas`.
+Set `fontAtlasCacheLimit` once, before creating any TextLayer. Each assignment clears cached atlases,
+which are rebuilt on next use. The limit must be at least 3.
+
+This setting controls TextLayer's cache. luma.gl manages its shared font atlas cache separately.
 
 ### Content Box Behavior
 

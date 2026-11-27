@@ -6,7 +6,6 @@ const packageRoot = dirname(fileURLToPath(import.meta.url));
 const lumaModules = join(packageRoot, '../luma.gl/modules');
 
 const LUMA_ALIASES_LOCAL = {
-  '@luma.gl/constants': `${lumaModules}/constants/src`,
   '@luma.gl/core': `${lumaModules}/core/src`,
   '@luma.gl/engine': `${lumaModules}/engine/src`,
   '@luma.gl/core/webgl': `${lumaModules}/core/src/webgl`,
@@ -20,8 +19,8 @@ const useLocalLuma = false;
 /** @type {OcularConfig} */
 const config = {
   lint: {
-    paths: ['modules', 'test', 'examples', 'examples-arrow']
-    // paths: ['modules', 'test', 'examples', 'examples-arrow', 'website']
+    paths: ['modules', 'test', 'examples', 'examples-v10']
+    // paths: ['modules', 'test', 'examples', 'examples-v10', 'website']
   },
 
   babel: false,

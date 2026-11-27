@@ -156,33 +156,6 @@ const layer = new ScatterplotLayer({
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
-
-  <TabItem value="query" label="Query">
-
-```js
-import {Deck} from '@deck.gl/core';
-import {sqlParser} from '@deck.gl/core/sql';
-import {ScatterplotLayer} from '@deck.gl/layers';
-import {tableFromArrays} from 'apache-arrow';
-
-const data = tableFromArrays({longitude: [-122.4], latitude: [37.74], population: [100]});
-
-new Deck({
-  sqlParser,
-  layers: [
-    new ScatterplotLayer({
-      data,
-      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
-      getRadius: {sql: 'FLOAT32(SQRT(population))'}
-    })
-  ]
-});
-```
-
-See [Querying Arrow data](../../developer-guide/using-with-arrow.md#querying-arrow-data)
-for filtering rows and writing accessor expressions.
-
-  </TabItem>
 </Tabs>
 
 
@@ -297,7 +270,7 @@ If `true`, circles are rendered with smoothed edges. If `false`, circles are ren
 
 ### Data Accessors
 
-Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
+Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations). When extensions are active, Arrow and SQL accessors use the same row-based attribute path as callbacks. If you supply Arrow columns without data rows, the column length supplies the instance count and callbacks can use the row index.
 
 #### `getPosition` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}
 
@@ -335,7 +308,7 @@ This prop supplies the fallback for `getLineColor` and `getFillColor`.
 
 * Default: `[0, 0, 0, 255]`
 
-For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Channels use the 0–255 range by default. See [Deck’s `normalizedColors`](../core/deck.md#normalizedcolors) to use 0–1 plain arrays.
 
 * If an array is provided, it is used as the filled color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
@@ -349,7 +322,7 @@ The default value comes from `getColor` when supplied.
 
 * Default: `[0, 0, 0, 255]`
 
-For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Channels use the 0–255 range by default. See [Deck’s `normalizedColors`](../core/deck.md#normalizedcolors) to use 0–1 plain arrays.
 
 * If an array is provided, it is used as the outline color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.

@@ -3,11 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {LightingEffect} from '@deck.gl/core';
+import {AmbientLight, LightingEffect} from '@deck.gl/core';
 import {_CameraLight as CameraLight, DirectionalLight, PointLight} from '@deck.gl/core';
 import {MapView, LayerManager, WebMercatorViewport} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
-import {equals, Matrix4} from '@math.gl/core';
+import {equals, Matrix4} from '@math.gl/core/matrix';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils/vitest';
 
@@ -80,6 +80,42 @@ test('LightingEffect#getShaderModuleProps', () => {
 
   lightingEffect.cleanup(effectContext);
   layerManager.finalize();
+});
+
+test('LightingEffect uses Deck color conventions for custom light colors', () => {
+  const directional = new DirectionalLight({color: [0.5, 0.25, 1]});
+  const ambient = new AmbientLight({color: [1, 0.5, 0.25]});
+  const point = new PointLight({color: [0.25, 1, 0.5]});
+  const defaultDirectional = new DirectionalLight();
+  const effect = new LightingEffect({ambient, directional, point, defaultDirectional});
+  const layer = new PolygonLayer();
+  const manager = new LayerManager(device, {viewport: testViewport});
+  manager.setProps({normalizedColors: true});
+  manager.setLayers([layer]);
+
+  const getColors = () =>
+    effect.getShaderModuleProps(layer, {}).lighting.lights.map(light => light.color);
+  expect(getColors()).toEqual([
+    [1, 0.5, 0.25],
+    [0.25, 1, 0.5],
+    [0.5, 0.25, 1],
+    [1, 1, 1]
+  ]);
+  expect(
+    new LightingEffect().getShaderModuleProps(layer, {}).lighting.lights.map(light => light.color)
+  ).toEqual([
+    [1, 1, 1],
+    [1, 1, 1],
+    [1, 1, 1]
+  ]);
+  manager.setProps({normalizedColors: false});
+  expect(getColors()).toEqual([
+    [1 / 255, 0.5 / 255, 0.25 / 255],
+    [0.25 / 255, 1 / 255, 0.5 / 255],
+    [0.5 / 255, 0.25 / 255, 1 / 255],
+    [1, 1, 1]
+  ]);
+  manager.finalize();
 });
 
 test('LightingEffect#setProps toggles shadow resources', () => {

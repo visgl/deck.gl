@@ -4,10 +4,11 @@
 
 import {afterAll, beforeAll, expect, test, vi} from 'vitest';
 import {GPUDataEvaluator} from '@luma.gl/graph/gpu-simple-graph';
-import {sqlParser} from '@deck.gl/core/sql';
+import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {device, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {ArrowConverter} from '@deck.gl/core/arrow';
+import {sqlParser} from '@deck.gl/core/sql';
 import {Texture} from '@luma.gl/core';
 import {GPUVectorModel} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
@@ -256,35 +257,83 @@ for (const backend of ['webgl', 'webgpu'] as const) {
   });
 }
 
-test('Scatterplot rejects extensions when entering or updating Arrow mode', async () => {
+test('Scatterplot switches between Arrow columns and row attributes with extensions', async () => {
   const {LayerExtension} = await import('@deck.gl/core');
-  const errors: Error[] = [];
+  const data = [{}, {}];
+  const arrowPositions = positions([
+    [0, 0],
+    [1, 1]
+  ]);
+  const extensions = [new LayerExtension()];
   await testLayerAsync({
     Layer: ScatterplotLayer,
     draw: false,
     testCases: [
-      {props: {data: [{}, {}], getPosition: () => [0, 0]}},
       {
-        updateProps: {
-          getPosition: positions([
-            [0, 0],
-            [1, 1]
-          ]),
-          extensions: [new LayerExtension()]
-        },
-        onAfterUpdate: () => expect(errors.at(-1)?.message).toContain('do not support extensions')
+        props: {data, getPosition: arrowPositions, extensions},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.columns).toBeUndefined();
+          expect(layer.getAttributeManager()).toBeTruthy();
+          expect(typeof layer.props.getPosition).toBe('function');
+        }
       },
-      {updateProps: {extensions: []}},
       {
-        updateProps: {extensions: [new LayerExtension()]},
-        onAfterUpdate: () => expect(errors.at(-1)?.message).toContain('do not support extensions')
+        updateProps: {extensions: []},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.columns).toBeDefined();
+          expect(layer.getAttributeManager()).toBeNull();
+        }
+      },
+      {
+        updateProps: {extensions},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.columns).toBeUndefined();
+          expect(layer.getAttributeManager()).toBeTruthy();
+        }
       }
-    ],
-    onError: error => {
-      errors.push(error);
-    }
+    ]
   });
-  expect(errors).toHaveLength(2);
+});
+
+test('Scatterplot still rejects direct GPUVector columns with extensions', async () => {
+  const {LayerExtension} = await import('@deck.gl/core');
+  const buffer = device.createBuffer({data: new Float32Array([2, 4])});
+  const radii = new GPUVector({
+    type: 'buffer',
+    name: 'radii',
+    buffer,
+    format: 'float32',
+    length: 2,
+    ownsBuffer: false
+  });
+  const errors: Error[] = [];
+  try {
+    await testLayerAsync({
+      Layer: ScatterplotLayer,
+      draw: false,
+      testCases: [
+        {
+          props: {
+            data: [{}, {}],
+            getPosition: [0, 0],
+            radii,
+            extensions: [new LayerExtension()]
+          }
+        }
+      ],
+      onError: error => {
+        errors.push(error);
+      }
+    });
+    expect(errors.length).toBeGreaterThan(0);
+    for (const error of errors) {
+      expect(error.message).toContain('Scatterplot Arrow columns do not support extensions');
+    }
+    expect(buffer.destroyed).toBe(false);
+  } finally {
+    radii.destroy();
+    buffer.destroy();
+  }
 });
 
 for (const backend of ['webgl', 'webgpu'] as const) {
@@ -546,7 +595,14 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         testCases: [
           {props: {getPosition: source, data: {length: 2}}},
           {
-            updateProps: {data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}}},
+            updateProps: {
+              // Replace the Arrow input to exercise conversion rather than chunk reuse.
+              getPosition: positions([
+                [0, 0],
+                [1, 1]
+              ]),
+              data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}}
+            },
             onBeforeUpdate: () => {
               delay = true;
             },
@@ -601,7 +657,14 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         testCases: [
           {props: {getPosition: source, data: {length: 2}}},
           {
-            updateProps: {data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}}},
+            updateProps: {
+              // Replace the Arrow input to exercise conversion rather than chunk reuse.
+              getPosition: positions([
+                [0, 0],
+                [1, 1]
+              ]),
+              data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}}
+            },
             onBeforeUpdate: () => {
               fail = true;
             },
@@ -948,6 +1011,7 @@ for (const backend of ['webgl', 'webgpu']) {
       size: vectorFromArray([4, 9], new Float32()),
       label: vectorFromArray(['Oak', 'Birch'])
     });
+    let firstColumns: ScatterplotLayer['state']['columns'];
     class SQLScatterplotLayer extends ScatterplotLayer {
       static layerName = 'SQLScatterplotLayer';
       initializeState() {
@@ -971,6 +1035,7 @@ for (const backend of ['webgl', 'webgpu']) {
             if (!layer.isLoaded) {
               return;
             }
+            firstColumns = layer.state.columns;
             expect(layer.getNumInstances()).toBe(2);
             const radius = (layer.state.columns as any).prepared.columns.instanceRadius;
             const bytes = await radius.data[0].buffer.readAsync();
@@ -984,6 +1049,20 @@ for (const backend of ['webgl', 'webgpu']) {
             });
             expect(info.object.label).toBe('Birch');
             expect(layer.props.data).toBe(table);
+          }
+        },
+        {
+          title: 'Keep the prepared model while the replacement SQL accessor resolves',
+          updateProps: {getRadius: {sql: 'size * 2'}},
+          onAfterUpdate: async ({layer}) => {
+            expect(layer.state.columns).toBe(firstColumns);
+            expect(layer.getNumInstances()).toBe(2);
+            if (!layer.isLoaded) return;
+            const radius = (layer.state.columns as any).prepared.columns.instanceRadius;
+            const bytes = await radius.data[0].buffer.readAsync();
+            expect(new Float32Array(bytes.buffer, bytes.byteOffset, 2)).toEqual(
+              Float32Array.of(8, 18)
+            );
           }
         }
       ]

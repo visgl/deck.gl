@@ -6,10 +6,12 @@ import {expect, test, vi} from 'vitest';
 import {NullDevice} from '@luma.gl/core/test-utils';
 import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {ScatterplotLayer, type ScatterplotLayerProps} from '@deck.gl/layers';
+import {DataFilterExtension} from '@deck.gl/extensions';
 import {Field, FixedSizeList, Float32, Float64, Int16, Uint8, vectorFromArray} from 'apache-arrow';
 import {validateProps, diffProps} from '../../../modules/core/src/lifecycle/props';
 import {resolveColumns} from '../../../modules/core/src/lib/resolve-columns';
 import {
+  hasScatterplotColumns,
   SCATTERPLOT_COLUMN_DEFINITIONS,
   ScatterplotLayerColumns
 } from '../../../modules/layers/src/scatterplot-layer/scatterplot-layer-columns';
@@ -46,7 +48,7 @@ void checkAccessorTypes;
 test('Scatterplot validates Arrow accessors and compares column identity', () => {
   const layer = new ScatterplotLayer(arrowProps);
   expect(() => validateProps(layer.props)).not.toThrow();
-  expect(resolveColumns(layer.props, SCATTERPLOT_COLUMN_DEFINITIONS).radii).toBe(radii);
+  expect(hasScatterplotColumns(layer.props)).toBe(true);
   expect(diffProps(layer.clone({getRadius: radii}).props, layer.props).propsChanged).toBe(false);
   expect(
     diffProps(layer.clone({getRadius: radii.slice()}).props, layer.props).propsChanged
@@ -63,9 +65,7 @@ test('Arrow accessors select columns without a competing CPU column prop', () =>
     'requires a GPUVector'
   );
   expect(resolveColumns({getRadius: radii}, {radii: {accessor: 'getRadius'}})).toEqual({});
-  expect(
-    resolveColumns(new ScatterplotLayer({getRadius: 2}).props, SCATTERPLOT_COLUMN_DEFINITIONS)
-  ).toEqual({});
+  expect(hasScatterplotColumns(new ScatterplotLayer({getRadius: 2}).props)).toBe(false);
 });
 
 test('GPU vectors are rejected as accessors and remain borrowed column inputs', () => {
@@ -137,4 +137,51 @@ test('Arrow accessors share conversion, validation and replacement with column p
     columns.destroy();
     device.destroy();
   }
+});
+
+test('Scatterplot normalizes plain color fallbacks alongside Arrow columns', async () => {
+  const device = new NullDevice({});
+  const columns = new ScatterplotLayerColumns(device);
+  const failed = vi.fn();
+  const layer = new ScatterplotLayer({
+    getPosition: [0, 0, 0],
+    getRadius: radii,
+    getFillColor: [0, 1, 0, 0]
+  });
+  const {props} = layer;
+  try {
+    await columns.update(layer.props, () => {}, failed);
+    await columns.updateIfNeeded(
+      {props, oldProps: layer.props, changeFlags: {}},
+      {dataLoading: false, changed: () => {}, failed, normalizedColors: true}
+    );
+    expect(failed).not.toHaveBeenCalled();
+    const prepared = (columns as any).prepared.columns;
+    expect(prepared.instanceFillColors.format).toBe('unorm8x4');
+    expect(Array.from(prepared.instanceFillColors.value)).toEqual([0, 255, 0, 0]);
+    expect(Array.from(prepared.instanceLineColors.value)).toEqual([0, 0, 0, 255]);
+  } finally {
+    columns.destroy();
+    device.destroy();
+  }
+});
+
+test('Scatterplot exposes Arrow accessor rows to extensions and restores columns on clone', () => {
+  const layer = new ScatterplotLayer({...arrowProps, extensions: [new DataFilterExtension()]});
+  expect(hasScatterplotColumns(layer.props)).toBe(false);
+  expect(typeof layer.props.getRadius).toBe('function');
+  expect(typeof layer.props.getFillColor).toBe('function');
+  expect(hasScatterplotColumns(layer.clone({extensions: []}).props)).toBe(true);
+});
+
+test('Scatterplot invalidates row attributes when an extension-enabled SQL accessor is removed', () => {
+  const layer = new ScatterplotLayer({
+    data: [],
+    extensions: [new DataFilterExtension()],
+    getRadius: {sql: 'radius'}
+  });
+  const updated = layer.clone({getRadius: () => 3});
+  expect(diffProps(updated.props, layer.props).dataChanged).toBe(
+    'An Arrow row accessor query changed'
+  );
 });

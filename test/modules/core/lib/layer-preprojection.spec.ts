@@ -7,11 +7,11 @@ import {createTestCRS, createTestViewport} from '../viewports/test-crs';
 import {test, expect, vi} from 'vitest';
 import {Layer, LayerManager, Viewport, CompositeLayer} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {getEmptyPickingInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {getUniformsFromViewport} from '@deck.gl/core/shaderlib/project/viewport-uniforms';
 import {PROJECTION_MODE} from '@deck.gl/core/shaderlib/project/constants';
-import {worldToPixels} from '@math.gl/web-mercator';
+import {worldToPixels} from '@math.gl/geospatial/web-mercator';
 
 class ProjectionViewport extends Viewport {
   constructor(

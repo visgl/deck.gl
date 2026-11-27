@@ -17,7 +17,6 @@ class QueryLayer extends Layer {
 }
 
 test('query reloads a URL only when its query changes', async () => {
-  const parseQuery = vi.fn(sqlParser.parseQuery);
   const fetch = vi.fn(async () => new Response('value\n1\n2\n'));
   const props = {
     data: 'https://example.test/points.csv',
@@ -26,7 +25,7 @@ test('query reloads a URL only when its query changes', async () => {
   };
   const makeLayer = (query: string) => {
     const layer = new QueryLayer({...props, query});
-    Object.assign(layer, {context: {sqlParser: {parseQuery}}});
+    Object.assign(layer, {context: {}});
     return layer;
   };
   const first = makeLayer('SELECT value WHERE value = 1');
@@ -34,12 +33,29 @@ test('query reloads a URL only when its query changes', async () => {
   state.setAsyncProps(first.props);
 
   await vi.waitFor(() => expect(state.getAsyncProp('data').getChild('value').get(0)).toBe(1));
+  const initialFetchCount = fetch.mock.calls.length;
+  expect(initialFetchCount).toBeGreaterThan(0);
   state.setAsyncProps(makeLayer('SELECT value WHERE value = 1').props);
-  expect(parseQuery).toHaveBeenCalledTimes(1);
+  expect(fetch).toHaveBeenCalledTimes(initialFetchCount);
 
   state.setAsyncProps(makeLayer('SELECT value WHERE value = 2').props);
   await vi.waitFor(() => expect(state.getAsyncProp('data').getChild('value').get(0)).toBe(2));
-  expect(parseQuery).toHaveBeenCalledTimes(2);
+  expect(fetch).toHaveBeenCalledTimes(2 * initialFetchCount);
+});
+
+test('layer query groups URL data through the loaders.gl scan', async () => {
+  const layer = new QueryLayer({
+    data: 'https://example.test/visits.csv',
+    loaders: [CSVLoader],
+    loadOptions: {core: {fetch: async () => new Response('hex,count\na,2\nb,7\na,3\n')}},
+    query: 'SELECT hex, SUM(count) AS visits FROM data GROUP BY hex'
+  });
+  Object.assign(layer, {context: {}});
+  const state = new LayerState({attributeManager: null, layer});
+  state.setAsyncProps(layer.props);
+  await vi.waitFor(() =>
+    expect(Array.from(state.getAsyncProp('data').getChild('visits'))).toEqual([5, 7])
+  );
 });
 
 test.each([false, true])('query works with Arrow table data (promised: %s)', async promised => {
@@ -64,7 +80,50 @@ test.each([false, true])('query works with Arrow table data (promised: %s)', asy
   await vi.waitFor(() => expect(state.getAsyncProp('data')).toBe(table));
 });
 
-test('reinstalling the query parser refreshes a reused layer', async () => {
+test('layer query groups matching keys across Arrow record batches', async () => {
+  const first = tableFromArrays({hex: ['a', 'b'], count: [2, 7]});
+  const data = first.concat(tableFromArrays({hex: ['a'], count: [3]}));
+  const layer = new QueryLayer({
+    data,
+    query: 'SELECT hex, SUM(count) AS visits FROM data GROUP BY hex ORDER BY hex'
+  });
+  Object.assign(layer, {context: {}});
+  const state = new LayerState({attributeManager: null, layer});
+  state.setAsyncProps(layer.props);
+  await vi.waitFor(() =>
+    expect(Array.from(state.getAsyncProp('data').getChild('visits'))).toEqual([5, 7])
+  );
+});
+
+test.each([null, undefined])(
+  'grouped query waits for data when initialized with %s',
+  async data => {
+    const device = new NullDevice({});
+    const manager = new LayerManager(device, {viewport: new Viewport()});
+    const onError = vi.fn();
+    const layer = new QueryLayer({
+      id: 'grouped',
+      data,
+      query: 'SELECT hex, SUM(count) AS visits FROM data GROUP BY hex',
+      onError
+    });
+    try {
+      manager.setLayers([layer]);
+      await vi.waitFor(() => expect(layer.isLoaded).toBe(true));
+      expect(layer.props.data).toEqual([]);
+      const next = layer.clone({data: tableFromArrays({hex: ['a', 'a'], count: [2, 3]})});
+      manager.setLayers([next]);
+      await vi.waitFor(() => expect(next.isLoaded).toBe(true));
+      expect((next.props.data as ReturnType<typeof tableFromArrays>).get(0)?.visits).toBe(5);
+      expect(onError).not.toHaveBeenCalled();
+    } finally {
+      manager.finalize();
+      device.destroy();
+    }
+  }
+);
+
+test('changing the query parser refreshes a reused layer', async () => {
   const device = new NullDevice({});
   const manager = new LayerManager(device, {viewport: new Viewport()});
   const data = tableFromArrays({value: [1, 2]});
@@ -72,10 +131,7 @@ test('reinstalling the query parser refreshes a reused layer', async () => {
   const layer = new QueryLayer({data, query: 'SELECT * WHERE value = 1', onError});
   try {
     manager.setLayers([layer]);
-    await vi.waitFor(() => expect(onError).toHaveBeenCalledOnce());
-
-    manager.setProps({sqlParser});
-    manager.updateLayers();
+    expect(layer.isLoaded).toBe(false);
     await vi.waitFor(() => expect((layer.props.data as typeof data).get(0)?.value).toBe(1));
 
     const parseQuery = vi.fn(() => sqlParser.parseQuery('SELECT * WHERE value = 2'));
@@ -84,8 +140,34 @@ test('reinstalling the query parser refreshes a reused layer', async () => {
     await vi.waitFor(() => expect((layer.props.data as typeof data).get(0)?.value).toBe(2));
     manager.updateLayers();
     expect(parseQuery).toHaveBeenCalledOnce();
+
+    manager.setProps({sqlParser: undefined});
+    manager.updateLayers();
+    await vi.waitFor(() => expect((layer.props.data as typeof data).get(0)?.value).toBe(1));
+    expect(onError).not.toHaveBeenCalled();
   } finally {
     manager.finalize();
     device.destroy();
   }
+});
+
+test('URL queries use a custom fetch and refresh when it changes', async () => {
+  const data = 'https://example.test/points';
+  const query = 'SELECT * WHERE value > 0';
+  const fetch = vi.fn(async () => tableFromArrays({value: [-1, 2]}));
+  const replacement = vi.fn(async () => tableFromArrays({value: [-1, 3]}));
+  const makeLayer = (load: typeof fetch) => {
+    const layer = new QueryLayer({data, query, fetch: load});
+    Object.assign(layer, {context: {sqlParser}});
+    return layer;
+  };
+  const first = makeLayer(fetch);
+  const state = new LayerState({attributeManager: null, layer: first});
+  state.setAsyncProps(first.props);
+  await vi.waitFor(() => expect(state.getAsyncProp('data').get(0)?.value).toBe(2));
+  expect(fetch).toHaveBeenCalledExactlyOnceWith(data, {propName: 'data', layer: first});
+
+  state.setAsyncProps(makeLayer(replacement).props);
+  await vi.waitFor(() => expect(state.getAsyncProp('data').get(0)?.value).toBe(3));
+  expect(replacement).toHaveBeenCalledOnce();
 });

@@ -10,12 +10,16 @@ import {
   type _ColumnDefinition as ColumnDefinition
 } from '@deck.gl/core';
 
+/** Shared byte default recognized in both rendering paths. */
+export const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+
 const DEFINITIONS: Record<string, ColumnDefinition> = {
   positions: {
     attribute: 'instancePositions',
     accessor: 'getPosition',
     arrowAccessor: true,
     semantic: 'position',
+    allowPackedXY: true,
     size: 3
   },
   elevations: {
@@ -31,6 +35,7 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     accessor: 'getFillColor',
     arrowAccessor: true,
     semantic: 'color',
+    defaultColor: DEFAULT_COLOR,
     size: 4
   },
   lineColors: {
@@ -38,6 +43,7 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     accessor: 'getLineColor',
     arrowAccessor: true,
     semantic: 'color',
+    defaultColor: DEFAULT_COLOR,
     size: 4
   },
   lineWidths: {
@@ -52,8 +58,8 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
 
 /** Experimental GPU-resident columns. CPU columns are supplied through accessors. */
 export type ColumnLayerColumnProps = {
-  /** @experimental GPU-resident column. */
-  positions?: GPUVector | null;
+  /** @experimental Borrowed XY or XYZ positions. XY implies zero elevation. */
+  positions?: GPUVector<'float32x2' | 'float32x3'> | null;
   /** @experimental GPU-resident column. */
   elevations?: GPUVector | null;
   /** @experimental GPU-resident column. */

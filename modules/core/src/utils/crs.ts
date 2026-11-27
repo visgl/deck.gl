@@ -7,7 +7,7 @@ import type {
   CRSConversion,
   CRSDescriptor,
   TypeScriptCRSInput
-} from '@math.gl/geospatial/projection/core';
+} from '@math.gl/geospatial/projection-core';
 import {GLOBE_CRS} from '../viewports/globe-util';
 import {OSM_TILE_CRS} from '../viewports/web-mercator-util';
 

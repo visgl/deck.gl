@@ -67,6 +67,9 @@ channels to RGBA8 (`unorm8x4`). RGB inputs receive opaque alpha.
 
 Constant arrays and callback results typically use 0–255 for all channels.
 
+For example, pack normalized `red`, `green`, and `blue` columns into an opaque
+ScatterplotLayer color with `getFillColor: {sql: 'RGBA8(red, green, blue, 1)'}`.
+
 ### Positions and other vectors
 
 Position columns require numeric fixed-size lists with two (XY) or three (XYZ) components.
@@ -122,64 +125,25 @@ replaces the data or is removed.
 ## Limitations
 
 Rendering columns must have equal lengths and matching chunk structures, and must not contain nulls.
-Arrow rendering accessors do not support attribute transitions or layer extensions. Use row accessors when you need those features.
+Direct column bindings do not support attribute transitions or layer extensions. ScatterplotLayer uses row-based attributes for Arrow and SQL accessors when extensions are active.
 
 See each layer's prop descriptions for supported inputs and the [loading data guide](./loading-data.md)
 for other ways to provide data.
 
 
-## Querying Arrow data
+## Matching Scatterplot table fields to accessors
 
-[Deck's `sqlParser`](../api-reference/core/deck.md#sqlparser) enables two ways to
-use SQL with an Arrow table. The layer's [`query`](../api-reference/core/layer.md#query)
-runs on the input data and can filter, rename, or select fields. An Arrow-enabled
-accessor with `{sql: string}` evaluates an expression over the loaded rows.
-
-```ts
-import {Deck} from '@deck.gl/core';
-import {sqlParser} from '@deck.gl/core/sql';
-import {ScatterplotLayer} from '@deck.gl/layers';
-
-new Deck({
-  sqlParser,
-  layers: [
-    new ScatterplotLayer({
-      id: 'points',
-      data: tablePromise,
-      query: 'SELECT * WHERE longitude IS NOT NULL AND latitude IS NOT NULL',
-      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
-      getRadius: {sql: 'FLOAT32(SQRT(population))'},
-      getFillColor: {sql: 'RGBA8(red, green, blue, 1.0)'}
-    })
-  ]
-});
-```
-
-The layer's data is the implicit source. `FROM data` is optional.
-For a URL, a source-capable loaders.gl loader can push down parts of the query.
-Each accessor expression returns one value per loaded row in order. Picking
-returns the row from the loaded table. Direct GPUVector props take precedence
-over SQL or Arrow accessors for the same input.
-
-Use `FLOAT32(expression)` to cast a numeric value to a 32-bit float. The typed
-constructors `FLOAT32x2/x3/x4`, `FLOAT64x2/x3/x4`, `RGBA8`, `RGBA16`,
-`RGBA16F`, and `RGBA32F` build fixed-size lists. `RGBA8` and `RGBA16` clamp
-channels to [0, 1] and scale them to their integer ranges. A null component
-makes the output value null. Use typed vector constructors at the top level
-of an accessor expression.
-
-## Matching table fields to accessors
-
-ScatterplotLayer uses matching, compatible Arrow table fields when an explicit
-Arrow accessor or GPUVector is absent. Use the exact accessor name, such as
-`getPosition` or `getRadius`. The table can be passed directly or resolved
-asynchronously. Accessors and picking can still read other fields on the row.
+On ScatterplotLayer without extensions, a compatible Arrow field named after an accessor,
+such as `getPosition` or `getRadius`, can supply that input directly. Explicit Arrow
+accessors and GPUVector props take precedence. Picking still returns the original row.
 
 ## Direct GPUVector inputs
 
 Some layers expose optional props for caller-owned luma.gl `GPUVector` buffers.
 These unstable props follow the layer's GPU layout and can change at any time.
 Check the layer reference for supported formats and the meaning and order of rows.
+
+Arc, Line, Column, and GridCell can bind caller-owned packed `float32x2` position vectors directly. Vertex fetch supplies zero elevation. Arc and Line accept XY and XYZ independently for each endpoint.
 
 Instanced rendering layers take values in rendered instance order. Supplied
 vectors must agree on row count and chunk boundaries. For GPU positions, choose a coordinate system that the rendering path can
@@ -226,6 +190,11 @@ supported batches. Deck discards loader metadata and exposes Arrow tables to app
 retain their columnar storage; they are not converted to row objects. Do not mix Arrow and row
 chunks in one stream. An empty Arrow snapshot clears the table while retaining its schema.
 
+Arrow columns retain their GPU buffers when new batches extend the existing chunk sequence.
+Only new chunks are converted and uploaded, including float64 position residuals. Picking rows
+are read lazily. Replaced chunks, changed conversion settings, and snapshot loading rebuild the
+GPU columns. CPU-preprojected positions and ordinary accessor fallbacks use full conversion.
+
 `onDataProgress` receives the current accumulated or replacement table after each accepted batch.
 `onDataLoad` runs once when the stream finishes. An empty stream completes with an empty array
 and no progress callback. Replaced or finalized streams cannot publish further callbacks.
@@ -233,3 +202,17 @@ and no progress callback. Replaced or finalized streams cannot publish further c
 `dataTransform` retains its existing behavior for row-array streams; it is not applied to Arrow
 chunks. Transform Arrow data in the producer before yielding it. This loading feature does not
 select fields or execute SQL; use accessors or explicit column props as with other Arrow inputs.
+
+## Arrow accessors that use row processing
+
+Path, Trips, Polygon, SolidPolygon, Text, and the aggregation layers accept
+Arrow vectors and SQL expressions on their row accessors. Supply a nested list
+for paths and polygons, a list of numbers for trip timestamps, and a string
+column for text or icon selection. GeoJsonLayer accepts an Arrow table with a
+GeoArrow geometry field and uses the source feature order for styling.
+SimpleMeshLayer and ScenegraphLayer accept Arrow and SQL instance transforms.
+
+These accessors use the same shapes and units as row callbacks. Supply the
+source table alongside the accessors so the layer has a row count. Passing
+`data: null` clears the layer and defers SQL evaluation. A zero-row Arrow
+table retains its schema and draws no features.

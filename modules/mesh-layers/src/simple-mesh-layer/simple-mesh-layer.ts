@@ -181,21 +181,21 @@ type _SimpleMeshLayerProps<DataT> = {
    * @see https://en.wikipedia.org/wiki/Euler_angles
    * @default [0, 0, 0]
    */
-  getOrientation?: Accessor<DataT, Readonly<[number, number, number]>>;
+  getOrientation?: ArrowAccessor<DataT, Readonly<[number, number, number]>>;
   /**
    * Scaling factor of the model along each axis.
    * @default [1, 1, 1]
    */
-  getScale?: Accessor<DataT, Readonly<[number, number, number]>>;
+  getScale?: ArrowAccessor<DataT, Readonly<[number, number, number]>>;
   /**
    * Translation from the anchor point, [x, y, z] in meters.
    * @default [0, 0, 0]
    */
-  getTranslation?: Accessor<DataT, Readonly<[number, number, number]>>;
+  getTranslation?: ArrowAccessor<DataT, Readonly<[number, number, number]>>;
   /**
    * TransformMatrix. If specified, `getOrientation`, `getScale` and `getTranslation` are ignored.
    */
-  getTransformMatrix?: Accessor<DataT, number[]>;
+  getTransformMatrix?: ArrowAccessor<DataT, number[]>;
   /**
    * Multiplier to scale each geometry by.
    * @default 1
@@ -248,11 +248,11 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
   // [pitch, yaw, roll]
-  getOrientation: {type: 'accessor', value: [0, 0, 0]},
-  getScale: {type: 'accessor', value: [1, 1, 1]},
-  getTranslation: {type: 'accessor', value: [0, 0, 0]},
+  getOrientation: {type: 'accessor', arrow: 'row', value: [0, 0, 0]},
+  getScale: {type: 'accessor', arrow: 'row', value: [1, 1, 1]},
+  getTranslation: {type: 'accessor', arrow: 'row', value: [0, 0, 0]},
   // 4x4 matrix
-  getTransformMatrix: {type: 'accessor', value: []},
+  getTransformMatrix: {type: 'accessor', arrow: 'row', value: []},
 
   textureParameters: {type: 'object', ignore: true, value: null}
 };
@@ -280,10 +280,12 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       vs,
       fs,
       source,
+      defines: {TERRAIN_COVER_BEFORE_LIGHTING: true},
       modules: [project32, color, phongMaterial, picking, simpleMeshUniforms]
     });
   }
 
+  /** Returns mesh bounds translated by the instance positions for non-instanced meshes. */
   getBounds(): [number[], number[]] | null {
     if (this.props._instanced) {
       return this.state.columns ? this.state.columns.getBounds() : super.getBounds();
@@ -308,6 +310,44 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       result = getMeshBoundingBox(attributes);
     }
 
+    const matrixAttribute = this.getAttributeManager()?.getAttributes().instanceModelMatrix;
+    const matrices = matrixAttribute?.value;
+    if (result && matrices && matrices.length >= 12 && this.getNumInstances() > 0) {
+      const transformed: [number[], number[]] = [
+        [Infinity, Infinity, Infinity],
+        [-Infinity, -Infinity, -Infinity]
+      ];
+      const matrixCount = matrixAttribute.constant
+        ? 1
+        : Math.min(this.getNumInstances(), Math.floor(matrices.length / 12));
+      for (let instance = 0; instance < matrixCount; instance++) {
+        const offset = instance * 12;
+        for (let corner = 0; corner < 8; corner++) {
+          const x = result[corner & 1][0];
+          const y = result[(corner >> 1) & 1][1];
+          const z = result[(corner >> 2) & 1][2];
+          for (let axis = 0; axis < 3; axis++) {
+            const value =
+              (matrices[offset + axis] * x +
+                matrices[offset + axis + 3] * y +
+                matrices[offset + axis + 6] * z) *
+                this.props.sizeScale +
+              matrices[offset + axis + 9];
+            transformed[0][axis] = Math.min(transformed[0][axis], value);
+            transformed[1][axis] = Math.max(transformed[1][axis], value);
+          }
+        }
+      }
+      result = transformed;
+    }
+    // Non-instanced terrain still applies getPosition in its vertex shader.
+    // Include it in the bounds used by terrain's render viewport and height range.
+    const instanceBounds = super.getBounds();
+    if (result && instanceBounds) {
+      result = result.map((corner, i) =>
+        corner.map((value, axis) => value + (instanceBounds[i][axis] || 0))
+      ) as [number[], number[]];
+    }
     this.state.positionBounds = result;
     return result;
   }
@@ -343,7 +383,8 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
         transition: true,
         size: this.props.colorFormat.length,
         accessor: 'getColor',
-        defaultValue: [0, 0, 0, 255]
+        semanticType: 'color',
+        defaultValue: DEFAULT_COLOR
       },
       instanceModelMatrix: MATRIX_ATTRIBUTES
     });
@@ -362,6 +403,9 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     super.updateState(params);
 
     const {props, oldProps, changeFlags} = params;
+    if (changeFlags.propsOrDataChanged) {
+      this.state.positionBounds = null;
+    }
     if (restored || props.mesh !== oldProps.mesh || changeFlags.extensionsChanged) {
       this.state.positionBounds = null;
       this.state.model?.destroy();
@@ -396,7 +440,14 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       this.state.model = undefined;
       this.internalState!.attributeManager?.finalize();
       this.internalState!.attributeManager = null;
-      this.state.columns = new LayerColumns(this.context.device, COLUMN_DEFINITIONS, 'SimpleMesh');
+      this.state.columns = new LayerColumns(
+        this.context.device,
+        {
+          ...COLUMN_DEFINITIONS,
+          colors: {...COLUMN_DEFINITIONS.colors, defaultColor: DEFAULT_COLOR}
+        },
+        'SimpleMesh'
+      );
     }
     if (entering || props.mesh !== oldProps.mesh) {
       this.updateColumnModel(props.mesh as Mesh | null);
@@ -465,6 +516,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
         }
       },
       {
+        normalizedColors: this.usesNormalizedColors(),
         dataLoading: this.internalState!.isAsyncPropLoading('data'),
         changed: () => {
           this.setState({});

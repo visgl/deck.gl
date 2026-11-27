@@ -108,7 +108,7 @@ fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
   fragmentInputs.pbr_vUV1 = vec2<f32>(0.0);
   fragmentInputs.pbr_vNormal = inputs.pbrNormal;
 
-  var color = inputs.color * pbr_filterColor(vec4<f32>(0.0));
+  var color = pbr_filterColor(inputs.color);
   color.a *= layer.opacity;
 
   if (picking.isHighlightActive > 0.5) {

@@ -150,33 +150,6 @@ const layer = new ColumnLayer({
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
-
-  <TabItem value="query" label="Query">
-
-```js
-import {Deck} from '@deck.gl/core';
-import {sqlParser} from '@deck.gl/core/sql';
-import {ColumnLayer} from '@deck.gl/layers';
-import {tableFromArrays} from 'apache-arrow';
-
-const data = tableFromArrays({longitude: [-122.4], latitude: [37.74], height: [100]});
-
-new Deck({
-  sqlParser,
-  layers: [
-    new ColumnLayer({
-      data,
-      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
-      getElevation: {sql: 'height'}
-    })
-  ]
-});
-```
-
-See [Querying Arrow data](../../developer-guide/using-with-arrow.md#querying-arrow-data)
-for filtering rows and writing accessor expressions.
-
-  </TabItem>
 </Tabs>
 
 
@@ -344,6 +317,10 @@ Method called to retrieve the position of each column, in `[x, y]`. An optional 
 An Arrow vector supplies one value per object. See [position columns](../../developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
 
 
+On top-level layers, Deck's [`normalizedColors`](../core/deck.md#normalizedcolors)
+option interprets plain-array color constants and callback results as 0–1 channels.
+Built-in defaults, typed arrays, binary inputs, and Arrow color columns retain their encoding.
+
 #### `getFillColor` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 
 * Default: `[0, 0, 0, 255]`
@@ -400,7 +377,7 @@ An Arrow vector supplies one value per object. See [scalar columns](../../develo
 
 GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
 
-- `positions` – `float32x3` – Positions in XYZ order.
+- `positions` – `float32x2` or `float32x3` – XY or XYZ positions. Packed XY positions have zero elevation.
 - `elevations` – `float32`
 - `fillColors` – `unorm8x4` – Packed RGBA fill colors.
 - `lineColors` – `unorm8x4` – Packed RGBA outline colors.

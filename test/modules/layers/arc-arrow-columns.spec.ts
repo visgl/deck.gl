@@ -6,6 +6,7 @@ import {expect, test, vi} from 'vitest';
 import {ArcLayer} from '@deck.gl/layers';
 import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {Texture} from '@luma.gl/core';
+import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {GPUVectorModel} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
@@ -194,3 +195,160 @@ test('ArcLayer keeps picking indexes distinct across WebGPU chunks', async ({ski
     container.remove();
   }
 });
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Animated flight arcs bind Arrow timestamps and clip on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) return skip();
+
+    const {Deck, OrthographicView} = await import('@deck.gl/core');
+    const {tableFromArrays} = await import('apache-arrow');
+    const {default: AnimatedArcLayer} =
+      backend === 'webgpu'
+        ? await import('../../../examples-v10/website/globe/animated-arc-layer')
+        : await import('../../../examples-v10/website/maplibre/animated-arc-layer');
+    const parent = document.createElement('div');
+    document.body.appendChild(parent);
+    const data = tableFromArrays({x: [-20], y: [20], start: [0], arrival: [10]});
+    const layer = new AnimatedArcLayer({
+      id: 'flight-time',
+      data,
+      getSourcePosition: backend === 'webgpu' ? {sql: 'FLOAT64x2(x, 0)'} : () => [-20, 0],
+      getTargetPosition: backend === 'webgpu' ? {sql: 'FLOAT64x2(y, 0)'} : () => [20, 0],
+      getTimestamps: {sql: 'FLOAT32x2(start, arrival)'},
+      getHeight: 0,
+      getWidth: 14,
+      timeRange: [0, 10],
+      pickable: true
+    });
+    const errors: Error[] = [];
+    const deck = new Deck({
+      device: testDevice,
+      parent,
+      width: 128,
+      height: 128,
+      useDevicePixels: false,
+      views: new OrthographicView(),
+      initialViewState: {target: [0, 0, 0], zoom: 0},
+      layers: [layer],
+      onError: error => errors.push(error)
+    });
+    const waitForRender = (current: typeof layer) =>
+      vi.waitFor(
+        () => {
+          expect(errors).toEqual([]);
+          expect(current.state?.columns?.length).toBe(1);
+          expect(current.getAttributeManager()).toBeNull();
+          expect(current.isLoaded).toBe(true);
+          deck.redraw('draw flight arcs');
+        },
+        {timeout: 5000}
+      );
+    try {
+      await waitForRender(layer);
+      expect((await deck.pickObjectAsync({x: 64, y: 64}))?.index).toBe(0);
+
+      const hidden = layer.clone({timeRange: [20, 30]});
+      deck.setProps({layers: [hidden]});
+      await waitForRender(hidden);
+      expect(await deck.pickObjectAsync({x: 64, y: 64})).toBeNull();
+      expect(errors).toEqual([]);
+    } finally {
+      deck.finalize();
+      parent.remove();
+    }
+  });
+}
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`ArcLayer draws packed XY and XYZ endpoints with absolute height on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) return skip();
+    const {Deck, OrthographicView} = await import('@deck.gl/core');
+    const source = testDevice.createBuffer({data: new Float32Array([-30, 0])});
+    const target = testDevice.createBuffer({data: new Float32Array([30, 0, 0.5])});
+    const sourcePositions = new GPUVector({
+      type: 'buffer',
+      name: 'source',
+      format: 'float32x2',
+      buffer: source,
+      length: 1
+    });
+    const targetPositions = new GPUVector({
+      type: 'buffer',
+      name: 'target',
+      format: 'float32x3',
+      buffer: target,
+      length: 1
+    });
+    const layer = new ArcLayer({
+      id: 'fixed-rise',
+      data: [{}],
+      sourcePositions,
+      targetPositions,
+      heightMode: 'absolute',
+      getHeight: 12,
+      getTilt: 90,
+      numSegments: 33,
+      getWidth: 4,
+      pickable: true
+    });
+    const errors: Error[] = [];
+    const parent = document.createElement('div');
+    document.body.appendChild(parent);
+    const deck = new Deck({
+      device: testDevice,
+      parent,
+      width: 128,
+      height: 128,
+      useDevicePixels: false,
+      views: new OrthographicView(),
+      initialViewState: {target: [0, 0, 0], zoom: 0},
+      layers: [layer],
+      onError: error => errors.push(error)
+    });
+    try {
+      await vi.waitFor(() => {
+        expect(errors).toEqual([]);
+        expect(layer.state?.columns?.length).toBe(1);
+        expect(layer.isLoaded).toBe(true);
+      });
+      const model = layer.state.model!;
+      const bind = vi.spyOn(model, 'setAttributeVectors');
+      try {
+        deck.redraw('check borrowed endpoint buffers');
+        const [inputs] = bind.mock.lastCall!;
+        expect(inputs.instanceSourcePositions).toMatchObject({format: 'float32x2', byteStride: 8});
+        expect(inputs.instanceTargetPositions).toMatchObject({format: 'float32x3', byteStride: 12});
+        expect((inputs.instanceSourcePositions as GPUVector).data[0].buffer).toBe(source);
+        expect((inputs.instanceTargetPositions as GPUVector).data[0].buffer).toBe(target);
+      } finally {
+        bind.mockRestore();
+      }
+      const [x, y] = deck.getViewports()[0].project([0, 12, 0.25]);
+      expect((await deck.pickObjectAsync({x, y}))?.index).toBe(0);
+      expect(await deck.pickObjectAsync({x: 64, y: 64})).toBeNull();
+      const below = layer.clone({getHeight: -12});
+      deck.setProps({layers: [below]});
+      await vi.waitFor(() => expect(below.state?.columns?.length).toBe(1));
+      const [negativeX, negativeY] = deck.getViewports()[0].project([0, -12, 0.25]);
+      expect((await deck.pickObjectAsync({x: negativeX, y: negativeY}))?.index).toBe(0);
+
+      expect(errors).toEqual([]);
+    } finally {
+      deck.finalize();
+      parent.remove();
+      try {
+        expect(source.destroyed).toBe(false);
+        expect(target.destroyed).toBe(false);
+      } finally {
+        sourcePositions.destroy();
+        targetPositions.destroy();
+        source.destroy();
+        target.destroy();
+      }
+    }
+  });
+}

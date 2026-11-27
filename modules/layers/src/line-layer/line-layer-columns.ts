@@ -10,12 +10,16 @@ import {
   type _ColumnDefinition as ColumnDefinition
 } from '@deck.gl/core';
 
+/** Shared byte-color default, recognized by reference in both rendering paths. */
+export const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+
 const DEFINITIONS: Record<string, ColumnDefinition> = {
   sourcePositions: {
     attribute: 'instanceSourcePositions',
     accessor: 'getSourcePosition',
     arrowAccessor: true,
     semantic: 'position',
+    allowPackedXY: true,
     size: 3
   },
   targetPositions: {
@@ -23,6 +27,7 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     accessor: 'getTargetPosition',
     arrowAccessor: true,
     semantic: 'position',
+    allowPackedXY: true,
     size: 3
   },
   colors: {
@@ -30,6 +35,7 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     accessor: 'getColor',
     arrowAccessor: true,
     semantic: 'color',
+    defaultColor: DEFAULT_COLOR,
     size: 4
   },
   widths: {
@@ -44,10 +50,10 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
 
 /** Experimental GPU-resident columns. CPU columns are supplied through accessors. */
 export type LineColumnProps = {
-  /** @experimental GPU-resident column. */
-  sourcePositions?: GPUVector | null;
-  /** @experimental GPU-resident column. */
-  targetPositions?: GPUVector | null;
+  /** @experimental Borrowed XY or XYZ source positions. XY implies zero elevation. */
+  sourcePositions?: GPUVector<'float32x2' | 'float32x3'> | null;
+  /** @experimental Borrowed XY or XYZ target positions. XY implies zero elevation. */
+  targetPositions?: GPUVector<'float32x2' | 'float32x3'> | null;
   /** @experimental GPU-resident column. */
   colors?: GPUVector | null;
   /** @experimental GPU-resident column. */

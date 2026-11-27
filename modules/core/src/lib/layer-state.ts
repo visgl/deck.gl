@@ -3,15 +3,17 @@
 // Copyright (c) vis.gl contributors
 
 // deck.gl, MIT license
-import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
-import {equalLoaderOptions} from '../utils/loader-utils';
+import type {ResolvedScale} from '@math.gl/core/color';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection-core';
+import {compareLoaderOptions} from '@loaders.gl/core';
 import ComponentState from '../lifecycle/component-state';
 
-import type Layer from './layer';
+import Layer from './layer';
 import type {Table, Vector} from 'apache-arrow';
-import type {SQLParser} from '../types/layer-props';
+import type {SQLFunctions, SQLParser} from '../types/layer-props';
 import type AttributeManager from './attribute/attribute-manager';
 import type Viewport from '../viewports/viewport';
+import type {PickingInfo} from './picking/pick-info';
 import type UniformTransitionManager from './uniform-transition-manager';
 
 export type ChangeFlags = {
@@ -36,18 +38,28 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     source: unknown;
     expressions: Record<string, string>;
     parseExpression: SQLParser['parseExpression'];
+    /** Effective function declarations used by this evaluation. */
+    functions?: SQLFunctions;
     pending: boolean;
     table?: Table;
     columns?: Record<string, Vector>;
+    /** Resolved scales for the colors currently applied to the layer. */
+    scales?: Readonly<Record<string, ResolvedScale>>;
   };
   /** Options and parser used by the current data request. */
   private dataRequest?: {
     query?: string | null;
     mode?: LayerT['props']['_dataLoadOptions'];
     parser: SQLParser['parseQuery'];
+    fetch?: Layer['props']['fetch'];
     loaders?: Layer['props']['loaders'];
     options: unknown;
   };
+
+  /** Last hovered object, used to refresh highlight callbacks during layer updates. */
+  hoverHighlightInfo: PickingInfo | null = null;
+  /** Color convention used for the most recent picking module update. */
+  normalizedHighlightColor = false;
 
   attributeManager: AttributeManager | null;
   needsRedraw: boolean;
@@ -142,11 +154,12 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
             query,
             mode: isURL && !query ? mode : undefined,
             parser: query ? layer.context.sqlParser?.parseQuery : undefined,
+            fetch: isURL && query ? layer.props.fetch : undefined,
             loaders: isURL ? layer.props.loaders : undefined,
             options: isURL ? layer.getLoadOptions() : undefined
           }
         : undefined;
-    const changed = !equalLoaderOptions(this.dataRequest, request);
+    const changed = !compareLoaderOptions(this.dataRequest, request);
     this.dataRequest = request;
     return changed;
   }
@@ -174,13 +187,18 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
   protected _fetch(propName, url: string) {
     const layer = this.layer;
     const request = propName === 'data' ? this.dataRequest : undefined;
-    if (request?.query) {
+    const fetch = layer?.props.fetch;
+    if (request?.query && layer) {
+      layer.context.resourceManager?.unsubscribe({consumerId: layer.id, requestId: propName});
+      const {fetch: defaultFetch} = Layer.defaultProps as {fetch: {value: Layer['props']['fetch']}};
+      if (fetch && fetch !== defaultFetch.value) {
+        return this._prepareAsyncInput(propName, fetch(url, {propName, layer}));
+      }
       const {query} = request;
       return import('../arrow/data-query').then(({queryLayerData}) =>
         queryLayerData(url, query, request.loaders, request.options, request.parser)
       );
     }
-    const fetch = layer?.props.fetch;
     if (fetch) {
       return fetch(url, {propName, layer});
     }

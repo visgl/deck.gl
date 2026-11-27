@@ -1417,3 +1417,39 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     }
   });
 }
+
+test('Color attribute shares opaque RGB defaults without repacking binary inputs', () => {
+  const attribute = new Attribute(device, {
+    id: 'colors',
+    size: 4,
+    type: 'unorm8',
+    accessor: 'getColor',
+    semanticType: 'color'
+  });
+
+  try {
+    attribute.setConstantValue(null, [1, 128, 255]);
+    expect(Array.from(attribute.value!)).toEqual(
+      Array.from(new Float32Array([1 / 255, 128 / 255, 1, 1]))
+    );
+
+    const data = [
+      [1, 128, 255],
+      [1, 128, 255, 0]
+    ];
+    attribute.setNeedsUpdate();
+    attribute.allocate(data.length);
+    attribute.updateBuffer({
+      data,
+      props: {getColor: (row: number[]) => row},
+      numInstances: data.length
+    });
+    expect(Array.from(attribute.value!.slice(0, 8))).toEqual([1, 128, 255, 255, 1, 128, 255, 0]);
+
+    const binary = new Uint8Array([1, 128, 255, 0]);
+    expect(attribute.setBinaryValue(binary)).toBe(true);
+    expect(attribute.value).toBe(binary);
+  } finally {
+    attribute.delete();
+  }
+});

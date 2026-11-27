@@ -143,33 +143,6 @@ const layer = new H3HexagonLayer({
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
-
-  <TabItem value="query" label="Query">
-
-```js
-import {Deck} from '@deck.gl/core';
-import {sqlParser} from '@deck.gl/core/sql';
-import {H3HexagonLayer} from '@deck.gl/geo-layers';
-import {tableFromArrays} from 'apache-arrow';
-
-const data = tableFromArrays({cells: ['8928308280fffff']});
-
-new Deck({
-  sqlParser,
-  layers: [
-    new H3HexagonLayer({
-      data,
-      getHexagon: {sql: 'cells'},
-      getFillColor: [255, 140, 0]
-    })
-  ]
-});
-```
-
-See [Querying Arrow data](../../developer-guide/using-with-arrow.md#querying-arrow-data)
-for filtering rows and writing accessor expressions.
-
-  </TabItem>
 </Tabs>
 
 

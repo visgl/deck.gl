@@ -20,6 +20,7 @@ export {DirectionalLight} from './effects/lighting/directional-light';
 export {PointLight} from './effects/lighting/point-light';
 export {default as _CameraLight} from './effects/lighting/camera-light';
 export {default as _SunLight} from './effects/lighting/sun-light';
+export {ShadowMapEffect, type ShadowMapEffectProps} from './effects/lighting/shadow-map-effect';
 export {default as PostProcessEffect} from './effects/post-process-effect';
 
 // Passes
@@ -40,6 +41,8 @@ export {default as DeckRenderer} from './lib/deck-renderer';
 export {default as Viewport} from './viewports/viewport';
 export type {ProjectPositionOptions} from './viewports/viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
+export {default as GlobeViewport} from './viewports/globe-viewport';
+/** @deprecated Use `GlobeViewport` */
 export {default as _GlobeViewport} from './viewports/globe-viewport';
 export {default as OrbitViewport} from './viewports/orbit-viewport';
 export {default as OrthographicViewport} from './viewports/orthographic-viewport';
@@ -63,12 +66,16 @@ export {default as MapView} from './views/map-view';
 export {default as FirstPersonView} from './views/first-person-view';
 export {default as OrbitView} from './views/orbit-view';
 export {default as OrthographicView} from './views/orthographic-view';
+export {default as GlobeView} from './views/globe-view';
+/** @deprecated Use `GlobeView` */
 export {default as _GlobeView} from './views/globe-view';
 
 // Controllers
 export {default as Controller} from './controllers/controller';
 export {default as MapController} from './controllers/map-controller';
 export {default as TerrainController} from './controllers/terrain-controller';
+export {default as GlobeController} from './controllers/globe-controller';
+/** @deprecated Use `GlobeController` */
 export {default as _GlobeController} from './controllers/globe-controller';
 export {default as FirstPersonController} from './controllers/first-person-controller';
 export {default as OrbitController} from './controllers/orbit-controller';
@@ -92,6 +99,7 @@ export {default as Tesselator} from './utils/tesselator'; // Export? move to lum
 
 // Experimental utilities
 export {fillArray as _fillArray, flatten as _flatten} from './utils/flatten'; // Export? move to luma.gl or math.gl?
+export {packNormalizedColor as _packNormalizedColor} from './utils/color';
 export {count as _count} from './utils/count';
 export {deepEqual as _deepEqual} from './utils/deep-equal';
 export {default as _memoize} from './utils/memoize';
@@ -115,9 +123,11 @@ export type {DeckProps} from './lib/deck';
 export type {
   LayerProps,
   SQLParser,
+  SQLFunctions,
   CompositeLayerProps,
   Accessor,
   ArrowAccessor,
+  ArrowAccessorFunction,
   AccessorContext,
   AccessorFunction,
   LayerData,
@@ -184,3 +194,6 @@ export {
 } from './shaderlib/path/path-uniforms';
 
 export {isArrowVector as _isArrowVector} from './arrow/upstream-math/is-arrow-vector';
+
+/** Scale metadata types exposed by the experimental color scale accessor. */
+export type {ResolvedScale, ResolvedScaleDescriptor} from '@math.gl/core/color';

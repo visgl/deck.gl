@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {cutPolylineByGrid, cutPolylineByMercatorBounds} from '@math.gl/geometry';
+import {cutPolylineByGrid, cutPolylineByMercatorBounds} from '@math.gl/geometry/polygon';
 
-import type {NumericArray} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 import type {Position} from '@deck.gl/core';
 
 export type NestedPathGeometry = Position[];

@@ -13,7 +13,7 @@ The `IconLayer` renders raster icons at given coordinates.
 
 There are two approaches to load icons. You can pre-generated a sprite image (`iconAtlas`), which packs all your icons
 into one layout, and a JSON descriptor (`iconMapping`), which describes the position and size of each icon in the `iconAtlas`.
-You can create sprite images with tools such as [TexturePacker](https://www.codeandweb.com/texturepacker). This is the
+You can create sprite images with tools such as [TexturePacker](https://www.codeandweb.com/texturepacker) or [SpriteSheet.dev](https://spritesheet.dev). This is the
 most efficient way to load icons.
 
 It is also possible to ask `IconLayer` to generate `iconAtlas` dynamically. This is slower but might be useful in certain
@@ -162,36 +162,6 @@ const layer = new IconLayer({
 ```
 
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
-
-  </TabItem>
-
-  <TabItem value="query" label="Query">
-
-```js
-import {Deck} from '@deck.gl/core';
-import {sqlParser} from '@deck.gl/core/sql';
-import {IconLayer} from '@deck.gl/layers';
-import {tableFromArrays} from 'apache-arrow';
-
-const data = tableFromArrays({longitude: [-122.4], latitude: [37.74], icon: ['marker']});
-
-new Deck({
-  sqlParser,
-  layers: [
-    new IconLayer({
-      data,
-      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
-      getIcon: row => row.icon,
-      iconAtlas: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png',
-      iconMapping: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.json',
-      getSize: 40
-    })
-  ]
-});
-```
-
-See [Querying Arrow data](../../developer-guide/using-with-arrow.md#querying-arrow-data)
-for filtering rows and writing accessor expressions.
 
   </TabItem>
 </Tabs>
@@ -523,6 +493,10 @@ The size of each object, in units specified by `sizeUnits` (default pixels). By 
 
 An Arrow vector supplies one value per object. See [scalar columns](../../developer-guide/using-with-arrow.md#scalars) for requirements.
 
+
+On top-level layers, Deck's [`normalizedColors`](../core/deck.md#normalizedcolors)
+option interprets plain-array color constants and callback results as 0–1 channels.
+Built-in defaults, typed arrays, binary inputs, and Arrow color columns retain their encoding.
 
 #### `getColor` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 

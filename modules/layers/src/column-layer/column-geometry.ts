@@ -5,7 +5,7 @@
 import {log} from '@deck.gl/core';
 import {Geometry, type GeometryAttribute} from '@luma.gl/engine';
 
-import {modifyPolygonWindingDirection} from '@math.gl/geometry';
+import {modifyPolygonWindingDirection} from '@math.gl/geometry/polygon';
 
 type ColumnGeometryProps = {
   id?: string;

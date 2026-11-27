@@ -10,6 +10,9 @@ import {
   type _ColumnDefinition as ColumnDefinition
 } from '@deck.gl/core';
 
+/** Shared byte default recognized in both rendering paths. */
+export const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+
 const DEFINITIONS: Record<string, ColumnDefinition> = {
   positions: {
     attribute: 'instancePositions',
@@ -30,6 +33,7 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     accessor: 'getColor',
     arrowAccessor: true,
     semantic: 'color',
+    defaultColor: DEFAULT_COLOR,
     size: 4
   }
 };

@@ -153,34 +153,6 @@ const layer = new SimpleMeshLayer({
 See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
 
   </TabItem>
-
-  <TabItem value="query" label="Query">
-
-```js
-import {Deck} from '@deck.gl/core';
-import {sqlParser} from '@deck.gl/core/sql';
-import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {CubeGeometry} from '@luma.gl/engine';
-import {tableFromArrays} from 'apache-arrow';
-
-const data = tableFromArrays({longitude: [-122.4], latitude: [37.74]});
-
-new Deck({
-  sqlParser,
-  layers: [
-    new SimpleMeshLayer({
-      data,
-      getPosition: {sql: 'FLOAT64x2(longitude, latitude)'},
-      mesh: new CubeGeometry()
-    })
-  ]
-});
-```
-
-See [Querying Arrow data](../../developer-guide/using-with-arrow.md#querying-arrow-data)
-for filtering rows and writing accessor expressions.
-
-  </TabItem>
 </Tabs>
 
 
@@ -316,13 +288,15 @@ Method called to retrieve the center position for each object in the `data` stre
 An Arrow vector supplies one value per object. See [position columns](../../developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
 
 
+Deck’s [`normalizedColors`](../core/deck.md#normalizedcolors) lets top-level layers accept 0–1 plain-array instance colors. Byte defaults, typed arrays, and binary inputs retain their encoding.
+
 #### `getColor` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 - Default: `[0, 0, 0, 255]`
 
 If `mesh` does not contain vertex colors, use this color to render each object. If `mesh` contains vertex colors, then the two colors are mixed together. Use `[255, 255, 255]` to use the original mesh colors. If `texture` is assigned, then both colors will be ignored.
 
-The color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+The color is in the format of `[r, g, b, [a]]`. Plain arrays use 0–255 channels by default and 0–1 when Deck enables `normalizedColors`. Omitted alpha is opaque (255 or 1, respectively).
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.

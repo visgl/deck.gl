@@ -5,7 +5,7 @@
 /* global fetch */
 import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import DeckGL from '@deck.gl/react/legacy';
 import {OrthographicView} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {MaskExtension} from '@deck.gl/extensions';

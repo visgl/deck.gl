@@ -18,11 +18,17 @@ import {
   ArrowAccessor,
   Color,
   DefaultProps,
+  type _ColumnDefinition as ColumnDefinition,
   _GPUVectorModel as DeckGPUVectorModel
 } from '@deck.gl/core';
 
 import {GPUVectorModel} from '@luma.gl/engine';
-import {ArcLayerColumns, hasArcColumns, type ArcColumnProps} from './arc-layer-columns';
+import {
+  DEFAULT_COLOR,
+  ArcLayerColumns,
+  hasArcColumns,
+  type ArcColumnProps
+} from './arc-layer-columns';
 
 import {arcUniforms, ArcProps} from './arc-layer-uniforms';
 import {shaderWGSL} from './arc-layer.wgsl';
@@ -31,8 +37,6 @@ import fs from './arc-layer-fragment.glsl';
 
 const defaultSourcePosition = (row: any) => row.sourcePosition;
 const defaultTargetPosition = (row: any) => row.targetPosition;
-
-const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<ArcLayerProps> = {
   sourcePositions: {type: 'object', value: null, optional: true},
@@ -60,6 +64,7 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
   getHeight: {type: 'accessor', arrow: true, value: 1},
   getTilt: {type: 'accessor', arrow: true, value: 0},
 
+  heightMode: 'relative',
   greatCircle: false,
   numSegments: {type: 'number', value: 50, min: 1},
 
@@ -81,6 +86,10 @@ type _ArcLayerProps<DataT> = ArcColumnProps & {
    * @default false
    */
   greatCircle?: boolean;
+  /** Interprets getHeight as a distance multiplier or a fixed midpoint rise above the endpoint baseline.
+   * @default 'relative'
+   */
+  heightMode?: 'relative' | 'absolute';
 
   /**
    * The number of segments used to draw each arc.
@@ -157,7 +166,7 @@ type _ArcLayerProps<DataT> = ArcColumnProps & {
   getWidth?: ArrowAccessor<DataT, number, Int | Float>;
 
   /**
-   * Multiplier of layer height. `0` will make the layer flat.
+   * Height multiplier in relative mode, or signed midpoint rise in absolute mode.
    * Accepts a constant, row callback, or numeric Arrow column.
    * @default 1
    */
@@ -185,7 +194,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
 
   /** Bypasses attribute generation while Arrow columns drive the model. */
   protected _getAttributeManager() {
-    return hasArcColumns(this.props) ? null : super._getAttributeManager();
+    return this.hasColumns() ? null : super._getAttributeManager();
   }
 
   getNumInstances(): number {
@@ -228,7 +237,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   initializeState() {
-    if (hasArcColumns(this.props)) {
+    if (this.hasColumns()) {
       if (this.props.extensions.length)
         throw new Error('Arc Arrow columns do not support extensions');
       return;
@@ -236,7 +245,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     this.initializeAccessorAttributes();
   }
 
-  private initializeAccessorAttributes() {
+  /** Registers instance attributes for the accessor model, including after a mode switch. */
+  protected initializeAccessorAttributes() {
     const attributeManager = this.getAttributeManager()!;
 
     /* eslint-disable max-len */
@@ -262,6 +272,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
         type: 'unorm8',
         transition: true,
         accessor: 'getSourceColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR
       },
       instanceTargetColors: {
@@ -269,6 +280,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
         type: 'unorm8',
         transition: true,
         accessor: 'getTargetColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR
       },
       instanceWidths: {
@@ -294,7 +306,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   updateState(params: UpdateParameters<this>): void {
-    if (hasArcColumns(this.props)) {
+    if (this.hasColumns()) {
       this.updateColumnState(params);
       return;
     }
@@ -320,6 +332,16 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     }
   }
 
+  /** Adds instance columns for subclass shaders when ArcLayer uses the Arrow path. */
+  protected getExtraColumnDefinitions(): Readonly<Record<string, ColumnDefinition>> | undefined {
+    return undefined;
+  }
+
+  /** Selects the same column definitions for initialization and updates. */
+  private hasColumns(): boolean {
+    return hasArcColumns(this.props, this.getExtraColumnDefinitions());
+  }
+
   /** Updates the model and schedules conversion while Arrow columns are active. */
   private updateColumnState(params: UpdateParameters<this>): void {
     if (this.props.extensions.length)
@@ -328,7 +350,10 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     if (entering) {
       this.internalState!.attributeManager?.finalize();
       this.internalState!.attributeManager = null;
-      this.state.columns = new ArcLayerColumns(this.context.device);
+      this.state.columns = new ArcLayerColumns(
+        this.context.device,
+        this.getExtraColumnDefinitions()
+      );
     }
     if (
       entering ||
@@ -339,6 +364,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       this.state.model = this._getModel();
     }
     void this.state.columns!.updateIfNeeded(params, {
+      normalizedColors: this.usesNormalizedColors(),
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});
@@ -366,6 +392,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       numSegments
     } = this.props;
     const arcProps: ArcProps = {
+      absoluteHeight: this.props.heightMode === 'absolute',
       numSegments,
       rowIndexOffset: 0,
       widthUnits: UNIT[widthUnits],
