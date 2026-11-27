@@ -27,7 +27,7 @@ import type {
   ImageType
 } from '@loaders.gl/core/loader-utils';
 import {createDataSourceSync} from '@loaders.gl/core';
-import {ImageSource, WMSSource} from '@loaders.gl/ogc/wms';
+import {ImageSource, WMSSource} from '@loaders.gl/ogc/wms/bundled';
 import {getProjectedViewportBounds, WGS84ToPseudoMercator} from './utils';
 
 /** All props supported by WMSLayer. */

@@ -68,7 +68,7 @@ const deckInstance = new Deck({
 import {Deck} from '@deck.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {resolveCesiumIonTileset} from '@loaders.gl/tiles-3d/3d-tiles';
-import type {Tileset3D} from '@loaders.gl/tiles-3d';
+import type {Tileset3D} from '@loaders.gl/tiles-3d/tileset';
 
 // Set up Ion account: https://cesium.com/docs/tutorials/getting-started/#your-first-app
 // Resolves the tileset url of the ion asset and a credential for its endpoint
@@ -116,7 +116,7 @@ import {DeckGL} from '@deck.gl/react';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {resolveCesiumIonTileset} from '@loaders.gl/tiles-3d/3d-tiles';
 import type {MapViewState} from '@deck.gl/core';
-import type {Tileset3D} from '@loaders.gl/tiles-3d';
+import type {Tileset3D} from '@loaders.gl/tiles-3d/tileset';
 import type {CesiumIonTilesetMetadata} from '@loaders.gl/tiles-3d/3d-tiles';
 
 function App() {
@@ -226,6 +226,8 @@ To use pre-bundled scripts:
 ```js
 new deck.Tile3DLayer({});
 ```
+
+For data below the WGS84 ellipsoid, set [`MapView.minimumElevation`](../core/map-view.md#minimumelevation) to the lowest elevation you need to see in top-down views.
 
 ## Properties
 

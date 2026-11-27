@@ -15,7 +15,7 @@ import type {Viewport} from '@deck.gl/core';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 import type {WMSLayerProps} from '@deck.gl/geo-layers';
 import type {BitmapLayer} from '@deck.gl/layers';
-import {WMSImageSource} from '@loaders.gl/ogc/wms';
+import {WMSImageSource} from '@loaders.gl/ogc/wms/bundled';
 import type {ImageSource} from '@loaders.gl/ogc/wms';
 import type {
   GetImageParameters,
@@ -158,9 +158,9 @@ test.each([
     srs: 'EPSG:32648',
     center: [105, 45, 0],
     zoom: 6,
-    // The UTM zone clamps the horizontal span to about 668 km at 1223 m/pixel.
-    bounds: [166021, 4616052, 833979, 5349848],
-    width: 546,
+    // UTM rendering bounds extend across zone edges, so the full view fits at 1223 m/pixel.
+    bounds: [10803, 4616053, 989197, 5349848],
+    width: 800,
     height: 600
   },
   {
