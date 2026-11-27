@@ -8,6 +8,7 @@ import {Matrix4, equals, type NumericArray} from '@math.gl/core/matrix';
 import {memoize} from '../tileset-2d/memoize';
 import {STRATEGY_DEFAULT, Tile2DHeader, type Tileset2D} from '../tileset-2d/index';
 import {getCullBounds, tile2DDeckAdapter, transformBox} from '../tileset-2d/deck-tileset-adapter';
+import {canCullTileBoundingBox} from '../tileset-2d/utils';
 
 import {refineTileStates} from './refinement';
 
@@ -153,7 +154,7 @@ export class Tile2DView<DataT = any> {
       return false;
     }
 
-    if (!cullRect || !this._viewport) {
+    if (!cullRect || !this._viewport || !canCullTileBoundingBox(this._viewport, tile.bbox)) {
       return true;
     }
     const boundsArr = this._getCullBounds({
