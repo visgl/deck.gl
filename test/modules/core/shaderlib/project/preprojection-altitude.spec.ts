@@ -96,6 +96,15 @@ test('Custom projection meter offsets retain local positions and project only th
   const targetOrigin = viewport.crs.converter.WGS84.from(coordinateOrigin);
   const scale = viewport.getDistanceScales(targetOrigin).unitsPerMeter;
   const uniforms = project.getUniforms(props);
+  // WGS84 ellipsoid: degrees of longitude and latitude per meter at the anchor
+  const sinLatitude = Math.sin((coordinateOrigin[1] * Math.PI) / 180);
+  const cosLatitude = Math.cos((coordinateOrigin[1] * Math.PI) / 180);
+  const w2 = 1 - 6.69437999014e-3 * sinLatitude ** 2;
+  const primeVerticalRadius = 6378137 / Math.sqrt(w2);
+  const degreesPerMeter = [
+    180 / Math.PI / (primeVerticalRadius * cosLatitude),
+    180 / Math.PI / ((primeVerticalRadius * (1 - 6.69437999014e-3)) / w2)
+  ];
   expect(viewport.getPreprojection(null).preproject).toBeNull();
   expect(uniforms.commonOrigin).toEqual(origin);
   expect(uniforms.commonUnitsPerWorldUnit).toEqual(scale);
@@ -104,8 +113,15 @@ test('Custom projection meter offsets retain local positions and project only th
     [0, 0, 0],
     [10, 20, 30]
   ]) {
-    const expected = origin.map((value, axis) => value + position[axis] * scale[axis]);
-    expect(getWorldPosition(position, props)).toEqual(expected);
+    // XY offsets follow the local Jacobian of the converter, Z the rendering scale.
+    const expected = [
+      origin[0] + position[0] * degreesPerMeter[0] * 1000 * normalizationScale,
+      origin[1] + position[1] * degreesPerMeter[1] * 2000 * normalizationScale,
+      origin[2] + position[2] * scale[2]
+    ];
+    getWorldPosition(position, props).forEach((value, i) =>
+      expect(value).toBeCloseTo(expected[i], 9)
+    );
     if (device.type === 'webgl') {
       const result = await runOnGPU({
         vs: `#version 300 es
