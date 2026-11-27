@@ -68,6 +68,7 @@ The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, 
 - [`BitmapLayer`](./api-reference/layers/bitmap-layer.md#positions) accepts typed triangle meshes through `positions`, `texCoords`, and optional `indices`.
 
 - [`TextLayer`](./api-reference/layers/text-layer.md) 🚧 uses `@luma.gl/text/fonts` for bitmap and SDF font atlas generation and glyph packing. Existing font settings and the custom font renderer hook remain supported.
+- [`TextLayer`](./api-reference/layers/text-layer.md) adds [`getLetterSpacing`](./api-reference/layers/text-layer.md#getletterspacing), which spaces the characters of each row, and [`getTextAlign`](./api-reference/layers/text-layer.md#gettextalign), which aligns the rows of a multi-line text block independently of its anchor.
 
 ### Tile Layers
 

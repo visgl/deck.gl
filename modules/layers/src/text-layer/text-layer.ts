@@ -43,6 +43,13 @@ const ALIGNMENT_BASELINE = {
   bottom: -1
 } as const;
 
+/** Position of a row across the text block: 0 at its left edge, 1 at its right edge */
+const TEXT_ALIGN: Partial<Record<'auto' | 'left' | 'center' | 'right', number>> = {
+  left: 0,
+  center: 0.5,
+  right: 1
+};
+
 /** Marks color dependencies without changing their shallow comparisons. */
 function colorUpdateTrigger(trigger: unknown, normalized: boolean): unknown {
   if (!normalized) return trigger;
@@ -57,6 +64,11 @@ const DEFAULT_BACKGROUND_COLOR = [255, 255, 255, 255] as const;
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const DEFAULT_LINE_HEIGHT = 1.0;
+
+/** The value of a constant accessor, or `undefined` for a function accessor */
+function getConstantValue(accessor: unknown): unknown {
+  return typeof accessor === 'function' ? undefined : accessor;
+}
 
 type _TextLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
@@ -191,6 +203,17 @@ type _TextLayerProps<DataT> = {
    */
   getAlignmentBaseline?: ArrowAccessor<DataT, 'top' | 'center' | 'bottom'>;
   /**
+   * Horizontal alignment of each row within a multi-line text block.
+   * `'auto'` aligns the rows by the text anchor.
+   * @default 'auto'
+   */
+  getTextAlign?: ArrowAccessor<DataT, 'auto' | 'left' | 'center' | 'right'>;
+  /**
+   * Extra space between characters, relative to the text size. Not added after the last character of a row.
+   * @default 0
+   */
+  getLetterSpacing?: ArrowAccessor<DataT, number>;
+  /**
    * Label offset from the anchor position, [x, y] in pixels
    * @default [0, 0]
    */
@@ -271,6 +294,8 @@ const defaultProps: DefaultProps<TextLayerProps> = {
   getAngle: {type: 'accessor', arrow: 'row', value: 0},
   getTextAnchor: {type: 'accessor', arrow: 'row', value: 'middle'},
   getAlignmentBaseline: {type: 'accessor', arrow: 'row', value: 'center'},
+  getTextAlign: {type: 'accessor', arrow: 'row', value: 'auto'},
+  getLetterSpacing: {type: 'accessor', arrow: 'row', value: 0},
   getPixelOffset: {type: 'accessor', arrow: 'row', value: [0, 0]},
   getContentBox: {type: 'accessor', arrow: 'row', value: [0, 0, -1, -1]},
 
@@ -440,7 +465,11 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {baselineOffset} = fontAtlasManager.atlas!;
     const {fontSize} = fontAtlasManager.props;
     const getText = this.state.getText!;
-    const {wordBreak, lineHeight, maxWidth} = this.props;
+    const {wordBreak, lineHeight, maxWidth, getLetterSpacing} = this.props;
+    const letterSpacing =
+      typeof getLetterSpacing === 'function'
+        ? getLetterSpacing(object, objectInfo)
+        : (getLetterSpacing as number);
 
     const paragraph = getText(object, objectInfo) || '';
     return transformParagraph(
@@ -449,7 +478,8 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       lineHeight * fontSize,
       wordBreak,
       maxWidth * fontSize,
-      iconMapping
+      iconMapping,
+      (letterSpacing || 0) * fontSize
     );
   }
 
@@ -485,13 +515,13 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
    * Used to layout characters in the vertex shader.
    */
   private getIconOffsets: AccessorFunction<DataT, number[]> = (object, objectInfo) => {
-    const {getTextAnchor, getAlignmentBaseline} = this.props;
+    const {getTextAnchor, getAlignmentBaseline, getTextAlign} = this.props;
 
     const {
       x,
       y,
       rowWidth,
-      size: [, height]
+      size: [width, height]
     } = this.transformParagraph(object, objectInfo);
     const anchorX =
       TEXT_ANCHOR[
@@ -505,6 +535,12 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           ? getAlignmentBaseline(object, objectInfo)
           : (getAlignmentBaseline as string)
       ];
+    const textAlign: number | undefined =
+      TEXT_ALIGN[
+        typeof getTextAlign === 'function'
+          ? getTextAlign(object, objectInfo)
+          : (getTextAlign as 'auto' | 'left' | 'center' | 'right')
+      ];
 
     const numCharacters = x.length;
     const offsets = new Array(numCharacters * 2);
@@ -513,7 +549,10 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     for (let i = 0; i < numCharacters; i++) {
       // For a multi-line object, offset in x-direction needs consider
       // the row offset in the paragraph and the object offset in the row
-      offsets[index++] = ((anchorX - 1) * rowWidth[i]) / 2 + x[i];
+      offsets[index++] =
+        textAlign === undefined
+          ? ((anchorX - 1) * rowWidth[i]) / 2 + x[i]
+          : ((anchorX - 1) * width) / 2 + textAlign * (width - rowWidth[i]) + x[i];
       offsets[index++] = ((anchorY - 1) * height) / 2 + y[i];
     }
     return offsets;
@@ -565,6 +604,10 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       contentCutoffPixels,
       contentAlignHorizontal,
       contentAlignVertical,
+      getTextAnchor,
+      getAlignmentBaseline,
+      getTextAlign,
+      getLetterSpacing,
       transitions,
       updateTriggers
     } = this.props;
@@ -588,6 +631,19 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
     const BackgroundLayerClass = this.getSubLayerClass('background', TextBackgroundLayer);
     const {fontSize} = this.state.fontAtlasManager.props;
+    // The text is laid out again when a layout accessor's update trigger changes,
+    // or when the value of a constant layout accessor changes
+    const layoutTriggers = {
+      getTextAnchor: updateTriggers.getTextAnchor,
+      getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+      getTextAlign: updateTriggers.getTextAlign,
+      getLetterSpacing: updateTriggers.getLetterSpacing,
+      textAnchor: getConstantValue(getTextAnchor),
+      alignmentBaseline: getConstantValue(getAlignmentBaseline),
+      textAlign: getConstantValue(getTextAlign),
+      letterSpacing: getConstantValue(getLetterSpacing),
+      styleVersion
+    };
 
     return [
       background &&
@@ -641,9 +697,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               getPixelOffset: updateTriggers.getPixelOffset,
               getBoundingRect: {
                 getText: updateTriggers.getText,
-                getTextAnchor: updateTriggers.getTextAnchor,
-                getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
-                styleVersion
+                ...layoutTriggers
               }
             }
           }),
@@ -710,11 +764,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getSize: updateTriggers.getSize,
             getPixelOffset: updateTriggers.getPixelOffset,
             getContentBox: updateTriggers.getContentBox,
-            getIconOffsets: {
-              getTextAnchor: updateTriggers.getTextAnchor,
-              getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
-              styleVersion
-            }
+            getIconOffsets: layoutTriggers
           }
         }),
         {
