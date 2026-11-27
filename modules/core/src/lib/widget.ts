@@ -66,7 +66,12 @@ export abstract class Widget<
   constructor(props: PropsT) {
     // @ts-expect-error `defaultProps` may not exist on constructor
     const {id, ...defaultProps} = this.constructor.defaultProps as Required<PropsT>;
-    this.props = createPropsWithDefaultId<Required<PropsT>>(id, defaultProps, props);
+    // A falsy id means the class default, as for views. Read only an own `id`: props from another
+    // widget keep their default on the prototype, and copying it would make it look app-supplied.
+    const ownId = props && Object.prototype.hasOwnProperty.call(props, 'id') ? props.id : undefined;
+    this.props = createPropsWithDefaultId<Required<PropsT>>(id, defaultProps, props, {
+      id: ownId || undefined
+    });
     // @ts-expect-error TODO(ib) - why is id considered optional even though we use Required<>
     this.id = this.props.id;
   }
@@ -89,8 +94,8 @@ export abstract class Widget<
     }
 
     Object.assign(this.props, props);
-    if (this.props.id === undefined) {
-      // As in the constructor, an `undefined` id falls back to the default on the prototype
+    if (!this.props.id) {
+      // As in the constructor, a falsy id falls back to the default on the prototype
       delete (this.props as {id?: string}).id;
     }
 

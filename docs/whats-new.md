@@ -15,7 +15,8 @@ v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, S
 ### GPU
 
 - [**WebGPU**](./developer-guide/webgpu.md) 🚧 — WebGPU is now the default renderer with full feature support.
-- [**GPU vectors**](./developer-guide/using-with-arrow.md#direct-gpuvector-inputs) — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph.
+- [**Arc height**](./api-reference/layers/arc-layer.md#heightmode) — ArcLayer supports a fixed midpoint rise independent of endpoint separation.
+- [**GPU vectors**](./developer-guide/using-with-arrow.md#direct-gpuvector-inputs) — Layers now accept chunked GPU buffers enabling integration with luma.gl’s new GPU Graph. Arc, Line, Column, and GridCell accept packed XY position buffers.
 
 ### Apache Arrow
 
@@ -53,6 +54,8 @@ The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, 
 
 ### Views
 
+- [`MapView`](./api-reference/core/map-view.md#minimumelevation) adds `minimumElevation` to keep below-ellipsoid terrain and 3D Tiles visible in top-down views. Below-ellipsoid camera targets also extend the automatic far plane.
+
 - [`GlobeView`](./api-reference/core/globe-view.md), [`GlobeViewport`](./api-reference/core/globe-viewport.md) and [`GlobeController`](./api-reference/core/globe-controller.md) are now officially supported and no longer experimental.
 
 ### Extensions
@@ -61,6 +64,8 @@ The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, 
 - [`MaskExtension`](./api-reference/extensions/mask-extension.md) now limits the source points that contribute to a heatmap. Set `maskByInstance: false` to clip the rendered heatmap.
 
 ### Layers
+
+- [`BitmapLayer`](./api-reference/layers/bitmap-layer.md#positions) accepts typed triangle meshes through `positions`, `texCoords`, and optional `indices`.
 
 - [`TextLayer`](./api-reference/layers/text-layer.md) 🚧 uses `@luma.gl/text/fonts` for bitmap and SDF font atlas generation and glyph packing. Existing font settings and the custom font renderer hook remain supported.
 
