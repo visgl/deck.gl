@@ -66,7 +66,7 @@ export default function App({
       loaders: [ParquetLoader],
       loadOptions: {parquet: {workerUrl: parquetWorkerUrl}},
       id: 'contour-layer',
-      getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
+      getPosition: {sql: 'ARRAY[longitude, latitude]'},
       getWeight: {
         sql: `CAST(COALESCE(casesByWeek[${week + 1}], 0) AS DOUBLE PRECISION) *
           CAST(100000 AS DOUBLE PRECISION) / CAST(population AS DOUBLE PRECISION)`

@@ -287,8 +287,8 @@ An Arrow vector supplies one value per object. See [scalar columns](../../develo
 
 GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
 
-- `sourcePositions` – `float32x3` – Source positions in XYZ order.
-- `targetPositions` – `float32x3` – Target positions in XYZ order.
+- `sourcePositions` – `float32x2` or `float32x3` – XY or XYZ positions. Packed XY positions have zero elevation.
+- `targetPositions` – `float32x2` or `float32x3` – XY or XYZ positions. Packed XY positions have zero elevation.
 - `colors` – `unorm8x4` – Packed RGBA colors.
 - `widths` – `float32`
 

@@ -38,13 +38,13 @@ import pickingModule, {
 } from '../shaderlib/picking/picking';
 
 import Component from '../lifecycle/component';
-import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection-core';
 import {areCRSEqual, resolveCRS} from '../utils/crs';
 import {supportsSourceCRS} from '../shaderlib/project/coordinate-systems';
 import LayerState, {ChangeFlags} from './layer-state';
 
 import {worldToPixels} from '@math.gl/geospatial/web-mercator';
-import {vec3TransformMat4 as transformMat4} from '@math.gl/core';
+import {vec3TransformMat4 as transformMat4} from '@math.gl/core/matrix';
 
 import {load, loadInBatches} from '@loaders.gl/core';
 
@@ -747,9 +747,20 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
             request.pending = false;
             layer.setNeedsUpdate();
             layer.raiseError(error, 'evaluating SQL accessors');
+            layer.setChangeFlags({dataChanged: 'SQL accessor evaluation failed'});
           }
         }
       );
+  }
+
+  /** Returns whether the caller supplied a SQL expression for this accessor. */
+  protected hasAccessorQuery(name: string): boolean {
+    return Boolean(this.props[ACCESSOR_QUERIES_SYMBOL]?.[name]);
+  }
+
+  /** Returns the current row-aligned SQL accessor results with their Arrow field metadata. */
+  protected getAccessorQueryTable() {
+    return this.internalState?.accessorQueries?.table;
   }
 
   /**

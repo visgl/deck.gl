@@ -3,7 +3,6 @@
 // Copyright (c) vis.gl contributors
 
 import type {Device} from '@luma.gl/core';
-import {GL} from '@luma.gl/core/webgl-constants';
 
 export function createRenderTarget(
   device: Device,
@@ -25,8 +24,7 @@ export function createRenderTarget(
       device.createTexture({
         id: opts.id,
         ...(opts.float && {
-          format: 'rgba32float',
-          type: GL.FLOAT
+          format: 'rgba32float'
         }),
         dimension: '2d',
         width: 1,

@@ -59,7 +59,7 @@ export default function App({
       },
       id: 'heatmap-layer',
       pickable: false,
-      getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
+      getPosition: {sql: 'ARRAY[longitude, latitude]'},
       getWeight: {sql: 'count'},
       radiusPixels,
       intensity,

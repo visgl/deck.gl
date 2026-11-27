@@ -234,7 +234,7 @@ export default function App({
             LIBELLEFRANCAIS
           WHERE LONGITUDE <> '' AND LATITUDE <> ''
         `,
-      getPosition: trees?.positions ?? [0, 0, 0],
+      getPosition: {sql: 'position'},
       onDataLoad: onTreesLoaded,
       radiusUnits: 'pixels',
       getRadius: 1,
@@ -244,8 +244,8 @@ export default function App({
       ]),
       getFillColor: TREE_COLOR,
       opacity,
-      visible: Boolean(trees) && opacity > 0,
-      pickable: Boolean(trees) && opacity >= 0.5,
+      visible: opacity > 0,
+      pickable: opacity >= 0.5,
       parameters: {depthCompare: 'always'}
     })
   );
@@ -256,7 +256,7 @@ export default function App({
         return null;
       }
       if (info.layer?.id === 'trees') {
-        const circumference = Math.fround(trees.circumferences.get(info.index));
+        const circumference = trees.circumferences.get(info.index);
         return `${trees.species.get(info.index) || 'Unknown species'}\n${
           circumference ? `Circumference: ${circumference} cm` : ''
         }`;

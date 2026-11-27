@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GeoArrow Spatial SQL</title>
+    <style>
+      body { margin: 0; font: 14px system-ui, sans-serif; background: #f4f7fb; }
+      #map { position: fixed; inset: 0; }
+      form { position: absolute; z-index: 1; margin: 16px; padding: 14px;
+        border: 1px solid #c9d3df; border-radius: 8px; background: white; }
+      output { display: block; margin-top: 10px; font-family: monospace; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <form>
+      <label>Spatial function
+        <select id="function">
+          <option>ST_Centroid</option>
+          <option>ST_PointOnSurface</option>
+          <option>ST_Envelope</option>
+        </select>
+      </label>
+      <output id="expression"></output>
+    </form>
+    <script type="module" src="./app.ts"></script>
+  </body>
+</html>

@@ -4,7 +4,7 @@
 
 import {expect, test, vi} from 'vitest';
 import {ArrowPolygonDataSource} from '../../../../../examples-v10/proposals/shared/arrow/arrow-polygons/arrow-polygon-data-source';
-import {GPUTraceCullingEffect} from '../../../../../examples-v10/proposals/gpu-culled-trace/gpu-trace-culling-effect';
+import {GPUTraceCullingEffect} from '../../../../../examples-v10/gpu-graph/culled-trace/gpu-trace-culling-effect';
 
 function makeTraceEffect(readAsync: () => Promise<Uint8Array>) {
   const effect = Object.create(GPUTraceCullingEffect.prototype);
