@@ -3,10 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {equals, config, Vector3} from '@math.gl/core';
-import {MapView, WebMercatorViewport} from 'deck.gl';
-import {Matrix4} from '@math.gl/core';
-import {getDistanceScales} from '@math.gl/web-mercator';
+import {equals, config, Vector3, Matrix4} from '@math.gl/core/matrix';
+import {GlobeView, MapView, WebMercatorViewport} from 'deck.gl';
+import {getDistanceScales} from '@math.gl/geospatial/web-mercator';
 
 // Adjust sensitivity of math.gl's equals
 const LNGLAT_TOLERANCE = 1e-6;
@@ -432,6 +431,8 @@ test.each([
   {longitude: NaN, latitude: 0}
 ])('WebMercatorViewport preserves local fallback for non-finite anchors: %j', options => {
   const viewport = new WebMercatorViewport(options);
+  expect(viewport.projectionMatrix.every(Number.isFinite)).toBe(true);
+  expect(viewport.project([4, 5, 6]).every(Number.isFinite)).toBe(true);
   expect(viewport.isGeospatial).toBe(false);
   expect(viewport.crs).toBeUndefined();
   expect(viewport.projectFlat([4, 5])).toEqual([4, 5]);
@@ -469,3 +470,22 @@ test.each([
     expect(getCulling(viewport.projectPosition(ground), viewport.getFrustumPlanes())).toBeNull();
   }
 );
+
+test.each([NaN, Infinity, -Infinity])(
+  'WebMercatorViewport ignores invalid minimumElevation %s',
+  minimumElevation => {
+    const options = {longitude: 0, latitude: 0, zoom: 18, width: 800, height: 600};
+    expect(new WebMercatorViewport({...options, minimumElevation}).projectionMatrix).toEqual(
+      new WebMercatorViewport(options).projectionMatrix
+    );
+  }
+);
+
+test('GlobeView passes minimumElevation to its high-zoom Mercator viewport', () => {
+  const options = {width: 800, height: 600, viewState: {longitude: 0, latitude: 0, zoom: 18}};
+  const point = [0, 0, -300];
+  expect(new GlobeView().makeViewport(options)!.project(point)[2]).toBeGreaterThan(1);
+  expect(
+    new GlobeView({minimumElevation: -500}).makeViewport(options)!.project(point)[2]
+  ).toBeLessThan(1);
+});

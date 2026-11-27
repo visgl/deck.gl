@@ -8,7 +8,7 @@ import {test, expect, vi} from 'vitest';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {device, gl} from '@deck.gl/test-utils/vitest';
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
 
 import * as mapsApi from './mock-maps-api';
 

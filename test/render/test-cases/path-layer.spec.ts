@@ -9,7 +9,7 @@ import {runRenderTestSuite, isRenderTestDeviceEnabled} from '../render-test-suit
 import type {TestCase} from '../deck-test-utils';
 import {measureWebGPUEdges, STROKE_COLOR} from '../webgpu-antialiasing-test-utils';
 
-import {Deck, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Deck, OrthographicView, GlobeView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {zigzag, zigzag3D, meterPaths, positionOrigin} from 'deck.gl-test/data';

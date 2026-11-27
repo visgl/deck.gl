@@ -16,7 +16,7 @@ import {
   PointLight,
   PostProcessEffect,
   _CameraLight as CameraLight,
-  _GlobeView as GlobeView,
+  GlobeView,
   _SunLight as SunLight
 } from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';

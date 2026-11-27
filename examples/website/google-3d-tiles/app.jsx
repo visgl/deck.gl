@@ -111,9 +111,10 @@ export default function App({
   const view = useMemo(
     () =>
       globeView
-        ? new GlobeView({id: 'view', controller: true})
+        ? new GlobeView({id: 'view', controller: true, minimumElevation: -500})
         : new MapView({
             id: 'view',
+            minimumElevation: -500,
             // Photogrammetry heights can be negative relative to the WGS84 ellipsoid.
             minimumElevation: -500,
             controller: {type: TerrainController, touchRotate: true, inertia: 500}

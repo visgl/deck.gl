@@ -28,7 +28,7 @@ import {
   _StatsWidget,
   DeckGL,
   type InfoWidgetProps
-} from '@deck.gl/react';
+} from '@deck.gl/react/legacy';
 import '@deck.gl/widgets/stylesheet.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz

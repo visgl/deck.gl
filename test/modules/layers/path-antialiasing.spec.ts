@@ -97,38 +97,52 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
   ]) {
     expect(shader).not.toContain('sourcePathLength');
     expect(shader).not.toContain('currLength2D');
-    expect(shader).not.toContain('arcLengthRatio');
+    expect(shader).not.toContain('dashArcLengthRatio');
     expect(shader).not.toContain('currentDeltaCommon');
     expect(shader).not.toContain('billboardPathLength');
     expect(shader).not.toContain('getClippedPathRange');
     expect(shader).not.toContain('sourcePathRange');
-    expect(shader).not.toContain('pathPositionOffset');
+    expect(shader).not.toContain('dashPositionOffset');
     expect(shader).not.toContain('vPathBounds');
+    expect(shader).not.toContain('vDashSegment');
   }
 
   for (const shader of [dashVertexShader, dashShaderWGSL]) {
     expect(shader).toContain('sourcePathLength');
     expect(shader).toContain('currLength2D');
-    expect(shader).toContain('arcLengthRatio');
+    expect(shader).toContain('dashArcLengthRatio');
     expect(shader).toContain('currentDeltaCommon');
     expect(shader).toContain('billboardPathLength');
     expect(shader).toContain('getClippedPathRange');
     expect(shader).toContain('sourcePathRange');
-    expect(shader).toContain('pathPositionOffset');
+    expect(shader).toContain('dashPositionOffset');
     expect(shader).toContain(
       'visiblePathLength = sourcePathLength * (sourcePathRange.y - sourcePathRange.x)'
     );
-    expect(shader).toContain('pathPositionOffset = sourcePathLength * sourcePathRange.x');
-    expect(shader).toContain('pathLength = sourcePathLength');
-    expect(shader).toContain(
-      'pathPositionOffset + dot(offsetFromStartOfPath, dir) * arcLengthRatio'
-    );
-    expect(shader).toContain('vPathBounds');
-    expect(shader).toContain('vPathBounds = billboardPathLength * billboardPathRange');
+    expect(shader).toContain('dashPositionOffset = sourcePathLength * sourcePathRange.x');
+    expect(shader).toContain('dashSegmentLength = sourcePathLength');
+    expect(shader).toContain('dashPositionOffset + positionAlongPath * dashArcLengthRatio');
+    expect(shader).toContain('vDashSegment');
   }
 
-  expect(dashFragmentShader).toContain('vPathPosition.y < vPathBounds.x');
-  expect(dashFragmentShader).toContain('vPathPosition.y > vPathBounds.y');
+  expect(dashVertexShader, 'GLSL keeps PathLayer coordinates geometric').toContain(
+    'vPathPosition = vec2(dot(offsetFromStartOfPath, perp), positionAlongPath);'
+  );
+  expect(dashVertexShader, 'GLSL keeps PathLayer length geometric').toContain('vPathLength = L;');
+  expect(dashShaderWGSL, 'WGSL keeps PathLayer coordinates geometric').toContain(
+    'let pathPosition = vec2<f32>(dot(offsetFromStartOfPath, perp), positionAlongPath);'
+  );
+
+  expect(dashFragmentShader, 'dash does not change core fragment geometry').toBe(
+    defaultFragmentShader
+  );
+  expect(
+    dashShaderWGSL.slice(dashShaderWGSL.indexOf('@fragment')),
+    'WGSL dash does not change core fragment geometry'
+  ).toBe(defaultShaderWGSL.slice(defaultShaderWGSL.indexOf('@fragment')));
+  expect(dashFragmentShader).toContain('vPathPosition.y < 0.0');
+  expect(dashFragmentShader).toContain('vPathPosition.y > vPathLength');
+  expect(dashShaderWGSL).toContain('@location(8) vDashSegment: vec2<f32>');
 
   expect(antialiasingVertexShader).toContain('coverageScale');
   expect(antialiasingFragmentShader).toContain('fwidth');
@@ -142,6 +156,48 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
   expect(antialiasingShaderWGSL).not.toContain('min(cornerPixels, bodyPixels)');
   expect(offsetAntialiasingShaderWGSL).toContain('min(cornerPixels, bodyPixels)');
   expect(antialiasingShaderWGSL).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
+});
+
+test('PathLayer#GLSL assembles join outputs once after selecting the raster envelope', () => {
+  const defaultVertexShader = preprocess(pathVertexShader);
+  const antialiasingVertexShader = preprocess(pathVertexShader, {defines: {ANTIALIASING: 1}});
+  const dashVertexShader = preprocess(pathVertexShader, {defines: {DASH_ENABLED: 1}});
+  const antialiasingDashVertexShader = preprocess(pathVertexShader, {
+    defines: {ANTIALIASING: 1, DASH_ENABLED: 1}
+  });
+
+  for (const shader of [defaultVertexShader, dashVertexShader]) {
+    expect(shader).toContain('renderOffsetVec = offsetVec;');
+    expect(shader).not.toContain('renderOffsetVec = offsetVec * coverageScale;');
+  }
+  for (const shader of [antialiasingVertexShader, antialiasingDashVertexShader]) {
+    expect(shader).toContain('renderOffsetVec = offsetVec * coverageScale;');
+    expect(shader).not.toContain('renderOffsetVec = offsetVec;');
+  }
+
+  for (const shader of [
+    defaultVertexShader,
+    antialiasingVertexShader,
+    dashVertexShader,
+    antialiasingDashVertexShader
+  ]) {
+    expect(shader.match(/vPathLength = L;/g)).toHaveLength(1);
+    expect(shader.match(/vCornerOffset = renderOffsetVec;/g)).toHaveLength(1);
+    expect(shader).toContain('offsetFromStartOfPath = renderOffsetVec + deltaA');
+    expect(shader.match(/vPathPosition = vec2\(/g)).toHaveLength(1);
+    expect(shader.match(/geometry\.uv = vPathPosition;/g)).toHaveLength(1);
+    expect(
+      shader.match(/vec3 offset = vec3\(renderOffsetVec \* width \* isValid, 0\.0\);/g)
+    ).toHaveLength(1);
+  }
+
+  for (const shader of [defaultVertexShader, antialiasingVertexShader]) {
+    expect(shader).not.toContain('vDashSegment = vec2(');
+  }
+
+  for (const shader of [dashVertexShader, antialiasingDashVertexShader]) {
+    expect(shader.match(/vDashSegment = vec2\(/g)).toHaveLength(1);
+  }
 });
 
 const webglTest = BufferTransform.isSupported(device) ? test : test.skip;

@@ -8,13 +8,11 @@ import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
-import {GL} from '@luma.gl/core/webgl-constants';
 import {hexagons, worldGrid} from 'deck.gl-test/data';
 import type {SnapshotTestCase} from '@deck.gl/test-utils';
 
 const cullBackParameters = {
-  cull: true,
-  cullFace: GL.BACK
+  cullMode: 'back' as const
 };
 
 const polygonCCW = [
@@ -187,7 +185,7 @@ for (const name of ['column-lnglat-extruded-wireframe', 'column-lnglat-flat-stro
     name: name + '-arrow',
     layers: [
       original.layers[0].clone({
-        positions: column(hexagons.slice(0, midpoint)).concat(column(hexagons.slice(midpoint)))
+        getPosition: column(hexagons.slice(0, midpoint)).concat(column(hexagons.slice(midpoint)))
       })
     ]
   });

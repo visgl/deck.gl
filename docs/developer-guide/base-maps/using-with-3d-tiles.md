@@ -97,6 +97,8 @@ Without `TerrainController`, the camera will orbit around the sea-level plane, w
 
 3D Tiles heights are measured from the WGS84 ellipsoid and can be negative, for example along coasts. When the camera looks straight down at high zoom, terrain below elevation 0 can disappear while a slightly tilted camera still shows it. Set `minimumElevation` on the `MapView` to the lowest height in your data, as the example above does with -500 m. A deeper value than needed reduces depth precision.
 
+![Top-down synthetic scene. The cyan surface at −300 m is clipped with the default 0 m floor and visible with a −500 m floor.](/images/using-with-3d-tiles/minimum-elevation-comparison.png)
+
 With an interleaved Mapbox or MapLibre overlay, the base map controls clipping, so configure its camera instead.
 
 ## Integrating Layers with the Terrain

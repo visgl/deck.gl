@@ -24,11 +24,11 @@ import {
   fovyToAltitude,
   fitBounds,
   getBounds
-} from '@math.gl/web-mercator';
+} from '@math.gl/geospatial/web-mercator';
 import {Padding} from './viewport';
 
-import {Matrix4, Vector3, clamp} from '@math.gl/core';
-import {vec2} from '@math.gl/core';
+import {Matrix4, Vector3, clamp} from '@math.gl/core/matrix';
+import {vec2} from '@math.gl/core/matrix';
 
 export type WebMercatorViewportOptions = {
   /** Subdivision intervals around the earth for nonlinear source CRS conversions. Default 0 disables subdivision. */
@@ -174,18 +174,20 @@ export default class WebMercatorViewport extends Viewport {
         offset = [0, clamp((top + height - bottom) / 2, 0, height) - height / 2];
       }
 
+      const targetElevation = position?.[2] || 0;
+      const requestedFloor = Number.isFinite(minimumElevation) ? minimumElevation : 0;
+      const clippingFloor = Math.min(0, requestedFloor, targetElevation);
+      const clipDepth = targetElevation - clippingFloor;
       projectionParameters = getProjectionParameters({
         width,
         height,
         scale,
         // Only the clipping calculation uses this offset. The render camera and geometry
         // retain their actual elevation, including when the controller targets terrain.
-        center: [
-          0,
-          0,
-          ((position?.[2] || 0) - Math.min(0, minimumElevation, position?.[2] || 0)) *
-            unitsPerMeter(latitude)
-        ],
+        center:
+          clipDepth && Number.isFinite(latitude)
+            ? [0, 0, clipDepth * unitsPerMeter(latitude)]
+            : undefined,
         offset,
         pitch,
         fovy,
