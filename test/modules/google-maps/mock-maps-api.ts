@@ -106,6 +106,18 @@ export class Map {
     Object.defineProperty(firstChild, 'offsetWidth', {value: opts.width});
     Object.defineProperty(firstChild, 'offsetHeight', {value: opts.height});
     this._mapDiv.appendChild(firstChild);
+    this.panes = {
+      floatPane: document.createElement('div'),
+      mapPane: document.createElement('div'),
+      markerLayer: document.createElement('div'),
+      overlayLayer: this._mapDiv,
+      overlayMouseTarget: document.createElement('div')
+    };
+    for (const pane of Object.values(this.panes)) {
+      if (pane !== this._mapDiv) {
+        firstChild.appendChild(pane);
+      }
+    }
   }
 
   addListener(event, cb) {
@@ -208,14 +220,7 @@ export class OverlayView {
   }
 
   getPanes() {
-    // For proper testing, overlayLayer should be part of the map's div
-    if (!this.map) return null;
-    return {
-      floatPane: this._container,
-      mapPane: this._container,
-      markerLayer: this._container,
-      overlayLayer: this.map._mapDiv
-    };
+    return this.map?.panes ?? null;
   }
 }
 

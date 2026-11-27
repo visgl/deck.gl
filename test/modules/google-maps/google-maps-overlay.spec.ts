@@ -16,6 +16,49 @@ globalThis.google = {maps: mapsApi};
 
 const withDevice = props => ({device, ...props});
 
+for (const renderingType of [mapsApi.RenderingType.RASTER, mapsApi.RenderingType.VECTOR]) {
+  test(`GoogleMapsOverlay#overlayPane (${renderingType})`, () => {
+    const map = new mapsApi.Map({
+      width: 1,
+      height: 1,
+      longitude: 0,
+      latitude: 0,
+      zoom: 1,
+      renderingType
+    });
+    const overlay = new GoogleMapsOverlay(
+      withDevice({
+        interleaved: renderingType === mapsApi.RenderingType.RASTER,
+        overlayPane: 'markerLayer'
+      })
+    );
+
+    try {
+      overlay.setMap(map);
+      const deck = overlay._deck;
+      const parent = deck.props.parent;
+      const container = () =>
+        renderingType === mapsApi.RenderingType.VECTOR ? parent.parentElement : parent;
+
+      expect(container().parentElement).toBe(map.panes.markerLayer);
+      overlay.setProps({overlayPane: 'floatPane'});
+      expect(container().parentElement).toBe(map.panes.floatPane);
+      expect(overlay._deck).toBe(deck);
+      overlay.setProps({layers: []});
+      expect(container().parentElement).toBe(map.panes.floatPane);
+      overlay.setProps({overlayPane: undefined});
+      expect(container().parentElement).toBe(map.panes.overlayLayer);
+      overlay.setMap(null);
+      overlay.setProps({overlayPane: 'overlayMouseTarget'});
+      overlay.setMap(map);
+      expect(container().parentElement).toBe(map.panes.overlayMouseTarget);
+    } finally {
+      overlay.finalize();
+    }
+    expect(map.panes.overlayMouseTarget.childElementCount).toBe(0);
+  });
+}
+
 test('GoogleMapsOverlay#constructor', () => {
   const map = new mapsApi.Map({
     width: 1,
@@ -407,7 +450,11 @@ for (const positioningFirst of [true, false]) {
     const addOverlaySpy = vi.spyOn(map, '_addOverlay').mockImplementation(mapOverlay => {
       map._overlays.add(mapOverlay);
     });
-    const overlay = new GoogleMapsOverlay({interleaved: true, layers: []});
+    const overlay = new GoogleMapsOverlay({
+      interleaved: true,
+      overlayPane: 'markerLayer',
+      layers: []
+    });
 
     try {
       overlay.setMap(map);
@@ -417,6 +464,8 @@ for (const positioningFirst of [true, false]) {
       if (positioningFirst) {
         positioningOverlay.onAdd();
         expect(overlay._deck, 'Deck waits for the shared context').toBeNull();
+        overlay.setProps({overlayPane: 'mapPane'});
+        expect(overlay._positioningContainer.parentElement).toBe(map.panes.overlayLayer);
       }
       webglOverlay.onContextRestored({gl});
       const deck = overlay._deck;
@@ -424,6 +473,8 @@ for (const positioningFirst of [true, false]) {
         positioningOverlay.onAdd();
       }
 
+      overlay.setProps({overlayPane: 'floatPane'});
+      expect(overlay._positioningContainer.parentElement).toBe(map.panes.overlayLayer);
       expect(overlay._deck, 'Positioning does not replace the shared Deck').toBe(deck);
       expect(deck.props.gl, 'Deck is created with the supplied context').toBe(gl);
       await expect.poll(() => deck.isInitialized).toBe(true);

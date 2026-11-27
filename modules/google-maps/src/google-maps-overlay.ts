@@ -38,6 +38,8 @@ export type GoogleMapsOverlayProps = Omit<
   | 'controller'
 > & {
   interleaved?: boolean;
+  /** Google Maps pane hosting the overlaid canvas. Defaults to overlayLayer. */
+  overlayPane?: keyof google.maps.MapPanes;
 };
 
 export default class GoogleMapsOverlay {
@@ -47,6 +49,8 @@ export default class GoogleMapsOverlay {
   private _overlay: google.maps.WebGLOverlayView | google.maps.OverlayView | null = null;
   private _positioningOverlay: google.maps.OverlayView | null = null;
   private _positioningContainer: HTMLElement | null = null;
+  /** Whether the bound vector overlay uses the map context. */
+  private _interleaved = false;
   private _renderingType: google.maps.RenderingType | null = null;
   private _renderingTypeListener: google.maps.MapsEventListener | null = null;
   private _externalFramebuffer: {
@@ -91,15 +95,27 @@ export default class GoogleMapsOverlay {
    * Update (partial) props.
    */
   setProps(props: Partial<GoogleMapsOverlayProps>): void {
+    const {overlayPane, ...deckProps} = props;
+    const paneChanged = 'overlayPane' in props && overlayPane !== this.props.overlayPane;
     Object.assign(this.props, props);
+    if (paneChanged && this._renderingType && !this._interleaved) {
+      const overlay = this._overlay;
+      const isRasterOverlay = overlay instanceof google.maps.OverlayView;
+      const paneOverlay = isRasterOverlay ? overlay : this._positioningOverlay;
+      const container = isRasterOverlay ? this._deck?.props.parent : this._positioningContainer;
+      const pane = paneOverlay && this._getOverlayPane(paneOverlay);
+      if (pane && container && container.parentElement !== pane) {
+        pane.appendChild(container);
+      }
+    }
     if (this._deck) {
       const parent = this._deck.props.parent || this._deck.getCanvas()?.parentElement;
       if (props.style && parent) {
         const parentStyle = parent.style;
         Object.assign(parentStyle, props.style);
-        props.style = null;
+        deckProps.style = null;
       }
-      this._deck.setProps(props);
+      this._deck.setProps(deckProps);
     }
   }
 
@@ -137,6 +153,9 @@ export default class GoogleMapsOverlay {
     this._renderingType = renderingType;
 
     const isVectorMap = renderingType === VECTOR && google.maps.WebGLOverlayView;
+    this._interleaved = Boolean(
+      isVectorMap && (this.props.interleaved ?? defaultProps.interleaved)
+    );
     if (isVectorMap) {
       this._createOverlayVector(map);
     } else {
@@ -185,7 +204,7 @@ export default class GoogleMapsOverlay {
    * In interleaved mode, WebGLOverlayView also provides the shared GL context.
    */
   _createOverlayVector(map: google.maps.Map) {
-    const interleaved = this.props.interleaved ?? defaultProps.interleaved;
+    const interleaved = this._interleaved;
     // Create positioning overlay for proper DOM placement
     const positioningOverlay = new google.maps.OverlayView();
     positioningOverlay.onAdd = this._onAddVectorOverlay.bind(this, interleaved);
@@ -224,11 +243,17 @@ export default class GoogleMapsOverlay {
     this._overlay.setMap(map);
   }
 
+  /** Resolve the configured pane once Maps has made its panes available. */
+  private _getOverlayPane(overlay: google.maps.OverlayView, interleaved = false) {
+    const panes = overlay.getPanes();
+    return panes?.[interleaved ? 'overlayLayer' : (this.props.overlayPane ?? 'overlayLayer')];
+  }
+
   _onAdd() {
     this._deck = createDeckInstance(
       // @ts-ignore (TS2345) map is defined at this stage
       this._map,
-      (this._overlay as google.maps.OverlayView).getPanes()?.overlayLayer,
+      this._getOverlayPane(this._overlay as google.maps.OverlayView),
       this._deck,
       this.props
     );
@@ -238,12 +263,12 @@ export default class GoogleMapsOverlay {
     // For non-interleaved vector maps, create a positioning container
     // that Google Maps will place correctly in the DOM with proper z-index
     const overlay = this._positioningOverlay as google.maps.OverlayView;
-    const panes = overlay.getPanes();
-    if (panes) {
+    const pane = this._getOverlayPane(overlay, interleaved);
+    if (pane) {
       const container = document.createElement('div');
       container.id = POSITIONING_CONTAINER_ID;
       container.style.position = 'absolute';
-      panes.overlayLayer.appendChild(container);
+      pane.appendChild(container);
       this._positioningContainer = container;
     }
 
