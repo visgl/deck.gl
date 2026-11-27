@@ -31,4 +31,4 @@ This example loads the full website dataset with `GeoParquetLoader` from `@loade
 
 The 4,627 polygons retain `valuePerParcel`, `valuePerSqm`, and `growth` properties.
 
-Standalone installations use deck.gl v10 and loaders.gl 5.0.1; the package overrides keep the loader runtime aligned.
+Standalone installations use deck.gl v10 and loaders.gl 5.0.2; the package overrides keep the loader runtime aligned.

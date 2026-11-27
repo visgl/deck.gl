@@ -9,7 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/scene": "^5.0.1",
+    "@loaders.gl/scene": "^5.0.2",
     "@math.gl/core": "^5.0.4",
     "deck.gl": "^9.0.0",
     "react": "^18.0.0",

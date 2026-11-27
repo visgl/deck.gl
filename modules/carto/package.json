@@ -48,8 +48,8 @@
   },
   "dependencies": {
     "@carto/api-client": "^0.5.19",
-    "@loaders.gl/compression": "^5.0.1",
-    "@loaders.gl/core": "^5.0.1",
+    "@loaders.gl/compression": "^5.0.2",
+    "@loaders.gl/core": "^5.0.2",
     "@luma.gl/core": "10.0.0-rc.1",
     "@luma.gl/shaders": "10.0.0-rc.1",
     "@math.gl/geospatial": "^5.0.4",
@@ -73,7 +73,7 @@
     "@deck.gl/extensions": "~10.0.0-alpha",
     "@deck.gl/geo-layers": "~10.0.0-alpha",
     "@deck.gl/layers": "~10.0.0-alpha",
-    "@loaders.gl/core": "^5.0.1",
+    "@loaders.gl/core": "^5.0.2",
     "@luma.gl/core": "10.0.0-rc.1"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
