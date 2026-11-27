@@ -392,7 +392,7 @@ test('Grid preserves CPU fallback when binary weights change to integer storage'
 test('Grid keeps GPU aggregation when zooming with shared Arrow positions', async ({skip}) => {
   const device = await getWebGPUTestDevice();
   if (!device) return skip();
-  const {query} = await import('@loaders.gl/core/scan');
+  const {query} = await import('@loaders.gl/core/query');
   const {parseSQLQuery} = await import('@math.gl/sql/parser');
   const {tableFromArrays} = await import('apache-arrow');
   const data = await query(
