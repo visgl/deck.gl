@@ -336,6 +336,26 @@ test('WidgetManager#onRedraw#without viewId falls back to deck size', () => {
   parentElement.remove();
 });
 
+test('WidgetManager#onRedraw#without viewId covers a canvas larger than the parent', () => {
+  const parentElement = document.createElement('div');
+  Object.assign(parentElement.style, {position: 'relative', width: '200px', height: '150px'});
+  document.body.append(parentElement);
+  const widgetManager = new WidgetManager({deck: {width: 400, height: 300}, parentElement});
+
+  widgetManager.addDefault(new TestWidget({id: 'A', placement: 'bottom-right'}));
+  widgetManager.onRedraw({viewports: [], layers: []});
+  const bounds = widgetManager.containers['root'].getBoundingClientRect();
+  const parentBounds = parentElement.getBoundingClientRect();
+  // Bottom-right widgets sit at the canvas corner, not the smaller parent's corner
+  expect(bounds.width, 'root container uses deck width').toBe(400);
+  expect(bounds.height, 'root container uses deck height').toBe(300);
+  expect(bounds.left, 'root container is aligned with parent').toBe(parentBounds.left);
+  expect(bounds.top, 'root container is aligned with parent').toBe(parentBounds.top);
+
+  widgetManager.finalize();
+  parentElement.remove();
+});
+
 test('WidgetManager#onRedraw#viewId uses canvas offset', () => {
   const parentElement = document.createElement('div');
   const canvasContext = {

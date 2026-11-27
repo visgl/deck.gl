@@ -1554,6 +1554,75 @@ test('Deck#cursor is only written when it changes', async () => {
   deck.finalize();
 });
 
+webglTest('Deck#cursor is only written when it changes on multiple canvases', async () => {
+  const parent = document.createElement('div');
+  document.body.appendChild(parent);
+  const canvases = ['deck-test-cursor-a', 'deck-test-cursor-b'].map(id => {
+    const canvas = document.createElement('canvas');
+    canvas.id = id;
+    canvas.width = 64;
+    canvas.height = 64;
+    parent.appendChild(canvas);
+    return canvas;
+  });
+
+  const deck = new Deck({
+    parent,
+    width: 64,
+    height: 64,
+    _canvases: canvases,
+    initialViewState: {
+      left: {longitude: 0, latitude: 0, zoom: 1},
+      right: {longitude: 0, latitude: 0, zoom: 1}
+    },
+    views: [
+      new MapView({id: 'left', canvasId: canvases[0].id}),
+      new MapView({id: 'right', canvasId: canvases[1].id})
+    ],
+    layers: [],
+    getCursor: ({isHovering}) => (isHovering ? 'pointer' : 'grab')
+  });
+  await waitForRender(deck);
+
+  let cursorWrites = 0;
+  for (const {style} of canvases) {
+    Object.defineProperty(style, 'cursor', {
+      configurable: true,
+      get: () => style.getPropertyValue('cursor'),
+      set: value => {
+        cursorWrites++;
+        style.setProperty('cursor', value);
+      }
+    });
+  }
+
+  // @ts-expect-error testing private method
+  deck._updateCursor();
+  expect(
+    canvases.map(canvas => canvas.style.cursor),
+    'cursor is set'
+  ).toEqual(['grab', 'grab']);
+  expect(cursorWrites, 'unchanged cursor is not written').toBe(0);
+
+  // @ts-expect-error testing private state
+  deck.cursorState.isHovering = true;
+  // @ts-expect-error testing private method
+  deck._updateCursor();
+  // @ts-expect-error testing private method
+  deck._updateCursor();
+  expect(
+    canvases.map(canvas => canvas.style.cursor),
+    'cursor is updated'
+  ).toEqual(['pointer', 'pointer']);
+  expect(cursorWrites, 'changed cursor is written once per canvas').toBe(2);
+
+  for (const {style} of canvases) {
+    delete (style as {cursor?: string}).cursor;
+  }
+  finalizeOwnedDeck(deck);
+  parent.remove();
+});
+
 test('Deck#props omitted are unchanged', async () => {
   const layer = new ScatterplotLayer({
     id: 'scatterplot-global-data',
