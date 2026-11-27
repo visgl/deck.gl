@@ -17,6 +17,10 @@ export default defineConfig({
         'modules/proposals/src/layers/filtered-scatterplot-layer/geographic-point-query-effect'
       ),
       '@deck.gl/proposals/layers': resolve(root, 'modules/proposals/src/layers'),
+      '@deck.gl/core/arrow': resolve(
+        root,
+        'modules/core/src/arrow/upstream-luma/arrow-converter.ts'
+      ),
       '@deck.gl/core': resolve(root, 'modules/core/src'),
       '@deck.gl/layers': resolve(root, 'modules/layers/src'),
       '@deck.gl/geo-layers': resolve(root, 'modules/geo-layers/src'),

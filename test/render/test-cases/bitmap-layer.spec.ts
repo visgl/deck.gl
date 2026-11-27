@@ -7,6 +7,7 @@ import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 import {BitmapLayer} from '@deck.gl/layers';
+import {Field, FixedSizeList, Float64, Uint16, vectorFromArray} from 'apache-arrow';
 
 const testCases = [
   {
@@ -46,6 +47,38 @@ const testCases = [
     goldenImage: './test/render/golden-images/bitmap-imagecoordinates.png'
   }
 ];
+
+// Golden: the same icon atlas and orientation as the bounds-generated bitmap.
+for (const indexed of [true, false]) {
+  const corners = [
+    [-122.45, 37.7],
+    [-122.45, 37.8],
+    [-122.35, 37.8],
+    [-122.35, 37.7]
+  ];
+  const uvs = [
+    [0, 1],
+    [0, 0],
+    [1, 0],
+    [1, 1]
+  ];
+  const order = [0, 2, 1, 0, 3, 2];
+  const column = (rows: number[][]) =>
+    vectorFromArray(rows, new FixedSizeList(2, new Field('value', new Float64(), false)));
+  testCases.push({
+    ...testCases[0],
+    name: `bitmap-typed-${indexed ? 'indexed' : 'triangles'}`,
+    layers: [
+      new BitmapLayer({
+        opacity: 0.8,
+        image: '/test/data/icon-atlas.png',
+        positions: column(indexed ? corners : order.map(i => corners[i])),
+        texCoords: column(indexed ? uvs : order.map(i => uvs[i])),
+        indices: indexed ? vectorFromArray(order, new Uint16()) : null
+      })
+    ]
+  });
+}
 
 describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
