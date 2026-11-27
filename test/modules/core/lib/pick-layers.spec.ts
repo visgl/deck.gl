@@ -4,14 +4,15 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 
-import {test, expect} from 'vitest';
-import {Deck} from '@deck.gl/core';
+import {test, expect, vi} from 'vitest';
+import {Deck, OrthographicView, log} from '@deck.gl/core';
 import {
   ScatterplotLayer,
   ColumnLayer,
   PolygonLayer,
   PathLayer,
-  GeoJsonLayer
+  GeoJsonLayer,
+  SolidPolygonLayer
 } from '@deck.gl/layers';
 import {GridLayer} from '@deck.gl/aggregation-layers';
 
@@ -793,6 +794,100 @@ test('pickingTest#unproject3D', async () => {
     'unprojects to 3D coordinate'
   ).toBeTruthy();
 
+  deck.finalize();
+});
+
+test('pickingTest#mask layers', async () => {
+  // At zoom 0 with a 500x550 canvas, world [x, 0] draws at screen [250 + x, 275]
+  const deck = new Deck({
+    width: 500,
+    height: 550,
+    useDevicePixels: false,
+    views: new OrthographicView(),
+    viewState: {target: [0, 0, 0], zoom: 0}
+  });
+  const logError = vi.spyOn(log, 'error');
+  const square = [
+    [-150, -50],
+    [-50, -50],
+    [-50, 50],
+    [-150, 50]
+  ];
+  // Each mask layer covers world x from -150 to -50 along the x axis
+  const maskLayers = [
+    new SolidPolygonLayer({
+      id: 'polygon-mask',
+      operation: 'mask',
+      pickable: true,
+      data: [square],
+      getPolygon: d => d
+    }),
+    new ScatterplotLayer({
+      id: 'scatterplot-mask',
+      operation: 'mask',
+      pickable: false,
+      data: [[-100, 0]],
+      getPosition: d => d,
+      getRadius: 50
+    })
+  ];
+
+  for (const maskLayer of maskLayers) {
+    await new Promise<void>(resolve => {
+      deck.setProps({
+        onAfterRender: () => {
+          // @ts-expect-error private member
+          if (!deck.layerManager.needsUpdate()) {
+            resolve();
+          }
+        },
+        layers: [
+          new ScatterplotLayer({
+            id: 'under-mask',
+            data: [[-70, 0]],
+            getPosition: d => d,
+            getRadius: 10,
+            pickable: true
+          }),
+          maskLayer,
+          new ScatterplotLayer({
+            id: 'masked',
+            data: [
+              [-120, 0],
+              [100, 0]
+            ],
+            getPosition: d => d,
+            getRadius: 10,
+            pickable: true,
+            extensions: [new MaskExtension()],
+            maskId: maskLayer.id,
+            maskInverted: true
+          })
+        ]
+      });
+    });
+    const name = maskLayer.id;
+
+    expect(deck.pickObject({x: 155, y: 275}), `${name}: mask area picks nothing`).toBeNull();
+    expect(
+      deck.pickObject({x: 180, y: 275})?.layer?.id,
+      `${name}: mask layer does not cover a pickable layer drawn before it`
+    ).toBe('under-mask');
+    expect(
+      deck.pickObject({x: 350, y: 275})?.layer?.id,
+      `${name}: object outside the mask is picked`
+    ).toBe('masked');
+    if (maskLayer instanceof SolidPolygonLayer) {
+      // ScatterplotLayer bounds do not include the radius, so only the polygon mask covers [-120, 0]
+      expect(
+        deck.pickObject({x: 130, y: 275}),
+        `${name}: object hidden by the mask is not picked`
+      ).toBeNull();
+    }
+    expect(logError, `${name}: picking buffer decodes without errors`).not.toHaveBeenCalled();
+  }
+
+  logError.mockRestore();
   deck.finalize();
 });
 
