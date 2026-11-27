@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 import type {Device} from '@luma.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
@@ -13,6 +15,7 @@ import {MapView} from '@deck.gl/core';
 import {ParquetLoader} from '@loaders.gl/tables/parquet';
 import parquetWorkerUrl from '@loaders.gl/tables/parquet/parquet-worker.js?url';
 import {isArrowTable} from '@math.gl/core/arrow';
+import {POWER} from '@math.gl/sql/math-functions';
 import RangeInput from './range-input';
 
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
@@ -82,11 +85,12 @@ export default function App({
   mapStyle = MAP_STYLE
 }: {
   device?: Device;
-  data?: string | Earthquake[];
+  data?: string;
   /** Called after data loads with the total row count, before visibility or filtering. */
   onDataLoad?: (count: number) => void;
   mapStyle?: string;
 }) {
+  const widgets = useMemo(() => [new LoadingWidget()], []);
   const [filter, setFilter] = useState<[start: number, end: number] | null>(null);
 
   const [timeRange, setTimeRange] = useState<[number, number] | null>(null);
@@ -115,11 +119,17 @@ export default function App({
       radiusMinPixels: 1,
       wrapLongitude: true,
 
-      getPosition: d => [d.longitude, d.latitude, -d.depth * 1000],
-      getRadius: d => Math.pow(2, d.magnitude),
-      getFillColor: d => {
-        const r = Math.sqrt(Math.max(d.depth, 0));
-        return [255 - r * 15, r * 5, r * 10];
+      sqlFunctions: [POWER],
+      getPosition: {sql: 'ARRAY[longitude, latitude, -1000 * depth]'},
+      getRadius: {sql: 'POWER(2, magnitude)'},
+      getFillColor: {
+        sql: `\
+          RGBA8(
+            (255 - 15 * SQRT(CASE WHEN depth > 0 THEN depth ELSE 0 END)) / 255,
+            5 * SQRT(CASE WHEN depth > 0 THEN depth ELSE 0 END) / 255,
+            10 * SQRT(CASE WHEN depth > 0 THEN depth ELSE 0 END) / 255,
+            1
+          )`
       },
 
       getFilterValue: d => d.timestamp,
@@ -137,6 +147,7 @@ export default function App({
   return (
     <>
       <DeckGL
+        widgets={widgets}
         device={device}
         views={MAP_VIEW}
         layers={layers}

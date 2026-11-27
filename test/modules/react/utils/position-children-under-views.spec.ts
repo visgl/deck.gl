@@ -4,8 +4,8 @@
 
 import {test, expect} from 'vitest';
 import React, {createElement} from 'react';
-import positionChildrenUnderViews from '@deck.gl/react/utils/position-children-under-views';
-import {DeckGlContext} from '@deck.gl/react/utils/deckgl-context';
+import positionChildrenUnderViews from '@deck.gl/react/legacy/utils/position-children-under-views';
+import {DeckGlContext} from '@deck.gl/react/legacy/utils/deckgl-context';
 import {MapView, OrthographicView, View} from '@deck.gl/core';
 
 const TEST_VIEW_STATES = {

@@ -15,7 +15,7 @@ import {
   updateDataFilterCategoryAttributes,
   getDataFilterCategoryKey
 } from './attributes';
-import {NumberArray4} from '@math.gl/core';
+import {NumberArray4} from '@math.gl/core/matrix';
 
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},
@@ -344,6 +344,7 @@ export default class DataFilterExtension extends LayerExtension<
     const filterModel = this.state.filterModel as Model;
 
     this.state.filterModel = null;
+    this.state.filterFBO = null;
     filterFBO?.colorAttachments[0].texture.destroy();
     filterFBO?.destroy();
     filterModel?.destroy();

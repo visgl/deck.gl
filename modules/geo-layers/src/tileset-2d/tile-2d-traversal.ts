@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Viewport, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
+import {Viewport, WebMercatorViewport, GlobeViewport} from '@deck.gl/core';
 
 import {
   CullingVolume,
@@ -223,7 +223,7 @@ export function getOSMTileIndices(
   bounds?: Bounds
 ): TileIndex[] {
   const project: ((xyz: number[]) => number[]) | null =
-    viewport instanceof _GlobeViewport
+    viewport instanceof GlobeViewport
       ? // eslint-disable-next-line @typescript-eslint/unbound-method
         viewport.projectPosition
       : null;

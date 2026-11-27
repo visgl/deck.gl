@@ -70,8 +70,8 @@ test('SQL accessors evaluate new batches in source order and reuse existing buff
   const data = new Table([...first.batches, ...second.batches]);
   const expressions = {getPosition: 'FLOAT32x2(x, y)', getRadius: 'FLOAT32(y * 2)'};
   const parseExpression = sqlParser.parseExpression;
-  const table = evaluateAccessorQueries(first, expressions, parseExpression);
-  const result = evaluateAccessorQueries(data, expressions, parseExpression, {
+  const {table} = evaluateAccessorQueries(first, expressions, parseExpression);
+  const {table: result} = evaluateAccessorQueries(data, expressions, parseExpression, {
     source: first,
     expressions,
     parseExpression,
@@ -81,8 +81,8 @@ test('SQL accessors evaluate new batches in source order and reuse existing buff
   expect(Array.from(result.getChild('getPosition')!.get(2))).toEqual([2, 5]);
   expect(result.getChild('getPosition')!.get(1)).toBeNull();
   expect(Array.from(result.getChild('getRadius')!)).toEqual([6, 8, 10]);
-  const defaultTable = evaluateAccessorQueries(first, expressions, undefined);
-  const appended = evaluateAccessorQueries(data, expressions, undefined, {
+  const {table: defaultTable} = evaluateAccessorQueries(first, expressions, undefined);
+  const {table: appended} = evaluateAccessorQueries(data, expressions, undefined, {
     source: first,
     expressions,
     parseExpression: undefined,
@@ -95,7 +95,7 @@ test('SQL accessors evaluate new batches in source order and reuse existing buff
 test('SQL accessors select Arrow lists without copying or changing their type', () => {
   const cells = vectorFromArray([['8928308280fffff']], new List(new Field('cell', new Utf8())));
   const data = new Table({cells});
-  const projected = evaluateAccessorQueries(
+  const {table: projected} = evaluateAccessorQueries(
     data,
     {getHexagons: 'cells'},
     sqlParser.parseExpression
@@ -110,7 +110,7 @@ test('SQL accessor constructors preserve every source batch boundary', () => {
   const first = tableFromArrays({x: [1, 2], y: [3, 4]});
   const second = tableFromArrays({x: [3], y: [5]});
   const data = new Table([...first.batches, ...second.batches]);
-  const result = evaluateAccessorQueries(
+  const {table: result} = evaluateAccessorQueries(
     data,
     {getPosition: 'FLOAT64x2(x, y)'},
     sqlParser.parseExpression
@@ -187,7 +187,7 @@ test('a failed replacement load leaves the layer free to update its previous Arr
 
 test('typed SQL colors clamp channels and propagate nulls', () => {
   const data = tableFromArrays({red: [-1, null], green: [0.5, 0], blue: [2, 1]});
-  const result = evaluateAccessorQueries(
+  const {table: result} = evaluateAccessorQueries(
     data,
     {getFillColor: 'RGBA8(red, green, blue, 1)'},
     sqlParser.parseExpression
@@ -206,7 +206,7 @@ test('typed SQL colors clamp channels and propagate nulls', () => {
 
 test('SQL colors normalize byte channels with arithmetic and CASE', () => {
   const data = tableFromArrays({gender: [1, 2], altitude: new Float64Array([5000, 2500])});
-  const result = evaluateAccessorQueries(
+  const {table: result} = evaluateAccessorQueries(
     data,
     {
       categorical: 'RGBA8(0, (CASE WHEN gender = 1 THEN 128 ELSE 0 END) / 255, 0, 1)',
@@ -228,7 +228,7 @@ test('default SQL functions extract nested Arrow values without a parser overrid
       new Struct([new Field('longitude', new Float64())])
     )
   });
-  const columns = evaluateAccessorQueries(
+  const {table: columns} = evaluateAccessorQueries(
     data,
     {
       longitude: "STRUCT_EXTRACT(endpoint, 'longitude')",
@@ -282,4 +282,199 @@ test('layer SQL functions override Deck declarations and changing them reevaluat
     manager.finalize();
     device.destroy();
   }
+});
+
+test('SQL color scales use the whole Arrow table and recolor after an append', () => {
+  const first = tableFromArrays({value: [0, 10, null]});
+  const second = tableFromArrays({value: [20]});
+  const expressions = {
+    getRadius: 'value',
+    getFillColor: "SCALE_COLOR(value, DOMAIN(value), PALETTE('#000000', '#ffffff'))"
+  };
+  const initial = evaluateAccessorQueries(first, expressions, undefined);
+  const {table, scales} = evaluateAccessorQueries(
+    new Table([...first.batches, ...second.batches]),
+    expressions,
+    undefined,
+    {source: first, expressions, parseExpression: undefined, table: initial.table}
+  );
+  expect(initial.scales.getFillColor.descriptor.domain).toEqual([0, 10]);
+  expect(scales.getFillColor.descriptor.domain).toEqual([0, 20]);
+  expect(scales.getFillColor.sample(10)).toEqual([0.5, 0.5, 0.5, 1]);
+  const colors = table.getChild('getFillColor')!;
+  expect(table.getChild('getRadius')!.data[0]).toBe(initial.table.getChild('getRadius')!.data[0]);
+  expect(colors.data.map(chunk => chunk.length)).toEqual([3, 1]);
+  expect(Array.from(colors.get(1))).toEqual([128, 128, 128, 255]);
+  expect(Array.from(colors.get(2))).toEqual([0, 0, 0, 0]);
+  expect(Array.from(colors.get(3))).toEqual([255, 255, 255, 255]);
+});
+
+test('SQL color scales accept one-based Arrow list subscripts', () => {
+  const data = tableFromArrays({
+    start: [
+      [0, 0, 0],
+      [1, 2, 5000],
+      [3, 4, 10000]
+    ]
+  });
+  const {table} = evaluateAccessorQueries(
+    data,
+    {
+      getColor:
+        "SCALE_COLOR(start[3], DOMAIN(0, 5000, 10000), PALETTE('#ff0000ff', '#00408080', '#0080ff00'))"
+    },
+    undefined
+  );
+  expect(Array.from(table.getChild('getColor')!, color => Array.from(color))).toEqual([
+    [255, 0, 0, 255],
+    [0, 64, 128, 128],
+    [0, 128, 255, 0]
+  ]);
+});
+
+test('SQL color scales share the default SQRT function with plain accessors', () => {
+  const {table} = evaluateAccessorQueries(
+    tableFromArrays({count: [1, 9, 100]}),
+    {
+      getSize: 'SQRT(count)',
+      getColor:
+        "SCALE_COLOR(SQRT(count), DOMAIN(1, 3, 10), PALETTE('#edf8b1', '#7fcdbb', '#2c7fb8'))"
+    },
+    undefined
+  );
+  expect(Array.from(table.getChild('getSize')!)).toEqual([1, 3, 10]);
+  expect(Array.from(table.getChild('getColor')!, color => Array.from(color))).toEqual([
+    [237, 248, 177, 255],
+    [127, 205, 187, 255],
+    [44, 127, 184, 255]
+  ]);
+});
+
+test('SQL scales use the caller parser and SQL functions', () => {
+  const data = tableFromArrays({value: [0, 5]});
+  const parse = vi.fn(() =>
+    sqlParser.parseExpression(
+      "SCALE_COLOR(DOUBLE(value), DOMAIN(0, 10), PALETTE('#000000', '#ffffff'))"
+    )
+  );
+  const declaration = {
+    name: 'DOUBLE',
+    prototypes: [
+      {
+        arguments: [new Field('value', new Float64())],
+        result: new Field('value', new Float64()),
+        evaluate: ([values]: Vector[]) =>
+          vectorFromArray(
+            Array.from(values, value => value * 2),
+            new Float64()
+          )
+      }
+    ]
+  };
+  const {table} = evaluateAccessorQueries(data, {getColor: 'custom scale'}, parse, undefined, [
+    declaration
+  ]);
+  expect(parse).toHaveBeenCalledExactlyOnceWith('custom scale');
+  expect(Array.from(table.getChild('getColor')!.get(1))).toEqual([255, 255, 255, 255]);
+});
+
+test('an all-null scale domain leaves other SQL accessors usable', () => {
+  const data = tableFromArrays({value: [null, null], radius: [1, 2]});
+  const {table, scales} = evaluateAccessorQueries(
+    data,
+    {
+      getFillColor: "SCALE_COLOR(value, DOMAIN(value), PALETTE('#000000', '#ffffff'))",
+      getRadius: 'radius + 1'
+    },
+    undefined
+  );
+  expect(Array.from(table.getChild('getRadius')!)).toEqual([2, 3]);
+  expect(Array.from(table.getChild('getFillColor')!.get(0))).toEqual([0, 0, 0, 0]);
+  expect(scales.getFillColor).toBeUndefined();
+});
+
+test('an empty Arrow table retains the SQL accessor schema', () => {
+  const data = new Table(tableFromArrays({value: [1]}).schema);
+  const {table} = evaluateAccessorQueries(
+    data,
+    {
+      getRadius: 'value',
+      getFillColor: "SCALE_COLOR(value, DOMAIN(value), PALETTE('#000000', '#ffffff'))"
+    },
+    undefined
+  );
+  expect(table.numRows).toBe(0);
+  expect(table.getChild('getRadius')).not.toBeNull();
+  expect(table.getChild('getFillColor')).not.toBeNull();
+});
+
+test('an all-null expression domain leaves other SQL accessors usable', () => {
+  const data = tableFromArrays({
+    coordinates: [
+      [1, null],
+      [2, null]
+    ],
+    radius: [1, 2]
+  });
+  const {table, scales} = evaluateAccessorQueries(
+    data,
+    {
+      getFillColor: "SCALE_QUANTILE(coordinates[2], 2, PALETTE('#000000', '#ffffff'))",
+      getRadius: 'radius + 1'
+    },
+    undefined
+  );
+  expect(Array.from(table.getChild('getRadius')!)).toEqual([2, 3]);
+  expect(Array.from(table.getChild('getFillColor')!.get(0))).toEqual([0, 0, 0, 0]);
+  expect(scales.getFillColor).toBeUndefined();
+});
+
+test('resolved color scales remain available while SQL accessors refresh', async () => {
+  const device = new NullDevice({});
+  const manager = new LayerManager(device, {viewport: new Viewport()});
+  /** Minimal layer that resolves a SQL color accessor. */
+  class ColorLayer extends Layer {
+    /** Layer type used by the fixture. */
+    static layerName = 'ColorLayer';
+    /** Enables SQL for the color accessor. */
+    static defaultProps = {getColor: {type: 'accessor', arrow: true, value: [0, 0, 0, 255]}};
+    /** The fixture needs no render resources. */
+    initializeState() {}
+  }
+  const layer = new ColorLayer({
+    data: tableFromArrays({value: [0, 10]}),
+    getColor: {sql: "SCALE_COLOR(value, DOMAIN(value), PALETTE('#000000', '#ffffff'))"}
+  });
+  try {
+    manager.setLayers([layer]);
+    await vi.waitFor(() => expect(layer._getResolvedColorScales()?.getColor).toBeDefined());
+    const scales = layer._getResolvedColorScales();
+    const next = layer.clone({data: tableFromArrays({value: [0, 20]})});
+    manager.setLayers([next]);
+    expect(next.isLoaded).toBe(false);
+    expect(next._getResolvedColorScales()).toBe(scales);
+    await vi.waitFor(() =>
+      expect(next._getResolvedColorScales()?.getColor.descriptor.domain).toEqual([0, 20])
+    );
+  } finally {
+    manager.finalize();
+    device.destroy();
+  }
+});
+
+test('SQL accessors resolve numeric, cyclic, and threshold scales', () => {
+  const data = tableFromArrays({value: [1, 2, 4]});
+  const {table, scales} = evaluateAccessorQueries(
+    data,
+    {
+      getRadius: 'SCALE_LINEAR(value, DOMAIN(1, 4), RANGE(10, 40))',
+      getLineColor: "SCALE_CYCLIC(value, DOMAIN(0, 4), PALETTE('#ff0000', '#0000ff'))",
+      getFillColor: "SCALE_THRESHOLD(value, ARRAY[2], PALETTE('#000000', '#ffffff'))"
+    },
+    undefined
+  );
+  expect(Array.from(table.getChild('getRadius')!)).toEqual([10, 20, 40]);
+  expect(scales.getLineColor.descriptor.type).toBe('cyclic');
+  expect(Array.from(table.getChild('getFillColor')!.get(0))).toEqual([0, 0, 0, 255]);
+  expect(Array.from(table.getChild('getFillColor')!.get(2))).toEqual([255, 255, 255, 255]);
 });

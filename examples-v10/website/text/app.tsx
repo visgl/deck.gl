@@ -4,20 +4,22 @@
 
 /* eslint-disable max-len */
 import React from 'react';
-import {useState, useCallback} from 'react';
+import {useMemo, useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 import type {Device} from '@luma.gl/core';
 import {MapView} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
-import {scaleLog} from 'd3-scale';
+import {LOG10} from '@math.gl/sql/math-functions';
 import {ParquetLoader} from '@loaders.gl/tables/parquet';
 import parquetWorkerUrl from '@loaders.gl/tables/parquet/parquet-worker.js?url';
 import {isArrowTable} from '@math.gl/core/arrow';
 
-import type {Color, MapViewState} from '@deck.gl/core';
+import type {MapViewState} from '@deck.gl/core';
 import type {CollisionFilterExtensionProps} from '@deck.gl/extensions';
 
 // Full GeoNames cities table
@@ -42,16 +44,6 @@ type City = {
   latitude: number;
 };
 
-const colorScale = scaleLog<Color>()
-  .domain([1e3, 1e4, 1e5, 1e6, 1e7])
-  .range([
-    [29, 145, 192],
-    [65, 182, 196],
-    [127, 205, 187],
-    [199, 233, 180],
-    [237, 248, 177]
-  ]);
-
 export default function App({
   device,
   data = DATA_URL,
@@ -68,6 +60,7 @@ export default function App({
   fontSize?: number;
   mapStyle?: string;
 }) {
+  const widgets = useMemo(() => [new LoadingWidget()], []);
   const [zoom, setZoom] = useState<number>(INITIAL_VIEW_STATE.zoom);
 
   const onViewStateChange = useCallback(({viewState}) => {
@@ -96,8 +89,16 @@ export default function App({
 
     // TextLayer options
     getText: {sql: 'name'},
-    getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
-    getColor: d => colorScale(d.population),
+    getPosition: {sql: 'ARRAY[longitude, latitude]'},
+    sqlFunctions: [LOG10],
+    getColor: {
+      sql: `\
+        SCALE_COLOR(
+          LOG10(CASE WHEN population > 0 THEN population ELSE 1 END),
+          DOMAIN(3, 4, 5, 6, 7),
+          PALETTE('#1d91c0', '#41b6c4', '#7fcdbb', '#c7e9b4', '#edf8b1')
+        )`
+    },
     getSize: {sql: 'SQRT(SQRT(population)) / 40'},
     sizeScale: fontSize,
     sizeMaxPixels,
@@ -106,7 +107,7 @@ export default function App({
 
     // CollideExtension options
     collisionEnabled: noOverlap,
-    getCollisionPriority: d => Math.log10(d.population),
+    getCollisionPriority: {sql: 'LOG10(CASE WHEN population > 0 THEN population ELSE 1 END)'},
     collisionTestProps: {
       sizeScale: fontSize * 2,
       sizeMaxPixels: sizeMaxPixels * 2,
@@ -118,6 +119,7 @@ export default function App({
 
   return (
     <DeckGL
+      widgets={widgets}
       device={device}
       views={new MapView({repeat: true})}
       layers={[textLayer]}

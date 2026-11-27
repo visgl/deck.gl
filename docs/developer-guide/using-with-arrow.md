@@ -122,7 +122,7 @@ replaces the data or is removed.
 ## Limitations
 
 Rendering columns must have equal lengths and matching chunk structures, and must not contain nulls.
-Arrow rendering accessors do not support attribute transitions or layer extensions. Use row accessors when you need those features.
+Direct column bindings do not support attribute transitions or layer extensions. ScatterplotLayer uses row-based attributes for Arrow and SQL accessors when extensions are active.
 
 See each layer's prop descriptions for supported inputs and the [loading data guide](./loading-data.md)
 for other ways to provide data.
@@ -133,6 +133,8 @@ for other ways to provide data.
 Some layers expose optional props for caller-owned luma.gl `GPUVector` buffers.
 These unstable props follow the layer's GPU layout and can change at any time.
 Check the layer reference for supported formats and the meaning and order of rows.
+
+Arc, Line, Column, and GridCell can bind caller-owned packed `float32x2` position vectors directly. Vertex fetch supplies zero elevation. Arc and Line accept XY and XYZ independently for each endpoint.
 
 Instanced rendering layers take values in rendered instance order. Supplied
 vectors must agree on row count and chunk boundaries. For GPU positions, choose a coordinate system that the rendering path can

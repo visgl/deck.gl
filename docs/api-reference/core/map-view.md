@@ -34,6 +34,12 @@ Scaler for the near plane, 1 unit equals to the height of the viewport. Default 
 
 Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1.01`. Overwrites the `far` parameter.
 
+#### `minimumElevation` (number, optional) {#minimumelevation}
+
+Lowest elevation, in meters, that stays visible. Default `0`. Set a negative value, such as `-500`, when terrain or 3D Tiles can be below sea level. See [Below-ellipsoid terrain and clipping](../../developer-guide/base-maps/using-with-3d-tiles.md#below-ellipsoid-terrain-and-clipping).
+
+Remarks: positive values have no effect. The automatic clipping range also includes the camera target when it lies below this floor. An explicit `farZ` or `projectionMatrix` takes precedence, and interleaved base maps control their own clipping.
+
 #### `projectionMatrix` (number[16], optional) {#projectionmatrix}
 
 Projection matrix.

@@ -5,7 +5,7 @@
 import {type Color, _packNormalizedColor as packNormalizedColor} from '@deck.gl/core';
 import type {Device, Texture} from '@luma.gl/core';
 import {normalizeByteColor4} from '@luma.gl/shaders';
-import type {NumericArray, TypedArray, TypedArrayConstructor} from '@math.gl/core';
+import type {NumericArray, TypedArray, TypedArrayConstructor} from '@math.gl/core/matrix';
 import type {ScaleType} from '../types';
 
 export const defaultColorRange: Color[] = [

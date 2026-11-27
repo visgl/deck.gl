@@ -1,6 +1,8 @@
 # React Widgets
 
-Rendering widget UI with [React](https://react.dev/) lets you build deck.gl widgets with the same components, hooks and state management as the rest of a React application. This guide walks through rendering widget UI with React using the [`useWidget`](../../api-reference/react/use-widget.md) hook and a portal.
+Rendering widget UI with [React](https://react.dev/) lets you build deck.gl widgets with the same components, hooks and state management as the rest of a React application. This guide walks through rendering widget UI with React using the [`useWidget`](../../api-reference/react/legacy/use-widget.md) hook and a portal.
+
+> This guide uses `@deck.gl/react/legacy`. With `@deck.gl/react`, make a component from a widget class with `createWidgetComponent`; see [Custom classes](../../api-reference/react/components.md#custom-classes).
 
 We recommend that users writing their own widgets be familiar with the `Widget` base class. Consider reviewing the [Universal Widgets](./universal-widgets.md) guide first.
 
@@ -8,10 +10,10 @@ We recommend that users writing their own widgets be familiar with the `Widget` 
 
 There are two distinct patterns, and it is important to pick the right one:
 
-1. **Wrap a universal widget in a React component.** The widget renders its own UI (with DOM APIs or [Preact](./preact-widgets.md)); React only manages its lifecycle and props. This is how the widgets exported from `@deck.gl/react` are implemented, and it is a two-line component:
+1. **Wrap a universal widget in a React component.** The widget renders its own UI (with DOM APIs or [Preact](./preact-widgets.md)); React only manages its lifecycle and props. This is how the widgets exported from `@deck.gl/react/legacy` are implemented, and it is a two-line component:
 
    ```tsx
-   import {useWidget} from '@deck.gl/react';
+   import {useWidget} from '@deck.gl/react/legacy';
    import {ZoomWidget as _ZoomWidget, type ZoomWidgetProps} from '@deck.gl/widgets';
 
    export const ZoomWidget = (props: ZoomWidgetProps = {}) => {
@@ -35,7 +37,7 @@ Widget UI implemented with React leverages the strengths of React's component mo
 
 ### Prerequisites
 
-Ensure your deck.gl project includes the `@deck.gl/react` package to utilize React-specific utilities, such as the [`useWidget`](../../api-reference/react/use-widget.md) hook.
+Ensure your deck.gl project includes the `@deck.gl/react` package to utilize React-specific utilities, such as the [`useWidget`](../../api-reference/react/legacy/use-widget.md) hook.
 
 Install the package if it's not already included:
 
@@ -129,12 +131,12 @@ Remarks:
 
 #### Create a React Component
 
-Wrap the widget class in a React component using the [`useWidget`](../../api-reference/react/use-widget.md) hook. The hook creates the widget instance once, adds it to the `DeckGL` parent, calls `setProps` on every render, and removes it on unmount. Render your UI into the element with a [portal](https://react.dev/reference/react-dom/createPortal):
+Wrap the widget class in a React component using the [`useWidget`](../../api-reference/react/legacy/use-widget.md) hook. The hook creates the widget instance once, adds it to the `DeckGL` parent, calls `setProps` on every render, and removes it on unmount. Render your UI into the element with a [portal](https://react.dev/reference/react-dom/createPortal):
 
 ```tsx
 import React, {useMemo} from 'react';
 import {createPortal} from 'react-dom';
-import {useWidget} from '@deck.gl/react';
+import {useWidget} from '@deck.gl/react/legacy';
 import {RotateWidget, type RotateWidgetProps} from './rotate-widget';
 
 export const Rotate = (props: RotateWidgetProps = {}) => {
@@ -163,7 +165,7 @@ Remarks:
 
 #### Mount the Component as a Deck Child
 
-The [`<DeckGL/>`](../../api-reference/react/deckgl.md) component must be an ancestor of any component that calls `useWidget`. It provides the context that `useWidget` uses to register the widget.
+The [`<DeckGL/>`](../../api-reference/react/legacy/deckgl.md) component must be an ancestor of any component that calls `useWidget`. It provides the context that `useWidget` uses to register the widget.
 
 ```tsx
 <DeckGL initialViewState={INITIAL_VIEW_STATE} controller>
@@ -182,7 +184,7 @@ The [`<DeckGL/>`](../../api-reference/react/deckgl.md) component must be an ance
 </DeckGL>
 ```
 
-> Note: When any React widget is in use, the `widgets` prop of `<DeckGL>` is ignored. Wrap universal widgets with `useWidget` (or use the components exported from `@deck.gl/react`) instead of mixing the two.
+> Note: When any React widget is in use, the `widgets` prop of `<DeckGL>` is ignored. Wrap universal widgets with `useWidget` (or use the components exported from `@deck.gl/react/legacy`) instead of mixing the two.
 
 #### Reading Widget State in React
 

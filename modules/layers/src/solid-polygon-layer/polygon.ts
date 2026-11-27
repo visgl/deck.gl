@@ -4,11 +4,11 @@
 
 /* eslint-disable max-params */
 import earcut from 'earcut';
-import {modifyPolygonWindingDirection} from '@math.gl/geometry';
+import {modifyPolygonWindingDirection} from '@math.gl/geometry/polygon';
 
-import type {PolygonWinding} from '@math.gl/geometry';
+import type {PolygonWinding} from '@math.gl/geometry/polygon';
 import type {Position} from '@deck.gl/core';
-import type {NumericArray} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 
 const OUTER_POLYGON_WINDING = 'clockwise';
 const HOLE_POLYGON_WINDING = 'counter-clockwise';

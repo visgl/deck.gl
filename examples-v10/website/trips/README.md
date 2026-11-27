@@ -14,6 +14,8 @@ yarn
 yarn start-local
 ```
 
+<!-- TODO(#11268): Switch to npm start when v10 is published. -->
+
 ### Data format
 
 The example loads the full Manhattan taxi trip dataset from a single Parquet file.

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import TransitionInterpolator from './transition-interpolator';
-import {lerp} from '@math.gl/core';
+import {lerp} from '@math.gl/core/matrix';
 
 import type Viewport from '../viewports/viewport';
 

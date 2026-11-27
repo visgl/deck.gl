@@ -6,7 +6,7 @@ import React, {useState, useEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
@@ -89,6 +89,7 @@ type Trip = {
   timestamps: number[];
 };
 
+/** Counts of rendered trips and path vertices. */
 type TripStats = {trips: number; vertices: number};
 
 /** Expands the shared segment dictionary into TripsLayer rows after loading. */

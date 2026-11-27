@@ -3,9 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {equals, config, Vector3} from '@math.gl/core';
-import {WebMercatorViewport} from 'deck.gl';
-import {Matrix4} from '@math.gl/core';
+import {equals, config, Vector3, Matrix4} from '@math.gl/core/matrix';
+import {GlobeView, MapView, WebMercatorViewport} from 'deck.gl';
 import {getDistanceScales} from '@math.gl/geospatial/web-mercator';
 
 // Adjust sensitivity of math.gl's equals
@@ -297,6 +296,90 @@ function getCulling(p, planes) {
   return outDir;
 }
 
+// Regression for visgl/loaders.gl#2508. Heights are relative to the WGS84 ellipsoid.
+test('WebMercatorViewport#minimumElevation fixes top-down clipping without moving the camera', () => {
+  const options = {longitude: -122.4, latitude: 37.8, width: 1000, height: 800, zoom: 15};
+  const ground = [-122.4, 37.8, -30];
+  const topDown = new WebMercatorViewport({...options, pitch: 0});
+  const tilted = new WebMercatorViewport({...options, pitch: 1});
+  const extended = new MapView({minimumElevation: -500}).makeViewport({
+    width: options.width,
+    height: options.height,
+    viewState: {...options, pitch: 0}
+  })!;
+
+  expect(topDown.project(ground)[2]).toBeGreaterThan(1);
+  expect(tilted.project(ground)[2]).toBeLessThan(1);
+  expect(extended.project(ground)[2]).toBeLessThan(1);
+  expect(getCulling(topDown.projectPosition(ground), topDown.getFrustumPlanes())).toBe('far');
+  expect(getCulling(extended.projectPosition(ground), extended.getFrustumPlanes())).toBeNull();
+  expect(extended.project(ground).slice(0, 2)).toEqual(topDown.project(ground).slice(0, 2));
+  expect(extended.cameraPosition).toEqual(topDown.cameraPosition);
+  expect(extended.viewMatrix).toEqual(topDown.viewMatrix);
+  expect(extended.getFrustumPlanes().near).toEqual(topDown.getFrustumPlanes().near);
+});
+
+test.each([
+  {zoom: 12, pitch: 0, elevation: 0, orthographic: false},
+  {zoom: 18, pitch: 0, elevation: 0, orthographic: false},
+  {zoom: 21, pitch: 0, elevation: -30, orthographic: false},
+  {zoom: 15, pitch: 1, elevation: -30, orthographic: false},
+  {zoom: 18, pitch: 45, elevation: 400, orthographic: false},
+  {zoom: 18, pitch: 0, elevation: -30, orthographic: true},
+  {zoom: 18, pitch: 45, elevation: 0, orthographic: true}
+])(
+  'WebMercatorViewport#minimumElevation includes the floor at $zoom/$pitch/$elevation/$orthographic',
+  options => {
+    const viewport = new WebMercatorViewport({
+      ...options,
+      longitude: -122.4,
+      latitude: 37.8,
+      width: 1000,
+      height: 800,
+      bearing: 35,
+      padding: {top: 120, left: 80},
+      position: [0, 0, options.elevation],
+      minimumElevation: -500
+    });
+    for (const pixel of [
+      [100, 160],
+      [900, 160],
+      [100, 640],
+      [900, 640]
+    ]) {
+      const ground = viewport.unproject(pixel, {targetZ: -500});
+      const projected = viewport.project(ground);
+      expect(projected[0]).toBeGreaterThan(0);
+      expect(projected[0]).toBeLessThan(viewport.width);
+      expect(projected[1]).toBeGreaterThan(0);
+      expect(projected[1]).toBeLessThan(viewport.height);
+      expect(projected[2]).toBeGreaterThan(0);
+      expect(projected[2]).toBeLessThan(1);
+    }
+  }
+);
+
+test('WebMercatorViewport#minimumElevation preserves defaults and explicit projection overrides', () => {
+  const options = {longitude: -122.4, latitude: 37.8, width: 1000, height: 800, zoom: 15};
+  const baseline = new WebMercatorViewport(options);
+  expect(new WebMercatorViewport({...options, minimumElevation: 0}).projectionMatrix).toEqual(
+    baseline.projectionMatrix
+  );
+  expect(new WebMercatorViewport({...options, minimumElevation: 100}).projectionMatrix).toEqual(
+    baseline.projectionMatrix
+  );
+  expect(
+    new WebMercatorViewport({...options, farZ: 4, minimumElevation: -500}).projectionMatrix
+  ).toEqual(new WebMercatorViewport({...options, farZ: 4}).projectionMatrix);
+  expect(
+    new WebMercatorViewport({
+      ...options,
+      projectionMatrix: baseline.projectionMatrix,
+      minimumElevation: -500
+    }).projectionMatrix
+  ).toEqual(baseline.projectionMatrix);
+});
+
 test('WebMercatorViewport describes OSMTile512 without changing common-space projection', () => {
   for (const latitude of [0, 40, 60]) {
     const viewport = new WebMercatorViewport({longitude: 12, latitude});
@@ -348,6 +431,8 @@ test.each([
   {longitude: NaN, latitude: 0}
 ])('WebMercatorViewport preserves local fallback for non-finite anchors: %j', options => {
   const viewport = new WebMercatorViewport(options);
+  expect(viewport.projectionMatrix.every(Number.isFinite)).toBe(true);
+  expect(viewport.project([4, 5, 6]).every(Number.isFinite)).toBe(true);
   expect(viewport.isGeospatial).toBe(false);
   expect(viewport.crs).toBeUndefined();
   expect(viewport.projectFlat([4, 5])).toEqual([4, 5]);
@@ -357,4 +442,50 @@ test.each([
   viewport
     .unprojectPosition(viewport.projectPosition(position))
     .forEach((value, axis) => expect(value).toBeCloseTo(position[axis], 10));
+});
+
+// TerrainController can place the camera target below both sea level and the configured floor.
+test.each([
+  {minimumElevation: 0, target: -30},
+  {minimumElevation: 0, target: -800},
+  {minimumElevation: -500, target: -30},
+  {minimumElevation: -500, target: -800},
+  {minimumElevation: 100, target: -30},
+  {minimumElevation: -1000, target: -800}
+])(
+  'WebMercatorViewport includes target $target below floor $minimumElevation',
+  ({minimumElevation, target}) => {
+    const viewport = new WebMercatorViewport({
+      longitude: -122.4,
+      latitude: 37.8,
+      width: 1000,
+      height: 800,
+      zoom: 18,
+      position: [0, 0, target],
+      minimumElevation
+    });
+    const ground = [-122.4, 37.8, target];
+    expect(viewport.project(ground)[2]).toBeGreaterThan(0);
+    expect(viewport.project(ground)[2]).toBeLessThan(1);
+    expect(getCulling(viewport.projectPosition(ground), viewport.getFrustumPlanes())).toBeNull();
+  }
+);
+
+test.each([NaN, Infinity, -Infinity])(
+  'WebMercatorViewport ignores invalid minimumElevation %s',
+  minimumElevation => {
+    const options = {longitude: 0, latitude: 0, zoom: 18, width: 800, height: 600};
+    expect(new WebMercatorViewport({...options, minimumElevation}).projectionMatrix).toEqual(
+      new WebMercatorViewport(options).projectionMatrix
+    );
+  }
+);
+
+test('GlobeView passes minimumElevation to its high-zoom Mercator viewport', () => {
+  const options = {width: 800, height: 600, viewState: {longitude: 0, latitude: 0, zoom: 18}};
+  const point = [0, 0, -300];
+  expect(new GlobeView().makeViewport(options)!.project(point)[2]).toBeGreaterThan(1);
+  expect(
+    new GlobeView({minimumElevation: -500}).makeViewport(options)!.project(point)[2]
+  ).toBeLessThan(1);
 });

@@ -5,11 +5,16 @@
 import {Field, FixedSizeList, Float64, List, tableFromArrays, vectorFromArray} from 'apache-arrow';
 import type {Table, Vector} from 'apache-arrow';
 
+/** A longitude and latitude pair in degrees. */
 type Point = [longitude: number, latitude: number];
+/** A longitude and latitude pair with elevation in meters. */
 type TripPoint = [longitude: number, latitude: number, height: number];
+/** A reconstructed trip and its per-vertex animation times. */
 type Trip = {vendor: number; path: TripPoint[]; timestamps: number[]};
 
+/** Duration of the repeating animation in seconds. */
 export const LOOP_LENGTH = 1800;
+/** Maximum trail duration carried across the loop boundary in seconds. */
 const LOOP_TRAIL_LENGTH = 180;
 
 /** Rebuilds the relative traversal time at every point in a shared segment. */

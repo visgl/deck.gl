@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {
-  _GlobeViewport as GlobeViewport,
+  GlobeViewport,
   type GetPickingInfoParams,
   type UpdateParameters,
   type Layer,
@@ -12,7 +12,7 @@ import {
 } from '@deck.gl/core';
 import {GeoJsonLayer, type GeoJsonLayerProps} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {worldToLngLat} from '@math.gl/geospatial/web-mercator';
 import {load} from '@loaders.gl/core';
 import {MVTWorkerLoader} from '@loaders.gl/tiles/mvt';

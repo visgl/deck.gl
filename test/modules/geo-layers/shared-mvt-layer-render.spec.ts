@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Deck, MapView, GlobeView} from '@deck.gl/core';
 import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {expect, test, vi} from 'vitest';
 import {Tileset2D} from '@deck.gl/geo-layers';

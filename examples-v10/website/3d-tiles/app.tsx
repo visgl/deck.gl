@@ -5,13 +5,13 @@
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 
 import type {MapViewState} from '@deck.gl/core';
-import type {Tileset3D} from '@loaders.gl/tiles-3d';
+import type {Tileset3D} from '@loaders.gl/tiles-3d/tileset';
 
 const ION_ASSET_ID = 43978;
 const ION_TOKEN =

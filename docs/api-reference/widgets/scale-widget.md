@@ -45,7 +45,8 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL, {_ScaleWidget as ScaleWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import {_ScaleWidget as ScaleWidget} from '@deck.gl/react/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
 function App() {

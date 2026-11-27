@@ -81,7 +81,7 @@ class TripsDemo extends Component {
         {...otherProps}
         key={this.props.device?.type}
         buildings={data}
-        onDataLoad={this.props.onStateChange}
+        onDataLoad={stats => this.props.onStateChange({...stats, progress: 0.8})}
         animationSpeed={1}
         trailLength={params.trail.value}
       />

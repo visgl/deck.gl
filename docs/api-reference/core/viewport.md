@@ -174,7 +174,7 @@ Returns:
 * `{near: {normal, distance}, far: {normal, distance}, left: {normal, distance}, right: {normal, distance}, top: {normal, distance}, bottom: {normal, distance}}`
 
 ```js
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 
 // Culling tests must be done in common space
 const commonPosition = new Vector3(viewport.projectPosition(point));

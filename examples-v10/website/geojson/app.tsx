@@ -3,10 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import {GeoParquetLoader} from '@loaders.gl/tables/parquet';
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer, PolygonLayer} from '@deck.gl/layers';
 import {LightingEffect, AmbientLight, _SunLight as SunLight} from '@deck.gl/core';
@@ -102,6 +104,7 @@ export default function App({
   /** Reports loaded geometry counts to the website controls. */
   onDataLoad?: (stats: {count: number; vertexCount: number}) => void;
 }) {
+  const widgets = useMemo(() => [new LoadingWidget()], []);
   const [effects] = useState(() => {
     const lightingEffect = new LightingEffect({ambientLight, dirLight});
     lightingEffect.shadowColor = [0, 0, 0, 0.5];
@@ -146,6 +149,7 @@ export default function App({
 
   return (
     <DeckGL
+      widgets={widgets}
       device={device}
       layers={layers}
       effects={effects}

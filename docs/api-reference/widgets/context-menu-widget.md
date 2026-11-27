@@ -139,7 +139,8 @@ const deck = new Deck({
 
 ```tsx
 import React, {useState, useCallback} from 'react';
-import DeckGL, {ContextMenuWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import {ContextMenuWidget} from '@deck.gl/react/widgets';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import type {PickingInfo} from '@deck.gl/core';
 import '@deck.gl/widgets/stylesheet.css';

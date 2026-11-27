@@ -4,6 +4,16 @@
 
 import {test, expect, vi} from 'vitest';
 import {FullscreenWidget} from '@deck.gl/widgets';
+import widgetStyles from '../../../modules/widgets/src/stylesheet.css?inline';
+
+function mockFullscreenProperty(target: object, name: string, descriptor: PropertyDescriptor) {
+  const original = Object.getOwnPropertyDescriptor(target, name);
+  Object.defineProperty(target, name, {...descriptor, configurable: true});
+  return () => {
+    if (original) Object.defineProperty(target, name, original);
+    else Reflect.deleteProperty(target, name);
+  };
+}
 
 test('FullscreenWidget - uncontrolled: defaults to not fullscreen', () => {
   const widget = new FullscreenWidget();
@@ -33,27 +43,129 @@ test('FullscreenWidget - pseudo-fullscreen toggles state and calls callback', ()
   expect(container.classList.contains('deck-pseudo-fullscreen')).toBe(false);
 });
 
-test('FullscreenWidget - onFullscreenChange event updates state and calls callback', () => {
-  const onFullscreenChange = vi.fn();
-  const widget = new FullscreenWidget({onFullscreenChange});
-
-  const container = document.createElement('div');
-  vi.spyOn(widget, 'getContainer').mockReturnValue(container);
-
-  widget.fullscreen = true;
-  widget.onFullscreenChange();
-
-  expect(onFullscreenChange).toHaveBeenCalledWith(false);
-  expect(widget.fullscreen).toBe(false);
+test('FullscreenWidget - rejected native request uses viewport fallback and exits by mode', async () => {
+  const target = document.createElement('div');
+  const root = document.createElement('div');
+  root.className = 'deck-widget deck-widget-fullscreen';
+  const canvas = document.createElement('canvas');
+  const ancestor = document.createElement('div');
+  ancestor.style.cssText = 'transform: translateX(30px); overflow: hidden; width: 120px';
+  ancestor.append(target);
+  target.append(canvas, root);
+  document.body.append(ancestor);
+  const styles = document.createElement('style');
+  styles.textContent = widgetStyles;
+  document.head.append(styles);
+  const request = vi.fn().mockRejectedValue(new Error('Denied'));
+  const exit = vi.fn().mockResolvedValue(undefined);
+  const restoreRequest = mockFullscreenProperty(target, 'requestFullscreen', {value: request});
+  const restoreExit = mockFullscreenProperty(document, 'exitFullscreen', {value: exit});
+  const changed = vi.fn();
+  const widget = new FullscreenWidget({container: target, onFullscreenChange: changed});
+  try {
+    widget.onAdd();
+    widget.onRenderHTML(root);
+    const originalBounds = target.getBoundingClientRect().toJSON();
+    root.querySelector('button')!.click();
+    await vi.waitFor(() => expect(widget.getFullscreen()).toBe(true));
+    expect(request).toHaveBeenCalledOnce();
+    expect(target.matches(':popover-open')).toBe(true);
+    const bounds = target.getBoundingClientRect();
+    expect(bounds.left).toBe(0);
+    expect(bounds.top).toBe(0);
+    expect(bounds.width).toBe(window.innerWidth);
+    expect(bounds.height).toBe(window.innerHeight);
+    expect(target.querySelector('canvas')).toBe(canvas);
+    const button = root.querySelector('button')!;
+    document.dispatchEvent(new Event('fullscreenchange'));
+    expect(widget.getFullscreen()).toBe(true);
+    button.click();
+    await vi.waitFor(() => expect(widget.getFullscreen()).toBe(false));
+    expect(target.hasAttribute('popover')).toBe(false);
+    expect(target.getBoundingClientRect().toJSON()).toEqual(originalBounds);
+    expect(canvas.parentElement).toBe(target);
+    expect(exit).not.toHaveBeenCalled();
+    expect(changed.mock.calls).toEqual([[true], [false]]);
+  } finally {
+    widget.onRemove();
+    restoreRequest();
+    restoreExit();
+    styles.remove();
+    ancestor.remove();
+  }
 });
 
-test('FullscreenWidget - onFullscreenChange does not fire callback when state unchanged', () => {
-  const onFullscreenChange = vi.fn();
-  const widget = new FullscreenWidget({onFullscreenChange});
+test('FullscreenWidget - late native rejection does not open fallback after removal', async () => {
+  const target = document.body.appendChild(document.createElement('div'));
+  const widget = new FullscreenWidget({container: target});
+  const request = Promise.withResolvers<void>();
+  const restoreRequest = mockFullscreenProperty(target, 'requestFullscreen', {
+    value: () => request.promise
+  });
+  try {
+    const pending = widget.requestFullscreen();
+    widget.onRemove();
+    request.reject(new Error('Denied'));
+    await pending;
+    expect(target.classList.contains('deck-pseudo-fullscreen')).toBe(false);
+  } finally {
+    target.remove();
+    restoreRequest();
+  }
+});
 
-  const container = document.createElement('div');
-  vi.spyOn(widget, 'getContainer').mockReturnValue(container);
+test('FullscreenWidget - removal releases fallback without a native API', async () => {
+  const target = document.createElement('div');
+  const root = target.appendChild(document.createElement('div'));
+  document.body.append(target);
+  Object.defineProperty(target, 'requestFullscreen', {value: undefined});
+  const widget = new FullscreenWidget({container: target});
+  try {
+    widget.onAdd();
+    widget.onRenderHTML(root);
+    await widget.handleClick();
+    expect(widget.getFullscreen()).toBe(true);
+    widget.onRemove();
+    expect(target.hasAttribute('popover')).toBe(false);
+    expect(target.classList.contains('deck-pseudo-fullscreen')).toBe(false);
+  } finally {
+    widget.onRemove();
+    target.remove();
+  }
+});
 
-  widget.onFullscreenChange();
-  expect(onFullscreenChange).not.toHaveBeenCalled();
+test('FullscreenWidget - native fullscreen follows browser exit events', async () => {
+  const target = document.createElement('div');
+  const root = target.appendChild(document.createElement('div'));
+  document.body.append(target);
+  let fullscreenElement: Element | null = null;
+  const restoreElement = mockFullscreenProperty(document, 'fullscreenElement', {
+    get: () => fullscreenElement
+  });
+  const restoreRequest = mockFullscreenProperty(target, 'requestFullscreen', {
+    value: async () => {
+      fullscreenElement = target;
+      document.dispatchEvent(new Event('fullscreenchange'));
+    }
+  });
+  const changed = vi.fn();
+  const widget = new FullscreenWidget({container: target, onFullscreenChange: changed});
+  try {
+    widget.onAdd();
+    widget.onRenderHTML(root);
+    await widget.handleClick();
+    expect(widget.getFullscreen()).toBe(true);
+    expect(target.classList.contains('deck-pseudo-fullscreen')).toBe(false);
+    fullscreenElement = null;
+    document.dispatchEvent(new Event('fullscreenchange'));
+    expect(widget.getFullscreen()).toBe(false);
+    document.dispatchEvent(new Event('fullscreenchange'));
+    expect(changed.mock.calls).toEqual([[true], [false]]);
+  } finally {
+    fullscreenElement = null;
+    widget.onRemove();
+    restoreElement();
+    restoreRequest();
+    target.remove();
+  }
 });

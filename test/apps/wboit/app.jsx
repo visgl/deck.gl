@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, {PureComponent, Fragment} from 'react';
-import DeckGL from '@deck.gl/react';
+import DeckGL from '@deck.gl/react/legacy';
 import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import WBOITLayer from './wboit-layer/wboit-layer';

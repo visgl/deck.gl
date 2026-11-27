@@ -13,7 +13,7 @@ import {
   pickingPlugin
 } from '@deck.gl/core';
 import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
-import {equals, Matrix4} from '@math.gl/core';
+import {equals, Matrix4} from '@math.gl/core/matrix';
 import {Timeline, Model} from '@luma.gl/engine';
 
 import {sleep, testAsyncData} from './async-iterator-test-utils';

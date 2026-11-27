@@ -9,6 +9,9 @@ import {IconButton} from './lib/components/icon-button';
 
 /* eslint-enable max-len */
 
+/** Class that expands the existing container to the viewport. */
+const FALLBACK_CLASS = 'deck-pseudo-fullscreen';
+
 export type FullscreenWidgetProps = WidgetProps & {
   id?: string;
   /** Widget positioning within the view. Default 'top-left'. */
@@ -51,6 +54,9 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   className = 'deck-widget-fullscreen';
   placement: WidgetPlacement = 'top-left';
   fullscreen: boolean = false;
+  private restoreFallback: (() => void) | null = null;
+  private fallbackRevision = 0;
+  private handleNativeChange = () => this.onFullscreenChange();
 
   constructor(props: FullscreenWidgetProps = {}) {
     super(props);
@@ -58,19 +64,29 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   }
 
   onAdd(): void {
-    document.addEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
+    document.addEventListener('fullscreenchange', this.handleNativeChange);
   }
 
   onRemove() {
-    document.removeEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
+    document.removeEventListener('fullscreenchange', this.handleNativeChange);
+    this.fallbackRevision++;
+    if (this.restoreFallback) {
+      this.restoreFallback();
+      this.restoreFallback = null;
+      this.fullscreen = false;
+    }
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
     const isFullscreen = this.getFullscreen();
     render(
       <IconButton
-        onClick={() => {
-          this.handleClick().catch(err => log.error(err)());
+        onClick={async () => {
+          try {
+            await this.handleClick();
+          } catch (error) {
+            log.error(String(error))();
+          }
         }}
         label={isFullscreen ? this.props.exitLabel : this.props.enterLabel}
         tooltip={isFullscreen ? this.props.exitTooltip : this.props.enterTooltip}
@@ -81,6 +97,9 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   }
 
   setProps(props: Partial<FullscreenWidgetProps>) {
+    if (this.restoreFallback && 'container' in props && props.container !== this.props.container) {
+      this.togglePseudoFullscreen();
+    }
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
@@ -95,7 +114,8 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
   }
 
   onFullscreenChange() {
-    const fullscreen = document.fullscreenElement === this.getContainer();
+    const fullscreen =
+      Boolean(this.restoreFallback) || document.fullscreenElement === this.getContainer();
     if (fullscreen !== this.fullscreen) {
       this.fullscreen = fullscreen;
       this.props.onFullscreenChange?.(fullscreen);
@@ -115,26 +135,66 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
 
   async requestFullscreen() {
     const container = this.getContainer();
+    const revision = this.fallbackRevision;
     if (container?.requestFullscreen) {
-      await container.requestFullscreen({navigationUI: 'hide'});
-    } else {
+      try {
+        await container.requestFullscreen({navigationUI: 'hide'});
+        return;
+      } catch {
+        // The browser exposes the API but does not allow this element to enter fullscreen.
+      }
+    }
+    if (
+      container?.isConnected &&
+      container === this.getContainer() &&
+      revision === this.fallbackRevision &&
+      !this.restoreFallback &&
+      !document.fullscreenElement
+    ) {
       this.togglePseudoFullscreen();
     }
   }
 
   async exitFullscreen() {
-    if (document.exitFullscreen) {
-      await document.exitFullscreen();
-    } else {
+    if (this.restoreFallback) {
       this.togglePseudoFullscreen();
+    } else if (document.exitFullscreen) {
+      await document.exitFullscreen();
     }
   }
 
   togglePseudoFullscreen() {
-    this.getContainer()?.classList.toggle('deck-pseudo-fullscreen');
-    // No fullscreenchange event fires for pseudo-fullscreen, so manually update state
-    this.fullscreen = !this.fullscreen;
-    this.props.onFullscreenChange?.(this.fullscreen);
-    this.updateHTML();
+    if (this.restoreFallback) {
+      this.restoreFallback();
+      this.restoreFallback = null;
+    } else {
+      const container = this.getContainer();
+      if (!container) return;
+      this.openFallback(container);
+    }
+    this.onFullscreenChange();
+  }
+
+  /** Expand the existing container, using the top layer to escape clipping ancestors. */
+  private openFallback(container: HTMLElement) {
+    container.classList.add(FALLBACK_CLASS);
+    let popover = false;
+    if (typeof container.showPopover === 'function' && !container.hasAttribute('popover')) {
+      container.setAttribute('popover', 'manual');
+      try {
+        container.showPopover();
+        popover = true;
+      } catch {
+        container.removeAttribute('popover');
+      }
+    }
+
+    this.restoreFallback = () => {
+      if (popover) {
+        container.hidePopover();
+        container.removeAttribute('popover');
+      }
+      container.classList.remove(FALLBACK_CLASS);
+    };
   }
 }
