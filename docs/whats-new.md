@@ -35,6 +35,7 @@ v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, S
 ### Projections
 
 - **Non Web Mercator projections**  —  [`CustomProjectionView`](./api-reference/core/custom-projection-view.md) renders longitude/latitude data in a planar projection specified by an EPSG code or PROJ string.
+- [**WMS imagery**](./api-reference/geo-layers/wms-layer.md#srs) can be requested and rendered directly in the CRS of `CustomProjectionView`.
 - [**Source data CRS**](./developer-guide/coordinate-systems.md#positions) is preserved during loading and projected automatically
 - **Curved geometry** — Set [`resolution`](./api-reference/core/view.md#resolution) to subdivide paths, polygons, and bitmaps so they follow the projection’s curves.
 

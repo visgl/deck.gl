@@ -16,6 +16,8 @@ import {
   UpdateParameters,
   DefaultProps,
   Viewport,
+  _CustomProjectionViewport as CustomProjectionViewport,
+  log,
   _deepEqual as deepEqual
 } from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
@@ -26,17 +28,26 @@ import type {
 } from '@loaders.gl/core/loader-utils';
 import {createDataSourceSync} from '@loaders.gl/core';
 import {ImageSource, WMSSource} from '@loaders.gl/ogc/wms/bundled';
-import {WGS84ToPseudoMercator} from './utils';
+import {getProjectedViewportBounds, WGS84ToPseudoMercator} from './utils';
 
-/** All props supported by the TileLayer */
+/** All props supported by WMSLayer. */
 export type WMSLayerProps = CompositeLayerProps & _WMSLayerProps;
 
-/** Props added by the TileLayer */
+/** Props added by WMSLayer. */
 type _WMSLayerProps = {
   data: string | ImageSource;
   serviceType?: 'wms' | 'auto';
   layers?: string[];
-  srs?: 'EPSG:4326' | 'EPSG:3857' | 'auto';
+  /**
+   * CRS to request from the image service. A matching custom view CRS uses native bounds.
+   * For a custom view defined without a CRS identifier, set this to the server's identifier
+   * for the view CRS to request native bounds. In a custom view, EPSG:4326 uses approximate
+   * placement and an explicit EPSG:3857 falls back to EPSG:4326 with a warning.
+   * `'auto'` uses the custom view's CRS identifier when available, EPSG:3857 in MapView,
+   * and EPSG:4326 otherwise.
+   * @default 'auto'
+   */
+  srs?: 'EPSG:4326' | 'EPSG:3857' | 'auto' | (string & {});
   onMetadataLoad?: (metadata: ImageSourceMetadata) => void;
   onMetadataLoadError?: (error: Error) => void;
   onImageLoadStart?: (requestId: unknown) => void;
@@ -63,9 +74,7 @@ const defaultProps: DefaultProps<WMSLayerProps> = {
   }
 };
 
-/**
- * The layer is used in Hex Tile layer in order to properly discard invisible elements during animation
- */
+/** Requests and displays a map image for the current viewport. */
 export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_WMSLayerProps>
 > {
@@ -76,18 +85,17 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     imageSource: ImageSource;
     image: ImageType;
     bounds: [number, number, number, number];
-    lastRequestParameters: {
-      bbox: [number, number, number, number];
-      layers: string[];
-      srs: 'EPSG:4326' | 'EPSG:3857';
-      width: number;
-      height: number;
-    };
+    /** Source CRS signature when the image bounds are in native projection units. */
+    boundsCoordinateSystem?: string;
+    /** The parameters of the request that produced `image`. */
+    lastRequestParameters: GetImageParameters;
     lastRequestId: number;
     _nextRequestId: number;
     /** TODO: Change any => setTimeout return type. Different between Node and browser... */
     _timeoutId: any;
     loadCounter: number;
+    /** Whether a custom view CRS mismatch has already been reported by this layer. */
+    srsMismatchWarned?: boolean;
   };
 
   /** Returns true if all async resources are loaded */
@@ -119,6 +127,8 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       this.debounce(() => this.loadImage(viewport, 'image source changed'), 0);
     } else if (!deepEqual(props.layers, oldProps.layers, 1)) {
       this.debounce(() => this.loadImage(viewport, 'layers changed'), 0);
+    } else if (props.srs !== oldProps.srs && viewport instanceof CustomProjectionViewport) {
+      this.debounce(() => this.loadImage(viewport, 'srs changed'), 0);
     } else if (changeFlags.viewportChanged) {
       this.debounce(() => this.loadImage(viewport, 'viewport changed'));
     }
@@ -131,13 +141,18 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
   override renderLayers(): Layer {
     // TODO - which bitmap layer is rendered should depend on the current viewport
     // Currently Studio only uses one viewport
-    const {bounds, image, lastRequestParameters} = this.state;
+    const {bounds, image, lastRequestParameters, boundsCoordinateSystem} = this.state;
 
     return (
       image &&
       new BitmapLayer({
         ...this.getSubLayerProps({id: 'bitmap'}),
-        _imageCoordinateSystem: lastRequestParameters.srs === 'EPSG:4326' ? 'lnglat' : 'cartesian',
+        ...(boundsCoordinateSystem && {coordinateSystem: boundsCoordinateSystem}),
+        _imageCoordinateSystem: boundsCoordinateSystem
+          ? 'default'
+          : lastRequestParameters.crs === 'EPSG:4326'
+            ? 'lnglat'
+            : 'cartesian',
         bounds,
         image
       })
@@ -205,14 +220,25 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       return;
     }
 
-    const bounds = viewport.getBounds();
-    const {width, height} = viewport;
-    const requestId = this.getRequestId();
-    let {srs} = this.props;
-    if (srs === 'auto') {
-      // BitmapLayer only supports LNGLAT or CARTESIAN (Web-Mercator)
-      srs = viewport.crs?.signature === 'OSMTile512' ? 'EPSG:3857' : 'EPSG:4326';
+    let {width, height} = viewport;
+    const {srs, native} = this.getRequestSrs(viewport);
+    const nativeViewport = native && viewport instanceof CustomProjectionViewport ? viewport : null;
+    let bounds: [number, number, number, number];
+    if (nativeViewport) {
+      const projectedBounds = getProjectedViewportBounds(nativeViewport);
+      if (!projectedBounds) return;
+      bounds = projectedBounds.bounds;
+      const {unclampedBounds} = projectedBounds;
+      // Preserve the requested pixel density when the CRS clips the visible ground bounds.
+      const widthFraction = (bounds[2] - bounds[0]) / (unclampedBounds[2] - unclampedBounds[0]);
+      const heightFraction = (bounds[3] - bounds[1]) / (unclampedBounds[3] - unclampedBounds[1]);
+      width = Math.max(1, Math.round(width * widthFraction));
+      height = Math.max(1, Math.round(height * heightFraction));
+    } else {
+      bounds = viewport.getBounds();
     }
+
+    const requestId = this.getRequestId();
     const requestParams: GetImageParameters = {
       width,
       height,
@@ -223,7 +249,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       layers,
       crs: srs
     };
-    if (srs === 'EPSG:3857') {
+    if (!nativeViewport && srs === 'EPSG:3857') {
       const min = WGS84ToPseudoMercator([bounds[0], bounds[1]]);
       const max = WGS84ToPseudoMercator([bounds[2], bounds[3]]);
       requestParams.boundingBox = [min, max];
@@ -242,6 +268,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
         this.setState({
           image,
           bounds,
+          boundsCoordinateSystem: nativeViewport?.crs.signature,
           lastRequestParameters: requestParams,
           lastRequestId: requestId
         });
@@ -255,6 +282,37 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
   }
 
   // HELPERS
+
+  /** Select the request CRS and whether the request uses native custom view bounds. */
+  private getRequestSrs(viewport: Viewport): {srs: string; native: boolean} {
+    const {srs} = this.props;
+    if (viewport instanceof CustomProjectionViewport) {
+      const {signature} = viewport.crs;
+      // math.gl preserves a supplied identifier in the signature under default conventions.
+      const hasIdentifier = /^[\w.-]+:[\w.-]+$/.test(signature);
+      if (srs === 'auto') {
+        return hasIdentifier ? {srs: signature, native: true} : {srs: 'EPSG:4326', native: false};
+      }
+      if (srs === 'EPSG:4326') {
+        return {srs, native: false};
+      }
+      if (srs !== 'EPSG:3857' && (!hasIdentifier || srs === signature)) {
+        return {srs, native: true};
+      }
+      if (!this.state.srsMismatchWarned) {
+        this.state.srsMismatchWarned = true;
+        log.warn(`WMSLayer: srs ${srs} differs from the view CRS. Using EPSG:4326.`)();
+      }
+      return {srs: 'EPSG:4326', native: false};
+    }
+    if (srs === 'auto') {
+      return {
+        srs: viewport.crs?.signature === 'OSMTile512' ? 'EPSG:3857' : 'EPSG:4326',
+        native: false
+      };
+    }
+    return {srs, native: false};
+  }
 
   /** Global counter for issuing unique request ids */
   private getRequestId(): number {
