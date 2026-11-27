@@ -114,10 +114,11 @@ The table below covers the public extensions in `@deck.gl/extensions`. All liste
 
 The table below covers the public effect classes exported by `@deck.gl/core`.
 
-| Module          | Effect              | WebGL | WebGPU | Notes                                                                                                                   |
-| --------------- | ------------------- | ----- | ------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `@deck.gl/core` | `LightingEffect`    | ✅    | 🚧     | Material lighting modules have WGSL support, but the shadow path still depends on the GLSL-only `shadow` shader module. |
-| `@deck.gl/core` | `PostProcessEffect` | ✅    | ✅     | WebGPU requires shader passes with WGSL source.                                                                         |
+| Module          | Effect                                                                                          | WebGL | WebGPU | Notes                                                                                                                    |
+| --------------- | ----------------------------------------------------------------------------------------------- | ----- | ------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `@deck.gl/core` | [`LightingEffect`](https://deck.gl/next/docs/api-reference/core/lighting-effect.md)        | ✅    | ✅     | Material lighting works on both backends. The legacy `DirectionalLight._shadow` option is WebGL-only and will remain so. |
+| `@deck.gl/core` | [`PostProcessEffect`](https://deck.gl/next/docs/api-reference/core/post-process-effect.md) | ✅    | ✅     | WebGPU requires shader passes with WGSL source.                                                                          |
+| `@deck.gl/core` | [`ShadowMapEffect`](https://deck.gl/next/docs/api-reference/core/shadow-map-effect.md)     | ❌    | ✅     | Provides soft, cascaded shadows for one directional light and one viewport with a finite, positive camera depth range.   |
 
 ## Features[​](#features "Direct link to Features")
 
