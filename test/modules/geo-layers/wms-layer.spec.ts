@@ -5,9 +5,16 @@
 // deck.gl, MIT license
 
 import {test, expect} from 'vitest';
-import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
+import {generateLayerTests, testInitializeLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
+import {WebMercatorViewport} from '@deck.gl/core';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 import {WMSImageSource} from '@loaders.gl/ogc/wms/bundled';
+import type {ImageSource} from '@loaders.gl/ogc/wms';
+import type {
+  GetImageParameters,
+  ImageSourceMetadata,
+  ImageType
+} from '@loaders.gl/core/loader-utils';
 import {projectionEngine} from '@math.gl/geospatial/projection';
 import {WGS84ToPseudoMercator} from '@deck.gl/geo-layers/wms-layer/utils';
 import {equals} from '@math.gl/core/matrix';
@@ -54,5 +61,55 @@ test('EPSG:4326 -> EPSG:3857', () => {
     // console.log(actual);
     // console.log(expected);
     expect(equals(actual, expected), 'matches projection output').toBeTruthy();
+  }
+});
+
+/** Returns an image source that records each GetMap request instead of fetching. */
+function createRecordingImageSource() {
+  const requests: GetImageParameters[] = [];
+  const imageSource = {
+    async getMetadata(): Promise<ImageSourceMetadata> {
+      return {name: 'recording', keywords: [], layers: []};
+    },
+    async getImage(parameters: GetImageParameters): Promise<ImageType> {
+      requests.push(parameters);
+      // The layer only passes the image through to BitmapLayer.
+      return {width: 10, height: 10} as unknown as ImageType;
+    }
+  } as unknown as ImageSource;
+  return {imageSource, requests};
+}
+
+test('WMSLayer positions an EPSG:4326 image in LNGLAT coordinates', async () => {
+  const viewport = new WebMercatorViewport({
+    width: 800,
+    height: 600,
+    longitude: -72,
+    latitude: 40,
+    zoom: 6
+  });
+  const {imageSource, requests} = createRecordingImageSource();
+  const layer = new WMSLayer({
+    id: 'wms-epsg-4326',
+    data: imageSource,
+    layers: ['test-layer'],
+    srs: 'EPSG:4326'
+  });
+  const {finalize} = testInitializeLayer({
+    layer,
+    viewport,
+    finalize: false,
+    onError: error => expect(error).toBeFalsy()
+  });
+  try {
+    // Request the image directly instead of waiting for the debounced initial load.
+    clearTimeout((layer.state as any)._timeoutId);
+    await layer.loadImage(viewport, 'test');
+    expect(requests.map(request => request.crs)).toEqual(['EPSG:4326']);
+
+    const bitmapLayer = layer.renderLayers() as any;
+    expect(bitmapLayer.props._imageCoordinateSystem).toBe('lnglat');
+  } finally {
+    finalize();
   }
 });
