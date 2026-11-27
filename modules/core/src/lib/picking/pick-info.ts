@@ -38,7 +38,8 @@ export function getEmptyPickingInfo({
   pixelRatio,
   x,
   y,
-  z
+  z,
+  depthPixel
 }: {
   pickInfo?: PickedPixel;
   viewports: Viewport[];
@@ -46,6 +47,8 @@ export function getEmptyPickingInfo({
   x: number;
   y: number;
   z?: number;
+  /** CSS position of the device pixel center that `z` was sampled at */
+  depthPixel?: [number, number];
 }): PickingInfo {
   // If more than one viewports are used in the picking pass, locate the viewport that
   // drew the picked pixel
@@ -58,6 +61,11 @@ export function getEmptyPickingInfo({
   if (pickedViewport) {
     const point = [x - pickedViewport.x, y - pickedViewport.y];
     if (z !== undefined) {
+      // The depth belongs to the sampled pixel center, not to the pointer position.
+      if (depthPixel) {
+        point[0] = depthPixel[0] - pickedViewport.x;
+        point[1] = depthPixel[1] - pickedViewport.y;
+      }
       point[2] = z;
     }
     try {
@@ -87,6 +95,16 @@ export function getEmptyPickingInfo({
   };
 }
 
+/** CSS position of the center of a bottom-left-origin device pixel. */
+export function getDevicePixelCenter(
+  deviceX: number,
+  deviceY: number,
+  deviceHeight: number,
+  pixelRatio: number
+): [number, number] {
+  return [(deviceX + 0.5) / pixelRatio, (deviceHeight - deviceY - 0.5) / pixelRatio];
+}
+
 /* eslint-disable max-depth */
 /** Generates the picking info of a picking operation */
 export function processPickInfo(opts: {
@@ -103,6 +121,7 @@ export function processPickInfo(opts: {
   x: number;
   y: number;
   z?: number;
+  depthPixel?: [number, number];
 }): Map<string | null, PickingInfo> {
   const {pickInfo, lastPickedInfo, mode, layers} = opts;
   const {pickedColor, pickedLayer, pickedObjectIndex} = pickInfo;

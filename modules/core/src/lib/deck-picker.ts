@@ -11,6 +11,7 @@ import {
   processPickInfo,
   getLayerPickingInfo,
   getEmptyPickingInfo,
+  getDevicePixelCenter,
   PickingInfo
 } from './picking/pick-info';
 import type {RenderStats} from '../passes/layers-pass';
@@ -321,20 +322,18 @@ export default class DeckPicker {
       }
 
       let z;
+      let depthPixel: [number, number] | undefined;
       const depthLayers = this._getDepthLayers(pickInfo, pickableLayers, unproject3D);
       if (depthLayers.length > 0) {
+        const depthX = pickInfo.pickedX ?? devicePixel[0];
+        const depthY = pickInfo.pickedY ?? devicePixel[1];
         const {pickedColors: pickedColors2} = await this._drawAndSampleAsync(
           {
             layers: depthLayers,
             views,
             viewports,
             onViewportActive,
-            deviceRect: {
-              x: pickInfo.pickedX ?? devicePixel[0],
-              y: pickInfo.pickedY ?? devicePixel[1],
-              width: 1,
-              height: 1
-            },
+            deviceRect: {x: depthX, y: depthY, width: 1, height: 1},
             cullRect,
             effects,
             pass: `picking:${mode}:z`,
@@ -342,10 +341,10 @@ export default class DeckPicker {
           },
           true
         );
-        // picked value is in common space (pixels) from the camera target (viewport.position)
-        // convert it to meters from the ground
+        // The picked value is the NDC depth at the center of the sampled device pixel.
         if (pickedColors2[3]) {
           z = pickedColors2[0];
+          depthPixel = getDevicePixelCenter(depthX, depthY, height, pixelRatio);
         }
       }
 
@@ -367,6 +366,7 @@ export default class DeckPicker {
         x,
         y,
         z,
+        depthPixel,
         pixelRatio
       });
 
@@ -487,20 +487,18 @@ export default class DeckPicker {
       }
 
       let z;
+      let depthPixel: [number, number] | undefined;
       const depthLayers = this._getDepthLayers(pickInfo, pickableLayers, unproject3D);
       if (depthLayers.length > 0) {
+        const depthX = pickInfo.pickedX ?? devicePixel[0];
+        const depthY = pickInfo.pickedY ?? devicePixel[1];
         const {pickedColors: pickedColors2} = this._drawAndSample(
           {
             layers: depthLayers,
             views,
             viewports,
             onViewportActive,
-            deviceRect: {
-              x: pickInfo.pickedX ?? devicePixel[0],
-              y: pickInfo.pickedY ?? devicePixel[1],
-              width: 1,
-              height: 1
-            },
+            deviceRect: {x: depthX, y: depthY, width: 1, height: 1},
             cullRect,
             effects,
             pass: `picking:${mode}:z`,
@@ -508,10 +506,10 @@ export default class DeckPicker {
           },
           true
         );
-        // picked value is in common space (pixels) from the camera target (viewport.position)
-        // convert it to meters from the ground
+        // The picked value is the NDC depth at the center of the sampled device pixel.
         if (pickedColors2[3]) {
           z = pickedColors2[0];
+          depthPixel = getDevicePixelCenter(depthX, depthY, height, pixelRatio);
         }
       }
 
@@ -533,6 +531,7 @@ export default class DeckPicker {
         x,
         y,
         z,
+        depthPixel,
         pixelRatio
       });
 
