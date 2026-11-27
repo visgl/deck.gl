@@ -50,17 +50,22 @@ function getEastNorthUp(longitude: number, latitude: number): number[][] {
   ];
 }
 
-/** Runs a WGSL compute snippet that writes `count` vec4 results to `output`. */
+/**
+ * Runs a WGSL compute snippet that writes `count` vec4 results to `output`. `input` fills `output`
+ * first: unlike a literal, the compiler cannot fold it into the arithmetic under test.
+ */
 async function runWGSL(
   webgpuDevice: Device,
   modules: ShaderModule[],
   props: {project: ProjectProps},
   body: string,
-  count: number
+  count: number,
+  input?: Float32Array
 ): Promise<Float32Array> {
   const output = webgpuDevice.createBuffer({
     byteLength: count * 16,
-    usage: Buffer.STORAGE | Buffer.COPY_SRC
+    usage: Buffer.STORAGE | Buffer.COPY_SRC,
+    ...(input && {data: input})
   });
   const computation = new Computation(webgpuDevice, {
     modules,
@@ -211,6 +216,62 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           `${longitude}, ${latitude}`
         ).toBeLessThan(1)
       );
+    }
+  });
+}
+
+// Float32 longitudes 2 steps west of 180 and 1 step east of -180; the step is 2^-16 in [128, 256)
+const SEAM_ORIGIN = 179.999969482421875;
+const SEAM_STEP = 2 ** -16;
+const SEAM_POINTS = [1, 2, 9, 64].map(k => -180 + k * SEAM_STEP);
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`project_globe_relative_ across the antimeridian: ${backend}`, async ({skip}) => {
+    const targetDevice = backend === 'webgpu' ? await getWebGPUTestDevice() : device;
+    if (!targetDevice || targetDevice.type !== backend) return skip();
+
+    for (const sign of [1, -1]) {
+      const viewport = new GlobeViewport({
+        longitude: sign * SEAM_ORIGIN,
+        latitude: 0,
+        zoom: 19,
+        _cameraRelative: true
+      });
+      const props = {viewport, coordinateSystem: 'lnglat' as const};
+      const base = viewport.projectPosition([sign * SEAM_ORIGIN, 0, 0]);
+      for (const point of SEAM_POINTS) {
+        const position: NumberArray3 = [sign * point, 0, 0];
+        let result: Float32Array;
+        if (backend === 'webgl') {
+          result = await runOnGPU({
+            vs: `#version 300 es
+              out vec3 outValue;
+              void main() {
+                outValue = project_globe_relative_(test.uPos, test.uPos64Low);
+              }`,
+            varying: 'outValue',
+            modules: [project, testUniforms],
+            vertexCount: 1,
+            shaderInputProps: {project: props, test: {uPos: position, uPos64Low: [0, 0, 0]}}
+          });
+        } else {
+          result = await runWGSL(
+            targetDevice,
+            [project],
+            {project: props},
+            'output[0] = vec4<f32>(project_globe_relative_(output[0].xyz, vec3<f32>(0.0)), 1.0);',
+            1,
+            new Float32Array([...position, 0])
+          );
+        }
+        const expected = viewport.projectPosition(position).map((v, i) => v - base[i]);
+        const error = Math.hypot(...expected.map((v, i) => result[i] - v));
+        // One float32 longitude step at the equator is 1.7 meters
+        expect(
+          error / GLOBE_METERS_TO_COMMON,
+          `${sign * point} from ${sign * SEAM_ORIGIN}`
+        ).toBeLessThan(0.05);
+      }
     }
   });
 }

@@ -27,7 +27,8 @@ coordinate validity or limits on altitude.
 
 The goal of `GlobeView` is to provide a generic solution to rendering and navigating data in the 3D space.
 
-- Above zoom 12, `GlobeView` renders with a [WebMercatorViewport](./web-mercator-viewport.md), at the same precision as `MapView`. Below zoom 12, positions are projected with 32-bit floats; software renderers such as SwiftShader can place them hundreds of meters off.
+- Above zoom 12, `GlobeView` renders with a [WebMercatorViewport](./web-mercator-viewport.md), at the same precision as `MapView`. Below zoom 12, positions are projected with 32-bit floats; software renderers such as SwiftShader can place them hundreds of meters off. Set the experimental [`_cameraRelative`](#_camerarelative) to keep the globe at every zoom level.
+- With `_cameraRelative`, the TerrainExtension lookups and the points along an `ArcLayer` arc are not camera-relative yet.
 - Supports layers in `'lnglat'` (the default value of the `coordinateSystem` prop) and `'meter-offsets'` coordinates.
 - Polygons, paths and tiles follow the curve of the globe only when the view's `resolution` is set, e.g. `new GlobeView({resolution: 36})` for 10° steps. With the default `0`, their edges are straight.
 - A layer shared across views prepares one set of geometry using the first viewport in which it is eligible to draw during a non-picking pass. To prepare geometry separately for a map and a globe, use separate layer instances with distinct IDs and filter each to its own viewport using [`layerFilter`](./deck.md#layerfilter).
@@ -61,6 +62,14 @@ Scaler for the far plane, 1 unit equals to the distance from the camera to the e
 #### `minimumElevation` (number, optional) {#minimumelevation}
 
 Lowest visible elevation in meters when `GlobeView` switches to Web Mercator above zoom 12. See [`MapView.minimumElevation`](./map-view.md#minimumelevation) for defaults and clipping behavior.
+
+#### `_cameraRelative` (boolean, optional) {#_camerarelative}
+
+Experimental. Default `false`.
+
+When `true`, the view keeps the globe at every zoom level, instead of switching to a [WebMercatorViewport](./web-mercator-viewport.md) above zoom 12. The shaders project positions relative to the camera target, with an origin computed in 64-bit floats. Near the camera, positions then have the precision of `MapView`, also on software renderers such as SwiftShader.
+
+Use it with a standalone deck. It is not for an interleaved or overlaid base map.
 
 #### `parameters` (object, optional) {#parameters}
 

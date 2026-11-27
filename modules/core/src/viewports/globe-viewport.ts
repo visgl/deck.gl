@@ -90,6 +90,11 @@ export type GlobeViewportOptions = {
   farZ?: number;
   /** Subdivision intervals around the earth. Default 0 disables subdivision. */
   resolution?: number;
+  /**
+   * Experimental. Project positions relative to the camera target in the shaders, with a float64
+   * origin, so that the globe keeps its precision at high zoom. Default `false`.
+   */
+  _cameraRelative?: boolean;
 };
 
 export default class GlobeViewport extends Viewport {
@@ -100,6 +105,8 @@ export default class GlobeViewport extends Viewport {
   bearing: number;
   pitch: number;
   fovy: number;
+  /** Positions are camera-relative in the shaders. See `GlobeViewportOptions._cameraRelative`. */
+  cameraRelative: boolean;
 
   constructor(opts: GlobeViewportOptions = {}) {
     const {
@@ -186,6 +193,7 @@ export default class GlobeViewport extends Viewport {
     this.bearing = bearing;
     this.pitch = pitch;
     this.fovy = fovy;
+    this.cameraRelative = Boolean(opts._cameraRelative);
   }
 
   protected _getCenter(options: GlobeViewportOptions, position: number[]): number[] {
