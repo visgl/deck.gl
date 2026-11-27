@@ -183,6 +183,7 @@ export class BitmapLayerMesh {
       if (version === this.version) {
         this.loading = false;
         failed(error as Error);
+        if (version === this.version) changed();
       }
     }
   }

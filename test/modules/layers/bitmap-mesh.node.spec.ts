@@ -52,7 +52,13 @@ test('Bitmap mesh converts positions and bounds and retains the last valid repla
   const indexBuffer = (mesh as any).indices.data[0].buffer;
   expect(indexBuffer.indexType).toBe('uint16');
   expect(indexBuffer.usage & Buffer.INDEX).toBeTruthy();
+  changed.mockClear();
+  changed.mockImplementationOnce(() => {
+    expect(mesh.loading).toBe(false);
+    expect((mesh as any).attributes).toBe(previous);
+  });
   await mesh.update({...props(), texCoords: column([[0, 0]])}, {}, changed, failed);
+  expect(changed).toHaveBeenCalledOnce();
   expect(failed).toHaveBeenCalledOnce();
   expect((mesh as any).attributes).toBe(previous);
   expect(buffer.destroyed).toBe(false);
