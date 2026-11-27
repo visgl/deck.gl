@@ -6,6 +6,13 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
+### @deck.gl/react
+
+`@deck.gl/react` is now a React renderer for deck.gl: layers, views, widgets and effects are React elements. It requires React 19.2 or later.
+
+- To keep the previous API, change the imports from `@deck.gl/react` to [`@deck.gl/react/legacy`](./api-reference/react/legacy/overview.md). It also requires React 19.2.
+- To move to the renderer, follow [Migrating from the previous API](./developer-guide/react/migrate-from-deckgl-react.md).
+
 ### GlobeView
 
 `GlobeView`, `GlobeViewport` and `GlobeController` are no longer experimental. Import them without the underscore. `_GlobeView`, `_GlobeViewport` and `_GlobeController` remain as deprecated aliases of the same classes and will be removed in a future major release.
@@ -96,7 +103,7 @@ layer and extension draws.
 
 ### loaders.gl and math.gl v5
 
-Update direct loaders.gl dependencies to `5.0.0-rc.2` and math.gl dependencies to `5.0.0`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+Update direct loaders.gl dependencies to `^5.0.1` and math.gl dependencies to `^5.0.4`. Several packages are consolidated; update imports and declare the containing package as a dependency:
 
 | Previous import | Replacement import |
 | --- | --- |
@@ -111,7 +118,10 @@ Update direct loaders.gl dependencies to `5.0.0-rc.2` and math.gl dependencies t
 | `@loaders.gl/gltf`, `@loaders.gl/obj` | `@loaders.gl/scene/gltf`, `@loaders.gl/scene/obj` |
 | `@loaders.gl/las`, `@loaders.gl/ply` | Corresponding subpaths of `@loaders.gl/pointclouds` |
 | `@loaders.gl/mvt` | `@loaders.gl/tiles/mvt` |
-| `@loaders.gl/tiles` (3D tiles types and sources) | `@loaders.gl/tiles-3d` |
+| `@loaders.gl/tiles` or `@loaders.gl/tiles-3d` (3D tiles types and sources) | `@loaders.gl/tiles-3d/tileset`, `@loaders.gl/tiles-3d/tiles-3d-source`, `@loaders.gl/tiles-3d/i3s-source` |
+| `ImageLoader` from `@loaders.gl/images` | `@loaders.gl/images/image/bundled` for the bundled parser |
+| `DracoWorkerLoader` from `@loaders.gl/scene` | `DracoLoader` from `@loaders.gl/scene/draco` |
+| `ImageSource`, `WMSSource` from `@loaders.gl/ogc/wms` | `@loaders.gl/ogc/wms/bundled` for runtime values |
 | `@loaders.gl/3d-tiles`, `@loaders.gl/i3s` | Corresponding subpaths of `@loaders.gl/tiles-3d` |
 | `@loaders.gl/terrain`, `@loaders.gl/wms` | `@loaders.gl/raster/terrain`, `@loaders.gl/ogc/wms` |
 | `@math.gl/types` | `@math.gl/core/types` |
@@ -149,6 +159,10 @@ Distance scales now describe world units for any CRS, so the same API supports g
 `viewport.resolution` now controls subdivision detail across CRSs with different units. Higher values generate finer geometry. It defaults to `0` (subdivision disabled), including for `GlobeView`, so applications can opt into the additional processing and memory overhead.
 
 To retain an old degree step `d`, set `resolution: 360 / d`; for example, the former `GlobeView` default of 10 degrees becomes `resolution: 36`. Custom layers should use `viewport.getSubdivisionStep(sourceCrs)` for a step in their source CRS units instead of interpreting `viewport.resolution` directly.
+
+### Widget
+
+- A widget `id` of `''` or `null` now falls back to the widget's default id, as a view `id` already does. Previously two such widgets shared that id and replaced each other in the `WidgetManager`. Pass a non-empty `id` to tell widgets of the same type apart.
 
 ### Layer
 
@@ -203,6 +217,10 @@ const commonPosition2 = layer.projectPosition(lnglat, {
   modelMatrix: null
 });
 ```
+
+### PathStyleExtension
+
+With [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) dashes on, `geometry.uv.y` in `PathLayer` shaders is now the geometric distance along the segment, the same as without dashes. Custom shader injections that need the dash coordinate, which also counts Z movement and the parts of the segment removed by camera clipping, should read `vDashSegment.x` (position) and `vDashSegment.y` (segment length) under `#ifdef DASH_ENABLED`.
 
 ### Deck props set to `undefined`
 

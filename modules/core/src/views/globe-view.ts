@@ -36,6 +36,8 @@ export type GlobeViewProps = {
   nearZMultiplier?: number;
   /** Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1.01`. Overwrites the `far` parameter. */
   farZMultiplier?: number;
+  /** Lowest visible elevation in meters when GlobeView uses WebMercatorViewport above zoom 12. */
+  minimumElevation?: number;
   /** Distance of the camera relative to viewport height. Default `1.5`. */
   altitude?: number;
   /**

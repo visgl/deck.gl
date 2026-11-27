@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState, useCallback} from 'react';
+import React, {useMemo, useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
 import {tableFromArrays} from 'apache-arrow';
@@ -97,6 +99,7 @@ export default function App({
   iconAtlas?: string;
   mapStyle?: string;
 }) {
+  const widgets = useMemo(() => [new LoadingWidget()], []);
   const [hoverInfo, setHoverInfo] = useState<IconClusterLayerPickingInfo<Meteorite> | null>(null);
 
   const hideTooltip = useCallback(() => {
@@ -150,7 +153,7 @@ export default function App({
             year: source.map(meteorite => meteorite.year)
           }) as LayerDataT;
         },
-        getPosition: {sql: 'ARRAY[coordinates[1], coordinates[2]]'},
+        getPosition: {sql: 'coordinates::ARRAY[2]'},
         getIcon: () => 'marker',
         sizeUnits: 'meters',
         sizeScale: 2000,
@@ -158,6 +161,7 @@ export default function App({
       });
   return (
     <DeckGL
+      widgets={widgets}
       device={device}
       layers={[layer]}
       views={MAP_VIEW}

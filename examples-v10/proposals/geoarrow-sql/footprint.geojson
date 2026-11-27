@@ -1,0 +1,16 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {"name": "Courtyard"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [[-24, -18], [24, -18], [24, 18], [-24, 18], [-24, -18]],
+          [[-8, -6], [-8, 6], [8, 6], [8, -6], [-8, -6]]
+        ]
+      }
+    }
+  ]
+}

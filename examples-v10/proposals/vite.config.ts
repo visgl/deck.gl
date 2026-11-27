@@ -12,9 +12,15 @@ export default defineConfig({
   base: './',
   resolve: {
     alias: {
-      '@deck.gl/proposals/effects/query': resolve(root, 'modules/proposals/src/effects/query'),
+      '@deck.gl/proposals/layers/filtered-scatterplot-layer/geographic-point-query-effect': resolve(
+        root,
+        'modules/proposals/src/layers/filtered-scatterplot-layer/geographic-point-query-effect'
+      ),
       '@deck.gl/proposals/layers': resolve(root, 'modules/proposals/src/layers'),
-      '@deck.gl/proposals/effects': resolve(root, 'modules/proposals/src/effects'),
+      '@deck.gl/core/arrow': resolve(
+        root,
+        'modules/core/src/arrow/upstream-luma/arrow-converter.ts'
+      ),
       '@deck.gl/core': resolve(root, 'modules/core/src'),
       '@deck.gl/layers': resolve(root, 'modules/layers/src'),
       '@deck.gl/geo-layers': resolve(root, 'modules/geo-layers/src'),

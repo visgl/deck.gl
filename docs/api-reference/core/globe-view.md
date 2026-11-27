@@ -59,6 +59,10 @@ Scaler for the near plane, 1 unit equals to the height of the viewport. Default 
 
 Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default to `2`. Overwrites the `far` parameter.
 
+#### `minimumElevation` (number, optional) {#minimumelevation}
+
+Lowest visible elevation in meters when `GlobeView` switches to Web Mercator above zoom 12. See [`MapView.minimumElevation`](./map-view.md#minimumelevation) for defaults and clipping behavior.
+
 #### `_cameraRelative` (boolean, optional) {#_camerarelative}
 
 Experimental. Default `false`.

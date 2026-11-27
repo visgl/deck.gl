@@ -20,9 +20,8 @@ for (const [path, name] of [
 }
 
 for (const [specifier, names] of [
-  ['@deck.gl/proposals/layers', ['GPUScatterplotLayer', 'ArrowScatterplotLayer', 'SkyLayer', 'Tile2DLayer', 'MVT2DLayer']],
-  ['@deck.gl/proposals/effects', ['SceneBufferEffect', 'ShaderPassEffect', 'GPUGraphDeckEffect']],
-  ['@deck.gl/proposals/effects/query', ['LuSpatialGeographicPointQueryEffect']]
+  ['@deck.gl/proposals/layers', ['GPUScatterplotLayer', 'ArrowScatterplotLayer', 'Tile2DLayer', 'MVT2DLayer']],
+  ['@deck.gl/proposals/layers/filtered-scatterplot-layer/geographic-point-query-effect', ['GeographicPointQueryEffect']]
 ]) {
   const esm = await import(specifier);
   const commonjs = require(specifier);
