@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
-import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
+import {
+  resolveCesiumIonTileset,
+  type CesiumIonTilesetMetadata
+} from '@loaders.gl/tiles-3d/3d-tiles';
 
 import type {MapViewState} from '@deck.gl/core';
 import type {Tileset3D} from '@loaders.gl/tiles-3d/tileset';
@@ -16,7 +19,6 @@ import type {Tileset3D} from '@loaders.gl/tiles-3d/tileset';
 const ION_ASSET_ID = 43978;
 const ION_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4OGMyMDVmMS0zNjIyLTRkMDQtYTQ2MS05YmQ3MTc5ZDJhOTAiLCJpZCI6MjYxMzMsImlhdCI6MTc3NjA4NzkxNX0.wfqN4Vu94UsALYDIunRGWO8wKFYMoe67ooozJwDAo-c';
-const TILESET_URL = `https://assets.ion.cesium.com/${ION_ASSET_ID}/tileset.json`;
 
 const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 40,
@@ -39,6 +41,12 @@ export default function App({
   updateAttributions?: (attributions: any) => void;
 }) {
   const [initialViewState, setInitialViewState] = useState(INITIAL_VIEW_STATE);
+  const [ionTileset, setIonTileset] = useState<CesiumIonTilesetMetadata | null>(null);
+
+  useEffect(() => {
+    // Resolves the tileset url of the ion asset and a credential for its endpoint
+    resolveCesiumIonTileset(ION_TOKEN, ION_ASSET_ID).then(setIonTileset, console.error);
+  }, []);
 
   const onTilesetLoad = (tileset: Tileset3D) => {
     // Recenter view to cover the new tileset
@@ -55,19 +63,20 @@ export default function App({
     }
   };
 
-  const tile3DLayer = new Tile3DLayer({
-    id: 'tile-3d-layer',
-    pointSize: 2,
-    data: TILESET_URL,
-    loaders: [CesiumIonLoader],
-    loadOptions: {'cesium-ion': {accessToken: ION_TOKEN}},
-    onTilesetLoad
-  });
+  const tile3DLayer =
+    ionTileset &&
+    new Tile3DLayer({
+      id: 'tile-3d-layer',
+      pointSize: 2,
+      data: ionTileset.url,
+      loadOptions: {core: {credentials: ionTileset.credentials}},
+      onTilesetLoad
+    });
 
   return (
     <DeckGL
       device={device}
-      layers={[tile3DLayer]}
+      layers={tile3DLayer ? [tile3DLayer] : []}
       initialViewState={initialViewState}
       controller={true}
     >
