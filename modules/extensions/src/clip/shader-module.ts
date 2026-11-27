@@ -6,13 +6,48 @@ import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import {project} from '@deck.gl/core';
 import type {ClipModuleProps} from './clip-extension';
 
+/** Number of vertices of the polygon that clips in a custom projection */
+export const CLIP_POLYGON_SIZE = 64;
+
 const shaderFunction = /* glsl */ `
 layout(std140) uniform clipUniforms {
   vec4 bounds;
+  vec4 polygon[${CLIP_POLYGON_SIZE / 2}];
   float worldWidth;
+  float polygonSize;
 } clip;
 
+vec2 clip_getPolygonVertex(int index) {
+  vec4 vertices = clip.polygon[index / 2];
+  return index % 2 == 0 ? vertices.xy : vertices.zw;
+}
+
+// Crossing number test. As for the rectangle, the edges at the minimum are inside
+// and the edges at the maximum are outside.
+bool clip_isInPolygon(vec2 position) {
+  bool inside = false;
+  int count = int(clip.polygonSize);
+  vec2 previous = clip_getPolygonVertex(count - 1);
+  for (int i = 0; i < ${CLIP_POLYGON_SIZE}; i++) {
+    if (i >= count) {
+      break;
+    }
+    vec2 current = clip_getPolygonVertex(i);
+    if ((current.y > position.y) != (previous.y > position.y)) {
+      float x = current.x + (position.y - current.y) * (previous.x - current.x) / (previous.y - current.y);
+      if (position.x < x) {
+        inside = !inside;
+      }
+    }
+    previous = current;
+  }
+  return inside;
+}
+
 bool clip_isInBounds(vec2 position) {
+  if (clip.polygonSize > 0.0) {
+    return clip_isInPolygon(position);
+  }
   return position.x >= clip.bounds[0] && position.y >= clip.bounds[1] && position.x < clip.bounds[2] && position.y < clip.bounds[3];
 }
 
@@ -30,12 +65,44 @@ bool clip_isGeometryInBounds(vec2 position) {
 const source = /* wgsl */ `\
 struct ClipUniforms {
   bounds: vec4<f32>,
+  polygon: array<vec4<f32>, ${CLIP_POLYGON_SIZE / 2}>,
   worldWidth: f32,
+  polygonSize: f32,
 };
 
 @group(2) @binding(auto) var<uniform> clip: ClipUniforms;
 
+fn clip_getPolygonVertex(index: i32) -> vec2<f32> {
+  let vertices = clip.polygon[index / 2];
+  return select(vertices.zw, vertices.xy, index % 2 == 0);
+}
+
+// Crossing number test. As for the rectangle, the edges at the minimum are inside
+// and the edges at the maximum are outside.
+fn clip_isInPolygon(position: vec2<f32>) -> bool {
+  var inside = false;
+  let count = i32(clip.polygonSize);
+  var previous = clip_getPolygonVertex(count - 1);
+  for (var i = 0; i < ${CLIP_POLYGON_SIZE}; i++) {
+    if (i >= count) {
+      break;
+    }
+    let current = clip_getPolygonVertex(i);
+    if ((current.y > position.y) != (previous.y > position.y)) {
+      let x = current.x + (position.y - current.y) * (previous.x - current.x) / (previous.y - current.y);
+      if (position.x < x) {
+        inside = !inside;
+      }
+    }
+    previous = current;
+  }
+  return inside;
+}
+
 fn clip_isInBounds(coordinates: vec2<f32>) -> bool {
+  if (clip.polygonSize > 0.0) {
+    return clip_isInPolygon(coordinates);
+  }
   return coordinates.x >= clip.bounds.x &&
     coordinates.y >= clip.bounds.y &&
     coordinates.x < clip.bounds.z &&
@@ -70,8 +137,13 @@ const clipModule = {
   vs: shaderFunction,
   fs: shaderFunction,
   source,
-  uniformTypes: {bounds: 'vec4<f32>', worldWidth: 'f32'}
-} satisfies ShaderModule<ClipModuleProps>;
+  uniformTypes: {
+    bounds: 'vec4<f32>',
+    polygon: ['vec4<f32>', CLIP_POLYGON_SIZE / 2],
+    worldWidth: 'f32',
+    polygonSize: 'f32'
+  }
+} satisfies ShaderModule<ClipModuleProps, ClipModuleProps, {}>;
 
 /** Clips whole instances by their anchor; luma.gl supplies the visibility varying. */
 export const clipInstancePlugin: ShaderPlugin = {

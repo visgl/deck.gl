@@ -134,6 +134,33 @@ export function projectBoundsToFlatCommon(
   return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])];
 }
 
+/**
+ * Returns the corners of `[minX, minY, maxX, maxY]`, from `[minX, minY]` to `[maxX, minY]`,
+ * `[maxX, maxY]` and `[minX, maxY]`. Edges are re-ordered as in `projectBoundsToFlatCommon()`.
+ * Lng/lat bounds with `minX - maxX > 180` cross the antimeridian.
+ */
+export function getBoundsCorners(
+  layer: Layer,
+  bounds: Readonly<[number, number, number, number]>,
+  opts?: FlatProjectOptions
+): number[][] {
+  let [minX, minY, maxX, maxY] = bounds;
+  if (minX - maxX > 180 && getSourceCoordinateSystem(layer, opts) === 'lnglat') {
+    maxX += 360;
+  } else if (minX > maxX) {
+    [minX, maxX] = [maxX, minX];
+  }
+  if (minY > maxY) {
+    [minY, maxY] = [maxY, minY];
+  }
+  return [
+    [minX, minY, 0],
+    [maxX, minY, 0],
+    [maxX, maxY, 0],
+    [minX, maxY, 0]
+  ];
+}
+
 function getLayerViewport(layer: Layer): Viewport {
   return layer.internalState?.viewport || layer.context.viewport;
 }
