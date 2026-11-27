@@ -8,7 +8,7 @@ Edit on Codepen
 
 The `IconLayer` renders raster icons at given coordinates.
 
-There are two approaches to load icons. You can pre-generated a sprite image (`iconAtlas`), which packs all your icons into one layout, and a JSON descriptor (`iconMapping`), which describes the position and size of each icon in the `iconAtlas`. You can create sprite images with tools such as [TexturePacker](https://www.codeandweb.com/texturepacker). This is the most efficient way to load icons.
+There are two approaches to load icons. You can pre-generated a sprite image (`iconAtlas`), which packs all your icons into one layout, and a JSON descriptor (`iconMapping`), which describes the position and size of each icon in the `iconAtlas`. You can create sprite images with tools such as [TexturePacker](https://www.codeandweb.com/texturepacker) or [SpriteSheet.dev](https://spritesheet.dev). This is the most efficient way to load icons.
 
 It is also possible to ask `IconLayer` to generate `iconAtlas` dynamically. This is slower but might be useful in certain use cases.
 

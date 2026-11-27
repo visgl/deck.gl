@@ -179,7 +179,7 @@ The following properties are available if the `pattern` option is enabled.
 
 #### `fillPatternAtlas` (Texture2D | String)[​](#fillpatternatlas "Direct link to fillpatternatlas")
 
-Sprite image url or texture that packs all your patterns into one layout. You can create sprite images with tools such as [TexturePacker](https://www.codeandweb.com/texturepacker). Ignored when `proceduralPattern` is enabled.
+Sprite image url or texture that packs all your patterns into one layout. You can create sprite images with tools such as [TexturePacker](https://www.codeandweb.com/texturepacker) or [SpriteSheet.dev](https://spritesheet.dev). Ignored when `proceduralPattern` is enabled.
 
 #### `fillPatternEnabled` (boolean)[​](#fillpatternenabled "Direct link to fillpatternenabled")
 
