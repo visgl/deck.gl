@@ -16,6 +16,7 @@ This module contains the following widgets:
 - [CompassWidget](./compass-widget.md)
 - [GeocoderWidget](./geocoder-widget.md)
 - [ScaleWidget](./scale-widget.md)
+- [_LegendWidget](./color-scale-widget.md)
 
 ### View Widgets
 

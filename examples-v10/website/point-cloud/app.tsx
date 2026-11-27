@@ -5,9 +5,9 @@
 /* eslint-disable no-unused-vars */
 import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {createRoot} from 'react-dom/client';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import {OrbitView, LinearInterpolator} from '@deck.gl/core';
-import {isArrowTable} from '@math.gl/arrow';
+import {isArrowTable} from '@math.gl/core/arrow';
 import {PointCloudLayer} from '@deck.gl/layers';
 
 import {LASLoader} from '@loaders.gl/pointclouds/las';

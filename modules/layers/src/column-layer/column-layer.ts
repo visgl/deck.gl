@@ -37,6 +37,7 @@ import {
   hasColumnLayerColumns,
   type ColumnLayerColumnProps
 } from './column-layer-columns';
+import {DEFAULT_COLOR} from './column-layer-columns';
 import ColumnGeometry from './column-geometry';
 
 import {columnUniforms, ColumnProps} from './column-layer-uniforms';
@@ -45,8 +46,6 @@ import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
 const defaultPosition = (x: any) => x.position;
-
-const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const GEOMETRY_BUFFER_LAYOUT: BufferLayout = {
   name: 'geometry',
@@ -350,6 +349,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         type: 'unorm8',
         transition: true,
         accessor: 'getFillColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR
       },
       instanceLineColors: {
@@ -357,6 +357,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         type: 'unorm8',
         transition: true,
         accessor: 'getLineColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR
       },
       instanceStrokeWidths: {
@@ -421,6 +422,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       this.state.columns = new ColumnLayerColumns(this.context.device);
     }
     void this.state.columns.updateIfNeeded(params, {
+      normalizedColors: this.usesNormalizedColors(),
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

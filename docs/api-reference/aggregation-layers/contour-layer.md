@@ -270,19 +270,23 @@ The `ContourLayer` renders the following sublayers:
 * `bands` - For Isobands, rendered by [SolidPolygonLayer](../layers/solid-polygon-layer.md)
 
 
-## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
+## Compute aggregation
 
-> GPU buffer layouts are internal to layer implementations and can change in future releases.
+On a WebGPU device, `gpuAggregation: true` aggregates points in a compute shader for all five
+`aggregation` operations. Contours are still generated on the CPU, so they update a frame or
+more after each change. Previous contours remain visible until the new results arrive.
+[DataFilterExtension](../extensions/data-filter-extension.md), [ClipExtension](../extensions/clip-extension.md),
+and [BrushingExtension](../extensions/brushing-extension.md) filter input points before aggregation. They also support [borrowed GPU columns](./aggregator.md#gpu-column-extensions).
+With accessor inputs, PathStyleExtension, FillStyleExtension, and MaskExtension
+can style contours while binning remains on the GPU. Unknown extensions select CPU aggregation.
 
-GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
+Set the experimental `gpuGeometry` prop to `true` to generate isolines from the bin
+buffer and draw them without readback. This path supports numeric thresholds, with
+picking disabled and no line sublayer overrides or rendering extensions.
+Isobands and other configurations use CPU contour geometry.
 
-- `positions` – A GPUVector of input positions.
-- `weights` – An array containing one matching weight vector.
-- `dataBounds` – `[min, max]` – Bounds in input coordinates.
+ContourLayer also accepts [GPU column inputs](./aggregator.md#gpu-column-inputs), which need `dataBounds`.
 
-Notes:
-
-- Use a custom aggregator that accepts GPU inputs. It defines the supported formats and chunking.
 
 ## Source
 

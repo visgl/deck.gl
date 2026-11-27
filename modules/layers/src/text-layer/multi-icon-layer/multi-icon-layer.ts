@@ -37,6 +37,8 @@ type _MultiIconLayerProps<DataT> = {
   smoothing?: number;
   outlineWidth?: number;
   outlineColor?: Color;
+  /** @internal Byte convention to use for plain arrays forwarded by TextLayer. */
+  outlineColorUseByteColors?: boolean;
 
   contentCutoffPixels?: [width: number, height: number];
   contentAlignHorizontal?: ContentAlignModes;
@@ -54,6 +56,7 @@ const defaultProps: DefaultProps<MultiIconLayerProps> = {
   smoothing: 0.1,
   outlineWidth: 0,
   outlineColor: {type: 'color', value: [0, 0, 0, 255]},
+  outlineColorUseByteColors: true,
   contentCutoffPixels: {type: 'array', value: [0, 0]},
   contentAlignHorizontal: 'none',
   contentAlignVertical: 'none'
@@ -110,7 +113,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
   updateState(params: UpdateParameters<this>) {
     super.updateState(params);
     const {props, oldProps, changeFlags} = params;
-    const {outlineColor} = props;
+    const {outlineColor, outlineColorUseByteColors} = props;
 
     if (changeFlags.extensionsChanged) {
       this.state.fillModel?.destroy();
@@ -132,16 +135,11 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     ) {
       this.getAttributeManager()!.invalidate('instanceIconDefs');
     }
-    if (outlineColor !== oldProps.outlineColor) {
-      // Decode the public byte color before storing normalized rendering state.
-      this.setState({
-        outlineColor: normalizeByteColor4([
-          outlineColor[0],
-          outlineColor[1],
-          outlineColor[2],
-          outlineColor[3] ?? 255
-        ])
-      });
+    if (
+      outlineColor !== oldProps.outlineColor ||
+      outlineColorUseByteColors !== oldProps.outlineColorUseByteColors
+    ) {
+      this.setState({outlineColor: normalizeByteColor4(outlineColor, outlineColorUseByteColors)});
     }
     if (!props.sdf && props.outlineWidth) {
       log.warn(`${this.id}: fontSettings.sdf is required to render outline`)();
@@ -207,7 +205,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
-      const text = getIcon(object, objectInfo) as string; // forwarded getText
+      const text = (getIcon as AccessorFunction<DataT, string>)(object, objectInfo); // forwarded getText
       const offsets = getIconOffsets(object, objectInfo); // text length x 2
       if (text) {
         let j = 0;

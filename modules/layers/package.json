@@ -3,7 +3,7 @@
   "description": "deck.gl core layers",
   "license": "MIT",
   "type": "module",
-  "version": "10.0.0-alpha.1",
+  "version": "10.0.0-alpha.2",
   "publishConfig": {
     "access": "public"
   },
@@ -46,22 +46,21 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "5.0.0-beta.10",
-    "@loaders.gl/images": "5.0.0-beta.10",
-    "@luma.gl/graph": "10.0.0-alpha.15",
-    "@luma.gl/shaders": "10.0.0-alpha.15",
-    "@mapbox/tiny-sdf": "^2.0.5",
-    "@math.gl/core": "5.0.0-beta.10",
-    "@math.gl/geometry": "5.0.0-beta.10",
-    "@math.gl/web-mercator": "5.0.0-beta.10",
+    "@loaders.gl/core": "^5.0.1",
+    "@loaders.gl/images": "^5.0.1",
+    "@luma.gl/graph": "10.0.0-rc.1",
+    "@luma.gl/shaders": "10.0.0-rc.1",
+    "@math.gl/core": "^5.0.4",
+    "@math.gl/geometry": "^5.0.4",
+    "@math.gl/geospatial": "^5.0.4",
     "@types/geojson": "^7946.0.16",
     "earcut": "^2.2.4"
   },
   "peerDependencies": {
     "@deck.gl/core": "~10.0.0-alpha",
-    "@loaders.gl/core": "5.0.0-beta.10",
-    "@luma.gl/core": "10.0.0-alpha.15",
-    "@luma.gl/engine": "10.0.0-alpha.15"
+    "@loaders.gl/core": "^5.0.1",
+    "@luma.gl/core": "10.0.0-rc.1",
+    "@luma.gl/engine": "10.0.0-rc.1"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

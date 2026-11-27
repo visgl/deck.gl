@@ -4,7 +4,7 @@
 
 import React, {useState, useEffect, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {TerrainLayer} from '@deck.gl/geo-layers';

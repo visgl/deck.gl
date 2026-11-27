@@ -1,6 +1,6 @@
 {
   "name": "@deck.gl/proposals",
-  "version": "10.0.0-alpha.1",
+  "version": "10.0.0-alpha.2",
   "private": true,
   "description": "Private experimental deck.gl layers and effects",
   "license": "MIT",
@@ -35,15 +35,10 @@
       "import": "./dist/layers/text-layer/text-layer.js",
       "require": "./dist/layers/text-layer/text-layer.cjs"
     },
-    "./effects": {
-      "types": "./dist/effects/index.d.ts",
-      "import": "./dist/effects/index.js",
-      "require": "./dist/effects/index.cjs"
-    },
-    "./effects/query": {
-      "types": "./dist/effects/query/index.d.ts",
-      "import": "./dist/effects/query/index.js",
-      "require": "./dist/effects/query/index.cjs"
+    "./layers/filtered-scatterplot-layer/geographic-point-query-effect": {
+      "types": "./dist/layers/filtered-scatterplot-layer/geographic-point-query-effect.d.ts",
+      "import": "./dist/layers/filtered-scatterplot-layer/geographic-point-query-effect.js",
+      "require": "./dist/layers/filtered-scatterplot-layer/geographic-point-query-effect.cjs"
     }
   },
   "files": [
@@ -53,20 +48,20 @@
   ],
   "sideEffects": false,
   "dependencies": {
-    "@deck.gl/core": "10.0.0-alpha.1",
-    "@deck.gl/extensions": "10.0.0-alpha.1",
-    "@deck.gl/geo-layers": "10.0.0-alpha.1",
-    "@deck.gl/layers": "10.0.0-alpha.1",
-    "@loaders.gl/core": "5.0.0-beta.10",
-    "@loaders.gl/tiles": "5.0.0-beta.10",
-    "@luma.gl/anari": "10.0.0-alpha.15",
-    "@luma.gl/core": "10.0.0-alpha.15",
-    "@luma.gl/engine": "10.0.0-alpha.15",
-    "@luma.gl/graph": "10.0.0-alpha.15",
-    "@luma.gl/shaders": "10.0.0-alpha.15",
-    "@math.gl/core": "5.0.0-beta.10",
-    "@math.gl/earth": "5.0.0-beta.10",
-    "@math.gl/web-mercator": "5.0.0-beta.10"
+    "@deck.gl/core": "10.0.0-alpha.2",
+    "@deck.gl/extensions": "10.0.0-alpha.2",
+    "@deck.gl/geo-layers": "10.0.0-alpha.2",
+    "@deck.gl/layers": "10.0.0-alpha.2",
+    "@loaders.gl/core": "^5.0.1",
+    "@loaders.gl/tiles": "^5.0.1",
+    "@luma.gl/anari": "10.0.0-rc.1",
+    "@luma.gl/core": "10.0.0-rc.1",
+    "@luma.gl/engine": "10.0.0-rc.1",
+    "@luma.gl/graph": "10.0.0-rc.1",
+    "@luma.gl/shaders": "10.0.0-rc.1",
+    "@math.gl/core": "^5.0.4",
+    "@math.gl/earth": "^5.0.4",
+    "@math.gl/geospatial": "^5.0.4"
   },
   "peerDependencies": {
     "apache-arrow": ">=17.0.0"

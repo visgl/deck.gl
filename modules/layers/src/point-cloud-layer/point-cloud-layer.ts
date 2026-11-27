@@ -28,6 +28,7 @@ import {
   hasPointCloudColumns,
   type PointCloudColumnProps
 } from './point-cloud-layer-columns';
+import {DEFAULT_COLOR} from './point-cloud-layer-columns';
 
 import {pointCloudUniforms, PointCloudProps} from './point-cloud-layer-uniforms';
 import vs from './point-cloud-layer-vertex.glsl';
@@ -36,7 +37,6 @@ import {shaderWGSL} from './point-cloud-layer.wgsl';
 
 const defaultPosition = (x: any) => x.position;
 
-const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 const DEFAULT_NORMAL = [0, 0, 1] as const;
 
 const defaultProps: DefaultProps<PointCloudLayerProps> = {
@@ -218,6 +218,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
         type: 'unorm8',
         transition: true,
         accessor: 'getColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR
       }
     });
@@ -269,6 +270,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     }
     const binary = (this.props.data as any)?.attributes;
     void this.state.columns!.updateIfNeeded(params, {
+      normalizedColors: this.usesNormalizedColors(),
       dataLoading: this.internalState!.isAsyncPropLoading('data'),
       changed: () => {
         this.setState({});

@@ -40,7 +40,7 @@ export type ToggleWidgetProps = WidgetProps & {
 export class ToggleWidget extends Widget<ToggleWidgetProps> {
   static defaultProps: Required<ToggleWidgetProps> = {
     ...Widget.defaultProps,
-    id: 'icon',
+    id: 'toggle',
     placement: 'top-left',
     viewId: null,
     initialChecked: false,

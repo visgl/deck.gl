@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  test-coverage:
+  test-webgl-unit:
     runs-on: ubuntu-22.04
     permissions:
       checks: write
@@ -38,32 +38,24 @@ jobs:
       - name: Build packages
         run: yarn build
 
-      - name: Run tests
+      - name: Run lint and WebGL unit tests with coverage
+        env:
+          RENDER_TEST_DEVICE: webgl
         run: |
           yarn lint
-          yarn test-ci
-
-      - name: Upload render test failure images
-        if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: render-test-failures
-          path: |
-            test/render/golden-images/*-fail.png
-            test/render/golden-images/*-diff.png
-            test/render/golden-images/**/*-fail.png
-            test/render/golden-images/**/*-diff.png
-          if-no-files-found: ignore
-          retention-days: 7
+          yarn ocular-test node react headless --coverage
 
       - name: Run tape backward compatibility smoke test
         run: yarn test-tape-compat
 
-      - name: Coveralls
-        uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2.3.8
+      - name: Upload webgl-unit coverage
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          fail-on-error: false
+          name: coverage-webgl-unit
+          path: coverage/lcov.info
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 7
 
   test-webgpu:
     runs-on: ubuntu-22.04
@@ -89,23 +81,12 @@ jobs:
       - name: Build packages
         run: yarn build
 
-      - name: Run WebGPU unit and render tests
-        run: xvfb-run -a --server-args="-screen 0 1280x1024x24" yarn test-webgpu
+      - name: Run WebGPU unit tests
+        env:
+          RENDER_TEST_DEVICE: webgpu
+        run: xvfb-run -a --server-args="-screen 0 1280x1024x24" yarn test-headless
 
-      - name: Upload render test failure images
-        if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: webgpu-render-test-failures
-          path: |
-            test/render/golden-images/*-fail.png
-            test/render/golden-images/*-diff.png
-            test/render/golden-images/**/*-fail.png
-            test/render/golden-images/**/*-diff.png
-          if-no-files-found: ignore
-          retention-days: 7
-
-  test-website:
+  test-render:
     runs-on: ubuntu-22.04
     permissions:
       checks: write
@@ -129,6 +110,91 @@ jobs:
       - name: Build packages
         run: yarn build
 
+      - name: Run WebGL render tests with coverage
+        env:
+          RENDER_TEST_DEVICE: webgl
+        run: yarn test-render --coverage
+
+      - name: Upload webgl-render coverage
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: coverage-webgl-render
+          path: coverage/lcov.info
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 7
+
+      - name: Run WebGPU render tests
+        env:
+          RENDER_TEST_DEVICE: webgpu
+        run: xvfb-run -a --server-args="-screen 0 1280x1024x24" yarn test-render
+
+      - name: Upload render test failure images
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: render-test-failures
+          path: |
+            test/render/golden-images/*-fail.png
+            test/render/golden-images/*-diff.png
+            test/render/golden-images/**/*-fail.png
+            test/render/golden-images/**/*-diff.png
+          if-no-files-found: ignore
+          retention-days: 7
+
+  test-coverage:
+    needs: [test-webgl-unit, test-render]
+    if: always()
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Require both coverage shards
+        env:
+          RESULTS: ${{ join(needs.*.result, ',') }}
+        run: test "$RESULTS" = success,success
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download WebGL coverage reports
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: coverage-webgl-*
+          path: coverage
+
+      - name: Require both LCOV reports
+        run: |
+          test -s coverage/coverage-webgl-unit/lcov.info
+          test -s coverage/coverage-webgl-render/lcov.info
+
+      # Publish once so Coveralls evaluates the complete suite in its status checks.
+      - name: Publish combined coverage to Coveralls
+        uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2.3.8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fail-on-error: false
+          files: coverage/coverage-webgl-unit/lcov.info coverage/coverage-webgl-render/lcov.info
+
+  test-website:
+    runs-on: ubuntu-22.04
+    permissions:
+      checks: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+
+      - name: Enable Corepack
+        run: corepack enable yarn
+
+      - name: Install dependencies
+        run: yarn bootstrap
+
+      # test-website builds the packages from source before building the site.
       - name: Test website build
         run: |
           yarn test-website

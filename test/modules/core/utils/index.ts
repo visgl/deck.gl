@@ -5,6 +5,7 @@
 import './color.spec';
 import './deep-equal.spec';
 import './deep-merge.spec';
+import './props-with-default-id.spec';
 import './flatten.spec';
 import './positions.spec';
 import './memoize.spec';
