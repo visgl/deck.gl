@@ -40,6 +40,7 @@ const DEFAULT_TINT_COLOR = [255, 255, 255] as const;
 const DEFAULT_TRANSPARENT_COLOR = [0, 0, 0, 0] as const;
 
 const defaultProps: DefaultProps<BitmapLayerProps> = {
+  imageMapping: {type: 'object', value: null, compare: -1},
   positions: {type: 'object', value: null, compare: false},
   texCoords: {type: 'object', value: null, compare: false},
   indices: {type: 'object', value: null, compare: false},
@@ -299,6 +300,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   /** Converts changed mesh inputs while retaining the last successful replacement. */
   private updateMeshState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     const enteringMesh = !this.state.typedMesh;
+    const subdivisionStep = this.getSubdivisionStep();
     if (enteringMesh) {
       this.getAttributeManager()!.remove(['indices', 'positions', 'texCoords']);
       this.state.typedMesh = new BitmapLayerMesh(this.context.device);
@@ -318,19 +320,27 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     }
     if (
       enteringMesh ||
+      this.state.subdivisionStep !== subdivisionStep ||
       changeFlags.projectionChanged ||
-      (this.state.preproject &&
+      ((this.state.preproject || (props.imageMapping && !props.imageMapping.positionCRS)) &&
         (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
           !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1))) ||
       props.positions !== oldProps.positions ||
       props.texCoords !== oldProps.texCoords ||
+      !deepEqual(props.imageMapping, oldProps.imageMapping, -1) ||
+      (props.imageMapping && !props.positions && !deepEqual(props.bounds, oldProps.bounds, -1)) ||
       props.indices !== oldProps.indices
     ) {
+      this.setState({subdivisionStep});
+      const {imageMapping} = props;
       void this.state.typedMesh!.update(
-        props,
+        imageMapping && !imageMapping.positionCRS
+          ? {...props, imageMapping: {...imageMapping, positionCRS: this.getMappingPositionCRS()}}
+          : props,
         {
           transform: this.usePositionTransforms().transform?.bind(this),
-          fp64: this.use64bitPositions()
+          fp64: this.use64bitPositions(),
+          resolution: subdivisionStep
         },
         () => {
           this.state.typedMesh!.bind(this.state.model!);
@@ -341,6 +351,22 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         error => this.raiseError(error, 'preparing bitmap mesh')
       );
     }
+  }
+
+  /** Infer the CRS only when the source CRS describes the input positions directly. */
+  private getMappingPositionCRS(): CoordinateSystem | undefined {
+    const {coordinateSystem, coordinateOrigin, modelMatrix} = this.props;
+    const sourceCrs = this.internalState?.sourceCrs;
+    if (
+      !sourceCrs ||
+      modelMatrix ||
+      coordinateOrigin?.some(value => value !== 0) ||
+      (typeof coordinateSystem === 'string' && coordinateSystem.toLowerCase().endsWith('-offsets'))
+    ) {
+      return undefined;
+    }
+    if (sourceCrs.signature === 'WGS84') return 'EPSG:4326';
+    return coordinateSystem === 'globe' ? sourceCrs.signature : coordinateSystem;
   }
 
   getPickingInfo(params: GetPickingInfoParams): BitmapLayerPickingInfo {

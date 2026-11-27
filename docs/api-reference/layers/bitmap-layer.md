@@ -208,6 +208,46 @@ Remarks for `positions`, `texCoords` and `indices`:
 * Mesh inputs cannot be combined with a positive `_projectionTolerance`.
 * Pass a new Arrow vector to update the mesh. See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates).
 
+#### `imageMapping` (object, optional) {#imagemapping}
+
+* Default: `null`
+
+Use `imageMapping` when the image and mesh use different projections, such as a Web Mercator
+image draped on a longitude/latitude mesh. The layer computes `texCoords` for each vertex.
+
+- `bounds` is the image rectangle `[left, bottom, right, top]` in `imageCRS` units.
+- `imageCRS` describes the image rectangle, for example a PROJ string for Web Mercator.
+- `positionCRS` describes the raw mesh positions. Omit it to use the layer's absolute
+  [`coordinateSystem`](../core/layer.md#coordinatesystem) when it has no model matrix or coordinate
+  offset. Keep an explicit `positionCRS` consistent with the rendered positions.
+- `maxEdgeLength` optionally splits edges longer than this positive length in source position
+  units. Edge length includes Z. Omit it to keep the supplied triangles.
+
+Without `positions`, the layer builds the mesh from its [`bounds`](#bounds), using the view's
+subdivision step. Coordinates outside the image rectangle sample according to
+[`textureParameters`](#textureparameters).
+
+```ts
+new BitmapLayer({
+  image,
+  positions, // Arrow longitude/latitude positions in degrees
+  coordinateSystem: 'lnglat',
+  imageMapping: {
+    bounds: [left, bottom, right, top], // Web Mercator meters
+    imageCRS: '+proj=merc +a=6378137 +b=6378137 +units=m'
+  }
+});
+```
+
+Remarks:
+
+* `imageMapping` replaces `texCoords` and the experimental `_imageCoordinateSystem` for this mesh.
+  The experimental setting remains available for bounds-only rendering without a mapping.
+* Positions must be CPU-readable Arrow columns. GPU-only meshes require explicit `texCoords`.
+* Split projection seams and clip to the image CRS's valid area before supplying the mesh.
+* Cannot be combined with a positive `_projectionTolerance`.
+* Very small `maxEdgeLength` values can exceed refinement limits and raise an error.
+
 #### `_projectionTolerance` (number, optional) {#_projectiontolerance}
 
 * Default: `0`
