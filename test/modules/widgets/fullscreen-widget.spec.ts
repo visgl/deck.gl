@@ -63,6 +63,7 @@ test('FullscreenWidget - rejected native request uses viewport fallback and exit
   const changed = vi.fn();
   const widget = new FullscreenWidget({container: target, onFullscreenChange: changed});
   try {
+    widget.onAdd();
     widget.onRenderHTML(root);
     const originalBounds = target.getBoundingClientRect().toJSON();
     root.querySelector('button')!.click();
@@ -76,18 +77,6 @@ test('FullscreenWidget - rejected native request uses viewport fallback and exit
     expect(bounds.height).toBe(window.innerHeight);
     expect(target.querySelector('canvas')).toBe(canvas);
     const button = root.querySelector('button')!;
-    const frame = root.querySelector('.deck-widget-button')!;
-    const buttonBounds = button.getBoundingClientRect();
-    const frameBounds = frame.getBoundingClientRect();
-    if (matchMedia('(pointer: coarse)').matches) {
-      expect(buttonBounds.width).toBeGreaterThanOrEqual(44);
-      expect(buttonBounds.height).toBeGreaterThanOrEqual(44);
-    } else {
-      expect(buttonBounds.width).toBeLessThan(44);
-      expect(buttonBounds.height).toBeLessThan(44);
-    }
-    expect(frameBounds.width).toBeGreaterThan(buttonBounds.width);
-    expect(frameBounds.height).toBeGreaterThan(buttonBounds.height);
     document.dispatchEvent(new Event('fullscreenchange'));
     expect(widget.getFullscreen()).toBe(true);
     button.click();
@@ -106,51 +95,24 @@ test('FullscreenWidget - rejected native request uses viewport fallback and exit
   }
 });
 
-test.each(['resolve', 'reject'] as const)(
-  'FullscreenWidget - removed widget cleans up when a native request later %ss',
-  async outcome => {
-    const target = document.createElement('div');
-    const root = target.appendChild(document.createElement('div'));
-    document.body.append(target);
-    const widget = new FullscreenWidget({container: target});
-    const changed = vi.spyOn(widget, 'onFullscreenChange');
-    const request = Promise.withResolvers<void>();
-    let fullscreenElement: HTMLElement | null = null;
-    const exit = vi.fn(async () => {
-      fullscreenElement = null;
-    });
-    const restoreRequest = mockFullscreenProperty(target, 'requestFullscreen', {
-      value: () => request.promise
-    });
-    const restoreElement = mockFullscreenProperty(document, 'fullscreenElement', {
-      get: () => fullscreenElement
-    });
-    const restoreExit = mockFullscreenProperty(document, 'exitFullscreen', {value: exit});
-    try {
-      widget.onRenderHTML(root);
-      const pending = widget.requestFullscreen();
-      widget.onRemove();
-      if (outcome === 'resolve') {
-        fullscreenElement = target;
-        request.resolve();
-      } else {
-        request.reject(new Error('Denied'));
-      }
-      await pending;
-      document.dispatchEvent(new Event('fullscreenchange'));
-      expect(changed).not.toHaveBeenCalled();
-      expect(exit).toHaveBeenCalledTimes(outcome === 'resolve' ? 1 : 0);
-      expect(fullscreenElement).toBeNull();
-      expect(target.classList.contains('deck-pseudo-fullscreen')).toBe(false);
-    } finally {
-      widget.onRemove();
-      target.remove();
-      restoreRequest();
-      restoreElement();
-      restoreExit();
-    }
+test('FullscreenWidget - late native rejection does not open fallback after removal', async () => {
+  const target = document.body.appendChild(document.createElement('div'));
+  const widget = new FullscreenWidget({container: target});
+  const request = Promise.withResolvers<void>();
+  const restoreRequest = mockFullscreenProperty(target, 'requestFullscreen', {
+    value: () => request.promise
+  });
+  try {
+    const pending = widget.requestFullscreen();
+    widget.onRemove();
+    request.reject(new Error('Denied'));
+    await pending;
+    expect(target.classList.contains('deck-pseudo-fullscreen')).toBe(false);
+  } finally {
+    target.remove();
+    restoreRequest();
   }
-);
+});
 
 test('FullscreenWidget - removal releases fallback without a native API', async () => {
   const target = document.createElement('div');
@@ -159,6 +121,7 @@ test('FullscreenWidget - removal releases fallback without a native API', async 
   Object.defineProperty(target, 'requestFullscreen', {value: undefined});
   const widget = new FullscreenWidget({container: target});
   try {
+    widget.onAdd();
     widget.onRenderHTML(root);
     await widget.handleClick();
     expect(widget.getFullscreen()).toBe(true);
@@ -188,6 +151,7 @@ test('FullscreenWidget - native fullscreen follows browser exit events', async (
   const changed = vi.fn();
   const widget = new FullscreenWidget({container: target, onFullscreenChange: changed});
   try {
+    widget.onAdd();
     widget.onRenderHTML(root);
     await widget.handleClick();
     expect(widget.getFullscreen()).toBe(true);

@@ -138,18 +138,6 @@
   z-index: 2147483647;
 }
 
-@media (pointer: coarse) {
-  .deck-widget-fullscreen .deck-widget-button {
-    min-width: 46px;
-    min-height: 46px;
-  }
-
-  .deck-widget-fullscreen .deck-widget-icon-button {
-    min-width: 44px;
-    min-height: 44px;
-  }
-}
-
 /* Zoom styles */
 /* Icon source: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:add:FILL@0;wght@400;GRAD@0;opsz@24 */
 .deck-widget.deck-widget-zoom button.deck-widget-zoom-in .deck-widget-icon {
