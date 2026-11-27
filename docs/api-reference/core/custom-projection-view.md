@@ -72,11 +72,17 @@ When displaying multiple views with different projections, create a separate lay
 
 ## Adaptive refinement {#adaptive-refinement}
 
-BitmapLayer can refine its mesh using the experimental `_projectionTolerance` prop. It samples edges and triangle interiors in UV space and preserves bilinear bounds and picking coordinates. The tolerance is a sampled approximation, not a certified bound. Split seams and provide finite geometry within the converter domain. Invalid samples or exhausted math.gl limits (10 refinement passes, 65,536 vertices and 131,072 triangles) throw. Camera movement does not regenerate the mesh; bounds, tolerance, projection, coordinate system and model matrix changes do.
+`PathLayer`, `SolidPolygonLayer`, `PolygonLayer` and `BitmapLayer` accept an experimental
+`_projectionTolerance` prop. A positive value adds vertices to approximate curved projections
+within that many meters. It runs after `resolution` grid cutting and again when geometry,
+projection or model transforms change. Camera moves do not rerun it.
 
-Path and polygon layers can subdivide edges to approximate curved projections using the experimental `_projectionTolerance` prop. The tolerance is a sampled error in map meters, not a certified bound. Existing `resolution` grid cutting occurs first. The model matrix and converter are included in sampling; camera movement does not retessellate geometry. Changes to tolerance or projection rebuild geometry.
+Limitations:
 
-Edges interpolate linearly, including altitude. Split seams and invalid domains before supplying geometry; this does not create great-circle edges or clip geometry. Quarter, midpoint and three-quarter samples are checked. Invalid samples or exhausted math.gl limits (16 bisection levels and 65,536 vertices per path or ring) throw. Inserted vertices require CPU-readable geometry and per-object styling; pre-tessellated external attribute or index buffers are unsupported.
+- Error is sampled, so the tolerance is an estimate.
+- Paths and polygons refine ring edges only; interiors and extruded sides are not refined.
+- Split geometry at projection seams first. Invalid samples throw.
+- Refinement throws when it reaches math.gl's vertex limits.
 
 ## Limitations
 

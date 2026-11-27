@@ -13,9 +13,9 @@ export type BitmapMeshSource = ColumnSource | GPUVector;
 
 /** Explicit triangle mesh inputs; positions and texture coordinates must be supplied together. */
 export type BitmapMeshProps = {
-  /** Arrow XY/XYZ lists or float32x2/float32x3 GPUVector positions, replacing bounds. */
+  /** Mesh positions replacing the bounds quad. Accepts Arrow XY/XYZ lists or float32x2/float32x3 GPUVector. Set bounds for view fitting with GPU-only positions. */
   positions?: BitmapMeshSource | null;
-  /** Two texture coordinates per vertex, with (0, 0) at the image's top left. */
+  /** Texture coordinates per vertex, with (0, 0) at the image's top left. Supply with positions. */
   texCoords?: BitmapMeshSource | null;
   /** Optional uint16/uint32 triangle indices. Otherwise every three vertices form a triangle. */
   indices?: BitmapMeshSource | null;
@@ -97,7 +97,9 @@ export class BitmapLayerMesh {
           });
           resources.push(result);
           attributes[name] = result.vector;
-          if (result.residualVector) attributes.positions64Low = result.residualVector;
+          if (name === 'positions' && result.residualVector) {
+            attributes.positions64Low = result.residualVector;
+          }
         }
       }
       attributes.positions64Low ??= new GPUConstant({

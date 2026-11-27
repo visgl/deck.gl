@@ -5,10 +5,18 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "jsx": "react-jsx"
   },
   "references": [
     {"path": "../core"},
+    {"path": "../aggregation-layers"},
+    {"path": "../geo-layers"},
+    {"path": "../google-maps"},
+    {"path": "../layers"},
+    {"path": "../mapbox"},
+    {"path": "../maplibre"},
+    {"path": "../mesh-layers"},
     {"path": "../widgets"}
   ]
 }

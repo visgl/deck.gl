@@ -13,11 +13,9 @@ import {CARTO_LAYERS, colorBins, colorCategories, colorContinuous} from '@deck.g
 import {CARTO_SOURCES} from '@carto/api-client';
 import * as Widgets from '@deck.gl/widgets';
 
-import {GL as GLConstants} from '@luma.gl/core/webgl-constants';
-
 import {registerLoaders} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {DracoWorkerLoader} from '@loaders.gl/scene';
+import {DracoLoader} from '@loaders.gl/scene/draco';
 import {Tiles3DLoader, CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 
 // Note: deck already registers JSONLoader...
@@ -26,7 +24,7 @@ registerLoaders([
     ...CSVLoader,
     options: {...CSVLoader.options, csv: {...CSVLoader.options.csv, shape: 'object-row-table'}}
   },
-  DracoWorkerLoader
+  DracoLoader
 ]);
 
 export default {
@@ -52,7 +50,7 @@ export default {
   // Enumerations that should be available to JSON parser
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
-    GL: GLConstants
+    GL: globalThis.WebGL2RenderingContext ?? {}
   },
 
   // Constants that should be resolved with the provided values by JSON converter

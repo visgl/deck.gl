@@ -187,16 +187,16 @@ CPU aggregation is used as fallback in the following cases:
 
 #### Compute aggregation
 
-On a WebGPU device, `GridLayer` uses compute aggregation when `gpuAggregation` is enabled
-and both `colorDomain` and `elevationDomain` are supplied. Color and elevation are aggregated
+On a WebGPU device, `GridLayer` uses compute aggregation when `gpuAggregation` is enabled. Color and elevation are aggregated
 independently using `SUM`, `MEAN`, `MIN`, `MAX`, or `COUNT`. Results remain in GPU buffers
 and are passed directly to the cell layer.
 
 ```typescript
 new GridLayer({
-  positions: positionVector,
-  weights: [colorWeightVector, elevationWeightVector],
-  dataBounds: [[-123, 37], [-122, 38]],
+  data,
+  getPosition: d => d.position,
+  getColorWeight: d => d.colorWeight,
+  getElevationWeight: d => d.elevationWeight,
   cellSize: 1000,
   colorAggregation: 'SUM',
   elevationAggregation: 'MEAN',
@@ -205,14 +205,10 @@ new GridLayer({
 });
 ```
 
-Accessor-based data and single-chunk `float32x2`/`float32x3` position vectors with two
-`float32` weight vectors are supported. GPU columns require `dataBounds` and buffers with
-`STORAGE` or `COPY_SRC` usage. Columns used in custom views must already use that view's
-coordinate system.
+Custom JavaScript callbacks and grids exceeding device limits use CPU aggregation.
 
-Picking, layer extensions, custom aggregation callbacks, domain callbacks, quantile or
-ordinal scales, and percentile filtering use CPU aggregation instead. GPU-only input columns
-cannot use this fallback; supply accessor-based data or a custom aggregator for these features.
+Previous cells remain visible and cannot be picked while new domains or scales are pending,
+as described for [HexagonLayer](./hexagon-layer.md#compute-aggregation).
 
 #### `cellSize` (number, optional) {#cellsize}
 
@@ -553,6 +549,22 @@ The [PickingInfo.object](../../developer-guide/interactivity.md#the-pickinginfo-
 The GridLayer renders the following sublayers:
 
 * `cells` - a custom layer that extends the [ColumnLayer](../layers/column-layer.md).
+
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
+
+- `positions` – `float32x2` or `float32x3` – A single-chunk position vector.
+- `weights` – `float32` – Two matching single-chunk vectors, in color and elevation order.
+- `dataBounds` – `[min, max]` – Bounds in input coordinates.
+
+Notes:
+
+- The built-in WebGPU compute path requires buffers with `STORAGE` or `COPY_SRC` usage.
+- Use positions in the view's coordinate system for custom views.
+- Positions must not require CPU preprojection. See [GPU column extensions](./aggregator.md#gpu-column-extensions) for supported extensions.
 
 ## Source
 

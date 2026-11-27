@@ -134,6 +134,15 @@ test('CustomProjectionView clone, equality, state overrides and zero dimensions'
   expect(view.makeViewport({width: 800, height: 0, viewState})).toBeNull();
 });
 
+test('CustomProjectionView keeps its default id on viewports and in equality', async () => {
+  const view = new CustomProjectionView(options);
+  await view.initialize();
+  expect(Object.hasOwn(view.props, 'id')).toBe(false);
+  expect(view.makeViewport({width: 800, height: 600, viewState})!.id).toBe(view.id);
+  expect(view.equals(new CustomProjectionView({...options, id: view.id}))).toBe(true);
+  expect(view.equals(new CustomProjectionView({...options, id: 'other'}))).toBe(false);
+});
+
 test('CustomProjectionView configures its default and custom controllers', () => {
   expect(new CustomProjectionView(options).controller).toBeNull();
   expect(new CustomProjectionView({...options, controller: false}).controller).toBeNull();

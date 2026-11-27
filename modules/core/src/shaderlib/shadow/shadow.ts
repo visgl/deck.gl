@@ -4,10 +4,10 @@
 
 import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../project/constants';
 import project from '../project/project';
-import {Vector3, Matrix4} from '@math.gl/core';
-import type {NumericArray} from '@math.gl/core';
+import {Vector3, Matrix4} from '@math.gl/core/matrix';
+import type {NumericArray} from '@math.gl/core/matrix';
 import memoize from '../../utils/memoize';
-import {pixelsToWorld} from '@math.gl/web-mercator';
+import {pixelsToWorld} from '@math.gl/geospatial/web-mercator';
 
 import type {Texture} from '@luma.gl/core';
 import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';

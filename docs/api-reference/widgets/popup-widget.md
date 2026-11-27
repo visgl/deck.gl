@@ -79,7 +79,8 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL, {PopupWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import {PopupWidget} from '@deck.gl/react/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
 function App() {

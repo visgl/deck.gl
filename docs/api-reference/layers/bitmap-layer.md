@@ -128,6 +128,23 @@ new deck.BitmapLayer({});
 ```
 
 
+### Render an image on a triangle mesh
+
+Pair [`positions`](#positions) with [`texCoords`](#texcoords) to map an image onto a custom mesh.
+
+```ts
+import {BitmapLayer} from '@deck.gl/layers';
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+
+const xy = new FixedSizeList(2, new Field('value', new Float32(), false));
+const layer = new BitmapLayer({
+  id: 'image-triangle',
+  image: '/image.png',
+  positions: vectorFromArray([[-122, 37], [-121, 37], [-122, 38]], xy),
+  texCoords: vectorFromArray([[0, 1], [1, 1], [0, 0]], xy)
+});
+```
+
 ## Properties
 
 ### Data
@@ -148,8 +165,8 @@ The image data will be converted to a [Texture](https://luma.gl/docs/api-referen
 
 #### `bounds` (number[4] | Position[4]) {#bounds}
 
-When `positions` is supplied, it defines the rendered mesh. For GPU-only positions, `bounds`
-provides the footprint for view fitting.
+When supplied, `positions` replaces the quad from `bounds`. With GPU-only positions,
+`bounds` still sets the footprint for view fitting.
 
 Supported formats:
 
@@ -182,14 +199,14 @@ These coordinates take precedence over `_imageCoordinateSystem`.
 Optional `uint16` or `uint32` triangle indices. Without indices, every three vertices form
 a triangle. Removing all mesh props restores the quad from `bounds`.
 
-Remarks:
+Remarks for `positions`, `texCoords` and `indices`:
 
 * Each input must be a single Arrow chunk or GPU buffer.
 * GPUVector inputs remain owned by the application. Keep them alive while the layer uses them.
 * GPU-only positions require a view that does not convert positions on the CPU.
 * Mesh inputs cannot be async iterables, and mesh changes do not transition.
 * Mesh inputs cannot be combined with a positive `_projectionTolerance`.
-* See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates) for updates.
+* Pass a new Arrow vector to update the mesh. See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates).
 
 #### `_projectionTolerance` (number, optional) {#_projectiontolerance}
 
@@ -273,6 +290,8 @@ The color to use for transparent pixels, in `[r, g, b, a]`. Each component is in
 - Default `[255, 255, 255]`
 
 The color to tint the bitmap by, in `[r, g, b]`. Each component is in the `[0, 255]` range.
+
+With Deck's [`normalizedColors`](../core/deck.md#normalizedcolors), plain arrays for `transparentColor` and `tintColor` on a top-level layer use 0–1 channels. Built-in defaults and byte typed arrays retain their byte encoding.
 
 ## Pixel Picking
 

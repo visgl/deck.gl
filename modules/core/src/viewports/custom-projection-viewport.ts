@@ -4,13 +4,13 @@
 
 import Viewport from './viewport';
 import type {ViewportOptions, DistanceScales, ProjectPositionOptions} from './viewport';
-import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection-core';
 import {
   getViewMatrix,
   getProjectionParameters,
   altitudeToFovy,
   pixelsToWorld
-} from '@math.gl/web-mercator';
+} from '@math.gl/geospatial/web-mercator';
 import {PROJECTION_MODE} from '../shaderlib/project/constants';
 
 const NORMALIZATION_SCALE = 512 / 40075016.6855;

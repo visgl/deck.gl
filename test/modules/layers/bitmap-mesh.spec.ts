@@ -69,12 +69,13 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           },
           {updateProps: {opacity: 0.5}},
           {updateProps: {indices: null}},
+          {updateProps: {extensions: [new DataFilterExtension()]}},
           {updateProps: {positions: null, texCoords: null}}
         ].map((testCase, index) => ({
           ...testCase,
           onAfterUpdate: async ({layer}) => {
             if (!layer.isLoaded) return;
-            if (index === 3) {
+            if (index === 4) {
               expect(layer.getAttributeManager()).not.toBeNull();
               expect(oldBuffer.destroyed).toBe(true);
             } else {
@@ -99,6 +100,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
                 expect(mesh.attributes.positions.data[0].buffer).toBe(oldBuffer);
                 expect(layer.state.model).toBe(previousModel);
               }
+              if (index === 3) expect(layer.state.model).not.toBe(previousModel);
               expect(layer.getBounds()).toEqual([
                 [0, 0, 0],
                 [1, 1, 0]

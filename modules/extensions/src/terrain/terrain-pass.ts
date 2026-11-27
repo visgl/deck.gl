@@ -83,6 +83,23 @@ export class TerrainPass extends LayersPass {
     layerIndex: number,
     viewport: Viewport
   ): Parameters {
+    if (this.device.type === 'webgpu' && layer.props.operation.includes('terrain')) {
+      return {
+        ...layer.props.parameters,
+        depthWriteEnabled: true,
+        depthCompare: 'less-equal',
+        // Height selection must not depend on display offsets or layer order.
+        depthBias: 0,
+        depthBiasSlopeScale: 0,
+        // Override deck's premultiplied-alpha defaults: these channels contain float bytes.
+        blendColorOperation: 'add',
+        blendColorSrcFactor: 'one',
+        blendColorDstFactor: 'zero',
+        blendAlphaOperation: 'add',
+        blendAlphaSrcFactor: 'one',
+        blendAlphaDstFactor: 'zero'
+      };
+    }
     return {
       ...layer.props.parameters,
       blend: true,

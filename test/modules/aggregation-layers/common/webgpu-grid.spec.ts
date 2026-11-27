@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {Buffer} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
@@ -230,7 +230,7 @@ test('Grid GPU columns share two-channel output and update prefixes', async ({sk
   }
 });
 
-test('Grid compute selection falls back for features requiring CPU results', async ({skip}) => {
+test('Grid compute selection supports metadata-dependent rendering features', async ({skip}) => {
   const device = await getWebGPUTestDevice();
   if (!device) return skip();
   const defaults = {
@@ -265,8 +265,11 @@ test('Grid compute selection falls back for features requiring CPU results', asy
     ].map((props, index) => ({
       ...(index === 0 ? {props: {data: [[0, 0]], getPosition: d => d}} : {}),
       updateProps: {...defaults, ...props},
-      onAfterUpdate({layer}) {
-        expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+      async onAfterUpdate({layer}) {
+        expect(layer.state.aggregator).toBeInstanceOf(WebGPUGridAggregator);
+        await vi.waitFor(() => expect(layer.state.aggregator.getResultValues(0)).not.toBeNull(), {
+          timeout: 10000
+        });
       }
     }))
   });
