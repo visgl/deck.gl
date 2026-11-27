@@ -5,8 +5,8 @@
 import Viewport, {type ViewportOptions} from './viewport';
 import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import {OSM_TILE_CRS, getMercatorScales} from './web-mercator-util';
-import {getMeterZoom} from '@math.gl/web-mercator';
-import {Matrix4, Vector3, SphericalCoordinates} from '@math.gl/core';
+import {getMeterZoom} from '@math.gl/geospatial/web-mercator';
+import {Matrix4, Vector3, SphericalCoordinates} from '@math.gl/core/matrix';
 
 export type FirstPersonViewportOptions = {
   /** Subdivision intervals around the earth for nonlinear source CRS conversions. Default 0 disables subdivision. */

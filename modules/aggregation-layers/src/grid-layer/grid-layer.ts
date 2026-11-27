@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor} from '@deck.gl/core';
 import {project} from '@deck.gl/core';
 
 import {
@@ -42,7 +43,7 @@ const defaultProps: DefaultProps<GridLayerProps> = {
   colorDomain: null,
   colorRange: defaultColorRange,
   getColorValue: {type: 'accessor', value: null}, // default value is calculated from `getColorWeight` and `colorAggregation`
-  getColorWeight: {type: 'accessor', value: 1},
+  getColorWeight: {type: 'accessor', arrow: 'row', value: 1},
   colorAggregation: 'SUM',
   lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   upperPercentile: {type: 'number', min: 0, max: 100, value: 100},
@@ -53,7 +54,7 @@ const defaultProps: DefaultProps<GridLayerProps> = {
   elevationDomain: null,
   elevationRange: [0, 1000],
   getElevationValue: {type: 'accessor', value: null}, // default value is calculated from `getElevationWeight` and `elevationAggregation`
-  getElevationWeight: {type: 'accessor', value: 1},
+  getElevationWeight: {type: 'accessor', arrow: 'row', value: 1},
   elevationAggregation: 'SUM',
   elevationScale: {type: 'number', min: 0, value: 1},
   elevationLowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
@@ -64,7 +65,7 @@ const defaultProps: DefaultProps<GridLayerProps> = {
   // grid
   cellSize: {type: 'number', min: 0, value: 1000},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
+  getPosition: {type: 'accessor', arrow: 'row', value: (x: any) => x.position},
   gridAggregator: {type: 'function', optional: true, value: null},
   extruded: false,
 
@@ -99,6 +100,7 @@ type _GridLayerProps<DataT> = {
 
   /**
    * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`
+   * Custom plain-array entries are 0–1 when Deck normalizedColors is enabled.
    */
   colorRange?: Color[];
 
@@ -202,13 +204,13 @@ type _GridLayerProps<DataT> = {
    * Method called to retrieve the position of each object.
    * @default object => object.position
    */
-  getPosition?: Accessor<DataT, Position>;
+  getPosition?: ArrowAccessor<DataT, Position>;
 
   /**
    * The weight of a data object used to calculate the color value for a cell.
    * @default 1
    */
-  getColorWeight?: Accessor<DataT, number>;
+  getColorWeight?: ArrowAccessor<DataT, number>;
 
   /**
    * After data objects are aggregated into cells, this accessor is called on each cell to get the value that its color is based on.
@@ -221,7 +223,7 @@ type _GridLayerProps<DataT> = {
    * The weight of a data object used to calculate the elevation value for a cell.
    * @default 1
    */
-  getElevationWeight?: Accessor<DataT, number>;
+  getElevationWeight?: ArrowAccessor<DataT, number>;
 
   /**
    * After data objects are aggregated into cells, this accessor is called on each cell to get the value that its elevation is based on.
@@ -282,6 +284,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       colors?: AttributeWithScale;
       elevations?: AttributeWithScale;
 
+      /** Whether domains, scales, callbacks or picking require a CPU result snapshot. */
+      metadataRequired?: boolean;
       binIdRange: [number, number][];
       aggregatorViewport: Viewport;
     } & AggregationLayer<any>['state'];
@@ -298,23 +302,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       return 'cpu';
     }
 
-    if (
-      gpuAggregation &&
-      this.context.device.type === 'webgpu' &&
-      this.props.colorDomain &&
-      this.props.elevationDomain &&
-      !this.props.pickable &&
-      !this.props.extensions.length &&
-      this.props.onSetColorDomain === noop &&
-      this.props.onSetElevationDomain === noop &&
-      this.props.colorScaleType !== 'quantile' &&
-      this.props.colorScaleType !== 'ordinal' &&
-      this.props.elevationScaleType !== 'quantile' &&
-      this.props.lowerPercentile === 0 &&
-      this.props.upperPercentile === 100 &&
-      this.props.elevationLowerPercentile === 0 &&
-      this.props.elevationUpperPercentile === 100
-    ) {
+    if (gpuAggregation && this.context.device.type === 'webgpu') {
       if (
         (!this.props.positions &&
           !WebGPUGridAggregator.supportsData(this.props.data, [
@@ -369,7 +357,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUGridAggregator {
-    if (type === 'webgpu') return new WebGPUGridAggregator(this.context.device);
+    if (type === 'webgpu')
+      return new WebGPUGridAggregator(this.context.device, this.getComputeAggregatorOptions());
     if (type === 'cpu') {
       const {gridAggregator, cellSize} = this.props;
       return new CPUAggregator({
@@ -443,6 +432,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const {props, oldProps, changeFlags} = params;
     const {aggregator} = this.state;
+    this.state.metadataRequired = this.needsAggregationMetadata(props, noop);
+    aggregator.setProps({readback: this.state.metadataRequired});
     if (
       (changeFlags.dataChanged || !this.state.dataAsArray) &&
       (props.getColorValue || props.getElevationValue)
@@ -456,6 +447,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       props.positions !== oldProps.positions ||
       props.weights !== oldProps.weights ||
       props.dataBounds !== oldProps.dataBounds ||
+      props.modelMatrix !== oldProps.modelMatrix ||
+      props.coordinateOrigin !== oldProps.coordinateOrigin ||
+      changeFlags.projectionChanged ||
       props.cellSize !== oldProps.cellSize ||
       props.getColorValue !== oldProps.getColorValue ||
       props.getElevationValue !== oldProps.getElevationValue ||
@@ -586,7 +580,11 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     if (channel === 0) {
       const result = aggregator.getResult(0)!;
       this.setState({
-        colors: new AttributeWithScale(result, aggregator.binCount)
+        colors: new AttributeWithScale(
+          result,
+          aggregator.binCount,
+          aggregator.getResultValues?.(channel)
+        )
       });
       if (props.onSetColorDomain !== noop) {
         props.onSetColorDomain(aggregator.getResultDomain(0));
@@ -594,7 +592,11 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     } else if (channel === 1) {
       const result = aggregator.getResult(1)!;
       this.setState({
-        elevations: new AttributeWithScale(result, aggregator.binCount)
+        elevations: new AttributeWithScale(
+          result,
+          aggregator.binCount,
+          aggregator.getResultValues?.(channel)
+        )
       });
       if (props.onSetElevationDomain !== noop) {
         props.onSetElevationDomain(aggregator.getResultDomain(1));
@@ -684,6 +686,14 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       elevationUpperPercentile,
       elevationDomain
     } = this.props;
+    const pendingMetadata = aggregator.getResultValues && !aggregator.getResultValues(0);
+    if (
+      pendingMetadata &&
+      (!colorDomain || !elevationDomain || this.needsAggregationScaleValues())
+    ) {
+      return this.getRetainedAggregationLayer()?.clone({pickable: false}) || null;
+    }
+    if (pendingMetadata && !this.needsAggregationScaleValues()) this.prepareRawAggregationScales();
     const CellLayerClass = this.getSubLayerClass('cells', GridCellLayer);
     const binAttribute = aggregator.getBins();
 
@@ -711,11 +721,12 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       return null;
     }
 
-    return new CellLayerClass(
+    const cellLayer = new CellLayerClass(
       this.getSubLayerProps({
         id: 'cells'
       }),
       {
+        ...(pendingMetadata ? {pickable: false} : {}),
         numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,
@@ -736,6 +747,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         cellSizeCommon,
         elevationScale,
         colorRange,
+        normalizedColorRange: this.usesNormalizedColors() && colorRange !== defaultColorRange,
         colorScaleType,
         elevationRange,
         extruded,
@@ -753,6 +765,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         extensions: []
       }
     );
+    this.retainAggregationLayer(cellLayer, this.state.binIdRange);
+    return cellLayer;
   }
 
   getPickingInfo(params: GetPickingInfoParams): GridLayerPickingInfo<DataT> {

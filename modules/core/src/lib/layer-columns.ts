@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {packNormalizedColor} from '../utils/color';
 import {createIterable} from '../utils/iterable-utils';
 import {deepEqual} from '../utils/deep-equal';
 import type {UpdateParameters} from './layer';
@@ -17,16 +18,26 @@ import {DynamicBuffer} from '@luma.gl/core/dynamic';
 import type {GPUVectorModel, GPUVectorModelInputs} from '@luma.gl/engine';
 import {GPUConstant, GPUVector, getGPUVectorFormatInfo} from '@luma.gl/graph/gpu-data';
 
-import type {ColumnSource} from './luma-upstream/arrow-converter';
+import type {PreparedArrowColumn} from '../arrow/append-arrow-column';
+import {resolveColumns} from './resolve-columns';
 
 export type ColumnDefinition = {
   attribute: string;
   accessor: string;
   semantic: 'position' | 'scalar' | 'color' | 'vector';
   size: number;
+  /** Accept packed XY buffers for a three-component position input. */
+  allowPackedXY?: boolean;
   prop?: boolean;
+  /** Select an Arrow vector supplied through the matching accessor, after an explicit column. */
+  arrowAccessor?: boolean;
   defaultValue?: number;
+  /** Built-in byte color to preserve when normalizing plain-array input. */
+  defaultColor?: readonly number[];
 };
+
+/** Definitions keyed by public column name, including internal inputs. */
+export type ColumnDefinitions = Readonly<Record<string, Partial<ColumnDefinition>>>;
 
 type PositionOptions = {
   transform?: ((value: number[]) => readonly number[]) | null;
@@ -43,11 +54,23 @@ type PrepareFallbacks = (
   own: (resource: {destroy(): void}) => void
 ) => Record<string, unknown>;
 
-type Request = {source: unknown; rows?: Rows};
+type Request = {source: unknown; rows?: Rows; normalizedColors: boolean};
 
 type Columns = Record<string, GPUVector | GPUConstant>;
 type Prepared = {
   columns: Columns;
+  /** Arrow source chunks and their conversion handles. */
+  arrow?: Record<string, PreparedArrowColumn>;
+  /** Allocations owned by this committed state; reused handles transfer on commit. */
+  resources?: Set<{destroy(): void}>;
+  /** Inputs used by the last successful conversion, including update triggers. */
+  props?: Record<string, any>;
+  /** Precision used for the committed position conversion. */
+  fp64?: boolean;
+  /** Whether committed positions required CPU preprojection. */
+  transformed?: boolean;
+  /** Invalidation generation satisfied by this conversion. */
+  revision?: number;
   destroy(): void;
   length: number;
   source: unknown;
@@ -60,6 +83,8 @@ type Prepared = {
 export class LayerColumns {
   private prepared?: Prepared;
   private version = 0;
+  /** Retains projection/trigger invalidation across superseded or failed requests. */
+  private conversionRevision = 0;
   private request?: Request;
   loading = false;
   /** Number of rows in the last successfully prepared columns, used as the instance count. */
@@ -79,7 +104,8 @@ export class LayerColumns {
     private readonly device: Device,
     private readonly definitions: Record<string, ColumnDefinition>,
     private readonly name: string,
-    private readonly useRowIndexes = false
+    private readonly useRowIndexes = false,
+    private readonly useTable = false
   ) {}
 
   /** Supplies shader input layouts while asynchronous conversion has not produced buffers yet. */
@@ -110,6 +136,7 @@ export class LayerColumns {
     return (
       !this.request ||
       props.data !== this.request.source ||
+      props._dataLoadOptions !== oldProps._dataLoadOptions ||
       !deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
       props.colorFormat !== oldProps.colorFormat ||
       !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1) ||
@@ -141,13 +168,15 @@ export class LayerColumns {
       changed,
       failed,
       positionOptions,
-      prepareFallbacks
+      prepareFallbacks,
+      normalizedColors = false
     }: {
       dataLoading: boolean;
       changed: () => void;
       failed: (error: Error) => void;
       positionOptions?: PositionOptions;
       prepareFallbacks?: PrepareFallbacks;
+      normalizedColors?: boolean;
     }
   ): Promise<void> | undefined {
     if (
@@ -155,9 +184,18 @@ export class LayerColumns {
       (changeFlags.dataChanged ||
         changeFlags.updateTriggersChanged ||
         changeFlags.projectionChanged ||
+        this.request?.normalizedColors !== normalizedColors ||
         this.needsUpdate(props, oldProps))
     ) {
-      return this.update(props, changed, failed, positionOptions, prepareFallbacks);
+      return this.update(
+        props,
+        changed,
+        failed,
+        positionOptions,
+        prepareFallbacks,
+        !changeFlags.projectionChanged && !changeFlags.updateTriggersChanged,
+        normalizedColors
+      );
     }
     return undefined;
   }
@@ -165,19 +203,24 @@ export class LayerColumns {
   /**
    * Converts explicit columns and fills missing inputs from accessors or binary attributes.
    * Replaces the previous result only after all inputs succeed; superseded requests release
-   * their allocations so asynchronous completions cannot overwrite newer state.
+   * their allocations so asynchronous completions cannot overwrite newer state. Unchanged Arrow
+   * chunks retain their allocations unless snapshot mode or conversion invalidation disables reuse.
    */
   async update(
     props: Record<string, any>,
     changed: () => void,
     failed: (error: Error) => void,
     positionOptions: PositionOptions = {},
-    prepareFallbacks?: PrepareFallbacks
+    prepareFallbacks?: PrepareFallbacks,
+    reuseChunks = true,
+    normalizedColors = false
   ): Promise<void> {
     const version = ++this.version;
+    if (!reuseChunks) this.conversionRevision++;
+    const revision = this.conversionRevision;
     this.loading = true;
     const previousRequest = this.request;
-    const request: Request = {source: props.data};
+    const request: Request = {source: props.data, normalizedColors};
     this.request = request;
     const results: Array<{destroy(): void}> = [];
     try {
@@ -191,8 +234,24 @@ export class LayerColumns {
         changed();
         return;
       }
-      const {ArrowConverter} = await import('./luma-upstream/arrow-converter');
+      const {ArrowConverter} = await import('../arrow/upstream-luma/arrow-converter');
+      const {appendArrowColumn} = await import('../arrow/append-arrow-column');
       const converter = new ArrowConverter(this.device);
+      const previous = this.prepared;
+      const reuse =
+        previous?.revision === revision &&
+        deepEqual(props.updateTriggers, previous.props?.updateTriggers, 2) &&
+        reuseChunks &&
+        props._dataLoadOptions !== 'snapshots' &&
+        !positionOptions.transform &&
+        !previous?.transformed &&
+        previous?.fp64 === positionOptions.fp64 &&
+        previous?.props &&
+        ['modelMatrix', 'coordinateOrigin', 'coordinateSystem', 'colorFormat'].every(key =>
+          deepEqual(props[key], previous.props![key], 1)
+        );
+      const arrow: Record<string, PreparedArrowColumn> = {};
+      const retained = new Set<{destroy(): void}>();
       const columns: Columns = {};
       let bounds: [number[], number[]] | undefined;
       let boundsAvailable = true;
@@ -214,11 +273,11 @@ export class LayerColumns {
           }
         }
       };
+      const sources = resolveColumns(props, this.definitions, this.useTable);
       let length: number | undefined;
       let chunkLengths: number[] | undefined;
       for (const [name, definition] of Object.entries(this.definitions)) {
-        const source =
-          definition.prop === false ? undefined : (props[name] as ColumnSource | undefined);
+        const source = sources[name];
         if (!source) continue;
         if (source instanceof GPUVector) {
           const format =
@@ -227,7 +286,10 @@ export class LayerColumns {
               : definition.size === 1
                 ? 'float32'
                 : 'float32x' + definition.size;
-          if (source.format !== format)
+          if (
+            source.format !== format &&
+            !(definition.allowPackedXY && source.format === 'float32x2')
+          )
             throw new Error('GPU column format must match the shader input');
           if (definition.semantic === 'position') {
             if (positionOptions.transform)
@@ -238,21 +300,34 @@ export class LayerColumns {
         const result =
           source instanceof GPUVector
             ? {vector: source, residualVector: undefined, destroy() {}}
-            : await converter.convert(source as Parameters<typeof converter.convert>[0], {
-                name,
-                semantic: definition.semantic === 'vector' ? 'numeric' : definition.semantic,
-                ...(definition.semantic === 'position'
-                  ? {
-                      format: 'float32x3',
-                      transform: value => {
-                        positionOptions.onPosition!(value);
-                        return positionOptions.transform ? positionOptions.transform(value) : value;
-                      },
-                      fp64: positionOptions.fp64
-                    }
-                  : {})
-              });
-        results.push(result);
+            : await appendArrowColumn(
+                converter,
+                source as Parameters<typeof converter.convert>[0],
+                {
+                  name,
+                  semantic: definition.semantic === 'vector' ? 'numeric' : definition.semantic,
+                  ...(definition.semantic === 'position'
+                    ? {
+                        format: 'float32x3',
+                        transform: positionOptions.transform ?? undefined,
+                        fp64: positionOptions.fp64
+                      }
+                    : {})
+                },
+                resource => results.push(resource),
+                reuse ? previous?.arrow?.[name] : undefined
+              );
+        if (!(source instanceof GPUVector)) {
+          const prepared = result as PreparedArrowColumn;
+          arrow[name] = prepared;
+          for (const resource of prepared.resources) {
+            if (previous?.resources?.has(resource)) retained.add(resource);
+          }
+          if (prepared.bounds) {
+            positionOptions.onPosition!(prepared.bounds[0]);
+            positionOptions.onPosition!(prepared.bounds[1]);
+          }
+        }
         if (version !== this.version) {
           for (const result of results) result.destroy();
           return;
@@ -277,7 +352,7 @@ export class LayerColumns {
         throw new Error('data rows must match Arrow column lengths');
       const fallbacks = prepareFallbacks?.(rows, length, resource => results.push(resource));
       for (const [name, definition] of Object.entries(this.definitions)) {
-        if (definition.prop === false || !props[name]) {
+        if (!sources[name]) {
           columns[definition.attribute] = await this.makeAccessorColumn(
             props,
             definition.accessor,
@@ -291,7 +366,8 @@ export class LayerColumns {
             definition.semantic === 'position' ? `${definition.attribute}64Low` : undefined,
             definition.defaultValue,
             fallbacks?.[definition.accessor],
-            definition.attribute
+            definition.attribute,
+            normalizedColors ? definition.defaultColor : undefined
           );
         }
       }
@@ -330,16 +406,25 @@ export class LayerColumns {
         for (const result of results) result.destroy();
         return;
       }
+      for (const resource of retained) previous?.resources?.delete(resource);
       this.prepared?.destroy();
+      const resources = new Set([...results, ...retained]);
       this.prepared = {
         columns,
+        arrow,
+        resources,
+        props,
+        fp64: positionOptions.fp64,
+        transformed: Boolean(positionOptions.transform),
+        revision,
         length,
         chunkLengths,
         bounds: length && boundsAvailable ? bounds : undefined,
         source: props.data,
         rows,
         destroy: () => {
-          for (const result of results) result.destroy();
+          for (const resource of resources) resource.destroy();
+          resources.clear();
         }
       };
       this.loading = false;
@@ -466,7 +551,8 @@ export class LayerColumns {
     lowAttribute?: string,
     defaultValue = 0,
     binaryOverride?: unknown,
-    attribute?: string
+    attribute?: string,
+    defaultColor?: readonly number[]
   ): Promise<GPUVector | GPUConstant> {
     let binaryColor = false;
     const binary =
@@ -591,6 +677,16 @@ export class LayerColumns {
       if (size === 1) {
         const scalar = Number.isFinite(value) ? value : value?.[0];
         target[offset] = Number.isFinite(scalar) ? scalar : defaultValue;
+        return;
+      }
+      if (
+        defaultColor &&
+        !binaryColor &&
+        Array.isArray(value) &&
+        (typeof source === 'function' || value !== defaultColor)
+      ) {
+        packNormalizedColor(value, target, offset, props.colorFormat === 'RGB' ? 3 : size);
+        if (props.colorFormat === 'RGB') target[offset + 3] = 255;
         return;
       }
       for (let component = 0; component < size; component++) {

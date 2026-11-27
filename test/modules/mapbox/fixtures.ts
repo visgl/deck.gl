@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {equals} from '@math.gl/core';
-import {GL} from '@luma.gl/core/webgl-constants';
+import {equals} from '@math.gl/core/matrix';
 
 export const DEFAULT_PARAMETERS = {
   depthWriteEnabled: true,

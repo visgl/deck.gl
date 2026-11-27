@@ -356,6 +356,12 @@ Width of outline around the text, relative to the font size. Only effective if `
 Color of outline around the text, in `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 
+With Deck's [`normalizedColors`](../core/deck.md#normalizedcolors), plain arrays for `outlineColor` on a top-level layer use 0–1 channels. Built-in defaults and byte typed arrays retain their byte encoding.
+
+On top-level TextLayer, Deck's [`normalizedColors`](../core/deck.md#normalizedcolors)
+also applies to plain arrays and callback results for glyph, background, and border colors.
+Omitted alpha is opaque.
+
 ### Data Accessors
 
 #### `getText` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettext}
@@ -705,7 +711,7 @@ TextLayer.fontAtlasCacheLimit = 10;
 Set `fontAtlasCacheLimit` once, before creating any TextLayer. Each assignment clears cached atlases,
 which are rebuilt on next use. The limit must be at least 3.
 
-The limit also applies to luma.gl's font atlas cache, which other luma.gl text rendering on the page shares.
+This setting controls TextLayer's cache. luma.gl manages its shared font atlas cache separately.
 
 ### Content Box Behavior
 

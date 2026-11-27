@@ -7,7 +7,7 @@ import {test, expect} from 'vitest';
 import {TextLayer} from '@deck.gl/layers';
 import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
-import {setFontAtlasCacheLimit} from '@luma.gl/engine/text-fonts';
+import {buildBitmapFontAtlas, setFontAtlasCacheLimit} from '@luma.gl/engine/text-fonts';
 
 test('TextLayer - fontAtlasCacheLimit', () => {
   TextLayer.fontAtlasCacheLimit = 10;
@@ -183,14 +183,17 @@ for (const backend of ['webgl'] as const) {
   });
 }
 
-test('TextLayer cache limit resets both atlas caches', async () => {
+test('TextLayer cache limit resets Deck snapshots and preserves luma atlases', async () => {
   const {default: FontAtlasManager} = await import(
     '../../../../modules/layers/src/text-layer/font-atlas-manager'
   );
   const manager = new FontAtlasManager();
   manager.setProps({fontSize: 46, characterSet: 'A'});
   const canvas = manager.atlas!.data;
+  const lumaSettings = {fontFamily: 'monospace', fontSize: 47, characterSet: 'Ae'};
+  const lumaAtlas = buildBitmapFontAtlas(lumaSettings).pages[0];
   TextLayer.fontAtlasCacheLimit = 3;
+  expect(buildBitmapFontAtlas(lumaSettings).pages[0]).toBe(lumaAtlas);
   const replacement = new FontAtlasManager();
   replacement.setProps({fontSize: 46, characterSet: 'A'});
   expect(replacement.atlas!.data).not.toBe(canvas);

@@ -5,8 +5,7 @@
 import {
   buildBitmapFontAtlas,
   buildSdfFontAtlas,
-  buildBrowserFontAtlas,
-  setFontAtlasCacheLimit as setLumaFontAtlasCacheLimit
+  buildBrowserFontAtlas
 } from '@luma.gl/engine/text-fonts';
 
 import {log} from '@deck.gl/core';
@@ -162,7 +161,6 @@ export function setFontAtlasCacheLimit(limit: number): void {
   log.assert(Number.isFinite(limit) && limit >= CACHE_LIMIT, 'Invalid cache limit');
 
   cache = new LRUCache(limit);
-  setLumaFontAtlasCacheLimit(limit);
 }
 
 export default class FontAtlasManager {
@@ -248,7 +246,7 @@ export default class FontAtlasManager {
     const source = pages[0] as HTMLCanvasElement | OffscreenCanvas;
     const canvas = document.createElement('canvas');
     canvas.width = source.width;
-    canvas.height = Math.max(1, source.height);
+    canvas.height = source.height;
     canvas.getContext('2d')!.drawImage(source, 0, 0);
     const mapping = Object.fromEntries(
       Object.entries(atlas.mapping).map(([character, glyph]) => [character, {...glyph}])

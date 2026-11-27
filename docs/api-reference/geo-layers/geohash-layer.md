@@ -12,6 +12,9 @@ The `GeohashLayer` renders filled and/or stroked polygons based on the [Geohash]
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -122,6 +125,26 @@ function App() {
   </TabItem>
 </Tabs>
 
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Utf8, vectorFromArray} from 'apache-arrow';
+import {GeohashLayer} from '@deck.gl/geo-layers';
+
+const cells = vectorFromArray(['9q8yy'], new Utf8());
+
+const layer = new GeohashLayer({
+  getGeohash: cells,
+  getFillColor: [255, 140, 0]
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
+  </TabItem>
+</Tabs>
+
 
 ## Installation
 
@@ -161,11 +184,38 @@ Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/compo
 
 ### Data Accessors
 
-#### `getGeohash` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getgeohash}
+#### `getGeohash` (Accessor | arrow.Vector, optional) {#getgeohash}
 
 Called for each data object to retrieve the geohash string identifier.
 
 * default: `object => object.geohash`
+
+Each Arrow row supplies one identifier or a list of identifiers for one source feature. See [cell identifier columns](../../developer-guide/using-with-arrow.md#cell-identifiers) for supported encodings and picking behavior.
+
+
+#### `getFillColor` (constant | Accessor | arrow.Vector, optional) {#getfillcolor}
+
+* Default: `[0, 0, 0, 255]`
+
+The fill color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getLineColor` (constant | Accessor | arrow.Vector, optional) {#getlinecolor}
+
+* Default: `[0, 0, 0, 255]`
+
+The outline color of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell color columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getLineWidth` (constant | Accessor | arrow.Vector, optional) {#getlinewidth}
+
+* Default: `1`
+
+The outline width of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
+
+#### `getElevation` (constant | Accessor | arrow.Vector, optional) {#getelevation}
+
+* Default: `1000`
+
+The elevation of each source feature. Accepts a constant, a row callback (Accessor), or an Arrow column in source-feature order. A value applies to all cells belonging to that feature. See [cell style columns](../../developer-guide/using-with-arrow.md#cell-styling) for requirements.
 
 
 ## Sub Layers
@@ -178,22 +228,3 @@ The `GeohashLayer` renders the following sublayers:
 ## Source
 
 [modules/geo-layers/src/geohash-layer](https://github.com/visgl/deck.gl/tree/master/modules/geo-layers/src/geohash-layer)
-
-### Column inputs
-
-`cells` accepts a CPU-readable Arrow column of cell identifiers. Scalar rows contain
-one cell, and list rows contain multiple cells belonging to one feature. String
-columns and dictionary-encoded string columns are supported, including inside
-lists. H3, S2, and A5 also accept `Uint64` identifiers, preserving their precision.
-H3ClusterLayer unions the cells in each row using its existing cluster behavior.
-
-With `cells`, `fillColors`, `lineColors`, `lineWidths`, and `elevations` accept
-CPU-readable Arrow columns in source feature order. Each styling column must have
-the same row count as `cells`. List expansion shares styling and picking identity
-across all cells in a feature. Accessors continue to receive the original data
-object and source row index when a corresponding styling column is omitted.
-
-The `data` prop is optional with columns. If provided, its row count must match
-`cells`. Null cells and null styling values are rejected. GPU-only cell and style
-columns are currently unsupported. Geometry uses the layer’s existing CPU decoder
-and rendering path.

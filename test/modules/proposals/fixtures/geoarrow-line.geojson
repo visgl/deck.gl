@@ -1,0 +1,10 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {"label": "native line"},
+      "geometry": {"type": "LineString", "coordinates": [[-8, 0], [8, 0]]}
+    }
+  ]
+}
