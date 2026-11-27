@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {ShaderPlugin} from '@luma.gl/shaders';
+import type {Defines} from './shaders.glsl';
 
 const dashUniformTypes = {
   dashAlignMode: 'f32',
@@ -33,11 +34,15 @@ fn pathStyle_fitPeriod(length: f32, period: f32) -> f32 {
 
 /** Port the PathLayer dash and lateral offset stages using luma-managed inputs. */
 export function getPathStylePlugin(
-  dash: boolean,
-  offset: boolean,
-  precise: boolean,
+  defines: Defines,
   glslInjections: Record<string, string>
 ): ShaderPlugin {
+  const {
+    DASH_ENABLED: dash,
+    PATH_STYLE_OFFSET: offset,
+    DASH_MODE_PATH: precise,
+    DASH_SOURCE_DISTANCE: sourceDistance
+  } = defines;
   return {
     name: 'pathStyle',
     module: {
@@ -47,7 +52,7 @@ export function getPathStylePlugin(
     vertexInputs: {
       ...(offset && {instanceOffsets: 'f32'}),
       ...(dash && {instanceDashArrays: 'vec2<f32>'}),
-      ...(dash && precise && {instanceDashOffsets: 'vec2<f32>'})
+      ...(dash && precise && {instanceDashOffsets: sourceDistance ? 'vec3<f32>' : 'vec2<f32>'})
     },
     interStageVariables: dash
       ? {
@@ -86,7 +91,17 @@ var offsetWidth = 1.0;
   pathStyle_dashOffset = 0.0;
   pathStyle_dashPathLength = 0.0;
   #ifdef DASH_MODE_PATH
+  #ifdef DASH_SOURCE_DISTANCE
+    let sourceDistances = instanceDashOffsets * (project_unit_size_to_pixel(1.0, UNIT_METERS) / dashWidthPixels);
+    let offsetAndLength = sourceDistances.xy;
+    let sourceLen = sourceDistances.z;
+    if ((*dashSegment).y > 0.0) {
+      (*dashSegment).x *= sourceLen / (*dashSegment).y;
+    }
+    (*dashSegment).y = sourceLen;
+  #else
     let offsetAndLength = instanceDashOffsets * project.scale / dashWidthPixels;
+  #endif
     pathStyle_dashPathLength = offsetAndLength.y;
     let period = max(pathStyle_dashArray.x + pathStyle_dashArray.y, 0.0001);
     let fittedPeriod = pathStyle_fitPeriod(offsetAndLength.y, period);

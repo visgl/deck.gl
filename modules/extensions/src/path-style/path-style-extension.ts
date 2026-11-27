@@ -3,9 +3,16 @@
 // Copyright (c) vis.gl contributors
 
 import {getPathStylePlugin, getSDFDashPlugin} from './shaders.wgsl';
-import {LayerExtension, WebMercatorViewport, project, _deepEqual as deepEqual} from '@deck.gl/core';
+import {
+  LayerExtension,
+  WebMercatorViewport,
+  createIterable,
+  project,
+  _deepEqual as deepEqual
+} from '@deck.gl/core';
 import {vec3} from '@math.gl/core/matrix';
 import {vec4} from '@math.gl/core/matrix';
+import type {NumericArray, TypedArray} from '@math.gl/core/matrix';
 import {
   dashInjections,
   Defines,
@@ -26,6 +33,7 @@ import type {
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
+  _getDashSourceDistances: {type: 'accessor', value: null},
   getOffset: {type: 'accessor', value: 0},
   dashJustified: false,
   dashGapPickable: false,
@@ -68,6 +76,10 @@ export type PathStyleExtensionProps<DataT = any> = {
    * Requires the `dash` option to be on.
    */
   getDashArray?: Accessor<DataT, Readonly<[number, number]>>;
+  /**
+   * Experimental. Cumulative distance in metres along the original source path, one per vertex.
+   */
+  _getDashSourceDistances?: Accessor<DataT, NumericArray>;
   /**
    * Accessor for the offset to draw each path with, relative to the width of the path.
    * Negative offset is to the left hand side, and positive offset is to the right hand side.
@@ -117,6 +129,11 @@ export type PathStyleExtensionOptions = {
    * @default 'segment'
    */
   dashMode?: DashMode;
+  /**
+   * Experimental. Use source distances for dash phase and spacing. Requires `dashMode: 'path'`.
+   * @default false
+   */
+  _dashSourceDistance?: boolean;
   /**
    * Improve dash rendering quality in certain circumstances. Note that this option introduces additional performance overhead.
    * @deprecated Use `dashMode: 'path'` instead.
@@ -219,13 +236,18 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
     dash = false,
     offset = false,
     dashMode,
+    _dashSourceDistance = false,
     highPrecisionDash = false
   }: PathStyleExtensionOptions = {}) {
     const resolvedDashMode: DashMode = dashMode ?? (highPrecisionDash ? 'path' : 'segment');
+    if (_dashSourceDistance && resolvedDashMode !== 'path') {
+      throw new Error("PathStyleExtension: _dashSourceDistance requires dashMode: 'path'.");
+    }
     super({
       dash: dash || highPrecisionDash || dashMode !== undefined,
       offset,
       dashMode: resolvedDashMode,
+      _dashSourceDistance,
       highPrecisionDash: resolvedDashMode === 'path'
     });
   }
@@ -263,9 +285,15 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       desiredAttributes.add('instanceOffsets');
     }
 
+    const dashMetricsSize = this.opts._dashSourceDistance ? 3 : 2;
     let topologyChanged = false;
     for (const attributeName of PATH_STYLE_ATTRIBUTES) {
-      if (attributes[attributeName] && !desiredAttributes.has(attributeName)) {
+      const attribute = attributes[attributeName];
+      if (
+        attribute &&
+        (!desiredAttributes.has(attributeName) ||
+          (attributeName === 'instanceDashOffsets' && attribute.size !== dashMetricsSize))
+      ) {
         attributeManager.remove([attributeName]);
         topologyChanged = true;
       }
@@ -277,17 +305,21 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       });
       topologyChanged = true;
     }
-    if (desiredAttributes.has('instanceDashOffsets') && !attributes.instanceDashOffsets) {
+    if (
+      desiredAttributes.has('instanceDashOffsets') &&
+      attributes.instanceDashOffsets?.size !== dashMetricsSize
+    ) {
       attributeManager.addInstanced({
         instanceDashOffsets: {
-          // [distance from the start of the path, total length of the path]
-          size: 2,
-          // Recalculate from rendered geometry when getPath changes. A binary getPath buffer
-          // contains positions, not dash metrics, so keep it as an update trigger rather than
-          // binding it directly to this attribute.
-          accessor: ['getPath'],
+          size: dashMetricsSize,
+          // An accessor array registers triggers and leaves binary sources to the updater.
+          accessor: this.opts._dashSourceDistance
+            ? ['getPath', '_getDashSourceDistances']
+            : ['getPath'],
           // eslint-disable-next-line @typescript-eslint/unbound-method
-          update: this.calculateDashMetrics
+          update: this.opts._dashSourceDistance
+            ? this.calculateSourceDashMetrics
+            : this.calculateDashMetrics
         }
       });
       topologyChanged = true;
@@ -327,19 +359,22 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       defines.DASH_ENABLED = true;
       if (extension.opts.dashMode === 'path') {
         defines.DASH_MODE_PATH = true;
+        if (extension.opts._dashSourceDistance) {
+          defines.DASH_SOURCE_DISTANCE = true;
+        }
       }
     }
     if (extension.opts.offset) {
       defines.PATH_STYLE_OFFSET = true;
     }
 
-    const {dash, offset, dashMode} = extension.opts;
+    const {dash, offset} = extension.opts;
     const injections = {
       ...((dash || offset) && pathStylePipelineInjections),
       ...(dash && dashInjections),
       ...(offset && offsetInjections)
     };
-    return {defines, plugins: [getPathStylePlugin(dash, offset, dashMode === 'path', injections)]};
+    return {defines, plugins: [getPathStylePlugin(defines, injections)]};
   }
 
   initializeState(this: Layer<PathStyleExtensionProps>, context: LayerContext, extension: this) {
@@ -374,6 +409,7 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       if (
         layerType === 'path' &&
         extension.opts.dashMode === 'path' &&
+        !extension.opts._dashSourceDistance &&
         dashMetricsProjectionPropsChanged(params)
       ) {
         this.getAttributeManager()?.invalidate('instanceDashOffsets');
@@ -390,6 +426,84 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
           dashUnits: DASH_UNITS[this.props.dashUnits ?? 'widths']
         };
         this.setShaderModuleProps({pathStyle: pathStyleProps});
+      }
+    }
+  }
+
+  private calculateSourceDashMetrics(
+    this: Layer<PathStyleExtensionProps>,
+    attribute: Attribute,
+    {startRow, endRow}: {startRow: number; endRow: number}
+  ): void {
+    const {data, _getDashSourceDistances: getDistances} = this.props;
+    const pathTesselator = this.state.pathTesselator as {
+      vertexStarts: NumericArray;
+      instanceCount: number;
+      getPathSegmentIndices(row: number): number[];
+    };
+    const {vertexStarts, instanceCount} = pathTesselator;
+    const {
+      startIndices,
+      attributes,
+      length: rowCount
+    } = data as {
+      startIndices?: NumericArray;
+      attributes?: {_getDashSourceDistances?: TypedArray | {value: TypedArray}};
+      length: number;
+    };
+    const binaryAttribute = attributes?._getDashSourceDistances;
+    const binaryDistances = ArrayBuffer.isView(binaryAttribute)
+      ? binaryAttribute
+      : binaryAttribute?.value;
+    if (binaryAttribute && (!ArrayBuffer.isView(binaryDistances) || !startIndices)) {
+      throw new Error(
+        'PathStyleExtension: binary source distances require a typed array and startIndices.'
+      );
+    }
+
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
+    const output = attribute.value as Float32Array;
+    const {size} = attribute;
+    attribute.startIndices = vertexStarts;
+    for (const object of iterable) {
+      const row = ++objectInfo.index;
+      const rowStart = vertexStarts[row];
+      const rowEnd = vertexStarts[row + 1] ?? instanceCount;
+      const vertexCount = rowEnd - rowStart;
+      let distances: NumericArray | undefined;
+      if (binaryDistances && startIndices) {
+        const start = startIndices[row];
+        const end = startIndices[row + 1] ?? binaryDistances.length;
+        if (
+          start >= 0 &&
+          end >= start &&
+          end <= binaryDistances.length &&
+          (row < rowCount - 1 || end === binaryDistances.length)
+        ) {
+          distances = binaryDistances.subarray(start, end);
+        }
+      } else {
+        distances =
+          typeof getDistances === 'function' ? getDistances(object, objectInfo) : getDistances;
+      }
+
+      const segments = pathTesselator.getPathSegmentIndices(row);
+      if (distances?.length !== vertexCount || segments.length !== Math.max(0, vertexCount - 1)) {
+        throw new Error(
+          `PathStyleExtension: _getDashSourceDistances must match the tessellated path vertices in row ${row} without splitting or loop padding ` +
+            `(${distances?.length ?? 0} distances, ${vertexCount} vertices).`
+        );
+      }
+
+      output.fill(0, rowStart * size, rowEnd * size);
+      const pathEnd = distances[vertexCount - 1];
+      for (const segmentIndex of segments) {
+        const vertexIndex = segmentIndex - rowStart;
+        const outputIndex = segmentIndex * size;
+        const segmentStart = distances[vertexIndex];
+        output[outputIndex] = segmentStart;
+        output[outputIndex + 1] = pathEnd;
+        output[outputIndex + 2] = distances[vertexIndex + 1] - segmentStart;
       }
     }
   }
