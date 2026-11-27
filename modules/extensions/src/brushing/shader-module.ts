@@ -37,9 +37,13 @@ const vertex = /* glsl */ `
     if (!brushing.enabled) {
       return true;
     }
-    vec2 source_commonspace = project_position(position);
-    vec2 target_commonspace = project_position(brushing.mousePos);
-    float distance = length((target_commonspace - source_commonspace) / project.commonUnitsPerMeter.xy);
+    // 3D chord distance in common space. Identical to the 2D distance under the flat
+    // (Mercator / identity) projection modes, where both z are 0; on the globe common space is
+    // sphere XYZ, so dropping z would shrink distances (especially north-south) and let far
+    // points pass the test.
+    vec3 source_commonspace = project_position(vec3(position, 0.0));
+    vec3 target_commonspace = project_position(vec3(brushing.mousePos, 0.0));
+    float distance = length((target_commonspace - source_commonspace) / project.commonUnitsPerMeter);
 
     return distance <= brushing.radius;
   }
@@ -110,9 +114,11 @@ struct BrushingUniforms {
 
 fn brushing_isPointInRange(position: vec2<f32>) -> bool {
   if (brushing.enabled == 0) { return true; }
-  let sourceCommon = project_position_vec2_f32(position);
-  let targetCommon = project_position_vec2_f32(brushing.mousePos);
-  let distance = length((targetCommon - sourceCommon) / project.commonUnitsPerMeter.xy);
+  // 3D chord distance in common space, as in the GLSL version: on the globe dropping z would
+  // shrink distances and let far points pass the test
+  let sourceCommon = project_position_vec3_f32(vec3<f32>(position, 0.0));
+  let targetCommon = project_position_vec3_f32(vec3<f32>(brushing.mousePos, 0.0));
+  let distance = length((targetCommon - sourceCommon) / project.commonUnitsPerMeter);
   return distance <= brushing.radius;
 }
 `,
