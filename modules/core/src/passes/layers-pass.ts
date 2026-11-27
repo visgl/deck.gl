@@ -12,7 +12,7 @@ import type {
 } from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
 import type {WebGLDevice} from '@luma.gl/core/webgl';
-import type {NumberArray4} from '@math.gl/core';
+import type {NumberArray4} from '@math.gl/core/matrix';
 
 import {normalizeByteColor4} from '@luma.gl/shaders';
 import Pass from './pass';
@@ -212,6 +212,38 @@ export default class LayersPass extends Pass {
     }
   }
 
+  /** Draws a viewport into a pass opened and managed by a caller. */
+  protected _drawIntoPass(
+    renderPass: RenderPass,
+    viewport: Viewport,
+    options: LayersPassRenderOptions
+  ): void {
+    const {
+      layers,
+      shaderModuleProps = {},
+      canvasContext = this.device.canvasContext!,
+      target
+    } = options;
+    this._activatedLayers.clear();
+    this._lastRenderIndex = -1;
+    options.onViewportActive?.(viewport);
+    const drawLayerParams = this._getDrawLayerParams(viewport, options);
+    this._drawLayersInViewport(
+      renderPass,
+      {
+        layers,
+        shaderModuleProps,
+        canvasContext,
+        target,
+        viewport,
+        pass: options.pass || 'unknown',
+        normalizedColors: options.normalizedColors
+      },
+      drawLayerParams,
+      target ? [0, 0, target.width, target.height] : undefined
+    );
+  }
+
   // When a viewport contains multiple subviewports (e.g. repeated web mercator map),
   // this is only done once for the parent viewport
   /* Resolve the parameters needed to draw each layer */
@@ -318,14 +350,17 @@ export default class LayersPass extends Pass {
       isPicking?: boolean;
       normalizedColors?: boolean;
     },
-    drawLayerParams: DrawLayerParameters[]
+    drawLayerParams: DrawLayerParameters[],
+    renderViewport?: [number, number, number, number]
   ): RenderStats {
-    const glViewport = getGLViewport(this.device, {
-      canvasContext,
-      shaderModuleProps: globalModuleParameters,
-      target,
-      viewport
-    });
+    const glViewport =
+      renderViewport ??
+      getGLViewport(this.device, {
+        canvasContext,
+        shaderModuleProps: globalModuleParameters,
+        target,
+        viewport
+      });
 
     if (view) {
       const {clear, clearColor, clearDepth, clearStencil} = view.props;
@@ -529,7 +564,7 @@ export default class LayersPass extends Pass {
       for (const effect of effects) {
         mergeModuleParameters(
           shaderModuleProps,
-          effect.getShaderModuleProps?.(layer, shaderModuleProps)
+          effect.getShaderModuleProps?.(layer, shaderModuleProps, pass)
         );
       }
     }

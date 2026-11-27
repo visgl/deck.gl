@@ -94,18 +94,26 @@ webglTest('Deck#creates an explicitly requested WebGL device', async () => {
   }
 });
 
-test('Deck#creates an explicitly requested WebGPU device with premultiplied alpha', async context => {
+test.for([
+  {type: 'webgpu', expected: 'premultiplied'},
+  {type: 'best-available', expected: 'premultiplied'},
+  {type: 'best-available', alphaMode: 'opaque', expected: 'opaque'}
+] as const)('Deck#$type selects WebGPU with $expected canvas alpha', async (options, context) => {
   if (!(await getWebGPUTestDevice())) return context.skip();
   const deck = new Deck({
     width: 1,
     height: 1,
-    deviceProps: {type: 'webgpu', adapters: [webgpuAdapter]},
+    deviceProps: {
+      type: options.type,
+      adapters: [webgpuAdapter],
+      createCanvasContext: 'alphaMode' in options ? {alphaMode: options.alphaMode} : {}
+    },
     initialViewState: {longitude: 0, latitude: 0, zoom: 0}
   });
   try {
     await waitForRender(deck);
     expect(deck.device?.type).toBe('webgpu');
-    expect(deck.device?.getDefaultCanvasContext().props.alphaMode).toBe('premultiplied');
+    expect(deck.device?.getDefaultCanvasContext().props.alphaMode).toBe(options.expected);
   } finally {
     const ownedDevice = deck.device;
     deck.finalize();

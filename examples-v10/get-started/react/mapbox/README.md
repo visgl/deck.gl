@@ -12,7 +12,7 @@ export MapboxAccessToken=<mapbox_access_token>
 
 Or set `MAPBOX_TOKEN` directly in `app.jsx`.
 
-Other options can be found at [using with Mapbox GL](../../../../docs/developer-guide/base-maps/using-with-mapbox.md).
+Other options can be found at [Using with Mapbox](../../../../docs/developer-guide/react/base-maps/using-with-mapbox.md).
 
 To install dependencies:
 

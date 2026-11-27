@@ -12,7 +12,6 @@ import {MVTLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
 import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {SQRT} from '@math.gl/sql/math-functions';
 import {scaleLinear} from 'd3-scale';
 import {isArrowTable} from '@math.gl/core/arrow';
 import SearchBar from './search-bar';
@@ -231,7 +230,7 @@ export default function App({
       data: DATA_URL.STATIONS,
       loaders: [CSVLoader],
       onDataLoad: onStationsLoaded,
-      getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude)'},
+      getPosition: {sql: 'ARRAY[longitude, latitude]'},
       getFillColor: [40, 40, 40, 128],
       getRadius: 20,
       radiusMinPixels: 2
@@ -245,7 +244,6 @@ export default function App({
       getHexagon: {sql: 'hex'},
       stroked: false,
       extruded: false,
-      sqlFunctions: [SQRT],
       // Interpolate the coverage palette in square-root-count space.
       getFillColor: {
         sql: `\

@@ -5,7 +5,7 @@
 import {WGS84_CRS} from '../../utils/crs';
 import {getWorldPosition} from '../../shaderlib/project/project-functions';
 import {getOffsetOrigin} from '../../shaderlib/project/viewport-uniforms';
-import {vec3} from '@math.gl/core';
+import {vec3} from '@math.gl/core/matrix';
 
 import type Layer from '../../lib/layer';
 

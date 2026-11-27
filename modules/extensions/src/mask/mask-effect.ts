@@ -4,7 +4,7 @@
 
 import {Layer, Viewport, Effect, EffectContext, PreRenderOptions, log} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
 import MaskPass from './mask-pass';
 import {
   joinLayerBounds,

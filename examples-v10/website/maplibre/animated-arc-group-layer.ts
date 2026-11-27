@@ -50,8 +50,8 @@ export default class AnimatedArcGroupLayer extends CompositeLayer<GroupProps> {
         new AnimatedArcLayer(this.props, this.getSubLayerProps({id: String(index)}), {
           data,
           visible: startTime < timeRange[1] && endTime > timeRange[0],
-          getSourcePosition: {sql: 'ARRAY_FLOAT64(lon1, lat1, alt1)'},
-          getTargetPosition: {sql: 'ARRAY_FLOAT64(lon2, lat2, alt2)'},
+          getSourcePosition: {sql: 'ARRAY[lon1, lat1, alt1]'},
+          getTargetPosition: {sql: 'ARRAY[lon2, lat2, alt2]'},
           getTimestamps: {sql: 'ARRAY_FLOAT32(time1, time2)'}
         })
     );

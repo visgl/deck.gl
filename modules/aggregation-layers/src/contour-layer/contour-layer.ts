@@ -29,7 +29,7 @@ import {getBinIdRange} from '../common/utils/bounds-utils';
 import {createAggregationViewport} from '../common/utils/projection-utils';
 import {WebGPUAggregator} from '../common/aggregator/webgpu-aggregator/webgpu-aggregator';
 import {GPUIsolines} from './gpu-isolines';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 
 /** Extensions whose hooks filter source points during aggregation. */
