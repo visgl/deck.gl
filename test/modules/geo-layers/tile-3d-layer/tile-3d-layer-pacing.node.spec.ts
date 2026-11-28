@@ -16,16 +16,25 @@ function makeTile(id: string, parent: object, type: string = TILE_TYPE.SCENEGRAP
 
 function makeLayer(props: Record<string, unknown>, tiles: object[]) {
   const layer = new Tile3DLayer(props);
-  layer.state = {tileset3d: {tiles, selectedTiles: tiles}, layerMap: {}} as never;
+  layer.state = {
+    tileset3d: {tiles, selectedTiles: tiles, destroy: vi.fn()},
+    layerMap: {}
+  } as never;
   // @ts-expect-error private method
   const getSubLayer = vi.spyOn(layer, '_getSubLayer').mockImplementation(tile => ({id: tile.id}));
   const renderedIds = () => (layer.renderLayers() as {id: string}[]).map(sublayer => sublayer.id);
   return {layer, getSubLayer, renderedIds};
 }
 
+/** Collects frame requests, so that a test can run them */
+function stubFrames() {
+  const frames: FrameRequestCallback[] = [];
+  vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => frames.push(callback));
+  return frames;
+}
+
 test('Tile3DLayer#_maxNewTilesPerFrame creates new glTF tiles over several frames', () => {
-  const requestAnimationFrame = vi.fn(() => 1);
-  vi.stubGlobal('requestAnimationFrame', requestAnimationFrame);
+  const frames = stubFrames();
   const parentA = {id: 'a'};
   const parentB = {id: 'b'};
   const tiles = [
@@ -36,18 +45,21 @@ test('Tile3DLayer#_maxNewTilesPerFrame creates new glTF tiles over several frame
     makeTile('b2', parentB)
   ];
   const {layer, renderedIds} = makeLayer({_maxNewTilesPerFrame: 2}, tiles);
+  layer.internalState = {layer} as never;
+  const setNeedsUpdate = vi.spyOn(layer, 'setNeedsUpdate').mockImplementation(() => {});
 
   expect(renderedIds(), 'siblings first; meshes are not held back').toEqual(['a1', 'a2', 'mesh']);
-  expect(requestAnimationFrame, 'requests the next batch').toHaveBeenCalledOnce();
+  expect(frames, 'requests the next batch').toHaveLength(1);
 
-  // The frame request clears its id before updating the layer
-  layer.state.nextTilesFrame = undefined;
-  expect(renderedIds(), 'creates the rest next frame').toEqual(['a1', 'b1', 'a2', 'mesh', 'b2']);
-  expect(requestAnimationFrame, 'nothing left to defer').toHaveBeenCalledOnce();
+  frames[0](0);
+  expect(setNeedsUpdate, 'updates the layer next frame').toHaveBeenCalledOnce();
+  expect(layer.state.nextTilesFrame, 'clears the request').toBeUndefined();
+  expect(renderedIds(), 'creates the rest').toEqual(['a1', 'b1', 'a2', 'mesh', 'b2']);
+  expect(frames, 'nothing left to defer').toHaveLength(1);
 });
 
 test('Tile3DLayer#_maxNewTilesPerFrame applies after a prop change', () => {
-  vi.stubGlobal('requestAnimationFrame', vi.fn(() => 1));
+  stubFrames();
   const tiles = ['a', 'b', 'c'].map(id => makeTile(`${id}1`, {id}));
   const {layer, getSubLayer, renderedIds} = makeLayer({_maxNewTilesPerFrame: 1}, tiles);
   layer.context = {} as never;
@@ -60,13 +72,24 @@ test('Tile3DLayer#_maxNewTilesPerFrame applies after a prop change', () => {
   expect(getSubLayer, 'updates a1 and creates b1').toHaveBeenCalledTimes(2);
 });
 
+test('Tile3DLayer#finalizeState cancels the next batch', () => {
+  stubFrames();
+  const cancelAnimationFrame = vi.fn();
+  vi.stubGlobal('cancelAnimationFrame', cancelAnimationFrame);
+  const tiles = ['a', 'b'].map(id => makeTile(`${id}1`, {id}));
+  const {layer, renderedIds} = makeLayer({_maxNewTilesPerFrame: 1}, tiles);
+  renderedIds();
+
+  layer.finalizeState({} as never);
+  expect(cancelAnimationFrame).toHaveBeenCalledWith(1);
+});
+
 test('Tile3DLayer#creates every new tile without _maxNewTilesPerFrame', () => {
-  const requestAnimationFrame = vi.fn(() => 1);
-  vi.stubGlobal('requestAnimationFrame', requestAnimationFrame);
+  const frames = stubFrames();
   const parent = {id: 'p'};
   const tiles = ['t1', 't2', 't3'].map(id => makeTile(id, parent));
   const {renderedIds} = makeLayer({}, tiles);
 
   expect(renderedIds()).toEqual(['t1', 't2', 't3']);
-  expect(requestAnimationFrame).not.toHaveBeenCalled();
+  expect(frames).toHaveLength(0);
 });
