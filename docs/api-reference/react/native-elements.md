@@ -127,7 +127,7 @@ This means that nesting is useful for React composition but does not create a pa
 </deckView>;
 ```
 
-Use deck.gl's normal view and layer configuration when an application needs view-specific rendering behavior. On the Mapbox and MapLibre roots, the overlay keeps its map's view and renders JSX views beside it; see [Views beside the map](../../developer-guide/react/using-with-maps.md#views-beside-the-map).
+To draw a layer in one view only, use deck.gl's [`layerFilter`](../core/deck.md#layerfilter). On the Mapbox and MapLibre roots, the overlay keeps its map's view and renders JSX views beside it; see [Views beside the map](../../developer-guide/react/using-with-maps.md#views-beside-the-map).
 
 Refs on these intrinsic elements resolve to their deck.gl instance, not an internal renderer wrapper. Use this low-level escape hatch sparingly; normal React data flow and deck.gl props are easier to keep in sync.
 

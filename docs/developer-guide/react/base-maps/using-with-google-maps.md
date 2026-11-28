@@ -58,8 +58,8 @@ source control, for example in an environment variable that your bundler exposes
 ## Examples
 
 Keep the map in React state, or read it from a hook that re-renders when it is ready, and pass it in
-`map`. `DeckGL` attaches its overlay with `overlay.setMap(map)`, attaches the new one when it
-recreates the overlay because `interleaved` changed, and detaches it with `setMap(null)` on unmount.
+[`map`](../../../api-reference/react/deckgl.md#map). [Attach the overlay to the host map](../using-with-maps.md#attach-the-overlay-to-the-host-map) says when `DeckGL`
+attaches and detaches the overlay.
 
 ### React Google Maps
 
