@@ -74,6 +74,27 @@ test('Tile3DLayer#_maxNewTilesPerFrame does not split siblings', () => {
   expect(frames, 'nothing left to defer').toHaveLength(0);
 });
 
+test('Tile3DLayer#_maxNewTilesPerFrame splits a sibling group that is too large', () => {
+  const frames = stubFrames();
+  const parent = {id: 'p'};
+  const tiles = Array.from({length: 10}, (_, index) => makeTile(`t${index}`, parent));
+  const {layer, renderedIds} = makeLayer({_maxNewTilesPerFrame: 2}, tiles);
+  layer.internalState = {layer} as never;
+  vi.spyOn(layer, 'setNeedsUpdate').mockImplementation(() => {});
+
+  const createdPerFrame: number[] = [];
+  let created = 0;
+  let frame: FrameRequestCallback | undefined;
+  do {
+    frame?.(0);
+    const rendered = renderedIds().length;
+    createdPerFrame.push(rendered - created);
+    created = rendered;
+    frame = frames.shift();
+  } while (frame);
+  expect(createdPerFrame, 'never more than twice the limit').toEqual([2, 2, 2, 4]);
+});
+
 test('Tile3DLayer#_maxNewTilesPerFrame applies after a prop change', () => {
   stubFrames();
   const tiles = ['a', 'b', 'c'].map(id => makeTile(`${id}1`, {id}));

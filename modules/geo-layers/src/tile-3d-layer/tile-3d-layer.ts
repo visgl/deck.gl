@@ -117,7 +117,7 @@ type _Tile3DLayerProps<DataT> = {
    * (Experimental) Maximum number of loaded glTF tiles that get a sublayer per frame.
    * Creating a sublayer uploads its tile to the GPU, so bursts of arriving tiles can stall
    * frames. Tiles over the limit wait for later frames while their parent stays visible.
-   * Siblings are created in the same frame, even past the limit.
+   * Siblings are kept in the same frame when the extra tiles fit within the limit.
    * @default no limit
    */
   _maxNewTilesPerFrame?: number;
@@ -507,10 +507,13 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       }
     });
     newTiles.sort((a, b) => siblingsOrder.get(a.parent)! - siblingsOrder.get(b.parent)!);
-    // The limit can only cut between sibling groups
+    // Finish the sibling group at the limit if the rest fits within the limit again
     let end = maxNewTiles;
     while (end < newTiles.length && newTiles[end].parent === newTiles[end - 1].parent) {
       end++;
+    }
+    if (end > 2 * maxNewTiles) {
+      end = maxNewTiles;
     }
     if (end === newTiles.length) {
       return new Set();
