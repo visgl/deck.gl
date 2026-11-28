@@ -13,7 +13,7 @@ const DEFAULT_LIGHT_DIRECTION = [0.0, 0.0, -1.0] as [number, number, number];
 let idCount = 0;
 
 /** Axis-aligned box in world coordinates: `[[minX, minY, minZ], [maxX, maxY, maxZ]]` */
-export type ShadowBounds = [number[], number[]];
+export type ShadowBounds = [[number, number, number], [number, number, number]];
 
 export type DirectionalLightOptions = {
   id?: string;

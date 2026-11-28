@@ -238,7 +238,7 @@ function getBoundsCorners(viewport: Viewport, [min, max]: ShadowBounds): number[
   const corners: number[][] = [];
   for (const x of [min[0], max[0]]) {
     for (const y of [min[1], max[1]]) {
-      for (const z of [min[2] ?? 0, max[2] ?? 0]) {
+      for (const z of [min[2], max[2]]) {
         corners.push(viewport.projectPosition([x, y, z]));
       }
     }
