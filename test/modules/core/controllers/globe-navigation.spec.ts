@@ -559,6 +559,31 @@ test.each([-75, 75])('GlobeController map inertia preserves bearing at latitude 
   }
 });
 
+test('GlobeController map inertia stops at the latitude limit and keeps panning', () => {
+  // https://github.com/visgl/deck.gl/issues/10946
+  const controller = createTestController({
+    view: new GlobeView({controller: {inertia: 300}}),
+    initialViewState: {...INITIAL_VIEW_STATE, latitude: 60, zoom: 1}
+  });
+  controller.handleEvent(makePanEvent('panstart'));
+  for (let index = 1; index <= 5; index++) {
+    controller.handleEvent(makePanEvent('panmove', 400, 300 + index * 32));
+  }
+  controller._panHistory.forEach((sample, index) => {
+    sample.timestamp = index * 26;
+  });
+  controller.handleEvent(makePanEvent('panend', 400, 460));
+  const transition = controller.transitionManager.transition;
+  transition._timeline.setTime(transition._timeline.getTime() + 300);
+  controller.updateTransition();
+  expect(controller.props.latitude, 'inertia stops at the latitude limit').toBeCloseTo(85.051129);
+
+  controller.handleEvent(makePanEvent('panstart'));
+  controller.handleEvent(makePanEvent('panmove', 340, 300));
+  expect(controller.props.longitude, 'a horizontal drag still pans').not.toBeCloseTo(0);
+  expect(controller.props.latitude, 'a horizontal drag keeps latitude').toBeCloseTo(85.051129);
+});
+
 test.each([-75, 75])('GlobeController ball inertia crosses a pole from latitude %s', latitude => {
   const controller = createTestController({
     view: new GlobeView({controller: {navigation: 'ball', inertia: 600}}),
