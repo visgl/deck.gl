@@ -30,6 +30,7 @@ const MIME: Record<string, string> = {
 
 let server: Server;
 let baseUrl: string;
+let heldResponses: (() => void)[] = [];
 
 beforeAll(async () => {
   server = createServer((req, res) => {
@@ -44,8 +45,20 @@ beforeAll(async () => {
         res.end('not found');
       }
     };
-    if (path.endsWith('tileset.json')) {
+    if (path.endsWith('__release')) {
+      // Test-controlled barrier: flush responses held by `?hold=1`
+      const flush = heldResponses;
+      heldResponses = [];
+      for (const release of flush) {
+        release();
+      }
+      res.end('released');
+    } else if (path.endsWith('tileset.json')) {
       const query = (req.url || '').split('?')[1] || '';
+      if (query.includes('hold')) {
+        heldResponses.push(serve);
+        return;
+      }
       const delay = query.includes('slow') ? 400 : query.includes('fast') ? 50 : TILESET_DELAY_MS;
       setTimeout(serve, delay);
     } else {
@@ -115,6 +128,16 @@ function selectTilesCalledWith(
   return selectTilesCallsFor(spy, tileset3d).some(
     call => Array.isArray(call[0]) && call[0].includes(viewport)
   );
+}
+
+async function waitFor(condition: () => boolean, timeoutMs: number): Promise<void> {
+  const start = Date.now();
+  while (!condition()) {
+    if (Date.now() - start > timeoutMs) {
+      return;
+    }
+    await new Promise(r => setTimeout(r, 25));
+  }
 }
 
 test('selects tiles when tileset.json resolves between the consuming update and the next draw', async () => {
@@ -237,6 +260,82 @@ test('a stale overlapping load does not select or replace the current tileset', 
   selectSpy.mockRestore();
 }, 30000);
 
+test('a discarded load destroy fires no unload callback and keeps the live layer map', async () => {
+  const onTileUnload = vi.fn();
+  const layer = makeLayer(`${baseUrl}/3d-tiles/tileset.json?hold=1`, {onTileUnload});
+  // @ts-expect-error Observing the prototype for test-only validation.
+  const destroySpy = vi.spyOn(Tileset3D.prototype, 'destroy');
+
+  // Load A starts; the server holds its tileset.json response until released below
+  // @ts-expect-error Calling the private loader for test-only validation.
+  const loadA = layer._loadTileset(layer.props.data);
+  layer.activateViewport(VIEWPORT);
+  layer.updateState({
+    props: layer.props,
+    oldProps: layer.props,
+    changeFlags: {viewportChanged: true}
+  } as never);
+
+  // Load B starts (fast) and becomes the current tileset
+  const newProps = {...layer.props, data: `${baseUrl}/3d-tiles/tileset.json?fast=1`};
+  // @ts-expect-error Observing the private loader for test-only validation.
+  const loadSpy = vi.spyOn(layer, '_loadTileset');
+  layer.updateState({props: newProps, oldProps: layer.props, changeFlags: {}} as never);
+  await loadSpy.mock.results[0].value;
+
+  // Render until the live tile's content populates the layer map (safety cap only;
+  // ordering is deterministic because load A is held by the server).
+  await waitFor(() => {
+    layer.renderLayers();
+    return Object.keys(layer.state.layerMap).length > 0;
+  }, 5000);
+  // Both loads parse the same tileset.json, so their tile ids collide
+  const mapKeysBeforeA = Object.keys(layer.state.layerMap).sort();
+  expect(mapKeysBeforeA.length, 'current tileset populated the layer map').toBeGreaterThan(0);
+
+  // Now let load A resolve. It is discarded: its destroy is resource cleanup only,
+  // the user was never told about these tiles, and the live map belongs to B.
+  await fetch(`${baseUrl}/__release`);
+  await loadA;
+
+  // The discard must actually destroy the stale tileset (resource cleanup), not leak it
+  const destroyedStale = destroySpy.mock.instances.filter(t => t !== layer.state.tileset3d);
+  expect(destroyedStale.length, 'discarded load destroyed its tileset').toBeGreaterThan(0);
+  destroySpy.mockRestore();
+  expect.soft(onTileUnload, 'discarded load fired no user onTileUnload').not.toHaveBeenCalled();
+  expect
+    .soft(
+      Object.keys(layer.state.layerMap).sort(),
+      'discarded load destroy left the live layer map unchanged'
+    )
+    .toEqual(mapKeysBeforeA);
+}, 30000);
+
+test('destroying a presented tileset still unloads its tiles normally', async () => {
+  const onTileUnload = vi.fn();
+  const layer = makeLayer(`${baseUrl}/3d-tiles/tileset.json`, {onTileUnload});
+
+  // @ts-expect-error Calling the private loader for test-only validation.
+  await layer._loadTileset(layer.props.data);
+  layer.activateViewport(VIEWPORT);
+  layer.updateState({
+    props: layer.props,
+    oldProps: layer.props,
+    changeFlags: {viewportChanged: true}
+  } as never);
+  await waitFor(() => {
+    layer.renderLayers();
+    return Object.keys(layer.state.layerMap).length > 0;
+  }, 5000);
+  expect(Object.keys(layer.state.layerMap).length, 'layer map populated').toBeGreaterThan(0);
+
+  // Normal teardown: the presented tileset unloads surface to the layer and the user
+  layer.finalizeState(layer.context);
+
+  expect(onTileUnload, 'presented tileset unload fired the user callback').toHaveBeenCalled();
+  expect(Object.keys(layer.state.layerMap), 'layer map emptied on unload').toHaveLength(0);
+}, 30000);
+
 test('stale detection survives layer re-creation via _transferState', async () => {
   const selectSpy = spyOnSelectTiles();
   const layer1 = makeLayer(`${baseUrl}/3d-tiles/tileset.json?slow=1`);
@@ -291,7 +390,10 @@ test('stale detection survives layer re-creation via _transferState', async () =
 
 test('a load that resolves after finalizeState is destroyed without storing', async () => {
   const onTilesetLoad = vi.fn();
-  const layer = makeLayer(`${baseUrl}/3d-tiles/tileset.json`, {onTilesetLoad});
+  const onTileUnload = vi.fn();
+  const layer = makeLayer(`${baseUrl}/3d-tiles/tileset.json`, {onTilesetLoad, onTileUnload});
+  // @ts-expect-error Observing the prototype for test-only validation.
+  const destroySpy = vi.spyOn(Tileset3D.prototype, 'destroy');
 
   // @ts-expect-error Calling the private loader for test-only validation.
   const loadPromise = layer._loadTileset(layer.props.data);
@@ -303,6 +405,13 @@ test('a load that resolves after finalizeState is destroyed without storing', as
 
   expect(layer.state.tileset3d, 'finalized layer did not store a tileset').toBe(null);
   expect(onTilesetLoad, 'no onTilesetLoad after finalize').not.toHaveBeenCalled();
+  expect(
+    onTileUnload,
+    'no user onTileUnload from a load discarded after finalize'
+  ).not.toHaveBeenCalled();
+  // The discard must actually destroy the in-flight tileset, not leak it
+  expect(destroySpy, 'discarded tileset destroyed after finalize').toHaveBeenCalled();
+  destroySpy.mockRestore();
 }, 30000);
 
 test('initial load before any draw does not select and does not crash', async () => {
