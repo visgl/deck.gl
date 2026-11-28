@@ -455,17 +455,21 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   /** Returns the hidden tiles whose sublayers wait for a later frame to stay within `_maxNewTilesPerFrame` */
-  private _getDeferredTiles(): Set<Tile2DHeader> {
+  private _getDeferredTiles(): Set<Tile2DHeader> | null {
+    const {_maxNewTilesPerFrame} = this.props;
+    if (_maxNewTilesPerFrame === Number.MAX_SAFE_INTEGER) {
+      return null;
+    }
     const tileset = this.state.tileset!;
     const newTiles = tileset.tiles.filter(tile => (tile.isLoaded || tile.content) && !tile.layers);
     // Visible tiles are always created, so that pacing never opens a hole
     const hiddenTiles = newTiles.filter(tile => !tile.isVisible);
     const maxHiddenTiles = Math.max(
-      this.props._maxNewTilesPerFrame - (newTiles.length - hiddenTiles.length),
+      _maxNewTilesPerFrame - (newTiles.length - hiddenTiles.length),
       0
     );
     if (hiddenTiles.length <= maxHiddenTiles) {
-      return new Set();
+      return null;
     }
 
     // Create the coverage most likely to be shown next first, and tiles no view needs last
@@ -505,7 +509,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return this.state.tileset!.tiles.map((tile: Tile2DHeader) => {
       const subLayerProps = this.getSubLayerPropsByTile(tile);
       // cache the rendered layer in the tile
-      if ((!tile.isLoaded && !tile.content) || deferredTiles.has(tile)) {
+      if ((!tile.isLoaded && !tile.content) || deferredTiles?.has(tile)) {
         // nothing to show
       } else if (!tile.layers) {
         const layers = this.renderSubLayers({

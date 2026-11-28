@@ -624,7 +624,11 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
   }
 
   /** Returns tiles hidden in every view whose sub-layers wait to stay within `_maxNewTilesPerFrame`. */
-  private _getDeferredTiles(tileset: Tileset2D<DataT, any>): Set<Tile2DHeader<DataT>> {
+  private _getDeferredTiles(tileset: Tileset2D<DataT, any>): Set<Tile2DHeader<DataT>> | null {
+    const {_maxNewTilesPerFrame} = this.props;
+    if (_maxNewTilesPerFrame === Number.MAX_SAFE_INTEGER) {
+      return null;
+    }
     const {tileLayers, tilesetViews} = this.state;
     const newTiles = tileset.tiles.filter(
       tile => (tile.isLoaded || tile.content) && !tileLayers.has(tile.id)
@@ -633,11 +637,11 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
     const views = Array.from(tilesetViews.values());
     const hiddenTiles = newTiles.filter(tile => !views.some(view => view.isTileVisible(tile)));
     const maxHiddenTiles = Math.max(
-      this.props._maxNewTilesPerFrame - (newTiles.length - hiddenTiles.length),
+      _maxNewTilesPerFrame - (newTiles.length - hiddenTiles.length),
       0
     );
     if (hiddenTiles.length <= maxHiddenTiles) {
-      return new Set();
+      return null;
     }
 
     // Create the coverage most likely to be shown next first, and tiles no view needs last
@@ -666,7 +670,7 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
     const deferredTiles = this._getDeferredTiles(tileset);
     return tileset.tiles.map(tile => {
       let layers = tileLayers.get(tile.id);
-      if ((!tile.isLoaded && !tile.content) || deferredTiles.has(tile)) {
+      if ((!tile.isLoaded && !tile.content) || deferredTiles?.has(tile)) {
         return layers;
       }
       if (!layers) {
