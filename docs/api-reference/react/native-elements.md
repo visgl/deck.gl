@@ -10,7 +10,7 @@ import {DeckGL} from '@deck.gl/react';
 
 The `deck` prefix keeps the element names clear of DOM and SVG elements, such as SVG's `view`, and of other renderers' elements.
 
-The import also provides the TypeScript JSX declarations. The elements are not DOM elements and they do not create DOM nodes. Each one carries a constructed deck.gl descriptor into the renderer. Normal React components can organize the tree when they ultimately return these elements, but raw DOM nodes and text do not belong inside `DeckGL`: the custom renderer rejects any other host children. Each element also throws, in every build, when its prop is missing or holds another kind of descriptor, for example a `View` passed to `<deckLayer>`.
+The import also provides the TypeScript JSX declarations. The elements are not DOM elements and they do not create DOM nodes. Each one carries a constructed deck.gl descriptor into the renderer. Normal React components can organize the tree when they ultimately return these elements, but raw DOM nodes and text do not belong inside `DeckGL`. The custom renderer rejects any other host children. Each element also throws, in every build, when its prop is missing or holds another kind of descriptor, for example a `View` passed to `<deckLayer>`.
 
 ## Linting
 
@@ -46,7 +46,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 
 deck.gl matches each new layer with the previous one that has the same `id`. A layer without an `id` gets one from its place in the React tree. See [Ids](./components.md#ids).
 
-The `layer` prop is intentionally an instance rather than a set of JSX props. Use the layer class from its deck.gl package for its full, typed property API. For example, import `ScatterplotLayer` from `@deck.gl/layers`, not the component from `@deck.gl/react/layers`.
+The `layer` prop is intentionally an instance rather than a set of JSX props. Use the layer class from its deck.gl package for its full, typed property API. For example, import `ScatterplotLayer` from `@deck.gl/layers`. The component from `@deck.gl/react/layers` builds the layer for you and doesn't go in `layer`.
 
 ## `<deckView>`
 
@@ -73,7 +73,7 @@ import {CompassWidget, ZoomWidget} from '@deck.gl/widgets';
 </DeckGL>;
 ```
 
-deck.gl matches widgets by ID, as it does layers. Rendering a new widget instance with the same ID updates the mounted widget's props instead of adding another one, so creating the instance during render is fine. A widget has no children. Like `<deckLayer>`, nesting a `<deckWidget>` inside a `<deckView>` does not attach it to that view; set the widget's `viewId` instead.
+deck.gl matches widgets by id, as it does layers. Rendering a new widget instance with the same id updates the mounted widget's props instead of adding another one, so creating the instance during render is fine. A widget has no children. Like `<deckLayer>`, nesting a `<deckWidget>` inside a `<deckView>` does not attach it to that view; set the widget's `viewId` instead.
 
 `SplitterWidget` from `@deck.gl/widgets` sets deck.gl's views itself. Without `<deckView>` children or a `views` prop, the root leaves them alone, so the split survives re-renders. To keep the views in React state instead, pass `onChange` and render the views it reports:
 
@@ -113,7 +113,7 @@ import {vignette} from '@luma.gl/effects';
 </DeckGL>;
 ```
 
-deck.gl matches effects by ID, as it does widgets. Rendering a new effect instance with the same ID updates the mounted effect's props instead of adding another one, so creating the instance during render is fine. deck.gl effects take no `id`: a `LightingEffect` has the ID `lighting-effect`, and a `PostProcessEffect` takes its ID from its shader module. An effect can't say whether its ID was set by you, so `<deckEffect>` keeps the effect's ID. To render two effects of one kind, set a different `id` on each after constructing it, or use the [effect components](./components.md#effects), which add their place in the React tree to the ID. An effect has no children.
+deck.gl matches effects by id, as it does widgets. Rendering a new effect instance with the same id updates the mounted effect's props, so creating the instance during render is fine. `<deckEffect>` keeps its effect's id; see [Ids](./components.md#ids).
 
 ## Tree shape and deck.gl output
 
@@ -129,14 +129,14 @@ This means that nesting is useful for React composition but does not create a pa
 
 To draw a layer in one view only, use deck.gl's [`layerFilter`](../core/deck.md#layerfilter). On the Mapbox and MapLibre roots, the overlay keeps its map's view and renders JSX views beside it; see [Views beside the map](../../developer-guide/react/using-with-maps.md#views-beside-the-map).
 
-Refs on these intrinsic elements resolve to their deck.gl instance, not an internal renderer wrapper. Use this low-level escape hatch sparingly; normal React data flow and deck.gl props are easier to keep in sync.
+A ref on one of these elements receives its deck.gl instance. Prefer props and React state, which stay in sync with what deck.gl draws.
 
 ## Mixing elements and props
 
 Each element has a matching `DeckGL` prop: `layers`, `views`, `widgets` and `effects`. The root combines the two, as `@deck.gl/react/legacy` does:
 
 - **Layers.** `<deckLayer>` layers come first and `layers` prop layers after them, so prop layers draw on top. IDs must be unique across both lists.
-- **Views, widgets and effects.** The root merges them by ID. A prop entry replaces the element with the same final ID, so `effects={[new LightingEffect()]}` replaces a `<deckEffect>` with a `LightingEffect`, which keeps its ID. An element with a generated ID is replaced only by an entry with that ID. Other prop entries follow the elements.
+- **Views, widgets and effects.** The root merges them by id. A prop entry replaces the element with the same final ID, so `effects={[new LightingEffect()]}` replaces a `<deckEffect>` with a `LightingEffect`, which keeps its ID. An element with a generated ID is replaced only by an entry with that ID. Other prop entries follow the elements.
 
 ```tsx
 <DeckGL

@@ -4,7 +4,7 @@
 
 `@deck.gl/react` is a client-side React 19 renderer for deck.gl. It lets an application describe deck.gl layers and views in a React tree while keeping deck.gl's normal descriptor objects and ID-based diffing model.
 
-The package has four public surfaces:
+The package has four entry points:
 
 | Use case | Import | What it provides |
 | --- | --- | --- |
@@ -45,12 +45,12 @@ each kind of component, [Components](components.md) lists them, and
 
 [Using deck.gl with React](../../get-started/using-with-react.md) covers installation, rendering on the client and sizing the root.
 
-The package requires `@deck.gl/core`, and `@deck.gl/widgets` for `@deck.gl/react/legacy`. Every other deck.gl package is an optional peer: install `@deck.gl/mapbox`, `@deck.gl/maplibre` or `@deck.gl/google-maps` for its root, and the layer or widget package behind each component subpath you import. The plain root imports none of them.
+The package requires `@deck.gl/core`, and `@deck.gl/widgets` for `@deck.gl/react/legacy`. Every other deck.gl package is an optional peer. Install `@deck.gl/mapbox`, `@deck.gl/maplibre` or `@deck.gl/google-maps` for its root, and the layer or widget package behind each component subpath you import. The plain root imports none of them.
 
 ## Guides and API reference
 
 - [Using deck.gl with React](../../get-started/using-with-react.md) walks through the root, client rendering, each kind of component, and instance access.
-- [Using with maps](../../developer-guide/react/using-with-maps.md) explains provider roots and links the [Mapbox](../../developer-guide/react/base-maps/using-with-mapbox.md) and [MapLibre](../../developer-guide/react/base-maps/using-with-maplibre.md) and [Google Maps](../../developer-guide/react/base-maps/using-with-google-maps.md) guides.
+- [Using with maps](../../developer-guide/react/using-with-maps.md) explains map roots and links the [Mapbox](../../developer-guide/react/base-maps/using-with-mapbox.md) and [MapLibre](../../developer-guide/react/base-maps/using-with-maplibre.md) and [Google Maps](../../developer-guide/react/base-maps/using-with-google-maps.md) guides.
 - [Migrating from the previous API](../../developer-guide/react/migrate-from-deckgl-react.md) lists the changes to make when coming from `@deck.gl/react/legacy`.
 - [Debugging](../../developer-guide/react/debugging.md) explains how to trace a problem through the renderer, with logs, React DevTools and error boundaries.
 - [DeckGL API](deckgl.md) documents root ownership and lifecycle behavior.

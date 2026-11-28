@@ -5,7 +5,7 @@
 | `@deck.gl/react/mapbox` | [`MapboxOverlay`](../../../api-reference/mapbox/mapbox-overlay.md) | ✓ | ✓ | ✓ |
 
 [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/) is a JavaScript library for building web
-maps. The `/mapbox` provider root creates a
+maps. The `/mapbox` map root creates a
 [`MapboxOverlay`](../../../api-reference/mapbox/mapbox-overlay.md) from
 [`@deck.gl/mapbox`](../../../api-reference/mapbox/overview.md) and renders its JSX
 layers into it. The application owns the Mapbox map and attaches the overlay to it.
@@ -24,7 +24,7 @@ guide covers the same integration without `@deck.gl/react`.
   the Mapbox controls container. See deck.gl's
   [overlaid mode](../../base-maps/using-with-mapbox.md#overlaid)
   description.
-- **Reverse controlled:** provider roots do not support this mode. See
+- **Reverse controlled:** map roots do not support this mode. See
   [Using with maps](../using-with-maps.md#reverse-controlled-maps).
 
 For interleaved rendering, use `beforeId` to position deck layers relative to a Mapbox style
@@ -33,7 +33,7 @@ antialiasing and other map-owned WebGL settings on the Mapbox map.
 
 ## Install
 
-Install the provider integration and the host SDK:
+Install deck.gl's Mapbox package and Mapbox GL JS:
 
 ```bash
 yarn add @deck.gl/mapbox mapbox-gl

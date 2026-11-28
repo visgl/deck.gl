@@ -2,7 +2,7 @@
 
 deck.gl works without a base map, but a base map gives geospatial layers context. This page
 describes what is shared by every base-map integration of `@deck.gl/react`. Each
-provider guide then covers installation, examples, and provider-specific options. For the
+base map guide then covers installation, examples, and the options for that map. For the
 underlying deck.gl concepts, see deck.gl's [Using with map](../../get-started/using-with-map.md)
 guide.
 
@@ -28,9 +28,9 @@ deck.gl's guide describes both modes in detail:
 | Google Maps | `@deck.gl/react/google-maps` | [`@deck.gl/google-maps`](../../api-reference/google-maps/overview.md) | Maps JavaScript API | ✓ | ✓ (vector maps) | [React Google Maps](https://visgl.github.io/react-google-maps/) | [Using with Google Maps](base-maps/using-with-google-maps.md) | [Using with Google Maps](../base-maps/using-with-google-maps.md) |
 | Custom overlay | `createDeckGL` from `@deck.gl/react` | The overlay's package | The host's SDK | Overlay-specific | Overlay-specific | Overlay-specific | [Using with custom overlays](base-maps/using-with-custom-overlays.md) | None |
 
-## Choose a provider root
+## Choose a map root {#choose-a-provider-root}
 
-Use a provider root when the application owns a Mapbox, MapLibre or Google map and needs deck.gl
+Use a map root when the application owns a Mapbox, MapLibre or Google map and needs deck.gl
 as a map overlay:
 
 ```tsx
@@ -39,13 +39,13 @@ import {DeckGL as MapLibreDeckGL} from '@deck.gl/react/maplibre';
 import {DeckGL as GoogleMapsDeckGL} from '@deck.gl/react/google-maps';
 ```
 
-A provider root creates the deck.gl overlay only. The application creates, configures, and removes
+A map root creates the deck.gl overlay only. The application creates, configures, and removes
 the host map. Keep map tokens, styles, camera options, terrain, projection, event handlers,
-workers, and CSP configuration on the map creator or React Map GL `<Map>`, not on `DeckGL`.
+workers, and CSP configuration on the map creator or React Map GL `<Map>`. `DeckGL` doesn't take them.
 
 ## Choose the overlay mode
 
-Provider roots pass `interleaved?: boolean` to the overlay unchanged, so each overlay's own default
+Map roots pass `interleaved?: boolean` to the overlay unchanged, so each overlay's own default
 applies:
 
 - Pass `false` for a dedicated deck canvas. This is the default of
@@ -66,19 +66,19 @@ provider; select Mapbox, MapLibre or Google Maps through the import path. Other 
 apply when the overlay is created are listed in
 [Props that only apply at creation](../../api-reference/react/deckgl.md#props-that-only-apply-at-creation).
 
-Provider roots render no host DOM node. You can place them inside a React Map GL `<Map>`, or beside
+Map roots render no DOM. You can place them inside a React Map GL `<Map>`, or beside
 a manual `new Map({container})` integration without adding a child to the map container.
 
 ## Views beside the map
 
 The Mapbox and MapLibre roots send JSX views, merged with the `views` prop, to the overlay,
 which supports deck.gl's [multi-view usage](../../api-reference/mapbox/mapbox-overlay.md#multi-view-usage).
-Only one view follows the map camera and receives map interaction: the view with id `mapbox` on
+Only one view follows the map camera and receives map interaction. It is the view with id `mapbox` on
 the `/mapbox` root and `maplibre` on the `/maplibre` root. The overlay adds it first when the list
 has none. Give a JSX view that id to set the map view's position in the list. Keep it the full size
 of the map, or its layers drift off the basemap.
 
-The Google Maps root does not send JSX views: `GoogleMapsOverlay` draws one view, which follows the
+The Google Maps root does not send JSX views. `GoogleMapsOverlay` draws one view, which follows the
 map camera. See [Using with Google Maps](base-maps/using-with-google-maps.md#views).
 
 ```tsx
@@ -120,8 +120,8 @@ On the Mapbox and MapLibre roots, `map` takes a Mapbox or MapLibre `Map`, or a R
 - moves the overlay when `map` changes, and removes it when `map` becomes `null` or `DeckGL`
   unmounts.
 
-The state matters: `DeckGL` sees the map only when a render passes it. A map created in an effect,
-as in the provider guides' manual examples, is set in state there.
+`DeckGL` sees the map only when a render passes it, so the state matters. A map created in an effect,
+as in the base map guides' manual examples, is set in state there.
 
 Without `map`, attach the overlay yourself: keep the instance from `onDeckChange` in state, add it
 with `map.addControl` in an effect, and remove it with `map.removeControl` in the effect's cleanup.
@@ -133,12 +133,12 @@ React Map GL's `useControl` hook, which deck.gl's own guides use, doesn't work w
 `useControl` creates its control once, when it mounts, and keeps it. `DeckGL` creates its own
 overlay, and a new one when `interleaved` changes, so `useControl` would hold the wrong instance.
 
-## Provider prop boundary
+## Props a map root takes {#provider-prop-boundary}
 
-The provider root accepts supported deck.gl and overlay props, including layers, effects,
+A map root accepts supported deck.gl and overlay props, including layers, effects,
 picking callbacks, layer filtering, parameters, and `interleaved`. Do not pass map-owned values
 to it. `canvas`, `parent`, `device`, `viewState`, `initialViewState`, and `controller` belong to
-the host map. Some providers exclude more props; see the provider guide.
+the host map. Some map roots exclude more props; see the base map guide.
 
 Use a standalone root when the application needs `Deck` and its canvas. For a compatible custom
 overlay, use the native `createDeckGL` factory instead of trying to select a provider at render
@@ -148,8 +148,7 @@ time. See [Using with custom overlays](base-maps/using-with-custom-overlays.md).
 
 deck.gl's guides describe a third mode, reverse controlled, in which the `@deck.gl/react/legacy` `DeckGL`
 component is the root, a React Map GL `<Map>` is its child, and deck.gl owns the camera. Provider
-roots do not support this mode. `DeckGL` renders its children with the deck.gl reconciler, which
-accepts only `<deckLayer>` and `<deckView>` elements, so it cannot render a `<Map>` child. An application
+roots do not support this mode. `DeckGL` renders its children with the deck.gl reconciler, which accepts only deck.gl elements, so it cannot render a `<Map>` child. An application
 that needs reverse-controlled rendering should keep using
 [`@deck.gl/react/legacy`](../../api-reference/react/legacy/deckgl.md) for that map.
 

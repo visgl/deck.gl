@@ -1,7 +1,6 @@
 # Using with custom overlays
 
-The Mapbox and MapLibre provider roots are thin bindings of the native `createDeckGL` factory. Use
-the same factory to bring your own overlay: a deck.gl overlay for a host map that has no provider
+The Mapbox and MapLibre map roots are made with `createDeckGL`. Use the same factory to bring your own overlay, a deck.gl overlay for a host map that has no provider
 root in this package. Examples of such hosts include the Leaflet and Bing Maps integrations in
 this repository:
 
@@ -70,7 +69,7 @@ overlay that a host attaches with `setMap`, such as `GoogleMapsOverlay`, would u
 
 Without `attach`, the application attaches the instance it receives through `onDeckChange`, as in
 [Attach the overlay to the host map](../using-with-maps.md#attach-the-overlay-to-the-host-map).
-The root then treats `map` like any other prop: if the overlay declares its own `map` prop, the
+The root then treats `map` like any other prop. If the overlay declares its own `map` prop, the
 root passes it to the constructor and to `setProps`.
 
 The host map owns the camera. Do not pass `viewState`, `initialViewState` or `controller` to a

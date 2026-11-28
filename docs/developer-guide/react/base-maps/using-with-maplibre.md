@@ -5,7 +5,7 @@
 | `@deck.gl/react/maplibre` | [`MapLibreOverlay`](../../../api-reference/maplibre/overview.md) | ✓ | ✓ | ✓ |
 
 [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) is an open-source library that renders
-interactive maps from vector tiles. The `/maplibre` provider root creates a
+interactive maps from vector tiles. The `/maplibre` map root creates a
 [`MapLibreOverlay`](../../../api-reference/maplibre/overview.md) from
 [`@deck.gl/maplibre`](../../../api-reference/maplibre/overview.md) and renders its JSX
 layers into it. The application owns the MapLibre map and attaches the overlay to it.
@@ -24,7 +24,7 @@ guide covers the same integration without `@deck.gl/react`.
   the MapLibre controls container. See deck.gl's
   [overlaid mode](../../base-maps/using-with-maplibre.md#overlaid)
   description.
-- **Reverse controlled:** provider roots do not support this mode. See
+- **Reverse controlled:** map roots do not support this mode. See
   [Using with maps](../using-with-maps.md#reverse-controlled-maps).
 
 MapLibre interleaved rendering requires WebGL2 and supports one interleaved overlay per map. Use
@@ -33,11 +33,11 @@ host map with `canvasContextAttributes.antialias` and `pixelRatio`; deck's `useD
 `device` do not control that context.
 
 The MapLibre overlay excludes `width`, `height`, and `gl` in addition to the map-owned props listed
-in [Provider prop boundary](../using-with-maps.md#provider-prop-boundary).
+in [Props a map root takes](../using-with-maps.md#provider-prop-boundary).
 
 ## Install
 
-Install the provider integration and the host SDK:
+Install deck.gl's MapLibre package and MapLibre GL JS:
 
 ```bash
 yarn add @deck.gl/maplibre maplibre-gl
@@ -49,7 +49,7 @@ boundary or a module that runs only in the browser.
 ## Configure the MapLibre worker
 
 MapLibre GL JS 6 ships as ES modules and runs its tile parsing in a separate worker module. A
-bundled application tells MapLibre where the bundler emitted that worker: call `setWorkerUrl(url)`
+bundled application tells MapLibre where the bundler emitted that worker. Call `setWorkerUrl(url)`
 once, in browser code, before it creates the first map. This applies to MapLibre only; Mapbox needs
 no worker setup.
 
