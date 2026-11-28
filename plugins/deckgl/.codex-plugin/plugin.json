@@ -1,0 +1,47 @@
+{
+  "name": "deckgl",
+  "version": "1.0.0",
+  "description": "Agent skills for building deck.gl visualizations: layers and accessors, base map integration, and performance tuning.",
+  "author": {
+    "name": "vis.gl",
+    "url": "https://deck.gl/"
+  },
+  "homepage": "https://deck.gl/",
+  "repository": "https://github.com/visgl/deck.gl",
+  "license": "MIT",
+  "keywords": [
+    "deck.gl",
+    "webgl",
+    "webgpu",
+    "visualization",
+    "maps",
+    "maplibre",
+    "mapbox",
+    "react",
+    "agent-skills"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "deck.gl",
+    "shortDescription": "GPU data visualization",
+    "longDescription": "Skills for deck.gl, the WebGL2/WebGPU framework for large-scale data visualization. Covers composing layers (data, get* accessors, updateTriggers, picking and tooltips, Deck and the React DeckGL component, normalized colors), combining deck.gl with Mapbox GL JS, MapLibre and Google Maps in overlaid or interleaved mode, and diagnosing slow apps with the performance guide (data and accessor changes, binary attributes, visibility toggling and logging).",
+    "developerName": "vis.gl",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://deck.gl/",
+    "privacyPolicyURL": "https://privacy-policy.openjsf.org",
+    "termsOfServiceURL": "https://terms-of-use.openjsf.org",
+    "defaultPrompt": [
+      "Add a deck.gl ScatterplotLayer over this MapLibre map",
+      "Why does my deck.gl layer not update when selection changes?",
+      "Make this deck.gl app handle 5 million points"
+    ],
+    "brandColor": "#603090",
+    "composerIcon": "./assets/logo.png",
+    "logo": "./assets/logo.png"
+  }
+}
