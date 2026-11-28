@@ -19,6 +19,7 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     accessor: 'getSourcePosition',
     arrowAccessor: true,
     semantic: 'position',
+    allowPackedXY: true,
     size: 3
   },
   targetPositions: {
@@ -26,6 +27,7 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     accessor: 'getTargetPosition',
     arrowAccessor: true,
     semantic: 'position',
+    allowPackedXY: true,
     size: 3
   },
   sourceColors: {
@@ -71,10 +73,10 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
 
 /** Experimental GPU-resident columns. CPU columns are supplied through accessors. */
 export type ArcColumnProps = {
-  /** @experimental GPU-resident column. */
-  sourcePositions?: GPUVector | null;
-  /** @experimental GPU-resident column. */
-  targetPositions?: GPUVector | null;
+  /** @experimental Borrowed XY or XYZ source positions. XY implies zero elevation. */
+  sourcePositions?: GPUVector<'float32x2' | 'float32x3'> | null;
+  /** @experimental Borrowed XY or XYZ target positions. XY implies zero elevation. */
+  targetPositions?: GPUVector<'float32x2' | 'float32x3'> | null;
   /** @experimental GPU-resident column. */
   sourceColors?: GPUVector | null;
   /** @experimental GPU-resident column. */

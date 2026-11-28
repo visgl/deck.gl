@@ -72,7 +72,7 @@ export class StoragePathLayer extends CompositeLayer<StoragePathLayerProps> {
 
   /** Selects the renderer for the supplied path representation. */
   override renderLayers(): Layer {
-    const {paths, colors, widths, ...props} = this.props;
+    const {data, paths, colors, widths, ...props} = this.props;
     if (isGPUVector(paths)) {
       return new PreparedPathLayer({
         ...props,
@@ -85,6 +85,7 @@ export class StoragePathLayer extends CompositeLayer<StoragePathLayerProps> {
     return new ArrowPathRendererLayer({
       ...props,
       ...this.getSubLayerProps({id: 'arrow'}),
+      data,
       parameters: {...ArrowPathRendererLayer.defaultProps.parameters, ...this.props.parameters},
       paths,
       colors,
@@ -221,6 +222,7 @@ const GPU_PATH_SHADER = makePathShaderWGSL({
   vertexEntry: storageVertexEntry,
   vertexSetup: storageVertexSetup,
   vertexOutput: storageVertexOutput,
+  pickingFilter: '',
   extraVaryings:
     '@location(9) measure: f32, @location(10) @interpolate(flat) pathPickingColor: vec3<f32>,',
   fragmentFilter: /* wgsl */ `

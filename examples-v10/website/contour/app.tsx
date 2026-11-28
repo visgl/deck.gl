@@ -5,7 +5,9 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
+import {ParquetLoader} from '@loaders.gl/tables/parquet';
+import parquetWorkerUrl from '@loaders.gl/tables/parquet/parquet-worker.js?url';
 import type {Device} from '@luma.gl/core';
 import {ContourLayer} from '@deck.gl/aggregation-layers';
 
@@ -13,7 +15,7 @@ import type {ContourLayerProps} from '@deck.gl/aggregation-layers';
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
 
 const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/contour/covid-by-county.json'; // eslint-disable-line
+  'https://media.githubusercontent.com/media/visgl/deck.gl-data/ea4a0a0a3fa71ee94ed381ce2691431cca864f88/website/covid-by-county.parquet';
 
 const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -100,
@@ -42,15 +44,6 @@ export const LINES: ContourLayerProps['contours'] = [
 
 const MS_PER_WEEK = 1000 * 60 * 60 * 24 * 7;
 
-type CaseReport = {
-  state: string;
-  county: string;
-  longitude: number;
-  latitude: number;
-  population: number;
-  casesByWeek: {[week: number]: number};
-};
-
 export default function App({
   device,
   data = DATA_URL,
@@ -60,20 +53,23 @@ export default function App({
   mapStyle = 'https://tiles.openfreemap.org/styles/dark'
 }: {
   device?: Device;
-  data?: string | CaseReport[];
+  data?: string;
   week?: number;
   contours?: ContourLayerProps['contours'];
   cellSize?: number;
   mapStyle?: string;
 }) {
   const layers = [
-    new ContourLayer<CaseReport>({
+    new ContourLayer({
+      // Sample row: {longitude: -75.5024, latitude: 39.084, population: 180786, casesByWeek: [0, 0, ...]}
       data,
+      loaders: [ParquetLoader],
+      loadOptions: {parquet: {workerUrl: parquetWorkerUrl}},
       id: 'contour-layer',
-      getPosition: d => [d.longitude, d.latitude],
-      getWeight: d => ((d.casesByWeek[week] || 0) / d.population) * 1e5,
-      updateTriggers: {
-        getWeight: week
+      getPosition: {sql: 'ARRAY[longitude, latitude]'},
+      getWeight: {
+        sql: `CAST(COALESCE(casesByWeek[${week + 1}], 0) AS DOUBLE PRECISION) *
+          CAST(100000 AS DOUBLE PRECISION) / CAST(population AS DOUBLE PRECISION)`
       },
       pickable: true,
       aggregation: 'MAX',

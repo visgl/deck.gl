@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, MapView, _GlobeView as GlobeView, _flatten as flatten} from '@deck.gl/core';
+import {Deck, MapView, GlobeView, _flatten as flatten} from '@deck.gl/core';
 import type {Viewport, MapViewState, Layer} from '@deck.gl/core';
 import type {Parameters} from '@luma.gl/core';
 import type MapboxLayerGroup from './mapbox-layer-group';
 import type {LayerOverlayProps, Map} from './types';
 import {getLayerGroupId} from './resolve-layer-groups';
 
-import {clamp} from '@math.gl/core';
-import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
+import {clamp} from '@math.gl/core/matrix';
+import {lngLatToWorld, unitsPerMeter} from '@math.gl/geospatial/web-mercator';
 
 export const MAPBOX_VIEW_ID = 'mapbox';
 

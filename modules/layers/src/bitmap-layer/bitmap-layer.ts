@@ -4,7 +4,7 @@
 
 import {
   Layer,
-  _GPUVectorModel as GPUVectorModel,
+  _GPUVectorModel as DeckGPUVectorModel,
   color as colorModule,
   project32,
   picking,
@@ -19,10 +19,11 @@ import {
   Position,
   DefaultProps
 } from '@deck.gl/core';
-import type {Model} from '@luma.gl/engine';
+import {GPUVectorModel} from '@luma.gl/engine';
+import {BitmapLayerMesh, hasBitmapMesh, type BitmapMeshProps} from './bitmap-layer-mesh';
 import type {SamplerProps, Texture} from '@luma.gl/core';
 import {normalizeByteColor3, normalizeByteColor4} from '@luma.gl/shaders';
-import {lngLatToWorld} from '@math.gl/web-mercator';
+import {lngLatToWorld} from '@math.gl/geospatial/web-mercator';
 
 import createMesh from './create-mesh';
 import {getMetersPerUnit} from '../utils';
@@ -32,7 +33,17 @@ import source from './bitmap-layer.wgsl';
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
+/** White tint in the legacy byte convention. */
+const DEFAULT_TINT_COLOR = [255, 255, 255] as const;
+
+/** Transparent replacement color in the legacy byte convention. */
+const DEFAULT_TRANSPARENT_COLOR = [0, 0, 0, 0] as const;
+
 const defaultProps: DefaultProps<BitmapLayerProps> = {
+  imageMapping: {type: 'object', value: null, compare: -1},
+  positions: {type: 'object', value: null, compare: false},
+  texCoords: {type: 'object', value: null, compare: false},
+  indices: {type: 'object', value: null, compare: false},
   image: {type: 'image', value: null, async: true},
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
   _imageCoordinateSystem: 'default',
@@ -42,8 +53,8 @@ const defaultProps: DefaultProps<BitmapLayerProps> = {
   // More context: because of the blending mode we're using for ground imagery,
   // alpha is not effective when blending the bitmap layers with the base map.
   // Instead we need to manually dim/blend rgb values with a background color.
-  transparentColor: {type: 'color', value: [0, 0, 0, 0]},
-  tintColor: {type: 'color', value: [255, 255, 255]},
+  transparentColor: {type: 'color', value: DEFAULT_TRANSPARENT_COLOR},
+  tintColor: {type: 'color', value: DEFAULT_TINT_COLOR},
 
   textureParameters: {type: 'object', ignore: true, value: null}
 };
@@ -55,7 +66,7 @@ export type BitmapBoundingBox =
   | [Position, Position, Position, Position];
 
 /** Properties added by BitmapLayer. */
-type _BitmapLayerProps = {
+type _BitmapLayerProps = BitmapMeshProps & {
   data: never;
   /**
    * The image to display.
@@ -138,7 +149,8 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   state!: {
     subdivisionStep?: number;
     disablePicking?: boolean;
-    model?: Model;
+    model?: GPUVectorModel;
+    typedMesh?: BitmapLayerMesh;
     mesh?: any;
     coordinateConversion: number;
     bounds: [number, number, number, number];
@@ -153,7 +165,42 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
+  /** Uses mesh vertices as rows for extension attributes. */
+  getNumInstances(): number {
+    return this.state?.typedMesh?.getVertexCount() ?? super.getNumInstances();
+  }
+
+  /** Includes pending Arrow conversion in the layer loading state. */
+  get isLoaded(): boolean {
+    return !this.state?.typedMesh?.loading && super.isLoaded;
+  }
+
+  /** Uses CPU mesh bounds, or the supplied footprint for GPU-only positions. */
+  getBounds(): [number[], number[]] | null {
+    if (!this.state?.typedMesh) return super.getBounds();
+    if (this.state.typedMesh.bounds) return this.state.typedMesh.bounds;
+    const {bounds} = this.props;
+    if (isRectangularBounds(bounds))
+      return [
+        [Math.min(bounds[0], bounds[2]), Math.min(bounds[1], bounds[3]), 0],
+        [Math.max(bounds[0], bounds[2]), Math.max(bounds[1], bounds[3]), 0]
+      ];
+    return [0, 1].map(side =>
+      [0, 1, 2].map(i => Math[side ? 'max' : 'min'](...bounds.map(point => point[i] || 0)))
+    ) as [number[], number[]];
+  }
+
+  /** Cancels mesh preparation and releases converted buffers on removal. */
+  finalizeState(context) {
+    super.finalizeState(context);
+    this.state.typedMesh?.destroy();
+  }
+
   initializeState() {
+    this.initializeMeshAttributes();
+  }
+
+  private initializeMeshAttributes(): void {
     const attributeManager = this.getAttributeManager()!;
 
     const noAlloc = true;
@@ -200,11 +247,26 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
-  updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
+  updateState(params: UpdateParameters<this>): void {
+    if (hasBitmapMesh(this.props)) {
+      if (this.props._projectionTolerance) {
+        throw new Error('_projectionTolerance is not supported with bitmap mesh inputs');
+      }
+      this.updateMeshState(params);
+      return;
+    }
+    const {props, oldProps, changeFlags} = params;
+    const leavingMesh = Boolean(this.state.typedMesh);
+    if (leavingMesh) {
+      this.state.model?.destroy();
+      this.state.typedMesh!.destroy();
+      this.state.typedMesh = undefined;
+      this.initializeMeshAttributes();
+    }
     // setup model first
     const attributeManager = this.getAttributeManager()!;
 
-    if (changeFlags.extensionsChanged) {
+    if (leavingMesh || changeFlags.extensionsChanged) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       attributeManager.invalidateAll();
@@ -212,6 +274,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
 
     const subdivisionStep = this.getSubdivisionStep();
     if (
+      leavingMesh ||
       props.bounds !== oldProps.bounds ||
       changeFlags.projectionChanged ||
       this.state.subdivisionStep !== subdivisionStep ||
@@ -232,6 +295,78 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     } else if (props._imageCoordinateSystem !== oldProps._imageCoordinateSystem) {
       this.setState(this._getCoordinateUniforms());
     }
+  }
+
+  /** Converts changed mesh inputs while retaining the last successful replacement. */
+  private updateMeshState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
+    const enteringMesh = !this.state.typedMesh;
+    const subdivisionStep = this.getSubdivisionStep();
+    if (enteringMesh) {
+      this.getAttributeManager()!.remove(['indices', 'positions', 'texCoords']);
+      this.state.typedMesh = new BitmapLayerMesh(this.context.device);
+    }
+    if (enteringMesh || changeFlags.extensionsChanged) {
+      this.state.model?.destroy();
+      this.state.model = new DeckGPUVectorModel(this.context.device, {
+        ...this.getShaders(),
+        id: this.props.id,
+        topology: 'triangle-list',
+        isInstanced: false,
+        inferDrawCount: 'no',
+        vertexCount: 0
+      });
+      this.state.typedMesh!.bind(this.state.model);
+      this.getAttributeManager()!.invalidateAll();
+    }
+    if (
+      enteringMesh ||
+      this.state.subdivisionStep !== subdivisionStep ||
+      changeFlags.projectionChanged ||
+      ((this.state.preproject || (props.imageMapping && !props.imageMapping.positionCRS)) &&
+        (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
+          !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1))) ||
+      props.positions !== oldProps.positions ||
+      props.texCoords !== oldProps.texCoords ||
+      !deepEqual(props.imageMapping, oldProps.imageMapping, -1) ||
+      (props.imageMapping && !props.positions && !deepEqual(props.bounds, oldProps.bounds, -1)) ||
+      props.indices !== oldProps.indices
+    ) {
+      this.setState({subdivisionStep});
+      const {imageMapping} = props;
+      void this.state.typedMesh!.update(
+        imageMapping && !imageMapping.positionCRS
+          ? {...props, imageMapping: {...imageMapping, positionCRS: this.getMappingPositionCRS()}}
+          : props,
+        {
+          transform: this.usePositionTransforms().transform?.bind(this),
+          fp64: this.use64bitPositions(),
+          resolution: subdivisionStep
+        },
+        () => {
+          this.state.typedMesh!.bind(this.state.model!);
+          this.getAttributeManager()!.invalidateAll();
+          this.setState({coordinateConversion: 0, bounds: [0, 0, 0, 0]});
+          this.setNeedsUpdate();
+        },
+        error => this.raiseError(error, 'preparing bitmap mesh')
+      );
+    }
+  }
+
+  /** Infer the CRS only when the source CRS describes the input positions directly. */
+  private getMappingPositionCRS(): CoordinateSystem | undefined {
+    const {coordinateSystem, coordinateOrigin, modelMatrix} = this.props;
+    const sourceCrs = this.internalState?.sourceCrs;
+    if (
+      !sourceCrs ||
+      modelMatrix ||
+      coordinateOrigin?.some(value => value !== 0) ||
+      (typeof coordinateSystem === 'string' && coordinateSystem.toLowerCase().endsWith('-offsets'))
+    ) {
+      return undefined;
+    }
+    if (sourceCrs.signature === 'WGS84') return 'EPSG:4326';
+    return coordinateSystem === 'globe' ? sourceCrs.signature : coordinateSystem;
   }
 
   getPickingInfo(params: GetPickingInfoParams): BitmapLayerPickingInfo {
@@ -313,7 +448,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     );
   }
 
-  protected _getModel(): Model {
+  protected _getModel(): GPUVectorModel {
     /*
       0,0 --- 1,0
        |       |
@@ -327,13 +462,36 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
             .filter(layout => layout.name !== 'indices')
         : this.getAttributeManager()!.getBufferLayouts();
 
-    return new GPUVectorModel(this.context.device, {
+    return new DeckGPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout,
       topology: 'triangle-list',
       isInstanced: false
     });
+  }
+
+  /** Interpolates bitmap colors in the same 0–1 representation used by the shader. */
+  protected getUniformTransitionValue(propName: string, value: unknown): unknown {
+    if (propName === 'tintColor') return this.decodeTintColor(value as Color);
+    if (propName === 'transparentColor') return this.decodeTransparentColor(value as Color);
+    return super.getUniformTransitionValue(propName, value);
+  }
+
+  /** Converts an authored tint to RGB shader channels. */
+  private decodeTintColor(color: Color): BitmapProps['tintColor'] {
+    return normalizeByteColor3(
+      color,
+      !this.usesNormalizedColors() || color === DEFAULT_TINT_COLOR
+    ) as BitmapProps['tintColor'];
+  }
+
+  /** Converts an authored transparent replacement color to RGBA shader channels. */
+  private decodeTransparentColor(color: Color): BitmapProps['transparentColor'] {
+    return normalizeByteColor4(
+      color,
+      !this.usesNormalizedColors() || color === DEFAULT_TRANSPARENT_COLOR
+    );
   }
 
   draw(opts) {
@@ -353,14 +511,12 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         bounds,
         coordinateConversion,
         desaturate,
-        // Decode public byte colors at the boundary; shader inputs are normalized.
-        tintColor: normalizeByteColor3([tintColor[0], tintColor[1], tintColor[2]]),
-        transparentColor: normalizeByteColor4([
-          transparentColor[0],
-          transparentColor[1],
-          transparentColor[2],
-          transparentColor[3] ?? 255
-        ])
+        tintColor: this.isUniformTransitionValue('tintColor')
+          ? (tintColor as BitmapProps['tintColor'])
+          : this.decodeTintColor(tintColor),
+        transparentColor: this.isUniformTransitionValue('transparentColor')
+          ? (transparentColor as BitmapProps['transparentColor'])
+          : this.decodeTransparentColor(transparentColor)
       };
       model.shaderInputs.setProps({bitmap: bitmapProps});
       model.draw(this.context.renderPass);

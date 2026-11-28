@@ -140,7 +140,7 @@ test('Deck color convention updates LineLayer and ArcLayer accessors', () => {
   }
 });
 
-test('GeoJsonLayer preserves byte point colors when Deck enables normalized colors', () => {
+test('GeoJsonLayer preserves typed byte point colors when Deck enables normalized colors', () => {
   testLayer({
     Layer: GeoJsonLayer,
     onError: error => {
@@ -150,7 +150,7 @@ test('GeoJsonLayer preserves byte point colors when Deck enables normalized colo
       {
         props: {
           data: [{type: 'Feature', properties: {}, geometry: {type: 'Point', coordinates: [0, 0]}}],
-          getFillColor: [128, 64, 32, 128]
+          getFillColor: new Uint8Array([128, 64, 32, 128])
         }
       },
       {

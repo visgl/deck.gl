@@ -124,21 +124,21 @@ type _ScenegraphLayerProps<DataT> = {
    * @see https://en.wikipedia.org/wiki/Euler_angles
    * @default [0, 0, 0]
    */
-  getOrientation?: Accessor<DataT, Readonly<[number, number, number]>>;
+  getOrientation?: ArrowAccessor<DataT, Readonly<[number, number, number]>>;
   /**
    * Scaling factor of the model along each axis.
    * @default [1, 1, 1]
    */
-  getScale?: Accessor<DataT, Readonly<[number, number, number]>>;
+  getScale?: ArrowAccessor<DataT, Readonly<[number, number, number]>>;
   /**
    * Translation from the anchor point, [x, y, z] in meters.
    * @default [0, 0, 0]
    */
-  getTranslation?: Accessor<DataT, Readonly<[number, number, number]>>;
+  getTranslation?: ArrowAccessor<DataT, Readonly<[number, number, number]>>;
   /**
    * TransformMatrix. If specified, `getOrientation`, `getScale` and `getTranslation` are ignored.
    */
-  getTransformMatrix?: Accessor<DataT, number[]>;
+  getTransformMatrix?: ArrowAccessor<DataT, number[]>;
   /**
    * Called once every model in the scenegraph has drawn, which can take several frames
    * while resources such as textures load.
@@ -198,11 +198,11 @@ const defaultProps: DefaultProps<ScenegraphLayerProps> = {
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
   // [pitch, yaw, roll]
-  getOrientation: {type: 'accessor', value: [0, 0, 0]},
-  getScale: {type: 'accessor', value: [1, 1, 1]},
-  getTranslation: {type: 'accessor', value: [0, 0, 0]},
+  getOrientation: {type: 'accessor', arrow: 'row', value: [0, 0, 0]},
+  getScale: {type: 'accessor', arrow: 'row', value: [1, 1, 1]},
+  getTranslation: {type: 'accessor', arrow: 'row', value: [0, 0, 0]},
   // 4x4 matrix
-  getTransformMatrix: {type: 'accessor', value: []},
+  getTransformMatrix: {type: 'accessor', arrow: 'row', value: []},
 
   loaders: [GLTFLoader]
 };
@@ -268,6 +268,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         type: 'unorm8',
         size: this.props.colorFormat.length,
         accessor: 'getColor',
+        semanticType: 'color',
         defaultValue: DEFAULT_COLOR,
         transition: supportsTransitions
       },
@@ -326,7 +327,14 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (!this.state.columns) {
       this.internalState!.attributeManager?.finalize();
       this.internalState!.attributeManager = null;
-      this.state.columns = new LayerColumns(this.context.device, COLUMN_DEFINITIONS, 'Scenegraph');
+      this.state.columns = new LayerColumns(
+        this.context.device,
+        {
+          ...COLUMN_DEFINITIONS,
+          colors: {...COLUMN_DEFINITIONS.colors, defaultColor: DEFAULT_COLOR}
+        },
+        'Scenegraph'
+      );
     }
     const transformsChanged = TRANSFORM_ACCESSORS.some(
       name =>
@@ -343,6 +351,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         }
       },
       {
+        normalizedColors: this.usesNormalizedColors(),
         dataLoading: this.internalState!.isAsyncPropLoading('data'),
         changed: () => {
           this.setState({});

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor, ArrowAccessorFunction} from '@deck.gl/core';
 import {
   Layer,
   _GPUVectorModel as GPUVectorModel,
@@ -110,17 +111,17 @@ type _PathLayerProps<DataT> = {
   /**
    * Path geometry accessor.
    */
-  getPath?: AccessorFunction<DataT, PathGeometry>;
+  getPath?: ArrowAccessorFunction<DataT, PathGeometry>;
   /**
    * Path color accessor.
    * @default [0, 0, 0, 255]
    */
-  getColor?: Accessor<DataT, Color | Color[]>;
+  getColor?: ArrowAccessor<DataT, Color | Color[]>;
   /**
    * Path width accessor.
    * @default 1
    */
-  getWidth?: Accessor<DataT, number | number[]>;
+  getWidth?: ArrowAccessor<DataT, number | number[]>;
   /**
    * @deprecated Use `jointRounded` and `capRounded` instead
    */
@@ -145,9 +146,9 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   _projectionTolerance: {type: 'number', value: 0, min: 0},
   _projectionNoCut: false,
 
-  getPath: {type: 'accessor', value: (object: any) => object.path},
-  getColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getWidth: {type: 'accessor', value: 1},
+  getPath: {type: 'accessor', arrow: 'row', value: (object: any) => object.path},
+  getColor: {type: 'accessor', arrow: 'row-color', value: DEFAULT_COLOR},
+  getWidth: {type: 'accessor', arrow: 'row', value: 1},
 
   // deprecated props
   rounded: {deprecatedFor: ['jointRounded', 'capRounded']}
@@ -352,6 +353,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         size: this.props.colorFormat.length,
         type: 'unorm8',
         accessor: 'getColor',
+        semanticType: 'color',
         transition: isWebGPU ? false : ATTRIBUTE_TRANSITION,
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'path-instance-data'
@@ -440,7 +442,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         buffers,
         normalize: !props._pathType,
         loop: props._pathType === 'loop',
-        getGeometry: props.getPath,
+        getGeometry: props.getPath as AccessorFunction<DataT, PathGeometry>,
         transform: this.usePositionTransforms().transform?.bind(this),
         positionFormat: props.positionFormat,
         // Longitude cutting assumes geographic input and cannot run on preprojected coordinates.

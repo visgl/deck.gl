@@ -4,7 +4,7 @@
 
 import {test, expect, vi} from 'vitest';
 import {LayerManager, WebMercatorViewport} from '@deck.gl/core';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {createTestViewport} from '../../core/viewports/test-crs';
 import {MaskExtension} from '@deck.gl/extensions';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';

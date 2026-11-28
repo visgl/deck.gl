@@ -3,11 +3,15 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {NullDevice} from '@luma.gl/core/test-utils';
-import {prepareMeshColumnTransforms} from '../../../modules/mesh-layers/src/utils/mesh-columns';
+import {
+  MESH_COLUMN_DEFINITIONS,
+  prepareMeshColumnTransforms
+} from '../../../modules/mesh-layers/src/utils/mesh-columns';
 import {GroupNode, ModelNode} from '@luma.gl/engine';
-import type {LayerContext} from '@deck.gl/core';
+import {type LayerContext, _LayerColumns as LayerColumns} from '@deck.gl/core';
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
 
 test('first draw waits for columns even with an explicit instance count', () => {
   const onFirstDraw = vi.fn();
@@ -102,3 +106,48 @@ for (const functional of [false, true]) {
     }
   });
 }
+
+test('Mesh Arrow fallbacks preserve byte defaults and toggle authored colors', async () => {
+  const device = new NullDevice({});
+  try {
+    const positions = vectorFromArray(
+      [[0, 0, 0]],
+      new FixedSizeList(3, new Field('x', new Float32()))
+    );
+    for (const Layer of [SimpleMeshLayer, ScenegraphLayer]) {
+      const defaults = new Layer().props;
+      const defaultColor = defaults.getColor as readonly number[];
+      const columns = new LayerColumns(
+        device,
+        {
+          positions: MESH_COLUMN_DEFINITIONS.positions,
+          colors: {...MESH_COLUMN_DEFINITIONS.colors, defaultColor}
+        },
+        'Mesh'
+      );
+      try {
+        const props = new Layer({getPosition: positions}).props;
+        const readColor = () => Array.from((columns as any).prepared.columns.instanceColors.value);
+        const failed = (error: Error) => {
+          throw error;
+        };
+        await columns.update(props, () => {}, failed, undefined, undefined, true, true);
+        expect(readColor()).toEqual(Array.from(defaultColor));
+        const authored = new Layer({getPosition: positions, getColor: [1, 0.5, 0, 0]}).props;
+        let oldProps = props;
+        for (const normalizedColors of [true, false, true]) {
+          await columns.updateIfNeeded(
+            {props: authored, oldProps, changeFlags: {}},
+            {normalizedColors, dataLoading: false, changed: () => {}, failed}
+          );
+          expect(readColor()).toEqual(normalizedColors ? [255, 128, 0, 0] : [1, 0, 0, 0]);
+          oldProps = authored as typeof props;
+        }
+      } finally {
+        columns.destroy();
+      }
+    }
+  } finally {
+    device.destroy();
+  }
+});
