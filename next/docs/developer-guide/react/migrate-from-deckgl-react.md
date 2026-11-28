@@ -7,7 +7,7 @@ This page lists the changes to make when you move an app from the deck.gl 9 Reac
 * React 19.2 or later.
 * deck.gl 10.
 * TypeScript 5.3 or later, if you use TypeScript.
-* A client module: in an app that uses React Server Components, import `DeckGL` from a `'use client'` module. See [Get started](https://deck.gl/next/docs/developer-guide/react/get-started.md).
+* A client module: in an app that uses React Server Components, import `DeckGL` from a `'use client'` module. See [Render on the client](https://deck.gl/next/docs/get-started/using-with-react.md#using-deckgl-with-ssr).
 
 ## Write JSX[​](#write-jsx "Direct link to Write JSX")
 

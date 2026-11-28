@@ -38,9 +38,9 @@ While deck.gl works independently without any map component, when visualizing ge
 
 #### using-with-react
 
-While not directly based on React, deck.gl is designed from ground up to work with React based applications. deck.gl layers fit naturally into React's component render flow and flux/redux based applications. deck.gl layers will be performantly rerendered whenever you rerender your normal JSX or React components.
+@deck.gl/react is a React renderer for deck.gl. You write layers, views, widgets and effects as JSX.
 
-- [Using deck.gl with React](https://deck.gl/next/docs/get-started/using-with-react.md): While not directly based on React, deck.gl is designed from ground up to work with React based applications. deck.gl layers fit naturally into React's component render flow and flux/redux based applications. deck.gl layers will be performantly rerendered whenever you rerender your normal JSX or React components.
+- [Using deck.gl with React](https://deck.gl/next/docs/get-started/using-with-react.md): @deck.gl/react is a React renderer for deck.gl. You write layers, views, widgets and effects as JSX.
 
 #### using-with-typescript
 
@@ -157,7 +157,7 @@ Applications written against math.gl's projection interfaces can use external pr
 - [Using with Mapbox](https://deck.gl/next/docs/developer-guide/react/base-maps/using-with-mapbox.md): | Import path | deck.gl overlay | Overlaid | Interleaved | React Map GL |
 - [Using with MapLibre](https://deck.gl/next/docs/developer-guide/react/base-maps/using-with-maplibre.md): | Import path | deck.gl overlay | Overlaid | Interleaved | React Map GL |
 - [Debugging](https://deck.gl/next/docs/developer-guide/react/debugging.md): @deck.gl/react sits between React and deck.gl. When something looks wrong, first find out which side of that boundary it comes from:
-- [Get started](https://deck.gl/next/docs/developer-guide/react/get-started.md): @deck.gl/react renders deck.gl in a React client tree. The root exports DeckGL, and subpaths named after deck.gl's modules export a component for each built-in layer, view, widget and effect.
+- [Get started](https://deck.gl/next/docs/developer-guide/react/get-started.md): This guide moved to Using deck.gl with React.
 - [Migrating from the previous API](https://deck.gl/next/docs/developer-guide/react/migrate-from-deckgl-react.md): This page lists the changes to make when you move an app from the deck.gl 9 React API to the React
 - [Using with maps](https://deck.gl/next/docs/developer-guide/react/using-with-maps.md): deck.gl works without a base map, but a base map gives geospatial layers context. This page
 
