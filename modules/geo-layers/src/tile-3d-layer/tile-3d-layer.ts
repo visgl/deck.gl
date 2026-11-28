@@ -486,8 +486,13 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   private _getDeferredTiles(): Set<Tile3D> {
     const {tileset3d, layerMap} = this.state;
     const maxNewTiles = this.props._maxNewTilesPerFrame;
+    const selectedTiles = tileset3d!.selectedTiles as Tile3D[];
+    // No tile can wait, for example without a limit
+    if (selectedTiles.length <= maxNewTiles) {
+      return new Set();
+    }
     // Only glTF tiles report their first draw, which keeps their parent visible while they wait
-    const newTiles = (tileset3d!.selectedTiles as Tile3D[]).filter(
+    const newTiles = selectedTiles.filter(
       tile => tile.content && tile.type === TILE_TYPE.SCENEGRAPH && !layerMap[tile.id]?.layer
     );
     if (newTiles.length <= maxNewTiles) {
