@@ -583,7 +583,7 @@ test.each([
   {bearing: -40, limits: {minBearing: -30}, target: -30, requestTarget: false},
   {bearing: -40, limits: {minBearing: -30}, target: -30, requestTarget: true}
 ])(
-  'GlobeController eases back to a newly enabled one-sided bearing limit %#',
+  'GlobeController reaches a newly enabled one-sided bearing limit %#',
   ({bearing, limits, target, requestTarget}) => {
     const {controller, bearings, update} = createControlledController({bearing});
     update({
@@ -604,8 +604,14 @@ test.each([
     }
     if (requestTarget) {
       expect(bearings.length, 'the transition emits frames').toBeGreaterThan(1);
-      expect(controller.props.bearing).toBeCloseTo(target);
+    } else {
+      // Like zoom and pitch limits, new limits alone start no transition;
+      // the next interaction applies them.
+      expect(bearings, 'unchanged view state starts no transition').toHaveLength(0);
+      controller.handleEvent(gesture('panstart') as any);
+      controller.handleEvent(gesture('panmove', 51) as any);
     }
+    expect(controller.props.bearing, 'the bearing reaches the limit').toBeCloseTo(target);
     controller.finalize();
   }
 );
