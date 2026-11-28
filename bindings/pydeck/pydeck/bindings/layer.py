@@ -1,3 +1,4 @@
+import json
 import uuid
 
 import numpy as np
@@ -12,6 +13,22 @@ from pydeck.exceptions import BinaryTransportException
 TYPE_IDENTIFIER = "@@type"
 FUNCTION_IDENTIFIER = "@@="
 QUOTE_CHARS = {"'", '"', "`"}
+
+
+def _to_js_item(item):
+    """Format one item of a list accessor as a JS expression.
+
+    Strings are kept as-is, since they are expressions. Other values are written
+    as JSON so None becomes null and True/False become true/false.
+    """
+    if isinstance(item, str):
+        return item
+    if isinstance(item, (np.ndarray, np.generic)):
+        item = item.tolist()
+    try:
+        return json.dumps(item)
+    except (TypeError, ValueError):
+        return str(item)
 
 
 class Layer(JSONMixin):
@@ -99,14 +116,10 @@ class Layer(JSONMixin):
                 elif isinstance(v, str):
                     # Have @deck.gl/json treat strings values as functions
                     kwargs[k] = FUNCTION_IDENTIFIER + v
-                elif isinstance(v, list) and v != [] and isinstance(v[0], str):
-                    # Allows the user to pass lists e.g. to specify coordinates
-                    array_as_str = ""
-                    for i, identifier in enumerate(v):
-                        if i == len(v) - 1:
-                            array_as_str += "{}".format(identifier)
-                        else:
-                            array_as_str += "{}, ".format(identifier)
+                elif isinstance(v, list) and any(isinstance(item, str) for item in v):
+                    # Allows the user to pass lists e.g. to specify coordinates,
+                    # including lists mixing constants and expressions like [255, "lng", 0]
+                    array_as_str = ", ".join(_to_js_item(item) for item in v)
                     kwargs[k] = "{}[{}]".format(FUNCTION_IDENTIFIER, array_as_str)
                 elif isinstance(v, Function):
                     kwargs[k] = v.serialize()
