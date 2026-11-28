@@ -8,17 +8,19 @@ import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {isArrowTable} from '@math.gl/core/arrow';
+import type {Table} from 'apache-arrow';
+import {FlightPathArrowLoader} from './flight-path-loader';
 import {JSONTableLoader} from '@loaders.gl/tables/json';
 
 import type {PickingInfo, MapViewState, Widget} from '@deck.gl/core';
 import {Device} from '@luma.gl/core';
 
-// Source JSON data
+// JSON airports and the full encoded-polyline flight dataset
 const DATA_URL = {
   AIRPORTS:
     'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/airports.json', // eslint-disable-line
   FLIGHT_PATHS:
-    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/line/heathrow-flights.json' // eslint-disable-line
+    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/flight-path-data.txt' // eslint-disable-line
 };
 
 type Airport = {
@@ -65,7 +67,7 @@ export default function App({
   onDataLoad
 }: {
   airports?: string;
-  flightPaths?: string;
+  flightPaths?: string | Table | null;
   lineWidth?: number;
   mapStyle?: string;
   device?: Device;
@@ -92,7 +94,7 @@ export default function App({
         id: 'flight-paths',
         // Sample row: {name: '0x342090', country: 'Spain', start: [-0.4855, 51.4727, 0], end: [-0.4592, 51.4776, 15.2]}
         data: flightPaths,
-        loaders: [JSONTableLoader],
+        loaders: [FlightPathArrowLoader],
         onDataLoad: table => {
           if (isArrowTable(table)) {
             onDataLoad?.(table.numRows);

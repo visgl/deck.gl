@@ -86,8 +86,9 @@ function deckSizeMatchesContainer(
   return Boolean(
     deck &&
       container &&
-      deck.width === container.clientWidth &&
-      deck.height === container.clientHeight
+      // ResizeObserver reports fractional CSS pixels; client dimensions are rounded.
+      Math.round(deck.width) === container.clientWidth &&
+      Math.round(deck.height) === container.clientHeight
   );
 }
 

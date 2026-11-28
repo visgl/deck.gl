@@ -24,6 +24,7 @@ v10 is a major new iteration of deck.gl as a WebGPU first, Apache Arrow first, S
 - [**Arrow loading**](./developer-guide/using-with-arrow.md#loading-and-updates) — `data` URLs now load Arrow tables instead of JS arrays.
 - [**Arrow streaming**](./developer-guide/using-with-arrow.md#streaming-arrow-data) — Layer data prop accepts `AsyncIterable<arrow.RecordBatch>` and incrementally transforms and renders RecordBatches as they arrive.
 - [**Arrow accessors**](./developer-guide/using-with-arrow.md#supplying-columns) — Layer accessors now support Arrow columns (`arrow.Vector`s)
+- [**Scenegraph transforms**](./api-reference/mesh-layers/scenegraph-layer.md#gettransformmatrix) — ScenegraphLayer accepts Arrow columns and SQL expressions for instance transforms.
 - [**GeoArrow**](./api-reference/proposals/arrow-layers.md) 🚧 — Full support for GeoArrow and GeoParquet source data and `geoarrow.union` and `geoarrow.wkb` rendering.
 
 ### SQL

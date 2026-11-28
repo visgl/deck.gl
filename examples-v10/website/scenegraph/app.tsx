@@ -3,18 +3,19 @@
 // Copyright (c) vis.gl contributors
 
 /* global fetch */
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react/legacy';
 import type {Device} from '@luma.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
-import {log} from '@deck.gl/core';
-import {tableFromArrays} from 'apache-arrow';
+import {tableFromJSON, type Table} from 'apache-arrow';
+import {ATAN2, DEGREES} from '@math.gl/sql/math-functions';
 import sampleData from './all.json';
+import {watchFlightData, type Aircraft} from './flight-data';
 
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
-import type {PickingInfo, MapViewState, LayerData} from '@deck.gl/core';
+import type {PickingInfo, MapViewState} from '@deck.gl/core';
 
 // Live data provided by the OpenSky Network, https://opensky-network.org.
 // The API may reject browser requests from other origins, so the bundled
@@ -23,6 +24,9 @@ const DATA_URL = 'https://opensky-network.org/api/states/all';
 const MODEL_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scenegraph-layer/airplane.glb';
 const DROP_IF_OLDER_THAN_SECONDS = 120;
+
+/** Numeric functions used by the SQL orientation accessor. */
+const SQL_FUNCTIONS = [ATAN2, DEGREES];
 
 const ANIMATIONS: ScenegraphLayerProps['_animations'] = {
   '*': {speed: 1}
@@ -38,26 +42,6 @@ const INITIAL_VIEW_STATE: MapViewState = {
 };
 
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/dark';
-
-// https://openskynetwork.github.io/opensky-api/rest.html#response
-type Aircraft = [
-  uniqueId: string,
-  callSign: string,
-  originCountry: string,
-  timePosition: number,
-  lastContact: number,
-  longitude: number | null,
-  latitude: number | null,
-  baroAltitude: number | null,
-  onGround: boolean,
-  velocity: number | null,
-  trueAttack: number | null,
-  verticalRate: number | null,
-  sensors: number[],
-  geoAltitude: number | null,
-  positionSource: number[],
-  category: number
-];
 
 /** Named flight fields used for styling and tooltips after Arrow conversion. */
 type AircraftRow = {
@@ -75,25 +59,28 @@ type AircraftRow = {
   verticalRate: number | null;
 };
 
-/** Converts the OpenSky response to named columns and makes contact times relative. */
-function normalizeData<LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT {
-  const {time, states} = source as {time: number; states: Aircraft[]};
-  return tableFromArrays({
-    callSign: states.map(aircraft => aircraft[1]),
-    originCountry: states.map(aircraft => aircraft[2]),
-    lastContact: Float64Array.from(states, aircraft => aircraft[4] - time),
-    longitude: Float64Array.from(states, aircraft => aircraft[5] ?? 0),
-    latitude: Float64Array.from(states, aircraft => aircraft[6] ?? 0),
-    velocity: states.map(aircraft => aircraft[9]),
-    trueTrack: states.map(aircraft => aircraft[10]),
-    verticalRate: states.map(aircraft => aircraft[11]),
-    altitude: Float64Array.from(states, aircraft => aircraft[13] ?? 0)
-  }) as LayerDataT;
+/** Unpacks the heterogeneous OpenSky tuples into named Arrow columns. */
+function normalizeData(source: {time: number; states: Aircraft[]}): Table {
+  const {time, states} = source;
+  return tableFromJSON(
+    states.map(aircraft => ({
+      callSign: aircraft[1],
+      originCountry: aircraft[2],
+      snapshotTime: time,
+      lastContact: aircraft[4],
+      longitude: aircraft[5],
+      latitude: aircraft[6],
+      velocity: aircraft[9],
+      trueTrack: aircraft[10],
+      verticalRate: aircraft[11],
+      altitude: aircraft[13]
+    }))
+  );
 }
 
 // https://github.com/visgl/deck.gl/pull/10465 updated the live OpenSky URL,
-// but the endpoint still rejects cross-origin browser requests. Start with this
-// bundled snapshot so the demo can render immediately and keep it as fallback.
+// but the endpoint may reject browser requests. Replay this bundled snapshot
+// with simulated positional updates whenever live polling is unavailable.
 const DATA = {
   ...(sampleData as {time: number; states: Aircraft[]}),
   length: sampleData.states.length
@@ -124,30 +111,39 @@ export default function App({
   device,
   sizeScale = 25,
   onDataLoad,
+  onDataSource,
   mapStyle = MAP_STYLE
 }: {
   device?: Device;
   sizeScale?: number;
   onDataLoad?: (count: number) => void;
+  /** Reports whether the example uses live positions or simulated replay. */
+  onDataSource?: (source: 'live' | 'replay') => void;
   mapStyle?: string;
 }) {
   const [data, setData] = useState(DATA);
-  useEffect(() => {
-    const abortController = new AbortController();
-    fetchData(abortController.signal)
-      .then(setData)
-      .catch(error => {
-        if (!abortController.signal.aborted) {
-          log.warn('Scenegraph example is using its bundled flight snapshot', error)();
-        }
-      });
-    return () => abortController.abort();
-  }, []);
+  useEffect(
+    () =>
+      watchFlightData(DATA, fetchData, (snapshot, source) => {
+        setData({...snapshot, length: snapshot.states.length});
+        onDataSource?.(source);
+      }),
+    []
+  );
+
+  const aircraft = useMemo(() => normalizeData(data), [data]);
 
   const layer = new ScenegraphLayer<AircraftRow>({
     id: 'scenegraph-layer',
-    data,
-    dataTransform: normalizeData,
+    data: aircraft,
+    sqlFunctions: SQL_FUNCTIONS,
+    query: `SELECT callSign, originCountry, velocity, trueTrack, verticalRate,
+      lastContact - snapshotTime AS lastContact,
+      COALESCE(longitude, 0) AS longitude,
+      COALESCE(latitude, 0) AS latitude,
+      COALESCE(altitude, 0) AS altitude,
+      CASE WHEN lastContact - snapshotTime < -${DROP_IF_OLDER_THAN_SECONDS}
+        THEN 0 ELSE 1 END AS visible`,
     onDataLoad: () => onDataLoad?.(data.states.length),
     pickable: true,
     sizeScale,
@@ -155,18 +151,14 @@ export default function App({
     _animations: ANIMATIONS,
     sizeMinPixels: 0.1,
     sizeMaxPixels: 1.5,
-    getPosition: {sql: 'ARRAY[longitude, latitude, altitude]'},
-    getOrientation: ({verticalRate, velocity, trueTrack}) => {
-      // -90 looking up, +90 looking down
-      const pitch = (-Math.atan2(verticalRate ?? 0, velocity ?? 0) * 180) / Math.PI;
-      return [pitch, -(trueTrack ?? 0), 90];
+    getPosition: {sql: 'ARRAY_FLOAT64(longitude, latitude, altitude)'},
+    getOrientation: {
+      sql: `FLOAT32x3(
+        -DEGREES(ATAN2(COALESCE(verticalRate, 0), COALESCE(velocity, 0))),
+        -COALESCE(trueTrack, 0), 90)`
     },
     getScale: {
-      sql: `\
-        CASE WHEN lastContact < -${DROP_IF_OLDER_THAN_SECONDS}
-          THEN ARRAY_FLOAT32(0, 0, 0)
-          ELSE ARRAY_FLOAT32(1, 1, 1)
-        END`
+      sql: 'FLOAT32x3(visible, visible, visible)'
     }
   });
 
