@@ -4,8 +4,9 @@
 
 import {test, expect} from 'vitest';
 
+import {Deck, GlobeView, MapView} from '@deck.gl/core';
 import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils/vitest';
+import {device, testLayer} from '@deck.gl/test-utils/vitest';
 
 function expectUniqueGeometryLayout(layer: ColumnLayer): void {
   const model = layer.state.fillModel!;
@@ -156,8 +157,8 @@ test('ColumnLayer - cap regenerates extruded geometry and is ignored for flat co
   // diskResolution 8 => 9 vertices around the edge
   const FLAT_VERTEX_COUNT = 9 * 3 + 1;
   // capSegs: dome = max(2, round(8 / 4)) = 2, cone = 1
-  const DOME_VERTEX_COUNT = 9 * 2 * (1 + 2) + 2 + 1;
-  const CONE_VERTEX_COUNT = 9 * 2 * (1 + 1) + 1 + 1;
+  const DOME_VERTEX_COUNT = 9 * 2 * (1 + 2) + 2 * 2;
+  const CONE_VERTEX_COUNT = 9 * 2 * (1 + 1) + 1 * 2;
 
   testLayer({
     Layer: ColumnLayer,
@@ -201,6 +202,70 @@ test('ColumnLayer - cap regenerates extruded geometry and is ignored for flat co
       }
     ],
     onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('ColumnLayer - caps face outward under back-face culling', async () => {
+  const anchor = [-122, 38];
+  const radius = 50000;
+  // Look straight down at a point inside the apex band of the dome and on the cone, away from
+  // the apex vertex. At zoom 3 the camera is ~1.5 viewport heights (over 10 km) above the
+  // ground, so it stays above the 7.5 km apex.
+  const longitude =
+    anchor[0] +
+    ((0.3 * radius) / (6370972 * Math.cos((anchor[1] * Math.PI) / 180)) / Math.PI) * 180;
+  const datum = {position: anchor};
+  // Draw on the shared test device; its canvas is 1x1 unless an earlier test resized it.
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    useDevicePixels: false,
+    viewState: {longitude, latitude: anchor[1], zoom: 3}
+  });
+  const picked: Record<string, boolean> = {};
+  try {
+    for (const [name, view] of [
+      ['GlobeView', new GlobeView()],
+      ['MapView', new MapView({parameters: {cullMode: 'back'}})]
+    ] as const) {
+      for (const cap of ['flat', 'dome', 'cone'] as const) {
+        const layer = new ColumnLayer({
+          id: `column-${cap}`,
+          data: [datum],
+          getPosition: d => d.position,
+          getElevation: 5000,
+          radius,
+          // Three dome bands, so the apex band is the third strip
+          diskResolution: 12,
+          extruded: true,
+          cap,
+          pickable: true
+        });
+        await new Promise<void>(resolve => {
+          deck.setProps({
+            views: view,
+            layers: [layer],
+            onAfterRender: () => {
+              // @ts-expect-error private member
+              if (!deck.layerManager.needsUpdate()) resolve();
+            }
+          });
+        });
+        const [x, y] = deck.getViewports()[0].project([longitude, anchor[1]]);
+        picked[`${name} ${cap}`] = deck.pickObject({x, y})?.object === datum;
+      }
+    }
+  } finally {
+    deck.finalize();
+  }
+  expect(picked, 'each cap is picked from above').toEqual({
+    'GlobeView flat': true,
+    'GlobeView dome': true,
+    'GlobeView cone': true,
+    'MapView flat': true,
+    'MapView dome': true,
+    'MapView cone': true
   });
 });
 

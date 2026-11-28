@@ -100,7 +100,7 @@ test('ColumnGeometry#cap', () => {
 
   // capSegs = 1 for cone
   const capSegsCone = 1;
-  const expectedConeVerts = vertsAroundEdge * 2 * (1 + capSegsCone) + capSegsCone + 1;
+  const expectedConeVerts = vertsAroundEdge * 2 * (1 + capSegsCone) + capSegsCone * 2;
   let geometry = new ColumnGeometry({radius: 1, height: 1, nradial, cap: 'cone'});
   let attributes = geometry.getAttributes();
 
@@ -131,7 +131,7 @@ test('ColumnGeometry#cap', () => {
 
   // capSegs = max(2, round(nradial/4)) for dome; nradial=4 → max(2,1) = 2
   const capSegsDome = Math.max(2, Math.round(nradial / 4));
-  const expectedDomeVerts = vertsAroundEdge * 2 * (1 + capSegsDome) + capSegsDome + 1;
+  const expectedDomeVerts = vertsAroundEdge * 2 * (1 + capSegsDome) + capSegsDome * 2;
   geometry = new ColumnGeometry({radius: 1, height: 1, nradial, cap: 'dome'});
   attributes = geometry.getAttributes();
 
@@ -155,4 +155,58 @@ test('ColumnGeometry#cap', () => {
   expect(attributes.POSITION.value.length, 'cap ignored when height=0 (not extruded)').toBe(
     nradial * 3
   );
+});
+
+/** Returns the face normals of the non-degenerate triangles of a triangle strip. */
+function getStripFaces(positions: ArrayLike<number>): {centroid: number[]; normal: number[]}[] {
+  const vertex = (index: number) => [0, 1, 2].map(axis => positions[index * 3 + axis]);
+  const faces: {centroid: number[]; normal: number[]}[] = [];
+  for (let k = 0; k + 2 < positions.length / 3; k++) {
+    // Odd triangles of a strip swap their first two vertices to keep the winding
+    const [a, b, c] = (k % 2 ? [k + 1, k, k + 2] : [k, k + 1, k + 2]).map(vertex);
+    const ab = [0, 1, 2].map(axis => b[axis] - a[axis]);
+    const ac = [0, 1, 2].map(axis => c[axis] - a[axis]);
+    const normal = [
+      ab[1] * ac[2] - ab[2] * ac[1],
+      ab[2] * ac[0] - ab[0] * ac[2],
+      ab[0] * ac[1] - ab[1] * ac[0]
+    ];
+    if (Math.hypot(...normal) > 1e-9) {
+      faces.push({centroid: [0, 1, 2].map(axis => (a[axis] + b[axis] + c[axis]) / 3), normal});
+    }
+  }
+  return faces;
+}
+
+test('ColumnGeometry#cap winding faces outward', () => {
+  for (const cap of ['flat', 'dome', 'cone'] as const) {
+    for (const options of [{nradial: 4}, {nradial: 12}, {nradial: 4, vertices: TEST_VERTICES}]) {
+      const geometry = new ColumnGeometry({radius: 1, height: 1, ...options, cap});
+      const faces = getStripFaces(geometry.getAttributes().POSITION.value);
+      // The column is convex around the origin, so outward faces point away from it
+      const inward = faces.filter(
+        ({centroid, normal}) =>
+          centroid[0] * normal[0] + centroid[1] * normal[1] + centroid[2] * normal[2] <= 0
+      );
+      expect(inward, `${cap} cap ${JSON.stringify(options)} has no inward triangles`).toHaveLength(
+        0
+      );
+    }
+  }
+});
+
+test('ColumnGeometry#cone cap normals follow the slope', () => {
+  const nradial = 4;
+  const geometry = new ColumnGeometry({radius: 1, height: 1, nradial, cap: 'cone'});
+  const {POSITION, NORMAL} = geometry.getAttributes();
+  const capStart = (nradial + 1) * 2 + 2;
+  for (let index = capStart; index < POSITION.value.length / 3; index++) {
+    const normal = [0, 1, 2].map(axis => NORMAL.value[index * 3 + axis]);
+    const z = POSITION.value[index * 3 + 2];
+    // The cone rises 1 above the sides over a base radius of 1
+    expect(normal[2], `normal ${index} is 45 degrees up the slope at z ${z}`).toBeCloseTo(
+      Math.SQRT1_2
+    );
+    expect(Math.hypot(...normal), `normal ${index} has unit length`).toBeCloseTo(1);
+  }
 });

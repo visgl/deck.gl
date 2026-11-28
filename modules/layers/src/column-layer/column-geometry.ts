@@ -57,8 +57,8 @@ function tesselateColumn(props: ColumnGeometryProps): {
 
   const numVertices = isExtruded
     ? useCap
-      ? // sides (vertsAroundEdge*2 + 1 degenerate) + bridge (1) + capSegs ring strips (2*vertsAroundEdge each) + (capSegs-1) degenerates
-        vertsAroundEdge * 2 * (1 + capSegs) + capSegs + 1
+      ? // sides (vertsAroundEdge*2 + 1 degenerate) + bridge (1) + capSegs ring strips (2*vertsAroundEdge each) + 2 degenerates per strip join
+        vertsAroundEdge * 2 * (1 + capSegs) + capSegs * 2
       : vertsAroundEdge * 3 + 1 // top, side top edge, side bottom edge, one additional degenerate vertex
     : nradial; // top only (flat, not extruded)
 
@@ -117,79 +117,47 @@ function tesselateColumn(props: ColumnGeometryProps): {
     //     0 *           * 0           0 *           * 0
     //       |   side    |               |   side    |
     //
-    // cap tesselation: each pair of rings (s, s + 1) is a strip 0, 1, 2, 3, 4, 5, ...
+    // cap tesselation: like the sides, each pair of rings (s + 1, s) is a strip 0, 1, 2, 3, 4, 5, ...
     //
-    // 1 - 3 - 5  ... ring s + 1
-    // | \ | \ |
-    // 0 - 2 - 4  ... ring s
+    // 0 - 2 - 4  ... ring s + 1
+    // | / | / |
+    // 1 - 3 - 5  ... ring s
     //
     // The apex ring has radius 0, so the last strip collapses into a fan around the apex.
-    // A bridge vertex joins the cap to the sides, and a duplicated last vertex joins
-    // consecutive strips, both through degenerate triangles.
+    // A bridge vertex joins the cap to the sides, and copies of the last and first vertices
+    // join consecutive strips, all through degenerate triangles. Every strip then starts on
+    // an even vertex, so its triangles keep the outward winding of the sides.
+    const setCapVertex = (ring: number, j: number) => {
+      const theta = (ring / capSegs) * (Math.PI / 2);
+      const a = j * stepAngle;
+      const vertexIndex = j % nradial;
+      const vx = vertices ? vertices[vertexIndex * 2] : Math.cos(a) * radius;
+      const vy = vertices ? vertices[vertexIndex * 2 + 1] : Math.sin(a) * radius;
+      const vLen = vertices ? Math.sqrt(vx * vx + vy * vy) : radius;
+      const invLen = vLen > 0 ? 1 / vLen : 0;
+      // Dome normals follow the sphere; a cone's are constant along its straight sides.
+      const normalAngle = cap === 'cone' ? Math.atan2(vLen, radius) : theta;
 
-    // Bridge vertex: one extra copy of ring0[0] to create a clean degenerate transition from the side strip.
-    const vx0 = vertices ? vertices[0] : radius;
-    const vy0 = vertices ? vertices[1] : 0;
-    const vLen0 = vertices ? Math.sqrt(vx0 * vx0 + vy0 * vy0) : radius;
-    positions[i + 0] = vx0;
-    positions[i + 1] = vy0;
-    positions[i + 2] = height / 2;
-    normals[i + 0] = vLen0 > 0 ? vx0 / vLen0 : 0;
-    normals[i + 1] = vLen0 > 0 ? vy0 / vLen0 : 0;
-    // normals[i + 2] = 0 (Float32Array default)
-    i += 3;
+      positions[i + 0] = vx * Math.cos(theta);
+      positions[i + 1] = vy * Math.cos(theta);
+      positions[i + 2] = height / 2 + radius * Math.sin(theta);
+      normals[i + 0] = vx * invLen * Math.cos(normalAngle);
+      normals[i + 1] = vy * invLen * Math.cos(normalAngle);
+      normals[i + 2] = Math.sin(normalAngle);
+      i += 3;
+    };
 
+    // Bridge vertex: a copy of the first cap vertex
+    setCapVertex(1, 0);
     for (let s = 0; s < capSegs; s++) {
-      const theta0 = (s / capSegs) * (Math.PI / 2);
-      const theta1 = ((s + 1) / capSegs) * (Math.PI / 2);
-      const r0 = radius * Math.cos(theta0);
-      const z0 = height / 2 + radius * Math.sin(theta0);
-      const r1 = radius * Math.cos(theta1);
-      const z1 = height / 2 + radius * Math.sin(theta1);
-      const nz0 = Math.sin(theta0);
-      const nScale0 = Math.cos(theta0);
-      const nz1 = Math.sin(theta1);
-      const nScale1 = Math.cos(theta1);
-
-      for (let j = 0; j <= nradial; j++) {
-        const a = j * stepAngle;
-        const vertexIndex = j % nradial;
-        const sinA = Math.sin(a);
-        const cosA = Math.cos(a);
-
-        const vx = vertices ? vertices[vertexIndex * 2] : cosA * radius;
-        const vy = vertices ? vertices[vertexIndex * 2 + 1] : sinA * radius;
-        const vLen = vertices ? Math.sqrt(vx * vx + vy * vy) : radius;
-        const invLen = vLen > 0 ? 1 / vLen : 0;
-
-        // ring_s vertex
-        positions[i + 0] = vx * (r0 / radius);
-        positions[i + 1] = vy * (r0 / radius);
-        positions[i + 2] = z0;
-        normals[i + 0] = vx * invLen * nScale0;
-        normals[i + 1] = vy * invLen * nScale0;
-        normals[i + 2] = nz0;
-        i += 3;
-
-        // ring_{s+1} vertex
-        positions[i + 0] = vx * (r1 / radius);
-        positions[i + 1] = vy * (r1 / radius);
-        positions[i + 2] = z1;
-        normals[i + 0] = vx * invLen * nScale1;
-        normals[i + 1] = vy * invLen * nScale1;
-        normals[i + 2] = nz1;
-        i += 3;
+      if (s > 0) {
+        // Degenerate join: copies of the last vertex of the previous strip and the first of this one
+        setCapVertex(s - 1, nradial);
+        setCapVertex(s + 1, 0);
       }
-
-      // Degenerate between ring strips (duplicate last vertex of this strip to bridge to next)
-      if (s < capSegs - 1) {
-        positions[i + 0] = positions[i - 3];
-        positions[i + 1] = positions[i - 2];
-        positions[i + 2] = positions[i - 1];
-        normals[i + 0] = normals[i - 3];
-        normals[i + 1] = normals[i - 2];
-        normals[i + 2] = normals[i - 1];
-        i += 3;
+      for (let j = 0; j <= nradial; j++) {
+        setCapVertex(s + 1, j);
+        setCapVertex(s, j);
       }
     }
   } else {
