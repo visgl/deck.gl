@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {clamp} from '@math.gl/core';
+import {clamp} from '@math.gl/core/matrix';
 import Controller from './controller';
 import {getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 
@@ -18,7 +18,7 @@ import {
   GLOBE_INERTIA_EASING,
   GlobeInertiaInterpolator
 } from '../viewports/globe-util';
-import {MAX_LATITUDE} from '@math.gl/web-mercator';
+import {MAX_LATITUDE} from '@math.gl/geospatial/web-mercator';
 
 import type {MjolnirGestureEvent} from 'mjolnir.js';
 

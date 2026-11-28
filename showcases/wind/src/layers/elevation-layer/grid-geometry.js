@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {GL} from '@luma.gl/webgl/constants';
 import {Geometry} from 'luma.gl';
 
 export default class GridGeometry extends Geometry {
-  constructor(opts = {}) {
+  constructor(gl, opts = {}) {
     const {id = 'grid-geometry'} = opts;
 
     const indices = calculateIndices(opts);
@@ -15,7 +14,7 @@ export default class GridGeometry extends Geometry {
     super(
       Object.assign({}, opts, {
         id,
-        drawMode: GL.TRIANGLES,
+        drawMode: gl.TRIANGLES,
         attributes: {
           // No size/type information is needed for known vertex names
           indices,

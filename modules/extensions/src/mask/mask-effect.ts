@@ -4,9 +4,15 @@
 
 import {Layer, Viewport, Effect, EffectContext, PreRenderOptions, log} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
 import MaskPass from './mask-pass';
-import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
+import {
+  joinLayerBounds,
+  getRenderBounds,
+  makeViewport,
+  getMercatorReferenceViewport,
+  Bounds
+} from '../utils/projection-utils';
 // import {debugFBO} from '../utils/debug';
 
 type Mask = {
@@ -71,10 +77,13 @@ export default class MaskEffect implements Effect {
 
     const maskLayers = layers.filter(l => l.props.visible && l.props.operation.includes('mask'));
     if (maskLayers.length === 0) {
+      const removedMasks = this.masks !== null;
       this.masks = null;
       this.channels.length = 0;
+      this._updateMaskedAggregations(layers, removedMasks);
       return {didRender};
     }
+    const previousMasks = this.masks;
     this.masks = {};
 
     // Map layers to channels
@@ -82,11 +91,6 @@ export default class MaskEffect implements Effect {
     // TODO - support multiple views
     const viewport = viewports[0];
     const viewportChanged = !this.lastViewport || !this.lastViewport.equals(viewport);
-
-    if (viewport.crs?.coordinateFrame === 'geocentric') {
-      log.warn('MaskExtension is not supported in GlobeView')();
-      return {didRender};
-    }
 
     for (const maskId in channelMap) {
       const result = this._renderChannel(channelMap[maskId], {
@@ -100,8 +104,21 @@ export default class MaskEffect implements Effect {
       didRender ||= result;
     }
 
-    // debugFBO(this.maskMap, {opaque: true});
+    const channelRemoved =
+      previousMasks && Object.keys(previousMasks).some(id => !this.masks?.[id]);
+    this._updateMaskedAggregations(layers, didRender || Boolean(channelRemoved));
     return {didRender};
+  }
+
+  /** Refreshes aggregations after the mask texture for this frame is available. */
+  private _updateMaskedAggregations(layers: Layer[], maskChanged: boolean): void {
+    const props = this.getShaderModuleProps();
+    for (const layer of layers) {
+      const aggregation = layer as Layer & {
+        _updateAggregationMask?: (props: Record<string, unknown>, maskChanged: boolean) => void;
+      };
+      aggregation._updateAggregationMask?.(props.mask, maskChanged);
+    }
   }
 
   /* eslint-disable-next-line complexity */
@@ -155,7 +172,12 @@ export default class MaskEffect implements Effect {
       // Recalculate mask bounds
       this.lastViewport = viewport;
 
-      const layerBounds = joinLayerBounds(channelInfo.layers, viewport);
+      // The mask texture is rendered flat (absolute Mercator for geospatial views); layers read
+      // it back through projectToFlatCommon / project_common_position_to_flat, not the active viewport.
+      const layerBounds = joinLayerBounds(
+        channelInfo.layers,
+        getMercatorReferenceViewport(viewport)
+      );
       channelInfo.bounds = layerBounds && getRenderBounds(layerBounds, viewport);
 
       if (maskChanged || !equals(channelInfo.bounds, oldChannelInfo.bounds)) {
@@ -185,6 +207,8 @@ export default class MaskEffect implements Effect {
           views,
           effects,
           shaderModuleProps: {
+            // Mask writers must not bind the attachment they are rendering into.
+            mask: {maskMap: this.dummyMaskMap, maskChannels: null},
             project: {
               devicePixelRatio: 1
             }

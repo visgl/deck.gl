@@ -89,7 +89,7 @@ export const A5LayerDemo = makeLayerDemo({
   Layer: A5Layer,
   getTooltip: '({object}) => object && `${object.pentagon} count: ${object.count}`',
   props: `{
-    data: '${DATA_URI}/sf.bike.parking.a5.json',
+    data: '${DATA_URI}/sf.bike.parking.a5v1.json',
     pickable: true,
     wireframe: false,
     filled: true,

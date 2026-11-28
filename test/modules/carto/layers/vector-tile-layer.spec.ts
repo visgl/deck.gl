@@ -7,7 +7,7 @@ import {vectorTableSource} from '@carto/api-client';
 import {VectorTileLayer} from '@deck.gl/carto';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import type {Feature} from 'geojson';
-import {geojsonToBinary} from '@loaders.gl/gis';
+import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
 import {testPickingLayer} from '../../layers/test-picking-layer';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {withMockFetchMapsV3} from '../mock-fetch';
@@ -201,7 +201,7 @@ function createTestVectorTileLayer(
     }
   ];
 
-  const geoJSONBinaryData = geojsonToBinary(
+  const geoJSONBinaryData = convertGeojsonToBinaryFeatureCollection(
     JSON.parse(JSON.stringify([...geoJSONData, ...additionalFeatures]))
   );
 

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {registerLoaders} from '@loaders.gl/core';
-import {ImageLoader} from '@loaders.gl/images';
+import {ImageLoader} from '@loaders.gl/images/image/bundled';
 
 import log from '../utils/log';
 import {register} from '../debug/index';

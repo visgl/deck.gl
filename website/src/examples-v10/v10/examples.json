@@ -1,0 +1,38 @@
+[
+  {
+    "label": "Arrow Layers - deck.gl v10",
+    "examples": [
+      {
+        "id": "arrow-path-layer",
+        "title": "Arrow Path Layer"
+      },
+      {
+        "id": "arrow-polygon-layer",
+        "title": "Arrow Polygon Layer"
+      },
+      {
+        "id": "arrow-text-layer",
+        "title": "Arrow Text Layer"
+      }
+    ]
+  },
+  {
+    "label": "GPU Graph Layers - deck.gl v10",
+    "examples": [
+      {
+        "id": "luspatial-taxi",
+        "title": "luProj + luSpatial: Taxi Explorer"
+      },
+      {
+        "id": "gpu-graph-explorer",
+        "source": "gpu-graph/graph-explorer",
+        "title": "GPU Graph: Network Explorer"
+      },
+      {
+        "id": "gpu-culled-trace",
+        "source": "gpu-graph/culled-trace",
+        "title": "GPU Culled Trace"
+      }
+    ]
+  }
+]

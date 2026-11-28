@@ -14,7 +14,7 @@ import {
   PickingInfo
 } from './picking/pick-info';
 import type {RenderStats} from '../passes/layers-pass';
-import type {Stats} from '@probe.gl/stats';
+import type {Stats} from 'probe.gl/stats';
 import type {Framebuffer} from '@luma.gl/core';
 import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
@@ -901,7 +901,12 @@ export default class DeckPicker {
     });
 
     try {
-      texture.readBuffer(options, readBuffer);
+      // options has a bottom-left origin. WebGPU textures have a top-left origin.
+      const flipY = this.device.type === 'webgpu';
+      texture.readBuffer(
+        flipY ? {...options, y: texture.height - options.y - height} : options,
+        readBuffer
+      );
       const readData = await readBuffer.readAsync(0, layout.byteLength);
       const bytesPerElement = ArrayType.BYTES_PER_ELEMENT;
       if (layout.bytesPerRow % bytesPerElement !== 0) {
@@ -926,7 +931,9 @@ export default class DeckPicker {
       const packed = new ArrayType(width * height * 4);
 
       for (let row = 0; row < height; row++) {
-        const sourceStart = row * sourceRowLength;
+        // Pack rows bottom to top on both backends, as the picking decoders expect
+        const sourceRow = flipY ? height - 1 - row : row;
+        const sourceStart = sourceRow * sourceRowLength;
         packed.set(
           source.subarray(sourceStart, sourceStart + packedRowLength),
           row * packedRowLength

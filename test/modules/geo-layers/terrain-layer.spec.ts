@@ -4,18 +4,24 @@
 
 import {test, expect} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
-import {LayerManager, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {GlobeView, LayerManager, MapView} from '@deck.gl/core';
 import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {TerrainLoader} from '@loaders.gl/terrain';
+import {TerrainLoader} from '@loaders.gl/raster/terrain';
 import {
   MAX_LATITUDE as MAX_WEB_MERCATOR_LATITUDE,
   lngLatToWorld,
   worldToLngLat
-} from '@math.gl/web-mercator';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+} from '@math.gl/geospatial/web-mercator';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
 const TEST_TERRAIN_MESH = {
+  header: {
+    boundingBox: [
+      [-1, -1, 0],
+      [1, 1, 1]
+    ]
+  },
   attributes: {
     positions: {
       size: 3,
@@ -31,6 +37,9 @@ const TEST_TERRAIN_MESH = {
     }
   }
 };
+
+const fetchTerrainFixture: NonNullable<TerrainLayer['props']['fetch']> = (_url, {propName}) =>
+  Promise.resolve(propName === 'texture' ? new ImageData(1, 1) : TEST_TERRAIN_MESH);
 
 class TestTerrainLayer extends TerrainLayer {
   static layerName = 'TestTerrainLayer';
@@ -84,8 +93,9 @@ test('TerrainLayer', async () => {
   const testCases = generateLayerTests({
     Layer: TerrainLayer,
     sampleProps: {
-      elevationData: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
-      texture: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw',
+      elevationData: 'terrain/{z}/{x}/{y}.png',
+      texture: 'surface/{z}/{x}/{y}.png',
+      fetch: fetchTerrainFixture,
       loaders: [TerrainLoader]
     },
     assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
@@ -101,7 +111,8 @@ test('TerrainLayer', async () => {
   const testCasesNonTiled = generateLayerTests({
     Layer: TerrainLayer,
     sampleProps: {
-      elevationData: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/1/0/0.png',
+      elevationData: 'terrain.png',
+      fetch: fetchTerrainFixture,
       bounds: [-180, 85, 0, 0],
       loaders: [TerrainLoader]
     },

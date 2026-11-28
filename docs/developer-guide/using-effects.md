@@ -30,7 +30,7 @@ import TabItem from '@theme/TabItem';
   <TabItem value="ts" label="TypeScript">
 
 ```js
-import {Deck, AmbientLight, SunLight, LightingEffect} from '@deck.gl/core';
+import {Deck, AmbientLight, _SunLight as SunLight, LightingEffect} from '@deck.gl/core';
 
 // create an ambient light
 const ambientLight = new AmbientLight({
@@ -65,7 +65,7 @@ const deckInstance = new Deck({
 ```tsx
 import React from 'react';
 import {DeckGL} from '@deck.gl/react';
-import {AmbientLight, SunLight, LightingEffect} from '@deck.gl/core';
+import {AmbientLight, _SunLight as SunLight, LightingEffect} from '@deck.gl/core';
 
 // create an ambient light
 const ambientLight = new AmbientLight({
@@ -160,13 +160,13 @@ The post-processing effect applies screen space pixel manipulation effects to th
 *Interactive demo of PostProcessEffect*
 
 
-`@luma.gl/effects` provides a collection of [shader modules](https://luma.gl/docs/api-reference/shadertools/shader-passes/image-processing) that implements some common image processing algorithms. You may also refer to their source code to see how to implement your own.
+`@luma.gl/engine/effects` provides a collection of [shader modules](https://luma.gl/docs/api-reference/shadertools/shader-passes/image-processing) that implements some common image processing algorithms. You may also refer to their source code to see how to implement your own.
 
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
 ```js
-import {brightnessContrast} from '@luma.gl/effects';
+import {brightnessContrast} from '@luma.gl/engine/effects';
 import {Deck, PostProcessEffect} from '@deck.gl/core';
 
 const postProcessEffect = new PostProcessEffect(brightnessContrast, {
@@ -190,7 +190,7 @@ const deckInstance = new Deck({
   <TabItem value="ts" label="TypeScript">
 
 ```ts
-import {brightnessContrast, BrightnessContrastProps} from '@luma.gl/effects';
+import {brightnessContrast, BrightnessContrastProps} from '@luma.gl/engine/effects';
 import {Deck, PostProcessEffect} from '@deck.gl/core';
 
 const postProcessEffect = new PostProcessEffect(brightnessContrast, {
@@ -210,7 +210,7 @@ const deckInstance = new Deck({
 ```tsx
 import React from 'react';
 import {DeckGL} from '@deck.gl/react';
-import {brightnessContrast, BrightnessContrastProps} from '@luma.gl/effects';
+import {brightnessContrast, BrightnessContrastProps} from '@luma.gl/engine/effects';
 import {PostProcessEffect} from '@deck.gl/core';
 
 const postProcessEffect = new PostProcessEffect(brightnessContrast, {
