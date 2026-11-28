@@ -20,12 +20,23 @@ const INITIAL_VIEW_STATE = {
   latitude: 51.47,
   longitude: 0.45,
   minZoom: 1,
-  zoom: 1
+  zoom: 1,
+  bearing: 0,
+  pitch: 0,
+  transitionDuration: 0
 };
 
 let currentViewState = {...INITIAL_VIEW_STATE};
 let zoomAround = 'pointer';
 let viewType = 'globe';
+let navigation = 'map';
+
+const PRESETS = {
+  north: {latitude: 80, longitude: 0, zoom: 2},
+  south: {latitude: -80, longitude: 0, zoom: 2},
+  rotated: {latitude: 75, longitude: 0, zoom: 2, bearing: 45},
+  street: {latitude: 51.47, longitude: 0.45, zoom: 14}
+};
 
 const GRATICULES = getGraticules(30);
 
@@ -33,6 +44,7 @@ function getControllerOptions() {
   return {
     inertia: 500,
     zoomAround,
+    navigation,
     multiTouchDrag: 'rotate',
     doubleClickZoom: true,
     doubleClickDragZoom: true
@@ -146,12 +158,18 @@ const settingsControl = createSettingsControl({
     deck.setProps({controller: getControllerOptions()});
     updateSettingsControl();
   },
+  onNavigationChange: nextNavigation => {
+    navigation = nextNavigation;
+    deck.setProps({controller: getControllerOptions()});
+    updateSettingsControl();
+  },
   onViewChange: nextViewType => {
     viewType = nextViewType;
     deck.setProps({views: getView(viewType)});
     updateSettingsControl();
   },
-  onReset: () => setViewState(INITIAL_VIEW_STATE)
+  onReset: () => setViewState(INITIAL_VIEW_STATE),
+  onPresetChange: preset => setViewState({...INITIAL_VIEW_STATE, ...PRESETS[preset]})
 });
 
 function setViewState(nextViewState) {
@@ -161,7 +179,7 @@ function setViewState(nextViewState) {
 }
 
 function updateSettingsControl() {
-  settingsControl.update({viewState: currentViewState, zoomAround, viewType});
+  settingsControl.update({viewState: currentViewState, zoomAround, viewType, navigation});
 }
 
 updateSettingsControl();

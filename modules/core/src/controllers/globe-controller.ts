@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {clamp} from '@math.gl/core/matrix';
-import Controller from './controller';
+import {MAX_LATITUDE} from '@math.gl/geospatial/web-mercator';
+import Controller, {type ControllerProps} from './controller';
 import {getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 
 import {MapState, MapStateProps} from './map-controller';
@@ -18,7 +19,6 @@ import {
   GLOBE_INERTIA_EASING,
   GlobeInertiaInterpolator
 } from '../viewports/globe-util';
-import {MAX_LATITUDE} from '@math.gl/geospatial/web-mercator';
 
 import type {MjolnirGestureEvent} from 'mjolnir.js';
 
@@ -41,8 +41,6 @@ type GlobeStateInternal = MapStateInternal & {
   startPanPos?: [number, number];
   startPanCameraFrame?: CameraFrame;
   startPanAngularRate?: number;
-  /** When true, bearing is held fixed during pan (north stays up) */
-  startPanLockBearing?: boolean;
 };
 
 class GlobeState extends MapState {
@@ -52,13 +50,7 @@ class GlobeState extends MapState {
         makeViewport: (props: Record<string, any>) => any;
       }
   ) {
-    const {
-      startPanPos,
-      startPanCameraFrame,
-      startPanAngularRate,
-      startPanLockBearing,
-      ...mapStateOptions
-    } = options;
+    const {startPanPos, startPanCameraFrame, startPanAngularRate, ...mapStateOptions} = options;
     mapStateOptions.normalize = false;
     super(mapStateOptions);
 
@@ -66,19 +58,15 @@ class GlobeState extends MapState {
     if (startPanPos !== undefined) s.startPanPos = startPanPos;
     if (startPanCameraFrame !== undefined) s.startPanCameraFrame = startPanCameraFrame;
     if (startPanAngularRate !== undefined) s.startPanAngularRate = startPanAngularRate;
-    if (startPanLockBearing !== undefined) s.startPanLockBearing = startPanLockBearing;
   }
 
   panStart({pos}: {pos: [number, number]}): GlobeState {
     const {latitude, longitude, zoom, bearing = 0} = this.getViewportProps();
     const cameraFrame = Globe.cameraFrame(longitude, latitude, bearing);
-    const lockBearing = Math.abs(bearing) < 1;
-
-    if (lockBearing) {
-      // Override horizontal axis to polar so north stays up.
-      // Boost rate by 1/cos(lat) to compensate for smaller longitude
-      // circles near the poles, capped at 4x.
+    if (this.getViewportProps().navigation === 'map') {
+      // Use geographic axes for locked navigation, including deliberately rotated maps.
       cameraFrame.axisHorizontal = [0, 0, 1];
+      cameraFrame.axisVertical = Globe.cameraFrame(longitude, latitude, 0).axisVertical;
     }
 
     // Radians of arc per pixel, derived from zoom scale
@@ -89,7 +77,6 @@ class GlobeState extends MapState {
       startPanPos: pos,
       startPanCameraFrame: cameraFrame,
       startPanAngularRate: angularRate,
-      startPanLockBearing: lockBearing,
       startZoom: zoom
     }) as GlobeState;
   }
@@ -106,24 +93,24 @@ class GlobeState extends MapState {
       return this;
     }
 
-    const dx = startPanPos[0] - pos[0];
-    const dy = startPanPos[1] - pos[1];
-
-    let hAngle = dx * rate;
-    let vAngle = -dy * rate;
-    const locked = state.startPanLockBearing;
-
-    if (locked) {
-      // Boost horizontal rate by 1/cos(lat) for the polar axis, capped at 4x
-      const cosLat = Math.cos(frame.latitude * DEGREES_TO_RADIANS);
-      hAngle = (dx * rate) / Math.max(cosLat, 0.25);
-      // Clamp vertical angle to prevent crossing the poles
-      const maxUp = (MAX_LATITUDE - frame.latitude) * DEGREES_TO_RADIANS;
-      const maxDown = -(MAX_LATITUDE + frame.latitude) * DEGREES_TO_RADIANS;
-      vAngle = clamp(vAngle, maxDown, maxUp);
+    const deltaX = startPanPos[0] - pos[0];
+    const deltaY = startPanPos[1] - pos[1];
+    const lockBearing = this.getViewportProps().navigation === 'map';
+    let horizontalAngle = deltaX * rate;
+    let verticalAngle = -deltaY * rate;
+    if (lockBearing) {
+      const bearing = frame.bearing * DEGREES_TO_RADIANS;
+      // Resolve screen movement into geographic angles; compensate for smaller latitude circles.
+      horizontalAngle =
+        ((deltaX * Math.cos(bearing) - deltaY * Math.sin(bearing)) * rate) /
+        Math.max(Math.cos(frame.latitude * DEGREES_TO_RADIANS), 0.25);
+      verticalAngle = clamp(
+        -(deltaX * Math.sin(bearing) + deltaY * Math.cos(bearing)) * rate,
+        -(MAX_LATITUDE + frame.latitude) * DEGREES_TO_RADIANS,
+        (MAX_LATITUDE - frame.latitude) * DEGREES_TO_RADIANS
+      );
     }
-
-    const rotated = Globe.rotateFrame(frame, hAngle, vAngle, locked);
+    const rotated = Globe.rotateFrame(frame, horizontalAngle, verticalAngle, lockBearing);
     const zoom = startZoom + zoomAdjust(rotated.latitude, true) - zoomAdjust(frame.latitude, true);
 
     return this._getUpdatedState({
@@ -139,7 +126,6 @@ class GlobeState extends MapState {
       startPanPos: null,
       startPanCameraFrame: null,
       startPanAngularRate: null,
-      startPanLockBearing: null,
       startZoom: null
     }) as GlobeState;
   }
@@ -162,10 +148,34 @@ class GlobeState extends MapState {
 
     if (constraintAround) {
       const viewport = this.makeViewport(props);
-      Object.assign(
-        props,
-        viewport.panByPosition(constraintAround.position, constraintAround.screenPosition)
-      );
+      const {position, screenPosition} = constraintAround;
+      if (!(viewport instanceof GlobeViewport) || props.navigation === 'map') {
+        Object.assign(
+          props,
+          viewport instanceof GlobeViewport
+            ? viewport.panByPosition(position, screenPosition, undefined, true)
+            : viewport.panByPosition(position, screenPosition)
+        );
+      } else {
+        const anchorStrength = viewport.getZoomAnchorStrength(screenPosition);
+        if (anchorStrength > 0) {
+          const currentCoordinates = viewport.unproject(screenPosition);
+          const cameraFrame = Globe.cameraFrame(
+            props.longitude,
+            props.latitude,
+            props.bearing || 0
+          );
+          const rotatedFrame = Globe.rotateFrameToMatch(
+            cameraFrame,
+            [currentCoordinates[0], currentCoordinates[1]],
+            [position[0], position[1]],
+            anchorStrength
+          );
+          props.longitude = rotatedFrame.longitude;
+          props.latitude = rotatedFrame.latitude;
+          props.bearing = rotatedFrame.bearing;
+        }
+      }
     }
 
     if (props.longitude < -180 || props.longitude > 180) {
@@ -174,8 +184,8 @@ class GlobeState extends MapState {
     if (props.bearing < -180 || props.bearing > 180) {
       props.bearing = mod(props.bearing + 180, 360) - 180;
     }
-    // North-up pans can't cross the poles, so keep them off the poles to avoid getting stuck
-    const latitudeLimit = Math.abs(props.bearing) < 1 ? MAX_LATITUDE : 90;
+    // Map navigation can't cross the poles, so keep it off the poles to avoid getting stuck
+    const latitudeLimit = props.navigation === 'map' ? MAX_LATITUDE : 90;
     props.latitude = clamp(props.latitude, -latitudeLimit, latitudeLimit);
     props.pitch = clamp(props.pitch, props.minPitch, props.maxPitch);
 
@@ -246,6 +256,8 @@ class GlobeState extends MapState {
         );
       }
     }
+    // maxBounds may extend past the globe's coordinate range.
+    props.latitude = clamp(props.latitude, -latitudeLimit, latitudeLimit);
     if (props.latitude !== latitude) {
       props.zoom += zoomAdjust(props.latitude, true) - zoomAdjust(latitude, true);
     }
@@ -301,20 +313,38 @@ export default class GlobeController extends Controller<MapState> {
 
   dragMode: 'pan' | 'rotate' = 'pan';
 
-  protected getZoomPosition(position: [number, number]): [number, number] {
-    const zoomPosition = super.getZoomPosition(position);
-    const viewport = this.makeViewport(this.controllerState.getViewportProps());
-
-    // Above zoom 12 GlobeView renders with a WebMercatorViewport, whose map covers the screen.
-    if (!(viewport instanceof GlobeViewport) || viewport.getZoomAnchorStrength(zoomPosition) > 0) {
-      return zoomPosition;
-    }
-
-    return viewport.project([viewport.longitude, viewport.latitude]) as [number, number];
-  }
-
   // Ring buffer tracking globe position during pan for inertia velocity
   private _panHistory: Array<{longitude: number; latitude: number; timestamp: number}> = [];
+
+  /** Update navigation policy without retaining gestures or inertia from the previous mode. */
+  setProps(props: ControllerProps & MapStateProps): void {
+    const navigation = props.navigation || 'map';
+    const navigationChanged = this.props && navigation !== (this.props.navigation || 'map');
+    // The event's cached controller state may precede the latest controlled view state.
+    // During a transition, props hold its destination until the application applies
+    // the next frame, so report the interpolated view state that is displayed.
+    const oldViewState = navigationChanged
+      ? new this.ControllerState({
+          ...(this.props as ControllerProps & MapStateProps),
+          ...this.transitionManager.getViewportInTransition(),
+          makeViewport: this.makeViewport
+        }).getViewportProps()
+      : undefined;
+    if (navigationChanged) {
+      this._panHistory = [];
+      this._cancelInteraction();
+      props = {...props, transitionDuration: 0};
+    }
+    super.setProps(props);
+    if (navigationChanged) {
+      this.updateViewport(
+        new this.ControllerState({...props, makeViewport: this.makeViewport}),
+        null,
+        {},
+        oldViewState
+      );
+    }
+  }
 
   protected _onPanStart(event: MjolnirGestureEvent): boolean {
     this._panHistory = [];
@@ -359,8 +389,6 @@ export default class GlobeController extends Controller<MapState> {
 
       if (dt > 0) {
         const viewportProps = this.controllerState.getViewportProps();
-        const state = this.controllerState.getState() as GlobeStateInternal;
-
         // Compute velocity from the actual positions the globe was at
         const angularDistance = Globe.angularDistance(first, last);
         const angularVelocity = angularDistance / dt;
@@ -371,7 +399,7 @@ export default class GlobeController extends Controller<MapState> {
           let endLng: number;
           let endLat: number;
 
-          if (state.startPanLockBearing) {
+          if (viewportProps.navigation === 'map') {
             // Decompose into lng/lat velocity and extrapolate linearly
             let dLng = last.longitude - first.longitude;
             if (dLng > 180) dLng -= 360;
@@ -388,8 +416,8 @@ export default class GlobeController extends Controller<MapState> {
 
             interpolator = new GlobeInertiaInterpolator({targetLongitude: endLng});
           } else {
-            // Free bearing — use single-axis rotation to maintain
-            // constant spin direction with up vector tracking.
+            // Spin around one fixed axis so position and up stay in the same
+            // rigid camera frame through poles and across the antimeridian.
             const axis = Globe.greatCircleAxis(first, last);
             const currentFrame = Globe.cameraFrame(
               viewportProps.longitude,
