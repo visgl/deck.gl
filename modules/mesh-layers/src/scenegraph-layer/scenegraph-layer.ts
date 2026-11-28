@@ -22,6 +22,11 @@ import {
   createScenegraphsFromGLTF,
   postProcessGLTF
 } from '@luma.gl/engine/gltf';
+import {
+  getPBREnvironmentBindings,
+  getPBREnvironmentUniforms,
+  type PBRLightingEnvironment
+} from '@luma.gl/engine/lighting';
 import {GLTFLoader} from '@loaders.gl/scene/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 
@@ -52,6 +57,22 @@ import {
 } from '@deck.gl/core';
 
 type GLTFInstantiatorOptions = Parameters<typeof createScenegraphsFromGLTF>[2];
+
+/**
+ * An image-based lighting environment for `ScenegraphLayer`.
+ * - `PBRLightingEnvironment` holds linear-light textures, for example the `textures` of a luma.gl
+ *   `createPrefilteredEnvironment()` result, with optional `intensity` and `rotation`.
+ * - `PBREnvironment` is the result of luma.gl `loadPBREnvironment()`.
+ */
+type ScenegraphLayerEnvironment = PBRLightingEnvironment | PBREnvironment;
+
+type EnvironmentUniforms = ReturnType<typeof getPBREnvironmentUniforms>;
+
+function isLightingEnvironment(
+  environment: ScenegraphLayerEnvironment
+): environment is PBRLightingEnvironment {
+  return 'specularTexture' in environment;
+}
 
 const DEFAULT_COLOR = [255, 255, 255, 255] as const;
 
@@ -98,15 +119,16 @@ type _ScenegraphLayerProps<DataT> = {
   _lighting?: 'flat' | 'pbr';
   /**
    * (Experimental) lighting environment. Requires `_lighting` to be `'pbr'`.
+   * The layer does not destroy the textures of the environment.
    */
   _imageBasedLightingEnvironment?:
-    | PBREnvironment
+    | ScenegraphLayerEnvironment
     | ((context: {
         device?: Device;
         /** @deprecated Use `device.handle`. */
         gl?: WebGL2RenderingContext;
         layer: ScenegraphLayer<DataT>;
-      }) => PBREnvironment);
+      }) => ScenegraphLayerEnvironment);
 
   /** @experimental GPU-resident column. */
   positions?: GPUVector | null;
@@ -219,6 +241,8 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     animator: GLTFAnimator | null;
     materials?: {destroy(): void}[] | null;
     models: Model[];
+    /** `pbrScene` uniforms of a `PBRLightingEnvironment`. */
+    environmentUniforms?: EnvironmentUniforms | null;
     firstDrawSignaled: boolean;
   } & Layer['state'];
 
@@ -283,8 +307,13 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
     if (props.scenegraph !== oldProps.scenegraph) {
       this._updateScenegraph();
-    } else if (props._animations !== oldProps._animations) {
-      this._applyAnimationsProp(this.state.animator, props._animations);
+    } else {
+      if (props._animations !== oldProps._animations) {
+        this._applyAnimationsProp(this.state.animator, props._animations);
+      }
+      if (props._imageBasedLightingEnvironment !== oldProps._imageBasedLightingEnvironment) {
+        this._updateEnvironmentControls();
+      }
     }
   }
 
@@ -371,6 +400,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const props = this.props;
     const {device} = this.context;
     let scenegraphData: any = null;
+    let environmentUniforms: EnvironmentUniforms | null = null;
     if (props.scenegraph instanceof ScenegraphNode) {
       // Signature 1: props.scenegraph is a proper luma.gl Scenegraph
       scenegraphData = {scenes: [props.scenegraph]};
@@ -381,8 +411,16 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       // Tiles3DLoader already processes GLTF
       const processedGLTF = gltf.json ? postProcessGLTF(gltf) : gltf;
 
-      const gltfObjects = createScenegraphsFromGLTF(device, processedGLTF, this._getModelOptions());
+      const environment = this._getEnvironment();
+      const gltfObjects = createScenegraphsFromGLTF(
+        device,
+        processedGLTF,
+        this._getModelOptions(environment)
+      );
       scenegraphData = gltfObjects;
+      if (environment && isLightingEnvironment(environment) && props._lighting === 'pbr') {
+        environmentUniforms = getPBREnvironmentUniforms(environment);
+      }
 
       waitForGLTFAssets(gltfObjects)
         .then(() => this.setNeedsRedraw())
@@ -412,6 +450,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         animator,
         materials: scenegraphData?.materials || null,
         models,
+        environmentUniforms,
         firstDrawSignaled: false
       });
       this.getAttributeManager()?.invalidateAll();
@@ -427,6 +466,28 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     this.state.animator = null;
     this.state.materials = null;
     this.state.models = [];
+    this.state.environmentUniforms = null;
+  }
+
+  /** Applies a new `intensity` and `rotation` without a new scenegraph. */
+  private _updateEnvironmentControls(): void {
+    const environment = this.props._imageBasedLightingEnvironment;
+    if (
+      this.state.environmentUniforms &&
+      environment &&
+      typeof environment !== 'function' &&
+      isLightingEnvironment(environment)
+    ) {
+      const {environmentIntensity, environmentRotation} = getPBREnvironmentUniforms(environment);
+      this.setState({
+        environmentUniforms: {
+          ...this.state.environmentUniforms,
+          environmentIntensity,
+          environmentRotation
+        }
+      });
+      this.setNeedsRedraw();
+    }
   }
 
   private _applyAnimationsProp(animator: GLTFAnimator | null, animationsProp: any): void {
@@ -468,20 +529,37 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       });
   }
 
-  private _getModelOptions(): GLTFInstantiatorOptions {
+  private _getEnvironment(): ScenegraphLayerEnvironment | undefined {
     const {_imageBasedLightingEnvironment} = this.props;
+    if (typeof _imageBasedLightingEnvironment === 'function') {
+      return _imageBasedLightingEnvironment({
+        device: this.context.device,
+        gl: this.context.gl,
+        layer: this
+      });
+    }
+    return _imageBasedLightingEnvironment || undefined;
+  }
 
+  private _getModelOptions(environment?: ScenegraphLayerEnvironment): GLTFInstantiatorOptions {
+    const shaders = this.getShaders();
     let env: PBREnvironment | undefined;
-    if (_imageBasedLightingEnvironment) {
-      if (typeof _imageBasedLightingEnvironment === 'function') {
-        env = _imageBasedLightingEnvironment({
-          device: this.context.device,
-          gl: this.context.gl,
-          layer: this
-        });
-      } else {
-        env = _imageBasedLightingEnvironment;
+    if (environment && isLightingEnvironment(environment)) {
+      // The glTF parser of luma.gl reads only `.texture` from each entry of a `PBREnvironment`.
+      const {pbr_diffuseEnvSampler, pbr_specularEnvSampler, pbr_brdfLUT} =
+        getPBREnvironmentBindings(environment);
+      env = {
+        diffuseEnvSampler: {texture: pbr_diffuseEnvSampler},
+        specularEnvSampler: {texture: pbr_specularEnvSampler},
+        brdfLutTexture: {texture: pbr_brdfLUT}
+      } as unknown as PBREnvironment;
+      if (this.props._lighting === 'pbr') {
+        // The textures are linear and prefiltered. This define selects the shader path that
+        // does not decode sRGB and that applies the `pbrScene` environment uniforms.
+        shaders.defines = {...shaders.defines, USE_SCENE_ENVIRONMENT: 1};
       }
+    } else {
+      env = environment;
     }
 
     const parameters =
@@ -500,7 +578,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         bufferLayout:
           this.state.columns?.getBufferLayouts() ?? this.getAttributeManager()!.getBufferLayouts(),
         parameters,
-        ...this.getShaders()
+        ...shaders
       },
       // tangents are not supported
       useTangents: false
@@ -545,7 +623,8 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
         model.shaderInputs.setProps({
           pbrProjection: pbrProjectionProps,
-          scenegraph: scenegraphProps
+          scenegraph: scenegraphProps,
+          ...(this.state.environmentUniforms && {pbrScene: this.state.environmentUniforms})
         });
         if (this.state.columns) {
           this.state.columns.draw(model, renderPass, (offset, rowCount) => {
