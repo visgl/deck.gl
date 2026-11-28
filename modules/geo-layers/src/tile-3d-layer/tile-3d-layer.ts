@@ -527,9 +527,11 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         let {layer} = layerCache;
         if (tile.selected) {
           // render selected tiles
-          if (!layer && !deferredTiles.has(tile)) {
-            // create layer
-            layer = this._getSubLayer(tile);
+          if (!layer) {
+            // create layer, unless it waits for a later frame
+            if (!deferredTiles.has(tile)) {
+              layer = this._getSubLayer(tile);
+            }
           } else if (layerCache.needsUpdate) {
             // props have changed, rerender layer
             layer = this._getSubLayer(tile, layer);
