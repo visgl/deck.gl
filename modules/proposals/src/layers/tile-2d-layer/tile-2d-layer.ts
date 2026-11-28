@@ -98,7 +98,8 @@ const defaultProps: DefaultProps<Tile2DLayerProps> = {
   debounceTime: 0,
   zoomOffset: 0,
   visibleMinZoom: null,
-  visibleMaxZoom: null
+  visibleMaxZoom: null,
+  _maxNewTilesPerFrame: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 1}
 };
 
 /** Internal defaults used to detect whether layer props were explicitly overridden. */
@@ -177,6 +178,8 @@ export type Tile2DLayerProps<DataT = unknown> = CompositeLayerProps & {
   visibleMinZoom?: number | null;
   /** Upper bound for rendering a viewport. */
   visibleMaxZoom?: number | null;
+  /** (Experimental) Maximum new tile sub-layers per frame; tiles hidden in every view wait. */
+  _maxNewTilesPerFrame?: number;
 };
 
 /** Picking info returned from {@link Tile2DLayer}. */
@@ -210,6 +213,8 @@ type Tile2DLayerState<DataT> = {
   tileLayers: Map<string, Layer[]>;
   /** Subscription disposer for tileset events. */
   unsubscribeTilesetEvents: (() => void) | null;
+  /** Frame request that creates the sub-layers deferred by `_maxNewTilesPerFrame`. */
+  nextTilesFrame?: number;
 };
 
 /** Composite layer that can reuse a shared {@link Tileset2D} across layers and views. */
@@ -247,6 +252,9 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
 
   /** Finalizes owned resources and detaches from any shared tileset. */
   finalizeState(): void {
+    if (this.state.nextTilesFrame !== undefined) {
+      cancelAnimationFrame(this.state.nextTilesFrame);
+    }
     this.state.unsubscribeTilesetEvents?.();
     for (const tilesetView of this.state.tilesetViews.values()) {
       tilesetView.finalize();
@@ -615,15 +623,56 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
     info.sourceTileSubLayer.updateAutoHighlight(info);
   }
 
+  /** Returns tiles hidden in every view whose sub-layers wait to stay within `_maxNewTilesPerFrame`. */
+  private _getDeferredTiles(tileset: Tileset2D<DataT, any>): Set<Tile2DHeader<DataT>> | null {
+    const {_maxNewTilesPerFrame} = this.props;
+    if (_maxNewTilesPerFrame === Number.MAX_SAFE_INTEGER) {
+      return null;
+    }
+    const {tileLayers, tilesetViews} = this.state;
+    const newTiles = tileset.tiles.filter(
+      tile => (tile.isLoaded || tile.content) && !tileLayers.has(tile.id)
+    );
+    // Tiles visible in any view are always created, so that pacing never opens a hole. At least
+    // one hidden tile is created too, so that hidden tiles advance while visible ones fill the
+    // limit.
+    const views = Array.from(tilesetViews.values());
+    const hiddenTiles = newTiles.filter(tile => !views.some(view => view.isTileVisible(tile)));
+    const maxHiddenTiles = Math.max(
+      _maxNewTilesPerFrame - (newTiles.length - hiddenTiles.length),
+      1
+    );
+    if (hiddenTiles.length <= maxHiddenTiles) {
+      return null;
+    }
+
+    // Create the coverage most likely to be shown next first, and tiles no view needs last
+    const priorities = new Map<Tile2DHeader<DataT>, number>();
+    for (const tile of hiddenTiles) {
+      const priority = tileset._getRequestPriority(tile);
+      priorities.set(tile, priority < 0 ? Number.MAX_SAFE_INTEGER : priority);
+    }
+    hiddenTiles.sort((a, b) => priorities.get(a)! - priorities.get(b)!);
+
+    // `setNeedsUpdate` has no effect during an update, so request it from the next frame
+    this.state.nextTilesFrame ??= requestAnimationFrame(() => {
+      const layer = this._getCurrentTilesetLayer();
+      layer.state.nextTilesFrame = undefined;
+      layer.setNeedsUpdate();
+    });
+    return new Set(hiddenTiles.slice(maxHiddenTiles));
+  }
+
   /** Renders cached or newly generated sub-layers for each loaded tile. */
   renderLayers(): Layer | null | LayersList {
     const {tileset, tileLayers} = this.state;
     if (!tileset) {
       return null;
     }
+    const deferredTiles = this._getDeferredTiles(tileset);
     return tileset.tiles.map(tile => {
       let layers = tileLayers.get(tile.id);
-      if (!tile.isLoaded && !tile.content) {
+      if ((!tile.isLoaded && !tile.content) || deferredTiles?.has(tile)) {
         return layers;
       }
       if (!layers) {

@@ -75,6 +75,8 @@ The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, 
 
 - [`TileLayer`](./api-reference/geo-layers/tile-layer.md#lodstrategy) and [`TerrainLayer`](./api-reference/geo-layers/terrain-layer.md) accept `lodStrategy: 'coverage'`. Alongside the tiles in view, the layer requests their lower resolution ancestors and shows them while sharper tiles load, which reduces blank areas during camera transitions. The default, `'none'`, keeps the current behavior.
 
+- [`TileLayer`](./api-reference/geo-layers/tile-layer.md#_maxnewtilesperframe) accepts an experimental `_maxNewTilesPerFrame` prop that spreads the sublayer creation of hidden tiles, such as prefetched coverage, over several frames. Visible tiles are always created right away.
+
 ### Aggregation Layers
 
 - [GridLayer](./api-reference/aggregation-layers/grid-layer.md), [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md), [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md), and [ContourLayer](./api-reference/aggregation-layers/contour-layer.md) now accept [custom aggregators](./api-reference/aggregation-layers/aggregator.md) with GPUVector results.

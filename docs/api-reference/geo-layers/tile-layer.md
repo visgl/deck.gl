@@ -390,6 +390,12 @@ Affects both rendering and tile fetching to produce a transformed tile layer.  N
 
 - Default: `null`
 
+#### `_maxNewTilesPerFrame` (number, optional) {#_maxnewtilesperframe}
+
+- Default: no limit
+
+Maximum number of loaded tiles that get sublayers per frame. Creating sublayers generates their attributes and uploads them to the GPU, so many tiles loading at once can stall a frame. Visible tiles are always created right away and count toward the limit. Hidden tiles, such as those prefetched by [`lodStrategy`](#lodstrategy), are created on later frames in request order. At least one hidden tile is created per frame, even when visible tiles use up the limit.
+
 ### Callbacks
 
 #### `onViewportLoad` (Function, optional) {#onviewportload}

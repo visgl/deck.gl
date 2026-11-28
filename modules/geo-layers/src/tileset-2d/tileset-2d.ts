@@ -691,8 +691,12 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
   /** Memoized conversion of screen culling rectangles to world bounds. */
   private _getCullBounds = memoize(getCullBounds);
 
-  /** Prioritizes requested tiles while retaining the default-view center-distance ordering. */
-  private _getRequestPriority(tile: Tile2DHeader): number {
+  /**
+   * Request priority of a tile across views: lower values load first, and negative values mark
+   * tiles that no view needs.
+   * @experimental
+   */
+  _getRequestPriority(tile: Tile2DHeader): number {
     if (this._consumers.size) {
       let visible = tile.isVisible;
       if (tile.isSelected) return 0;

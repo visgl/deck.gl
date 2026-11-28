@@ -146,4 +146,6 @@ Standard applications do not need a custom adapter. `Tileset2DAdapter<ViewStateT
 
 Low-level `attachConsumer(id)`, `updateConsumer(id, selectedTiles, visibleTiles, prefetchTiles?)`, and `detachConsumer(id)` control retention for custom consumers. `getTile(index, true)` starts or reuses a request; `getPrefetchTiles(viewport, selectedTiles)` starts or reuses the coverage requests of a view; `prepareTiles()` synchronizes the tile tree before refinement. Normal `Tile2DLayer` applications must not call these methods themselves.
 
+The experimental `_getRequestPriority(tile)` returns the request priority of a tile across consumers: lower values load first, and negative values mean that no consumer needs the tile.
+
 See the [shared-tileset example](/examples-v10/shared-tile-2d-layer) for ownership, subscriptions, and multiple consumers in one application.
