@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {MapView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {MapView, GlobeView} from '@deck.gl/core';
 import {PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
 import {describe} from 'vitest';

@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import {device, testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
-import {Deck, LayerManager, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Deck, LayerManager, MapView, GlobeView} from '@deck.gl/core';
 import {SimpleMeshLayer} from 'deck.gl';
 import {CubeGeometry, TruncatedConeGeometry} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';

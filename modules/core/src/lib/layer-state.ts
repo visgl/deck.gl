@@ -3,8 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 // deck.gl, MIT license
-import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
-import {equalLoaderOptions} from '../utils/loader-utils';
+import type {ResolvedScale} from '@math.gl/core/color';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection-core';
+import {compareLoaderOptions} from '@loaders.gl/core';
 import ComponentState from '../lifecycle/component-state';
 
 import Layer from './layer';
@@ -42,6 +43,8 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     pending: boolean;
     table?: Table;
     columns?: Record<string, Vector>;
+    /** Resolved scales for the colors currently applied to the layer. */
+    scales?: Readonly<Record<string, ResolvedScale>>;
   };
   /** Options and parser used by the current data request. */
   private dataRequest?: {
@@ -156,7 +159,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
             options: isURL ? layer.getLoadOptions() : undefined
           }
         : undefined;
-    const changed = !equalLoaderOptions(this.dataRequest, request);
+    const changed = !compareLoaderOptions(this.dataRequest, request);
     this.dataRequest = request;
     return changed;
   }

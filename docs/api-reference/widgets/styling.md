@@ -52,13 +52,13 @@ This lets application customize the appearance of widgets beyond the default lig
 ### Customizing themes in TypeScript
 
 ```ts
-import type {Theme} from '@deck.gl/widgets';
+import type {DeckWidgetTheme} from '@deck.gl/widgets';
 import {DarkTheme} from '@deck.gl/widgets';
 
 const CustomTheme = {
   ...DarkTheme,
   ...
-} satisfies Theme;
+} satisfies DeckWidgetTheme;
 ```
 
 ### Customizing themes in CSS

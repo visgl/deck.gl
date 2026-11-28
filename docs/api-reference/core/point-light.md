@@ -30,7 +30,7 @@ The constructor for the `PointLight` class. Use this to create a new `PointLight
 const pointLight = new PointLight({color, intensity, position});
 ```
 
-* `color` - (number[3],)  RGB color of point light source, default value is `[255, 255, 255]`.
+* `color` - (number[3],)  RGB color of point light source, default value is `[255, 255, 255]`. Custom RGB arrays use 0–1 channels when Deck’s [`normalizedColors`](./deck.md#normalizedcolors) is enabled and 0–255 channels otherwise.
 * `intensity` - (number) Strength of point light source, default value is `1.0`.
 * `position` - (number[3])  Location of point light source, default value is `[0, 0, 1]`.The coordinate system of the position depends on the current [view](./deck.md#views): `[longitude, latitude, altitude]` in geospatial views and world position in non-geospatial views.
 * `attenuation` = (number[3]) Light attenuation coefficients: `[C_constant, C_linear, C_quadratic]`. Reduces the intensity based on the distance `D` from the light:

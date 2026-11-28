@@ -5,7 +5,7 @@
 import React, {useState, useMemo, useCallback} from 'react';
 import {scaleLinear} from 'd3-scale';
 import {createRoot} from 'react-dom/client';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import {MapView, _GlobeView as GlobeView, TerrainController} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
@@ -111,9 +111,10 @@ export default function App({
   const view = useMemo(
     () =>
       globeView
-        ? new GlobeView({id: 'view', controller: true})
+        ? new GlobeView({id: 'view', controller: true, minimumElevation: -500})
         : new MapView({
             id: 'view',
+            minimumElevation: -500,
             controller: {type: TerrainController, touchRotate: true, inertia: 500}
           }),
     [globeView]

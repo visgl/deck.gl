@@ -28,13 +28,11 @@ export class TerrainEffect implements Effect {
   /** A texture encoding the ground elevation, updated once per redraw. Used by layers with offset mode */
   private heightMap?: HeightMapBuilder;
   private terrainPass!: TerrainPass;
-  private supportsDraping = true;
   private terrainPickingPass!: TerrainPickingPass;
   /** One texture for each primitive terrain layer, into which the draped layers render */
   private terrainCovers: Map<string, TerrainCover> = new Map();
 
   setup({device, deck}: EffectContext) {
-    this.supportsDraping = device.type !== 'webgpu';
     this.dummyHeightMap = device.createTexture({
       width: 1,
       height: 1,
@@ -64,7 +62,7 @@ export class TerrainEffect implements Effect {
     const {viewports} = opts;
     const isPicking = opts.pass.startsWith('picking');
     this.isPicking = isPicking;
-    this.isDrapingEnabled = this.supportsDraping;
+    this.isDrapingEnabled = true;
 
     // TODO - support multiple views?
     const viewport = viewports[0];
@@ -84,8 +82,6 @@ export class TerrainEffect implements Effect {
         this._updateHeightMap(terrainLayers, viewport, opts);
       }
     }
-
-    if (!this.supportsDraping) return;
 
     const drapeLayers = layers.filter(l => l.state.terrainDrawMode === 'drape');
     // Filter out the terrain effect itself to avoid feedback loops when rendering terrain covers

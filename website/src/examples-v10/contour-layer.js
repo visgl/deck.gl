@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, {Component} from 'react';
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import App, {BANDS, LINES} from 'v10-website-examples/contour/app';
 
 import {makeExample} from '../components';
@@ -18,12 +18,6 @@ class ContourDemo extends Component {
 
   /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
-
-  /** Data sources loaded before rendering the demo. */
-  static data = {
-    url: `${DATA_URI}/covid-by-county.txt`,
-    worker: '/workers/contour-data-decoder.js'
-  };
 
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/contour`;
@@ -44,7 +38,7 @@ class ContourDemo extends Component {
       min: 30000,
       max: 100000
     },
-    week: {displayName: 'Week', type: 'range', value: 30, step: 1, min: 0, max: 30}
+    week: {displayName: 'Week', type: 'range', value: 30, step: 1, min: 0, max: 86}
   };
 
   /** Base map style used by the demo. */
@@ -87,16 +81,12 @@ class ContourDemo extends Component {
   /** Initializes the demo after its container mounts. */
   componentDidMount() {
     this.updateSummary();
-    this.updateOptions();
   }
 
   /** Updates the demo when its inputs change. */
   componentDidUpdate(oldProps) {
     if (this.props.params.week !== oldProps.params.week) {
       this.updateSummary();
-    }
-    if (this.props.data !== oldProps.data) {
-      this.updateOptions();
     }
   }
 
@@ -116,31 +106,10 @@ class ContourDemo extends Component {
     });
   }
 
-  /** Updates the available controls from the loaded data. */
-  updateOptions() {
-    /** Provides data for the example. */
-    const {data} = this.props;
-    if (data) {
-      /** Provides max week for the example. */
-      let maxWeek = 0;
-      for (const d of data) {
-        /** Provides weeks for the example. */
-        const weeks = Object.keys(d.casesByWeek)
-          .map(Number)
-          .sort((a, b) => a - b);
-        maxWeek = Math.max(maxWeek, weeks.pop());
-      }
-      this.props.useParam({
-        ...ContourDemo.parameters,
-        week: {...ContourDemo.parameters.week, max: maxWeek}
-      });
-    }
-  }
-
   /** Renders the Arrow demo with the current controls and data. */
   render() {
     /** Provides params, data for the example. */
-    const {params, data} = this.props;
+    const {params} = this.props;
     /** Provides cell size for the example. */
     const cellSize = params.cellSize.value;
     /** Provides week for the example. */
@@ -150,9 +119,9 @@ class ContourDemo extends Component {
 
     return (
       <App
-        {...this.props}
+        mapStyle={this.props.mapStyle}
+        device={this.props.device}
         key={this.props.device?.type}
-        data={data}
         contours={style === 'Isoband' ? BANDS : LINES}
         cellSize={cellSize}
         week={week}

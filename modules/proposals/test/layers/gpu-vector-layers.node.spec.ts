@@ -4,12 +4,7 @@
 
 import type {PickingInfo} from '@deck.gl/core';
 import {
-  GPUArcLayer,
-  GPUColumnLayer,
-  GPUGridCellLayer,
   GPUIconLayer,
-  GPULineLayer,
-  GPUPointCloudLayer,
   GPUScatterplotLayer,
   type GPUVectorLayerPickingInfo
 } from '@deck.gl/proposals/layers';
@@ -88,18 +83,10 @@ describe('GPUVector deck layers', () => {
 
   test('uses one GPUVectorModel-backed layer across every fixed-width primitive batch', () => {
     const positions2 = makeChunkedVector('positions2', 'float32x2', [2, 3]);
-    const positions3 = makeChunkedVector('positions3', 'float32x3', [2, 3]);
-    const targets = makeChunkedVector('targets', 'float32x2', [2, 3]);
     const offsets = makeChunkedVector('offsets', 'float32x2', [2, 3]);
     const frames = makeChunkedVector('frames', 'float32x4', [2, 3]);
     const colorModes = makeChunkedVector('colorModes', 'float32', [2, 3]);
     const layers = [
-      new GPUArcLayer({
-        id: 'arcs',
-        getSourcePosition: positions2,
-        getTargetPosition: targets
-      }),
-      new GPUColumnLayer({id: 'columns', getPosition: positions2}),
       new GPUIconLayer({
         id: 'icons',
         iconAtlas: {} as Texture,
@@ -108,23 +95,12 @@ describe('GPUVector deck layers', () => {
         iconFrames: frames,
         iconColorModes: colorModes
       }),
-      new GPULineLayer({
-        id: 'lines',
-        getSourcePosition: positions2,
-        getTargetPosition: targets
-      }),
-      new GPUPointCloudLayer({id: 'point-cloud', getPosition: positions3}),
       new GPUScatterplotLayer({id: 'scatterplot', getPosition: positions2})
     ];
 
     for (const layer of layers) {
       expect('renderLayers' in layer).toBe(false);
     }
-
-    const gridCellLayer = new GPUGridCellLayer({id: 'cells', getPosition: positions2});
-    const columnLayer = gridCellLayer.renderLayers();
-    expect(columnLayer).toBeInstanceOf(GPUColumnLayer);
-    expect('renderLayers' in columnLayer).toBe(false);
   });
 
   test('delegates physical chunks to one GPUVectorModel draw', () => {

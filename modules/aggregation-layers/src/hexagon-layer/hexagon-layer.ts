@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ArrowAccessor} from '@deck.gl/core';
 import {WebGPUHexagonAggregator} from './webgpu-hexagon-aggregator';
 import {project} from '@deck.gl/core';
 
@@ -43,7 +44,7 @@ const defaultProps: DefaultProps<HexagonLayerProps> = {
   colorDomain: null,
   colorRange: defaultColorRange,
   getColorValue: {type: 'accessor', value: null}, // default value is calculated from `getColorWeight` and `colorAggregation`
-  getColorWeight: {type: 'accessor', value: 1},
+  getColorWeight: {type: 'accessor', arrow: 'row', value: 1},
   colorAggregation: 'SUM',
   lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   upperPercentile: {type: 'number', min: 0, max: 100, value: 100},
@@ -54,7 +55,7 @@ const defaultProps: DefaultProps<HexagonLayerProps> = {
   elevationDomain: null,
   elevationRange: [0, 1000],
   getElevationValue: {type: 'accessor', value: null}, // default value is calculated from `getElevationWeight` and `elevationAggregation`
-  getElevationWeight: {type: 'accessor', value: 1},
+  getElevationWeight: {type: 'accessor', arrow: 'row', value: 1},
   elevationAggregation: 'SUM',
   elevationScale: {type: 'number', min: 0, value: 1},
   elevationLowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
@@ -65,7 +66,7 @@ const defaultProps: DefaultProps<HexagonLayerProps> = {
   // hexbin
   radius: {type: 'number', min: 1, value: 1000},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
+  getPosition: {type: 'accessor', arrow: 'row', value: (x: any) => x.position},
   hexagonAggregator: {type: 'function', optional: true, value: null},
   extruded: false,
 
@@ -102,6 +103,7 @@ type _HexagonLayerProps<DataT> = {
 
   /**
    * Default: [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`
+   * Custom plain-array entries are 0–1 when Deck normalizedColors is enabled.
    */
   colorRange?: Color[];
 
@@ -205,13 +207,13 @@ type _HexagonLayerProps<DataT> = {
    * Method called to retrieve the position of each object.
    * @default object => object.position
    */
-  getPosition?: Accessor<DataT, Position>;
+  getPosition?: ArrowAccessor<DataT, Position>;
 
   /**
    * The weight of a data object used to calculate the color value for a cell.
    * @default 1
    */
-  getColorWeight?: Accessor<DataT, number>;
+  getColorWeight?: ArrowAccessor<DataT, number>;
 
   /**
    * After data objects are aggregated into cells, this accessor is called on each cell to get the value that its color is based on.
@@ -224,7 +226,7 @@ type _HexagonLayerProps<DataT> = {
    * The weight of a data object used to calculate the elevation value for a cell.
    * @default 1
    */
-  getElevationWeight?: Accessor<DataT, number>;
+  getElevationWeight?: ArrowAccessor<DataT, number>;
 
   /**
    * After data objects are aggregated into cells, this accessor is called on each cell to get the value that its elevation is based on.
@@ -750,6 +752,7 @@ export default class HexagonLayer<
         hexOriginCommon,
         elevationScale,
         colorRange,
+        normalizedColorRange: this.usesNormalizedColors() && colorRange !== defaultColorRange,
         colorScaleType,
         elevationRange,
         extruded,

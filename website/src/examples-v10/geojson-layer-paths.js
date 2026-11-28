@@ -4,7 +4,7 @@
 
 import React, {Component} from 'react';
 import {readableInteger} from '../utils/format-utils';
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import App, {COLOR_SCALE} from 'v10-website-examples/highway/app';
 
 import {makeExample} from '../components';
@@ -13,18 +13,6 @@ import {makeExample} from '../components';
 class HighwayDemo extends Component {
   /** Title shown above the example controls. */
   static title = 'Highway Safety in the US';
-
-  /** Data sources loaded before rendering the demo. */
-  static data = [
-    {
-      url: `${DATA_URI}/highway-accidents.txt`,
-      worker: '/workers/highway-accidents-decoder.js'
-    },
-    {
-      url: `${DATA_URI}/highway-roads.txt`,
-      worker: '/workers/highway-roads-decoder.js'
-    }
-  ];
 
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/highway`;
@@ -80,10 +68,7 @@ class HighwayDemo extends Component {
         </p>
         <div className="layout">
           <div className="stat col-1-2">
-            No. of Paths<b>{readableInteger(meta.count) || 0}</b>
-          </div>
-          <div className="stat col-1-2">
-            No. of Vertices<b>{readableInteger(meta.vertexCount || 0)}</b>
+            Road features<b>{readableInteger(meta.count) || 0}</b>
           </div>
         </div>
       </div>
@@ -99,8 +84,7 @@ class HighwayDemo extends Component {
       <App
         {...otherProps}
         year={params.year.value}
-        accidents={data && data[0]}
-        roads={data && data[1]}
+        onDataLoad={stats => this.props.onStateChange(stats)}
       />
     );
   }

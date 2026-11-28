@@ -195,7 +195,7 @@ On a WebGPU device, HexagonLayer aggregates in compute shaders when `gpuAggregat
 Automatic domains, picking, domain callbacks, quantile and ordinal scales and percentiles copy
 results back to the CPU after each change. Until the copy lands, the previous cells stay visible
 and cannot be picked. With `colorDomain`, `elevationDomain`, linear or quantize scales and default
-percentiles, new cells draw without waiting. Extensions work with accessor data.
+percentiles, new cells draw without waiting. Extensions work with accessor data and [supported GPU columns](./aggregator.md#gpu-column-extensions).
 [GPU column inputs](./aggregator.md#gpu-column-inputs) also need `dataBounds`.
 Data over the device buffer limits uses CPU aggregation.
 

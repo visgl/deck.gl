@@ -2,14 +2,18 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState, useCallback} from 'react';
+import React, {useMemo, useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
 import {tableFromArrays} from 'apache-arrow';
-import {JSONTableLoader} from '@loaders.gl/tables/json';
+import {ParquetLoader} from '@loaders.gl/tables/parquet';
+import parquetWorkerUrl from '@loaders.gl/tables/parquet/parquet-worker.js?url';
+import {isArrowTable} from '@math.gl/core/arrow';
 
 import IconClusterLayer from './icon-cluster-layer';
 import type {IconClusterLayerPickingInfo} from './icon-cluster-layer';
@@ -17,9 +21,9 @@ import type {LayerData, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {IconLayerProps} from '@deck.gl/layers';
 import {Device} from '@luma.gl/core';
 
-// Source data JSON
+// Full meteorite landings table
 const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/icon/meteorites.json'; // eslint-disable-line
+  'https://media.githubusercontent.com/media/visgl/deck.gl-data/479ec6c4c9788b2e80df9a1fe3e42443208523e2/examples/icon/meteorites.parquet';
 
 const MAP_VIEW = new MapView({repeat: true});
 const INITIAL_VIEW_STATE: MapViewState = {
@@ -80,18 +84,22 @@ function renderTooltip(info: IconClusterLayerPickingInfo<Meteorite>) {
 export default function App({
   device,
   data = DATA_URL,
-  iconMapping = 'data/location-icon-mapping.json',
-  iconAtlas = 'data/location-icon-atlas.png',
+  onDataLoad,
+  iconMapping = new URL('./data/location-icon-mapping.json', import.meta.url).href,
+  iconAtlas = new URL('./data/location-icon-atlas.png', import.meta.url).href,
   showCluster = true,
   mapStyle = MAP_STYLE
 }: {
   device?: Device;
   showCluster?: boolean;
   data?: string | Meteorite[];
+  /** Called after data loads with the total row count, before visibility or filtering. */
+  onDataLoad?: (count: number) => void;
   iconMapping?: string;
   iconAtlas?: string;
   mapStyle?: string;
 }) {
+  const widgets = useMemo(() => [new LoadingWidget()], []);
   const [hoverInfo, setHoverInfo] = useState<IconClusterLayerPickingInfo<Meteorite> | null>(null);
 
   const hideTooltip = useCallback(() => {
@@ -107,10 +115,19 @@ export default function App({
 
   const layerProps: IconLayerProps<Meteorite> = {
     id: 'icon',
-    // Sample row: {coordinates: [28.96, 13.66033], name: "Al Zarnkh", class: "LL5", mass: "700", year: 2001}
+    // Sample row: {coordinates: [-5.86666, 30.23322], name: "Northwest Africa 724", class: "LL3", mass: 1200, year: 0}
     data,
+    loaders: [ParquetLoader],
+    loadOptions: {parquet: {workerUrl: parquetWorkerUrl}},
+    onDataLoad: table => {
+      if (isArrowTable(table)) {
+        onDataLoad?.(table.numRows);
+      } else if (Array.isArray(table)) {
+        onDataLoad?.(table.length);
+      }
+    },
     pickable: true,
-    getPosition: d => d.coordinates,
+    getPosition: d => Array.from(d.coordinates) as [number, number],
     iconAtlas,
     iconMapping
   };
@@ -124,7 +141,6 @@ export default function App({
     : new IconLayer({
         ...layerProps,
         id: 'icon',
-        loaders: [JSONTableLoader],
         dataTransform: <LayerDataT = LayerData<unknown>>(source: unknown): LayerDataT => {
           if (!Array.isArray(source)) {
             return source as LayerDataT;
@@ -137,7 +153,7 @@ export default function App({
             year: source.map(meteorite => meteorite.year)
           }) as LayerDataT;
         },
-        getPosition: {sql: 'FLOAT64x2(LIST_EXTRACT(coordinates, 1), LIST_EXTRACT(coordinates, 2))'},
+        getPosition: {sql: 'coordinates::ARRAY[2]'},
         getIcon: () => 'marker',
         sizeUnits: 'meters',
         sizeScale: 2000,
@@ -145,6 +161,7 @@ export default function App({
       });
   return (
     <DeckGL
+      widgets={widgets}
       device={device}
       layers={[layer]}
       views={MAP_VIEW}
@@ -160,6 +177,7 @@ export default function App({
   );
 }
 
+/** Mounts the standalone example. */
 export function renderToDOM(container: HTMLDivElement) {
   createRoot(container).render(<App />);
 }

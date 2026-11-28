@@ -314,3 +314,38 @@ test('TextLayer - fontAtlasCacheLimit', () => {
   });
   testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
+
+test('TextLayer forwards normalized glyph, background and border colors', () => {
+  testLayer({
+    Layer: TextLayer,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          data: [{position: [0, 0], text: 'A'}],
+          background: true,
+          getColor: [1, 0.5, 0],
+          getBorderColor: () => [0, 0.5, 1, 0]
+        }
+      },
+      {
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({subLayers}) => {
+          const glyph = subLayers.find(layer => layer.id.endsWith('-characters'))!;
+          const background = subLayers.find(layer => layer.id.endsWith('-background'))!;
+          expect(glyph.props.getColor).toEqual([255, 128, 0, 255]);
+          expect(background.props.getFillColor).toEqual([255, 255, 255, 255]);
+          expect(
+            Array.from(
+              background.getAttributeManager()!.attributes.instanceLineColors.value!.slice(0, 4)
+            )
+          ).toEqual([0, 128, 255, 0]);
+        }
+      }
+    ]
+  });
+});

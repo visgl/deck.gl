@@ -128,6 +128,23 @@ new deck.BitmapLayer({});
 ```
 
 
+### Render an image on a triangle mesh
+
+Pair [`positions`](#positions) with [`texCoords`](#texcoords) to map an image onto a custom mesh.
+
+```ts
+import {BitmapLayer} from '@deck.gl/layers';
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+
+const xy = new FixedSizeList(2, new Field('value', new Float32(), false));
+const layer = new BitmapLayer({
+  id: 'image-triangle',
+  image: '/image.png',
+  positions: vectorFromArray([[-122, 37], [-121, 37], [-122, 38]], xy),
+  texCoords: vectorFromArray([[0, 1], [1, 1], [0, 0]], xy)
+});
+```
+
 ## Properties
 
 ### Data
@@ -148,6 +165,9 @@ The image data will be converted to a [Texture](https://luma.gl/docs/api-referen
 
 #### `bounds` (number[4] | Position[4]) {#bounds}
 
+When supplied, `positions` replaces the quad from `bounds`. With GPU-only positions,
+`bounds` still sets the footprint for view fitting.
+
 Supported formats:
 
 - Coordinates of the bounding box of the bitmap `[left, bottom, right, top]`
@@ -155,6 +175,78 @@ Supported formats:
 
 `left` and `right` refers to the world longitude/x at the corresponding side of the image.
 `top` and `bottom` refers to the world latitude/y at the corresponding side of the image.
+
+#### `positions` (object, optional) {#positions}
+
+* Default: `null`
+
+Mesh vertex positions, replacing the quad from `bounds`. Accepts numeric Arrow XY/XYZ
+fixed-size lists or a `float32x2`/`float32x3` GPUVector. With GPU-only positions,
+set `bounds` to the footprint for view fitting.
+
+#### `texCoords` (object, optional) {#texcoords}
+
+* Default: `null`
+
+Texture coordinates per vertex as Arrow XY fixed-size lists or a `float32x2` GPUVector.
+Supply with `positions` and the same vertex count. `(0, 0)` is the image's top-left corner.
+These coordinates take precedence over `_imageCoordinateSystem`.
+
+#### `indices` (object, optional) {#indices}
+
+* Default: `null`
+
+Optional `uint16` or `uint32` triangle indices. Without indices, every three vertices form
+a triangle. Removing all mesh props restores the quad from `bounds`.
+
+Remarks for `positions`, `texCoords` and `indices`:
+
+* Each input must be a single Arrow chunk or GPU buffer.
+* GPUVector inputs remain owned by the application. Keep them alive while the layer uses them.
+* GPU-only positions require a view that does not convert positions on the CPU.
+* Mesh inputs cannot be async iterables, and mesh changes do not transition.
+* Mesh inputs cannot be combined with a positive `_projectionTolerance`.
+* Pass a new Arrow vector to update the mesh. See [Using with Arrow](../../developer-guide/using-with-arrow.md#loading-and-updates).
+
+#### `imageMapping` (object, optional) {#imagemapping}
+
+* Default: `null`
+
+Use `imageMapping` when the image and mesh use different projections, such as a Web Mercator
+image draped on a longitude/latitude mesh. The layer computes `texCoords` for each vertex.
+
+- `bounds` is the image rectangle `[left, bottom, right, top]` in `imageCRS` units.
+- `imageCRS` describes the image rectangle, for example a PROJ string for Web Mercator.
+- `positionCRS` describes the raw mesh positions. Omit it to use the layer's absolute
+  [`coordinateSystem`](../core/layer.md#coordinatesystem) when it has no model matrix or coordinate
+  offset. Keep an explicit `positionCRS` consistent with the rendered positions.
+- `maxEdgeLength` optionally splits edges longer than this positive length in source position
+  units. Edge length includes Z. Omit it to keep the supplied triangles.
+
+Without `positions`, the layer builds the mesh from its [`bounds`](#bounds), using the view's
+subdivision step. Coordinates outside the image rectangle sample according to
+[`textureParameters`](#textureparameters).
+
+```ts
+new BitmapLayer({
+  image,
+  positions, // Arrow longitude/latitude positions in degrees
+  coordinateSystem: 'lnglat',
+  imageMapping: {
+    bounds: [left, bottom, right, top], // Web Mercator meters
+    imageCRS: '+proj=merc +a=6378137 +b=6378137 +units=m'
+  }
+});
+```
+
+Remarks:
+
+* `imageMapping` replaces `texCoords` and the experimental `_imageCoordinateSystem` for this mesh.
+  The experimental setting remains available for bounds-only rendering without a mapping.
+* Positions must be CPU-readable Arrow columns. GPU-only meshes require explicit `texCoords`.
+* Split projection seams and clip to the image CRS's valid area before supplying the mesh.
+* Cannot be combined with a positive `_projectionTolerance`.
+* Very small `maxEdgeLength` values can exceed refinement limits and raise an error.
 
 #### `_projectionTolerance` (number, optional) {#_projectiontolerance}
 

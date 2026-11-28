@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import evaluateChildren from '@deck.gl/react/utils/evaluate-children';
+import evaluateChildren from '@deck.gl/react/legacy/utils/evaluate-children';
 import React, {createElement} from 'react';
 
 const TEST_CHILD_PROPS = {zIndex: 1};
