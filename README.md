@@ -88,6 +88,12 @@ pip install pydeck
 * [vis.gl Medium blog](https://medium.com/vis-gl)
 * [deck.gl Slack workspace](https://slack-invite.openjsf.org/)
 
+## Agent Skills
+
+An agent-agnostic plugin marketplace at [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json)
+registers [`plugins/deckgl`](plugins/deckgl), with [agent skills](https://agentskills.io/) for layers, base maps
+and performance, plus Codex and Claude Code manifests.
+
 ## Contributing
 
 deck.gl is part of vis.gl, an [OpenJS Foundation](https://openjsf.org/) project. Read the [contribution guidelines](/CONTRIBUTING.md) if you are interested in contributing.
