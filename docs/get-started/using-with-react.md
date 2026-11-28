@@ -1,6 +1,6 @@
 # Using deck.gl with React
 
-[`@deck.gl/react`](../api-reference/react/overview.md) is a React renderer for deck.gl. You write layers, views, widgets and effects as JSX, and deck.gl matches each layer with the previous render by `id`, so only what changed is updated on the GPU.
+[`@deck.gl/react`](../api-reference/react/overview.md) is a React renderer for deck.gl. You write layers, views, widgets and effects as JSX.
 
 ## Install
 
@@ -9,7 +9,7 @@ npm install react react-dom @deck.gl/react @deck.gl/core @deck.gl/layers
 ```
 
 :::note
-Until deck.gl 10.0 is released, this installs deck.gl 9.4. To try the 10.0 prerelease, pin each deck.gl package to it, including `@deck.gl/mapbox` or `@deck.gl/maplibre` if you use one:
+Until deck.gl 10.0 is released, this installs deck.gl 9.4. To try the 10.0 prerelease, pin each deck.gl package to it, including the base map package if you use one:
 
 ```bash
 npm install react react-dom @deck.gl/react@10.0.0-alpha.2 @deck.gl/core@10.0.0-alpha.2 @deck.gl/layers@10.0.0-alpha.2
@@ -17,18 +17,13 @@ npm install react react-dom @deck.gl/react@10.0.0-alpha.2 @deck.gl/core@10.0.0-a
 
 :::
 
-The renderer needs React 19.2 or later, and TypeScript 5.3 or later for its types. Each component subpath needs its deck.gl package, such as `@deck.gl/layers` for `@deck.gl/react/layers`. To add deck.gl to a Mapbox or MapLibre map, also install the matching deck.gl package and map library:
-
-```bash
-npm install @deck.gl/mapbox mapbox-gl
-npm install @deck.gl/maplibre maplibre-gl
-```
+The renderer needs React 19.2 or later, and TypeScript 5.3 or later for its types. Each component subpath needs its deck.gl package, such as `@deck.gl/layers` for `@deck.gl/react/layers`. To add deck.gl to a base map, also install its deck.gl package, such as `@deck.gl/maplibre`. Each base map guide in [Using with maps](../developer-guide/react/using-with-maps.md) lists what to install.
 
 ## Render on the client {#using-deckgl-with-ssr}
 
 `DeckGL` creates a browser renderer. In an application that uses React Server Components, put `'use client'` at the beginning of the module that imports `DeckGL`, or import it from an existing client-marked module. In traditional SSR without React Server Components, create a map or overlay after hydration in an effect.
 
-Server rendering a `DeckGL` root does not need `ssr: false`: the standalone root renders its wrapper and canvas markup, a map root renders no markup, and deck.gl or the overlay is created only after hydration.
+Server rendering a `DeckGL` root works without `ssr: false`. The standalone root renders its wrapper and canvas markup, a map root renders no markup, and deck.gl creates the renderer or overlay after hydration.
 
 Some of deck.gl's dependencies, such as `d3-scale`, are ES modules only. If server rendering fails with `require() of ES Module`, set `"type": "module"` in your project's `package.json`, or load the component that renders `DeckGL` only on the client.
 
@@ -70,15 +65,17 @@ export function App({data}: {data: Line[]}) {
 }
 ```
 
-Props are checked against `LineLayerProps`, and the accessors are typed by the data type, which is inferred from `data` or passed as `<LineLayer<Line>>`. The component builds a new layer on every render, and deck.gl updates only what changed.
+Props are checked against `LineLayerProps`. The accessors are typed by the data type, which is inferred from `data` or passed as `<LineLayer<Line>>`.
 
 deck.gl matches layers by `id`. A layer without one gets an id from its place in the React tree, so give layers in a changing list a `key`, and give an `id` to any layer that other code refers to. See [Ids](../api-reference/react/components.md#ids).
 
 Use ordinary React components to organize a map. A component can load its own data with hooks and return one or more layers:
 
 ```tsx
+import {ScatterplotLayer} from '@deck.gl/react/layers';
+
 function Airports() {
-  const airports = useAirports();
+  const airports = useAirports(); // your data hook
   return <ScatterplotLayer id="airports" data={airports} getPosition={d => d.coordinates} />;
 }
 
@@ -92,8 +89,11 @@ function Airports() {
 Views and effects come from `@deck.gl/react/core`, and widgets from `@deck.gl/react/widgets`:
 
 ```tsx
+import {AmbientLight} from '@deck.gl/core';
 import {LightingEffect, MapView} from '@deck.gl/react/core';
 import {ZoomWidget} from '@deck.gl/react/widgets';
+
+const ambientLight = new AmbientLight({intensity: 1});
 
 <DeckGL initialViewState={INITIAL_VIEW_STATE} controller>
   <MapView id="main-map" />
@@ -103,7 +103,7 @@ import {ZoomWidget} from '@deck.gl/react/widgets';
 </DeckGL>;
 ```
 
-The React tree is flattened before deck.gl receives it. A view can contain React children for composition, but it does not scope its child layers to that view; use deck.gl's `layerFilter` for that.
+The React tree is flattened before deck.gl receives it. A view can contain React children for composition, but it does not scope its child layers to that view. To draw a layer in one view only, use [`layerFilter`](../api-reference/core/deck.md#layerfilter).
 
 ## Add a base map
 
@@ -124,10 +124,11 @@ When you already have an instance, for example from `useMemo`, pass it to a nati
 
 ## Use the `layers` prop
 
-`DeckGL` also accepts deck.gl's `layers` prop. Layers from the prop are drawn after, and so on top of, the layers from JSX. This helps when moving an existing deck.gl app to React one part at a time. Every layer from both sources needs a unique id.
+`DeckGL` also accepts deck.gl's `layers` prop. Layers from the prop draw on top of the layers from JSX. This helps when moving an existing deck.gl app to React one part at a time. Every layer from both sources needs a unique id.
 
 ```tsx
 import {ScatterplotLayer as DeckScatterplotLayer} from '@deck.gl/layers';
+import {ScatterplotLayer} from '@deck.gl/react/layers';
 
 <DeckGL
   layers={[new DeckScatterplotLayer({id: 'existing-points', data: []})]}
@@ -146,7 +147,7 @@ import {useEffect, useState} from 'react';
 import type {Deck} from '@deck.gl/core';
 import {DeckGL} from '@deck.gl/react';
 
-function Map() {
+function DeckMap() {
   const [deck, setDeck] = useState<Deck | null>(null);
 
   useEffect(() => {
@@ -164,13 +165,13 @@ function Map() {
 }
 ```
 
-`onDeckChange` is not a callback ref: replacing only the callback does not reconfigure or unmount the root.
+Passing a new `onDeckChange` function on each render does not recreate the root.
 
 Callbacks such as `onClick` are deck.gl event handlers, passed to the root or a layer. They are not React synthetic events.
 
 ## Performance
 
-Building layers on every render is cheap: deck.gl compares the new layers with the previous ones and only updates GPU resources when props change. See [Should I be creating new layers on every render?](../developer-guide/using-layers.md#should-i-be-creating-new-layers-on-every-render)
+Building layers on every render is cheap. deck.gl matches each layer with the previous render by `id` and only updates GPU resources when its props change. See [Should I be creating new layers on every render?](../developer-guide/using-layers.md#should-i-be-creating-new-layers-on-every-render)
 
 Callbacks such as `onHover` and `onViewStateChange` can run on every animation frame. Setting React state in them rerenders your components, so keep expensive work in `useMemo` and out of the render path.
 
