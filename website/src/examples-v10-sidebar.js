@@ -52,7 +52,7 @@ const sidebars = {
         'tile-layer',
         'tile-layer-non-geospatial',
         'tile-3d-layer',
-        'trips-layer',
+        withStatus('trips-layer', 'started'),
         'wms-layer'
       ]
     },
