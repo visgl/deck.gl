@@ -13,7 +13,7 @@ export function createRenderTarget(
     depth?: boolean;
   }
 ) {
-  return device.createFramebuffer({
+  const framebuffer = device.createFramebuffer({
     id: opts.id,
     depthStencilAttachment: opts.depth
       ? 'depth32float'
@@ -42,4 +42,8 @@ export function createRenderTarget(
       })
     ]
   });
+  // The framebuffer owns its texture so that resize() and destroy() release it.
+  // The depth attachment is created from a format, so the framebuffer already owns it.
+  framebuffer.colorAttachments[0].texture.transferOwnershipTo(framebuffer);
+  return framebuffer;
 }
