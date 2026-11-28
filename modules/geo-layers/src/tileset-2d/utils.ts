@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Viewport} from '@deck.gl/core';
+import {GlobeViewport, Viewport} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core/matrix';
 import {getOSMTileIndices} from './tile-2d-traversal';
 import {Bounds, GeoBoundingBox, TileBoundingBox, TileIndex, ZRange} from './types';
@@ -257,10 +257,15 @@ function getIdentityTileIndices(
   return indices;
 }
 
+/** Whether an underzoomed globe can use the single world tile. */
+export function canUseGlobeRootTile(viewport: Viewport, minZoom: number): boolean {
+  return minZoom === 0 && viewport instanceof GlobeViewport;
+}
+
 /**
  * Returns all tile indices in the current viewport. If the current zoom level is smaller
- * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
- * return tiles that are on maxZoom.
+ * than minZoom, return an empty array unless an extent is defined or a globe can use
+ * its root tile. If the current zoom level is greater than maxZoom, return tiles at maxZoom.
  */
 // eslint-disable-next-line complexity
 export function getTileIndices({
@@ -295,7 +300,7 @@ export function getTileIndices({
     : Math.ceil(viewport.zoom + zoomOffset);
 
   if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
-    if (!extent) {
+    if (!extent && !canUseGlobeRootTile(viewport, minZoom)) {
       return [];
     }
     z = minZoom;

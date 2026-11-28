@@ -262,7 +262,7 @@ The max zoom level of the layer's data. When overzoomed (i.e. `zoom > maxZoom`),
 
 #### `minZoom` (number, optional) {#minzoom}
 
-The min zoom level of the layer's data. When underzoomed (i.e. `zoom < minZoom`), the layer will not display any tiles unless `extent` is defined, to avoid issuing too many tile requests.
+The min zoom level of the layer's data. When underzoomed (i.e. `zoom < minZoom`), the layer will not display any tiles unless `extent` is defined, to avoid issuing too many tile requests. On a `GlobeView` with `minZoom: 0`, the layer can display the single zoom-0 tile when the viewport zoom drops below 0 near the poles.
 
 - Default: 0
 
