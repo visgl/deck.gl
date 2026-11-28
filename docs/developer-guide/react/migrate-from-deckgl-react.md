@@ -111,5 +111,5 @@ To re-render when the instance is created or torn down, store it in state with `
 - **A custom `Deck` class.** For a custom overlay, use
   [`createDeckGL`](../../api-reference/react/deckgl.md#custom-compatible-overlays).
 
-Nesting a layer inside a view does not assign it to that view, as in `@deck.gl/react/legacy`. See
+Nesting a layer inside a view no longer draws it in that view only, as `@deck.gl/react/legacy` did. See
 [Tree shape and deck.gl output](../../api-reference/react/native-elements.md#tree-shape-and-deckgl-output).

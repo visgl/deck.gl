@@ -5,7 +5,7 @@
 | `@deck.gl/react/google-maps` | [`GoogleMapsOverlay`](../../../api-reference/google-maps/google-maps-overlay.md) | ✓ | ✓ (vector maps) | ✓ |
 
 The [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript)
-renders Google's base maps in the browser. The `/google-maps` provider root creates a
+renders Google's base maps in the browser. The `/google-maps` map root creates a
 [`GoogleMapsOverlay`](../../../api-reference/google-maps/google-maps-overlay.md) from
 [`@deck.gl/google-maps`](../../../api-reference/google-maps/overview.md) and renders its
 JSX layers into it. The application owns the Google map and attaches the overlay to it.
@@ -23,7 +23,7 @@ guide covers the same integration without `@deck.gl/react`.
   which needs a map ID.
 - **Overlaid:** pass `interleaved={false}` to render deck.gl into its own canvas above the map.
   A raster map always renders this way, whatever `interleaved` is.
-- **Reverse controlled:** provider roots do not support this mode. See
+- **Reverse controlled:** map roots do not support this mode. See
   [Using with maps](../using-with-maps.md#reverse-controlled-maps).
 
 `GoogleMapsOverlay` waits for the map to report its rendering type before it creates its deck.gl
@@ -35,16 +35,15 @@ detaches and finalizes the current overlay, creates a new one, and attaches it t
 
 ## Views
 
-`GoogleMapsOverlay` draws one deck.gl `MapView`, which follows the Google map's camera. It does not
-support views beside the map: the root does not send JSX views, such as `<MapView>` or
+`GoogleMapsOverlay` draws one deck.gl `MapView`, which follows the Google map's camera. It does not support views beside the map. The root does not send JSX views, such as `<MapView>` or
 `<deckView>`, to the overlay. Do not pass `views`.
 
 The Google Maps overlay excludes `width`, `height`, `gl` and `deviceProps` in addition to the
-map-owned props listed in [Provider prop boundary](../using-with-maps.md#provider-prop-boundary).
+map-owned props listed in [Props a map root takes](../using-with-maps.md#provider-prop-boundary).
 
 ## Install
 
-Install the provider integration, and a way to load the Maps JavaScript API, such as
+Install deck.gl's Google Maps package, and a way to load the Maps JavaScript API, such as
 [`@vis.gl/react-google-maps`](https://visgl.github.io/react-google-maps/):
 
 ```bash
