@@ -353,6 +353,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     return this._interactionState.isDragging || false;
   }
 
+  /** Returns `true` while a view state transition is in progress */
+  isTransitioning(): boolean {
+    return this.transitionManager.transition.inProgress;
+  }
+
   // When a multi-touch event ends, e.g. pinch, not all pointers are lifted at the same time.
   // This triggers a brief `pan` event.
   // Calling this method will temporarily disable *start events to avoid conflicting transitions.
