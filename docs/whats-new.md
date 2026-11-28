@@ -58,6 +58,10 @@ The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, 
 
 - [`GlobeView`](./api-reference/core/globe-view.md), [`GlobeViewport`](./api-reference/core/globe-viewport.md) and [`GlobeController`](./api-reference/core/globe-controller.md) are now officially supported and no longer experimental.
 
+### Effects
+
+- [`DirectionalLight`](./api-reference/core/directional-light.md) 🧪 accepts `_shadowBounds`, which fits its shadow map to the part of those bounds in view. Shadows of small objects, such as trees or buildings in a city block, stay sharp and visible in zoomed-out and steeply pitched views.
+
 ### Extensions
 
 - [MaskExtension](./api-reference/extensions/mask-extension.md) now supports [GlobeView](./api-reference/core/globe-view.md).

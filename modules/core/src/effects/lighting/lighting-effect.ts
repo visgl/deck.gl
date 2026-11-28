@@ -5,7 +5,11 @@
 import type {Device} from '@luma.gl/core';
 import {Texture} from '@luma.gl/core';
 import {AmbientLight, DEFAULT_AMBIENT_LIGHT_COLOR} from './ambient-light';
-import {DirectionalLight, DEFAULT_DIRECTIONAL_LIGHT_COLOR} from './directional-light';
+import {
+  DirectionalLight,
+  DEFAULT_DIRECTIONAL_LIGHT_COLOR,
+  type ShadowBounds
+} from './directional-light';
 import {PointLight, DEFAULT_POINT_LIGHT_COLOR} from './point-light';
 import {Matrix4, Vector3} from '@math.gl/core/matrix';
 import ShadowPass from '../../passes/shadow-pass';
@@ -50,6 +54,7 @@ export default class LightingEffect implements Effect {
   private shadowPasses: ShadowPass[] = [];
   private dummyShadowMap: Texture | null = null;
   private shadowMatrices?: Matrix4[];
+  private shadowBounds?: (ShadowBounds | null)[];
 
   constructor(props: LightingEffectProps = {}) {
     this.setProps(props);
@@ -121,6 +126,7 @@ export default class LightingEffect implements Effect {
 
     // create light matrix every frame to make sure always updated from light source
     this.shadowMatrices = this._calculateMatrices();
+    this.shadowBounds = this.directionalLights.map(light => light.shadowBounds);
 
     for (let i = 0; i < this.shadowPasses.length; i++) {
       const shadowPass = this.shadowPasses[i];
@@ -134,7 +140,8 @@ export default class LightingEffect implements Effect {
           shadow: {
             shadowLightId: i,
             dummyShadowMap: this.dummyShadowMap,
-            shadowMatrices: this.shadowMatrices
+            shadowMatrices: this.shadowMatrices,
+            shadowBounds: this.shadowBounds
           }
         }
       });
@@ -149,7 +156,8 @@ export default class LightingEffect implements Effect {
           shadowMaps: this.shadowPasses.map(shadowPass => shadowPass.getShadowMap()),
           dummyShadowMap: this.dummyShadowMap!,
           shadowColor: this.shadowColor,
-          shadowMatrices: this.shadowMatrices
+          shadowMatrices: this.shadowMatrices,
+          shadowBounds: this.shadowBounds
         } satisfies ShadowModuleProps)
       : {};
 
