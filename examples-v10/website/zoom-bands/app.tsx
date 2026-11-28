@@ -10,7 +10,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {DeckGL} from '@deck.gl/react/legacy';
 import {CSVLoader} from '@loaders.gl/tables/csv';
 import {isArrowTable} from '@math.gl/core/arrow';
-import type {Table} from 'apache-arrow';
+import type {FixedSizeList, Float64, Table, Vector} from 'apache-arrow';
 
 import type {Color, Layer, MapViewState, PickingInfo} from '@deck.gl/core';
 import type {GridLayerPickingInfo} from '@deck.gl/aggregation-layers';
@@ -54,14 +54,10 @@ const TREE_COLOR: Color = [173, 221, 142];
 const EARTH_CIRCUMFERENCE = 40075016.686;
 
 type Trees = {
-  length: number;
-  /**
-   * Packed [longitude, latitude, 0] triplets.
-   * Float64Array matches the 64-bit layout of `getPosition`, which GridLayer's GPU aggregation expects.
-   */
-  positions: Float64Array;
-  species: string[];
-  circumferences: Float32Array;
+  data: Table;
+  positions: Vector<FixedSizeList<Float64>>;
+  species: Vector;
+  circumferences: Vector;
   /** Latitude at the center of the data bounds, used by GridLayer to convert cellSize to common space */
   latitude: number;
 };
@@ -129,29 +125,20 @@ const LOAD_OPTIONS = {csv: {dynamicTyping: false}};
 
 /** Collects queried tree positions and statistics for the grid and tooltip. */
 function summarizeTrees(data: Table): Trees {
-  const trees = data.toArray() as unknown as {
-    longitude: number;
-    latitude: number;
-    LIBELLEFRANCAIS: string;
-    circumference: number;
-  }[];
-  const positions = new Float64Array(trees.length * 3);
-  const circumferences = new Float32Array(trees.length);
+  const latitude = data.getChild('latitude')!;
   let minLatitude = Infinity;
   let maxLatitude = -Infinity;
-  trees.forEach((d, i) => {
-    positions[i * 3] = d.longitude;
-    positions[i * 3 + 1] = d.latitude;
-    circumferences[i] = d.circumference;
-    minLatitude = Math.min(minLatitude, d.latitude);
-    maxLatitude = Math.max(maxLatitude, d.latitude);
-  });
+  for (let index = 0; index < data.numRows; index++) {
+    const value = latitude.get(index);
+    minLatitude = Math.min(minLatitude, value);
+    maxLatitude = Math.max(maxLatitude, value);
+  }
 
   return {
-    length: trees.length,
-    positions,
-    species: trees.map(d => d.LIBELLEFRANCAIS),
-    circumferences,
+    data,
+    positions: data.getChild('position')! as Vector<FixedSizeList<Float64>>,
+    species: data.getChild('LIBELLEFRANCAIS')!,
+    circumferences: data.getChild('circumference')!,
     latitude: (minLatitude + maxLatitude) / 2
   };
 }
@@ -183,22 +170,9 @@ export default function App({
       }
       const result = summarizeTrees(source);
       setTrees(result);
-      onDataLoad?.(result.length);
+      onDataLoad?.(source.numRows);
     },
     [onDataLoad]
-  );
-
-  // Keep `data` referentially stable, so that zooming never triggers re-aggregation.
-  // Every layer reads the same typed array; each uploads its own GPU copy.
-  const data = useMemo(
-    () =>
-      trees && {
-        length: trees.length,
-        attributes: {
-          getPosition: {value: trees.positions, size: 3}
-        }
-      },
-    [trees]
   );
 
   const opacityStops = useMemo(
@@ -216,13 +190,15 @@ export default function App({
   }, [activeBandLabel]);
 
   const layers: Layer[] = [];
-  if (data) {
+  if (trees) {
     CELL_SIZES.forEach((cellSize, band) => {
       const opacity = opacities[band];
       layers.push(
         new GridLayer({
           id: `grid-${cellSize}m`,
-          data,
+          // Reuse the loaded table and column while zoom only changes presentation.
+          data: trees.data,
+          getPosition: trees.positions,
           cellSize,
           gpuAggregation: true,
           extruded: false,
@@ -252,13 +228,13 @@ export default function App({
       loadOptions: LOAD_OPTIONS,
       query: `\
           SELECT
-            LONGITUDE::DOUBLE PRECISION AS longitude,
+            ARRAY_FLOAT64(LONGITUDE::DOUBLE PRECISION, LATITUDE::DOUBLE PRECISION, 0) AS position,
             LATITUDE::DOUBLE PRECISION AS latitude,
             "CIRCONFERENCE(CM)"::DOUBLE PRECISION AS circumference,
             LIBELLEFRANCAIS
           WHERE LONGITUDE <> '' AND LATITUDE <> ''
         `,
-      getPosition: {sql: 'ARRAY[longitude, latitude]'},
+      getPosition: {sql: 'position'},
       onDataLoad: onTreesLoaded,
       radiusUnits: 'pixels',
       getRadius: 1,
@@ -280,8 +256,8 @@ export default function App({
         return null;
       }
       if (info.layer?.id === 'trees') {
-        const circumference = trees.circumferences[info.index];
-        return `${trees.species[info.index] || 'Unknown species'}\n${
+        const circumference = trees.circumferences.get(info.index);
+        return `${trees.species.get(info.index) || 'Unknown species'}\n${
           circumference ? `Circumference: ${circumference} cm` : ''
         }`;
       }

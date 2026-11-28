@@ -388,3 +388,55 @@ test('Grid preserves CPU fallback when binary weights change to integer storage'
     ]
   });
 });
+
+test('Grid keeps GPU aggregation when zooming with shared Arrow positions', async ({skip}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  const {query} = await import('@loaders.gl/core/query');
+  const {parseSQLQuery} = await import('@math.gl/sql/parser');
+  const {tableFromArrays} = await import('apache-arrow');
+  const data = await query(
+    parseSQLQuery('SELECT ARRAY_FLOAT64(longitude, latitude, 0) AS position'),
+    {source: tableFromArrays({longitude: [2.345, 2.346], latitude: [48.857, 48.858]})}
+  );
+  const positions = data.getChild('position')!;
+  const viewport = new WebMercatorViewport({
+    width: 200,
+    height: 200,
+    longitude: 2.345,
+    latitude: 48.857,
+    zoom: 12
+  });
+  let aggregator: WebGPUGridAggregator;
+  let invalidated: ReturnType<typeof vi.spyOn>;
+  await testLayerAsync({
+    Layer: GridLayer,
+    device,
+    viewport,
+    testCases: [
+      {
+        props: {data, getPosition: positions, cellSize: 200, gpuAggregation: true},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.aggregator).toBeInstanceOf(WebGPUGridAggregator);
+          aggregator = layer.state.aggregator as WebGPUGridAggregator;
+          expect(layer.getNumInstances()).toBe(2);
+          invalidated = vi.spyOn(aggregator, 'setNeedsUpdate');
+        }
+      },
+      {
+        viewport: new WebMercatorViewport({
+          width: 200,
+          height: 200,
+          longitude: 2.345,
+          latitude: 48.857,
+          zoom: 16
+        }),
+        updateProps: {opacity: 0.5},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.aggregator).toBe(aggregator);
+          expect(invalidated).not.toHaveBeenCalled();
+        }
+      }
+    ]
+  });
+});
