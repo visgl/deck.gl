@@ -154,6 +154,7 @@ Callback when the expanded state changes (user clicks header). In controlled mod
 - When collapsed, click the FPS button to expand the stats display
 - When expanded, click the header to collapse the stats display
 - Stats are automatically updated based on `framesPerUpdate`
+- deck.gl draws no frames while nothing changes, so the FPS and stats keep their last values while idle
 - Different stat types provide access to various performance metrics:
   - `'deck'`: deck.gl rendering statistics
   - `'luma'`: luma.gl WebGL statistics

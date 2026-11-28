@@ -359,6 +359,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   setNeedsRedraw(): void {
     if (this.internalState) {
       this.internalState.needsRedraw = true;
+      this.context.deck?._requestFrame();
     }
   }
 

@@ -12,6 +12,7 @@ import {Widget} from './widget';
 import {WidgetManager} from './widget-manager';
 import {TooltipWidget} from './tooltip-widget';
 import CanvasManager from './canvas-manager';
+import OnDemandFrameProvider from './on-demand-frame-provider';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
@@ -377,6 +378,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   protected widgetManager: WidgetManager | null = null;
   protected tooltip: TooltipWidget | null = null;
   protected animationLoop: AnimationLoop | null = null;
+  /** Frame source for the animation loop, stops requesting frames while idle */
+  private _frameProvider: OnDemandFrameProvider | null = null;
+  /** `true` if the transition timeline was paused when the loop went idle */
+  private _isTimelinePausedWhileIdle: boolean = false;
   private _canvasContext: CanvasContext | null = null;
   private _deviceResizeHandler: {
     device: Device;
@@ -657,6 +662,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.widgetManager!.setProps(resolvedProps);
     }
 
+    this._requestFrame();
     this.stats.get('setProps Time').timeEnd();
   }
 
@@ -725,6 +731,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     } else {
       this._drawLayers(redrawReason);
     }
+  }
+
+  /** Internal use only: resumes the animation loop if it stopped requesting frames */
+  _requestFrame(): void {
+    this._frameProvider?.requestFrame();
   }
 
   /** Flag indicating that the Deck instance has initialized its resources and it's safe to call public methods. */
@@ -945,24 +956,29 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
    */
   _addDefaultEffect(effect: Effect) {
     this.effectManager!.addDefaultEffect(effect);
+    this._requestFrame();
   }
 
   _addDefaultShaderModule(module: ShaderModule<Record<string, unknown>>) {
     this.layerManager!.addDefaultShaderModule(module);
+    this._requestFrame();
   }
 
   _removeDefaultShaderModule(module: ShaderModule<Record<string, unknown>>) {
     this.layerManager?.removeDefaultShaderModule(module);
+    this._requestFrame();
   }
 
   /** Install an effect's shader plugin on all layer models. */
   _addDefaultShaderPlugin(plugin: ShaderPlugin) {
     this.layerManager!.addDefaultShaderPlugin(plugin);
+    this._requestFrame();
   }
 
   /** Remove an effect's shader plugin from layer models. */
   _removeDefaultShaderPlugin(plugin: ShaderPlugin) {
     this.layerManager?.removeDefaultShaderPlugin(plugin);
+    this._requestFrame();
   }
 
   // Private Methods
@@ -1062,6 +1078,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.props.onHover?.(pickedInfo, event);
       this.widgetManager.onHover(pickedInfo, event);
     }
+    // After the hover callbacks, so `getCursor` sees state they set. The loop may go idle
+    // after this pick, so no later frame would correct the cursor.
+    this._updateCursor();
   }
 
   private _dispatchPickingEvent(info: PickingInfo, event: MjolnirGestureEvent): void {
@@ -1452,6 +1471,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
     // luma owns resize detection; Deck reacts by invalidating redraw and updating view state.
     this._needsRedraw = 'Canvas resized';
+    this._requestFrame();
     this._updateCanvasSize(canvasContext);
   }
 
@@ -1473,6 +1493,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this._needsRedraw = 'Canvas resized';
+    this._requestFrame();
     // A secondary canvas can resize without changing Deck.width/height, so invalidate layouts
     // explicitly before ViewManager re-reads CSS dimensions from each canvas context.
     this.viewManager?.setNeedsUpdate('Canvas resized');
@@ -1496,8 +1517,27 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // onAfterRender,
     } = props;
 
+    this._frameProvider = new OnDemandFrameProvider({
+      needsFrame: () => this._needsFrame(),
+      // Transitions started while idle should not count the idle time as elapsed
+      onIdle: () => {
+        const timeline = this.animationLoop?.timeline;
+        if (timeline?.playing) {
+          timeline.pause();
+          this._isTimelinePausedWhileIdle = true;
+        }
+      },
+      onResume: () => {
+        if (this._isTimelinePausedWhileIdle) {
+          this.animationLoop?.timeline?.play();
+          this._isTimelinePausedWhileIdle = false;
+        }
+      }
+    });
+
     return new AnimationLoop({
       device: deviceOrPromise,
+      animationFrameProvider: this._frameProvider,
       // TODO v9
       autoResizeDrawingBuffer: !gl && !Array.isArray(props._canvases), // do not auto resize external or multi-canvas contexts
       autoResizeViewport: false,
@@ -1654,6 +1694,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     _pickRequest.event = event;
+    this._requestFrame();
   };
 
   /** Actually run picking */
@@ -1776,6 +1817,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       onViewStateChange: this._onViewStateChange.bind(this),
       onInteractionStateChange: this._onInteractionStateChange.bind(this),
       onViewRemoved: viewId => this.layerManager?.projectionScaleResources.delete(viewId),
+      onNeedsUpdate: () => this._requestFrame(),
       onError: error => this.props.onError?.(error),
       pickPosition: this._pickPositionForController.bind(this),
       views: this._getViews(),
@@ -1914,6 +1956,28 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this.props.onAfterRender({device, gl});
+
+    // A basemap may draw outside of the animation loop and leave a transition running
+    if (this._frameProvider?.isIdle && this._needsFrame()) {
+      this._requestFrame();
+    }
+  }
+
+  /** Whether the animation loop needs another frame, checked after each frame */
+  private _needsFrame(): boolean {
+    if (!this.layerManager || !this.viewManager) {
+      return true;
+    }
+    return Boolean(
+      this.needsRedraw({clearRedrawFlags: false}) ||
+        // `updateLayers` skips layers without a viewport, e.g. on a zero-size canvas.
+        // The resize wake restarts the loop once the viewport exists.
+        (this.layerManager.context.viewport && this.layerManager.needsUpdate()) ||
+        this._pickRequest.event ||
+        Object.values(this.viewManager.controllers).some(controller =>
+          controller?.isTransitioning()
+        )
+    );
   }
 
   // Callbacks
@@ -1977,8 +2041,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   private _onInteractionStateChange(interactionState: InteractionState) {
-    this.cursorState.isDragging = interactionState.isDragging || false;
+    const isDragging = interactionState.isDragging || false;
+    const dragStateChanged = this.cursorState.isDragging !== isDragging;
+    this.cursorState.isDragging = isDragging;
     this.props.onInteractionStateChange(interactionState);
+    // After the callback, so `getCursor` sees state it set. A drag can end without a redraw.
+    if (dragStateChanged) {
+      this._updateCursor();
+    }
   }
 
   /** Internal use only: event handler for click & drag */

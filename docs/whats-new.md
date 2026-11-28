@@ -78,6 +78,10 @@ The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, 
 - [GridLayer](./api-reference/aggregation-layers/grid-layer.md), [HexagonLayer](./api-reference/aggregation-layers/hexagon-layer.md), [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md), and [ContourLayer](./api-reference/aggregation-layers/contour-layer.md) now accept [custom aggregators](./api-reference/aggregation-layers/aggregator.md) with GPUVector results.
 - The aggregation layers support clipping, brushing, and numeric filtering extensions with [GPUVector inputs](./api-reference/aggregation-layers/aggregator.md#gpu-column-extensions).
 
+### Performance
+
+- **Idle rendering** — `Deck` stops requesting animation frames while nothing needs a redraw. Prop changes, data loading, transitions, interaction and canvas resizes resume the loop. Set `_animate` to redraw every frame. If `getCursor` reads state outside deck.gl, call `deck.setProps({getCursor})` after that state changes.
+
 ### Examples
 
 - [Examples v10](/examples-v10) have been updated to use Arrow loading and SQL accessors.
