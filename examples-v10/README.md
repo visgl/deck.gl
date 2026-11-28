@@ -18,6 +18,13 @@ map working together.
 * **[Scripting](./get-started/scripting)** HTML single-file examples that can be opened directly in a browser.
 
 
+### [React Examples](./react)
+
+Standalone applications built with the `@deck.gl/react` renderer, one per framework.
+
+* **[Vite](./react/vite)** An interleaved MapLibre map with layers as React components.
+
+
 ### [Website Examples](./website)
 
 These are stand-alone versions of the examples in the [deck.gl
