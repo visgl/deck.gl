@@ -249,8 +249,6 @@ A few props behaved differently with `undefined`. To keep that behavior, pass th
 
 Below zoom 12, `GlobeView` now applies camera and layer meter offsets east, north and up, matching `MapView`. If your application compensated for the previous orientation, update its offsets or remove the compensating rotation.
 
-With `coordinateSystem: 'meter-offsets'`, `project_normal` now turns normals to the east, north and up of the coordinate origin, as `project_position` does for positions. In `GlobeView`, `SimpleMeshLayer`, `ScenegraphLayer` and `PointCloudLayer`, including `Tile3DLayer` glTF and point-cloud tiles, previously lit them as if they stood at the north pole (NaN on WebGPU).
-
 ### pydeck lighting
 
 The obsolete `pydeck.LightSettings` binding has been removed. It serialized the
