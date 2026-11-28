@@ -58,6 +58,8 @@ The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, 
 
 - [`GlobeView`](./api-reference/core/globe-view.md), [`GlobeViewport`](./api-reference/core/globe-viewport.md) and [`GlobeController`](./api-reference/core/globe-controller.md) are now officially supported and no longer experimental.
 
+- `GlobeView` lights `'meter-offsets'` meshes and point clouds, including [`Tile3DLayer`](./api-reference/geo-layers/tile-3d-layer.md) glTF and point-cloud tiles, in the east, north and up of their coordinate origin instead of as if at the north pole.
+
 ### Extensions
 
 - [MaskExtension](./api-reference/extensions/mask-extension.md) now supports [GlobeView](./api-reference/core/globe-view.md).

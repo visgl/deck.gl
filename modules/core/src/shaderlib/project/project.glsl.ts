@@ -164,7 +164,12 @@ mat3 project_get_orientation_matrix(vec3 up) {
 }
 
 bool project_needs_rotation(vec3 commonPosition, out mat3 transform) {
-  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+  if (project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS) {
+    // Meter offsets lie in the tangent plane at the coordinate origin, as in project_position
+    transform = project_get_orientation_matrix(project.commonOrigin);
+    return true;
+  }
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
     transform = project_get_orientation_matrix(commonPosition);
     return true;
   }

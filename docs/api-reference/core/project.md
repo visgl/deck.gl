@@ -148,7 +148,7 @@ The shift is paid for in depth against the rest of the scene. It is zero where t
 vec3 project_normal(vec3 vector)
 ```
 
-Converts position deltas from the world space to normalized vector in the common space.
+Converts position deltas from the world space to normalized vector in the common space. In `GlobeView`, deltas point east, north and up at `geometry.position`; with `coordinateSystem: 'meter-offsets'`, at the coordinate origin, as the positions do.
 
 
 ### project_common_position_to_clipspace

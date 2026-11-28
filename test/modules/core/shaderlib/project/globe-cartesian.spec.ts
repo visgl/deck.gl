@@ -75,4 +75,62 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     }
     expected.forEach((value, i) => expect(result[i]).toBeCloseTo(value, 6));
   });
+
+  test(`Globe Cartesian normals projected before the position are not rotated: ${backend}`, async ({
+    skip
+  }) => {
+    const targetDevice = backend === 'webgpu' ? await getWebGPUTestDevice() : device;
+    if (!targetDevice || targetDevice.type !== backend) return skip();
+
+    // SimpleMeshLayer and ScenegraphLayer with a composed model matrix call project_normal before
+    // they set geometry.position: globe-centered normals are already in common space.
+    const props = {
+      viewport: new GlobeViewport({longitude: -100, latitude: 40, zoom: 3}),
+      coordinateSystem: 'cartesian' as const
+    };
+    const normal = [0.3, -0.5, 0.8].map(x => x / Math.hypot(0.3, 0.5, 0.8));
+    let result: Float32Array;
+    if (backend === 'webgl') {
+      result = await runOnGPU({
+        vs: `#version 300 es
+          out vec3 result;
+          void main() {
+            result = project_normal(test.uInput);
+          }`,
+        modules: [project, testUniforms],
+        vertexCount: 1,
+        varying: 'result',
+        shaderInputProps: {project: props, test: {uInput: normal}}
+      });
+    } else {
+      const output = targetDevice.createBuffer({
+        byteLength: 16,
+        usage: Buffer.STORAGE | Buffer.COPY_SRC
+      });
+      const computation = new Computation(targetDevice, {
+        modules: [project],
+        source: `
+          @group(0) @binding(0) var<storage, read_write> output: array<vec4<f32>>;
+          @compute @workgroup_size(1)
+          fn main() {
+            output[0] = vec4<f32>(project_normal(vec3<f32>(${normal.join(', ')})), 1.0);
+          }`,
+        bindings: {output}
+      });
+      try {
+        computation.shaderInputs.setProps({project: props});
+        computation.predraw(targetDevice.commandEncoder);
+        const pass = targetDevice.beginComputePass();
+        computation.dispatch(pass, 1);
+        pass.end();
+        targetDevice.submit();
+        const bytes = await output.readAsync();
+        result = new Float32Array(bytes.buffer, bytes.byteOffset, 3);
+      } finally {
+        computation.destroy();
+        output.destroy();
+      }
+    }
+    normal.forEach((value, i) => expect(result[i]).toBeCloseTo(value, 6));
+  });
 }

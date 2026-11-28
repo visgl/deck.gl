@@ -64,7 +64,8 @@ void main(void) {
   if(scenegraph.composeModelMatrix > 0.5) {
     DECKGL_FILTER_SIZE(pos, geometry);
     // using instancePositions as world coordinates
-    // when using globe mode, this branch does not re-orient the model to align with the surface of the earth
+    // when using globe mode, this branch does not re-orient the model to align with the surface of the earth,
+    // except meter offsets, which project_position and project_normal turn to the coordinate origin's frame
     // call project_normal before setting position to avoid rotation
     geometry.normal = project_normal(normal);
     geometry.worldPosition += pos;
