@@ -161,6 +161,7 @@ export class TerrainEffect implements Effect {
 
     this.terrainPass.renderHeightMap(this.heightMap, {
       ...opts,
+      // Do not bind the height map while this pass writes it
       effects: opts.effects?.filter(effect => effect !== this),
       layers: terrainLayers,
       shaderModuleProps: {
