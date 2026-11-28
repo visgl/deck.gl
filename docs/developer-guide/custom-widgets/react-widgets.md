@@ -182,7 +182,6 @@ export function App() {
 Remarks:
 
 * `DeckGL` renders its children with deck.gl's renderer, which only accepts deck.gl elements, so render the portal beside `DeckGL`. A portal inside `DeckGL` throws. A portal beside it is part of your application's React tree, so the UI can read its state and context.
-* `App` creates the element with `document` during render, which fails in server rendering. In a server-rendered app, render this component only on the client.
 * The component builds a new widget on every render. deck.gl keeps the first widget with each `id` and passes it the new props, so the widget passed to `onAttach` is the one deck.gl runs. Call its methods, and give the component an `id`.
 * Widget containers have `pointer-events: none` so they do not block interaction with the map. Interactive elements must set `pointer-events: auto`.
 
