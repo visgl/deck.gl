@@ -427,6 +427,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   private _createdDevice: CreatedDevice | null = null;
   /** The canvas this Deck renders to, counted so its context isn't released while in use. */
   private _usedCanvas: DeviceCanvas | null = null;
+  /** A `props.canvas` hidden while a shared device canvas draws in its place */
+  private _hiddenPlaceholder: {canvas: HTMLCanvasElement; display: string} | null = null;
   private _pickRequest: {
     mode: string;
     event: MjolnirPointerEvent | null;
@@ -553,6 +555,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.canvas.parentElement?.removeChild(this.canvas);
       this.canvas = null;
       this._ownedCanvas = null;
+    }
+    if (this._hiddenPlaceholder) {
+      const {canvas: placeholder, display} = this._hiddenPlaceholder;
+      // Take out the shared canvas placed after it, which the restored canvas would offset
+      if (this.canvas && this.canvas.previousElementSibling === placeholder) {
+        this.canvas.remove();
+      }
+      placeholder.style.display = display;
+      this._hiddenPlaceholder = null;
     }
     this._canvasContext = null;
 
@@ -1728,9 +1739,27 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     if (this._isMultiCanvasMode()) {
       this._syncCanvasTargets();
-    } else if (this.canvas && !this.canvas.isConnected && this.props.parent) {
+    } else if (this.canvas && this.props.parent) {
+      const {canvas: placeholder, parent} = this.props;
+      const isStandIn =
+        placeholder instanceof HTMLCanvasElement &&
+        placeholder !== this.canvas &&
+        placeholder.isConnected;
+      // Hide the canvas the shared canvas draws in place of, so its inline box can't offset it.
+      // This also runs when a previous Deck already inserted the shared canvas.
+      if (isStandIn) {
+        this._hiddenPlaceholder ??= {canvas: placeholder, display: placeholder.style.display};
+        placeholder.style.display = 'none';
+      }
       // external canvas may not be in DOM
-      this.props.parent.insertBefore(this.canvas, this.props.parent.firstChild);
+      if (!this.canvas.isConnected) {
+        if (isStandIn) {
+          // Keep the stacking order of the canvas it stands in for
+          placeholder.after(this.canvas);
+        } else {
+          parent.insertBefore(this.canvas, parent.firstChild);
+        }
+      }
     }
     // TODO v9
     // ts-expect-error - Currently luma.gl v9 does not expose these options
