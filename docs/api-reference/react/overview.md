@@ -36,26 +36,10 @@ export function Map({data}: {data: Point[]}) {
 ```
 
 Each component builds a new instance from its props on every render, and deck.gl matches it with
-the previous one by `id`. Props are type-checked against the class, and layer components infer
-their data type from `data`. Components can sit at any depth inside your own components, which can
-use hooks and context.
-
-Every component renders one of four elements: `<deckLayer>`, `<deckView>`, `<deckWidget>` or
-`<deckEffect>`.
-
-You would use these when working directly with instances or when authoring your own classes.
-
-For your own classes you may also create JSX components with `createLayerComponent` and its view, widget and effect
-counterparts, with no registration.
-
-See [Components](components.md)
-and [Native elements](native-elements.md).
-
-The renderer flattens the committed tree into deck.gl's `layers`, `views`, `widgets` and `effects`
-arrays. Nesting a layer inside a view does not assign the layer to that view: use a layer filter
-for view-specific layers. Elements without an `id` get one from their place in the tree; see
-[When you need an id](./components.md#when-you-need-an-id). The root
-`DeckGL` owns one standalone `Deck`; import `/mapbox`, `/maplibre` or `/google-maps` for a map overlay.
+the previous one by `id`. Components can sit at any depth inside your own components, which can use
+hooks and context. [Using deck.gl with React](../../get-started/using-with-react.md) walks through
+each kind of component, [Components](components.md) lists them, and
+[Native elements](native-elements.md) covers instances you build yourself.
 
 ## Install and set up
 

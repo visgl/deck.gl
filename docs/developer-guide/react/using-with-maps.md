@@ -127,8 +127,11 @@ Without `map`, attach the overlay yourself: keep the instance from `onDeckChange
 with `map.addControl` in an effect, and remove it with `map.removeControl` in the effect's cleanup.
 On Google Maps, call `overlay.setMap(map)` and `overlay.setMap(null)` instead.
 The effect must depend on the instance, because `onDeckChange` reports `null` and then a new
-instance when the overlay is recreated. React Map GL's `useControl` cannot do this; see the
-provider guides.
+instance when the overlay is recreated.
+
+React Map GL's `useControl` hook, which deck.gl's own guides use, doesn't work with `DeckGL`.
+`useControl` creates its control once, when it mounts, and keeps it. `DeckGL` creates its own
+overlay, and a new one when `interleaved` changes, so `useControl` would hold the wrong instance.
 
 ## Provider prop boundary
 

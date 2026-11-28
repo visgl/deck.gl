@@ -103,7 +103,7 @@ const ambientLight = new AmbientLight({intensity: 1});
 </DeckGL>;
 ```
 
-The React tree is flattened before deck.gl receives it. A view can contain React children for composition, but it does not scope its child layers to that view. To draw a layer in one view only, use [`layerFilter`](../api-reference/core/deck.md#layerfilter).
+A view can contain React children, but nesting a layer in a view does not draw it in that view only. See [Tree shape and deck.gl output](../api-reference/react/native-elements.md#tree-shape-and-deckgl-output).
 
 ## Add a base map
 

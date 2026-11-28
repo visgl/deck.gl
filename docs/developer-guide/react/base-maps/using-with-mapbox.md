@@ -41,9 +41,8 @@ yarn add @deck.gl/mapbox mapbox-gl
 
 ## Examples
 
-Keep the map in React state and pass it in `map`. `DeckGL` adds its overlay to the map, adds the
-new one when it recreates the overlay because `interleaved` changed, and removes it on unmount.
-It does not wait for the map to load: `MapboxOverlay` waits for the style before it adds layers.
+Keep the map in React state and pass it in [`map`](../../../api-reference/react/deckgl.md#map).
+[Attach the overlay to the host map](../using-with-maps.md#attach-the-overlay-to-the-host-map) says when `DeckGL` adds and removes the overlay.
 
 ### React Map GL
 
@@ -118,10 +117,8 @@ export function ManualMapboxMap() {
 
 ### React Map GL `useControl`
 
-deck.gl's own guides attach the overlay with React Map GL's `useControl` hook. That does not work
-with these roots. `useControl` creates its control once, when it mounts, and keeps it. The root
-creates its own overlay, and creates a new one when `interleaved` changes, so `useControl` would
-hold the wrong instance. Pass the map in `map` instead.
+deck.gl's own guides attach the overlay with React Map GL's `useControl` hook, which doesn't work
+with `DeckGL`. Pass the map in `map` instead. [Attach the overlay to the host map](../using-with-maps.md#attach-the-overlay-to-the-host-map) explains why.
 
 ### Mapbox token and alternatives
 
