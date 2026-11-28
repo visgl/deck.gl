@@ -54,6 +54,8 @@ import {
 type GLTFInstantiatorOptions = Parameters<typeof createScenegraphsFromGLTF>[2];
 
 const DEFAULT_COLOR = [255, 255, 255, 255] as const;
+/** Draws that wait for every model to draw before `onFirstDraw` is called anyway */
+const MAX_FIRST_DRAW_RETRIES = 60;
 
 export type ScenegraphLayerProps<DataT = unknown> = _ScenegraphLayerProps<DataT> & LayerProps;
 
@@ -140,7 +142,9 @@ type _ScenegraphLayerProps<DataT> = {
    */
   getTransformMatrix?: ArrowAccessor<DataT, number[]>;
   /**
-   * Called after the layer has rendered for the first time.
+   * Called once every model in the scenegraph has drawn, which can take several frames
+   * while resources such as textures load. If a model still has not drawn after 60 attempts,
+   * for example because its shaders failed to compile, it is called anyway.
    * Used by Tile3DLayer to signal that a tile's sublayer is visible,
    * allowing parent tiles to be safely deselected during transitions.
    */
@@ -220,6 +224,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     materials?: {destroy(): void}[] | null;
     models: Model[];
     firstDrawSignaled: boolean;
+    firstDrawRetries: number;
   } & Layer['state'];
 
   getShaders() {
@@ -412,7 +417,8 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         animator,
         materials: scenegraphData?.materials || null,
         models,
-        firstDrawSignaled: false
+        firstDrawSignaled: false,
+        firstDrawRetries: 0
       });
       this.getAttributeManager()?.invalidateAll();
     } else if (scenegraph !== null) {
@@ -523,6 +529,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     };
 
     const numInstances = this.getNumInstances();
+    let allModelsDrawn = true;
     this.state.scenegraph.traverse((node, {worldMatrix}) => {
       if (node instanceof ModelNode) {
         const {model} = node;
@@ -547,20 +554,25 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           pbrProjection: pbrProjectionProps,
           scenegraph: scenegraphProps
         });
-        if (this.state.columns) {
-          this.state.columns.draw(model, renderPass, (offset, rowCount) => {
-            model.setInstanceCount(Math.min(rowCount, Math.max(0, numInstances - offset)));
-            model.shaderInputs.setProps({scenegraph: {rowIndexOffset: offset}});
-          });
-        } else {
-          model.draw(renderPass);
-        }
+        const drawn = this.state.columns
+          ? this.state.columns.draw(model, renderPass, (offset, rowCount) => {
+              model.setInstanceCount(Math.min(rowCount, Math.max(0, numInstances - offset)));
+              model.shaderInputs.setProps({scenegraph: {rowIndexOffset: offset}});
+            })
+          : model.draw(renderPass);
+        allModelsDrawn = drawn && allModelsDrawn;
       }
     });
 
     if (!this.state.firstDrawSignaled) {
-      this.state.firstDrawSignaled = true;
-      this.props.onFirstDraw?.();
+      // A model skips its draw until its resources are ready, but some never draw, for example
+      // after a shader error, so stop waiting after a while
+      if (allModelsDrawn || ++this.state.firstDrawRetries > MAX_FIRST_DRAW_RETRIES) {
+        this.state.firstDrawSignaled = true;
+        this.props.onFirstDraw?.();
+      } else {
+        this.setNeedsRedraw();
+      }
     }
   }
 }

@@ -142,6 +142,25 @@ test('LayerColumns prepares accessor-only rows and clamps colors', async () => {
   device.destroy();
 });
 
+test('LayerColumns draw reports whether luma drew the batches', async () => {
+  const device = new NullDevice({});
+  const columns = makeColumns(device);
+  const model = {setAttributeVectors: vi.fn(), drawBatches: vi.fn()};
+  const draw = () => columns.draw(model as never, {} as never);
+  try {
+    expect(draw(), 'nothing to draw is complete').toBe(true);
+    expect(model.drawBatches).not.toHaveBeenCalled();
+    await columns.update(props(), () => {}, vi.fn());
+    for (const drawn of [false, true]) {
+      model.drawBatches.mockReturnValueOnce(drawn);
+      expect(draw()).toBe(drawn);
+    }
+  } finally {
+    columns.destroy();
+    device.destroy();
+  }
+});
+
 for (const mode of ['batched', 'snapshots'] as const) {
   test(`LayerColumns ${mode} controls GPU chunk retention`, async () => {
     const device = new NullDevice({});

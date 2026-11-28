@@ -439,14 +439,18 @@ export class LayerColumns {
     }
   }
 
-  /** Draws matching batches using luma's managed uniform ranges and constant bindings. */
+  /**
+   * Draws matching batches using luma's managed uniform ranges and constant bindings.
+   * @returns `false` if luma skipped the draw because resources are not ready.
+   */
   draw(
     model: GPUVectorModel,
     renderPass: RenderPass,
     onBatch?: (offset: number, rowCount: number) => void
-  ): void {
+  ): boolean {
     const prepared = this.prepared;
-    if (!prepared?.length) return;
+    // Nothing to draw is complete
+    if (!prepared?.length) return true;
     const vectors: GPUVectorModelInputs = {};
     const constants: Record<string, GPUConstant> = {};
     const layouts: BufferLayout[] = [];
@@ -495,7 +499,7 @@ export class LayerColumns {
       });
     }
     model.setAttributeVectors({...vectors, ...constants}, layouts);
-    model.drawBatches(renderPass, {
+    return model.drawBatches(renderPass, {
       vectors,
       onBatch: batch => onBatch?.(batch.rowIndexOffset, batch.rowCount)
     });

@@ -9,7 +9,7 @@ import {
   MESH_COLUMN_DEFINITIONS,
   prepareMeshColumnTransforms
 } from '../../../modules/mesh-layers/src/utils/mesh-columns';
-import {GroupNode} from '@luma.gl/engine';
+import {GroupNode, ModelNode} from '@luma.gl/engine';
 import {type LayerContext, _LayerColumns as LayerColumns} from '@deck.gl/core';
 import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
 
@@ -28,6 +28,71 @@ test('an empty prepared column completes the first-draw lifecycle', () => {
   layer.context = {viewport: {cameraPosition: [0, 0, 0]}} as unknown as LayerContext;
   layer.draw({context: {}});
   expect(onFirstDraw).toHaveBeenCalledOnce();
+});
+
+/** A model that reports each draw result in turn, as luma does while resources load */
+function makeModelNode(drawResults: boolean[], laterResult = true) {
+  const model = {
+    setInstanceCount: vi.fn(),
+    shaderInputs: {setProps: vi.fn()},
+    draw: vi.fn(() => drawResults.shift() ?? laterResult),
+    destroy: vi.fn()
+  };
+  return new ModelNode({model} as never);
+}
+
+test('first draw waits until every model has drawn', () => {
+  const onFirstDraw = vi.fn();
+  const layer = new ScenegraphLayer({numInstances: 1, onFirstDraw});
+  layer.state = {
+    scenegraph: new GroupNode([makeModelNode([true, true]), makeModelNode([false, true])]),
+    firstDrawRetries: 0
+  } as never;
+  layer.context = {viewport: {cameraPosition: [0, 0, 0]}} as unknown as LayerContext;
+  const setNeedsRedraw = vi.spyOn(layer, 'setNeedsRedraw').mockImplementation(() => {});
+
+  layer.draw({context: {}});
+  expect(onFirstDraw, 'a model skipped its draw').not.toHaveBeenCalled();
+  expect(setNeedsRedraw, 'checks again next frame').toHaveBeenCalled();
+
+  layer.draw({context: {}});
+  layer.draw({context: {}});
+  expect(onFirstDraw, 'signals once when every model drew').toHaveBeenCalledOnce();
+});
+
+test('first draw waits until columns have drawn', () => {
+  const onFirstDraw = vi.fn();
+  const layer = new ScenegraphLayer({numInstances: 1, onFirstDraw});
+  const draw = vi.fn().mockReturnValueOnce(false).mockReturnValue(true);
+  layer.state = {
+    scenegraph: new GroupNode([makeModelNode([])]),
+    columns: {loading: false, length: 1, draw},
+    firstDrawRetries: 0
+  } as never;
+  layer.context = {viewport: {cameraPosition: [0, 0, 0]}} as unknown as LayerContext;
+  vi.spyOn(layer, 'setNeedsRedraw').mockImplementation(() => {});
+
+  layer.draw({context: {}});
+  expect(onFirstDraw).not.toHaveBeenCalled();
+  layer.draw({context: {}});
+  expect(onFirstDraw).toHaveBeenCalledOnce();
+});
+
+test('first draw stops waiting for a model that never draws', () => {
+  const onFirstDraw = vi.fn();
+  const layer = new ScenegraphLayer({numInstances: 1, onFirstDraw});
+  layer.state = {
+    scenegraph: new GroupNode([makeModelNode([], false)]),
+    firstDrawRetries: 0
+  } as never;
+  layer.context = {viewport: {cameraPosition: [0, 0, 0]}} as unknown as LayerContext;
+  const setNeedsRedraw = vi.spyOn(layer, 'setNeedsRedraw').mockImplementation(() => {});
+
+  for (let i = 0; i < 1000; i++) layer.draw({context: {}});
+  expect(onFirstDraw, 'signals after a bounded wait').toHaveBeenCalledOnce();
+  setNeedsRedraw.mockClear();
+  layer.draw({context: {}});
+  expect(setNeedsRedraw, 'lets deck go idle').not.toHaveBeenCalled();
 });
 
 for (const functional of [false, true]) {
