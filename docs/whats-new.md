@@ -84,6 +84,10 @@ The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, 
 
 ---
 
+### Core
+
+- Binary attributes in `data.attributes` accept an optional `version` and `dataRange`, so buffers rewritten in place are re-uploaded, fully or by row range, without creating new objects. See [data.attributes](./api-reference/core/layer.md#dataattributes).
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
