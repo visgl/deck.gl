@@ -184,6 +184,7 @@ class GlobeState extends MapState {
     if (props.bearing < -180 || props.bearing > 180) {
       props.bearing = mod(props.bearing + 180, 360) - 180;
     }
+    // Map navigation can't cross the poles, so keep it off the poles to avoid getting stuck
     const latitudeLimit = props.navigation === 'map' ? MAX_LATITUDE : 90;
     props.latitude = clamp(props.latitude, -latitudeLimit, latitudeLimit);
     props.pitch = clamp(props.pitch, props.minPitch, props.maxPitch);
@@ -394,18 +395,26 @@ export default class GlobeController extends Controller<MapState> {
 
         if (angularVelocity > 1e-6) {
           const totalAngle = (angularVelocity * inertia) / 2;
-          let endLongitude: number;
-          let endLatitude: number;
           let interpolator: GlobeInertiaInterpolator;
+          let endLng: number;
+          let endLat: number;
+
           if (viewportProps.navigation === 'map') {
-            const longitudeDelta = mod(last.longitude - first.longitude + 180, 360) - 180;
-            endLongitude = viewportProps.longitude + (longitudeDelta * inertia) / (2 * dt);
-            endLatitude = clamp(
-              viewportProps.latitude + ((last.latitude - first.latitude) * inertia) / (2 * dt),
+            // Decompose into lng/lat velocity and extrapolate linearly
+            let dLng = last.longitude - first.longitude;
+            if (dLng > 180) dLng -= 360;
+            else if (dLng < -180) dLng += 360;
+            const dLat = last.latitude - first.latitude;
+            const vLng = dLng / dt;
+            const vLat = dLat / dt;
+            endLng = viewportProps.longitude + (vLng * inertia) / 2;
+            endLat = clamp(
+              viewportProps.latitude + (vLat * inertia) / 2,
               -MAX_LATITUDE,
               MAX_LATITUDE
             );
-            interpolator = new GlobeInertiaInterpolator({targetLongitude: endLongitude});
+
+            interpolator = new GlobeInertiaInterpolator({targetLongitude: endLng});
           } else {
             // Spin around one fixed axis so position and up stay in the same
             // rigid camera frame through poles and across the antimeridian.
@@ -420,8 +429,8 @@ export default class GlobeController extends Controller<MapState> {
               totalAngle,
               0
             );
-            endLongitude = endFrame.longitude;
-            endLatitude = clamp(endFrame.latitude, -90, 90);
+            endLng = endFrame.longitude;
+            endLat = clamp(endFrame.latitude, -90, 90);
             interpolator = new GlobeInertiaInterpolator({axis, totalAngle});
           }
 
@@ -432,8 +441,8 @@ export default class GlobeController extends Controller<MapState> {
               transitionInterpolator: interpolator,
               transitionDuration: inertia,
               transitionEasing: GLOBE_INERTIA_EASING,
-              longitude: endLongitude,
-              latitude: endLatitude
+              longitude: endLng,
+              latitude: endLat
             },
             {
               isDragging: false,
