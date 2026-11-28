@@ -1,0 +1,60 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "label": "native polygon"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -8,
+              -8
+            ],
+            [
+              8,
+              -8
+            ],
+            [
+              8,
+              8
+            ],
+            [
+              -8,
+              8
+            ],
+            [
+              -8,
+              -8
+            ]
+          ],
+          [
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              7
+            ],
+            [
+              7,
+              7
+            ],
+            [
+              7,
+              3
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

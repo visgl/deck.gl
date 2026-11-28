@@ -1,0 +1,23 @@
+{
+  "name": "deckgl-example-react-google-maps",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../../../vite.config.local.mjs",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^10.0.0-alpha.2",
+    "@deck.gl/google-maps": "^10.0.0-alpha.2",
+    "@deck.gl/layers": "^10.0.0-alpha.2",
+    "@deck.gl/react": "^10.0.0-alpha.2",
+    "@vis.gl/react-google-maps": "^0.7.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.3"
+  }
+}

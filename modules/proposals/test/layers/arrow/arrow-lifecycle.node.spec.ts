@@ -3,14 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {type LayerContext} from '@deck.gl/core';
-import {
-  ArrowArcLayer,
-  ArrowColumnLayer,
-  ArrowIconLayer,
-  ArrowLineLayer,
-  ArrowPointCloudLayer,
-  ArrowScatterplotLayer
-} from '@deck.gl/proposals/layers';
+import {ArrowIconLayer, ArrowScatterplotLayer} from '@deck.gl/proposals/layers';
 import {makeArrowFixedSizeListVector} from '@luma.gl/graph/arrow';
 import {NullDevice} from '@luma.gl/core/test-utils';
 import * as arrow from 'apache-arrow';
@@ -18,11 +11,6 @@ import {expect, test, vi} from 'vitest';
 import {ArrowPathRendererLayer} from '../../../src/layers/path-layer/arrow-path-renderer-layer';
 
 const adapterCases = [
-  [
-    ArrowArcLayer,
-    {getSourcePosition: 'positions', getTargetPosition: 'positions', getWidth: 'missing'}
-  ],
-  [ArrowColumnLayer, {getPosition: 'positions', getRadius: 'missing'}],
   [
     ArrowIconLayer,
     {
@@ -32,11 +20,6 @@ const adapterCases = [
       getSize: 'missing'
     }
   ],
-  [
-    ArrowLineLayer,
-    {getSourcePosition: 'positions', getTargetPosition: 'positions', getWidth: 'missing'}
-  ],
-  [ArrowPointCloudLayer, {getPosition: 'positions', getColor: 'missing'}],
   [ArrowScatterplotLayer, {getPosition: 'positions', getRadius: 'missing'}]
 ] as const;
 
@@ -45,8 +28,8 @@ for (const [LayerClass, props] of adapterCases) {
     const device = new NullDevice({});
     const positions = makeArrowFixedSizeListVector(
       new arrow.Float32(),
-      LayerClass === ArrowPointCloudLayer ? 3 : 2,
-      new Float32Array(LayerClass === ArrowPointCloudLayer ? [1, 2, 3] : [1, 2])
+      2,
+      new Float32Array([1, 2])
     );
     const data = new arrow.Table({positions, icons: arrow.vectorFromArray(['dot'])});
     const layer = new LayerClass({id: 'adapter', data, ...props} as never);

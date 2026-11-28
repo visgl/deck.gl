@@ -102,6 +102,49 @@ If an accessor prop is set to a constant value, the value is applied to all obje
 The rest of the props are typically numeric or boolean values that apply to the whole layer. These include props that define the render options (opacity, extrusion of the PolygonLayer, font family of the TextLayer, etc.), [coordinate system](./coordinate-systems.md), and [interactivity](./interactivity.md).
 
 
+## Normalized colors
+
+Set [`normalizedColors: true`](../api-reference/core/deck.md#normalizedcolors) on Deck to use
+0–1 RGB or RGBA arrays for supported colors. The option defaults to `false`, which uses the
+legacy 0–255 convention. With the option enabled, divide each channel of an application-supplied
+plain byte array by 255, including alpha when present. A missing alpha channel is opaque and
+an explicit zero is transparent. The same rule applies to plain arrays returned by accessors.
+
+```js
+new Deck({
+  normalizedColors: true,
+  layers: [
+    new ScatterplotLayer({
+      data: [{position: [0, 0]}],
+      getPosition: d => d.position,
+      // Formerly [255, 128, 0, 192].
+      getFillColor: [1, 128 / 255, 0, 192 / 255]
+    })
+  ]
+});
+```
+
+| Surface | Supported inputs |
+| --- | --- |
+| Basic layers | ScatterplotLayer fill and stroke, LineLayer and ArcLayer colors, PathLayer strokes, PolygonLayer and SolidPolygonLayer fills, strokes and wireframes, IconLayer and PointCloudLayer colors, ColumnLayer fill and line |
+| Bitmap and text | BitmapLayer tint and transparent colors, TextLayer outline colors |
+| GeoJSON | Top-level GeoJsonLayer color accessors |
+| Mesh and terrain | Top-level SimpleMeshLayer and ScenegraphLayer instance colors, TerrainLayer fallback color, and Tile3DLayer point and mesh fallback colors |
+| Vector tiles | GeoJSON color accessor forwarding in the default TileLayer and MVTLayer renderers |
+| Extensions and effects | FillStyleExtension pattern backgrounds and ambient, directional, point and sun light RGB |
+| Views and picking | View clear colors and top-level layer highlight colors |
+
+Built-in palettes and omitted color props retain their colors. `Uint8Array` and
+`Uint8ClampedArray` colors retain their byte interpretation. Explicit binary attributes, Arrow
+colors, existing GPU columns, and tile-supplied colors keep the encoding defined by their
+formats. The default vector-tile renderer forwards user styling to GeoJsonLayer. Custom
+`renderSubLayers` callbacks supply child colors in the convention expected by the child.
+LightingEffect shadow tints already use normalized RGBA. Color attribute transitions use
+the WebGL backend.
+
+Attribute and palette RGB(A) channels are clamped to 0–1 and rounded to a byte when packed.
+The option changes how you supply colors for standard dynamic range rendering.
+
 ## Rendering Layers
 
 deck.gl allows you to render multiple layers using the same or different data sets. You simply provide an array of layer instances to the [Deck](../api-reference/core/deck.md) class (pure JS) or [DeckGL](../api-reference/react/deckgl.md) component (React) and they will be rendered in order.

@@ -30,7 +30,8 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       data: [{icon: 'a'}, {icon: 'b'}],
       iconAtlas: atlas,
       iconMapping: {a: {x: 0, y: 0, width: 2, height: 1}, b: {x: 2, y: 0, width: 2, height: 1}},
-      positions,
+      getPosition: positions,
+      getColor: [1, 0.5, 0],
       getSize: 8,
       pickable: true
     });
@@ -56,6 +57,19 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           }
         });
       });
+      for (const normalizedColors of [false, true, false]) {
+        deck.setProps({normalizedColors});
+        const expected = normalizedColors ? [255, 128, 0, 255] : [1, 0, 0, 255];
+        await expect
+          .poll(
+            () => {
+              const color = (layer.state as any).columns?.prepared?.columns.instanceColors;
+              return color && Array.from(color.value);
+            },
+            {timeout: 10000}
+          )
+          .toEqual(expected);
+      }
       expect(errors).toEqual([]);
       expect(layer.getNumInstances()).toBe(2);
       expect(layer.getBounds()).toEqual([
