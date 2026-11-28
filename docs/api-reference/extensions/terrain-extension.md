@@ -9,6 +9,8 @@ To use this extension, first define a terrain source with the prop `operation: '
 
 For each layer that should be fitted to the terrain surface, add the `TerrainExtension` to its `extensions` prop.
 
+When no terrain source is rendered, for example while a `TerrainLayer` loads its first tiles, layers with the `TerrainExtension` draw at their own positions as if they had no extension, then move onto the surface once it is available.
+
 The extension works on both `MapView` and `GlobeView`. Terrain cover and height-map FBOs are computed in absolute Mercator common space so the same draw target can be sampled from either projection without re-rendering when the user toggles between them.
 
 <div style={{position:'relative',height:450}}></div>
