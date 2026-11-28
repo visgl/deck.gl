@@ -277,6 +277,7 @@ class GlobeState extends MapState {
     } else {
       props.bearing = mod(props.bearing + 180, 360) - 180;
     }
+    // Map navigation can't cross the poles, so keep it off the poles to avoid getting stuck
     const latitudeLimit = props.navigation === 'map' ? MAX_LATITUDE : 90;
     props.latitude = clamp(props.latitude, -latitudeLimit, latitudeLimit);
     props.pitch = constrain(
