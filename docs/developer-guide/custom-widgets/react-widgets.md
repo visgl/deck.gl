@@ -147,9 +147,12 @@ Create the element once, render the widget component inside `DeckGL`, and render
 ```tsx
 import {useState} from 'react';
 import {createPortal} from 'react-dom';
+import type {MapViewState} from '@deck.gl/core';
 import {DeckGL} from '@deck.gl/react';
 import {RotateWidget} from './rotate-widget-component';
 import type {RotateWidget as DeckRotateWidget} from './rotate-widget';
+
+const INITIAL_VIEW_STATE: MapViewState = {longitude: -122.4, latitude: 37.8, zoom: 11};
 
 export function App() {
   const [element] = useState(() => document.createElement('div'));
@@ -178,7 +181,8 @@ export function App() {
 
 Remarks:
 
-* `DeckGL` renders its children with deck.gl's renderer, which only accepts deck.gl elements, so the portal must be rendered beside `DeckGL`, not inside it. A portal beside `DeckGL` is part of your application's React tree, so the UI can read its state and context.
+* `DeckGL` renders its children with deck.gl's renderer, which only accepts deck.gl elements, so render the portal beside `DeckGL`. A portal inside `DeckGL` throws. A portal beside it is part of your application's React tree, so the UI can read its state and context.
+* `App` creates the element with `document` during render, which fails in server rendering. In a server-rendered app, render this component only on the client.
 * The component builds a new widget on every render. deck.gl keeps the first widget with each `id` and passes it the new props, so the widget passed to `onAttach` is the one deck.gl runs. Call its methods, and give the component an `id`.
 * Widget containers have `pointer-events: none` so they do not block interaction with the map. Interactive elements must set `pointer-events: auto`.
 
@@ -197,15 +201,17 @@ Widget lifecycle methods run outside React. To reflect deck.gl state in your JSX
 ```tsx
 const [bearing, setBearing] = useState(0);
 
-<DeckGL initialViewState={INITIAL_VIEW_STATE} controller>
-  <RotateWidget
-    id="rotate"
-    element={element}
-    onAttach={setWidget}
-    onRotate={params => setBearing(params.bearing)}
-  />
-</DeckGL>;
-{createPortal(<div className="deck-widget">Bearing: {bearing.toFixed(0)}°</div>, element)}
+<>
+  <DeckGL initialViewState={INITIAL_VIEW_STATE} controller>
+    <RotateWidget
+      id="rotate"
+      element={element}
+      onAttach={setWidget}
+      onRotate={params => setBearing(params.bearing)}
+    />
+  </DeckGL>
+  {createPortal(<div className="deck-widget">Bearing: {bearing.toFixed(0)}°</div>, element)}
+</>;
 ```
 
 For state that changes every frame (for example the current zoom), subclass the widget and override `onViewportChange` to call a setter passed through props, and throttle updates as needed.
