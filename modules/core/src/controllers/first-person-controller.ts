@@ -9,7 +9,7 @@ import {mod} from '../utils/math-utils';
 import type Viewport from '../viewports/viewport';
 import LinearInterpolator from '../transitions/linear-interpolator';
 
-import {Vector3, SphericalCoordinates, clamp} from '@math.gl/core';
+import {Vector3, SphericalCoordinates, clamp} from '@math.gl/core/matrix';
 
 const MOVEMENT_SPEED = 20;
 const PAN_SPEED = 500;

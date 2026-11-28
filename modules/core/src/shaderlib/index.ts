@@ -46,6 +46,11 @@ const SHADER_INJECTION_TARGETS: ShaderInjectionTarget[] = [
     stage: 'fragment',
     glsl: {parameters: 'inout vec4 color, FragmentGeometry geometry'},
     wgsl: {parameters: 'color: ptr<function, vec4<f32>>, geometry: FragmentGeometry'}
+  },
+  {
+    name: 'DECKGL_FILTER_COLOR_BEFORE_LIGHTING',
+    stage: 'fragment',
+    wgsl: {parameters: 'color: ptr<function, vec4<f32>>, geometry: FragmentGeometry'}
   }
 ];
 

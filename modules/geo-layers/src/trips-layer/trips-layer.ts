@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {NumericArray} from '@math.gl/core';
+import type {ArrowAccessorFunction} from '@deck.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 import {createIterable} from '@deck.gl/core';
 import type {AccessorFunction, Attribute, DefaultProps} from '@deck.gl/core';
 import {PathLayer, PathLayerProps} from '@deck.gl/layers';
@@ -14,7 +15,7 @@ const defaultProps: DefaultProps<TripsLayerProps> = {
   fadeTrail: true,
   trailLength: {type: 'number', value: 120, min: 0},
   currentTime: {type: 'number', value: 0, min: 0},
-  getTimestamps: {type: 'accessor', value: (d: any) => d.timestamps}
+  getTimestamps: {type: 'accessor', arrow: 'row', value: (d: any) => d.timestamps}
 };
 
 const tripsShaderInjectionsGLSL = {
@@ -25,7 +26,13 @@ out float vTime;
 `,
   // Timestamp of the vertex
   'glsl:vs:#main-end': `\
-vTime = instanceTimestamps + (instanceNextTimestamps - instanceTimestamps) * vPathPosition.y / vPathLength;
+#ifdef DASH_ENABLED
+// Camera clipping shortens the visible geometry, but trip time still follows the original segment.
+float tripsPathProgress = vDashSegment.x / vDashSegment.y;
+#else
+float tripsPathProgress = vPathPosition.y / vPathLength;
+#endif
+vTime = instanceTimestamps + (instanceNextTimestamps - instanceTimestamps) * tripsPathProgress;
 `,
   'glsl:fs:#decl': `\
 in float vTime;
@@ -65,7 +72,7 @@ type _TripsLayerProps<DataT = unknown> = {
   /**
    * Timestamp accessor.
    */
-  getTimestamps?: AccessorFunction<DataT, NumericArray>;
+  getTimestamps?: ArrowAccessorFunction<DataT, NumericArray>;
 };
 
 /** Render animated paths that represent vehicle trips. */
@@ -138,7 +145,8 @@ export default class TripsLayer<DataT = any, ExtraProps extends {} = {}> extends
         continue;
       }
 
-      const timestamps = props.getTimestamps?.(object, objectInfo) ?? [];
+      const timestamps =
+        (props.getTimestamps as AccessorFunction<DataT, NumericArray>)?.(object, objectInfo) ?? [];
       packedTimestamps.set(
         packTripTimestamps(timestamps, vertexEnd - vertexStart, props._pathType === 'loop'),
         vertexStart * 2

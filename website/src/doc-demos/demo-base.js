@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import DeckGL from '@deck.gl/react/legacy';
 import {Map} from 'react-map-gl/maplibre';
 import styled from 'styled-components';
 import {useColorMode} from '@docusaurus/theme-common';

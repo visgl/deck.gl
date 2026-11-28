@@ -175,6 +175,7 @@ export class TerrainEffect implements Effect {
       shaderModuleProps: {
         terrain: {
           heightMapBounds: this.heightMap.bounds,
+          heightMapRange: this.heightMap.heightRange,
           dummyHeightMap: this.dummyHeightMap,
           drawToTerrainHeightMap: true
         },

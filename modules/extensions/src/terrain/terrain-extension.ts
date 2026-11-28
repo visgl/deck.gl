@@ -15,7 +15,7 @@ const defaultProps = {
 export type TerrainExtensionProps = {
   /**
    * controls whether an object is drawn over the terrain surface by its anchor (usually defined by an accessor called `getPosition`, e.g. icon, scatterplot) or by its geometry (e.g. path, polygon).
-   * If not specified, it is automatically deduced from the layer.
+   * If not specified, layers with anchors or `extruded: true` use `'offset'`, and other layers use `'drape'`.
    */
   terrainDrawMode?: 'offset' | 'drape';
 };
@@ -27,7 +27,7 @@ type TerrainExtensionState = {
   terrainCoverNeedsRedraw: boolean;
 };
 
-/** Allows layers to show/hide objects by a geofence. */
+/** Fits layer anchors or geometry to terrain. */
 export default class TerrainExtension extends LayerExtension {
   static defaultProps = defaultProps;
   static extensionName = 'TerrainExtension';
@@ -38,15 +38,14 @@ export default class TerrainExtension extends LayerExtension {
     };
   }
 
-  initializeState(this: Layer<TerrainExtensionProps>) {
-    this.context.deck?._addDefaultEffect(new TerrainEffect());
-  }
-
   updateState(
     this: Layer<TerrainExtensionProps>,
     params: UpdateParameters<Layer<TerrainExtensionProps>>
   ) {
-    const {props, oldProps} = params;
+    const {props, oldProps, changeFlags} = params;
+    if (changeFlags.extensionsChanged) {
+      this.context.deck?._addDefaultEffect(new TerrainEffect());
+    }
 
     // updateState also runs when the extension is added to an existing layer.
     if (
@@ -57,6 +56,7 @@ export default class TerrainExtension extends LayerExtension {
     }
 
     if (
+      !changeFlags.extensionsChanged &&
       this.state.terrainDrawMode &&
       props.terrainDrawMode === oldProps.terrainDrawMode &&
       // @ts-ignore `extruded` may not exist in props

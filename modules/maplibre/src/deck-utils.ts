@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, MapView, _GlobeView as GlobeView, _flatten as flatten} from '@deck.gl/core';
+import {Deck, MapView, GlobeView, _flatten as flatten} from '@deck.gl/core';
 
 import {
   getMapLibreCameraElevation,

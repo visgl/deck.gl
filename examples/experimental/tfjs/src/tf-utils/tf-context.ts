@@ -5,7 +5,6 @@
 import {pushContextState, popContextState, getParameters, setParameters} from '@luma.gl/gltools';
 import * as tf from '@tensorflow/tfjs';
 import * as tfgl from '@tensorflow/tfjs-backend-webgl';
-import {GL} from '@luma.gl/webgl/constants';
 
 /** Helper class for sharing WebGL context between Deck and tfjs */
 export class CustomTFContext {
@@ -46,10 +45,10 @@ export class CustomTFContext {
 
     if (this.lastContextState) {
       setParameters(gl, this.lastContextState);
-      gl.bindVertexArray(this.lastContextState[GL.VERTEX_ARRAY_BINDING]);
+      gl.bindVertexArray(this.lastContextState[gl.VERTEX_ARRAY_BINDING]);
       gl.bindBuffer(
-        GL.ELEMENT_ARRAY_BUFFER,
-        this.lastContextState[GL.ELEMENT_ARRAY_BUFFER_BINDING]
+        gl.ELEMENT_ARRAY_BUFFER,
+        this.lastContextState[gl.ELEMENT_ARRAY_BUFFER_BINDING]
       );
     }
 
@@ -60,8 +59,8 @@ export class CustomTFContext {
     this.lastContextState = {
       ...getParameters(gl),
       // gl states not tracked by luma but expected by TF
-      [GL.ELEMENT_ARRAY_BUFFER_BINDING]: gl.getParameter(GL.ELEMENT_ARRAY_BUFFER_BINDING),
-      [GL.VERTEX_ARRAY_BINDING]: gl.getParameter(GL.VERTEX_ARRAY_BINDING)
+      [gl.ELEMENT_ARRAY_BUFFER_BINDING]: gl.getParameter(gl.ELEMENT_ARRAY_BUFFER_BINDING),
+      [gl.VERTEX_ARRAY_BINDING]: gl.getParameter(gl.VERTEX_ARRAY_BINDING)
     };
     popContextState(gl);
   }

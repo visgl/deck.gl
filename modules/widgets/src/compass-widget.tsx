@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Widget, FlyToInterpolator, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
+import {Widget, FlyToInterpolator, WebMercatorViewport, GlobeViewport} from '@deck.gl/core';
 import type {Viewport, WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
 import {Tooltip} from './lib/components/tooltip';
@@ -110,7 +110,7 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
   getRotation(viewport?: Viewport) {
     if (viewport instanceof WebMercatorViewport) {
       return [-viewport.bearing, viewport.pitch];
-    } else if (viewport instanceof _GlobeViewport) {
+    } else if (viewport instanceof GlobeViewport) {
       return [0, Math.max(-80, Math.min(80, viewport.latitude))];
     }
     return [0, 0];

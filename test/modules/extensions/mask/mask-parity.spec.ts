@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {beforeEach, describe, expect, test} from 'vitest';
-import {Deck, MapView, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Deck, MapView, OrthographicView, GlobeView} from '@deck.gl/core';
 import {IconLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {MaskExtension} from '@deck.gl/extensions';
 import {Buffer, luma, Texture} from '@luma.gl/core';

@@ -15,7 +15,7 @@ Options for the widget, as passed into the constructor and can be updated with `
 
 #### `id` (string, optional) {#id}
 
-* Default: the widget's name.
+* Default: the widget's name. An empty or `null` `id` also uses the default.
 
 The `id` string must be unique among all your widgets at a given time. While a default `id` is provided, it is recommended to set `id` explicitly if you have multiple widgets of the same type.
 

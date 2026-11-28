@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {LayerManager, WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {LayerManager, WebMercatorViewport, GlobeViewport} from '@deck.gl/core';
 import {projectBoundsToFlatCommon} from '@deck.gl/extensions/utils/projection-utils';
 import {PathLayer, SolidPolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
@@ -11,7 +11,7 @@ import {PathStyleExtension, Fp64Extension} from '@deck.gl/extensions';
 import {device} from '@deck.gl/test-utils/vitest';
 import {resolveCRS} from '@deck.gl/core/utils/crs';
 import {normalizeCoordinateSystem} from '@deck.gl/geo-layers/tile-3d-layer/tile-3d-layer';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
 const geographicCRS = {
   type: 'GeographicCRS',

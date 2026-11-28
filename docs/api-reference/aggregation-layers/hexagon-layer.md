@@ -191,13 +191,13 @@ CPU aggregation is used as fallback in the following cases:
 
 ##### Compute aggregation
 
-On a WebGPU device, HexagonLayer uses compute aggregation with explicit `colorDomain`
-and `elevationDomain`. Accessor data and GPU columns are supported; GPU positions require explicit `dataBounds`.
-
-Picking, extensions, domain callbacks, percentile filtering, quantile scales, and ordinal
-color scales use CPU aggregation instead. Dense grids exceeding
-device buffer limits also use CPU aggregation for accessor data. GPU-only inputs require
-a compatible compute configuration. Columns requiring CPU preprojection are unsupported.
+On a WebGPU device, HexagonLayer aggregates in compute shaders when `gpuAggregation` is true.
+Automatic domains, picking, domain callbacks, quantile and ordinal scales and percentiles copy
+results back to the CPU after each change. Until the copy lands, the previous cells stay visible
+and cannot be picked. With `colorDomain`, `elevationDomain`, linear or quantize scales and default
+percentiles, new cells draw without waiting. Extensions work with accessor data and [supported GPU columns](./aggregator.md#gpu-column-extensions).
+[GPU column inputs](./aggregator.md#gpu-column-inputs) also need `dataBounds`.
+Data over the device buffer limits uses CPU aggregation.
 
 #### `radius` (number, optional) {#radius}
 
@@ -543,6 +543,21 @@ The HexagonLayer renders the following sublayers:
 
 * `cells` - a [ColumnLayer](../layers/column-layer.md) rendering the aggregated columns.
 
+
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the aggregation path. This is particularly useful when applications compute input data on the GPU. Values follow input point order.
+
+- `positions` – A GPUVector of input positions.
+- `weights` – Matching weight vectors in color and elevation order.
+- `dataBounds` – `[min, max]` – Bounds in input coordinates.
+
+Notes:
+
+- GPU inputs require a compatible WebGPU compute configuration with explicit color and elevation domains.
+- The GPU position path requires a coordinate system that the layer can use without CPU preprojection.
 
 ## Source
 

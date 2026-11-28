@@ -6,7 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {_GlobeView as GlobeView} from '@deck.gl/core';
+import {GlobeView} from '@deck.gl/core';
 import {GeoJsonLayer, IconLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -66,7 +66,6 @@ const testCases = [
   },
   {
     name: 'terrain-extension-drape',
-    skip: ['webgpu'],
     viewState: {
       longitude: -122.45,
       latitude: 37.75,
@@ -96,7 +95,6 @@ const testCases = [
     // No stroke: a draped PathLayer on GlobeView re-tessellates every frame, so the screenshot
     // never settles.
     name: 'terrain-extension-drape-fill-globe',
-    skip: ['webgpu'],
     views: new GlobeView({resolution: 36}),
     viewState: {
       longitude: -122.45,
