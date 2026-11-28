@@ -106,5 +106,6 @@ export abstract class GPUTransitionBase<SettingsT extends TransitionSettings>
       buffer.destroy();
     }
     this.buffers.length = 0;
+    this.attributeInTransition.delete();
   }
 }
