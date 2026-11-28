@@ -49,6 +49,7 @@ export type {TileLoadProps} from './tileset-2d/index';
 export type _Tileset2DProps<DataT = any, ViewStateT = Viewport> = Tileset2DProps<DataT, ViewStateT>;
 export type {
   RefinementStrategy,
+  LODStrategy,
   Tileset2DAdapter,
   Tileset2DListener,
   Tileset2DProps,

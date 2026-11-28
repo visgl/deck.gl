@@ -149,6 +149,8 @@ For data below the WGS84 ellipsoid, set [`MapView.minimumElevation`](../core/map
 
 When in Tiled Mode, inherits from all [TileLayer](./tile-layer.md) properties. Forwards `wireframe` property to [SimpleMeshLayer](../mesh-layers/simple-mesh-layer.md).
 
+Set [`lodStrategy: 'coverage'`](./tile-layer.md#lodstrategy) to show lower resolution terrain while sharper tiles load.
+
 
 
 ### Data Options

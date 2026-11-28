@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {Tile2DHeader} from './tile-2d-header';
+import type {LODStrategy} from './tileset-2d';
 
 /** Selection and visibility flags for the default consumer or a view-local record. */
 export type TileRefinementState = {
@@ -26,13 +27,18 @@ const VISIBLE = 2;
 export function refineTileStates(
   tiles: Tile2DHeader[],
   strategy: 'best-available' | 'no-overlap' | 'never',
-  getState: GetTileState
+  getState: GetTileState,
+  lodStrategy: LODStrategy = 'none'
 ): void {
   if (strategy === 'never') return;
   for (const tile of tiles) getState(tile).state = 0;
   for (const tile of tiles) {
-    if (getState(tile).isSelected && !showLoadedAncestor(tile, getState)) {
-      if (strategy === 'best-available') showLoadedChildren(tile, getState);
+    if (!getState(tile).isSelected) continue;
+    const isCovered = showLoadedAncestor(tile, getState);
+    // Coverage ancestors are nearly always loaded, so also show the sharper tiles they would hide
+    const keepChildren = lodStrategy === 'coverage' && !tile.isLoaded && !tile.content;
+    if (strategy === 'best-available' && (!isCovered || keepChildren)) {
+      showLoadedChildren(tile, getState);
     }
   }
   const ordered = strategy === 'no-overlap' ? [...tiles].sort((a, b) => a.zoom - b.zoom) : tiles;

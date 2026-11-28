@@ -30,6 +30,8 @@ export class Tile2DView<DataT = any> {
   private _tileset: Tileset2D<DataT, Viewport>;
   /** Tiles selected during the latest traversal. */
   private _selectedTiles: Tile2DHeader<DataT>[] | null = null;
+  /** Coverage ancestors prefetched for the latest traversal, by request rank. */
+  private _prefetchTiles = new Map<Tile2DHeader<DataT>, number>();
   /** Incremented whenever this view's visible tile set changes. */
   private _frameNumber = 0;
   /** Last viewport used to compute tile selection. */
@@ -58,6 +60,7 @@ export class Tile2DView<DataT = any> {
   finalize(): void {
     this._tileset.detachConsumer(this.id);
     this._selectedTiles = null;
+    this._prefetchTiles = new Map();
     this._state.clear();
   }
 
@@ -116,16 +119,23 @@ export class Tile2DView<DataT = any> {
         modelMatrixInverse: this._modelMatrixInverse
       });
       this._selectedTiles = tileIndices.map(index => this._tileset.getTile(index, true));
+      this._prefetchTiles = this._tileset.getPrefetchTiles(viewport, this._selectedTiles);
       this._tileset.prepareTiles();
     } else if (this.needsReload) {
       this._selectedTiles = (this._selectedTiles || []).map(tile =>
         this._tileset.getTile(tile.index, true)
       );
+      this._prefetchTiles = this._tileset.getPrefetchTiles(viewport, this._selectedTiles);
       this._tileset.prepareTiles();
     }
 
     const changed = this._updateTileStates();
-    this._tileset.updateConsumer(this.id, this._selectedTiles || [], this._getVisibleTiles());
+    this._tileset.updateConsumer(
+      this.id,
+      this._selectedTiles || [],
+      this._getVisibleTiles(),
+      this._prefetchTiles
+    );
 
     if (changed) {
       this._frameNumber++;
@@ -219,7 +229,12 @@ export class Tile2DView<DataT = any> {
         getTileState(this._state, tile).isVisible = facade.isVisible;
       }
     } else {
-      refineTileStates(allTiles, refinementStrategy, tile => getTileState(this._state, tile));
+      refineTileStates(
+        allTiles,
+        refinementStrategy,
+        tile => getTileState(this._state, tile),
+        this._tileset.lodStrategy
+      );
     }
 
     let changed = false;
