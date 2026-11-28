@@ -282,7 +282,12 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     await tileset3d.tilesetInitializationPromise;
 
     if (loadRequest !== this.state.tilesetLoadRequest) {
-      // A newer load superseded this one
+      // A newer load superseded this one, or the layer was finalized mid-load.
+      // This tileset was never presented, so its destroy must stay invisible: loaders.gl
+      // calls onTileUnload for every tile during destroy, which would delete entries of
+      // the live layerMap (tile ids collide across loads of the same tileset) and fire
+      // the user's onTileUnload for tiles the live tileset still holds.
+      tileset3d.options.onTileUnload = () => {};
       tileset3d.destroy();
       return;
     }
