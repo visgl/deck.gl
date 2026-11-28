@@ -471,7 +471,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     // Create the coverage most likely to be shown next first, and tiles no view needs last
     const priorities = new Map<Tile2DHeader, number>();
     for (const tile of hiddenTiles) {
-      const priority = tileset.getRequestPriority(tile);
+      const priority = tileset._getRequestPriority(tile);
       priorities.set(tile, priority < 0 ? Number.MAX_SAFE_INTEGER : priority);
     }
     hiddenTiles.sort((a, b) => priorities.get(a)! - priorities.get(b)!);
