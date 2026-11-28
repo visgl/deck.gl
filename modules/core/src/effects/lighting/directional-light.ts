@@ -39,6 +39,7 @@ export type DirectionalLightOptions = {
    * zoomed-out and steeply pitched views. The shadow map covers a light-aligned box around the
    * bounds: geometry just outside the bounds may still cast and receive shadows, and geometry
    * beyond that box does not. The bounds should cover the full height of the shadow casters.
+   * Ignored in `GlobeView` and custom projections, which curve the bounds between their corners.
    * @default null
    */
   _shadowBounds?: ShadowBounds | null;

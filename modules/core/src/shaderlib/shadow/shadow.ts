@@ -233,6 +233,19 @@ function clipLightBox(box: LightBox, bounds: LightBox): LightBox {
   return overlaps ? clipped : box;
 }
 
+/**
+ * Whether the corners of world-space bounds enclose them in common space. GlobeView and custom
+ * projections curve the surface between the corners, so they are left out.
+ */
+function boundsFitCorners(viewport: Viewport): boolean {
+  const {projectionMode} = viewport;
+  return (
+    projectionMode === PROJECTION_MODE.IDENTITY ||
+    projectionMode === PROJECTION_MODE.WEB_MERCATOR ||
+    projectionMode === PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET
+  );
+}
+
 /** Returns the corners of world-space shadow bounds in common space. */
 function getBoundsCorners(viewport: Viewport, [min, max]: ShadowBounds): number[][] {
   const corners: number[][] = [];
@@ -265,7 +278,7 @@ function getViewProjectionMatrices({
     // Fit the shadow map to the part of the light's bounds in view, so that its texels and its
     // depth range stay small when the view spans kilometers (zoomed out or steeply pitched)
     const bounds = shadowBounds?.[i];
-    if (bounds) {
+    if (bounds && boundsFitCorners(viewport)) {
       const boundsCorners = getBoundsCorners(viewport, bounds);
       box = clipLightBox(
         box,

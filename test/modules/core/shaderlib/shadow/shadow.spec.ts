@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {MapView, OrbitView} from '@deck.gl/core';
+import {GlobeView, MapView, OrbitView} from '@deck.gl/core';
 import project from '@deck.gl/core/shaderlib/project/project';
 import shadow from '@deck.gl/core/shaderlib/shadow/shadow';
 import {Matrix4, Vector3} from '@math.gl/core/matrix';
@@ -334,4 +334,25 @@ test('shadow#getUniforms fits the shadow map to shadowBounds', () => {
   expect(offscreen.viewProjectionMatrix0, 'Bounds outside the view are ignored').toEqual(
     viewFit.viewProjectionMatrix0
   );
+});
+
+test('shadow#getUniforms ignores shadowBounds in GlobeView', () => {
+  // The globe curves the bounds between their corners, so the corners do not enclose them
+  const viewport = new GlobeView().makeViewport({
+    width: 800,
+    height: 600,
+    viewState: {longitude: 0, latitude: 30, zoom: 3}
+  })!;
+  const props = {
+    project: {viewport},
+    shadowMatrices: [new Matrix4().lookAt({eye: new Vector3([0, 0, 1])})]
+  };
+  const shadowBounds = [
+    [-20, 30, 0],
+    [20, 31, 100]
+  ];
+  expect(
+    shadow.getUniforms({...props, shadowBounds: [shadowBounds]}).viewProjectionMatrix0,
+    'Shadow map is fitted to the view'
+  ).toEqual(shadow.getUniforms(props).viewProjectionMatrix0);
 });
