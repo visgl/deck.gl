@@ -1,0 +1,24 @@
+{
+  "name": "deckgl-example-react-map-gl-maplibre",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../../../vite.config.local.mjs",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^10.0.0-alpha.2",
+    "@deck.gl/layers": "^10.0.0-alpha.2",
+    "@deck.gl/maplibre": "^10.0.0-alpha.2",
+    "@deck.gl/react": "^10.0.0-alpha.2",
+    "maplibre-gl": "^6.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-map-gl": "^8.1.2"
+  },
+  "devDependencies": {
+    "vite": "^7.3.3"
+  }
+}

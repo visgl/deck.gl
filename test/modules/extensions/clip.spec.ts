@@ -3,12 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {
-  LayerManager,
-  MapView,
-  WebMercatorViewport,
-  _GlobeViewport as GlobeViewport
-} from '@deck.gl/core';
+import {LayerManager, MapView, WebMercatorViewport, GlobeViewport} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {lngLatToMercatorCommon} from '@deck.gl/extensions/utils/projection-utils';
 import {GeoJsonLayer, PathLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';

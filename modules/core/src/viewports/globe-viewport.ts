@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Matrix4, Vector3} from '@math.gl/core';
-import {vec3} from '@math.gl/core';
-import {vec4} from '@math.gl/core';
-import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/web-mercator';
+import {Matrix4, Vector3} from '@math.gl/core/matrix';
+import {vec3} from '@math.gl/core/matrix';
+import {vec4} from '@math.gl/core/matrix';
+import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/geospatial/web-mercator';
 import Viewport, {type DistanceScales, type ProjectPositionOptions} from './viewport';
 import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import {mod} from '../utils/math-utils';

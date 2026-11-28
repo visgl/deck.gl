@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {GL, Model, Framebuffer, Texture2D, withParameters, Buffer} from '@luma.gl/webgl-legacy';
+import {Model, Framebuffer, Texture2D, withParameters, Buffer} from '@luma.gl/webgl-legacy';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {SolidPolygonLayer} from '@deck.gl/layers';
@@ -24,19 +24,20 @@ export default class WBOITLayer extends SolidPolygonLayer {
 
   initializeState() {
     super.initializeState();
+    const {gl} = this.context.device;
 
     const [drawingBufferWidth, drawingBufferHeight] = this.context.device.canvasContext.getDra;
 
     const textureOpts = {
-      type: GL.FLOAT,
+      type: gl.FLOAT,
       width: gl.drawingBufferWidth,
       height: gl.drawingBufferHeight,
       mipmaps: false,
       parameters: {
-        [GL.TEXTURE_MIN_FILTER]: GL.NEAREST,
-        [GL.TEXTURE_MAG_FILTER]: GL.NEAREST,
-        [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-        [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+        [gl.TEXTURE_MIN_FILTER]: gl.NEAREST,
+        [gl.TEXTURE_MAG_FILTER]: gl.NEAREST,
+        [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
+        [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
       }
     };
 
@@ -53,16 +54,16 @@ export default class WBOITLayer extends SolidPolygonLayer {
     // This is the depthTexture from solid objects!
     // const accumulationDepthTexture = new Texture2D(gl, {
     //   ...textureOpts,
-    //   format: GL.DEPTH_COMPONENT32F,
+    //   format: gl.DEPTH_COMPONENT32F,
     // });
 
     const accumulationFramebuffer = new Framebuffer(gl, {
       width: gl.drawingBufferWidth,
       height: gl.drawingBufferHeight,
       attachments: {
-        [GL.COLOR_ATTACHMENT0]: accumulationTexture,
-        [GL.COLOR_ATTACHMENT1]: revealageTexture
-        // [GL.DEPTH_ATTACHMENT]: accumulationDepthTexture
+        [gl.COLOR_ATTACHMENT0]: accumulationTexture,
+        [gl.COLOR_ATTACHMENT1]: revealageTexture
+        // [gl.DEPTH_ATTACHMENT]: accumulationDepthTexture
       }
     });
 
@@ -89,12 +90,13 @@ export default class WBOITLayer extends SolidPolygonLayer {
   }
 
   draw(opts) {
+    const {gl} = this.context.device;
     this.state.accumulationFramebuffer.clear({color: [0, 0, 0, 1], depth: 1});
 
     withParameters(
       this.context.device,
       {
-        blendFunc: [GL.ONE, GL.ONE, GL.ZERO, GL.ONE_MINUS_SRC_ALPHA],
+        blendFunc: [gl.ONE, gl.ONE, gl.ZERO, gl.ONE_MINUS_SRC_ALPHA],
         blend: true,
         depthMask: false,
         cull: false,
@@ -116,7 +118,7 @@ export default class WBOITLayer extends SolidPolygonLayer {
     withParameters(
       this.context.device,
       {
-        blendFunc: [GL.ONE, gl.ONE_MINUS_SRC_ALPHA],
+        blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
         blend: true,
         depthTest: false,
         framebuffer: null
@@ -139,7 +141,7 @@ export default class WBOITLayer extends SolidPolygonLayer {
         const {sideModel} = this.state;
         const {wireframe} = this.props;
         if (sideModel && wireframe) {
-          sideModel.setDrawMode(GL.LINE_STRIP);
+          sideModel.setDrawMode(gl.LINE_STRIP);
           sideModel.setUniforms({isWireframe: true}).draw();
         }
       }

@@ -50,6 +50,7 @@ Parameters:
 
   + `nearZMultiplier` (number, optional) - Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`.
   + `farZMultiplier` (number, optional) - Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1.01`.
+  + `minimumElevation` (number, optional) - Lowest elevation in meters that stays visible. Default `0`. See [MapView](./map-view.md#minimumelevation).
   + `orthographic` (boolean, optional) - Default `false`.
   + `projectionMatrix` (number[16], optional) - Optional 16-element 4x4 projection matrix, that overrides the matrix created from the parameters above.
 
@@ -71,7 +72,7 @@ Its bounds `[[0, 0], [512, 512]]` describe an appropriate rendering target, not 
 projection algorithm's validity limits. This is a tile-coordinate convention, distinct
 from EPSG:3857 coordinates in meters.
 
-The descriptor's WGS84 converters use `@math.gl/web-mercator`. Conversion preserves
+The descriptor's WGS84 converters use `@math.gl/geospatial/web-mercator`. Conversion preserves
 altitude and continuous longitude; explicit normalization wraps longitude and clamps
 latitude to the Mercator rendering extent. The viewport retains its northward Y in
 common space and its existing meter-based altitude scaling.
@@ -158,7 +159,7 @@ Returns a new viewport that fit around the given bounding box. Viewport `width` 
 Parameters:
 
 * `bounds` (number[2][2]) - Bounding box in `[[longitude, latitude], [longitude, latitude]]`.
-* `opts` (object) - See additional options in [@math.gl/web-mercator](https://math.gl/modules/web-mercator/docs/api-reference/web-mercator-utils#fitboundsopts)
+* `opts` (object) - See additional options in [@math.gl/geospatial/web-mercator](https://math.gl/modules/web-mercator/docs/api-reference/web-mercator-utils#fitboundsopts)
   + `width` (number) - If not supplied, will use the current width of the viewport (default `1`)
   + `height` (number) - If not supplied, will use the current height of the viewport (default `1`)
   + `minExtent` (number) - In degrees, 0.01 would be about 1000 meters

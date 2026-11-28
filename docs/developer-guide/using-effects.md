@@ -30,7 +30,7 @@ import TabItem from '@theme/TabItem';
   <TabItem value="ts" label="TypeScript">
 
 ```js
-import {Deck, AmbientLight, SunLight, LightingEffect} from '@deck.gl/core';
+import {Deck, AmbientLight, _SunLight as SunLight, LightingEffect} from '@deck.gl/core';
 
 // create an ambient light
 const ambientLight = new AmbientLight({
@@ -65,7 +65,7 @@ const deckInstance = new Deck({
 ```tsx
 import React from 'react';
 import {DeckGL} from '@deck.gl/react';
-import {AmbientLight, SunLight, LightingEffect} from '@deck.gl/core';
+import {AmbientLight, _SunLight as SunLight, LightingEffect} from '@deck.gl/core';
 
 // create an ambient light
 const ambientLight = new AmbientLight({
