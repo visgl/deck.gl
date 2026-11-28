@@ -47,7 +47,10 @@ export function createTexture(
     };
   }
 
-  const {width, height} = image.data;
+  // A plain object gives its size on the object: {width, height, data: Uint8Array}.
+  // A browser image wrapped above gives it on `data`.
+  const width = image.width ?? image.data?.width;
+  const height = image.height ?? image.data?.height;
   const texture = device.createTexture({
     ...image,
     sampler: {
