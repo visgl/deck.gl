@@ -197,7 +197,7 @@ type _TileLayerProps<DataT> = {
   /**
    * (Experimental) Maximum number of tiles that get sublayers per frame. Visible tiles are always
    * created and count toward the limit; hidden tiles, such as prefetched coverage, wait for later
-   * frames.
+   * frames, at least one of them created per frame.
    *
    * @default no limit
    */
@@ -462,11 +462,12 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
     const tileset = this.state.tileset!;
     const newTiles = tileset.tiles.filter(tile => (tile.isLoaded || tile.content) && !tile.layers);
-    // Visible tiles are always created, so that pacing never opens a hole
+    // Visible tiles are always created, so that pacing never opens a hole. At least one hidden
+    // tile is created too, so that hidden tiles advance while visible ones fill the limit.
     const hiddenTiles = newTiles.filter(tile => !tile.isVisible);
     const maxHiddenTiles = Math.max(
       _maxNewTilesPerFrame - (newTiles.length - hiddenTiles.length),
-      0
+      1
     );
     if (hiddenTiles.length <= maxHiddenTiles) {
       return null;

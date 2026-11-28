@@ -82,13 +82,15 @@ for (const Layer of [TileLayer, Tile2DLayer]) {
     const {getCreatedIds} = await setup(layer, fourTilesViewport);
     const createdIds = getCreatedIds();
 
-    expect(createdIds.length, 'every visible tile is created').toBe(4);
     expect(
-      createdIds.every(id => id.endsWith('-12')),
-      'hidden coverage waits'
-    ).toBe(true);
+      createdIds.filter(id => id.endsWith('-12')).length,
+      'every visible tile is created'
+    ).toBe(4);
+    expect(createdIds.length, 'one hidden tile is created although visible tiles fill the limit').toBe(
+      5
+    );
     layer.state.nextTilesFrame = undefined;
-    expect(getCreatedIds().length, 'one more tile next frame').toBe(5);
+    expect(getCreatedIds().length, 'one more tile next frame').toBe(6);
     layer.finalizeState();
   });
 }

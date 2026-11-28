@@ -633,12 +633,14 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
     const newTiles = tileset.tiles.filter(
       tile => (tile.isLoaded || tile.content) && !tileLayers.has(tile.id)
     );
-    // Tiles visible in any view are always created, so that pacing never opens a hole
+    // Tiles visible in any view are always created, so that pacing never opens a hole. At least
+    // one hidden tile is created too, so that hidden tiles advance while visible ones fill the
+    // limit.
     const views = Array.from(tilesetViews.values());
     const hiddenTiles = newTiles.filter(tile => !views.some(view => view.isTileVisible(tile)));
     const maxHiddenTiles = Math.max(
       _maxNewTilesPerFrame - (newTiles.length - hiddenTiles.length),
-      0
+      1
     );
     if (hiddenTiles.length <= maxHiddenTiles) {
       return null;
