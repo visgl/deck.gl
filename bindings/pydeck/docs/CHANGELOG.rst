@@ -29,6 +29,7 @@ Releases and associated GitHub PRs for pydeck are documented here.
 - Add a Paris Trees gallery example, drawn with ``TreeLayer`` from ``@deck.gl-community/three``
 - Embed the deck JSON in ``to_html`` output compactly to reduce file size
 - Fix ``register_library`` adding a duplicate entry when a name is registered again (#10949)
+- Serialize NumPy arrays and scalars as JSON lists and numbers instead of strings (#6850)
 
 0.9.3 - Jul 2026
 ^^^^^^^^^^^^^^^^^^^
