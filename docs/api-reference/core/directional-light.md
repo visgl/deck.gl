@@ -30,7 +30,7 @@ The constructor for the `DirectionalLight` class. Use this to create a new `Dire
 const directionalLight = new DirectionalLight({color, intensity, direction});
 ```
 
-* `color` - (number[3],)  RGB color of directional light source, default value is `[255, 255, 255]`.
+* `color` - (number[3],)  RGB color of directional light source, default value is `[255, 255, 255]`. Custom RGB arrays use 0–1 channels when Deck’s [`normalizedColors`](./deck.md#normalizedcolors) is enabled and 0–255 channels otherwise.
 * `intensity` - (number) Strength of directional light source, default value is `1.0`.
 * `direction` - (number[3])  3D vector specifies the direction the light comes from, default value is `[0, 0, -1]`.
 * `_shadow` - (boolean, optional) Enable experimental shadow effect, default value is `false`.

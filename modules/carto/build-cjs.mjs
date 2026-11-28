@@ -5,7 +5,7 @@
 import {fileURLToPath} from 'node:url';
 import {build} from 'esbuild';
 
-// loaders.gl alpha.11 only exports this synchronous decoder to ESM consumers.
+// loaders.gl beta.1 only exports this synchronous decoder to ESM consumers.
 // Bundle it into CARTO's CommonJS output until loaders.gl provides a require export.
 await build({
   // Preserve TypeScript transforms, including the package version used in worker URLs.
@@ -19,8 +19,8 @@ await build({
   sourcemap: true,
   sourcesContent: false,
   alias: {
-    '@loaders.gl/compression/gzip-decompressor': fileURLToPath(
-      import.meta.resolve('@loaders.gl/compression/gzip-decompressor')
+    '@loaders.gl/compression/gzip-decompressor-fflate': fileURLToPath(
+      import.meta.resolve('@loaders.gl/compression/gzip-decompressor-fflate')
     )
   }
 });

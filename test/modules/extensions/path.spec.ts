@@ -9,7 +9,7 @@ import {
   OrthographicViewport,
   WebMercatorViewport,
   project,
-  _GlobeViewport as GlobeViewport
+  GlobeViewport
 } from '@deck.gl/core';
 import type {ProjectUniforms} from '@deck.gl/core';
 import {PathStyleExtension} from '@deck.gl/extensions';
@@ -21,13 +21,13 @@ import {
   _TextBackgroundLayer as TextBackgroundLayer
 } from '@deck.gl/layers';
 import {device, getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
-import {preprocess} from '@luma.gl/shadertools';
+import {preprocess} from '@luma.gl/shaders';
 import {
-  dashShaders,
-  offsetShaders,
-  pathStylePipelineShaders
+  dashInjections,
+  offsetInjections,
+  pathStylePipelineInjections
 } from '../../../modules/extensions/src/path-style/shaders.glsl';
-import * as vec3 from '@math.gl/core/vec3';
+import {vec3} from '@math.gl/core/matrix';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -251,8 +251,11 @@ test('PathStyleExtension#PathLayer', () => {
         ).toBe(true);
         const pathStyleModule = layer
           .getShaders()
-          .modules.find(module => module.name === 'pathStyle')!;
-        expect(pathStyleModule.uniformTypes, 'dash module retains its uniform block').toEqual({
+          .plugins.find(plugin => plugin.name === 'pathStyle')!;
+        expect(
+          pathStyleModule.module.uniformTypes,
+          'dash module retains its uniform block'
+        ).toEqual({
           dashAlignMode: 'f32',
           dashGapPickable: 'i32',
           dashUnits: 'i32'
@@ -333,9 +336,9 @@ test('PathStyleExtension#offset-only shader module', () => {
           ).toBe(true);
           const pathStyleModule = layer
             .getShaders()
-            .modules.find(module => module.name === 'pathStyle')!;
+            .plugins.find(plugin => plugin.name === 'pathStyle')!;
           expect(
-            Object.hasOwn(pathStyleModule, 'uniformTypes'),
+            Object.hasOwn(pathStyleModule.module, 'uniformTypes'),
             'offset-only module does not declare an unused uniform block'
           ).toBe(false);
         }
@@ -539,13 +542,13 @@ test('PathStyleExtension#shader defines', () => {
           shaders.defines.DASH_ENABLED,
           'DASH_ENABLED is unset when only offset is enabled'
         ).toBeUndefined();
-        const pathStyleModule = shaders.modules.find(module => module.name === 'pathStyle')!;
+        const pathStyleModule = shaders.plugins.find(plugin => plugin.name === 'pathStyle')!;
         expect(
-          pathStyleModule.inject?.['fs:#main-start'],
+          pathStyleModule.injections?.['glsl:fs:#main-start'],
           'offset does not reject fragments before PathLayer evaluates derivatives'
         ).toBeUndefined();
         expect(
-          pathStyleModule.inject?.['fs:#main-end'],
+          pathStyleModule.injections?.['glsl:fs:#main-end'],
           'non-AA offset retains a deferred hard clip'
         ).toContain('#ifndef ANTIALIASING');
       }
@@ -558,15 +561,12 @@ test('PathStyleExtension#shader defines', () => {
         const {defines} = layer.getShaders();
         // The shared coordinate stage guards dash-only varyings and calculations on this define.
         expect(defines.DASH_ENABLED, 'DASH_ENABLED is set when dash is enabled').toBe(true);
-        expect(
-          defines.HIGH_PRECISION_DASH,
-          'HIGH_PRECISION_DASH is off by default'
-        ).toBeUndefined();
+        expect(defines.DASH_MODE_PATH, 'DASH_MODE_PATH is off by default').toBeUndefined();
         const pathStyleModule = layer
           .getShaders()
-          .modules.find(module => module.name === 'pathStyle')!;
-        const fragmentStart = pathStyleModule.inject?.['fs:#main-start'];
-        const fragmentEnd = pathStyleModule.inject?.['fs:#main-end'];
+          .plugins.find(plugin => plugin.name === 'pathStyle')!;
+        const fragmentStart = pathStyleModule.injections?.['glsl:fs:#main-start'];
+        const fragmentEnd = pathStyleModule.injections?.['glsl:fs:#main-end'];
         expect(fragmentStart, 'rounded caps use a signed pixel-distance ramp').toContain(
           'smoothedge(0.0, capEdgePixels)'
         );
@@ -586,12 +586,22 @@ test('PathStyleExtension#shader defines', () => {
     },
     {
       updateProps: {
+        extensions: [new PathStyleExtension({dashMode: 'path'})]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {defines} = layer.getShaders();
+        expect(defines.DASH_ENABLED, 'path mode implies dash').toBe(true);
+        expect(defines.DASH_MODE_PATH, 'path mode sets DASH_MODE_PATH').toBe(true);
+      }
+    },
+    {
+      updateProps: {
         extensions: [new PathStyleExtension({highPrecisionDash: true})]
       },
       onAfterUpdate: ({layer}) => {
         const {defines} = layer.getShaders();
         expect(defines.DASH_ENABLED, 'highPrecisionDash implies dash').toBe(true);
-        expect(defines.HIGH_PRECISION_DASH, 'HIGH_PRECISION_DASH is set').toBe(true);
+        expect(defines.DASH_MODE_PATH, 'legacy alias selects DASH_MODE_PATH').toBe(true);
       }
     }
   ];
@@ -600,13 +610,13 @@ test('PathStyleExtension#shader defines', () => {
 });
 
 test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
-  const injection = dashShaders.inject['fs:#main-start'];
+  const injection = dashInjections['glsl:fs:#main-start'];
   const segmentShader = preprocess(injection);
-  const pathShader = preprocess(injection, {defines: {HIGH_PRECISION_DASH: 1}});
+  const pathShader = preprocess(injection, {defines: {DASH_MODE_PATH: 1}});
 
   for (const [mode, shader, unitLengthAssignment] of [
-    ['segment', segmentShader, 'unitLength = vPathLength /'],
-    ['path', pathShader, 'unitLength = vDashPathLength /']
+    ['segment', segmentShader, 'unitLength = vDashSegment.y /'],
+    ['path', pathShader, 'unitLength = pathStyle_dashPathLength /']
   ] as const) {
     const assignmentIndex = shader.indexOf(unitLengthAssignment);
     const clampIndex = shader.indexOf('solidLength = min(solidLength, unitLength);');
@@ -621,35 +631,35 @@ test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
   }
 
   expect(segmentShader, 'segment mode uses its local phase').not.toContain(
-    'offset += vDashOffset;'
+    'offset += pathStyle_dashOffset;'
   );
   expect(pathShader, 'path mode adds the accumulated path phase').toContain(
-    'offset += vDashOffset;'
+    'offset += pathStyle_dashOffset;'
   );
 });
 
 test('PathStyleExtension#orders offset remapping before dash conversion', () => {
-  const vertexInjection = pathStylePipelineShaders.inject['vs:#main-end'];
+  const vertexInjection = pathStylePipelineInjections['glsl:vs:#main-end'];
   const offsetVertexShader = preprocess(vertexInjection, {
     defines: {PATH_STYLE_OFFSET: 1}
   });
   const dashVertexShader = preprocess(vertexInjection, {
-    defines: {DASH_ENABLED: 1, HIGH_PRECISION_DASH: 1}
+    defines: {DASH_ENABLED: 1, DASH_MODE_PATH: 1}
   });
   const combinedVertexShader = preprocess(vertexInjection, {
-    defines: {DASH_ENABLED: 1, HIGH_PRECISION_DASH: 1, PATH_STYLE_OFFSET: 1}
+    defines: {DASH_ENABLED: 1, DASH_MODE_PATH: 1, PATH_STYLE_OFFSET: 1}
   });
   const remapIndex = combinedVertexShader.indexOf('vPathPosition.y *= offsetWidth');
   const widthRestoreIndex = combinedVertexShader.indexOf('strokeHalfWidth /= offsetWidth');
-  const dashArrayIndex = combinedVertexShader.indexOf('vDashArray = instanceDashArrays');
-  const dashOffsetIndex = combinedVertexShader.indexOf('vDashOffset = dashPeriod');
+  const dashArrayIndex = combinedVertexShader.indexOf('pathStyle_dashArray = instanceDashArrays');
+  const dashOffsetIndex = combinedVertexShader.indexOf('pathStyle_dashOffset = dashPeriod');
 
   expect(remapIndex, 'restores the along-path coordinate').toBeGreaterThanOrEqual(0);
   expect(combinedVertexShader, 'restores segment length in the same stage').toContain(
     'vPathLength *= offsetWidth'
   );
-  expect(combinedVertexShader, 'restores clipped path bounds in the same stage').toContain(
-    'vPathBounds *= offsetWidth'
+  expect(combinedVertexShader, 'restores dash arclength in the same stage').toContain(
+    'vDashSegment *= offsetWidth'
   );
   expect(widthRestoreIndex, 'recovers the pre-offset stroke width after remapping').toBeGreaterThan(
     remapIndex
@@ -664,7 +674,7 @@ test('PathStyleExtension#orders offset remapping before dash conversion', () => 
     'restoredDashPeriod'
   );
   expect(
-    combinedVertexShader.match(/vDashOffset = dashPeriod/g),
+    combinedVertexShader.match(/pathStyle_dashOffset = dashPeriod/g),
     'combined path mode reduces phase exactly once'
   ).toHaveLength(1);
 
@@ -672,28 +682,28 @@ test('PathStyleExtension#orders offset remapping before dash conversion', () => 
     'vPathPosition.y *= offsetWidth'
   );
   expect(offsetVertexShader, 'offset-only does not compile dash calculations').not.toContain(
-    'vDashArray'
+    'pathStyle_dashArray'
   );
-  expect(offsetVertexShader, 'offset-only does not access dash path bounds').not.toContain(
-    'vPathBounds'
+  expect(offsetVertexShader, 'offset-only does not access dash arclength').not.toContain(
+    'vDashSegment'
   );
 
   expect(dashVertexShader, 'dash-only keeps dash conversion').toContain(
-    'vDashArray = instanceDashArrays'
+    'pathStyle_dashArray = instanceDashArrays'
   );
   expect(dashVertexShader, 'dash-only does not compile offset remapping').not.toContain(
     'offsetWidth'
   );
   expect(
-    dashShaders.inject,
+    dashInjections,
     'dash capability has no competing vertex-end injection'
-  ).not.toHaveProperty('vs:#main-end');
+  ).not.toHaveProperty('glsl:vs:#main-end');
   expect(
-    offsetShaders.inject,
+    offsetInjections,
     'offset capability has no competing vertex-end injection'
-  ).not.toHaveProperty('vs:#main-end');
+  ).not.toHaveProperty('glsl:vs:#main-end');
 
-  const fragmentInjection = pathStylePipelineShaders.inject['fs:#main-end'];
+  const fragmentInjection = pathStylePipelineInjections['glsl:fs:#main-end'];
   const antialiasedFragmentShader = preprocess(fragmentInjection, {
     defines: {ANTIALIASING: 1, DASH_ENABLED: 1, PATH_STYLE_OFFSET: 1}
   });

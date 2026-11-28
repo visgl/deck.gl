@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {bigIntToHex} from 'quadbin';
-import {BinaryPointFeature} from '@loaders.gl/schema';
+import {BinaryPointFeature} from '@loaders.gl/core/schema';
 
 export type IndexScheme = 'h3' | 'quadbin';
 

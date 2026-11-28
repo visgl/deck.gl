@@ -1,0 +1,15 @@
+{
+  "description": "deck.gl scripting examples",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "build": "rm -rf dist && mkdir dist && cp -r images dist && node build-tools/build",
+    "start": "node build-tools/serve",
+    "start-local": "node build-tools/serve --version=local"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "express": "^4.16.3",
+    "mustache": "^2.3.0"
+  }
+}

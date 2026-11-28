@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <title>deck.gl GreatCircleLayer Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+    <script src='https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.js'></script>
+
+    <link href='https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+      }
+      .deck-tooltip {
+        font-family: Helvetica, Arial, sans-serif;
+        padding: 6px !important;
+        margin: 8px;
+        max-width: 300px;
+        font-size: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+  </body>
+
+  <script type="text/javascript">
+    const {DeckGL, GreatCircleLayer} = deck;
+
+    const greatCircleLayer = new GreatCircleLayer({
+      id: 'great-circle',
+      data:
+        'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/flights.json',
+      getSourcePosition: d => d.from.coordinates,
+      getTargetPosition: d => d.to.coordinates,
+      getSourceColor: [64, 255, 0],
+      getTargetColor: [0, 128, 200],
+      widthMinPixels: 5,
+      pickable: true
+    });
+
+    new DeckGL({
+      mapStyle: 'https://tiles.openfreemap.org/styles/dark',
+      initialViewState: {
+        longitude: -122.38,
+        latitude: 37.6,
+        zoom: 1,
+        maxZoom: 20,
+        pitch: 30,
+        bearing: 0,
+      },
+      controller: true,
+      layers: [greatCircleLayer],
+      getTooltip: ({object}) => object && `${object.from.name} to ${object.to.name}`
+    });
+  </script>
+</html>

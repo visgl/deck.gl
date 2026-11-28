@@ -4,13 +4,13 @@
 
 import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../project/constants';
 import project from '../project/project';
-import {Vector3, Matrix4} from '@math.gl/core';
-import type {NumericArray} from '@math.gl/core';
+import {Vector3, Matrix4} from '@math.gl/core/matrix';
+import type {NumericArray} from '@math.gl/core/matrix';
 import memoize from '../../utils/memoize';
-import {pixelsToWorld} from '@math.gl/web-mercator';
+import {pixelsToWorld} from '@math.gl/geospatial/web-mercator';
 
 import type {Texture} from '@luma.gl/core';
-import {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import type Viewport from '../../viewports/viewport';
 import type {ShadowBounds} from '../../effects/lighting/directional-light';
 import {ProjectProps, ProjectUniforms} from '../project/viewport-uniforms';
@@ -354,19 +354,12 @@ function createShadowUniforms(
   return uniforms;
 }
 
-export default {
+const shadowModule = {
   name: 'shadow',
   dependencies: [project],
   vs,
   fs,
-  inject: {
-    'vs:DECKGL_FILTER_GL_POSITION': `
-    position = shadow_setVertexPosition(geometry.position);
-    `,
-    'fs:DECKGL_FILTER_COLOR': `
-    color = shadow_filterShadowColor(color);
-    `
-  },
+
   getUniforms: createShadowUniforms,
   uniformTypes: {
     drawShadowMap: 'f32',
@@ -401,3 +394,19 @@ type NumberArray16 = [
   number,
   number
 ];
+
+/** Shadow injection target contributions and uniforms for custom model assembly. */
+export const shadowPlugin: ShaderPlugin = {
+  name: 'shadow',
+  module: shadowModule,
+  injections: {
+    'glsl:vs:DECKGL_FILTER_GL_POSITION': `
+    position = shadow_setVertexPosition(geometry.position);
+    `,
+    'glsl:fs:DECKGL_FILTER_COLOR': `
+    color = shadow_filterShadowColor(color);
+    `
+  }
+};
+
+export default shadowModule;

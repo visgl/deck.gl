@@ -4,7 +4,6 @@
 
 /* global window */
 import {Layer} from 'deck.gl';
-import {GL} from '@luma.gl/webgl/constants';
 import {Model, Geometry, Buffer, setParameters, loadTextures, Texture2D} from 'luma.gl';
 import {Transform} from 'luma.gl';
 
@@ -37,10 +36,10 @@ export default class ParticleLayer extends Layer {
       urls: [ELEVATION_DATA_IMAGE],
       parameters: {
         parameters: {
-          [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-          [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-          [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-          [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+          [gl.TEXTURE_MAG_FILTER]: gl.LINEAR,
+          [gl.TEXTURE_MIN_FILTER]: gl.LINEAR,
+          [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
+          [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
         }
       }
     }).then(textures => {
@@ -129,7 +128,7 @@ export default class ParticleLayer extends Layer {
       depthFunc: gl.LEQUAL
     });
     const pixelStoreParameters = {
-      [GL.UNPACK_FLIP_Y_WEBGL]: true
+      [gl.UNPACK_FLIP_Y_WEBGL]: true
     };
 
     textureFrom.setImageData({
@@ -220,7 +219,7 @@ export default class ParticleLayer extends Layer {
     }
 
     const pixelStoreParameters = {
-      [GL.UNPACK_FLIP_Y_WEBGL]: true
+      [gl.UNPACK_FLIP_Y_WEBGL]: true
     };
 
     textureFrom.setImageData({
@@ -285,10 +284,10 @@ export default class ParticleLayer extends Layer {
       fs: fragment,
       geometry: new Geometry({
         id: this.props.id,
-        drawMode: GL.POINTS,
+        drawMode: gl.POINTS,
         vertexCount: 1,
         attributes: {
-          positions: {size: 3, type: GL.FLOAT, value: positions3, instanced: 0}
+          positions: {size: 3, type: gl.FLOAT, value: positions3, instanced: 0}
         }
       }),
       isInstanced: true,

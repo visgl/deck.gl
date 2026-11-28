@@ -4,9 +4,8 @@
 
 import type {Device} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
-import {fp64arithmetic} from '@luma.gl/shadertools';
-import type {ShaderModule} from '@luma.gl/shadertools';
-import {GL} from '@luma.gl/webgl/constants';
+import {fp64arithmetic} from '@luma.gl/shaders';
+import type {ShaderModule} from '@luma.gl/shaders';
 import Attribute from '../lib/attribute/attribute';
 import {
   getAttributeTypeFromSize,
@@ -210,7 +209,7 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
       // Default uniforms are not set without this
       moduleSettings: {},
       varyings: ['vCurrent', 'vCurrent64Low'],
-      bufferMode: GL.INTERLEAVED_ATTRIBS,
+      feedbackBufferMode: 'interleaved',
       disableWarnings: true
     });
   }

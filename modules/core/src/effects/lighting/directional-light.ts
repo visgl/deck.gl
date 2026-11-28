@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 import type Layer from '../../lib/layer';
 
-const DEFAULT_LIGHT_COLOR = [255, 255, 255] as [number, number, number];
+/** Built-in white light in byte RGB. */
+export const DEFAULT_DIRECTIONAL_LIGHT_COLOR = [255, 255, 255] as [number, number, number];
 const DEFAULT_LIGHT_INTENSITY = 1.0;
 const DEFAULT_LIGHT_DIRECTION = [0.0, 0.0, -1.0] as [number, number, number];
 
@@ -16,7 +17,7 @@ export type ShadowBounds = [number[], number[]];
 
 export type DirectionalLightOptions = {
   id?: string;
-  /** Light color, [r, g, b] in the 0-255 range
+  /** Light color as RGB. Channels are 0–1 with Deck normalizedColors and 0–255 otherwise.
    * @default [255, 255, 255]
    */
   color?: [number, number, number];
@@ -53,7 +54,7 @@ export class DirectionalLight {
   shadowBounds: ShadowBounds | null;
 
   constructor(props: DirectionalLightOptions = {}) {
-    const {color = DEFAULT_LIGHT_COLOR} = props;
+    const {color = DEFAULT_DIRECTIONAL_LIGHT_COLOR} = props;
     const {intensity = DEFAULT_LIGHT_INTENSITY} = props;
     const {direction = DEFAULT_LIGHT_DIRECTION} = props;
     const {_shadow = false, _shadowBounds = null} = props;

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {ShaderModule} from '@luma.gl/shadertools';
+import {ShaderModule} from '@luma.gl/shaders';
 import {LayerProps} from '../../types/layer-props';
 
 const colorWGSL = /* WGSL */ `

@@ -33,10 +33,12 @@
           "developer-guide/using-layers",
           "developer-guide/interactivity",
           "developer-guide/coordinate-systems",
+          "developer-guide/projection-domains",
           "developer-guide/views",
           "developer-guide/animations-and-transitions",
           "developer-guide/zoom-dependent-layers",
           "developer-guide/loading-data",
+          "developer-guide/using-with-arrow",
           "developer-guide/using-effects",
           "developer-guide/performance",
           "developer-guide/tips-and-tricks",
@@ -55,6 +57,26 @@
           "developer-guide/base-maps/using-with-google-maps",
           "developer-guide/base-maps/using-with-mapbox",
           "developer-guide/base-maps/using-with-maplibre"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Using with React",
+        "items": [
+          "developer-guide/react/get-started",
+          {
+            "type": "category",
+            "label": "Using with maps",
+            "link": {"type": "doc", "id": "developer-guide/react/using-with-maps"},
+            "items": [
+              "developer-guide/react/base-maps/using-with-mapbox",
+              "developer-guide/react/base-maps/using-with-maplibre",
+              "developer-guide/react/base-maps/using-with-google-maps",
+              "developer-guide/react/base-maps/using-with-custom-overlays"
+            ]
+          },
+          "developer-guide/react/migrate-from-deckgl-react",
+          "developer-guide/react/debugging"
         ]
       },
       {
@@ -143,6 +165,20 @@
       },
       {
         "type": "category",
+        "label": "Proposals",
+        "items": [
+          "api-reference/proposals/overview",
+          "api-reference/proposals/layers",
+          "api-reference/proposals/arrow-layers",
+          "api-reference/proposals/gpu-layers",
+          "api-reference/proposals/tile-2d-layer",
+          "api-reference/proposals/mvt-2d-layer",
+          "api-reference/proposals/tileset-2d",
+          "api-reference/proposals/tile-2d-header"
+        ]
+      },
+      {
+        "type": "category",
         "label": "Aggregation Layers",
         "items": [
           "api-reference/aggregation-layers/overview",
@@ -219,7 +255,8 @@
         "label": "Effects",
         "items": [
           "api-reference/core/lighting-effect",
-          "api-reference/core/post-process-effect"
+          "api-reference/core/post-process-effect",
+          "api-reference/core/shadow-map-effect"
         ]
       },
       {
@@ -321,7 +358,17 @@
         "items": [
           "api-reference/react/overview",
           "api-reference/react/deckgl",
-          "api-reference/react/use-widget"
+          "api-reference/react/components",
+          "api-reference/react/native-elements",
+          {
+            "type": "category",
+            "label": "@deck.gl/react/legacy",
+            "items": [
+              "api-reference/react/legacy/overview",
+              "api-reference/react/legacy/deckgl",
+              "api-reference/react/legacy/use-widget"
+            ]
+          }
         ]
       },
       {
@@ -351,17 +398,18 @@
           "api-reference/widgets/loading-widget",
           "api-reference/widgets/popup-widget",
           "api-reference/widgets/reset-view-widget",
-          "api-reference/widgets/scale-widget",
           "api-reference/widgets/screenshot-widget",
           "api-reference/widgets/scrollbar-widget",
           "api-reference/widgets/selector-widget",
-          "api-reference/widgets/splitter-widget",
-          "api-reference/widgets/stats-widget",
           "api-reference/widgets/theme-widget",
-          "api-reference/widgets/timeline-widget",
           "api-reference/widgets/toggle-widget",
           "api-reference/widgets/view-layout",
-          "api-reference/widgets/zoom-widget"
+          "api-reference/widgets/zoom-widget",
+          "api-reference/widgets/color-scale-widget",
+          "api-reference/widgets/scale-widget",
+          "api-reference/widgets/splitter-widget",
+          "api-reference/widgets/stats-widget",
+          "api-reference/widgets/timeline-widget"
         ]
       }
     ]

@@ -17,12 +17,11 @@ import * as deckMeshLayers from '@deck.gl/mesh-layers';
 import * as deckWidgets from '@deck.gl/widgets';
 import * as lumaCore from '@luma.gl/core';
 import * as lumaEngine from '@luma.gl/engine';
-import * as lumaShadertools from '@luma.gl/shadertools';
-import * as lumaShadertoolsWgsl from '@luma.gl/shadertools/wgsl';
-import * as lumaWebgl from '@luma.gl/webgl';
-import * as lumaWebglConstants from '@luma.gl/webgl/constants';
+import * as lumaShadertools from '@luma.gl/shaders';
+import * as lumaShadertoolsWgsl from '@luma.gl/shaders/wgsl';
+import * as lumaWebgl from '@luma.gl/core/webgl';
 import * as loadersCore from '@loaders.gl/core';
-import * as mathCore from '@math.gl/core';
+import * as mathCore from '@math.gl/core/matrix';
 
 export const SHARED_MODULES = {
   '@deck.gl/core': deckCore,
@@ -34,12 +33,11 @@ export const SHARED_MODULES = {
   '@deck.gl/widgets': deckWidgets,
   '@luma.gl/core': lumaCore,
   '@luma.gl/engine': lumaEngine,
-  '@luma.gl/shadertools': lumaShadertools,
-  '@luma.gl/shadertools/wgsl': lumaShadertoolsWgsl,
-  '@luma.gl/webgl': lumaWebgl,
-  '@luma.gl/webgl/constants': lumaWebglConstants,
+  '@luma.gl/shaders': lumaShadertools,
+  '@luma.gl/shaders/wgsl': lumaShadertoolsWgsl,
+  '@luma.gl/core/webgl': lumaWebgl,
   '@loaders.gl/core': loadersCore,
-  '@math.gl/core': mathCore
+  '@math.gl/core/matrix': mathCore
 };
 
 // The re-exporting modules are blob URLs, so they read the namespaces from a global
@@ -61,10 +59,15 @@ export function installSharedModuleImportMap() {
     const names = Object.keys(namespace).filter(
       name => IDENTIFIER.test(name) && name !== 'default'
     );
+    // Export names such as math.gl's `eval` cannot be local bindings in strict mode.
+    const exports = names.map(
+      (name, index) =>
+        `const value${index} = ns[${JSON.stringify(name)}]; export {value${index} as ${name}};`
+    );
     const source =
       `const ns = globalThis[${JSON.stringify(REGISTRY_NAME)}][${JSON.stringify(specifier)}];\n` +
       'export default ns;\n' +
-      `export const {${names.join(', ')}} = ns;\n`;
+      exports.join('\n');
     imports[specifier] = URL.createObjectURL(new Blob([source], {type: 'text/javascript'}));
   }
 
