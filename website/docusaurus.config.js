@@ -99,6 +99,7 @@ const config = {
   ],
 
   plugins: [
+    './scripts/home-taxi-preload.js',
     // Publishes /llms.txt (a curated Markdown index of the documentation) and a raw
     // Markdown sibling for every docs page (e.g. /docs/api-reference/json/overview.md),
     // so coding agents can read current deck.gl documentation at inference time.
@@ -265,7 +266,7 @@ const config = {
           {
             type: 'html',
             position: 'right',
-            value: '<a href="https://openvisualization.org" target="_blank" style="content: \'\'; height: 24px; width: 80px; background-image: url(\'/openjs-foundation.svg\'); background-repeat: no-repeat;  background-size: 80px 24px; display: flex"></a>'
+            value: `<a href="https://openvisualization.org" target="_blank" rel="noopener noreferrer" aria-label="Open Visualization Collaborators at the OpenJS Foundation"><img src="${prefixWebsiteRoute('/images/openjs-foundation.svg')}" width="76" height="24" alt="" style="display: block"></a>`
           }
         ]
       },

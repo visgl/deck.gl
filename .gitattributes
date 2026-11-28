@@ -1,3 +1,4 @@
 dist/** -diff
 dist-demo/** -diff
 # yarn.lock -diff
+website/static/data/home/*-data-s.txt -text -diff
