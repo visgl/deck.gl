@@ -54,6 +54,8 @@ import {
 type GLTFInstantiatorOptions = Parameters<typeof createScenegraphsFromGLTF>[2];
 
 const DEFAULT_COLOR = [255, 255, 255, 255] as const;
+/** Draws that wait for every model to draw before `onFirstDraw` is called anyway */
+const MAX_FIRST_DRAW_RETRIES = 60;
 
 export type ScenegraphLayerProps<DataT = unknown> = _ScenegraphLayerProps<DataT> & LayerProps;
 
@@ -141,7 +143,8 @@ type _ScenegraphLayerProps<DataT> = {
   getTransformMatrix?: ArrowAccessor<DataT, number[]>;
   /**
    * Called once every model in the scenegraph has drawn, which can take several frames
-   * while resources such as textures load.
+   * while resources such as textures load. If a model still has not drawn after 60 attempts,
+   * for example because its shaders failed to compile, it is called anyway.
    * Used by Tile3DLayer to signal that a tile's sublayer is visible,
    * allowing parent tiles to be safely deselected during transitions.
    */
@@ -221,6 +224,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     materials?: {destroy(): void}[] | null;
     models: Model[];
     firstDrawSignaled: boolean;
+    firstDrawRetries: number;
   } & Layer['state'];
 
   getShaders() {
@@ -413,7 +417,8 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         animator,
         materials: scenegraphData?.materials || null,
         models,
-        firstDrawSignaled: false
+        firstDrawSignaled: false,
+        firstDrawRetries: 0
       });
       this.getAttributeManager()?.invalidateAll();
     } else if (scenegraph !== null) {
@@ -560,11 +565,12 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     });
 
     if (!this.state.firstDrawSignaled) {
-      if (allModelsDrawn) {
+      // A model skips its draw until its resources are ready, but some never draw, for example
+      // after a shader error, so stop waiting after a while
+      if (allModelsDrawn || ++this.state.firstDrawRetries > MAX_FIRST_DRAW_RETRIES) {
         this.state.firstDrawSignaled = true;
         this.props.onFirstDraw?.();
       } else {
-        // A model skips its draw until its resources are ready; check again next frame
         this.setNeedsRedraw();
       }
     }
