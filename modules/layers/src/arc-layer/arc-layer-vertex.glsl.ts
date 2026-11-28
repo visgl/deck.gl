@@ -61,15 +61,22 @@ float getSegmentRatio(float index) {
 
 vec3 interpolateFlat(vec3 source, vec3 target, float segmentRatio) {
   float distance = length(source.xy - target.xy);
-  float z = paraboloid(distance, source.z, target.z, segmentRatio);
+  float baseline = 0.0;
+  float z;
+  if (arc.absoluteHeight) {
+    baseline = mix(source.z, target.z, segmentRatio);
+    z = 4.0 * segmentRatio * (1.0 - segmentRatio) * project_size(instanceHeights);
+  } else {
+    z = paraboloid(distance, source.z, target.z, segmentRatio);
+  }
 
   float tiltAngle = radians(instanceTilts);
-  vec2 tiltDirection = normalize(target.xy - source.xy);
+  vec2 tiltDirection = (target.xy - source.xy) / max(distance, 1e-10);
   vec2 tilt = vec2(-tiltDirection.y, tiltDirection.x) * z * sin(tiltAngle);
 
   return vec3(
     mix(source.xy, target.xy, segmentRatio) + tilt,
-    z * cos(tiltAngle)
+    baseline + z * cos(tiltAngle)
   );
 }
 
@@ -99,7 +106,9 @@ vec3 interpolateGreatCircle(vec3 source, vec3 target, vec3 source3D, vec3 target
     lngLat = degrees(vec2(atan(p.y, -p.x), atan(p.z, length(p.xy))));
   }
 
-  float z = paraboloid(angularDist * EARTH_RADIUS, source.z, target.z, t);
+  float z = arc.absoluteHeight
+    ? mix(source.z, target.z, t) + 4.0 * t * (1.0 - t) * instanceHeights
+    : paraboloid(angularDist * EARTH_RADIUS, source.z, target.z, t);
 
   return vec3(lngLat, z);
 }

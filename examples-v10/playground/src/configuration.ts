@@ -15,16 +15,22 @@ import * as Widgets from '@deck.gl/widgets';
 
 import {registerLoaders} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/tables/csv';
-import {DracoWorkerLoader} from '@loaders.gl/scene';
-import {Tiles3DLoader, CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
+import csvWorkerUrl from '@loaders.gl/tables/csv-worker.js?url';
+import {DracoLoader} from '@loaders.gl/scene/draco';
+import {CesiumIonAuthentication} from '@loaders.gl/services/authentication';
+import {Tiles3DLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 
 // Note: deck already registers JSONLoader...
 registerLoaders([
   {
     ...CSVLoader,
-    options: {...CSVLoader.options, csv: {...CSVLoader.options.csv, shape: 'object-row-table'}}
+    options: {
+      ...CSVLoader.options,
+      // Resolve the worker independently of Vite's prebundled CSV loader.
+      csv: {...CSVLoader.options.csv, shape: 'object-row-table', workerUrl: csvWorkerUrl}
+    }
   },
-  DracoWorkerLoader
+  DracoLoader
 ]);
 
 export default {
@@ -55,8 +61,8 @@ export default {
 
   // Constants that should be resolved with the provided values by JSON converter
   constants: {
-    Tiles3DLoader,
-    CesiumIonLoader
+    CesiumIonAuthentication,
+    Tiles3DLoader
   },
 
   postProcessConvertedJson: (json: any) => {

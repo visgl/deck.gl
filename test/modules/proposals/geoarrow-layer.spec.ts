@@ -14,7 +14,7 @@ import {Buffer, Texture} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Field, Schema, Table, tableFromArrays} from 'apache-arrow';
 import {expect, test} from 'vitest';
-import {ArrowSolidPolygonLayer} from '../../../modules/proposals/src/layers/arrow-solid-polygon-layer';
+import {ArrowPolygonLayer} from '../../../modules/proposals/src/layers/arrow-polygon-layer';
 import {GeoArrowLayer} from '../../../modules/proposals/src/layers/geoarrow-layer';
 
 /** Builds a mixed source with a null row before the visible features. */
@@ -188,10 +188,10 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         if (nativePolygon) {
           await expect
             .poll(() => {
-              const polygonLayer = layer.getSubLayers()[0] as ArrowSolidPolygonLayer | undefined;
+              const polygonLayer = layer.getSubLayers()[0] as ArrowPolygonLayer | undefined;
               return {
                 errors: errors.map(error => error.message),
-                models: polygonLayer?.getSubLayers()[0]?.getModels().length
+                models: polygonLayer?.getModels().length
               };
             })
             .toEqual({errors: [], models: 1});
@@ -220,7 +220,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         expect(info?.index).toBe(native || styled || encoding === 'centroid' ? 0 : 1);
         expect(info?.object.label).toBe(polygon);
         if (nativePolygon) {
-          expect(layer.getSubLayers()[0]?.constructor.name).toBe('ArrowSolidPolygonLayer');
+          expect(layer.getSubLayers()[0]?.constructor.name).toBe('ArrowPolygonLayer');
           const [x, y] = deck.getViewports()[0].project([5, 5]);
           expect(await deck.pickObjectAsync({x: Math.round(x), y: Math.round(y)})).toBeNull();
         } else if (native) {
@@ -293,7 +293,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
           deck.setProps({layers: [nativeQuery]});
           await expect
             .poll(() => nativeQuery.getSubLayers()[0]?.constructor.name)
-            .toBe('ArrowSolidPolygonLayer');
+            .toBe('ArrowPolygonLayer');
           await expect
             .poll(async () => (await deck.pickObjectAsync({x: 32, y: 32}))?.object.label)
             .toBe(polygon);

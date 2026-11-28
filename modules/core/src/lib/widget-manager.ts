@@ -11,7 +11,7 @@ import {Widget} from './widget';
 
 import {EVENT_HANDLERS} from './constants';
 import {deepEqual} from '../utils/deep-equal';
-import log from '../utils/log';
+import {matchById} from './match-by-id';
 
 const PLACEMENTS = {
   'top-left': {top: 0, left: 0},
@@ -180,57 +180,53 @@ export class WidgetManager {
    * Update props of existing widgets
    */
   private _setWidgets(nextWidgets: Widget[]) {
-    const oldWidgetMap: Record<string, Widget | null> = {};
+    // Default widgets come first, so a widget with the id of a default widget is a duplicate.
+    const defaultCount = this.defaultWidgets.length;
+    const {matches, removed} = matchById(
+      this.resolvedWidgets,
+      [...this.defaultWidgets, ...nextWidgets],
+      'widgets'
+    );
 
-    for (const widget of this.resolvedWidgets) {
-      oldWidgetMap[widget.id] = widget;
-    }
     // Clear and rebuild the list
     this.resolvedWidgets.length = 0;
 
-    // Add all default widgets
-    for (const widget of this.defaultWidgets) {
-      oldWidgetMap[widget.id] = null;
-      this.resolvedWidgets.push(widget);
-    }
-
-    for (let widget of nextWidgets) {
-      const oldWidget = oldWidgetMap[widget.id];
-      if (oldWidget === null) {
-        // null, rather than undefined, means a widget with this id was already matched in this
-        // pass. Mounting another one would leave two widgets that later updates cannot tell apart.
-        log.warn(`Multiple widgets with same id ${widget.id}`)();
-        continue;
+    matches.forEach(({item, previous, duplicate}, index) => {
+      if (index < defaultCount) {
+        // Default widgets are mounted by addDefault
+        this.resolvedWidgets.push(item);
+        return;
       }
-      if (!oldWidget) {
+      if (duplicate) {
+        // Mounting another widget with this id would leave two widgets that later updates
+        // cannot tell apart
+        return;
+      }
+
+      let widget = item;
+      if (!previous) {
         // Widget is new
         this._addWidget(widget);
       } else if (
         // Widget type or placement changed: replace the old widget, so the props of
         // another widget type are never passed to it.
-        getWidgetType(oldWidget) !== getWidgetType(widget) ||
-        oldWidget.viewId !== widget.viewId ||
-        oldWidget.placement !== widget.placement
+        getWidgetType(previous) !== getWidgetType(widget) ||
+        previous.viewId !== widget.viewId ||
+        previous.placement !== widget.placement
       ) {
-        this._removeWidget(oldWidget);
+        this._removeWidget(previous);
         this._addWidget(widget);
-      } else if (widget !== oldWidget) {
+      } else if (widget !== previous) {
         // Widget props changed
-        oldWidget.setProps(widget.props);
-        widget = oldWidget;
+        previous.setProps(widget.props);
+        widget = previous;
       }
-
-      // mark as matched
-      oldWidgetMap[widget.id] = null;
       this.resolvedWidgets.push(widget);
-    }
+    });
 
-    for (const id in oldWidgetMap) {
-      const oldWidget = oldWidgetMap[id];
-      if (oldWidget) {
-        // No longer exists
-        this._removeWidget(oldWidget);
-      }
+    // No longer exists
+    for (const widget of removed) {
+      this._removeWidget(widget);
     }
     this.widgets = nextWidgets;
   }

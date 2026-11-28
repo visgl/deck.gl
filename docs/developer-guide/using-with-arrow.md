@@ -134,6 +134,8 @@ Some layers expose optional props for caller-owned luma.gl `GPUVector` buffers.
 These unstable props follow the layer's GPU layout and can change at any time.
 Check the layer reference for supported formats and the meaning and order of rows.
 
+Arc, Line, Column, and GridCell can bind caller-owned packed `float32x2` position vectors directly. Vertex fetch supplies zero elevation. Arc and Line accept XY and XYZ independently for each endpoint.
+
 Instanced rendering layers take values in rendered instance order. Supplied
 vectors must agree on row count and chunk boundaries. For GPU positions, choose a coordinate system that the rendering path can
 use directly. Layers that require CPU preprojection for the supplied

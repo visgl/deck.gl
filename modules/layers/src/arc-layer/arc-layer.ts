@@ -64,6 +64,7 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
   getHeight: {type: 'accessor', arrow: true, value: 1},
   getTilt: {type: 'accessor', arrow: true, value: 0},
 
+  heightMode: 'relative',
   greatCircle: false,
   numSegments: {type: 'number', value: 50, min: 1},
 
@@ -85,6 +86,10 @@ type _ArcLayerProps<DataT> = ArcColumnProps & {
    * @default false
    */
   greatCircle?: boolean;
+  /** Interprets getHeight as a distance multiplier or a fixed midpoint rise above the endpoint baseline.
+   * @default 'relative'
+   */
+  heightMode?: 'relative' | 'absolute';
 
   /**
    * The number of segments used to draw each arc.
@@ -161,7 +166,7 @@ type _ArcLayerProps<DataT> = ArcColumnProps & {
   getWidth?: ArrowAccessor<DataT, number, Int | Float>;
 
   /**
-   * Multiplier of layer height. `0` will make the layer flat.
+   * Height multiplier in relative mode, or signed midpoint rise in absolute mode.
    * Accepts a constant, row callback, or numeric Arrow column.
    * @default 1
    */
@@ -387,6 +392,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       numSegments
     } = this.props;
     const arcProps: ArcProps = {
+      absoluteHeight: this.props.heightMode === 'absolute',
       numSegments,
       rowIndexOffset: 0,
       widthUnits: UNIT[widthUnits],

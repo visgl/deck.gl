@@ -170,7 +170,6 @@
           "api-reference/proposals/layers",
           "api-reference/proposals/arrow-layers",
           "api-reference/proposals/gpu-layers",
-          "api-reference/proposals/effects",
           "api-reference/proposals/tile-2d-layer",
           "api-reference/proposals/mvt-2d-layer",
           "api-reference/proposals/tileset-2d",
@@ -255,7 +254,8 @@
         "label": "Effects",
         "items": [
           "api-reference/core/lighting-effect",
-          "api-reference/core/post-process-effect"
+          "api-reference/core/post-process-effect",
+          "api-reference/core/shadow-map-effect"
         ]
       },
       {

@@ -14,6 +14,7 @@ import {
   type Vector
 } from 'apache-arrow';
 import {compileArrowScale, compileArrowScales} from '@math.gl/sql/scales';
+import {SQRT} from '@math.gl/sql/math-functions';
 import {parseSQLScaleAST} from '@math.gl/sql/parser';
 import type {ResolvedScale} from '@math.gl/core/color';
 import type {SQLFunctions, SQLParser} from '../types/layer-props';
@@ -66,6 +67,9 @@ export function evaluateAccessorQueries(
   const entries = Object.entries(expressions);
   const parse = parseExpression ?? sqlParser.parseExpression;
   const customFunctions = new Set(functions?.map(fn => fn.name.toUpperCase()));
+  const registeredFunctions = functions?.some(fn => fn.name.toUpperCase() === 'SQRT')
+    ? functions
+    : [SQRT, ...(functions ?? [])];
   const parsed = entries.map(([name, sql]) => {
     const expression = parse(sql);
     const isColorScale =
@@ -111,12 +115,12 @@ export function evaluateAccessorQueries(
         }
       )
     ),
-    functions
+    registeredFunctions
   );
   for (const [name, parsedScale] of scaleExpressions) {
     if (parsedScale.scale.domain.type === 'expression-extent') {
       try {
-        compiled[name] = compileArrowScale(data, parsedScale, undefined, functions);
+        compiled[name] = compileArrowScale(data, parsedScale, undefined, registeredFunctions);
       } catch (error) {
         // The upstream resolver signals an extent with no non-null samples with this error.
         if (
@@ -158,7 +162,7 @@ export function evaluateAccessorQueries(
               column: reused,
               metadata: priorTable?.schema.fields.find(field => field.name === name)?.metadata
             }
-          : evaluateColumnExpression(expression, input, functions);
+          : evaluateColumnExpression(expression, input, registeredFunctions);
         columns[name] = result.column;
         fields.push(new Field(name, result.column.type, true, result.metadata));
         continue;
