@@ -42,7 +42,7 @@ test('TerrainLayer applies the loaded elevation range with a stationary viewport
     height: 100,
     viewState: {longitude: -122, latitude: 37, zoom: 13, pitch: 50}
   })!;
-  const layer = new TerrainLayer({
+  let layer = new TerrainLayer({
     elevationData: 'terrain/{z}/{x}/{y}.png',
     fetch: fetchTerrainFixture
   });
@@ -52,9 +52,11 @@ test('TerrainLayer applies the loaded elevation range with a stationary viewport
     return (layer.getSubLayers()[0] as TileLayer).props.zRange;
   };
   try {
+    // TileLayer reports the loaded tiles inside its update: the scheduled refresh applies the range
     layerManager.setLayers([layer]);
     await expect.poll(readTileRange).toEqual([0, 1]);
 
+    // Loads outside an update: the range grows at either end
     for (const [bounds, expected] of [
       [
         [-3, 0],
@@ -82,6 +84,11 @@ test('TerrainLayer applies the loaded elevation range with a stationary viewport
       tileLayer.props.onViewportLoad?.([tile]);
       await expect.poll(readTileRange).toEqual(expected);
     }
+
+    // New elevation data starts a new range
+    layer = layer.clone({elevationData: 'other-terrain/{z}/{x}/{y}.png'});
+    layerManager.setLayers([layer]);
+    await expect.poll(readTileRange).toEqual([0, 1]);
   } finally {
     layerManager.finalize();
   }
