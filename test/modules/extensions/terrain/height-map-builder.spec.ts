@@ -4,8 +4,10 @@
 
 import {test, expect, vi} from 'vitest';
 import {HeightMapBuilder} from '@deck.gl/extensions/terrain/height-map-builder';
+import {createRenderTarget} from '@deck.gl/extensions/terrain/utils';
 import {WebMercatorViewport, GlobeViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
+import {device} from '@deck.gl/test-utils/vitest';
 import {LifecycleTester} from '../utils';
 import type {Device} from '@luma.gl/core';
 import type {Layer} from '@deck.gl/core';
@@ -164,4 +166,24 @@ test('HeightMapBuilder#delete releases the height map texture', async () => {
   expect(texture.destroyed, 'delete() releases the height map texture').toBe(true);
 
   lifecycle.finalize();
+});
+
+test('createRenderTarget#releases the height map depth texture', () => {
+  // The WebGPU height map also writes depth (see HeightMapBuilder.getRenderFramebuffer)
+  const fbo = createRenderTarget(device, {id: 'height-map', float: true, depth: true});
+  const getTextures = () => [fbo.colorAttachments[0].texture, fbo.depthStencilAttachment!.texture];
+
+  const initialTextures = getTextures();
+  fbo.resize({width: 256, height: 256});
+  expect(
+    initialTextures.map(texture => texture.destroyed),
+    'resize() releases the replaced textures'
+  ).toEqual([true, true]);
+
+  const textures = getTextures();
+  fbo.destroy();
+  expect(
+    textures.map(texture => texture.destroyed),
+    'destroy() releases the color and depth textures'
+  ).toEqual([true, true]);
 });

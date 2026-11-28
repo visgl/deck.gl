@@ -42,7 +42,8 @@ export function createRenderTarget(
       })
     ]
   });
-  // The framebuffer owns its texture so that resize() and destroy() release it
-  framebuffer.attachResource(framebuffer.colorAttachments[0].texture);
+  // The framebuffer owns its texture so that resize() and destroy() release it.
+  // The depth attachment is created from a format, so the framebuffer already owns it.
+  framebuffer.colorAttachments[0].texture.transferOwnershipTo(framebuffer);
   return framebuffer;
 }
