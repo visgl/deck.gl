@@ -273,10 +273,10 @@ If `false`, use smooth shading. Only effective if `extruded` is `true`.
 The shape of the cap at the top of each column. Only applies if `extruded: true`. Accepted values:
 
 - `'flat'`: flat disk cap (default behavior, no additional geometry)
-- `'dome'`: smooth hemispherical cap; normals transition from outward at the base to upward at the apex, giving a curved appearance under lighting
+- `'dome'`: rounded cap; normals transition from outward at the base to upward at the apex, giving a curved appearance under lighting
 - `'cone'`: pointed conical cap
 
-The height of the dome or cone cap equals the column radius.
+A dome or cone is added on top of the column's top face and is half as tall as the column, so its apex is at 1.5 times the elevation (`getElevation` × `elevationScale`). Its height follows the elevation, not the radius: a dome is a hemisphere only when the elevation is twice the drawn radius (`radius` × `coverage`).
 
 #### `radiusUnits` (string, optional) {#radiusunits}
 

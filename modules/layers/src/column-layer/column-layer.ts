@@ -174,8 +174,9 @@ type _ColumnLayerProps<DataT> = ColumnLayerColumnProps & {
   /**
    * The shape of the cap at the top of each column. Only applies if `extruded: true`.
    * - `'flat'`: flat disk cap (default, no additional geometry)
-   * - `'dome'`: smooth hemispherical cap with normals curving from outward to upward
+   * - `'dome'`: rounded cap with normals curving from outward to upward
    * - `'cone'`: pointed conical cap
+   * A dome or cone adds half of the column's elevation on top of it.
    * @default 'flat'
    */
   cap?: 'flat' | 'dome' | 'cone';
