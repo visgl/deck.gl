@@ -20,7 +20,7 @@ import type {
   MjolnirKeyEvent
 } from 'mjolnir.js';
 import type {Timeline} from '@luma.gl/engine';
-import {worldToPixels} from '@math.gl/web-mercator';
+import {worldToPixels} from '@math.gl/geospatial/web-mercator';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0

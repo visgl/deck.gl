@@ -10,7 +10,7 @@ import {H3HexagonLayer} from '@deck.gl/geo-layers';
 import {scaleLog} from 'd3-scale';
 import {cellToLatLng} from 'h3-js';
 import {load} from '@loaders.gl/core';
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 import {Map, NavigationControl, useControl, Layer} from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 

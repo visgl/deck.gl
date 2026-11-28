@@ -1,0 +1,16 @@
+---
+title: Examples v10
+---
+
+import {ExamplesIndex} from '../components';
+import {RestoreExamplesSidebar} from '../theme/NavbarItem';
+
+<RestoreExamplesSidebar />
+
+- ✅ Arrow and SQL port ready
+- 🚧 Arrow and SQL port started. Some data preparation or accessors still use JavaScript.
+- 🧪 Experimental proposal example
+
+Examples without a status marker are awaiting a port.
+
+<ExamplesIndex getThumbnail={item => `/images/examples/${item.docId || item.label.toLowerCase()}.jpg`} />

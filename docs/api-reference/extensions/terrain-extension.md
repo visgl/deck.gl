@@ -113,6 +113,15 @@ How data should be fitted to the terrain surface. If not specified, will be auto
   </tbody>
 </table>
 
+## Limitations
+
+When using `terrainDrawMode: 'offset'` on WebGPU, a custom layer with `operation: 'terrain'` must
+return three-dimensional bounds from `getBounds()`. Return `[[minX, minY, minZ], [maxX, maxY, maxZ]]`
+in the terrain layer's coordinate system and include the full elevation range of the surface.
+The offset pass uses that range to encode terrain heights.
+
+`TerrainLayer` and non-instanced `SimpleMeshLayer` meshes already provide the elevation range.
+
 ## Source
 
 [modules/extensions/src/terrain](https://github.com/visgl/deck.gl/tree/8.6-release/modules/extensions/src/terrain)

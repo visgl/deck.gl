@@ -48,6 +48,8 @@ The following properties are used to initialize a `Deck` instance. Any custom va
 
 The canvas to render into. It can be either a HTMLCanvasElement or the element id, and will be auto-created if not supplied.
 
+When Deck creates a WebGL device for a supplied canvas, finalizing the last Deck using it disposes of the device wrapper and its resize observers. By default the WebGL context stays available for reuse. Pass `deviceProps.ownsHandle: true` if Deck should also release the context when the canvas is removed during finalization.
+
 #### `_canvases` ((HTMLCanvasElement | String)[], optional) {#_canvases}
 
 Experimental: presentation canvases for multi-canvas mode. Deck renders into an offscreen default context and presents the result into one `PresentationContext` per canvas entry. String entries are resolved as DOM element ids. Views without an explicit [`canvasId`](./view.md#canvasid) render into the first configured canvas.
@@ -100,7 +102,7 @@ The container to append the auto-created canvas to.
 Flag to enable GPU debug mode when initializing a device. Import the luma.gl WebGL debug subpath to register the optional debugging tools. The tools are loaded on demand when debug mode is enabled:
 
 ```js
-import '@luma.gl/webgl/debug';
+import '@luma.gl/core/webgl-debug';
 import {Deck} from '@deck.gl/core';
 
 new Deck({
@@ -203,6 +205,23 @@ Notes:
 - GPU `parameters` supplied to a view override the global `parameters` for layers rendered in that view.
 - GPU `parameters` supplied to individual layers override both view and global `parameters` when that layer is rendered.
 
+#### `sqlParser` (object, optional) {#sqlparser}
+
+Overrides the parser for [layer queries](./layer.md#query) and Arrow accessor
+expressions. Deck loads the math.gl parser on first use. Supply `parseQuery` to
+override table query parsing and `parseExpression` to override accessor expression
+parsing.
+
+#### `sqlFunctions` (SQLFunctions, optional) {#sqlfunctions}
+
+Additional math.gl Arrow functions available to SQL accessors in every layer. A
+layer can override a function by name through its own
+[`sqlFunctions`](./layer.md#sqlfunctions) prop. Function names are case-insensitive.
+
+SQL accessors can use `LIST_EXTRACT(column, index)` and
+`STRUCT_EXTRACT(column, 'field')` by default. List indices start at 1, negative
+indices count from the end, and a non-integer or out-of-range index returns null.
+
 #### `layers` (LayersList) {#layers}
 
 * Default: `[]`
@@ -221,6 +240,18 @@ new Deck({
 });
 // layers is in the shape of [[<layer>, <layer>], null, [<layer>, <layer>], ...]
 ```
+
+#### `normalizedColors` (boolean, optional) {#normalizedcolors}
+
+Default: `false`.
+
+When enabled, supported color props interpret plain JavaScript arrays as 0–1 channels,
+including arrays returned by accessor functions. Missing alpha is opaque. Color attributes and
+palette textures pack channels into bytes. Built-in defaults, byte typed arrays, Arrow columns,
+and binary or GPU inputs retain their existing encodings.
+
+See [Normalized colors](../../developer-guide/using-layers.md#normalized-colors) for the list of
+supported props and migration examples.
 
 #### `layerFilter` (Function) {#layerfilter}
 

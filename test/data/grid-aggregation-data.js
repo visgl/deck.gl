@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {GL} from '@luma.gl/webgl/constants';
 import {WebMercatorViewport} from 'deck.gl';
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import {device} from '@deck.gl/test-utils';
@@ -27,7 +26,7 @@ export function buildAttributes(opts) {
   const attributeManager = new AttributeManager(device);
   const accessorProps = {};
   attributeManager.add({
-    positions: {size: 3, accessor: 'getPosition', type: GL.DOUBLE}
+    positions: {size: 3, accessor: 'getPosition', type: 'float64'}
   });
   accessorProps.getPosition = opts.getPosition || (x => x.position);
   for (const weightId in weights) {

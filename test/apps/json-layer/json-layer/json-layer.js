@@ -8,11 +8,10 @@ import {JSONConverter, JSONConfiguration} from '@deck.gl/json';
 
 import {MapView, FirstPersonView, OrbitView, OrthographicView} from '@deck.gl/core';
 import * as layers from '@deck.gl/layers';
-import {GL} from '@luma.gl/webgl/constants';
 
 const DEFAULT_CONFIGURATION = {
   classes: Object.assign({MapView, FirstPersonView, OrbitView, OrthographicView}, layers),
-  enumerations: {GL}
+  enumerations: {GL: globalThis.WebGL2RenderingContext ?? {}}
 };
 
 const defaultProps = {

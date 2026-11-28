@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {clamp} from '@math.gl/core';
-import {MAX_LATITUDE} from '@math.gl/web-mercator';
+import {clamp} from '@math.gl/core/matrix';
+import {MAX_LATITUDE} from '@math.gl/geospatial/web-mercator';
 import Controller, {type ControllerProps} from './controller';
 import {applyRubberBand, getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 

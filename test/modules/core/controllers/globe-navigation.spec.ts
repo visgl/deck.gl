@@ -3,11 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {
-  _GlobeController as GlobeController,
-  _GlobeView as GlobeView,
-  _GlobeViewport as GlobeViewport
-} from '@deck.gl/core';
+import {GlobeController, GlobeView, GlobeViewport} from '@deck.gl/core';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {Globe} from '@deck.gl/core/viewports/globe-util';
 import {Timeline} from '@luma.gl/engine';

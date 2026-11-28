@@ -22,7 +22,7 @@ void main(void) {
   // Position on the enclosing triangle. Its edges are tangent to the unit circle.
   unitPosition = positions.xy;
   geometry.uv = unitPosition;
-  geometry.pickingColor = picking_getPickingColorFromInstanceID();
+  geometry.pickingColor = picking_getPickingColorFromIndex(uint(gl_InstanceID) + pointCloud.rowIndexOffset);
 
   // Find the center of the point and add the current vertex
   vec3 offset = vec3(positions.xy * project_size_to_pixel(pointCloud.radiusPixels, pointCloud.sizeUnits), 0.0);

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {clamp} from '@math.gl/core';
+import {clamp} from '@math.gl/core/matrix';
 import Controller, {ControllerProps, InteractionState} from './controller';
 import ViewState, {
   CONSTRAINT_AROUND,
@@ -10,7 +10,7 @@ import ViewState, {
   type ConstraintContext
 } from './view-state';
 import {applyRubberBand, getMaxBoundsExtents, getMaxBoundsRect} from './utils';
-import {worldToLngLat, lngLatToWorld as _lngLatToWorld} from '@math.gl/web-mercator';
+import {worldToLngLat, lngLatToWorld as _lngLatToWorld} from '@math.gl/geospatial/web-mercator';
 import assert from '../utils/assert';
 import {mod} from '../utils/math-utils';
 

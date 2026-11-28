@@ -4,6 +4,7 @@
 
 import {
   Accessor,
+  ArrowAccessor,
   Color,
   CompositeLayer,
   CompositeLayerProps,
@@ -17,7 +18,10 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 
-import type {BinaryFeatureCollection} from '@loaders.gl/schema';
+import {isArrowTable} from '@math.gl/core/arrow';
+import {getGeoArrowFieldInfo, convertGeoArrowVectorCellToGeoJSON} from '@loaders.gl/core/geoarrow';
+import type {Table} from 'apache-arrow';
+import type {BinaryFeatureCollection} from '@loaders.gl/core/schema';
 import type {Feature, Geometry, GeoJSON} from 'geojson';
 
 import {replaceInRange} from '../utils';
@@ -45,10 +49,12 @@ export type GeoJsonLayerProps<FeaturePropertiesT = unknown> =
 export type _GeoJsonLayerProps<FeaturePropertiesT> = {
   data:
     | string
+    | Table
+    | null
     | GeoJSON
     | Feature[]
     | BinaryFeatureCollection
-    | Promise<GeoJSON | Feature[] | BinaryFeatureCollection>;
+    | Promise<GeoJSON | Feature[] | BinaryFeatureCollection | Table>;
   /**
    * How to render Point and MultiPoint features in the data.
    *
@@ -83,7 +89,7 @@ type _GeoJsonLayerFillProps<FeaturePropertiesT> = {
    *
    * @default [0, 0, 0, 255]
    */
-  getFillColor?: Accessor<Feature<Geometry, FeaturePropertiesT>, Color>;
+  getFillColor?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, Color>;
 };
 
 /** GeoJsonLayer stroke options. */
@@ -102,14 +108,14 @@ type _GeoJsonLayerStrokeProps<FeaturePropertiesT> = {
    *
    * @default [0, 0, 0, 255]
    */
-  getLineColor?: Accessor<Feature<Geometry, FeaturePropertiesT>, Color>;
+  getLineColor?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, Color>;
 
   /**
    * Line width value or accessor.
    *
    * @default 1
    */
-  getLineWidth?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
+  getLineWidth?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, number>;
 
   /**
    * The units of the line width, one of `meters`, `common`, and `pixels`.
@@ -215,7 +221,7 @@ type _GeoJsonLayer3DProps<FeaturePropertiesT> = {
    *
    * @default 1000
    */
-  getElevation?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
+  getElevation?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, number>;
 
   /**
    * Elevation multiplier.
@@ -238,7 +244,7 @@ type _GeoJsonLayer3DProps<FeaturePropertiesT> = {
 
 /** GeoJsonLayer Properties forwarded to `ScatterPlotLayer` if `pointType` is `'circle'` */
 export type _GeoJsonLayerPointCircleProps<FeaturePropertiesT> = {
-  getPointRadius?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
+  getPointRadius?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, number>;
   pointRadiusUnits?: Unit;
   pointRadiusScale?: number;
   pointRadiusMinPixels?: number;
@@ -247,18 +253,18 @@ export type _GeoJsonLayerPointCircleProps<FeaturePropertiesT> = {
   pointBillboard?: boolean;
 
   /** @deprecated use getPointRadius */
-  getRadius?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
+  getRadius?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, number>;
 };
 
 /** GeoJsonLayer properties forwarded to `IconLayer` if `pointType` is `'icon'` */
 type _GeojsonLayerIconPointProps<FeaturePropertiesT> = {
   iconAtlas?: any;
   iconMapping?: any;
-  getIcon?: Accessor<Feature<Geometry, FeaturePropertiesT>, any>;
-  getIconSize?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
-  getIconColor?: Accessor<Feature<Geometry, FeaturePropertiesT>, Color>;
-  getIconAngle?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
-  getIconPixelOffset?: Accessor<Feature<Geometry, FeaturePropertiesT>, number[]>;
+  getIcon?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, any>;
+  getIconSize?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, number>;
+  getIconColor?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, Color>;
+  getIconAngle?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, number>;
+  getIconPixelOffset?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, number[]>;
   iconSizeUnits?: Unit;
   iconSizeScale?: number;
   iconSizeMinPixels?: number;
@@ -269,16 +275,16 @@ type _GeojsonLayerIconPointProps<FeaturePropertiesT> = {
 
 /** GeoJsonLayer properties forwarded to `TextLayer` if `pointType` is `'text'` */
 type _GeojsonLayerTextPointProps<FeaturePropertiesT> = {
-  getText?: Accessor<Feature<Geometry, FeaturePropertiesT>, any>;
-  getTextColor?: Accessor<Feature<Geometry, FeaturePropertiesT>, Color>;
-  getTextAngle?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
-  getTextSize?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
-  getTextAnchor?: Accessor<Feature<Geometry, FeaturePropertiesT>, string>;
-  getTextAlignmentBaseline?: Accessor<Feature<Geometry, FeaturePropertiesT>, string>;
-  getTextPixelOffset?: Accessor<Feature<Geometry, FeaturePropertiesT>, number[]>;
-  getTextBackgroundColor?: Accessor<Feature<Geometry, FeaturePropertiesT>, Color>;
-  getTextBorderColor?: Accessor<Feature<Geometry, FeaturePropertiesT>, Color>;
-  getTextBorderWidth?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
+  getText?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, any>;
+  getTextColor?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, Color>;
+  getTextAngle?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, number>;
+  getTextSize?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, number>;
+  getTextAnchor?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, string>;
+  getTextAlignmentBaseline?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, string>;
+  getTextPixelOffset?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, number[]>;
+  getTextBackgroundColor?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, Color>;
+  getTextBorderColor?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, Color>;
+  getTextBorderWidth?: ArrowAccessor<Feature<Geometry, FeaturePropertiesT>, number>;
   textSizeUnits?: Unit;
   textSizeScale?: number;
   textSizeMinPixels?: number;
@@ -314,8 +320,8 @@ const defaultProps: DefaultProps<GeoJsonLayerProps> = {
   _full3d: false,
   iconAtlas: {type: 'object', value: null},
   iconMapping: {type: 'object', value: {}},
-  getIcon: {type: 'accessor', value: f => f.properties.icon},
-  getText: {type: 'accessor', value: f => f.properties.text},
+  getIcon: {type: 'accessor', arrow: 'row', value: f => f.properties.icon},
+  getText: {type: 'accessor', arrow: 'row', value: f => f.properties.text},
 
   // Self props
   pointType: 'circle',
@@ -323,6 +329,24 @@ const defaultProps: DefaultProps<GeoJsonLayerProps> = {
   // TODO: deprecated, remove in v9
   getRadius: {deprecatedFor: 'getPointRadius'}
 };
+
+/** Decodes feature geometry while retaining the table's row order for styling and picking. */
+function getArrowFeatures(data: Table): Feature[] {
+  /** First declared GeoArrow geometry field. */
+  const field = data.schema.fields.find(candidate => getGeoArrowFieldInfo(candidate)?.encoding);
+  if (!field) {
+    if (!data.numRows) return [];
+    throw new Error('GeoJsonLayer requires a GeoArrow geometry column');
+  }
+  /** Geometry encoding and column identified by the field metadata. */
+  const {encoding} = getGeoArrowFieldInfo(field)!;
+  const column = data.getChild(field.name)!;
+  return Array.from({length: data.numRows}, (_, index) => ({
+    type: 'Feature',
+    geometry: convertGeoArrowVectorCellToGeoJSON(column, index, encoding!) as Geometry,
+    properties: data.get(index)
+  }));
+}
 
 type GeoJsonPickingInfo = PickingInfo & {
   featureType?: string | null;
@@ -381,7 +405,10 @@ export default class GeoJsonLayer<
   }
 
   private _updateStateJSON({props, changeFlags}): void {
-    const features: Feature[] = getGeojsonFeatures(props.data) as any;
+    /** GeoJSON features in original row order, including null geometries. */
+    const features: Feature[] = isArrowTable(props.data)
+      ? getArrowFeatures(props.data)
+      : getGeojsonFeatures(props.data as GeoJSON);
     const wrapFeature = this.getSubLayerRow.bind(this);
     let newFeatures: SeparatedGeometries = {} as SeparatedGeometries;
     const featuresDiff = {};
@@ -453,7 +480,12 @@ export default class GeoJsonLayer<
       this.getSubLayerClass(id, POLYGON_LAYER.type);
 
     if (PolygonFillLayer) {
-      const forwardedProps = forwardProps(this, POLYGON_LAYER.props, 'getPolygon');
+      const forwardedProps = forwardProps(
+        this,
+        POLYGON_LAYER.props,
+        'getPolygon',
+        this.usesNormalizedColors()
+      );
       // Avoid building the lineColors attribute if wireframe is off
       const useLineColor = extruded && wireframe;
       if (!useLineColor) {
@@ -490,7 +522,12 @@ export default class GeoJsonLayer<
       this.getSubLayerClass(lineStringsLayerId, LINE_LAYER.type);
 
     if (PolygonStrokeLayer || LineStringsLayer) {
-      const forwardedProps = forwardProps(this, LINE_LAYER.props, 'getPath');
+      const forwardedProps = forwardProps(
+        this,
+        LINE_LAYER.props,
+        'getPath',
+        this.usesNormalizedColors()
+      );
 
       return [
         PolygonStrokeLayer &&
@@ -540,7 +577,12 @@ export default class GeoJsonLayer<
         this.shouldRenderSubLayer(id, layerProps.points?.data) &&
         this.getSubLayerClass(id, PointLayerMapping.type);
       if (PointsLayer) {
-        const forwardedProps = forwardProps(this, PointLayerMapping.props);
+        const forwardedProps = forwardProps(
+          this,
+          PointLayerMapping.props,
+          'getPosition',
+          this.usesNormalizedColors()
+        );
         let pointsLayerProps = layerProps.points;
 
         if (type === 'text' && binary) {

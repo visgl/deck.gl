@@ -5,8 +5,8 @@
 import {afterEach, expect, test, vi} from 'vitest';
 import {
   type ControllerProps,
-  _GlobeController as GlobeController,
-  _GlobeView as GlobeView,
+  GlobeController,
+  GlobeView,
   LinearInterpolator,
   MapView
 } from '@deck.gl/core';

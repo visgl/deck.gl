@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Deck, MapView, GlobeView} from '@deck.gl/core';
 import {zoomAdjust} from '@deck.gl/core/viewports/globe-viewport';
 import {GeoJsonLayer, ArcLayer, ColumnLayer, BitmapLayer, PathLayer} from '@deck.gl/layers';
 import {createSettingsControl} from './settings-control';

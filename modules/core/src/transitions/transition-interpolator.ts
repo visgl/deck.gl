@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
 import assert from '../utils/assert';
 
 export default abstract class TransitionInterpolator {

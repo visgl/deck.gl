@@ -28,6 +28,7 @@ Releases and associated GitHub PRs for pydeck are documented here.
   matching ``@deck.gl-community`` packages to pydeck's deck.gl version (#10797)
 - Add a Paris Trees gallery example, drawn with ``TreeLayer`` from ``@deck.gl-community/three``
 - Embed the deck JSON in ``to_html`` output compactly to reduce file size
+- Fix ``register_library`` adding a duplicate entry when a name is registered again (#10949)
 
 0.9.3 - Jul 2026
 ^^^^^^^^^^^^^^^^^^^
