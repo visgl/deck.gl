@@ -13,10 +13,6 @@ The package has four public surfaces:
 | Custom classes | `@deck.gl/react` | The factories for custom classes, and the `<deckLayer>`, `<deckView>`, `<deckWidget>` and `<deckEffect>` elements. Used by apps and libraries that write their own classes. |
 | Direct reconciler integration | `@deck.gl/react/reconciler` | Advanced root-management APIs. Most applications should use the native root instead. |
 
-## Client-only renderer
-
-The native root creates a canvas-backed deck.gl renderer. In an application that uses React Server Components, put `'use client'` at the beginning of the module that imports and renders `DeckGL`, or import it from an existing client-marked module. This React directive marks that module and its transitive dependencies as client code; Next.js is one framework that supports it. In a traditional SSR application without React Server Components, create the map or overlay after hydration in an effect. Server rendering a `DeckGL` root does not require `ssr: false`: the standalone root renders its wrapper and canvas markup, provider roots render no markup, and deck.gl or the overlay is created only after hydration.
-
 ## How it works
 
 Import the root, then import a component for each deck.gl class from the subpath named after its
@@ -61,29 +57,19 @@ for view-specific layers. Elements without an `id` get one from their place in t
 [When you need an id](./components.md#when-you-need-an-id). The root
 `DeckGL` owns one standalone `Deck`; import `/mapbox`, `/maplibre` or `/google-maps` for a map overlay.
 
-## Installation
+## Install and set up
 
-Install React 19.2 or later, the package, and the deck.gl packages that your application uses. This example installs the packages for the scatterplot example above:
-
-```bash
-npm install react react-dom @deck.gl/react @deck.gl/core @deck.gl/layers
-```
+[Using deck.gl with React](../../get-started/using-with-react.md) covers installation, rendering on the client and sizing the root.
 
 The package requires `@deck.gl/core`, and `@deck.gl/widgets` for `@deck.gl/react/legacy`. Every other deck.gl package is an optional peer: install `@deck.gl/mapbox`, `@deck.gl/maplibre` or `@deck.gl/google-maps` for its root, and the layer or widget package behind each component subpath you import. The plain root imports none of them.
 
-TypeScript users need TypeScript 5.3 or later.
-
-## Standalone layout
-
-Without `canvas`, a standalone root renders an absolutely positioned wrapper that fills its nearest positioned ancestor, with `width` and `height` of `100%` by default. Give that ancestor a position and a size in application CSS, or set `width`, `height` or `style` on `DeckGL`. See [Root DOM and sizing](./deckgl.md#root-dom-and-sizing). Alternatively, provide and size the canvas in your own DOM tree with the `canvas` prop. In that case, `DeckGL` renders no wrapper or canvas itself.
-
 ## Guides and API reference
 
-- [Get started](../../developer-guide/react/get-started.md) explains the root, client boundaries, layer and view components, and instance access.
+- [Using deck.gl with React](../../get-started/using-with-react.md) walks through the root, client rendering, each kind of component, and instance access.
 - [Using with maps](../../developer-guide/react/using-with-maps.md) explains provider roots and links the [Mapbox](../../developer-guide/react/base-maps/using-with-mapbox.md) and [MapLibre](../../developer-guide/react/base-maps/using-with-maplibre.md) and [Google Maps](../../developer-guide/react/base-maps/using-with-google-maps.md) guides.
 - [Migrating from the previous API](../../developer-guide/react/migrate-from-deckgl-react.md) lists the changes to make when coming from `@deck.gl/react/legacy`.
 - [Debugging](../../developer-guide/react/debugging.md) explains how to trace a problem through the renderer, with logs, React DevTools and error boundaries.
 - [DeckGL API](deckgl.md) documents root ownership and lifecycle behavior.
 - [Components](components.md) lists the component subpaths and the factories for custom classes.
 - [Native elements](native-elements.md) documents `<deckLayer>`, `<deckView>`, `<deckWidget>` and `<deckEffect>`.
-- The [`@deck.gl/react` examples](https://github.com/visgl/deck.gl-community/tree/7086b0a5edca913e59906ebeb7a69bbbfac95e87/examples/react-fiber) are Vite, Next.js, React Router and TanStack Start applications.
+- The [React get-started examples](https://github.com/visgl/deck.gl/tree/master/examples-v10/get-started/react) are minimal applications, one per base map.

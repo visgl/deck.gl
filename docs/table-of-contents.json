@@ -63,7 +63,6 @@
         "type": "category",
         "label": "Using with React",
         "items": [
-          "developer-guide/react/get-started",
           {
             "type": "category",
             "label": "Using with maps",
