@@ -342,6 +342,8 @@ const testCases = [
         getElevation: 5
       })
     ],
+    // The shadows cover few pixels: without the bounds, the image still matches 99.4%
+    imageDiffOptions: {threshold: 0.997},
     goldenImage: './test/render/golden-images/shadow-effect-bounds.png'
   },
   // Mask polygons per fragment and points by their anchor in map/globe views.
