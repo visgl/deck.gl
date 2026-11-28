@@ -122,7 +122,7 @@ replaces the data or is removed.
 ## Limitations
 
 Rendering columns must have equal lengths and matching chunk structures, and must not contain nulls.
-Arrow rendering accessors do not support attribute transitions or layer extensions. Use row accessors when you need those features.
+Direct column bindings do not support attribute transitions or layer extensions. ScatterplotLayer uses row-based attributes for Arrow and SQL accessors when extensions are active.
 
 See each layer's prop descriptions for supported inputs and the [loading data guide](./loading-data.md)
 for other ways to provide data.
@@ -133,6 +133,8 @@ for other ways to provide data.
 Some layers expose optional props for caller-owned luma.gl `GPUVector` buffers.
 These unstable props follow the layer's GPU layout and can change at any time.
 Check the layer reference for supported formats and the meaning and order of rows.
+
+Arc, Line, Column, and GridCell can bind caller-owned packed `float32x2` position vectors directly. Vertex fetch supplies zero elevation. Arc and Line accept XY and XYZ independently for each endpoint.
 
 Instanced rendering layers take values in rendered instance order. Supplied
 vectors must agree on row count and chunk boundaries. For GPU positions, choose a coordinate system that the rendering path can
@@ -191,3 +193,17 @@ and no progress callback. Replaced or finalized streams cannot publish further c
 `dataTransform` retains its existing behavior for row-array streams; it is not applied to Arrow
 chunks. Transform Arrow data in the producer before yielding it. This loading feature does not
 select fields or execute SQL; use accessors or explicit column props as with other Arrow inputs.
+
+## Arrow accessors that use row processing
+
+Path, Trips, Polygon, SolidPolygon, Text, and the aggregation layers accept
+Arrow vectors and SQL expressions on their row accessors. Supply a nested list
+for paths and polygons, a list of numbers for trip timestamps, and a string
+column for text or icon selection. GeoJsonLayer accepts an Arrow table with a
+GeoArrow geometry field and uses the source feature order for styling.
+SimpleMeshLayer and ScenegraphLayer accept Arrow and SQL instance transforms.
+
+These accessors use the same shapes and units as row callbacks. Supply the
+source table alongside the accessors so the layer has a row count. Passing
+`data: null` clears the layer and defers SQL evaluation. A zero-row Arrow
+table retains its schema and draws no features.

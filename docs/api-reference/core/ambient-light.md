@@ -29,5 +29,5 @@ The constructor for the `AmbientLight` class. Use this to create a new `AmbientL
 const ambientLight = new AmbientLight({color, intensity});
 ```
 
-* `color` - (number[3],)  RGB color of ambient light source, default value is `[255, 255, 255]`.
+* `color` - (number[3],)  RGB color of ambient light source, default value is `[255, 255, 255]`. Custom RGB arrays use 0–1 channels when Deck’s [`normalizedColors`](./deck.md#normalizedcolors) is enabled and 0–255 channels otherwise.
 * `intensity` - (number) Strength of ambient light source, default value is `1.0`.

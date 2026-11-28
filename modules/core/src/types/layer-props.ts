@@ -16,10 +16,10 @@ import type {Texture, TextureProps} from '@luma.gl/core';
 import type {Buffer, Parameters} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
-import type {Matrix4Like} from '@math.gl/core';
-import type {Expression} from '@math.gl/expressions';
-import type {SQLQuery} from '@math.gl/expressions/sql';
-import type {ArrowTableFunction} from '@math.gl/expressions/arrow';
+import type {Matrix4Like} from '@math.gl/core/matrix';
+import type {Expression} from '@math.gl/sql/expressions';
+import type {SQLQuery} from '@math.gl/sql/parser';
+import type {ArrowTableFunction} from '@math.gl/sql/arrow';
 
 /** Additional Arrow functions available to SQL accessors. */
 export type SQLFunctions = readonly ArrowTableFunction[];
@@ -77,13 +77,16 @@ export type AccessorFunction<In, Out> = (
 /** Either a uniform value for all objects, or a function that returns a value for each object. */
 export type Accessor<In, Out> = Out | AccessorFunction<In, Out>;
 
-/** A constant, row callback, Arrow column, or SQL expression on opted-in accessors.
- * GPUVector inputs are only supported by separate column props.
- */
-export type ArrowAccessor<In, Out, ArrowType extends DataType = DataType> =
-  | Accessor<In, Out>
+/** A row callback, Arrow column, or SQL expression on an opted-in accessor. */
+export type ArrowAccessorFunction<In, Out, ArrowType extends DataType = DataType> =
+  | AccessorFunction<In, Out>
   | Vector<ArrowType>
   | {readonly sql: string};
+
+/** A constant or a row, Arrow, or SQL accessor. Direct GPU vectors use separate column props. */
+export type ArrowAccessor<In, Out, ArrowType extends DataType = DataType> =
+  | Out
+  | ArrowAccessorFunction<In, Out, ArrowType>;
 
 /** A position in the format of `[lng, lat, alt?]` or `[x, y, z?]` depending on the coordinate system.
  * See https://deck.gl/docs/developer-guide/coordinate-systems#positions
@@ -284,7 +287,8 @@ export type LayerProps = {
    */
   highlightedObjectIndex?: number | null;
   /**
-   * The color of the highlight.
+   * The highlight color, in byte channels by default. Deck’s normalizedColors option
+   * selects 0–1 plain-array inputs for top-level layers.
    */
   highlightColor?: number[] | ((pickingInfo: PickingInfo) => number[]);
 

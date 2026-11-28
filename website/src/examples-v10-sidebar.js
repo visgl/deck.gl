@@ -32,22 +32,22 @@ const sidebars = {
       items: [
         withStatus('arc-layer', 'started'),
         'bitmap-layer',
-        'contour-layer',
-        'geojson-layer-polygons',
-        'geojson-layer-paths',
-        withStatus('global-grids', 'started'),
+        withStatus('contour-layer', 'ready'),
+        withStatus('geojson-layer-polygons', 'started'),
+        withStatus('geojson-layer-paths', 'started'),
+        withStatus('global-grids', 'ready'),
         withStatus('grid-layer', 'started'),
-        'heatmap-layer',
-        withStatus('hexagon-layer', 'started'),
+        withStatus('heatmap-layer', 'ready'),
+        withStatus('hexagon-layer', 'ready'),
         withStatus('icon-layer', 'started'),
         withStatus('line-layer', 'ready'),
         withStatus('point-cloud-layer', 'ready'),
         withStatus('scatterplot-layer', 'ready'),
         withStatus('scenegraph-layer', 'started'),
-        'screen-grid-layer',
+        withStatus('screen-grid-layer', 'ready'),
         // 'simple-mesh-layer',
         'terrain-layer',
-        'text-layer',
+        withStatus('text-layer', 'ready'),
         'text-layer-clipping',
         'tile-layer',
         'tile-layer-non-geospatial',
@@ -71,7 +71,7 @@ const sidebars = {
     {
       type: 'category',
       label: 'Integrations',
-      items: ['arcgis', 'carto', 'google-3d-tiles', 'google-maps', withStatus('mapbox', 'started'), withStatus('maplibre', 'started')]
+      items: ['arcgis', 'carto', 'google-3d-tiles', 'google-maps', withStatus('mapbox', 'ready'), withStatus('maplibre', 'started')]
     },
     {
       type: 'category',
@@ -84,7 +84,7 @@ const sidebars = {
       items: [
         'brushing-extension',
         'collision-filter-extension',
-        'data-filter-extension',
+        withStatus('data-filter-extension', 'ready'),
         'mask-extension',
         'path-style-extension',
         'terrain-extension'

@@ -9,8 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@math.gl/arrow": "5.0.0-beta.10",
-    "@loaders.gl/tables": "^5.0.0-beta.10",
+    "@loaders.gl/tables": "^5.0.2",
     "apache-arrow": "^21.2.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
@@ -18,7 +17,8 @@
     "maplibre-gl": "^5.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-map-gl": "^8.0.0"
+    "react-map-gl": "^8.0.0",
+    "@math.gl/core": "^5.0.4"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

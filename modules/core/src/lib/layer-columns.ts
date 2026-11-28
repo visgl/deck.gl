@@ -26,6 +26,8 @@ export type ColumnDefinition = {
   accessor: string;
   semantic: 'position' | 'scalar' | 'color' | 'vector';
   size: number;
+  /** Accept packed XY buffers for a three-component position input. */
+  allowPackedXY?: boolean;
   prop?: boolean;
   /** Select an Arrow vector supplied through the matching accessor, after an explicit column. */
   arrowAccessor?: boolean;
@@ -284,7 +286,10 @@ export class LayerColumns {
               : definition.size === 1
                 ? 'float32'
                 : 'float32x' + definition.size;
-          if (source.format !== format)
+          if (
+            source.format !== format &&
+            !(definition.allowPackedXY && source.format === 'float32x2')
+          )
             throw new Error('GPU column format must match the shader input');
           if (definition.semantic === 'position') {
             if (positionOptions.transform)

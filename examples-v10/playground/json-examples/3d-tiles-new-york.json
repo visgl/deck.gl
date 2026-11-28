@@ -23,11 +23,20 @@
       "@@type": "Tile3DLayer",
       "id": "tiles-new-york",
       "DracoWorkerLoader": "@!DracoWorkerLoader",
-      "loader": "@@#CesiumIonLoader",
-      "data": "https://assets.cesium.com/7162/tileset.json",
+      "data": "https://assets.ion.cesium.com/7162/tileset.json",
       "loadOptions": {
-        "cesium-ion": {
-          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzMGY4ODczYy1mNTk4LTRiMDUtYmIxYy0xZWYwOWZmMGY4NjQiLCJpZCI6NDQsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJhc3NldHMiOlsxLDIsMyw0LDYxOTMsNjI3Myw3MTYyLDczNTMsNzE0Ml0sImlhdCI6MTU0MTYxODM0NX0.lWnGs9ySXO4QK3HagcMsDpZ8L01DpmUDQm38-2QAQuE"
+        "core": {
+          "authentications": [
+            "@@#CesiumIonAuthentication"
+          ],
+          "credentials": [
+            {
+              "type": "cesium-ion",
+              "assetId": 7162,
+              "tokenType": "account",
+              "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzMGY4ODczYy1mNTk4LTRiMDUtYmIxYy0xZWYwOWZmMGY4NjQiLCJpZCI6NDQsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJhc3NldHMiOlsxLDIsMyw0LDYxOTMsNjI3Myw3MTYyLDczNTMsNzE0Ml0sImlhdCI6MTU0MTYxODM0NX0.lWnGs9ySXO4QK3HagcMsDpZ8L01DpmUDQm38-2QAQuE"
+            }
+          ]
         }
       }
     }

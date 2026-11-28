@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
 import {WebMercatorViewport, OrthographicView, Viewport} from '@deck.gl/core';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
 const testViewState = {
   bearing: 0,

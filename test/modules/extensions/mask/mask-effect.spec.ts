@@ -3,12 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {
-  MapView,
-  LayerManager,
-  _GlobeView as GlobeView,
-  _GlobeViewport as GlobeViewport
-} from '@deck.gl/core';
+import {MapView, LayerManager, GlobeView, GlobeViewport} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
 import {lngLatToMercatorCommon} from '@deck.gl/extensions/utils/projection-utils';

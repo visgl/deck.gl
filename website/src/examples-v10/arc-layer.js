@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React, {Component} from 'react';
-import {MAPBOX_STYLES, DATA_URI, GITHUB_TREE} from '../constants/defaults';
+import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
 import {readableInteger} from '../utils/format-utils';
 import App, {inFlowColors, outFlowColors} from 'v10-website-examples/arc/app';
 
@@ -23,12 +23,6 @@ class ArcDemo extends Component {
 
   /** Enables graphics backend selection for this demo. */
   static hasDeviceTabs = true;
-
-  /** Data sources loaded before rendering the demo. */
-  static data = {
-    url: `${DATA_URI}/arc-data.txt`,
-    worker: '/workers/arc-data-decoder.js'
-  };
 
   /** Source directory for this Arrow example. */
   static code = `${GITHUB_TREE}/examples-v10/website/arc`;
@@ -72,7 +66,7 @@ class ArcDemo extends Component {
             Counties<b>{meta.count || 0}</b>
           </div>
           <div className="stat col-1-2">
-            Arcs<b>{readableInteger(meta.flowCount || 0)}</b>
+            Visible arcs<b>{readableInteger(meta.flowCount || 0)}</b>
           </div>
         </div>
       </>
@@ -81,18 +75,20 @@ class ArcDemo extends Component {
 
   /** Updates the selected county shown in the information panel. */
   _onSelectCounty = f => {
-    this.props.onStateChange({sourceName: f.properties.name});
+    this.props.onStateChange({sourceName: f.name});
   };
 
   /** Renders the Arrow demo with the current controls and data. */
   render() {
     /** Provides params, ...other props for the example. */
-    const {params, ...otherProps} = this.props;
+    const {data, params, ...otherProps} = this.props;
 
     return (
       <App
         {...otherProps}
         key={this.props.device?.type}
+        onDataLoad={stats => this.props.onStateChange(stats)}
+        onArcDataLoad={flowCount => this.props.onStateChange({flowCount})}
         strokeWidth={params.lineWidth.value}
         onSelectCounty={this._onSelectCounty}
       />

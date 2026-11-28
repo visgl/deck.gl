@@ -62,7 +62,8 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import {DeckGL, CompassWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import {CompassWidget} from '@deck.gl/react/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
 function App() {
@@ -88,7 +89,8 @@ function App() {
 
 ```tsx
 import React, {useState, useCallback} from 'react';
-import {DeckGL, CompassWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import {CompassWidget} from '@deck.gl/react/widgets';
 import type {MapViewState} from '@deck.gl/core';
 import '@deck.gl/widgets/stylesheet.css';
 

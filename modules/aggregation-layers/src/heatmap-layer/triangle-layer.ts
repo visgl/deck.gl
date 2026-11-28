@@ -7,6 +7,7 @@ import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {
   Layer,
   LayerContext,
+  type UpdateParameters,
   color,
   project32,
   _GPUVectorModel as GPUVectorModel
@@ -18,7 +19,7 @@ import {TriangleProps, triangleUniforms} from './triangle-layer-uniforms';
 
 type _TriangleLayerProps = {
   data: {attributes: {positions: Buffer; texCoords: Buffer}};
-  colorDomain: Readonly<[number, number]>;
+  getColorDomain: () => Readonly<[number, number]>;
   aggregationMode: number;
   threshold: number;
   intensity: number;
@@ -43,6 +44,15 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
 
   initializeState({device}: LayerContext): void {
     this.setState({model: this._getModel(device)});
+  }
+
+  /** Rebuild the display shader when clipping or other extensions change. */
+  override updateState(params: UpdateParameters<this>): void {
+    super.updateState(params);
+    if (params.changeFlags.extensionsChanged) {
+      this.state.model.destroy();
+      this.setState({model: this._getModel(this.context.device)});
+    }
   }
 
   _getModel(device: Device): GPUVectorModel {
@@ -86,7 +96,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     const {model} = this.state;
     const {
       aggregationMode,
-      colorDomain,
+      getColorDomain,
       intensity,
       threshold,
       colorTexture,
@@ -95,7 +105,8 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     } = this.props;
     const triangleProps: TriangleProps = {
       aggregationMode,
-      colorDomain,
+      // The mask effect can update the weight scale just before this draw.
+      colorDomain: getColorDomain(),
       intensity,
       threshold,
       colorTexture,
