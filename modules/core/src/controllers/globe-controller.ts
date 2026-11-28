@@ -171,11 +171,12 @@ class GlobeState extends MapState {
     if (props.longitude < -180 || props.longitude > 180) {
       props.longitude = mod(props.longitude + 180, 360) - 180;
     }
-    props.latitude = clamp(props.latitude, -90, 90);
-
     if (props.bearing < -180 || props.bearing > 180) {
       props.bearing = mod(props.bearing + 180, 360) - 180;
     }
+    // North-up pans can't cross the poles, so keep them off the poles to avoid getting stuck
+    const latitudeLimit = Math.abs(props.bearing) < 1 ? MAX_LATITUDE : 90;
+    props.latitude = clamp(props.latitude, -latitudeLimit, latitudeLimit);
     props.pitch = clamp(props.pitch, props.minPitch, props.maxPitch);
 
     const maxBoundsRect = maxBounds
@@ -379,7 +380,11 @@ export default class GlobeController extends Controller<MapState> {
             const vLng = dLng / dt;
             const vLat = dLat / dt;
             endLng = viewportProps.longitude + (vLng * inertia) / 2;
-            endLat = clamp(viewportProps.latitude + (vLat * inertia) / 2, -90, 90);
+            endLat = clamp(
+              viewportProps.latitude + (vLat * inertia) / 2,
+              -MAX_LATITUDE,
+              MAX_LATITUDE
+            );
 
             interpolator = new GlobeInertiaInterpolator({targetLongitude: endLng});
           } else {

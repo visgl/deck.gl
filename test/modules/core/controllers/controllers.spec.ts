@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {
   type ControllerProps,
   LinearInterpolator,
@@ -15,6 +15,7 @@ import {
   GlobeViewport
 } from '@deck.gl/core';
 import {Timeline} from '@luma.gl/engine';
+import {MAX_LATITUDE} from '@math.gl/web-mercator';
 
 import testController, {createTestController} from './test-controller';
 
@@ -179,6 +180,34 @@ test('MapController only handles trackpad pinch when trackpad gestures are enabl
   enabledController.handleEvent(makePinchEvent('pinchstart', 1) as any);
   enabledController.handleEvent(makePinchEvent('pinchmove', 1.2) as any);
   expect(enabledController.props.zoom, 'trackpad pinch follows touchZoom').toBeGreaterThan(10);
+});
+
+test('MapController preserves pinch inertia for trackpad input', () => {
+  const controller = createTestController({
+    view: new MapView({controller: {inertia: 500, trackpadGesture: true}}),
+    initialViewState: {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 10,
+      pitch: 30,
+      bearing: -45
+    }
+  });
+  const makePinchEvent = (type: string, scale: number, deltaTime: number) => ({
+    ...makeGestureEvent(type, {pointerType: 'trackpad'}),
+    scale,
+    rotation: 0,
+    deltaTime
+  });
+
+  controller.handleEvent(makePinchEvent('pinchstart', 1, 0) as any);
+  controller.handleEvent(makePinchEvent('pinchmove', 1.1, 16) as any);
+  controller.handleEvent(makePinchEvent('pinchend', 1.2, 32) as any);
+
+  expect(
+    controller.transitionManager.transition.inProgress,
+    'trackpad pinch retains its inertia transition'
+  ).toBe(true);
 });
 
 test('MapController restricts wheel zoom to mouse input when trackpad gestures are enabled', () => {
@@ -570,6 +599,126 @@ test('GlobeController zooms through the zoom 12 viewport handoff', () => {
   const underPointer = after.unproject(pointer);
   expect(underPointer[0], 'the pointer keeps its longitude').toBeCloseTo(anchor[0], 5);
   expect(underPointer[1], 'the pointer keeps its latitude').toBeCloseTo(anchor[1], 5);
+});
+
+test('GlobeController hands off touch pinch to pan and another pinch', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: {inertia: 500, zoomAround: 'pointer'}}),
+    initialViewState: {
+      width: 1280,
+      height: 720,
+      longitude: 0,
+      latitude: 45,
+      zoom: 5,
+      minZoom: 0
+    }
+  });
+  const makeTouchPinchEvent = (type: string, scale: number, deltaTime: number) => ({
+    ...makeGestureEvent(type, {x: 640, y: 360}),
+    scale,
+    rotation: 0,
+    deltaTime,
+    srcEvent: {pointerType: 'touch'}
+  });
+
+  controller.handleEvent(makeTouchPinchEvent('pinchstart', 1, 0) as any);
+  controller.handleEvent(makeTouchPinchEvent('pinchmove', 1.2, 16) as any);
+  const zoomAfterPinchMove = controller.props.zoom;
+  controller.handleEvent(makeTouchPinchEvent('pinchend', 10, 17) as any);
+
+  expect(controller.props.zoom, 'touch lift does not project a noisy pinch velocity').toBeCloseTo(
+    zoomAfterPinchMove
+  );
+  expect(
+    controller.handleEvent(makeGestureEvent('panstart', {x: 640, y: 360}) as any),
+    'one-finger pan starts immediately after pinch'
+  ).toBe(true);
+  const beforePan = controller.props;
+  controller.handleEvent(makeGestureEvent('panmove', {x: 680, y: 380}) as any);
+  expect(
+    Math.hypot(
+      controller.props.longitude - beforePan.longitude,
+      controller.props.latitude - beforePan.latitude
+    ),
+    'pan moves the globe after pinch'
+  ).toBeGreaterThan(0);
+  controller.handleEvent(makeGestureEvent('panend', {x: 680, y: 380}) as any);
+
+  expect(
+    controller.handleEvent(makeTouchPinchEvent('pinchstart', 1, 0) as any),
+    'second pinch starts immediately after pan'
+  ).toBe(true);
+  const zoomBeforeSecondPinch = controller.props.zoom;
+  controller.handleEvent(makeTouchPinchEvent('pinchmove', 0.8, 16) as any);
+  expect(controller.props.zoom, 'second pinch changes zoom').not.toBeCloseTo(zoomBeforeSecondPinch);
+  controller.handleEvent(makeTouchPinchEvent('pinchend', 0.8, 32) as any);
+});
+
+test('GlobeController keeps north-up inertia off the poles', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: {inertia: 300}}),
+    initialViewState: {width: 800, height: 600, longitude: 0, latitude: 60, zoom: 1}
+  });
+  const nowSpy = vi.spyOn(Date, 'now');
+  try {
+    // A fast downward flick
+    controller.handleEvent(makeGestureEvent('panstart', {x: 400, y: 300}) as any);
+    for (let i = 1; i <= 5; i++) {
+      nowSpy.mockReturnValue(1000 + i * 26);
+      controller.handleEvent(makeGestureEvent('panmove', {x: 400, y: 300 + i * 32}) as any);
+    }
+    controller.handleEvent(makeGestureEvent('panend', {x: 400, y: 460}) as any);
+    advanceRubberBandTransition(controller, 300);
+  } finally {
+    nowSpy.mockRestore();
+  }
+  expect(controller.props.latitude, 'inertia stops at the max latitude').toBeCloseTo(MAX_LATITUDE);
+
+  controller.handleEvent(makeGestureEvent('panstart', {x: 400, y: 300}) as any);
+  controller.handleEvent(makeGestureEvent('panmove', {x: 340, y: 300}) as any);
+  controller.handleEvent(makeGestureEvent('panend', {x: 340, y: 300}) as any);
+  expect(controller.props.longitude, 'a horizontal drag still pans').not.toBeCloseTo(0);
+  expect(controller.props.latitude, 'a horizontal drag keeps the latitude').toBeCloseTo(
+    MAX_LATITUDE
+  );
+});
+
+test('GlobeController keeps north-up pointer zoom off the poles', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+    initialViewState: {
+      width: 800,
+      height: 600,
+      longitude: 0,
+      latitude: 80,
+      zoom: 2
+    }
+  });
+  for (let i = 0; i < 10; i++) {
+    const wheelEvent = makeWheelEvent();
+    wheelEvent.offsetCenter = {x: 400, y: 450};
+    wheelEvent.delta = -60;
+    controller.handleEvent(wheelEvent as any);
+  }
+
+  expect(
+    Math.abs(controller.props.latitude),
+    'pointer zoom stops at the max latitude'
+  ).toBeLessThanOrEqual(MAX_LATITUDE + 1e-9);
+});
+
+test('GlobeController lets a rotated globe pan over the poles', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: true}),
+    initialViewState: {width: 800, height: 600, longitude: 0, latitude: 80, zoom: 1, bearing: 5}
+  });
+  controller.handleEvent(makeGestureEvent('panstart', {x: 400, y: 300}) as any);
+  controller.handleEvent(makeGestureEvent('panmove', {x: 400, y: 400}) as any);
+  controller.handleEvent(makeGestureEvent('panend', {x: 400, y: 400}) as any);
+
+  expect(controller.props.latitude, 'free-bearing pan can pass the max latitude').toBeGreaterThan(
+    MAX_LATITUDE
+  );
 });
 
 test('GlobeController initializes multipan like pointer pan', () => {

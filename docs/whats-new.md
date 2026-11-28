@@ -58,6 +58,11 @@ The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, 
 
 - [`GlobeView`](./api-reference/core/globe-view.md), [`GlobeViewport`](./api-reference/core/globe-viewport.md) and [`GlobeController`](./api-reference/core/globe-controller.md) are now officially supported and no longer experimental.
 
+### Controllers
+
+- Touch pinch zoom now ends at the last live gesture position instead of applying inertia from the noisy finger-lift frame, allowing an immediate handoff to pan or another pinch.
+- Mobile gesture recognition now distinguishes two-finger translation from pinch zoom and accepts a more deliberate first tap for double-tap-drag zoom.
+
 ### Extensions
 
 - [MaskExtension](./api-reference/extensions/mask-extension.md) now supports [GlobeView](./api-reference/core/globe-view.md).
