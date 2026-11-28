@@ -375,6 +375,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   protected eventManager: EventManager | null = null;
   protected eventManagers: Record<string, EventManager> = {};
   protected widgetManager: WidgetManager | null = null;
+  /** Screen passes drawn since widgets were last redrawn, merged by viewport id */
+  private _pendingWidgetRedraw: {
+    viewports: Map<string, Viewport>;
+    layers: Layer[];
+    renderedLayers: Map<string, Set<Layer>>;
+  } | null = null;
   protected tooltip: TooltipWidget | null = null;
   protected animationLoop: AnimationLoop | null = null;
   private _canvasContext: CanvasContext | null = null;
@@ -544,6 +550,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.widgetManager?.finalize();
     this.widgetManager = null;
+    this._pendingWidgetRedraw = null;
 
     this._canvasManager.finalize();
     if (this._isMultiCanvasMode()) {
@@ -1836,6 +1843,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       effects?: Effect[];
       clearStack?: boolean;
       clearCanvas?: boolean;
+      /** Leave widgets for `_redrawWidgets`, for a frame drawn in several screen passes */
+      deferWidgetRedraw?: boolean;
     }
   ) {
     const {device, gl} = this.layerManager!.context;
@@ -1906,14 +1915,69 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     if (opts.pass === 'screen') {
       // This method could be called when drawing to picking buffer, texture etc.
       // Only when drawing to screen, update all widgets (UI components)
-      this.widgetManager!.onRedraw({
-        viewports: opts.viewports,
-        layers: opts.layers,
-        renderedLayers
-      });
+      this._addWidgetRedraw(opts.viewports, opts.layers, renderedLayers);
+      if (!opts.deferWidgetRedraw) {
+        this._redrawWidgets();
+      }
     }
 
     this.props.onAfterRender({device, gl});
+  }
+
+  /**
+   * Redraws widgets once with every screen pass drawn since they were last redrawn.
+   * Integrations that draw a frame in several deferred passes call this at the end of the frame.
+   * @param emptyFrameViewports Viewports to redraw widgets with, with no rendered layers, when no
+   * screen pass was drawn since the last redraw
+   */
+  _redrawWidgets(emptyFrameViewports?: Viewport[]): void {
+    const pending = this._pendingWidgetRedraw;
+    if (!pending) {
+      if (emptyFrameViewports) {
+        this.widgetManager?.onRedraw({
+          viewports: emptyFrameViewports,
+          layers: this.layerManager?.getLayers() ?? [],
+          renderedLayers: new Map()
+        });
+      }
+      return;
+    }
+    this._pendingWidgetRedraw = null;
+
+    const viewports = Array.from(pending.viewports.values());
+    const renderedLayers = new Map<Viewport, Set<Layer>>();
+    for (const viewport of viewports) {
+      const layers = pending.renderedLayers.get(viewport.id);
+      if (layers) {
+        renderedLayers.set(viewport, layers);
+      }
+    }
+    this.widgetManager?.onRedraw({viewports, layers: pending.layers, renderedLayers});
+  }
+
+  /** Adds one screen pass to the next widget redraw */
+  private _addWidgetRedraw(
+    viewports: Viewport[],
+    layers: Layer[],
+    renderedLayers: Map<Viewport, Set<Layer>>
+  ): void {
+    this._pendingWidgetRedraw ||= {viewports: new Map(), layers, renderedLayers: new Map()};
+    const pending = this._pendingWidgetRedraw;
+    pending.layers = layers;
+    // Passes in one frame can build separate viewports for the same view; widgets get the last one
+    for (const viewport of viewports) {
+      pending.viewports.set(viewport.id, viewport);
+    }
+    for (const [viewport, viewportLayers] of renderedLayers) {
+      let pendingLayers = pending.renderedLayers.get(viewport.id);
+      if (!pendingLayers) {
+        pendingLayers = new Set();
+        pending.renderedLayers.set(viewport.id, pendingLayers);
+      }
+      for (const layer of viewportLayers) {
+        pendingLayers.add(layer);
+      }
+    }
   }
 
   // Callbacks

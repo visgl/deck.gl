@@ -158,7 +158,9 @@ export function drawLayerGroup(
       return false;
     },
     clearStack,
-    clearCanvas: false
+    clearCanvas: false,
+    // Widgets redraw once per frame in afterRender, with every layer group
+    deferWidgetRedraw: true
   });
 }
 
@@ -355,6 +357,10 @@ function afterRender(deck: Deck, map: Map): void {
     const device = (deck as any).device;
     const gl = device?.gl;
     deck.props.onBeforeRender?.({device, gl});
+
+    // Without layers no pass draws, but widgets still need the empty frame
+    const mapboxViewport = (deck.userData as UserData).currentViewport || getViewport(deck, map);
+    deck._redrawWidgets(mapboxViewport ? [mapboxViewport] : []);
     deck.props.onAfterRender?.({device, gl});
   }
 

@@ -9,7 +9,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import {getDeckInstance, getProjection, getViewState} from '@deck.gl/mapbox/deck-utils';
 import MapboxLayerGroup from '@deck.gl/mapbox/mapbox-layer-group';
-import {GlobeView, MapView} from '@deck.gl/core';
+import {GlobeView, MapView, Widget} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 
 import MockMapboxMap from './mapbox-gl-mock/map';
@@ -400,6 +400,99 @@ webglTest('MapboxOverlay#interleaved', async () => {
   map.addControl(overlay);
 
   expect(overlay._deck, 'Deck instance is created').toBeTruthy();
+  await renderPromise;
+});
+
+/** Records the viewports and rendered layers of each widget redraw */
+class RedrawLogWidget extends Widget {
+  className = 'deck-redraw-log-widget';
+  placement = 'top-left' as const;
+  redraws: {viewportIds: string[]; layerIds: string[]}[] = [];
+
+  onRenderHTML(): void {}
+
+  onRedraw({viewports, renderedLayers}: Parameters<Widget['onRedraw']>[0]): void {
+    this.redraws.push({
+      viewportIds: viewports.map(viewport => viewport.id),
+      layerIds: viewports
+        .flatMap(viewport => [...(renderedLayers?.get(viewport) ?? [])].map(layer => layer.id))
+        .sort()
+    });
+  }
+}
+
+webglTest('MapboxOverlay#interleaved redraws widgets once per frame', async () => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14,
+    style: {layers: [{id: 'water'}]}
+  });
+  const widget = new RedrawLogWidget({id: 'redraw-log'});
+  const data = [[-122.45, 37.78]];
+  const overlay = new MapboxOverlay({
+    interleaved: true,
+    layers: [
+      new ScatterplotLayer({id: 'below-water', beforeId: 'water', data, getPosition: d => d}),
+      new ScatterplotLayer({id: 'top', data, getPosition: d => d})
+    ],
+    widgets: [widget]
+  });
+
+  const renderPromise = waitForRender(map, async () => {
+    await vi.waitUntil(() => widget.redraws.length > 0);
+    widget.redraws.length = 0;
+
+    // One map frame draws each layer group in its own screen pass
+    map._render();
+    expect(widget.redraws, 'one widget redraw with both layer groups').toEqual([
+      {viewportIds: ['mapbox'], layerIds: ['below-water', 'top']}
+    ]);
+
+    // Removing the last layer leaves no pass to draw, but widgets still get the empty frame
+    overlay.setProps({layers: []});
+    widget.redraws.length = 0;
+    map._render();
+    expect(widget.redraws, 'one widget redraw without layers').toEqual([
+      {viewportIds: ['mapbox'], layerIds: []}
+    ]);
+
+    map.removeControl(overlay);
+  });
+  map.addControl(overlay);
+  await renderPromise;
+});
+
+webglTest('MapboxOverlay#interleaved merges a second view into the widget redraw', async () => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const widget = new RedrawLogWidget({id: 'redraw-log'});
+  const data = [[-122.45, 37.78]];
+  const overlay = new MapboxOverlay({
+    interleaved: true,
+    views: [new MapView({id: 'minimap', x: '75%', y: '75%', width: '25%', height: '25%'})],
+    layers: [
+      new ScatterplotLayer({id: 'a', data, getPosition: d => d}),
+      new ScatterplotLayer({id: 'b', data, getPosition: d => d})
+    ],
+    // `a` is drawn by its layer group pass, `b` by the extra pass for the minimap
+    layerFilter: ({layer, viewport}) => (viewport.id === 'minimap') === (layer.id === 'b'),
+    widgets: [widget]
+  });
+
+  const renderPromise = waitForRender(map, async () => {
+    await vi.waitUntil(() => widget.redraws.length > 0);
+    widget.redraws.length = 0;
+
+    map._render();
+    expect(widget.redraws, 'one widget redraw with both views').toEqual([
+      {viewportIds: ['mapbox', 'minimap'], layerIds: ['a', 'b']}
+    ]);
+
+    map.removeControl(overlay);
+  });
+  map.addControl(overlay);
   await renderPromise;
 });
 
