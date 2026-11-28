@@ -54,6 +54,22 @@ function getExtendedMat3FromMat4(mat4) {
   return mat4.subarray(0, 12);
 }
 
+/** Computes the four shader vectors for a mesh instance using the normal transform math. */
+export function getMeshInstanceTransform(
+  matrix: readonly number[],
+  orientation: readonly number[],
+  scale: readonly number[],
+  translation: readonly number[]
+): Float32Array {
+  if (matrix?.length === 16) {
+    return getExtendedMat3FromMat4(new Float32Array(matrix));
+  }
+  const result = new Float32Array(12);
+  calculateTransformMatrix(result, orientation, scale);
+  result.set(translation, 9);
+  return result;
+}
+
 export const MATRIX_ATTRIBUTES = {
   size: 12,
   accessor: ['getOrientation', 'getScale', 'getTranslation', 'getTransformMatrix'],
@@ -86,20 +102,18 @@ export const MATRIX_ATTRIBUTES = {
     const constantOrientation = Array.isArray(getOrientation);
     const constantTranslation = Array.isArray(getTranslation);
 
-    const hasMatrix = constantMatrix || (!arrayMatrix && Boolean(getTransformMatrix(data[0])));
-
-    if (hasMatrix) {
-      attribute.constant = constantMatrix;
-    } else {
-      attribute.constant = constantOrientation && constantScale && constantTranslation;
-    }
+    /** A matrix callback can override the other transforms on any row. */
+    const hasMatrixAccessor = typeof getTransformMatrix === 'function';
+    attribute.constant =
+      constantMatrix ||
+      (!hasMatrixAccessor && constantOrientation && constantScale && constantTranslation);
 
     const instanceModelMatrixData = attribute.value;
 
     if (attribute.constant) {
       let matrix;
 
-      if (hasMatrix) {
+      if (constantMatrix) {
         modelMatrix.set(getTransformMatrix);
         matrix = getExtendedMat3FromMat4(modelMatrix);
       } else {
@@ -120,10 +134,10 @@ export const MATRIX_ATTRIBUTES = {
         objectInfo.index++;
         let matrix;
 
-        if (hasMatrix) {
-          modelMatrix.set(
-            constantMatrix ? getTransformMatrix : getTransformMatrix(object, objectInfo)
-          );
+        /** Read the current row with its actual accessor context. */
+        const transform = hasMatrixAccessor ? getTransformMatrix(object, objectInfo) : null;
+        if (transform?.length === 16) {
+          modelMatrix.set(transform);
           matrix = getExtendedMat3FromMat4(modelMatrix);
         } else {
           matrix = valueArray;

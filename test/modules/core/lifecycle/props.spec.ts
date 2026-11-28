@@ -6,7 +6,7 @@ import {test, expect} from 'vitest';
 import {createProps} from '@deck.gl/core/lifecycle/create-props';
 import {compareProps} from '@deck.gl/core/lifecycle/props';
 import {PROP_TYPES_SYMBOL} from '@deck.gl/core/lifecycle/constants';
-import {Vector2} from '@math.gl/core';
+import {Vector2} from '@math.gl/core/matrix';
 
 const SAME = 'equal';
 const NOT_SAME = 'not equal';

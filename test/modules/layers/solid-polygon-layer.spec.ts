@@ -3,12 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {geojsonToBinary} from '@loaders.gl/gis';
-import {LayerManager, MapView, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
+import {LayerManager, MapView, GlobeViewport} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {device} from '@deck.gl/test-utils/vitest';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {geoJSONData} from './data/fixtures';
 import PolygonTesselator from '@deck.gl/layers/solid-polygon-layer/polygon-tesselator';
 
@@ -87,7 +87,7 @@ test('SolidPolygonLayer#WebGPU binary extruded polygons', async ({skip}) => {
 
   const layer = new GeoJsonLayer({
     id: 'webgpu-binary-extruded-polygons',
-    data: geojsonToBinary(geoJSONData),
+    data: convertGeojsonToBinaryFeatureCollection(geoJSONData),
     extruded: true,
     wireframe: true,
     stroked: false,

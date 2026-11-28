@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import {floatEquals, vecEquals} from '../../../utils/utils';
 import {getFrustumPlanes, toDoublePrecisionArray} from '@deck.gl/core/utils/math-utils';
-import {equals, Matrix4} from '@math.gl/core';
+import {equals, Matrix4} from '@math.gl/core/matrix';
 
 const ROOT2 = 0.7071;
 

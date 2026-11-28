@@ -18,7 +18,7 @@ import {GridLayer} from '@deck.gl/aggregation-layers';
 import {MaskExtension} from '@deck.gl/extensions';
 import * as DATA from '../../../../examples/layer-browser/src/data-samples';
 import type {DeckProps} from '@deck.gl/core';
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
 
 const VIEW_STATE = {
   longitude: -122.42694203247012,

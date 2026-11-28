@@ -4,17 +4,33 @@
 
 import {test, expect} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
-import {LayerManager, MapView} from '@deck.gl/core';
+import {
+  LayerManager,
+  MapView,
+  _pathShaderWGSL as pathShaderWGSL,
+  _pathShaderPlugin as pathShaderPlugin
+} from '@deck.gl/core';
 import {TripsLayer} from '@deck.gl/geo-layers';
-import {WGSLShaderAssembler} from '@luma.gl/shadertools';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {WGSLShaderAssembler, resolveShaderPlugins} from '@luma.gl/shaders';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {trips} from 'deck.gl-test/data';
-import {shaderWGSL as pathShaderWGSL} from '@deck.gl/layers/path-layer/path-layer.wgsl';
 import {tripsUniforms} from '@deck.gl/geo-layers/trips-layer/trips-layer-uniforms';
 import {
   packTripTimestamps,
-  tripsShaderInjectionsWGSL
+  tripsShaderPluginWGSL
 } from '@deck.gl/geo-layers/trips-layer/trips-layer.wgsl';
+
+class DashArclengthTripsLayer extends TripsLayer {
+  static layerName = 'DashArclengthTripsLayer';
+
+  getShaders() {
+    const shaders = super.getShaders();
+    return {
+      ...shaders,
+      defines: {...shaders.defines, DASH_ENABLED: 1}
+    };
+  }
+}
 
 test('TripsLayer#packTripTimestamps', () => {
   expect(packTripTimestamps([10, 20, 35])).toEqual(new Float32Array([10, 20, 20, 35, 35, 35]));
@@ -33,35 +49,55 @@ test('TripsLayer#packTripTimestamps follows closed path padding', () => {
 });
 
 test('TripsLayer#WebGPU shader extends PathLayer', () => {
-  for (const insertionPoint of Object.keys(tripsShaderInjectionsWGSL)) {
-    expect(pathShaderWGSL).toContain(insertionPoint);
+  for (const target of Object.keys(tripsShaderPluginWGSL.injections!)) {
+    expect(pathShaderWGSL).toContain(target.split(':').pop());
   }
 
-  const shaderAssembler = new WGSLShaderAssembler();
-  const {source} = shaderAssembler.assembleWGSLShader({
-    platformInfo: {
-      type: 'webgpu',
-      shaderLanguage: 'wgsl',
-      shaderLanguageVersion: 300,
-      gpu: 'test',
-      features: new Set()
-    },
-    source: pathShaderWGSL,
-    modules: [tripsUniforms],
-    inject: tripsShaderInjectionsWGSL
-  });
+  const resolvedPlugins = resolveShaderPlugins([pathShaderPlugin, tripsShaderPluginWGSL], 'wgsl');
+  const assembleShader = (defines?: Record<string, number>) =>
+    new WGSLShaderAssembler().assembleWGSLShader({
+      platformInfo: {
+        type: 'webgpu',
+        shaderLanguage: 'wgsl',
+        shaderLanguageVersion: 300,
+        gpu: 'test',
+        features: new Set()
+      },
+      source: pathShaderWGSL,
+      defines,
+      modules: [tripsUniforms],
+      pluginInjectionTargets: resolvedPlugins.injectionTargets,
+      pluginInjections: resolvedPlugins.injections,
+      pluginVertexInputs: resolvedPlugins.vertexInputs,
+      pluginInterStageVariables: resolvedPlugins.interStageVariables
+    }).source;
+  const source = assembleShader();
+  const dashSource = assembleShader({DASH_ENABLED: 1});
 
-  expect(source).toContain('@location(13) instanceTimestamps: vec2<f32>');
+  expect(source).toContain('@location(13) _luma_instanceTimestamps: vec2<f32>');
   expect(source).toContain('@location(6) vTime: f32');
-  expect(source).toContain('attributes.instanceTimestamps.x');
-  expect(source).toContain('attributes.instanceTimestamps.y');
-  expect(source).toContain('varyings.vTime > trips.currentTime');
+  expect(source).toContain('instanceTimestamps.x');
+  expect(source).toContain('instanceTimestamps.y');
+  expect(source).toContain('vTime > trips.currentTime');
   expect(source).toContain('trips.fadeTrail > 0.5');
   expect(source).toContain('var<uniform> trips: TripsUniforms');
   expect(source).not.toContain('in float instanceTimestamps');
+  expect(source).toContain(
+    'DECKGL_FILTER_PATH_COLOR_VERTEX(&varyings.vColor, varyings.vPathPosition, varyings.vPathLength)'
+  );
+  expect(source).not.toContain('vDashSegment');
+  // With dashes, trip time follows the source segment even where camera clipping shortens it
+  expect(dashSource).toContain('@location(8) vDashSegment: vec2<f32>');
+  expect(dashSource.replace(/\s+/g, ' ')).toContain(
+    'DECKGL_FILTER_PATH_COLOR_VERTEX( &varyings.vColor, vec2<f32>(varyings.vPathPosition.x, varyings.vDashSegment.x), varyings.vDashSegment.y );'
+  );
+  expect(dashSource).not.toContain(
+    'DECKGL_FILTER_PATH_COLOR_VERTEX(&varyings.vColor, varyings.vPathPosition, varyings.vPathLength)'
+  );
 });
 
 test('TripsLayer#time-window discard follows PathLayer coverage derivatives', () => {
+  const resolvedPlugins = resolveShaderPlugins([pathShaderPlugin, tripsShaderPluginWGSL], 'wgsl');
   const shaderAssembler = new WGSLShaderAssembler();
   const {source} = shaderAssembler.assembleWGSLShader({
     platformInfo: {
@@ -74,16 +110,19 @@ test('TripsLayer#time-window discard follows PathLayer coverage derivatives', ()
     source: pathShaderWGSL,
     defines: {ANTIALIASING: 1},
     modules: [tripsUniforms],
-    inject: tripsShaderInjectionsWGSL
+    pluginInjectionTargets: resolvedPlugins.injectionTargets,
+    pluginInjections: resolvedPlugins.injections,
+    pluginVertexInputs: resolvedPlugins.vertexInputs,
+    pluginInterStageVariables: resolvedPlugins.interStageVariables
   });
 
   expect(source.indexOf('fwidth(bodyCoord)')).toBeGreaterThan(-1);
-  expect(source.indexOf('varyings.vTime > trips.currentTime')).toBeGreaterThan(
+  expect(source.lastIndexOf('DECKGL_FILTER_PATH_COLOR();')).toBeGreaterThan(
     source.indexOf('fwidth(bodyCoord)')
   );
 });
 
-test('TripsLayer#initializes with a WebGPU device', async ({skip}) => {
+test('TripsLayer#initializes dash arclength with a WebGPU device', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) {
     skip();
@@ -99,8 +138,8 @@ test('TripsLayer#initializes with a WebGPU device', async ({skip}) => {
   const layerManager = new LayerManager(webgpuDevice, {viewport});
   layerManager.setProps({onError: error => errors.push(error)});
 
-  const layer = new TripsLayer({
-    id: 'webgpu-trips',
+  const layer = new DashArclengthTripsLayer({
+    id: 'webgpu-trips-dash-arclength',
     data: [
       {
         path: [
@@ -113,6 +152,8 @@ test('TripsLayer#initializes with a WebGPU device', async ({skip}) => {
     ],
     getPath: trip => trip.path,
     getTimestamps: trip => trip.timestamps,
+    billboard: true,
+    antialiasing: true,
     currentTime: 10,
     trailLength: 20
   });

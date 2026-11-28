@@ -18,7 +18,8 @@ out float vIntensityMin;
 out float vIntensityMax;
 
 void main(void) {
-  gl_Position = project_position_to_clipspace(positions, vec3(0.0), vec3(0.0));
+  geometry.worldPosition = positions;
+  gl_Position = project_position_to_clipspace(positions, vec3(0.0), vec3(0.0), geometry.position);
   vTexCoords = texCoords;
   vec4 maxTexture = texture(maxTexture, vec2(0.5));
   float maxValue = triangle.aggregationMode < 0.5 ? maxTexture.r : maxTexture.g;

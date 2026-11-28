@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Deck, MapView, GlobeView} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer, ColumnLayer, BitmapLayer, PathLayer} from '@deck.gl/layers';
 import {ResetViewWidget as _ResetViewWidget} from '@deck.gl/widgets';
 import '@deck.gl/widgets/stylesheet.css';

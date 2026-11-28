@@ -3,12 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {_GlobeViewport as GlobeViewport, project} from '@deck.gl/core';
+import {GlobeViewport, project} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Buffer} from '@luma.gl/core';
 import {Computation} from '@luma.gl/engine';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {runOnGPU, testUniforms} from './project-glsl-test-utils';
 
 for (const backend of ['webgl', 'webgpu'] as const) {

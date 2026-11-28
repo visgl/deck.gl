@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Loader} from '@loaders.gl/loader-utils';
+import type {Loader} from '@loaders.gl/core/loader-utils';
 
 function isJSON(text: string): boolean {
   const firstChar = text[0];
@@ -10,7 +10,7 @@ function isJSON(text: string): boolean {
   return (firstChar === '{' && lastChar === '}') || (firstChar === '[' && lastChar === ']');
 }
 
-// A light weight version instead of @loaders.gl/json (stream processing etc.)
+// A light weight version instead of @loaders.gl/tables/json (stream processing etc.)
 export default {
   dataType: null as any,
   batchType: null as never,

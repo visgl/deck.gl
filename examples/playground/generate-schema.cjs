@@ -83,7 +83,7 @@ class ClassTypeNodeParser {
             ts.isClassDeclaration(declaration) ||
             // Loader objects contain parsing functions and recursive runtime state.
             (symbol.name === 'Loader' &&
-              declaration.getSourceFile().fileName.includes('@loaders.gl/loader-utils/'))
+              declaration.getSourceFile().fileName.includes('@loaders.gl/core/dist/loader-utils/'))
         )
     );
   }
