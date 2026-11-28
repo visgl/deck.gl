@@ -180,7 +180,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       const {elevationData} = props;
       const isTiled =
         elevationData && (Array.isArray(elevationData) || isTileSetURL(elevationData));
-      this.setState({isTiled});
+      // The elevation range only grows, so start over with new elevation data
+      this.setState({isTiled, zRange: null});
     }
 
     // Reloading for single terrain mesh
@@ -337,7 +338,13 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     const maxZ = Math.max(...ranges.map(x => x[1]));
 
     if (!zRange || minZ < zRange[0] || maxZ > zRange[1]) {
-      this.setState({zRange: [minZ, maxZ]});
+      this.setState({
+        zRange: zRange ? [Math.min(minZ, zRange[0]), Math.max(maxZ, zRange[1])] : [minZ, maxZ]
+      });
+      // TileLayer can notify us inside a layer-manager update, which discards the
+      // update request of setState() when it ends. Schedule the refresh after that
+      // update so culling uses the new range on a still camera.
+      queueMicrotask(() => this.getCurrentLayer()?.setNeedsUpdate());
     }
   }
 

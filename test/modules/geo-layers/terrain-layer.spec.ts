@@ -3,9 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
+import {device, generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
-import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
+import {TerrainLayer, TileLayer, Tile2DHeader} from '@deck.gl/geo-layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TerrainLoader} from '@loaders.gl/raster/terrain';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
@@ -35,6 +35,64 @@ const TEST_TERRAIN_MESH = {
 
 const fetchTerrainFixture: NonNullable<TerrainLayer['props']['fetch']> = (_url, {propName}) =>
   Promise.resolve(propName === 'texture' ? new ImageData(1, 1) : TEST_TERRAIN_MESH);
+
+test('TerrainLayer applies the loaded elevation range with a stationary viewport', async () => {
+  const viewport = new MapView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: -122, latitude: 37, zoom: 13, pitch: 50}
+  })!;
+  let layer = new TerrainLayer({
+    elevationData: 'terrain/{z}/{x}/{y}.png',
+    fetch: fetchTerrainFixture
+  });
+  const layerManager = new LayerManager(device, {viewport});
+  const readTileRange = () => {
+    layerManager.updateLayers();
+    return (layer.getSubLayers()[0] as TileLayer).props.zRange;
+  };
+  try {
+    // TileLayer reports the loaded tiles inside its update: the scheduled refresh applies the range
+    layerManager.setLayers([layer]);
+    await expect.poll(readTileRange).toEqual([0, 1]);
+
+    // Loads outside an update: the range grows at either end
+    for (const [bounds, expected] of [
+      [
+        [-3, 0],
+        [-3, 1]
+      ],
+      [
+        [0, 4],
+        [-3, 4]
+      ]
+    ]) {
+      const tile = new Tile2DHeader({x: 0, y: 0, z: 0});
+      tile.content = [
+        {
+          ...TEST_TERRAIN_MESH,
+          header: {
+            boundingBox: [
+              [-1, -1, bounds[0]],
+              [1, 1, bounds[1]]
+            ]
+          }
+        },
+        null
+      ];
+      const tileLayer = layer.getSubLayers()[0] as TileLayer;
+      tileLayer.props.onViewportLoad?.([tile]);
+      await expect.poll(readTileRange).toEqual(expected);
+    }
+
+    // New elevation data starts a new range
+    layer = layer.clone({elevationData: 'other-terrain/{z}/{x}/{y}.png'});
+    layerManager.setLayers([layer]);
+    await expect.poll(readTileRange).toEqual([0, 1]);
+  } finally {
+    layerManager.finalize();
+  }
+});
 
 class TestTerrainLayer extends TerrainLayer {
   static layerName = 'TestTerrainLayer';
