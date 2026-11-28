@@ -233,12 +233,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       }
     };
     const {fetch} = this.props;
-    return fetch(elevationData, {
-      propName: 'elevationData',
-      layer: this,
-      loadOptions,
-      signal
-    });
+    return fetch(elevationData, {propName: 'elevationData', layer: this, loadOptions, signal});
   }
 
   getTiledTerrainData(tile: TileLoadProps): Promise<MeshAndTexture> {
