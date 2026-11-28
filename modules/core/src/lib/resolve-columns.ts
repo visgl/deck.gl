@@ -42,7 +42,7 @@ export function resolveColumns(
     if (!definition.semantic) {
       continue;
     }
-    const column = table?.getChild(name);
+    const column = table?.getChild(definition.arrowAccessor ? definition.accessor! : name);
     if (!column) {
       continue;
     }

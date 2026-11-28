@@ -73,6 +73,22 @@ test('empty Arrow snapshot clears rows while preserving its schema', async () =>
   expect(state.getAsyncProp('data').schema.fields[0].name).toBe('x');
 });
 
+test('Arrow streams pass bare chunks and previously transformed data to dataTransform', async () => {
+  const transform = vi.fn(<T>(chunk: unknown, previous?: T): T => {
+    if (!(chunk instanceof Table)) return chunk as T;
+    const scaled = tableFromArrays({x: Array.from(chunk.getChild('x')!, x => x * 2)});
+    return (previous instanceof Table ? previous.concat(scaled) : scaled) as T;
+  });
+  const {state, run, progress, complete} = makeState({dataTransform: transform});
+  transform.mockClear();
+  await run(chunks(first.batches[0], second.batches[0]));
+  expect(transform.mock.calls.map(([chunk]) => (chunk as Table).numRows)).toEqual([2, 1]);
+  expect(transform.mock.calls[1][1]).toBe(progress.mock.calls[0][1]);
+  const table = state.getAsyncProp('data') as Table;
+  expect(Array.from(table.getChild('x')!)).toEqual([2, 4, 6]);
+  expect(complete).toHaveBeenCalledExactlyOnceWith('data', table);
+});
+
 test('row arrays and loader wrappers retain transforms and append ranges', async () => {
   const transform = vi.fn((rows, previous = []) => previous.concat(rows.map(x => x * 2)));
   const {state, run, progress} = makeState({dataTransform: transform});

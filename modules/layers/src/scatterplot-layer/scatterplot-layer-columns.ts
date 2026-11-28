@@ -6,7 +6,6 @@ import type {Device} from '@luma.gl/core';
 import type {GPUVector} from '@luma.gl/graph/gpu-data';
 import {
   _LayerColumns as LayerColumns,
-  _resolveColumns as resolveColumns,
   type _ColumnDefinition as ColumnDefinition
 } from '@deck.gl/core';
 
@@ -76,14 +75,9 @@ export type ScatterplotColumnProps = {
   lineWidths?: GPUVector | null;
 };
 
-/** Returns whether a column prop or an opted-in Arrow accessor drives the layer. */
-export function hasScatterplotColumns(props: Readonly<Record<string, unknown>>): boolean {
-  return Object.keys(resolveColumns(props, SCATTERPLOT_COLUMN_DEFINITIONS)).length > 0;
-}
-
 /** Prepares Scatterplot columns using the shared column implementation. */
 export class ScatterplotLayerColumns extends LayerColumns {
   constructor(device: Device) {
-    super(device, SCATTERPLOT_COLUMN_DEFINITIONS, 'Scatterplot', true);
+    super(device, SCATTERPLOT_COLUMN_DEFINITIONS, 'Scatterplot', true, true);
   }
 }

@@ -354,20 +354,22 @@ export default class ComponentState<ComponentT extends Component> {
             }
             return normalizeArrowBatch(batch as import('apache-arrow').RecordBatch, arrowRuntime);
           });
-          if (_dataLoadOptions === 'snapshots') {
-            arrowBatches = [...batches];
+          const schema = batches[0]?.schema ?? normalizeArrowSchema(arrow.schema, arrowRuntime);
+          if (dataTransform) {
+            lastResult = dataTransform(new Table(schema, batches), lastResult);
           } else {
-            // Preserve Arrow columnar storage without converting to row objects.
-            arrowBatches.push(...batches);
+            if (_dataLoadOptions === 'snapshots') {
+              arrowBatches = batches;
+            } else {
+              // Preserve Arrow columnar storage without converting to row objects.
+              arrowBatches.push(...batches);
+            }
+            lastResult = new Table(schema, arrowBatches);
           }
-          const table = new Table(
-            batches[0]?.schema ?? normalizeArrowSchema(arrow.schema, arrowRuntime),
-            arrowBatches
-          );
-          lastResult = table;
-          this._setAsyncPropValue(propName, table, loadCount);
+          if (!this.component || loadCount !== asyncProp.pendingLoadCount) return;
+          this._setAsyncPropValue(propName, lastResult, loadCount);
           if (this.component && loadCount === asyncProp.pendingLoadCount) {
-            this._onProgress(propName, table);
+            this._onProgress(propName, lastResult);
           }
           continue;
         }

@@ -67,6 +67,9 @@ channels to RGBA8 (`unorm8x4`). RGB inputs receive opaque alpha.
 
 Constant arrays and callback results typically use 0–255 for all channels.
 
+For example, pack normalized `red`, `green`, and `blue` columns into an opaque
+ScatterplotLayer color with `getFillColor: {sql: 'RGBA8(red, green, blue, 1)'}`.
+
 ### Positions and other vectors
 
 Position columns require numeric fixed-size lists with two (XY) or three (XYZ) components.
@@ -127,6 +130,12 @@ Direct column bindings do not support attribute transitions or layer extensions.
 See each layer's prop descriptions for supported inputs and the [loading data guide](./loading-data.md)
 for other ways to provide data.
 
+
+## Matching Scatterplot table fields to accessors
+
+On ScatterplotLayer without extensions, a compatible Arrow field named after an accessor,
+such as `getPosition` or `getRadius`, can supply that input directly. Explicit Arrow
+accessors and GPUVector props take precedence. Picking still returns the original row.
 
 ## Direct GPUVector inputs
 

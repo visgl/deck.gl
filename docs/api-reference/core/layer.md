@@ -412,8 +412,8 @@ Executed to manipulate remote data when it's fetched. This callback applies when
 
 The function receives two arguments:
 
-- `data` - the newly fetched data. A complete Arrow load supplies an Apache Arrow `Table`.
-- `previousData` - (only available when `data` is an async iterable) the previously loaded data. If `dataTransform` is not supplied, the new data chunk is appended to the previous data array.
+- `data` - the newly fetched data. Arrow loads and stream chunks supply an Apache Arrow `Table`.
+- `previousData` - (only available when `data` is an async iterable) the previously transformed data. Without `dataTransform`, deck.gl appends new batches to the current data, or replaces it in snapshot mode.
 
 And must return a valid `data` object: an array, an iterable or a non-iterable object that contains a `length` field. See documentation of the `data` prop for details.
 

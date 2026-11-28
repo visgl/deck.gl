@@ -18,6 +18,7 @@ import {DynamicBuffer} from '@luma.gl/core/dynamic';
 import type {GPUVectorModel, GPUVectorModelInputs} from '@luma.gl/engine';
 import {GPUConstant, GPUVector, getGPUVectorFormatInfo} from '@luma.gl/graph/gpu-data';
 
+import {readAccessorValue} from '../arrow/read-accessor-value';
 import type {PreparedArrowColumn} from '../arrow/append-arrow-column';
 import {resolveColumns} from './resolve-columns';
 
@@ -671,6 +672,7 @@ export class LayerColumns {
       target: Float32Array | Uint8Array | Uint8ClampedArray | Uint32Array,
       offset: number
     ) => {
+      value = readAccessorValue(value, color);
       if (lowAttribute) positionOptions.onPosition?.(value);
       if (Boolean(lowAttribute) && positionOptions.transform)
         value = positionOptions.transform(value);

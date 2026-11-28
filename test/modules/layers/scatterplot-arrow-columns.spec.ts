@@ -8,10 +8,11 @@ import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {device, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {ArrowConverter} from '@deck.gl/core/arrow';
+import {sqlParser} from '@deck.gl/core/sql';
 import {Texture} from '@luma.gl/core';
 import {GPUVectorModel} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
-import {Field, FixedSizeList, Float32, Uint8, vectorFromArray} from 'apache-arrow';
+import {Field, FixedSizeList, Float32, Table, Uint8, vectorFromArray} from 'apache-arrow';
 
 const bufferPoolSize = GPUDataEvaluator.bufferPoolSize;
 beforeAll(() => {
@@ -915,5 +916,156 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       }
     });
     expect(checks).toBeGreaterThan(0);
+  });
+}
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Scatterplot resolves Arrow table data on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      return skip();
+    }
+    const data = new Table({
+      getPosition: positions([
+        [0, 0],
+        [1, 1]
+      ]),
+      radius: vectorFromArray([2, 3], new Float32())
+    });
+    const listFallbackData = new Table({
+      position: positions([
+        [2, 3],
+        [4, 5]
+      ]),
+      getRadius: vectorFromArray([2, 3], new Float32())
+    });
+    const getRadius = vi.fn(row => row.radius);
+    const loadedTables = new Set();
+    const checkTable = ({layer}: {layer: ScatterplotLayer}) => {
+      if (!layer.isLoaded) {
+        return;
+      }
+      loadedTables.add(layer.props.data);
+      expect(layer.state.columns).toBeDefined();
+      expect(layer.getNumInstances()).toBe(2);
+      const info = layer.getPickingInfo({
+        info: {index: 1, color: null, layer, picked: true, x: 0, y: 0, pixelRatio: 1},
+        mode: 'query',
+        sourceLayer: null
+      });
+      expect(info.object.radius).toBe(3);
+      expect(getRadius).toHaveBeenCalled();
+    };
+    await testLayerAsync({
+      Layer: ScatterplotLayer,
+      device: testDevice,
+      draw: false,
+      testCases: [
+        {props: {data, getRadius}, onAfterUpdate: checkTable},
+        {updateProps: {data: Promise.resolve(new Table(data.batches))}, onAfterUpdate: checkTable},
+        {
+          updateProps: {data: listFallbackData},
+          onAfterUpdate: async ({layer}) => {
+            if (!layer.isLoaded) {
+              return;
+            }
+            const {instancePositions} = (layer.state.columns as any).prepared.columns;
+            const bytes = await instancePositions.data[0].buffer.readAsync();
+            expect(Array.from(new Float32Array(bytes.buffer, bytes.byteOffset, 6))).toEqual([
+              2, 3, 0, 4, 5, 0
+            ]);
+            expect(layer.getBounds()).toEqual([
+              [2, 3, 0],
+              [4, 5, 0]
+            ]);
+          }
+        },
+        {
+          updateProps: {data: [{position: [0, 0], radius: 1}]},
+          onAfterUpdate: ({layer}) => {
+            expect(layer.state.columns).toBeUndefined();
+            expect(layer.getNumInstances()).toBe(1);
+          }
+        }
+      ],
+      onError: error => {
+        throw error;
+      }
+    });
+    expect(loadedTables.size).toBe(2);
+  });
+}
+
+for (const backend of ['webgl', 'webgpu']) {
+  test(`Scatterplot resolves SQL accessors without replacing source rows on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgl' ? device : await getWebGPUTestDevice();
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    const table = new Table({
+      x: vectorFromArray([1, 2], new Float32()),
+      y: vectorFromArray([3, 4], new Float32()),
+      size: vectorFromArray([4, 9], new Float32()),
+      label: vectorFromArray(['Oak', 'Birch'])
+    });
+    let firstColumns: ScatterplotLayer['state']['columns'];
+    class SQLScatterplotLayer extends ScatterplotLayer {
+      static layerName = 'SQLScatterplotLayer';
+      initializeState() {
+        this.context.sqlParser = sqlParser;
+        super.initializeState();
+      }
+    }
+    await testLayerAsync({
+      Layer: SQLScatterplotLayer,
+      device: testDevice,
+      draw: false,
+      testCases: [
+        {
+          title: 'Bind SQL position and radius expressions',
+          props: {
+            data: Promise.resolve(table),
+            getPosition: {sql: 'FLOAT64x2(x, y)'},
+            getRadius: {sql: 'FLOAT32(SQRT(size))'}
+          },
+          onAfterUpdate: async ({layer}) => {
+            if (!layer.isLoaded) {
+              return;
+            }
+            firstColumns = layer.state.columns;
+            expect(layer.getNumInstances()).toBe(2);
+            const radius = (layer.state.columns as any).prepared.columns.instanceRadius;
+            const bytes = await radius.data[0].buffer.readAsync();
+            expect(new Float32Array(bytes.buffer, bytes.byteOffset, 2)).toEqual(
+              Float32Array.of(2, 3)
+            );
+            const info = layer.getPickingInfo({
+              info: {index: 1, color: null, layer, picked: true, x: 0, y: 0, pixelRatio: 1},
+              mode: 'query',
+              sourceLayer: null
+            });
+            expect(info.object.label).toBe('Birch');
+            expect(layer.props.data).toBe(table);
+          }
+        },
+        {
+          title: 'Keep the prepared model while the replacement SQL accessor resolves',
+          updateProps: {getRadius: {sql: 'size * 2'}},
+          onAfterUpdate: async ({layer}) => {
+            expect(layer.state.columns).toBe(firstColumns);
+            expect(layer.getNumInstances()).toBe(2);
+            if (!layer.isLoaded) return;
+            const radius = (layer.state.columns as any).prepared.columns.instanceRadius;
+            const bytes = await radius.data[0].buffer.readAsync();
+            expect(new Float32Array(bytes.buffer, bytes.byteOffset, 2)).toEqual(
+              Float32Array.of(8, 18)
+            );
+          }
+        }
+      ]
+    });
   });
 }
