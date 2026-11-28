@@ -128,6 +128,9 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     /** Color convention applied to cached tile sublayers. */
     normalizedColors?: boolean;
     tileset3d: Tileset3D | null;
+    /** Monotonic id of the most recent `_loadTileset` call, used to drop stale loads.
+     * Lives in `state` so it survives layer re-creation via `_transferState`. */
+    tilesetLoadRequest: number;
   };
 
   initializeState() {
@@ -139,7 +142,8 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       layerMap: {},
       tileset3d: null,
       activeViewports: {},
-      lastUpdatedViewports: null
+      lastUpdatedViewports: null,
+      tilesetLoadRequest: 0
     };
   }
 
@@ -181,6 +185,8 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   finalizeState(context: LayerContext): void {
+    // Invalidate in-flight loads so they destroy their tileset instead of storing it
+    this.state.tilesetLoadRequest++;
     this.state.tileset3d?.destroy();
     this.state.tileset3d = null;
     this.state.layerMap = {};
@@ -270,14 +276,33 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       ...options
     });
 
+    // Only the most recent `_loadTileset` call may store and select tiles
+    const loadRequest = ++this.state.tilesetLoadRequest;
+
     await tileset3d.tilesetInitializationPromise;
+
+    if (loadRequest !== this.state.tilesetLoadRequest) {
+      // A newer load superseded this one, or the layer was finalized mid-load.
+      // This tileset was never presented, so its destroy must stay invisible: loaders.gl
+      // calls onTileUnload for every tile during destroy, which would delete entries of
+      // the live layerMap (tile ids collide across loads of the same tileset) and fire
+      // the user's onTileUnload for tiles the live tileset still holds.
+      tileset3d.options.onTileUnload = () => {};
+      tileset3d.destroy();
+      return;
+    }
 
     this.setState({
       tileset3d,
       layerMap: {}
     });
 
-    this._updateTileset(this.state.activeViewports);
+    // The viewports may have been consumed by `updateState` while the tileset was loading;
+    // fall back to `lastUpdatedViewports` like `_onTileLoad` does
+    const {activeViewports, lastUpdatedViewports} = this.state;
+    this._updateTileset(
+      Object.keys(activeViewports).length ? activeViewports : lastUpdatedViewports
+    );
     this.props.onTilesetLoad(tileset3d);
   }
 
