@@ -7,19 +7,27 @@ import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 import {GlobeView} from '@deck.gl/core';
-import {IconLayer, ScatterplotLayer, SolidPolygonLayer, TextLayer} from '@deck.gl/layers';
+import type {Color, Position} from '@deck.gl/core';
+import {
+  IconLayer,
+  PointCloudLayer,
+  ScatterplotLayer,
+  SolidPolygonLayer,
+  TextLayer
+} from '@deck.gl/layers';
 import {iconAtlas as iconMapping} from 'deck.gl-test/data';
 import fontMapping from '../../data/font-atlas.json';
 
-// Billboards on GlobeView: IconLayer, TextLayer and billboard ScatterplotLayer hide anchors behind
-// the globe and shift depth toward the camera so the globe's curve does not clip visible sprites.
-// Far-side cases look from above lng 0, lat 10 at zoom 0.9: blue is near side and must show, red is
-// far side (drawn four times larger so a leak fails the loose SwiftShader diff) and must not.
+// Billboards on GlobeView: IconLayer, TextLayer, PointCloudLayer and billboard ScatterplotLayer hide
+// anchors behind the globe and shift depth toward the camera so the globe's curve does not clip
+// visible sprites. Far-side cases look from above lng 0, lat 10 at zoom 0.9: blue is near side and
+// must show, red is far side (drawn four times larger so a leak fails the loose SwiftShader diff)
+// and must not.
 
 const ICON_ATLAS = '/test/data/icon-atlas.png';
 const VIEW_STATE = {longitude: 0, latitude: 10, zoom: 0.9, pitch: 0, bearing: 0};
 
-type Marker = {position: number[]; farSide: boolean; label: string};
+type Marker = {position: Position; farSide: boolean; label: string};
 
 const GRID: Marker[] = [];
 for (let lng = -180; lng < 180; lng += 30) {
@@ -29,7 +37,7 @@ for (let lng = -180; lng < 180; lng += 30) {
 }
 
 /** Two meridians straddling the horizon (lng 80 is just visible, lng 100 is just behind it) */
-const HORIZON: {position: number[]}[] = [];
+const HORIZON: {position: Position}[] = [];
 for (let lat = -60; lat <= 60; lat += 15) {
   for (const lng of [80, 100]) {
     HORIZON.push({position: [lng, lat, 0]}, {position: [lng, lat, 600000]});
@@ -48,16 +56,16 @@ const EARTH = [
 ];
 
 /** East-west and north-south meter offsets around lng 60, lat 10, reaching the limb */
-const METER_OFFSET_GRID: {position: number[]}[] = [];
+const METER_OFFSET_GRID: {position: Position}[] = [];
 for (let east = -400000; east <= 400000; east += 200000) {
   for (let north = -900000; north <= 900000; north += 600000) {
     METER_OFFSET_GRID.push({position: [east, north, 0]});
   }
 }
 
-const NEAR_COLOR = [30, 90, 200];
-const FAR_COLOR = [220, 40, 40];
-const getSideColor = (d: Marker) => (d.farSide ? FAR_COLOR : NEAR_COLOR);
+const NEAR_COLOR: Color = [30, 90, 200];
+const FAR_COLOR: Color = [220, 40, 40];
+const getSideColor = (d: Marker): Color => (d.farSide ? FAR_COLOR : NEAR_COLOR);
 const FAR_SCALE = 4;
 const getSideScale = (d: Marker) => (d.farSide ? FAR_SCALE : 1);
 
@@ -83,7 +91,7 @@ const WALL = [
  * Icons 1 km, 3 km and 10 km behind the wall, in a column hidden by it and two columns beside it.
  * 1 km is within the depth shift the globe helper applies, the other two are beyond it.
  */
-const BEHIND_WALL: {position: number[]; metersBehind: number}[] = [];
+const BEHIND_WALL: {position: Position; metersBehind: number}[] = [];
 for (const [lat, metersBehind] of [
   [0, 1000],
   [0.018, 3000],
@@ -96,7 +104,7 @@ for (const [lat, metersBehind] of [
 
 function createIconLayer(
   id: string,
-  data: {position: number[]}[],
+  data: {position: Position}[],
   getColor: any,
   billboard: boolean = true
 ): IconLayer {
@@ -244,6 +252,25 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/globe-occlusion-points-billboard.png'
   },
   {
+    name: 'globe-occlusion-point-cloud',
+    views: new GlobeView({resolution: 36}),
+    viewState: VIEW_STATE,
+    // pointSize is per layer, so the larger far-side points are a layer of their own
+    layers: [false, true].map(
+      farSide =>
+        new PointCloudLayer<Marker>({
+          id: farSide ? 'points-far-side' : 'points',
+          data: GRID.filter(d => d.farSide === farSide),
+          material: false,
+          pointSize: farSide ? 8 * FAR_SCALE : 8,
+          getPosition: d => d.position,
+          getNormal: [0, 0, 1],
+          getColor: getSideColor
+        })
+    ),
+    goldenImage: './test/render/golden-images/globe-occlusion-point-cloud.png'
+  },
+  {
     name: 'globe-occlusion-marks-surface',
     // Golden: near-side marks foreshortened on the surface, whole up to the limb, none on the far
     // side and none torn across the viewport
@@ -288,7 +315,7 @@ const testCases: TestCase[] = [
         id: 'icons',
         data: METER_OFFSET_GRID,
         coordinateSystem: 'meter-offsets',
-        coordinateOrigin: [73, 10],
+        coordinateOrigin: [73, 10, 0],
         iconAtlas: ICON_ATLAS,
         iconMapping,
         sizeScale: 12,
