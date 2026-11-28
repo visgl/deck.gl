@@ -8,7 +8,7 @@ import type {TestCase} from '../deck-test-utils';
 
 import {OrbitView, LightingEffect, AmbientLight, PointLight} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {CubeGeometry, SphereGeometry} from '@luma.gl/engine';
 const cube = new CubeGeometry();
 

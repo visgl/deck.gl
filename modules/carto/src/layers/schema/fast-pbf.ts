@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-// The concrete subpath supports synchronous decoding without asynchronous preloading.
-import {GZipDecompressor} from '@loaders.gl/compression/gzip-decompressor';
+// The fflate decoder supports synchronous parsing without WASM preloading.
+import {GZipFflateDecompressor} from '@loaders.gl/compression/gzip-decompressor-fflate';
 
 type ReadPackedOptions = {
   compression: null | 'gzip';
@@ -15,7 +15,7 @@ export function readPackedTypedArray(TypedArray, pbf, obj, options?: ReadPackedO
   const data = pbf.buf.buffer.slice(pbf.pos, end);
 
   if (options?.compression === 'gzip') {
-    const decompressor = new GZipDecompressor();
+    const decompressor = new GZipFflateDecompressor();
     const decompressedData = decompressor.decompressSync(data);
     obj.value = new TypedArray(decompressedData);
   } else {

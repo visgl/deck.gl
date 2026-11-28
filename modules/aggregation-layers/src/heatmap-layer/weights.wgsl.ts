@@ -47,6 +47,9 @@ fn vertexMain(attributes: WeightAttributes) -> WeightVaryings {
   );
   output.pointCoordinates = (offset + vec2<f32>(1.0)) * 0.5;
   output.weights = vec4<f32>(attributes.instanceWeights * weight.weightsScale, 0.0, 0.0, 1.0);
+  geometry.worldPosition = attributes.instancePositions;
+  geometry.position = vec4<f32>(commonPosition, 1.0);
+  DECKGL_FILTER_GL_POSITION(&output.position, geometry);
   return output;
 }
 
@@ -59,6 +62,8 @@ fn fragmentMain(varyings: WeightVaryings) -> @location(0) vec4<f32> {
 
   let gaussian = exp(-pow(2.0 * distanceFromCenter, 2.0) / 0.05555) /
     (1.77245385 * 0.166666);
-  return varyings.weights * gaussian;
+  var weights = varyings.weights * gaussian;
+  DECKGL_FILTER_COLOR(&weights, fragmentGeometry);
+  return weights;
 }
 `;

@@ -3,7 +3,6 @@
 // Copyright (c) vis.gl contributors
 
 import {Layer} from 'deck.gl';
-import {GL} from '@luma.gl/webgl/constants';
 import {Model, loadTextures} from 'luma.gl';
 
 import {ELEVATION_DATA_IMAGE, ELEVATION_DATA_BOUNDS, ELEVATION_RANGE} from '../../defaults';
@@ -37,10 +36,10 @@ export default class ElevationLayer extends Layer {
       // TODO open bug for this, refine the loadTextures interface
       parameters: {
         parameters: {
-          [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-          [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-          [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-          [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+          [gl.TEXTURE_MAG_FILTER]: gl.LINEAR,
+          [gl.TEXTURE_MIN_FILTER]: gl.LINEAR,
+          [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
+          [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
         }
       }
     }).then(textures => {
@@ -111,7 +110,7 @@ ${fsSource}`;
 
     const {lngResolution, latResolution, boundingBox} = this.props;
 
-    const geometry = new GridGeometry({
+    const geometry = new GridGeometry(gl, {
       xResolution: lngResolution,
       yResolution: latResolution,
       boundingBox

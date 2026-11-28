@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {Texture} from '@luma.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 const uniformBlockWGSL = /* wgsl */ `\
 struct SimpleMeshUniforms {
@@ -11,6 +11,7 @@ struct SimpleMeshUniforms {
   composeModelMatrix: f32,
   hasTexture: f32,
   flatShading: f32,
+  rowIndexOffset: u32,
 };
 
 @group(0) @binding(auto) var<uniform> simpleMesh: SimpleMeshUniforms;
@@ -24,6 +25,7 @@ layout(std140) uniform simpleMeshUniforms {
   bool composeModelMatrix;
   bool hasTexture;
   bool flatShading;
+  highp uint rowIndexOffset;
 } simpleMesh;
 `;
 
@@ -32,6 +34,7 @@ export type SimpleMeshProps = {
   composeModelMatrix?: boolean;
   hasTexture?: boolean;
   flatShading?: boolean;
+  rowIndexOffset?: number;
   sampler?: Texture;
   simpleMeshTexture?: Texture;
 };
@@ -45,6 +48,7 @@ export const simpleMeshUniforms = {
     sizeScale: 'f32',
     composeModelMatrix: 'f32',
     hasTexture: 'f32',
-    flatShading: 'f32'
+    flatShading: 'f32',
+    rowIndexOffset: 'u32'
   }
 } as const satisfies ShaderModule<SimpleMeshProps>;

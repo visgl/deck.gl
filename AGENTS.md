@@ -71,6 +71,16 @@ When asked to "get ready for merge", do a full merge-readiness pass:
 - In the final handoff, call out which merge-readiness gates passed, which were not run, and any
   remaining risk or unrelated pre-existing failures.
 
+## Documentation
+
+- Describe current features and behavior in API documentation. Explain what changed in release
+  notes or, for changes that require user action, in the upgrade guide.
+
+## Source Code
+
+- Add TSDoc comments to classes, functions, methods, types, interfaces, constants, and fields,
+  including internal declarations.
+
 ## Code Style
 
 - Prefer TypeScript and ES module syntax.
@@ -97,6 +107,14 @@ When asked to "get ready for merge", do a full merge-readiness pass:
   import `assert` from `@deck.gl/core`.
 - Use `log.log(priority, '...')()` at priority 3 or higher for lifecycle and diffing detail; see
   `docs/developer-guide/debugging.md`.
+
+## Render Tests
+
+- Comment each case in `test/render/test-cases` with what it draws, if the code doesn't make that
+  obvious, and a `// Golden:` line describing what the image should show, so a reviewer can
+  check the golden by eye. Keep file headers to a sentence or two.
+- Don't write paragraphs explaining a case. Keep a non-obvious reason (a skip, a threshold, why a
+  prop is off) to one line; implementation detail belongs in the PR or an issue.
 
 ## Dependencies
 

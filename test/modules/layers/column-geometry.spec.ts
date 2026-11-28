@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
 
 import ColumnGeometry from '@deck.gl/layers/column-layer/column-geometry';
 

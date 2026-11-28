@@ -13,7 +13,7 @@ This example is adapted from the deck.gl documentation.
 import pydeck as pdk
 import pandas as pd
 
-A5_DATA = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5.json"
+A5_DATA = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.bike.parking.a5v1.json"
 
 df = pd.read_json(A5_DATA)
 

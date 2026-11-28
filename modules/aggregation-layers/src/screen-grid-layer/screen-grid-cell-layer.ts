@@ -3,8 +3,15 @@
 // Copyright (c) vis.gl contributors
 
 import {Texture} from '@luma.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
-import {Layer, color, picking, UpdateParameters, Color} from '@deck.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {
+  Layer,
+  color,
+  picking,
+  UpdateParameters,
+  Color,
+  _GPUVectorModel as GPUVectorModel
+} from '@deck.gl/core';
 import {createColorRangeTexture, updateColorRangeTexture} from '../common/utils/color-utils';
 import source from './screen-grid-cell-layer.wgsl';
 import vs from './screen-grid-layer-vertex.glsl';
@@ -22,12 +29,16 @@ export type _ScreenGridCellLayerProps = {
 };
 
 export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends Layer<
-  ExtraPropsT & Required<_ScreenGridCellLayerProps>
+  ExtraPropsT &
+    Required<_ScreenGridCellLayerProps> & {
+      /** Whether plain-array palette entries are normalized. */
+      normalizedColorRange?: boolean;
+    }
 > {
   static layerName = 'ScreenGridCellLayer';
 
   state!: {
-    model?: Model;
+    model?: GPUVectorModel;
     colorTexture: Texture;
   };
 
@@ -58,12 +69,16 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
     const {props, oldProps, changeFlags} = params;
     const model = this.state.model!;
 
-    if (oldProps.colorRange !== props.colorRange) {
+    if (
+      oldProps.colorRange !== props.colorRange ||
+      oldProps.normalizedColorRange !== props.normalizedColorRange
+    ) {
       this.state.colorTexture?.destroy();
       this.state.colorTexture = createColorRangeTexture(
         this.context.device,
         props.colorRange,
-        props.colorScaleType
+        props.colorScaleType,
+        props.normalizedColorRange
       );
       const screenGridProps: Partial<ScreenGridProps> = {colorRange: this.state.colorTexture};
       model.shaderInputs.setProps({screenGrid: screenGridProps});
@@ -105,8 +120,8 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
 
   // Private Methods
 
-  _getModel(): Model {
-    return new Model(this.context.device, {
+  _getModel(): GPUVectorModel {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

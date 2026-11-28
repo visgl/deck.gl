@@ -17,7 +17,7 @@ import {
 import {gridDisk} from 'h3-js';
 
 import {registerLoaders} from '@loaders.gl/core';
-import {PLYLoader} from '@loaders.gl/ply';
+import {PLYLoader} from '@loaders.gl/pointclouds/ply';
 
 import * as dataSamples from '../data-samples';
 

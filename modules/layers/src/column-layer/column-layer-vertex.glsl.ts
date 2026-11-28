@@ -54,7 +54,7 @@ void main(void) {
   float shouldRender = float(color.a > 0.0 && instanceElevations >= 0.0);
   float dotRadius = column.radius * column.coverage * shouldRender;
 
-  geometry.pickingColor = picking_getPickingColorFromInstanceID();
+  geometry.pickingColor = picking_getPickingColorFromIndex(uint(gl_InstanceID) + column.rowIndexOffset);
 
   // project center of column
   vec3 centroidPosition = vec3(instancePositions.xy, instancePositions.z + elevation);

@@ -37,7 +37,7 @@ import DeckGL, {
   ThemeWidget,
   _TimelineWidget as TimelineWidget,
   _StatsWidget as StatsWidget
-} from '@deck.gl/react';
+} from '@deck.gl/react/legacy';
 import {
   CompassWidget as CoreCompassWidget,
   FullscreenWidget as CoreFullscreenWidget,

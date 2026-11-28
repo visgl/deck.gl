@@ -3,14 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {geojsonToBinary} from '@loaders.gl/gis';
+import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
 import {processPickInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {LayerManager, WebMercatorViewport, DeckRenderer} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {device} from '@deck.gl/test-utils/vitest';
 
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
 
 const testLayer = new ScatterplotLayer({
   id: 'test-layer',
@@ -62,7 +62,9 @@ const testMVTLayer = new TestMVTLayer({
   data: ['https://json/{z}/{x}/{y}.mvt']
 });
 
-const geoJSONBinaryData = geojsonToBinary(JSON.parse(JSON.stringify(geoJSONData)));
+const geoJSONBinaryData = convertGeojsonToBinaryFeatureCollection(
+  JSON.parse(JSON.stringify(geoJSONData))
+);
 geoJSONBinaryData.points.fields = geoJSONData.map(({id}) => ({id}));
 
 const testMVTLayerBinary = new TestMVTLayer({
