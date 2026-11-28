@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-import {WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {GlobeViewport, WebMercatorViewport} from '@deck.gl/core';
 import {
   getCoverageFloors,
   getCoverageTileIndices
