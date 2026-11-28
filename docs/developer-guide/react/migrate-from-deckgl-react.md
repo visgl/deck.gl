@@ -2,7 +2,7 @@
 
 This page lists the changes to make when you move an app from the deck.gl 9 React API to the React
 renderer. deck.gl 10 publishes the previous API as `@deck.gl/react/legacy`, and the renderer as
-`@deck.gl/react`. See [From `@deck.gl/react` 9](#from-deckglreact-9). Start with
+`@deck.gl/react`. `@deck.gl/react/legacy` is supported through deck.gl 10 and removed in deck.gl 11. See [From `@deck.gl/react` 9](#from-deckglreact-9). Start with
 [Write JSX](#write-jsx), which shows the syntax you end up with.
 
 ## Requirements

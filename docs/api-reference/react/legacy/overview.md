@@ -2,6 +2,8 @@
 
 This module integrates deck.gl with React. First-time deck.gl developers may find it helpful to read [Using deck.gl with React](../../../get-started/using-with-react.md) before getting started.
 
+> `@deck.gl/react/legacy` is the deck.gl 9 React API. It is supported through deck.gl 10 and removed in deck.gl 11. New code should use [`@deck.gl/react`](../overview.md); to move an app, see [Migrating from the previous API](../../../developer-guide/react/migrate-from-deckgl-react.md).
+
 This module contains the following:
 
 ### React Components

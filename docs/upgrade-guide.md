@@ -10,7 +10,7 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 `@deck.gl/react` is now a React renderer for deck.gl: layers, views, widgets and effects are React elements. It requires React 19.2 or later.
 
-- To keep the previous API, change the imports from `@deck.gl/react` to [`@deck.gl/react/legacy`](./api-reference/react/legacy/overview.md). It also requires React 19.2.
+- To keep the previous API, change the imports from `@deck.gl/react` to [`@deck.gl/react/legacy`](./api-reference/react/legacy/overview.md). It also requires React 19.2. `@deck.gl/react/legacy` is supported through deck.gl 10 and removed in deck.gl 11.
 - To move to the renderer, follow [Migrating from the previous API](./developer-guide/react/migrate-from-deckgl-react.md).
 
 ### GlobeView

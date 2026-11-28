@@ -50,7 +50,7 @@ The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, 
 
 - [**React components**](./api-reference/react/overview.md) 🚧 — Compose views, layers, and widgets in JSX, including custom layers wrapped with component factories.
 - **Map integrations** 🚧 — Use dedicated React entry points for [Mapbox](./developer-guide/react/base-maps/using-with-mapbox.md), [MapLibre](./developer-guide/react/base-maps/using-with-maplibre.md), and [Google Maps](./developer-guide/react/base-maps/using-with-google-maps.md).
-- **Migration** — The previous React API stays available from [`@deck.gl/react/legacy`](./api-reference/react/legacy/overview.md). See the [upgrade guide](./upgrade-guide.md#deckglreact).
+- **Migration** — The previous React API stays available from [`@deck.gl/react/legacy`](./api-reference/react/legacy/overview.md) through deck.gl 10, and is removed in deck.gl 11. See the [upgrade guide](./upgrade-guide.md#deckglreact).
 
 ### Views
 
