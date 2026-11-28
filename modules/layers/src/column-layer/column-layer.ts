@@ -82,6 +82,8 @@ const defaultProps: DefaultProps<ColumnLayerProps> = {
   stroked: false,
   flatShading: false,
 
+  cap: 'flat',
+
   getPosition: {type: 'accessor', arrow: true, constantTypes: ['array'], value: defaultPosition},
   getFillColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', arrow: true, value: DEFAULT_COLOR},
@@ -168,6 +170,16 @@ type _ColumnLayerProps<DataT> = ColumnLayerColumnProps & {
    * @default false
    */
   flatShading?: boolean;
+
+  /**
+   * The shape of the cap at the top of each column. Only applies if `extruded: true`.
+   * - `'flat'`: flat disk cap (default, no additional geometry)
+   * - `'dome'`: rounded cap with normals curving from outward to upward
+   * - `'cone'`: pointed conical cap
+   * A dome or cone adds half of the column's elevation on top of it.
+   * @default 'flat'
+   */
+  cap?: 'flat' | 'dome' | 'cone';
 
   /**
    * The units of the radius.
@@ -405,6 +417,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       regenerateModels ||
       props.diskResolution !== oldProps.diskResolution ||
       props.vertices !== oldProps.vertices ||
+      props.cap !== oldProps.cap ||
       props.extruded !== oldProps.extruded ||
       props.stroked !== oldProps.stroked
     ) {
@@ -437,12 +450,18 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     });
   }
 
-  getGeometry(diskResolution: number, vertices: number[] | undefined, hasThinkness: boolean) {
+  getGeometry(
+    diskResolution: number,
+    vertices: number[] | undefined,
+    hasThinkness: boolean,
+    cap?: string
+  ) {
     const geometry = new ColumnGeometry({
       radius: 1,
       height: hasThinkness ? 2 : 0,
       vertices,
-      nradial: diskResolution
+      nradial: diskResolution,
+      cap: cap as 'flat' | 'dome' | 'cone'
     });
 
     let meanVertexDistance = 0;
@@ -500,8 +519,14 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     };
   }
 
-  protected _updateGeometry({diskResolution, vertices, extruded, stroked}) {
-    const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked);
+  protected _updateGeometry({diskResolution, vertices, extruded, stroked, cap}) {
+    // Caps apply only when extruded; the flat stroke below assumes the flat top's vertex count.
+    const geometry = this.getGeometry(
+      diskResolution,
+      vertices,
+      extruded || stroked,
+      extruded ? cap : 'flat'
+    );
     const positionAttribute = geometry.attributes.POSITION;
     const normalAttribute = geometry.attributes.NORMAL;
 

@@ -116,3 +116,44 @@ for (const [Layer, backend] of [ColumnLayer, GridCellLayer].flatMap(Layer =>
     }
   });
 }
+
+test('ColumnLayer Arrow meshes regenerate cap geometry', async () => {
+  // diskResolution 8 => 9 vertices around the edge; dome has 2 rings, cone 1
+  const DOME_VERTEX_COUNT = 9 * 2 * (1 + 2) + 2 * 2;
+  const CONE_VERTEX_COUNT = 9 * 2 * (1 + 1) + 1 * 2;
+  let previousGeometry;
+  await testLayerAsync({
+    Layer: ColumnLayer,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          getPosition: positions([[0, 0, 0]]),
+          numInstances: 1,
+          extruded: true,
+          diskResolution: 8,
+          cap: 'dome'
+        },
+        onAfterUpdate: ({layer}) => {
+          if (!layer.isLoaded) return;
+          expect(layer.getAttributeManager(), 'Arrow mode').toBeNull();
+          expect(layer.state.fillModel!.vertexCount, 'dome vertex count').toBe(DOME_VERTEX_COUNT);
+          previousGeometry = layer.state.geometries!.get(layer.state.fillModel!);
+        }
+      },
+      {
+        updateProps: {cap: 'cone'},
+        onAfterUpdate: ({layer}) => {
+          if (!layer.isLoaded) return;
+          expect(layer.state.fillModel!.vertexCount, 'cone vertex count').toBe(CONE_VERTEX_COUNT);
+          expect(
+            previousGeometry.attributes.geometry.data[0].buffer.destroyed,
+            'the dome geometry is released'
+          ).toBe(true);
+        }
+      }
+    ]
+  });
+});
