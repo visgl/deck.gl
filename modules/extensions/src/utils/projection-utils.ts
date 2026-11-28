@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {WebMercatorViewport, OrthographicViewport, _GlobeViewport} from '@deck.gl/core';
+import {WebMercatorViewport, OrthographicViewport, GlobeViewport} from '@deck.gl/core';
 import type {Layer, ProjectUniforms, Viewport} from '@deck.gl/core';
-import * as vec3 from '@math.gl/core/vec3';
-import * as vec4 from '@math.gl/core/vec4';
-import type {NumericArray} from '@math.gl/core';
+import {vec3} from '@math.gl/core/matrix';
+import {vec4} from '@math.gl/core/matrix';
+import type {NumericArray} from '@math.gl/core/matrix';
 
-/** TILE_SIZE in the project shader module */
-const TILE_SIZE = 512;
+/** TILE_SIZE in the project shader module: the width of one world copy in flat common space */
+export const TILE_SIZE = 512;
 /** GLOBE_RADIUS / EARTH_RADIUS in the project shader module */
 const GLOBE_METERS_TO_COMMON = 256 / 6370972;
 
@@ -42,12 +42,12 @@ export function getMercatorReferenceViewport(viewport: Viewport): Viewport {
 
 /** False only for GlobeViewport, whose common space is a sphere. The single globe check in this module. */
 export function isFlatViewport(viewport: Viewport): boolean {
-  return !(viewport instanceof _GlobeViewport);
+  return !(viewport instanceof GlobeViewport);
 }
 
 /** Per-call overrides of the layer's coordinateSystem, coordinateOrigin and modelMatrix */
 export type FlatProjectOptions = {
-  sourceCrs?: import('@math.gl/projection/core').CRSDescriptor;
+  sourceCrs?: import('@math.gl/geospatial/projection-core').CRSDescriptor;
   coordinateSystem?: 'cartesian' | 'meter-offsets';
   coordinateOrigin?: [number, number, number];
   modelMatrix?: NumericArray | null;

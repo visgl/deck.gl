@@ -288,6 +288,14 @@ The proper value depends on the source of your data. Most geometry formats [enfo
 
 ### Data Accessors
 
+#### `_projectionTolerance` (number, optional) {#_projectiontolerance}
+
+* Default: `0`
+
+> Note: This prop is experimental
+
+Maximum sampled boundary error in meters with a preprojecting viewport. Zero disables refinement. Requires `_normalize: true` and per-object styling. Applies to fill and outline; interiors and extruded sides are not refined. See [Adaptive refinement](../core/custom-projection-view.md#adaptive-refinement).
+
 #### `getPolygon` ([Accessor&lt;PolygonGeometry&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpolygon}
 
 * default: `object => object.polygon`
@@ -329,6 +337,11 @@ If the optional third component `z` is supplied for a position, it specifies the
   <img src="https://user-images.githubusercontent.com/18344164/48512983-cca32e80-e8ae-11e8-9107-c380925cf861.gif" />
   <p><i>Polygons with 3D positions, courtesy of <a href="https://github.com/SymbolixAU">@SymbolixAU</a> and <a href="https://github.com/mdsumner">@mdsumner</a></i></p>
 </div>
+
+On top-level layers, Deck's [`normalizedColors`](../core/deck.md#normalizedcolors) option
+interprets plain-array `getFillColor` and `getLineColor` values and callback results as 0–1 channels.
+Omitted alpha is opaque. Byte typed arrays, binary attributes, and built-in defaults keep
+their existing encoding.
 
 #### `getFillColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getfillcolor}
 

@@ -8,16 +8,26 @@ import {fileURLToPath} from 'node:url';
 import {build} from 'vite';
 import {execFileSync} from 'node:child_process';
 
-const examplesRoot = fileURLToPath(new URL('../examples/v10-experimental/', import.meta.url));
+const examplesRoot = fileURLToPath(new URL('../examples-v10/proposals/', import.meta.url));
 const requestedExamples = process.argv.slice(2);
-const examples = readdirSync(examplesRoot, {withFileTypes: true})
+const proposals = readdirSync(examplesRoot, {withFileTypes: true})
   .filter(entry => entry.isDirectory() && existsSync(resolve(examplesRoot, entry.name, 'index.html')))
   .map(entry => entry.name);
-for (const name of requestedExamples) {
-  if (!examples.includes(name)) throw new Error(`Unknown private example: ${name}`);
+const examples = new Map(proposals.map(name => [name, resolve(examplesRoot, name)]));
+for (const name of ['graph-explorer', 'culled-trace']) {
+  examples.set(`gpu-${name}`, resolve(examplesRoot, '../gpu-graph', name));
 }
-execFileSync('yarn', ['tsc', '-p', resolve(examplesRoot, 'tsconfig.json')], {stdio: 'inherit'});
-for (const name of requestedExamples.length ? requestedExamples : examples) {
+for (const name of requestedExamples) {
+  if (!examples.has(name)) throw new Error(`Unknown private example: ${name}`);
+}
+const selected = requestedExamples.length ? requestedExamples : [...examples.keys()];
+const configs = new Set(selected.map(name =>
+  resolve(proposals.includes(name) ? examplesRoot : examples.get(name), 'tsconfig.json')
+));
+for (const config of configs) {
+  execFileSync('yarn', ['tsc', '-p', config], {stdio: 'inherit'});
+}
+for (const name of selected) {
   console.log(`Building private example: ${name}`);
-  await build({root: resolve(examplesRoot, name), logLevel: 'warn'});
+  await build({root: examples.get(name), logLevel: 'warn'});
 }

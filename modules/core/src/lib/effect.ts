@@ -31,8 +31,12 @@ export interface Effect {
   preRender(opts: PreRenderOptions): void;
   /** Called after layers are rendered to screen */
   postRender?(opts: PostRenderOptions): Framebuffer | null;
-  /** Module settings passed to models */
-  getShaderModuleProps?(layer: Layer, otherShaderModuleProps: Record<string, any>): any;
+  /** Module settings passed to models for the named render pass. */
+  getShaderModuleProps?(
+    layer: Layer,
+    otherShaderModuleProps: Record<string, any>,
+    pass?: string
+  ): any;
 
   // / Lifecycle methods
   /** Called when this effect is added */

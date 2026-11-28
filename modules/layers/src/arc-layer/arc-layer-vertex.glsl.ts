@@ -49,8 +49,8 @@ float paraboloid(float distance, float sourceZ, float targetZ, float ratio) {
 vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float width) {
   // normalized direction of the line
   vec2 dir_screenspace = normalize(line_clipspace * project.viewportSize);
-  // rotate by 90 degrees
-  dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
+  // rotate by 90 degrees clockwise so the strip (-1 side first) winds counter-clockwise
+  dir_screenspace = vec2(dir_screenspace.y, -dir_screenspace.x);
 
   return dir_screenspace * offset_direction * width / 2.0;
 }
@@ -61,15 +61,22 @@ float getSegmentRatio(float index) {
 
 vec3 interpolateFlat(vec3 source, vec3 target, float segmentRatio) {
   float distance = length(source.xy - target.xy);
-  float z = paraboloid(distance, source.z, target.z, segmentRatio);
+  float baseline = 0.0;
+  float z;
+  if (arc.absoluteHeight) {
+    baseline = mix(source.z, target.z, segmentRatio);
+    z = 4.0 * segmentRatio * (1.0 - segmentRatio) * project_size(instanceHeights);
+  } else {
+    z = paraboloid(distance, source.z, target.z, segmentRatio);
+  }
 
   float tiltAngle = radians(instanceTilts);
-  vec2 tiltDirection = normalize(target.xy - source.xy);
+  vec2 tiltDirection = (target.xy - source.xy) / max(distance, 1e-10);
   vec2 tilt = vec2(-tiltDirection.y, tiltDirection.x) * z * sin(tiltAngle);
 
   return vec3(
     mix(source.xy, target.xy, segmentRatio) + tilt,
-    z * cos(tiltAngle)
+    baseline + z * cos(tiltAngle)
   );
 }
 
@@ -99,7 +106,9 @@ vec3 interpolateGreatCircle(vec3 source, vec3 target, vec3 source3D, vec3 target
     lngLat = degrees(vec2(atan(p.y, -p.x), atan(p.z, length(p.xy))));
   }
 
-  float z = paraboloid(angularDist * EARTH_RADIUS, source.z, target.z, t);
+  float z = arc.absoluteHeight
+    ? mix(source.z, target.z, t) + 4.0 * t * (1.0 - t) * instanceHeights
+    : paraboloid(angularDist * EARTH_RADIUS, source.z, target.z, t);
 
   return vec3(lngLat, z);
 }
@@ -130,7 +139,7 @@ void main(void) {
 
   uv = vec2(segmentRatio, segmentSide);
   geometry.uv = uv;
-  geometry.pickingColor = picking_getPickingColorFromInstanceID();
+  geometry.pickingColor = picking_getPickingColorFromIndex(uint(gl_InstanceID) + arc.rowIndexOffset);
 
   vec4 curr;
   vec4 next;

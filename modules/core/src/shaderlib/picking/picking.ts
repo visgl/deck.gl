@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {picking} from '@luma.gl/shadertools';
+import {picking, normalizeByteColor4, type ShaderModule, type ShaderPlugin} from '@luma.gl/shaders';
 import log from '../../utils/log';
 
 export const PICKING_MAX_DISABLED_INDICES = 10;
@@ -142,7 +142,13 @@ fn picking_getPickingColorFromIndex(objectIndex: u32) -> vec3<f32> {
 }
 `;
 
-export default {
+/** Picking inputs with a separate convention for semantic highlight colors. */
+export type PickingProps = import('@luma.gl/shaders').PickingProps & {
+  /** Interpret highlightColor as normalized without changing picking ID decoding. */
+  normalizedHighlightColor?: boolean;
+};
+
+const pickingModule: ShaderModule = {
   ...picking,
   vs: `${addPickingUniformsGLSL(picking.vs)}\n${pickingHelpersGLSL}`,
   fs: addPickingUniformsGLSL(picking.fs),
@@ -163,25 +169,57 @@ export default {
     disabledPickingIndices2: [0, 0, 0, 0]
   },
   getUniforms(props, prevUniforms) {
-    const uniforms = picking.getUniforms(props, prevUniforms) as any;
+    // Decode semantic highlight colors separately from byte-encoded picking IDs.
+    const {highlightColor, normalizedHighlightColor, ...pickingProps} = props;
+    const uniforms = picking.getUniforms(pickingProps, prevUniforms) as any;
+    if (highlightColor) {
+      const useByteColors = !normalizedHighlightColor && (props.useByteColors ?? true);
+      uniforms.highlightColor = normalizeByteColor4(
+        [
+          highlightColor[0],
+          highlightColor[1],
+          highlightColor[2],
+          highlightColor[3] ?? (useByteColors ? 255 : 1)
+        ],
+        useByteColors
+      );
+    }
     const disabledPickingIndices = props.disabledPickingIndices || [];
     uniforms.disabledPickingIndexCount = disabledPickingIndices.length;
     uniforms.disabledPickingIndices0 = packDisabledPickingIndices(disabledPickingIndices, 0);
     uniforms.disabledPickingIndices1 = packDisabledPickingIndices(disabledPickingIndices, 4);
     uniforms.disabledPickingIndices2 = packDisabledPickingIndices(disabledPickingIndices, 8);
     return uniforms;
-  },
-  inject: {
-    'vs:DECKGL_FILTER_GL_POSITION': `
+  }
+};
+
+export default pickingModule;
+
+/** Picking injection target contributions for models assembled outside Layer.getShaders. */
+export const pickingPlugin: ShaderPlugin = {
+  name: 'picking',
+  module: pickingModule,
+  injections: [
+    {
+      stage: 'vertex',
+      target: 'DECKGL_FILTER_GL_POSITION',
+      glsl: `
     // for picking depth values
     picking_setPickingAttribute(position.z / position.w);
-  `,
-    'vs:DECKGL_FILTER_COLOR': `
+  `
+    },
+    {
+      stage: 'vertex',
+      target: 'DECKGL_FILTER_COLOR',
+      glsl: `
   picking_setPickingColor(geometry.pickingColor);
-  `,
-    'fs:DECKGL_FILTER_COLOR': {
+  `
+    },
+    {
+      stage: 'fragment',
+      target: 'DECKGL_FILTER_COLOR',
       order: 99,
-      injection: `
+      glsl: `
   // use highlight color if this fragment belongs to the selected object.
   color = picking_filterHighlightColor(color);
 
@@ -189,5 +227,5 @@ export default {
   color = picking_filterPickingColor(color);
     `
     }
-  }
+  ]
 };

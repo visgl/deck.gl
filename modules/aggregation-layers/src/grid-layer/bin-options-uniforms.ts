@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 const uniformBlock = /* glsl */ `\
 layout(std140) uniform binOptionsUniforms {
@@ -19,6 +19,8 @@ export type BinOptions = {
 export const binOptionsUniforms = {
   name: 'binOptions',
   vs: uniformBlock,
+  source: `struct BinOptionsUniforms { cellOriginCommon: vec2f, cellSizeCommon: vec2f, };
+    @group(0) @binding(auto) var<uniform> binOptions: BinOptionsUniforms;`,
   uniformTypes: {
     cellOriginCommon: 'vec2<f32>',
     cellSizeCommon: 'vec2<f32>'

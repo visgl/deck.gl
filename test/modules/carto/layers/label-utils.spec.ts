@@ -8,7 +8,7 @@ import {
   createPointsFromPolygons,
   FEATURE_BBOX_PROP
 } from '@deck.gl/carto/layers/label-utils';
-import type {BinaryFeatureCollection} from '@loaders.gl/schema';
+import type {BinaryFeatureCollection} from '@loaders.gl/core/schema';
 
 test('createPointsFromLines', () => {
   const lines: BinaryFeatureCollection['lines'] = {

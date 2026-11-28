@@ -7,7 +7,7 @@ import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 import {MVTLayer} from '@deck.gl/geo-layers';
-import {MVTLoader} from '@loaders.gl/mvt';
+import {MVTLoader} from '@loaders.gl/tiles/mvt';
 
 function createMVTLayer(id, {highlight = false, binary = false, holes = false} = {}) {
   let goldenImage;

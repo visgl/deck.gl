@@ -3,7 +3,6 @@
 // Copyright (c) vis.gl contributors
 
 import {Texture2D, Model, Buffer, Framebuffer, Geometry, TransformFeedback, readPixelsToArray} from 'luma.gl';
-import {GL} from '@luma.gl/webgl/constants';
 import {sortCharactersByBrightness} from './utils';
 
 const vs = `
@@ -98,13 +97,13 @@ function getPixelMapTexture(gl, {iconMapping, iconAtlas}) {
   return new Texture2D(gl, {
     width: 256,
     height: 1,
-    dataFormat: GL.RGBA,
-    format: GL.RGBA32F,
-    type: GL.FLOAT,
+    dataFormat: gl.RGBA,
+    format: gl.RGBA32F,
+    type: gl.FLOAT,
     mipmaps: false,
     parameters: {
-      [GL.TEXTURE_MIN_FILTER]: GL.NEAREST,
-      [GL.TEXTURE_MAG_FILTER]: GL.NEAREST
+      [gl.TEXTURE_MIN_FILTER]: gl.NEAREST,
+      [gl.TEXTURE_MAG_FILTER]: gl.NEAREST
     },
     data
   });
@@ -121,7 +120,7 @@ export default class AsciiFilter {
       fs,
       varyings: ['instanceIconFrames', 'instanceColors'],
       geometry: new Geometry({
-        drawMode: GL.POINTS
+        drawMode: gl.POINTS
       }),
       vertexCount: 0,
       isIndexed: true
@@ -130,8 +129,8 @@ export default class AsciiFilter {
     this.videoTexture = new Texture2D(gl, {
       mipmaps: false,
       parameters: {
-        [GL.TEXTURE_MIN_FILTER]: GL.NEAREST,
-        [GL.TEXTURE_MAG_FILTER]: GL.NEAREST
+        [gl.TEXTURE_MIN_FILTER]: gl.NEAREST,
+        [gl.TEXTURE_MAG_FILTER]: gl.NEAREST
       }
     });
     this._updateDimension({width: 1, height: 1});
@@ -143,7 +142,7 @@ export default class AsciiFilter {
   }
 
   getBuffers({width, height, video}) {
-    const {model, videoTexture, transformFeedback} = this;
+    const {gl, model, videoTexture, transformFeedback} = this;
 
     this._updateDimension({width, height, video});
     videoTexture.setSubImageData({width: video.videoWidth, height: video.videoHeight, data: video});
@@ -154,7 +153,7 @@ export default class AsciiFilter {
       },
       transformFeedback,
       parameters: {
-        [GL.RASTERIZER_DISCARD]: true
+        [gl.RASTERIZER_DISCARD]: true
       }
     });
 
@@ -191,14 +190,14 @@ export default class AsciiFilter {
       size: 4,
       instanced: 1,
       data: new Float32Array(4 * vertexCount),
-      usage: GL.DYNAMIC_COPY
+      usage: gl.DYNAMIC_COPY
     });
 
     const colorBuffer = new Buffer(gl, {
       size: 4,
       instanced: 1,
       data: new Float32Array(4 * vertexCount),
-      usage: GL.DYNAMIC_COPY
+      usage: gl.DYNAMIC_COPY
     });
 
     this.buffers = {

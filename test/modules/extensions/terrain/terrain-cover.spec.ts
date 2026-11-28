@@ -6,11 +6,7 @@ import {test, expect} from 'vitest';
 import {TerrainCover} from '@deck.gl/extensions/terrain/terrain-cover';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
-import {
-  WebMercatorViewport,
-  OrthographicViewport,
-  _GlobeViewport as GlobeViewport
-} from '@deck.gl/core';
+import {WebMercatorViewport, OrthographicViewport, GlobeViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TileLayer} from '@deck.gl/geo-layers';
