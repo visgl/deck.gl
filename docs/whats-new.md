@@ -72,6 +72,7 @@ The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, 
 ### Tile Layers
 
 - [`Tile2DLayer`](./api-reference/proposals/tile-2d-layer.md) and [`MVT2DLayer`](./api-reference/proposals/mvt-2d-layer.md) 🚧 can now share a [`Tileset2D`](./api-reference/proposals/tileset-2d.md) and reuse loaded tiles across layers and views.
+- [`Tile3DLayer`](./api-reference/geo-layers/tile-3d-layer.md#_maxnewtilesperframe) 🧪 accepts `_maxNewTilesPerFrame`, which spreads the GPU upload of arriving glTF tiles over several frames while their parent tiles stay visible.
 
 ### Aggregation Layers
 
