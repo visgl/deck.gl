@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useMemo, useEffect} from 'react';
+import React, {useMemo, useEffect, useReducer} from 'react';
 import {createRoot} from 'react-dom/client';
 import {APIProvider, Map, useMap} from '@vis.gl/react-google-maps';
 import {GeoJsonLayer, ArcLayer} from 'deck.gl';
@@ -18,7 +18,7 @@ const GOOGLE_MAP_ID = process.env.GoogleMapsMapId; // eslint-disable-line
 
 function DeckGLOverlay(props) {
   const map = useMap();
-  const overlay = useMemo(() => new DeckOverlay(props));
+  const overlay = useMemo(() => new DeckOverlay(props), []);
 
   useEffect(() => {
     overlay.setMap(map);
@@ -30,6 +30,10 @@ function DeckGLOverlay(props) {
 }
 
 function Root() {
+  // The overlay creates a new deck when a vector map falls back to raster rendering or restores a
+  // lost WebGL context, and that deck needs new layer instances. Render again when it loads.
+  const [, onLoad] = useReducer(count => count + 1, 0);
+
   const onClick = info => {
     if (info.object) {
       // eslint-disable-next-line
@@ -68,7 +72,7 @@ function Root() {
   return (
     <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
       <Map defaultCenter={{lat: 51.47, lng: 0.45}} defaultZoom={4} mapId={GOOGLE_MAP_ID}>
-        <DeckGLOverlay layers={layers} />
+        <DeckGLOverlay layers={layers} onLoad={onLoad} />
       </Map>
     </APIProvider>
   );
