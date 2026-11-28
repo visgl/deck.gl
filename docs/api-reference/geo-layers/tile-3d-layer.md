@@ -254,7 +254,7 @@ This value is only applied when [tile format](https://github.com/AnalyticalGraph
 
 - Default: no limit
 
-Maximum number of loaded glTF tiles (`b3dm`, `i3dm` and `glb`) that get a sublayer per frame. Creating a sublayer uploads the tile to the GPU, so many tiles arriving at once can stall a frame. Tiles over the limit are created on later frames, siblings together, while their parent tile stays visible. Point cloud and mesh tiles are not limited.
+Maximum number of loaded glTF tiles (`b3dm`, `i3dm` and `glb`) that get a sublayer per frame. Creating a sublayer uploads the tile to the GPU, so many tiles arriving at once can stall a frame. Tiles over the limit are created on later frames while their parent tile stays visible. Siblings are created in the same frame, even past the limit, so that their parent is released as early as possible. Point cloud and mesh tiles are not limited.
 
 ### Data Properties
 

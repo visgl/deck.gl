@@ -42,20 +42,36 @@ test('Tile3DLayer#_maxNewTilesPerFrame creates new glTF tiles over several frame
     makeTile('b1', parentB),
     makeTile('a2', parentA),
     makeTile('mesh', parentB, TILE_TYPE.MESH),
-    makeTile('b2', parentB)
+    makeTile('b2', parentB),
+    makeTile('a3', parentA)
   ];
   const {layer, renderedIds} = makeLayer({_maxNewTilesPerFrame: 2}, tiles);
   layer.internalState = {layer} as never;
   const setNeedsUpdate = vi.spyOn(layer, 'setNeedsUpdate').mockImplementation(() => {});
 
-  expect(renderedIds(), 'siblings first; meshes are not held back').toEqual(['a1', 'a2', 'mesh']);
+  expect(renderedIds(), 'siblings together; meshes are not held back').toEqual([
+    'a1',
+    'a2',
+    'mesh',
+    'a3'
+  ]);
   expect(frames, 'requests the next batch').toHaveLength(1);
 
   frames[0](0);
   expect(setNeedsUpdate, 'updates the layer next frame').toHaveBeenCalledOnce();
   expect(layer.state.nextTilesFrame, 'clears the request').toBeUndefined();
-  expect(renderedIds(), 'creates the rest').toEqual(['a1', 'b1', 'a2', 'mesh', 'b2']);
+  expect(renderedIds(), 'creates the rest').toEqual(['a1', 'b1', 'a2', 'mesh', 'b2', 'a3']);
   expect(frames, 'nothing left to defer').toHaveLength(1);
+});
+
+test('Tile3DLayer#_maxNewTilesPerFrame does not split siblings', () => {
+  const frames = stubFrames();
+  const parent = {id: 'p'};
+  const tiles = ['t1', 't2', 't3', 't4'].map(id => makeTile(id, parent));
+  const {renderedIds} = makeLayer({_maxNewTilesPerFrame: 2}, tiles);
+
+  expect(renderedIds()).toEqual(['t1', 't2', 't3', 't4']);
+  expect(frames, 'nothing left to defer').toHaveLength(0);
 });
 
 test('Tile3DLayer#_maxNewTilesPerFrame applies after a prop change', () => {
