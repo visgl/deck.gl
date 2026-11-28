@@ -84,6 +84,10 @@ The `@deck.gl/react` module is now a React renderer for deck.gl: layers, views, 
 
 ---
 
+### Other Improvements
+
+- New [`Deck.hasActiveTransitions`](./api-reference/core/deck.md#hasactivetransitions) method reports whether any view state, layer prop or attribute transition is in progress.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
