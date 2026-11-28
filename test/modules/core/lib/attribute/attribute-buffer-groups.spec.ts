@@ -5,7 +5,7 @@
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import {Layer, Viewport} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {beforeAll, test, expect, vi} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
 

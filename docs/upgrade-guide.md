@@ -6,6 +6,137 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
+### @deck.gl/react
+
+`@deck.gl/react` is now a React renderer for deck.gl: layers, views, widgets and effects are React elements. It requires React 19.2 or later.
+
+- To keep the previous API, change the imports from `@deck.gl/react` to [`@deck.gl/react/legacy`](./api-reference/react/legacy/overview.md). It also requires React 19.2.
+- To move to the renderer, follow [Migrating from the previous API](./developer-guide/react/migrate-from-deckgl-react.md).
+
+### GlobeView
+
+`GlobeView`, `GlobeViewport` and `GlobeController` are no longer experimental. Import them without the underscore. `_GlobeView`, `_GlobeViewport` and `_GlobeController` remain as deprecated aliases of the same classes and will be removed in a future major release.
+
+### SQL accessor functions
+
+math.gl now provides `LIST_EXTRACT` and `STRUCT_EXTRACT`. Rename custom declarations
+that use either reserved name and update their SQL call sites.
+
+### View clear color alpha
+
+A View's [`clearColor`](./api-reference/core/view.md#clearcolor) with an explicit zero alpha,
+such as `[0, 0, 0, 0]`, now clears to transparent. Previously a zero alpha cleared to
+opaque. To keep an opaque clear, pass alpha `255` or omit it.
+
+### WebGLAggregator outputs
+
+`WebGLAggregator.getBins()` and `getResult(channel)` now return borrowed `GPUVector`
+views instead of binary attribute descriptors. They can still be passed directly
+as layer binary attributes. For direct buffer access, use `getGPUVectorData(vector)`
+from `@luma.gl/graph/gpu-data` and read its `buffer`, `byteOffset`, and `byteStride`
+instead of the former descriptor's `buffer`, `offset`, and `stride` fields.
+
+### luma.gl v10 alpha.11
+
+The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from
+`@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and
+`@luma.gl/core/webgpu`. WebGL debugging tools move to
+`@luma.gl/core/webgl-debug`. Use string-valued GPU parameters in deck.gl.
+
+Import `postProcessGLTF` from `@luma.gl/engine/gltf`; the legacy loaders.gl postprocessor
+dependency is no longer needed.
+
+`@luma.gl/shadertools` becomes `@luma.gl/shaders`. The glTF, effects, text, splats, and
+Arrow rendering integrations move to the corresponding `@luma.gl/engine` subpaths.
+`@luma.gl/gpgpu` is consolidated into `@luma.gl/graph`: use `/gpu-data` for
+typed GPU columns and `/gpu-simple-graph` for the legacy evaluator operations.
+WebGPU evaluator operations use `/gpu-simple-graph/webgpu`.
+Arrow conversion helpers move to `@luma.gl/graph/arrow`. Test utilities move to
+`@luma.gl/core/test-utils`. The Arrow integration is now published,
+so website builds no longer require a pinned luma.gl source checkout.
+
+`ShaderAssembler.getDefaultShaderAssembler()` is removed. Import `getShaderAssembler`
+from `@deck.gl/core` and call `getShaderAssembler('glsl')` or `getShaderAssembler('wgsl')`
+to register shared modules and injection targets. Deck installs its GLSL assembler as the default
+for luma models, preserving custom WebGL layers that construct models directly.
+For language-specific custom models, spread `this.getShaders(...)` into model options
+or pass `shaderAssembler: this.context.shaderAssembler`. Without deck's assembler,
+shader modules can throw `Unknown shader injection target vs:DECKGL_FILTER_GL_POSITION`.
+
+Shader injections move from `inject` on modules or model options into native
+`ShaderPlugin` descriptors passed in `plugins`. Keep reusable shader source, uniforms,
+and dependencies in a `ShaderModule`; attach it as the plugin's `module` when it also
+contributes injections. Preserve inherited plugins when extending a layer:
+
+```ts
+const shaders = super.getShaders();
+return {
+  ...shaders,
+  plugins: [...(shaders.plugins || []), {
+    name: 'customFilter',
+    injections: {'glsl:fs:DECKGL_FILTER_COLOR': 'color.a *= 0.5;'}
+  }]
+};
+```
+
+Register `ShaderInjectionTarget` descriptors with `addShaderInjectionTarget`, using
+`{name, stage, glsl: {parameters}, wgsl: {parameters}}` instead of signature strings.
+Declare plugin targets in `injectionTargets`.
+Use explicit `ShaderInjection` arrays for ordered injections and
+language-qualified keys for GLSL-only plugins. `Layer.getShaders` still installs
+picking injections when its `modules` includes deck's `picking` module. Custom models
+constructed outside that method must pass `plugins: [pickingPlugin]` from
+`@deck.gl/core` to install the picking module and its injections. Similarly, use
+`shadowPlugin` instead of adding `shadow` alone to a custom model.
+
+`Layer.getModels()` now returns luma.gl `GPUVectorModel` instances, the common base
+of both rendering model classes. Narrow to `Model` when accessing material-specific APIs.
+
+`RenderPassParameters.colorMask` is removed in alpha.10. Set `colorMask` on layer
+or model pipeline parameters instead. `LayersPassRenderOptions.colorMask` still
+applies to layer draws and preserves masked WebGL attachment clears.
+
+`RenderPass.withParameters` is removed in alpha.11. For custom render-pass state
+overrides, save `renderPass.getParameters()`, apply overrides with `setParameters`,
+and restore the saved parameters in a `finally` block. Deck.gl handles this for
+layer and extension draws.
+
+### loaders.gl and math.gl v5
+
+Update direct loaders.gl dependencies to `^5.0.2` and math.gl dependencies to `^5.0.4`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+
+| Previous import | Replacement import |
+| --- | --- |
+| `@math.gl/web-mercator` | `@math.gl/geospatial/web-mercator` |
+| `@math.gl/arrow` | `@math.gl/core/arrow` |
+| `@math.gl/expressions` | `@math.gl/sql/expressions` |
+| `@math.gl/expressions/sql` | `@math.gl/sql/parser` |
+| `@math.gl/expressions/arrow` | `@math.gl/sql/arrow` |
+| `@loaders.gl/arrow` | `@loaders.gl/tables/arrow` |
+| `@loaders.gl/loader-utils`, `@loaders.gl/schema`, `@loaders.gl/polyfills` | Corresponding subpaths of `@loaders.gl/core` |
+| `@loaders.gl/csv`, `@loaders.gl/json` | `@loaders.gl/tables/csv`, `@loaders.gl/tables/json` |
+| `@loaders.gl/gltf`, `@loaders.gl/obj` | `@loaders.gl/scene/gltf`, `@loaders.gl/scene/obj` |
+| `@loaders.gl/las`, `@loaders.gl/ply` | Corresponding subpaths of `@loaders.gl/pointclouds` |
+| `@loaders.gl/mvt` | `@loaders.gl/tiles/mvt` |
+| `@loaders.gl/tiles` or `@loaders.gl/tiles-3d` (3D tiles types and sources) | `@loaders.gl/tiles-3d/tileset`, `@loaders.gl/tiles-3d/tiles-3d-source`, `@loaders.gl/tiles-3d/i3s-source` |
+| `ImageLoader` from `@loaders.gl/images` | `@loaders.gl/images/image/bundled` for the bundled parser |
+| `DracoWorkerLoader` from `@loaders.gl/scene` | `DracoLoader` from `@loaders.gl/scene/draco` |
+| `ImageSource`, `WMSSource` from `@loaders.gl/ogc/wms` | `@loaders.gl/ogc/wms/bundled` for runtime values |
+| `@loaders.gl/3d-tiles`, `@loaders.gl/i3s` | Corresponding subpaths of `@loaders.gl/tiles-3d` |
+| `@loaders.gl/terrain`, `@loaders.gl/wms` | `@loaders.gl/raster/terrain`, `@loaders.gl/ogc/wms` |
+| `@math.gl/types` | `@math.gl/core/types` |
+| `@math.gl/core` (matrix and vector APIs) | `@math.gl/core/matrix` |
+| `@math.gl/sql` | `@math.gl/sql/query` |
+| `@loaders.gl/core/scan` | `@loaders.gl/core/query` |
+| `@math.gl/geospatial/projection/core` | `@math.gl/geospatial/projection-core` |
+| `@math.gl/polygon`, `@math.gl/culling` | `@math.gl/geometry/polygon`, `@math.gl/geometry/culling` |
+| `@math.gl/projection` | `@math.gl/geospatial/projection` |
+| `@math.gl/sun` | `@math.gl/earth/sun` |
+
+Import vector and matrix namespaces such as `vec3` and `mat4` from `@math.gl/core/matrix`; their old subpaths are removed. Replace `WINDING.CLOCKWISE` and `WINDING.COUNTER_CLOCKWISE` with `'clockwise'` and `'counter-clockwise'`.
+
+The `@loaders.gl/gis` helpers move to `@loaders.gl/core/geoarrow`: use `convertGeojsonToBinaryFeatureCollection` and `convertBinaryFeatureCollectionToGeojson` instead of `geojsonToBinary` and `binaryToGeojson`.
+
 ### Viewport
 
 #### CRS configuration
@@ -29,9 +160,9 @@ Distance scales now describe world units for any CRS, so the same API supports g
 
 To retain an old degree step `d`, set `resolution: 360 / d`; for example, the former `GlobeView` default of 10 degrees becomes `resolution: 36`. Custom layers should use `viewport.getSubdivisionStep(sourceCrs)` for a step in their source CRS units instead of interpreting `viewport.resolution` directly.
 
-#### GlobeView position
+### Widget
 
-`GlobeView` now applies `viewState.position` as meter offsets to the east, north and up at every zoom, matching `MapView`. Camera offsets follow the local directions consistently across locations and the zoom-12 projection transition. If your application compensated for the former globe-axis interpretation below zoom 12, update those offsets to use local east, north and up.
+- A widget `id` of `''` or `null` now falls back to the widget's default id, as a view `id` already does. Previously two such widgets shared that id and replaced each other in the `WidgetManager`. Pass a non-empty `id` to tell widgets of the same type apart.
 
 ### Layer
 
@@ -44,6 +175,10 @@ The `project` shader uniform `coordinateSystem` is renamed to `coordinateFrame` 
 #### Coordinate origins
 
 Absolute layer CRSs, including WGS84 (`'lnglat'`), now support `coordinateOrigin` after `modelMatrix` and before projection, making the transform order consistent across source CRSs. If a nonzero origin was previously supplied but ignored, set it to `[0, 0, 0]` to preserve the rendered positions. Offset modes retain their geographic-anchor convention.
+
+#### A5Layer
+
+`A5Layer` now uses [A5](https://a5geo.org) v1, [which changes the cell index](https://a5geo.org/docs/upgrade-guide).
 
 #### projectPosition
 
@@ -91,7 +226,36 @@ to approximately `±85.051°`. If you relied on free rotation with a rotated glo
 prereleases, set `controller: {navigation: 'ball'}` to retain pole crossing and evolving bearing. Explicit rotation
 gestures remain available in both modes.
 
+### PathStyleExtension
+
+With [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) dashes on, `geometry.uv.y` in `PathLayer` shaders is now the geometric distance along the segment, the same as without dashes. Custom shader injections that need the dash coordinate, which also counts Z movement and the parts of the segment removed by camera clipping, should read `vDashSegment.x` (position) and `vDashSegment.y` (segment length) under `#ifdef DASH_ENABLED`.
+
+### Deck props set to `undefined`
+
+A [`Deck`](./api-reference/core/deck.md) prop set to `undefined`, in the constructor or in
+`setProps`, now uses its default value. In the constructor this is the same as leaving the prop
+out. In `setProps`, leaving a prop out still keeps its current value. Previously an explicit
+`undefined` replaced the default. For some props this threw an error or stopped
+rendering, such as a callback like `onAfterRender: debug ? callback : undefined`.
+
+A few props behaved differently with `undefined`. To keep that behavior, pass these instead:
+
+| Prop | `undefined` now | To get the previous behavior |
+| --- | --- | --- |
+| `width`, `height` | `'100%'` | `null`, to leave the canvas size to your CSS |
+| `onError` | Logs the error (the default) | `null`, to ignore errors |
+| `debug` | `false` | `true`, to enable GPU debug mode |
+| `layers`, `widgets` in `setProps` | Removes them | Leave the prop out of `setProps` to keep the current ones |
+| `useDevicePixels` | `true` | `false`, to render one canvas pixel per CSS pixel |
+| `touchAction` | `'none'` | The `touch-action` value you want, such as `'manipulation'` |
+
+`null` is unchanged. Props without a default are also unchanged.
+
 ## Upgrading to v9.4
+
+### GlobeView meter offsets
+
+Below zoom 12, `GlobeView` now applies camera and layer meter offsets east, north and up, matching `MapView`. If your application compensated for the previous orientation, update its offsets or remove the compensating rotation.
 
 ### pydeck lighting
 
@@ -159,6 +323,10 @@ new PathStyleExtension({dashMode: 'path'});
 ```
 
 See [Choosing a dash mode](./api-reference/extensions/path-style-extension.md#choosing-a-dash-mode) for when to use `'path'` or `'segment'`.
+
+### TerrainLayer and MVTLayer heights
+
+Starting in v9.4.1, `TerrainLayer`, extruded `MVTLayer` features and other layers using the `'cartesian'` coordinate system in a `MapView` look taller below zoom 12, by about 1.4x at 46° latitude and 2x at 60°. They were previously drawn too flat, and their height jumped when zooming past 12. If you raised `elevationScale` to make up for it, lower it again.
 
 ## Upgrading to v9.3
 
@@ -312,7 +480,7 @@ The [ShaderModule](https://luma.gl/docs/api-reference/shadertools/shader-module)
 See [layerUniforms](https://github.com/visgl/deck.gl/blob/master/modules/core/src/shaderlib/misc/layer-uniforms.ts) for an example.
 
 Layers need to be modified:
-- `getShaders()` needs to additionaly return the `ShaderModule` that defines the UBO
+- `getShaders()` needs to additionally return the `ShaderModule` that defines the UBO
 - Instead of calling `model.setUniforms` (or `model.setBindings`) use `model.shaderInputs.setProps` to update the UBO with props
 
 For more information see [presentation](https://docs.google.com/presentation/d/1OcjA_hdu6vEvL_nxm7ywnXZQbMr5eR4R_L-wcz6K0HI/) ([recording](https://www.youtube.com/watch?v=ei6scnRpNhU))
@@ -410,7 +578,7 @@ new Deck({
 `DeckProps.parameters`, `LayerProps.parameters`, and `LayerProps.textureParameters` no longer use WebGL constants, but instead use (WebGPU style) [string constants](https://luma.gl/docs/api-reference/core/parameters/):
 
 ```ts
-// deck.gl v9 using string constants (preferred)
+// deck.gl v9 using string constants
 import {Deck} from '@deck.gl/core'
 new Deck({
   parameters: {
@@ -420,29 +588,6 @@ new Deck({
     blendAlphaOperation: 'add',
     blendAlphaSrcFactor: 'one-minus-dst-alpha',
     blendAlphaDstFactor: 'one'
-  }
-})
-
-// deck.gl v9 using GL constants
-// The constant module remains but is now considered an internal luma.gl module, and is no longer intended to be imported by applications.
-import {Deck} from '@deck.gl/core'
-import {GL} from '@luma.gl/webgl/constants'
-
-new Deck({
-  parameters: {
-    blendEquation: [GL.ADD, GL.ADD],
-    blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
-  }
-})
-
-// deck.gl v8
-import {Deck} from '@deck.gl/core/typed'
-import {GL} from '@luma.gl/webgl/constants';
-
-new Deck({
-  parameters: {
-    blendEquation: [GL.ADD, GL.ADD],
-    blendFunc: [GL.ONE, GL.ONE, GL.ONE, GL.ONE],
   }
 })
 ```
@@ -640,7 +785,7 @@ Note that this flag may be removed in a future release.
   }
   ```
 
-  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supportd. Instead, you need to either set the [_subLayerProps](./api-reference/core/composite-layer.md#_sublayerprops) prop (stock layer) or implement the [filterSubLayer](./api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
+  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supported. Instead, you need to either set the [_subLayerProps](./api-reference/core/composite-layer.md#_sublayerprops) prop (stock layer) or implement the [filterSubLayer](./api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
 
 - If a composite layer has `visible: false`, all of the layers generated by it will also be hidden regardless of their own `visible` prop. In previous versions, a descendant layer may be visible as long as it has `visible: true`, which often led to confusing behavior if a composite layer does not propagate its props correctly.
 
@@ -823,7 +968,7 @@ const layer = new Tile3DLayer({
 
 ##### React
 
-- `DeckGL` no longer injects its children with view props (`width`, `height`, `viewState` etc.). If your custom component needs these props, consider using the [ContextProvider](./api-reference/react/deckgl.md#react-context) or a render callback:
+- `DeckGL` no longer injects its children with view props (`width`, `height`, `viewState` etc.). If your custom component needs these props, consider using the [ContextProvider](./api-reference/react/legacy/deckgl.md#react-context) or a render callback:
 
   ```jsx
   <DeckGL>

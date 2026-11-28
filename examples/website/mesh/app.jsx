@@ -9,7 +9,7 @@ import {OrbitView, DirectionalLight, LightingEffect, AmbientLight} from '@deck.g
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
-import {OBJLoader} from '@loaders.gl/obj';
+import {OBJLoader} from '@loaders.gl/scene/obj';
 import {registerLoaders} from '@loaders.gl/core';
 
 // Add the loaders that handle your mesh format here

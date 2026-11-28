@@ -11,10 +11,10 @@ import {
   project,
   ProjectProps
 } from '@deck.gl/core';
-import {fp64} from '@luma.gl/shadertools';
+import {fp64} from '@luma.gl/shaders';
 const {fp64LowPart} = fp64;
 import {projectPosition} from './project-glsl-test-utils';
-import {equals, config, NumberArray3} from '@math.gl/core';
+import {equals, config, NumberArray3} from '@math.gl/core/matrix';
 import {runOnGPU, TestProps, testUniforms, verifyGPUResult} from './project-glsl-test-utils';
 import {device} from '@deck.gl/test-utils/vitest';
 

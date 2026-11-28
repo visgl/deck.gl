@@ -3,12 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {
-  Viewport,
-  WebMercatorViewport,
-  FirstPersonViewport,
-  _GlobeViewport as GlobeViewport
-} from '@deck.gl/core';
+import {Viewport, WebMercatorViewport, FirstPersonViewport, GlobeViewport} from '@deck.gl/core';
 import {WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {createTestCRS, createTestViewport} from './test-crs';
 

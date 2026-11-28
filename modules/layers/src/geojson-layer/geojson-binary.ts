@@ -13,7 +13,7 @@ import {
   BinaryPointFeature,
   BinaryPolygonFeature,
   Feature
-} from '@loaders.gl/schema';
+} from '@loaders.gl/core/schema';
 
 export type BinaryFeatureTypes = BinaryPointFeature | BinaryLineFeature | BinaryPolygonFeature;
 

@@ -3,8 +3,15 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {MapView, OrthographicViewport} from '@deck.gl/core';
-import type {Viewport} from '@deck.gl/core';
+import {
+  MapView,
+  OrthographicViewport,
+  WebMercatorViewport,
+  GlobeViewport,
+  fp64LowPart,
+  project
+} from '@deck.gl/core';
+import type {ProjectUniforms, Viewport} from '@deck.gl/core';
 import {FillStyleExtension} from '@deck.gl/extensions';
 import {PolygonLayer} from '@deck.gl/layers';
 import {getLayerUniforms, testLayer, device} from '@deck.gl/test-utils/vitest';
@@ -128,6 +135,51 @@ webglTest('FillStyleExtension#PolygonLayer', () => {
   testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
+webglTest('FillStyleExtension forwards normalized polygon background colors', () => {
+  testLayer({
+    Layer: PolygonLayer,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          data: FIXTURES.polygons,
+          getPolygon: d => d,
+          extensions: [new FillStyleExtension({proceduralPattern: true})]
+        }
+      },
+      {
+        onBeforeUpdate: ({layer}) => {
+          layer.context.layerManager.setProps({normalizedColors: true});
+        },
+        onAfterUpdate: ({subLayers}) => {
+          const fill = subLayers.find(layer => layer.id.endsWith('fill'));
+          expect(fill.props.getFillPatternBackgroundColor).toEqual([0, 0, 0, 0]);
+        }
+      },
+      {
+        updateProps: {getFillPatternBackgroundColor: [1, 0.5, 0]},
+        onAfterUpdate: ({subLayers}) => {
+          const fill = subLayers.find(layer => layer.id.endsWith('fill'));
+          expect(fill.props.getFillPatternBackgroundColor).toEqual([255, 128, 0, 255]);
+        }
+      },
+      {
+        updateProps: {
+          getFillPatternBackgroundColor: () => [0, 0.5, 1, 0],
+          updateTriggers: {getFillPatternBackgroundColor: 1}
+        },
+        onAfterUpdate: ({subLayers}) => {
+          const fill = subLayers.find(layer => layer.id.endsWith('fill'));
+          const {value} = fill.getAttributeManager().attributes.fillPatternBackgroundColors;
+          expect(Array.from(value.slice(0, 4))).toEqual([0, 128, 255, 0]);
+        }
+      }
+    ]
+  });
+});
+
 webglTest('FillStyleExtension#originPrecision', () => {
   // Above zoom 12 the shader coordinate origin is a large common-space value, which is what the
   // origin reduction exists for
@@ -186,6 +238,73 @@ webglTest('FillStyleExtension#originPrecision', () => {
           Math.abs(getLayerUniforms(fillLayer).uvCoordinateOrigin[0]),
           'tile sizes are unknown, so the coordinate origin is left alone'
         ).toBeGreaterThan(1);
+      }
+    }
+  ];
+
+  testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+webglTest('FillStyleExtension#uvCoordinateOrigin', () => {
+  // The shader flattens geometry.position with project_common_position_to_flat(): offset-relative
+  // (project.commonOrigin) on Mercator, absolute Mercator on the globe. uvCoordinateOrigin is what
+  // gets added back, so it must follow the same rule or the pattern anchor drifts.
+  const SF = {longitude: -122.42694203247012, latitude: 37.751537058389985};
+  const SIZE = {width: 800, height: 450};
+  // zoom >= 12 switches the shader to WEB_MERCATOR_AUTO_OFFSET (non-zero commonOrigin)
+  const mercatorHighZoomViewport = new WebMercatorViewport({...SF, ...SIZE, zoom: 14});
+  const globeViewport = new GlobeViewport({...SF, ...SIZE, zoom: 11.5});
+
+  // FILL_PATTERN_MAPPING is a 1x1 frame at getFillPatternScale 2 -> the origin is reduced modulo
+  // a 2-texel period in the default 'meters' unit
+  const METERS_PER_COMMON_UNIT = 512 / 40000000;
+  const ORIGIN_PERIOD = 2 * 1 * METERS_PER_COMMON_UNIT;
+
+  const testCases = [
+    {
+      title: 'GlobeViewport: absolute Mercator, no origin',
+      props: {
+        id: 'fill-style-uv-origin-test',
+        data: FIXTURES.polygons,
+        getPolygon: d => d,
+
+        fillPatternAtlas: FILL_PATTERN_ATLAS,
+        fillPatternMapping: FILL_PATTERN_MAPPING,
+        getFillPattern: () => 'pattern',
+        getFillPatternScale: 2,
+
+        extensions: [new FillStyleExtension({pattern: true})]
+      },
+      viewport: globeViewport,
+      onAfterUpdate: ({subLayers}) => {
+        const fillLayer = subLayers.find(l => l.id.includes('fill'));
+        const uniforms = getLayerUniforms(fillLayer);
+        expect(uniforms.uvCoordinateOrigin, 'flat position is absolute on the globe').toEqual([
+          0, 0
+        ]);
+        expect(uniforms.uvCoordinateOrigin64Low, 'no low part either').toEqual([0, 0]);
+      }
+    },
+    {
+      title: 'WebMercatorViewport zoom 14: reduced commonOrigin',
+      viewport: mercatorHighZoomViewport,
+      onAfterUpdate: ({subLayers}) => {
+        const fillLayer = subLayers.find(l => l.id.includes('fill'));
+        const uniforms = getLayerUniforms(fillLayer);
+        const {commonOrigin} = project.getUniforms({
+          viewport: mercatorHighZoomViewport,
+          coordinateSystem: 'lnglat',
+          coordinateOrigin: [0, 0, 0]
+        }) as ProjectUniforms;
+        expect(commonOrigin[0], 'auto offset is active').not.toBe(0);
+        const expected = [commonOrigin[0] % ORIGIN_PERIOD, commonOrigin[1] % ORIGIN_PERIOD];
+        expect(uniforms.uvCoordinateOrigin, 'origin is commonOrigin reduced by the period').toEqual(
+          expected
+        );
+        expect(uniforms.uvCoordinateOrigin64Low).toEqual([
+          fp64LowPart(expected[0]),
+          fp64LowPart(expected[1])
+        ]);
       }
     }
   ];

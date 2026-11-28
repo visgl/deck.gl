@@ -1,4 +1,4 @@
-# GlobeController (Experimental)
+# GlobeController
 
 Inherits from [Base Controller](./controller.md).
 
@@ -11,7 +11,7 @@ The `GlobeController` class can be passed to either the `Deck` class's [controll
 Use with the default view:
 
 ```js
-import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Deck, GlobeView} from '@deck.gl/core';
 
 new Deck({
   views: new GlobeView(),
@@ -23,7 +23,7 @@ new Deck({
 is equivalent to:
 
 ```js
-import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Deck, GlobeView} from '@deck.gl/core';
 
 new Deck({
   views: new GlobeView({
@@ -73,7 +73,7 @@ zooms without steering in either navigation mode. `maxBounds` can impose additio
 You can further customize the `GlobeController`'s behavior by extending the class:
 
 ```js
-import {Deck, _GlobeView as GlobeView, _GlobeController as GlobeController} from '@deck.gl/core';
+import {Deck, GlobeView, GlobeController} from '@deck.gl/core';
 
 class MyGlobeController extends GlobeController {
 

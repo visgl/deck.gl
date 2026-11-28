@@ -181,11 +181,19 @@ fn vertexMain(inp: Attributes) -> Varyings {
 
   var pos: vec4<f32>;
   var anchorPosScreen: vec2<f32>;
+  // Hide glyphs whose anchor is behind the globe; culling handles non-billboard glyphs
+  var globeOccluded = false;
   if (icon.billboard != 0) {
+    let anchorCommon = project_position_vec3_f64(inp.instancePositions, inp.instancePositions64Low);
+    geometry.position = vec4<f32>(anchorCommon, 1.0);
     pos = project_position_to_clipspace(inp.instancePositions, inp.instancePositions64Low, vec3<f32>(0.0));
+    pos = project_globe_billboard_clipspace(pos, anchorCommon);
+    globeOccluded = project_globe_is_occluded(anchorCommon);
     anchorPosScreen = pos.xy / pos.w;
 
-    let clipOffset = project_pixel_size_to_clipspace(pixelOffset);
+    var size = vec3<f32>(pixelOffset, 0.0);
+    DECKGL_FILTER_SIZE(&size, geometry);
+    let clipOffset = project_pixel_size_to_clipspace(size.xy);
     pos = vec4<f32>(pos.x + clipOffset.x, pos.y + clipOffset.y, pos.z, pos.w);
   } else {
     var offsetCommon = vec3<f32>(project_pixel_size_vec2(pixelOffset), 0.0);
@@ -194,7 +202,10 @@ fn vertexMain(inp: Attributes) -> Varyings {
     }
     let anchorPos = project_position_to_clipspace(inp.instancePositions, inp.instancePositions64Low, vec3<f32>(0.0));
     anchorPosScreen = anchorPos.xy / anchorPos.w;
-    pos = project_position_to_clipspace(inp.instancePositions, inp.instancePositions64Low, offsetCommon);
+    DECKGL_FILTER_SIZE(&offsetCommon, geometry);
+    let projected = project_position_to_clipspace_and_commonspace(inp.instancePositions, inp.instancePositions64Low, offsetCommon);
+    geometry.position = projected.commonPosition;
+    pos = projected.clipPosition;
   }
 
   anchorPosScreen = vec2<f32>(anchorPosScreen.x + 1.0, 1.0 - anchorPosScreen.y) / 2.0 *
@@ -252,6 +263,10 @@ fn vertexMain(inp: Attributes) -> Varyings {
       : ''
   }
 
+  if (globeOccluded) {
+    pos = vec4<f32>(0.0, 0.0, 2.0, 1.0);
+  }
+
   let uvMix = (inp.positions.xy + vec2<f32>(1.0, 1.0)) * 0.5;
   outp.vTextureCoords = mix(inp.instanceIconFrames.xy, inp.instanceIconFrames.xy + iconSize, uvMix) / icon.iconsTextureDim;
 
@@ -260,12 +275,15 @@ fn vertexMain(inp: Attributes) -> Varyings {
   outp.vColorMode = inp.instanceColorModes;
   outp.pickingColor = picking_getPickingColorFromIndex(inp.rowIndexes);
 
+  DECKGL_FILTER_GL_POSITION(&outp.position, geometry);
+
   return outp;
 }
 
 @fragment
 fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = inp.uv;
+  fragmentGeometry.uv = geometry.uv;
 
   let texColor = textureSample(iconsTexture, iconsTextureSampler, inp.vTextureCoords);
   var alpha = texColor.a;
@@ -294,6 +312,9 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(inp.pickingColor)) {
       discard;
     }
+    var extensionColor = vec4<f32>(inp.pickingColor, 1.0);
+    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(inp.pickingColor, 1.0);
   }
 
@@ -309,7 +330,7 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
       : ''
   }
 
-  var fragColor = deckgl_premultiplied_alpha(vec4<f32>(color.rgb, a));
+  var fragColor = vec4<f32>(color.rgb, a);
 
   if (picking.isHighlightActive > 0.5) {
     let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
@@ -328,7 +349,8 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
     }
   }
 
-  return fragColor;
+  DECKGL_FILTER_COLOR(&fragColor, fragmentGeometry);
+  return deckgl_premultiplied_alpha(fragColor);
 }
 `;
 }

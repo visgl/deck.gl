@@ -3,12 +3,13 @@
 // Copyright (c) vis.gl contributors
 
 import type {Device, Framebuffer} from '@luma.gl/core';
-import {initializeShaderModule, ShaderPass} from '@luma.gl/shadertools';
+import {initializeShaderModule, ShaderPass} from '@luma.gl/shaders';
 
 import ScreenPass from '../passes/screen-pass';
 
 import type {Effect, EffectContext, PostRenderOptions} from '../lib/effect';
 
+/** Applies a screen-space shader pass to Deck’s rendered layers. WebGPU requires WGSL. */
 export default class PostProcessEffect<ShaderPassT extends ShaderPass> implements Effect {
   id: string;
   props: ShaderPassT['props'];
@@ -70,10 +71,14 @@ export default class PostProcessEffect<ShaderPassT extends ShaderPass> implement
 }
 
 function createPasses(device: Device, module: ShaderPass, id: string): ScreenPass[] {
+  if (device.type === 'webgpu' && !module.source) {
+    throw new Error(`PostProcessEffect: ${module.name} requires a WGSL shader on WebGPU`);
+  }
   return module.passes!.map((pass, index) => {
     const fs = getFragmentShaderForRenderPass(module, pass);
     const idn = `${id}-${index}`;
-    return new ScreenPass(device, {id: idn, module, fs});
+    const source = device.type === 'webgpu' ? getWGSLFragmentShader(module, pass) : undefined;
+    return new ScreenPass(device, {id: idn, module, fs, source});
   });
 }
 
@@ -119,4 +124,27 @@ function getFragmentShaderForRenderPass(
 
   // console.error(`${module.name} no fragment shader generated`);
   return '';
+}
+
+function getWGSLFragmentShader(
+  module: ShaderPass,
+  pass: NonNullable<ShaderPass['passes']>[number]
+): string {
+  const filter = typeof pass.filter === 'string' ? pass.filter : `${module.name}_filterColor_ext`;
+  const sampler = typeof pass.sampler === 'string' ? pass.sampler : `${module.name}_sampleColor`;
+  const color = pass.filter
+    ? `${filter}(textureSample(texSrc, texSrcSampler, coordinate), texSize, coordinate)`
+    : `${sampler}(texSrc, texSrcSampler, texSize, coordinate)`;
+
+  return /* wgsl */ `
+@group(0) @binding(auto) var texSrc: texture_2d<f32>;
+@group(0) @binding(auto) var texSrcSampler: sampler;
+
+@fragment
+fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4f {
+  let coordinate = vec2f(inputs.coordinate.x, 1.0 - inputs.coordinate.y);
+  let texSize = vec2f(textureDimensions(texSrc));
+  return ${color};
+}
+`;
 }

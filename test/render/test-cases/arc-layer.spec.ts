@@ -4,9 +4,11 @@
 
 import {describe, expect, test} from 'vitest';
 import {luma} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/webgl';
+import {GPUVector} from '@luma.gl/graph/gpu-data';
+import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {runRenderTestSuite, isRenderTestDeviceEnabled} from '../render-test-suite';
-import type {TestCase} from '../deck-test-utils';
+import {createContainer, createTestDevice, type TestCase} from '../deck-test-utils';
+import {expandViewMatrix} from '../view-presets';
 import {measureWebGPUEdges, STROKE_COLOR} from '../webgpu-antialiasing-test-utils';
 
 import {Deck, MapView, OrthographicView} from '@deck.gl/core';
@@ -15,29 +17,41 @@ import {ArcLayer} from '@deck.gl/layers';
 import * as dataSamples from 'deck.gl-test/data';
 
 const testCases = [
-  {
-    name: 'arc-lnglat',
-    viewState: {
-      latitude: 37.76,
-      longitude: -122.45,
-      zoom: 11.5,
-      pitch: 20,
-      bearing: 0
+  // The globe variant guards the strip winding: GlobeView draws with cullMode: 'back', and a
+  // clockwise (back-facing) quad would be culled entirely
+  // Golden: San Francisco routes as arcs from green at the source to blue at the target, pitched
+  // 20°, the same picture on the map and on the globe
+  ...expandViewMatrix(
+    {
+      name: 'arc-lnglat',
+      viewState: {
+        latitude: 37.76,
+        longitude: -122.45,
+        zoom: 11.5,
+        pitch: 20,
+        bearing: 0
+      },
+      layers: [
+        new ArcLayer({
+          id: 'arc-lnglat',
+          data: dataSamples.routes,
+          opacity: 0.8,
+          getWidth: 2,
+          getSourcePosition: d => d.START,
+          getTargetPosition: d => d.END,
+          getSourceColor: [64, 255, 0],
+          getTargetColor: [0, 128, 200]
+        })
+      ],
+      goldenImage: './test/render/golden-images/arc-lnglat.png',
+      overrides: {
+        globe: {
+          imageDiffOptions: {threshold: 0.985}
+        }
+      }
     },
-    layers: [
-      new ArcLayer({
-        id: 'arc-lnglat',
-        data: dataSamples.routes,
-        opacity: 0.8,
-        getWidth: 2,
-        getSourcePosition: d => d.START,
-        getTargetPosition: d => d.END,
-        getSourceColor: [64, 255, 0],
-        getTargetColor: [0, 128, 200]
-      })
-    ],
-    goldenImage: './test/render/golden-images/arc-lnglat.png'
-  },
+    ['map', 'globe']
+  ),
   {
     name: 'arc-lnglat-wrap-longitude',
     viewState: {
@@ -422,3 +436,63 @@ describe.runIf(isRenderTestDeviceEnabled('webgpu'))('ArcLayer#antialiasing on We
     expect(worstOvershoot, 'premultiplied red should track alpha').toBeLessThanOrEqual(2);
   }, 60000);
 });
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test.runIf(isRenderTestDeviceEnabled(backend))(
+    `absolute arc rise is independent of span on ${backend}`,
+    async () => {
+      const parent = createContainer();
+      const device = await createTestDevice(backend, parent);
+      const source = device.createBuffer({data: new Float32Array([-20, -20, -45, 20])});
+      const target = device.createBuffer({data: new Float32Array([20, -20, 45, 20])});
+      const layer = new ArcLayer({
+        id: 'absolute-rise',
+        sourcePositions: new GPUVector({
+          type: 'buffer',
+          name: 'sources',
+          buffer: source,
+          format: 'float32x2',
+          length: 2
+        }),
+        targetPositions: new GPUVector({
+          type: 'buffer',
+          name: 'targets',
+          buffer: target,
+          format: 'float32x2',
+          length: 2
+        }),
+        getWidth: 4,
+        getHeight: 10,
+        heightMode: 'absolute',
+        getTilt: 90,
+        numSegments: 33,
+        pickable: true
+      });
+      const deck = new Deck({
+        device,
+        parent,
+        width: 128,
+        height: 128,
+        useDevicePixels: false,
+        views: new OrthographicView(),
+        initialViewState: {target: [0, 0, 0], zoom: 0},
+        layers: [layer]
+      });
+      try {
+        await expect.poll(() => layer.state?.columns?.length).toBe(2);
+        for (const [index, y] of [-10, 30].entries()) {
+          const [pixelX, pixelY] = deck.getViewports()[0].project([0, y, 0]);
+          expect((await deck.pickObjectAsync({x: pixelX, y: pixelY}))?.index).toBe(index);
+        }
+      } finally {
+        deck.finalize();
+        layer.props.sourcePositions?.destroy();
+        layer.props.targetPositions?.destroy();
+        source.destroy();
+        target.destroy();
+        device.destroy();
+        parent.remove();
+      }
+    }
+  );
+}
