@@ -462,6 +462,40 @@ webglTest('MapboxOverlay#interleaved redraws widgets once per frame', async () =
   await renderPromise;
 });
 
+webglTest('MapboxOverlay#interleaved merges a second view into the widget redraw', async () => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const widget = new RedrawLogWidget({id: 'redraw-log'});
+  const data = [[-122.45, 37.78]];
+  const overlay = new MapboxOverlay({
+    interleaved: true,
+    views: [new MapView({id: 'minimap', x: '75%', y: '75%', width: '25%', height: '25%'})],
+    layers: [
+      new ScatterplotLayer({id: 'a', data, getPosition: d => d}),
+      new ScatterplotLayer({id: 'b', data, getPosition: d => d})
+    ],
+    // `a` is drawn by its layer group pass, `b` by the extra pass for the minimap
+    layerFilter: ({layer, viewport}) => (viewport.id === 'minimap') === (layer.id === 'b'),
+    widgets: [widget]
+  });
+
+  const renderPromise = waitForRender(map, async () => {
+    await vi.waitUntil(() => widget.redraws.length > 0);
+    widget.redraws.length = 0;
+
+    map._render();
+    expect(widget.redraws, 'one widget redraw with both views').toEqual([
+      {viewportIds: ['mapbox', 'minimap'], layerIds: ['a', 'b']}
+    ]);
+
+    map.removeControl(overlay);
+  });
+  map.addControl(overlay);
+  await renderPromise;
+});
+
 test('MapboxOverlay#interleaved drops useDevicePixels', () => {
   // The base map owns the drawing buffer size in interleaved mode, so useDevicePixels cannot apply
   const interleaved = new MapboxOverlay({interleaved: true, useDevicePixels: 1.5});
