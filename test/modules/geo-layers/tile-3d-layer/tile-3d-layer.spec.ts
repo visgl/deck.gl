@@ -10,7 +10,7 @@ import {normalizeCoordinateSystem} from '@deck.gl/geo-layers/tile-3d-layer/tile-
 import {Deck, WebMercatorViewport} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
-import {TILE_TYPE} from '@loaders.gl/tiles-3d';
+import {TILE_TYPE} from '@loaders.gl/tiles-3d/tileset';
 
 test('Tile3DLayer#normalizeCoordinateSystem', () => {
   // Loaders that predate the v9.3 string constants report numeric values, see issue #10368

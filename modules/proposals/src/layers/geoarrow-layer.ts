@@ -18,10 +18,7 @@ import {DataType, Table, type RecordBatch} from 'apache-arrow';
 import type {Feature, Geometry} from 'geojson';
 import {ArrowScatterplotLayer, type ArrowScatterplotLayerProps} from './arrow-scatterplot-layer';
 import {ArrowPathLayer, type ArrowPathLayerProps} from './arrow-path-layer';
-import {
-  ArrowSolidPolygonLayer,
-  type ArrowSolidPolygonLayerProps
-} from './arrow-solid-polygon-layer';
+import {ArrowPolygonLayer, type ArrowPolygonLayerProps} from './arrow-polygon-layer';
 
 import {
   makeGeoArrowFeatures,
@@ -49,9 +46,7 @@ export type GeoArrowLayerProps = Omit<LayerProps, 'data'> &
     /** Point radius column or constant. */
     getRadius?: ArrowScatterplotLayerProps['getRadius'];
     /** Point fill or polygon fill color. */
-    getFillColor?:
-      | ArrowScatterplotLayerProps['getFillColor']
-      | ArrowSolidPolygonLayerProps['getFillColor'];
+    getFillColor?: ArrowScatterplotLayerProps['getFillColor'] | ArrowPolygonLayerProps['color'];
     /** Linestring color. */
     colors?: ArrowPathLayerProps['colors'];
     /** Linestring width. */
@@ -71,7 +66,7 @@ export type GeoArrowLayerProps = Omit<LayerProps, 'data'> &
     /** Maximum line width in pixels. */
     widthMaxPixels?: number;
     /** Optional pre-tessellated polygon interpretation. */
-    tessellated?: ArrowSolidPolygonLayerProps['tessellated'];
+    tessellated?: ArrowPolygonLayerProps['tessellated'];
     /** GPU model selection forwarded to the selected native renderer. */
     model?: ArrowPathLayerProps['model'];
   };
@@ -251,15 +246,15 @@ export class GeoArrowLayer extends CompositeLayer<GeoArrowLayerProps> {
         } as ArrowPathLayerProps);
       case 'geoarrow.polygon':
       case 'geoarrow.multipolygon':
-        return new ArrowSolidPolygonLayer({
+        return new ArrowPolygonLayer({
           ...layerProps,
           ...this.getSubLayerProps({id: 'polygons'}),
           data,
-          getPolygon: geometry.columnName,
-          getFillColor: getFillColor as ArrowSolidPolygonLayerProps['getFillColor'],
+          polygons: geometry.columnName,
+          color: getFillColor as ArrowPolygonLayerProps['color'],
           tessellated,
           model
-        } as ArrowSolidPolygonLayerProps);
+        } as ArrowPolygonLayerProps);
     }
     return null;
   }

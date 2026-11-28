@@ -27,7 +27,9 @@ import {default as MeshLayer} from '../mesh-layer/mesh-layer';
 
 import {coreApi} from '@loaders.gl/core';
 import {MeshAttributes} from '@loaders.gl/core/schema';
-import {Tileset3D, Tiles3DSource, I3SSource, Tile3D, TILE_TYPE} from '@loaders.gl/tiles-3d';
+import {Tileset3D, Tile3D, TILE_TYPE} from '@loaders.gl/tiles-3d/tileset';
+import {Tiles3DSource} from '@loaders.gl/tiles-3d/tiles-3d-source';
+import {I3SSource} from '@loaders.gl/tiles-3d/i3s-source';
 import {Tiles3DLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 
 import {toByteColor} from '../utils/normalized-color';

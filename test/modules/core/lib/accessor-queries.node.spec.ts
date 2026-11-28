@@ -332,6 +332,24 @@ test('SQL color scales accept one-based Arrow list subscripts', () => {
   ]);
 });
 
+test('SQL color scales share the default SQRT function with plain accessors', () => {
+  const {table} = evaluateAccessorQueries(
+    tableFromArrays({count: [1, 9, 100]}),
+    {
+      getSize: 'SQRT(count)',
+      getColor:
+        "SCALE_COLOR(SQRT(count), DOMAIN(1, 3, 10), PALETTE('#edf8b1', '#7fcdbb', '#2c7fb8'))"
+    },
+    undefined
+  );
+  expect(Array.from(table.getChild('getSize')!)).toEqual([1, 3, 10]);
+  expect(Array.from(table.getChild('getColor')!, color => Array.from(color))).toEqual([
+    [237, 248, 177, 255],
+    [127, 205, 187, 255],
+    [44, 127, 184, 255]
+  ]);
+});
+
 test('SQL scales use the caller parser and SQL functions', () => {
   const data = tableFromArrays({value: [0, 5]});
   const parse = vi.fn(() =>

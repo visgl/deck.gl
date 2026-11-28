@@ -47,16 +47,16 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "5.0.0-rc.2",
-    "@loaders.gl/scene": "5.0.0-rc.2",
-    "@luma.gl/engine": "10.0.0-beta.3",
-    "@luma.gl/shaders": "10.0.0-beta.3"
+    "@loaders.gl/core": "^5.0.2",
+    "@loaders.gl/scene": "^5.0.2",
+    "@luma.gl/engine": "10.0.0-rc.1",
+    "@luma.gl/shaders": "10.0.0-rc.1"
   },
   "peerDependencies": {
     "@deck.gl/core": "~10.0.0-alpha",
-    "@luma.gl/core": "10.0.0-beta.3",
-    "@luma.gl/engine": "10.0.0-beta.3",
-    "@luma.gl/shaders": "10.0.0-beta.3"
+    "@luma.gl/core": "10.0.0-rc.1",
+    "@luma.gl/engine": "10.0.0-rc.1",
+    "@luma.gl/shaders": "10.0.0-rc.1"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
