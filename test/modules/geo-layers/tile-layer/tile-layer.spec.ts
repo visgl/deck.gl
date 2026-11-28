@@ -3,13 +3,49 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {GlobeViewport, WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {generateLayerTests, testLayerAsync, testLayer} from '@deck.gl/test-utils/vitest';
-import {TileLayer} from '@deck.gl/geo-layers';
+import {TileLayer, type TileLoadProps} from '@deck.gl/geo-layers';
 
 const DUMMY_DATA =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/test-data/geojson-point.json';
+
+test('TileLayer loads and displays the root tile on an underzoomed globe', async () => {
+  const viewport = new GlobeViewport({
+    width: 800,
+    height: 600,
+    longitude: 167.79,
+    latitude: 76.15,
+    zoom: -1.16,
+    pitch: 30
+  });
+  const requestedTiles: TileLoadProps['index'][] = [];
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport,
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        props: {
+          getTileData: ({index: {x, y, z}}) => {
+            requestedTiles.push({x, y, z});
+            return [{position: [167.79, 76.15]}];
+          },
+          renderSubLayers: props => new ScatterplotLayer(props)
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (layer.isLoaded) {
+            expect(subLayers).toHaveLength(1);
+          }
+        }
+      }
+    ]
+  });
+  expect(requestedTiles).toEqual([{x: 0, y: 0, z: 0}]);
+});
 
 test('TileLayer updates default GeoJSON tile colors without refetching', async () => {
   let requests = 0;

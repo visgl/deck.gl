@@ -27,6 +27,7 @@ import {
 } from '../tileset-2d/index';
 import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d/index';
 import {Matrix4} from '@math.gl/core/matrix';
+import {canUseGlobeRootTile} from '../tileset-2d/utils';
 
 /** GeoJSON tile renderer that forwards the top-level application's color convention. */
 class TileGeoJsonLayer extends GeoJsonLayer<any, {_normalizedTileColors?: boolean}> {
@@ -430,11 +431,12 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   renderLayers(): Layer | null | LayersList {
     const {visibleMinZoom, visibleMaxZoom, minZoom, extent} = this.props;
-    const zoom = this.context.viewport.zoom;
+    const {viewport} = this.context;
+    const {zoom} = viewport;
     const hidden =
       (visibleMinZoom != null && zoom < visibleMinZoom) ||
       (visibleMaxZoom != null && zoom > visibleMaxZoom) ||
-      (minZoom != null && !extent && zoom < minZoom);
+      (minZoom != null && !extent && zoom < minZoom && !canUseGlobeRootTile(viewport, minZoom));
     if (hidden) {
       // Clear cached sublayer references so they are recreated when visible again
       for (const tile of this.state.tileset!.tiles) {
