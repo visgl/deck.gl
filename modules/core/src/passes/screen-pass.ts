@@ -14,6 +14,7 @@ import {ScreenProps, screenUniforms} from './screen-pass-uniforms';
 type ScreenPassProps = {
   module: ShaderModule;
   fs: string;
+  source?: string;
   id: string;
 };
 
@@ -30,7 +31,7 @@ export default class ScreenPass extends Pass {
 
   constructor(device: Device, props: ScreenPassProps) {
     super(device, props);
-    const {module, fs, id} = props;
+    const {module, fs, source, id} = props;
     const parameters: RenderPipelineParameters = {
       depthWriteEnabled: false,
       depthCompare: 'always' as const,
@@ -43,7 +44,13 @@ export default class ScreenPass extends Pass {
       blendColorOperation: 'add',
       blendAlphaOperation: 'add'
     };
-    this.model = new ClipSpace(device, {id, fs, modules: [module, screenUniforms], parameters});
+    this.model = new ClipSpace(device, {
+      id,
+      fs,
+      source,
+      modules: source ? [module] : [module, screenUniforms],
+      parameters
+    });
   }
 
   render(params: ScreenPassRenderOptions): void {
@@ -70,19 +77,26 @@ export default class ScreenPass extends Pass {
       texSrc: inputBuffer.colorAttachments[0],
       texSize
     };
+    if (device.type === 'webgpu') {
+      const view = screenProps.texSrc;
+      this.model.setBindings({texSrc: view, texSrcSampler: view.texture.sampler});
+    }
     this.model.shaderInputs.setProps({
-      screen: screenProps,
+      ...(device.type === 'webgl' ? {screen: screenProps} : {}),
       ...options.moduleProps
     });
     const renderPass = this.device.beginRenderPass({
       framebuffer: outputBuffer,
       parameters: {viewport: [0, 0, ...texSize]},
       clearColor: clearCanvas ? [0, 0, 0, 0] : false,
-      clearDepth: 1,
+      clearDepth: device.type === 'webgpu' ? false : 1,
       clearStencil: false
     });
 
     this.model.draw(renderPass);
     renderPass.end();
+    if (device.type === 'webgpu') {
+      device.submit();
+    }
   }
 }

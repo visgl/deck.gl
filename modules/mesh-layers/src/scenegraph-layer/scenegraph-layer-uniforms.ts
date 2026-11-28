@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Matrix4} from '@math.gl/core';
+import type {Matrix4} from '@math.gl/core/matrix';
 import type {ShaderModule} from '@luma.gl/shaders';
 
 const uniformBlockWGSL = /* wgsl */ `\

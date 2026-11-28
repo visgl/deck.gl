@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import {FirstPersonViewport, Viewport, WebMercatorViewport} from '@deck.gl/core';
-import {getDistanceScales, lngLatToWorld} from '@math.gl/web-mercator';
+import {getDistanceScales, lngLatToWorld} from '@math.gl/geospatial/web-mercator';
 import {getProjectionParameters} from '@deck.gl/core/utils/math-utils';
 
 test('FirstPersonViewport inherits projection and retains its camera defaults', () => {

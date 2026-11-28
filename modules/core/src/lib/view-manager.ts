@@ -5,6 +5,7 @@
 import {deepEqual} from '../utils/deep-equal';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
+import {matchById, warnDuplicates} from './match-by-id';
 
 import type Controller from '../controllers/controller';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
@@ -406,18 +407,18 @@ export default class ViewManager<ViewsT extends View[]> {
     views = flatten(views, Boolean);
 
     const previousViews = this.views;
-    // Retain pending and ready views, but let a fresh descriptor retry failed initialization.
-    views = views.map(view => {
-      const previous = previousViews.find(candidate => candidate.id === view.id);
-      return previous && !this._failedViews.has(previous) && previous.equals(view)
-        ? previous
-        : view;
-    });
+    const {matches, removed} = matchById(previousViews, views);
+    // Keep the old view only when it `equals` the new one: a view has no `setProps`, so its class
+    // and props are its behavior. Retain pending and ready views, but let a fresh descriptor retry
+    // failed initialization.
+    views = matches.map(({item, previous}) =>
+      previous && !this._failedViews.has(previous) && previous.equals(item) ? previous : item
+    );
     const viewsChanged = this._diffViews(views, previousViews);
     if (viewsChanged) {
-      const viewIds = new Set(views.map(view => view.id));
-      for (const view of this.views) {
-        if (!viewIds.has(view.id)) this._eventCallbacks.onViewRemoved?.(view.id);
+      warnDuplicates(matches, 'views');
+      for (const view of removed) {
+        this._eventCallbacks.onViewRemoved?.(view.id);
       }
       this.setNeedsUpdate('views changed');
     }
@@ -595,15 +596,26 @@ export default class ViewManager<ViewsT extends View[]> {
 
     const {oldControllers, oldViewEventManagers} = this._startViewportRebuild();
 
+    // Controllers, event managers and lookups are keyed by view id, so they belong to the first
+    // view with each id. A later view with the same id is still drawn, but gets no controller.
+    // `_setViews` has already warned about it.
+    const {matches} = matchById([], views);
+
     let invalidateControllers = false;
     // Create controllers in reverse order, so that views on top receive events first
     for (let i = views.length; i--; ) {
       const view = views[i];
       const {width, height} = this._getCanvasDimensions(view);
-      const viewEventManager = this._getViewEventManager(view);
-      this._viewEventManagers[view.id] = viewEventManager;
       const viewState = this.getViewState(view);
       const viewport = view.makeViewport({viewState, width, height});
+      if (matches[i].duplicate) {
+        if (viewport) {
+          this._viewports.unshift(viewport);
+        }
+        continue;
+      }
+      const viewEventManager = this._getViewEventManager(view);
+      this._viewEventManagers[view.id] = viewEventManager;
 
       let oldController = this._getReusableController(
         oldControllers[view.id],
@@ -654,7 +666,7 @@ export default class ViewManager<ViewsT extends View[]> {
     this._viewportMap = {};
     this._viewports.forEach(viewport => {
       if (viewport.id) {
-        // TODO - issue warning if multiple viewports use same id
+        // The first viewport with an id wins; `_setViews` warns about duplicate ids
         this._viewportMap[viewport.id] = this._viewportMap[viewport.id] || viewport;
       }
     });

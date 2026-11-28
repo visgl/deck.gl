@@ -14,6 +14,9 @@ The `LineLayer` renders straight lines joining pairs of source and target coordi
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<Tabs groupId="layer-input">
+  <TabItem value="accessors" label="Classic accessors">
+
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
 
@@ -137,6 +140,28 @@ function App() {
   </TabItem>
 </Tabs>
 
+  </TabItem>
+  <TabItem value="arrow" label="Arrow inputs">
+
+```js
+import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+import {LineLayer} from '@deck.gl/layers';
+
+const positionType = new FixedSizeList(2, new Field('value', new Float32()));
+const positions = vectorFromArray([[-122.4, 37.74]], positionType);
+const targets = vectorFromArray([[-122.41, 37.75]], positionType);
+
+const layer = new LineLayer({
+  getSourcePosition: positions,
+  getTargetPosition: targets
+});
+```
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for column layouts and mixed inputs.
+
+  </TabItem>
+</Tabs>
+
 
 ## Installation
 
@@ -209,58 +234,42 @@ When enabled, this prop computes edge coverage in the shader. When disabled, the
 Other antialiasing techniques have different trade-offs; see [Antialiasing and Multisampling](https://luma.gl/docs/api-guide/gpu/gpu-antialiasing) in the luma.gl docs.
 
 
-### Arrow Columns
-
-See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
-
-#### `sourcePositions` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric XY or XYZ fixed-size lists specifying source positions. Overrides [`getSourcePosition`](#getsourceposition).
-
-#### `targetPositions` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric XY or XYZ fixed-size lists specifying target positions. Overrides [`getTargetPosition`](#gettargetposition).
-
-#### `colors` (Arrow Vector, optional)
-
-* Default: `null`
-
-RGB or RGBA fixed-size lists specifying line colors. Overrides [`getColor`](#getcolor).
-
-#### `widths` (Arrow Vector, optional)
-
-* Default: `null`
-
-Numeric scalar widths in `widthUnits`. Overrides [`getWidth`](#getwidth).
 
 ### Data Accessors
 
-#### `getSourcePosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsourceposition}
+Arrow inputs follow the shared [column requirements and limitations](../../developer-guide/using-with-arrow.md#limitations).
+
+#### `getSourcePosition` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsourceposition}
 
 * Default: `object => object.sourcePosition`
 
 Method called to retrieve the source position of each object.
 
-#### `getTargetPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gettargetposition}
+An Arrow vector supplies one value per object. See [position columns](../../developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
+
+
+#### `getTargetPosition` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#gettargetposition}
 
 * Default: `object => object.targetPosition`
 
 Method called to retrieve the target position of each object.
 
-#### `getColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
+An Arrow vector supplies one value per object. See [position columns](../../developer-guide/using-with-arrow.md#positions-and-other-vectors) for requirements.
+
+
+#### `getColor` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getcolor}
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
+For arrays and callback results, the rgba color is in the format of `[r, g, b, [a]]`. Each channel is a number between 0-255 and `a` is 255 if not supplied.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-#### `getWidth` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getwidth}
+An Arrow vector supplies one value per object. See [color columns](../../developer-guide/using-with-arrow.md#colors) for requirements.
+
+
+#### `getWidth` (constant | Accessor | arrow.Vector, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getwidth}
 
 * Default: `1`
 
@@ -268,6 +277,25 @@ The line width of each object, in units specified by `widthUnits` (default pixel
 
 * If a number is provided, it is used as the line width for all objects.
 * If a function is provided, it is called on each object to retrieve its line width.
+
+An Arrow vector supplies one value per object. See [scalar columns](../../developer-guide/using-with-arrow.md#scalars) for requirements.
+
+
+## GPUVector inputs 🧪 {#gpuvector-inputs-unstable}
+
+> GPU buffer layouts are internal to layer implementations and can change in future releases.
+
+GPUVector props let applications supply caller-owned GPU buffers to the rendering path. This is particularly useful when applications compute rendering attributes on the GPU.
+
+- `sourcePositions` – `float32x2` or `float32x3` – XY or XYZ positions. Packed XY positions have zero elevation.
+- `targetPositions` – `float32x2` or `float32x3` – XY or XYZ positions. Packed XY positions have zero elevation.
+- `colors` – `unorm8x4` – Packed RGBA colors.
+- `widths` – `float32`
+
+Notes:
+
+- Supply one value per rendered instance, in instance order.
+- See [Direct GPUVector inputs](../../developer-guide/using-with-arrow.md#direct-gpuvector-inputs) for ownership, chunk alignment, and preprocessing requirements.
 
 ## Source
 

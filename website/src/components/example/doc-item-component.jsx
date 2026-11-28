@@ -4,7 +4,6 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import useBaseUrl from '@docusaurus/useBaseUrl';
 
 const DemoContainer = styled.div`
   position: absolute;
@@ -20,11 +19,11 @@ const DemoContainer = styled.div`
 `;
 
 /** Passed to @docusaurus/plugin-content-docs to render the mdx content */
-export default function DocItem({content, route}) {
+export default function DocItem({content}) {
   const MDXComponent = content;
-  const indexPath = useBaseUrl('/examples');
+  const {metadata} = content;
 
-  if (route.path === indexPath) {
+  if (metadata.id === 'index') {
     return (
       <div key="index">
         <MDXComponent />

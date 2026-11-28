@@ -13,7 +13,7 @@ import {binOptionsUniforms} from '@deck.gl/aggregation-layers/hexagon-layer/bin-
 import {hexbin} from 'd3-hexbin';
 import {device} from '@deck.gl/test-utils/vitest';
 import {BufferTransform} from '@luma.gl/engine';
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
 
 function pointToHexbinCentroidD3(p: [number, number], radius: number): [number, number] {
   const bins = hexbin().radius(radius)([p]);

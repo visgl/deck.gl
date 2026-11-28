@@ -64,11 +64,18 @@ fn interpolateFlat(
   tiltDegrees: f32
 ) -> vec3<f32> {
   let distance = length(source.xy - targetPosition.xy);
-  let z = paraboloid(distance, source.z, targetPosition.z, ratio, height);
+  var baseline = 0.0;
+  var z: f32;
+  if (arc.absoluteHeight != 0.0) {
+    baseline = mix(source.z, targetPosition.z, ratio);
+    z = 4.0 * ratio * (1.0 - ratio) * project_size_float(height);
+  } else {
+    z = paraboloid(distance, source.z, targetPosition.z, ratio, height);
+  }
   let tiltAngle = radians(tiltDegrees);
-  let tiltDirection = normalize(targetPosition.xy - source.xy);
+  let tiltDirection = (targetPosition.xy - source.xy) / max(distance, 1e-10);
   let tilt = vec2<f32>(-tiltDirection.y, tiltDirection.x) * z * sin(tiltAngle);
-  return vec3<f32>(mix(source.xy, targetPosition.xy, ratio) + tilt, z * cos(tiltAngle));
+  return vec3<f32>(mix(source.xy, targetPosition.xy, ratio) + tilt, baseline + z * cos(tiltAngle));
 }
 
 // Great circle interpolation
@@ -107,6 +114,10 @@ fn interpolateGreatCircle(
     ));
   }
 
+  if (arc.absoluteHeight != 0.0) {
+    let z = mix(source.z, targetPosition.z, ratio) + 4.0 * ratio * (1.0 - ratio) * height;
+    return vec3<f32>(longitudeLatitude, z);
+  }
   let z = paraboloid(
     angularDistance * EARTH_RADIUS,
     source.z,

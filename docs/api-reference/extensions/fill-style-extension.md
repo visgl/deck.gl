@@ -130,7 +130,7 @@ The following properties are available if the `pattern` option is enabled.
 #### `fillPatternAtlas` (Texture2D | String) {#fillpatternatlas}
 
 Sprite image url or texture that packs all your patterns into one layout.
-You can create sprite images with tools such as [TexturePacker](https://www.codeandweb.com/texturepacker).
+You can create sprite images with tools such as [TexturePacker](https://www.codeandweb.com/texturepacker) or [SpriteSheet.dev](https://spritesheet.dev).
 Ignored when `proceduralPattern` is enabled.
 
 #### `fillPatternEnabled` (boolean) {#fillpatternenabled}
@@ -279,7 +279,9 @@ The offset of the pattern, relative to the original size. Offset `[0.5, 0.5]` sh
 
 The color filled behind the pattern. The pattern is composited on top of it, so the background shows
 through wherever the pattern is transparent. Defaults to fully transparent, which leaves the area
-behind the pattern unfilled.
+behind the pattern unfilled. With Deck’s [`normalizedColors`](../core/deck.md#normalizedcolors)
+option, plain arrays use 0–1 channels. Omitted alpha is opaque. Use 0–255 channels in
+legacy mode or with byte typed arrays.
 
 This makes it possible to style a polygon's background independently from the pattern drawn over it
 within a single layer. The layer's own `getFillColor` (or, with

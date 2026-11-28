@@ -186,10 +186,12 @@ The reverse-controlled option is supported by the pre-built scripting bundle, an
 
   <TabItem value="react" label="React">
 
+Reverse-controlled maps, with `DeckGL` as the root and the map as its child, need `@deck.gl/react/legacy`. To add deck.gl to a map you create with `@deck.gl/react`, see [Using with maps](../react/using-with-maps.md).
+
 ```tsx
 import React from 'react';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react/legacy';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import 'maplibre-gl/dist/maplibre-gl.css';
 

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Viewport} from '@deck.gl/core';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {getOSMTileIndices} from './tile-2d-traversal';
 import {Bounds, GeoBoundingBox, TileBoundingBox, TileIndex, ZRange} from './types';
 
