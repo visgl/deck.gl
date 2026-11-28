@@ -1069,16 +1069,16 @@ test('GlobeController keeps north-up pointer zoom off the poles', () => {
   ).toBeLessThanOrEqual(MAX_LATITUDE + 1e-9);
 });
 
-test('GlobeController lets a rotated globe pan over the poles', () => {
+test('GlobeController lets ball navigation pan over the poles', () => {
   const controller = createTestController({
-    view: new GlobeView({controller: true}),
+    view: new GlobeView({controller: {navigation: 'ball'}}),
     initialViewState: {width: 800, height: 600, longitude: 0, latitude: 80, zoom: 1, bearing: 5}
   });
   controller.handleEvent(makeGestureEvent('panstart', {x: 400, y: 300}) as any);
   controller.handleEvent(makeGestureEvent('panmove', {x: 400, y: 400}) as any);
   controller.handleEvent(makeGestureEvent('panend', {x: 400, y: 400}) as any);
 
-  expect(controller.props.latitude, 'free-bearing pan can pass the max latitude').toBeGreaterThan(
+  expect(controller.props.latitude, 'ball pan can pass the max latitude').toBeGreaterThan(
     MAX_LATITUDE
   );
 });
