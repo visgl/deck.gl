@@ -33,6 +33,10 @@ export default class CustomProjectionViewport extends Viewport {
   static displayName = 'CustomProjectionViewport';
   pitch: number;
   bearing: number;
+  /** Camera vertical field of view in degrees, as in `WebMercatorViewport`. */
+  fovy: number;
+  /** Use an orthographic camera, as in `WebMercatorViewport`. */
+  readonly orthographic: boolean;
   private signature: string;
   declare crs: CRSDescriptor;
   readonly sizeScaleSignature: string;
@@ -95,6 +99,8 @@ export default class CustomProjectionViewport extends Viewport {
     this.crs = crs;
     this.pitch = pitch;
     this.bearing = bearing;
+    this.fovy = fovy;
+    this.orthographic = opts.orthographic ?? false;
     this.isGeospatial = true;
     this.signature = JSON.stringify([crs.signature, this.resolution]);
     this.sizeScaleSignature = JSON.stringify([crs.signature, crs.renderingBounds]);
@@ -113,6 +119,29 @@ export default class CustomProjectionViewport extends Viewport {
   }
   get projectionMode(): number {
     return PROJECTION_MODE.CUSTOM_GEOSPATIAL;
+  }
+
+  /**
+   * Returns a copy of this camera with zero pitch, in the same CRS and over the same target.
+   * loaders.gl 3D tileset traversal (`Tile3DLayer`) uses it to measure projected tile size,
+   * because it cannot rebuild this viewport from longitude, latitude and zoom.
+   */
+  getTopDownViewport(): CustomProjectionViewport {
+    const {id, crs, resolution, width, height, padding, position, zoom, bearing, orthographic} =
+      this;
+    return new CustomProjectionViewport({
+      id,
+      crs,
+      resolution,
+      width,
+      height,
+      padding,
+      center: [position[0], position[1], 0],
+      zoom,
+      bearing,
+      pitch: 0,
+      orthographic
+    });
   }
 
   /** Sample the Jacobian scalar, XY slopes, and Z-unit encoding over the CRS bounds. */
