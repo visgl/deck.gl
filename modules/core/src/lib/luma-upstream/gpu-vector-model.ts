@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {getAttributeShaderTypeInfo} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import type {TypedArray} from '@math.gl/core';
+import type {TypedArray} from '@math.gl/core/matrix';
 
 /**
  * Marks models that receive AttributeManager's typed GPU vectors.
@@ -27,11 +28,13 @@ export default class GPUVectorModel extends Model {
       for (const [name, value] of Object.entries(attributes)) {
         // A WebGL generic attribute's numeric type must match the shader input.
         // The vector binder constructs constants from the storage format instead.
-        if (
-          this._attributeInfos[name]?.integer === false &&
-          (value instanceof Int32Array || value instanceof Uint32Array)
-        ) {
-          attributes = {...attributes, [name]: new Float32Array(value)};
+        if (value instanceof Int32Array || value instanceof Uint32Array) {
+          const declaration = this.pipeline?.shaderLayout.attributes.find(
+            attribute => attribute.name === name
+          );
+          if (declaration && !getAttributeShaderTypeInfo(declaration.type).integer) {
+            attributes = {...attributes, [name]: new Float32Array(value)};
+          }
         }
       }
     }

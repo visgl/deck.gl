@@ -2,22 +2,25 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global fetch */
+import {GeoParquetLoader} from '@loaders.gl/tables/parquet';
 import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
-import {tableFromArrays} from 'apache-arrow';
+import {DeckGL} from '@deck.gl/react/legacy';
+import {LoadingWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+import {tableFromArrays, type Table} from 'apache-arrow';
 import type {Device} from '@luma.gl/core';
-import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
+import {isArrowTable} from '@math.gl/core/arrow';
+import {ArcLayer} from '@deck.gl/layers';
+import {GeoArrowLayer} from '@deck.gl/proposals/layers';
 import {scaleQuantile} from 'd3-scale';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
-import type {Feature, Polygon, MultiPolygon} from 'geojson';
 
-// Source data GeoJSON
+// Full website geometry in GeoParquet; properties retain their original names.
 const DATA_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/arc/counties.json'; // eslint-disable-line
+  'https://media.githubusercontent.com/media/visgl/deck.gl-data/886cf5ab469bba3816aa5a32d4454835e0ce5951/examples/arc/counties.parquet'; // eslint-disable-line
 
 export const inFlowColors: Color[] = [
   [255, 255, 204],
@@ -50,16 +53,14 @@ const INITIAL_VIEW_STATE: MapViewState = {
 
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 
-type CountyProperties = {
+type County = {
   /** county name */
   name: string;
   /** county index -> net flow */
   flows: Record<string, number>;
   /** geographical centroid */
-  centroid: [lon: number, lat: number];
+  centroid: Iterable<number>;
 };
-
-type County = Feature<Polygon | MultiPolygon, CountyProperties>;
 
 type MigrationFlow = {
   source: County;
@@ -70,17 +71,11 @@ type MigrationFlow = {
 };
 
 /** Builds columnar arc endpoints and styling values for the selected county. */
-function makeArcTable(data: County[] | undefined, selectedCounty?: County) {
-  if (!data || !data.length) {
-    return null;
-  }
-  if (!selectedCounty) {
-    selectedCounty = data.find(f => f.properties.name === 'Los Angeles, CA')!;
-  }
-  const {flows} = selectedCounty.properties;
+function makeArcTable(data: Table, selectedCounty: County) {
+  const {flows} = selectedCounty;
 
   const arcs: MigrationFlow[] = Object.keys(flows).map(toId => {
-    const f = data[Number(toId)];
+    const f = data.get(Number(toId)) as County;
     return {
       source: selectedCounty,
       target: f,
@@ -98,66 +93,103 @@ function makeArcTable(data: County[] | undefined, selectedCounty?: County) {
   });
 
   return tableFromArrays({
-    source_longitude: Float64Array.from(arcs, arc => arc.source.properties.centroid[0]),
-    source_latitude: Float64Array.from(arcs, arc => arc.source.properties.centroid[1]),
-    target_longitude: Float64Array.from(arcs, arc => arc.target.properties.centroid[0]),
-    target_latitude: Float64Array.from(arcs, arc => arc.target.properties.centroid[1]),
+    source_longitude: Float64Array.from(arcs, arc => Array.from(arc.source.centroid)[0]),
+    source_latitude: Float64Array.from(arcs, arc => Array.from(arc.source.centroid)[1]),
+    target_longitude: Float64Array.from(arcs, arc => Array.from(arc.target.centroid)[0]),
+    target_latitude: Float64Array.from(arcs, arc => Array.from(arc.target.centroid)[1]),
     value: Float64Array.from(arcs, arc => arc.value),
     quantile: Uint8Array.from(arcs, arc => arc.quantile)
   });
 }
 
 function getTooltip({object}: PickingInfo<County>) {
-  return object && object.properties.name;
+  return object && object.name;
 }
 
 /* eslint-disable react/no-deprecated */
 export default function App({
   device,
-  data,
+  data = DATA_URL,
   strokeWidth = 1,
   mapStyle = MAP_STYLE,
-  onSelectCounty
+  onSelectCounty,
+  onDataLoad,
+  onArcDataLoad
 }: {
   device?: Device;
-  data?: County[];
+  data?: string | Table;
   strokeWidth?: number;
   mapStyle?: string;
   onSelectCounty?: (county: County) => void;
+  /** Reports the loaded county count to the website controls. */
+  onDataLoad?: (stats: {count: number}) => void;
+  /** Reports the number of arcs for the current county. */
+  onArcDataLoad?: (count: number) => void;
 }) {
-  const [selectedCounty, selectCounty] = useState<County>();
+  const widgets = useMemo(() => [new LoadingWidget()], []);
+  /** Index of the county selected by picking. */
+  const [selectedCounty, selectCounty] = useState<number>();
 
-  const arcs = useMemo(() => makeArcTable(data, selectedCounty), [data, selectedCounty]);
+  /** County table supplied by the geometry layer after loading. */
+  const [loadedCounties, setLoadedCounties] = useState<Table>();
+  /** County table used for the migration destination lookup. */
+  const counties = typeof data === 'string' ? loadedCounties : data;
+  /** Index of Los Angeles, or the first row when absent. */
+  const defaultCounty = useMemo(() => {
+    /** County names in source row order. */
+    const names = counties?.getChild('name');
+    return Math.max(0, names ? [...names].indexOf('Los Angeles, CA') : -1);
+  }, [counties]);
+  /** One source row whose identity changes with county selection. */
+  const arcSource = useMemo(() => {
+    /** Source row for the current selection. */
+    const index = selectedCounty ?? defaultCounty;
+    return counties && index < counties.numRows ? counties.slice(index, index + 1) : null;
+  }, [counties, selectedCounty, defaultCounty]);
 
   const layers = [
-    new GeoJsonLayer<CountyProperties>({
-      id: 'geojson',
+    new GeoArrowLayer({
+      id: 'counties',
       data,
-      stroked: false,
-      filled: true,
+      loaders: [GeoParquetLoader],
+      onDataLoad: table => {
+        if (isArrowTable(table)) {
+          setLoadedCounties(table);
+          selectCounty(undefined);
+          onDataLoad?.({count: table.numRows});
+        }
+      },
       getFillColor: [0, 0, 0, 0],
-      onClick: ({object}) => {
+      onClick: ({object, index}) => {
         if (object) {
-          selectCounty(object);
+          selectCounty(index);
           onSelectCounty?.(object);
         }
       },
       pickable: true
     }),
-    arcs &&
-      new ArcLayer<MigrationFlow>({
-        id: 'arc',
-        data: arcs,
-        getSourcePosition: {sql: 'FLOAT64x2(source_longitude, source_latitude)'},
-        getTargetPosition: {sql: 'FLOAT64x2(target_longitude, target_latitude)'},
-        getSourceColor: d => (d.value > 0 ? inFlowColors : outFlowColors)[d.quantile],
-        getTargetColor: d => (d.value > 0 ? outFlowColors : inFlowColors)[d.quantile],
-        getWidth: strokeWidth
-      })
+    new ArcLayer<MigrationFlow>({
+      id: 'arc',
+      data: arcSource,
+      dataTransform: <LayerDataT,>(source: unknown): LayerDataT => {
+        /** Source county whose flow map supplies the arcs. */
+        const county = isArrowTable(source) ? source.get(0) : null;
+        return (counties && county ? makeArcTable(counties, county as County) : []) as LayerDataT;
+      },
+      onDataLoad: table => {
+        onArcDataLoad?.(isArrowTable(table) ? table.numRows : 0);
+      },
+      getSourcePosition: {sql: 'ARRAY[source_longitude, source_latitude]'},
+      getTargetPosition: {sql: 'ARRAY[target_longitude, target_latitude]'},
+      getSourceColor: d => (d.value > 0 ? inFlowColors : outFlowColors)[d.quantile],
+      getTargetColor: d => (d.value > 0 ? outFlowColors : inFlowColors)[d.quantile],
+      getWidth: strokeWidth
+    })
   ];
 
   return (
     <DeckGL
+      widgets={widgets}
       device={device}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
@@ -169,11 +201,7 @@ export default function App({
   );
 }
 
-export async function renderToDOM(container: HTMLDivElement) {
-  const root = createRoot(container);
-  root.render(<App />);
-
-  const resp = await fetch(DATA_URL);
-  const {features} = await resp.json();
-  root.render(<App data={features} />);
+/** Mounts the standalone example. */
+export function renderToDOM(container: HTMLDivElement) {
+  createRoot(container).render(<App />);
 }

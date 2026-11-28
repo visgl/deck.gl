@@ -3,13 +3,15 @@
 The single private workspace for experimental deck.gl layers and effects. This
 package is not published and is not a dependency of public deck.gl modules.
 
-- `@deck.gl/proposals/layers`: GPU-resident, Arrow, atmospheric, and particle layers.
+- `@deck.gl/proposals/layers`: GPU-resident and Arrow layers.
 - `@deck.gl/proposals/layers/path-layer`, `/polygon-layer`, `/solid-polygon-layer`,
   and `/text-layer`: focused GPU layer entry points.
-- `@deck.gl/proposals/effects`: scene buffers, shader passes, and GPU graph effects.
-- `@deck.gl/proposals/effects/query`: geographic query effects and diagnostics.
+- `@deck.gl/proposals/layers/filtered-scatterplot-layer/geographic-point-query-effect`: geographic query effects and diagnostics.
 
-Implementations live in `src/layers` and `src/effects`; tests mirror that structure.
+Find the [sky and effect layers](../../docs/api-reference/proposals/gpu-layers.md#sky-and-effect-layers)
+in deck.gl-community.
+
+Implementations live in `src/layers`; tests mirror that structure.
 Add new prototypes here instead of creating more private packages. The build checks
 that `proposals` is the only private package under `modules`.
 
@@ -45,3 +47,16 @@ alive while a layer uses them, and release them after the layer is done.
 
 These proposals cover WebGPU strokes and flat fills. Extrusion, wireframe, and
 extension parity are outside this scope.
+
+### GeoArrowLayer
+
+`GeoArrowLayer` accepts an Arrow table or record batch. It finds a geometry
+column from GeoArrow extension metadata or uses the field named by
+`getGeometry`. Supply `geometryType` for a field without extension metadata.
+
+Native Point, LineString, Polygon, and MultiPolygon columns use the Arrow
+renderers. WKB, WKT, mixed `geoarrow.geometry`, GeometryCollection, MultiPoint,
+and MultiLineString use the standard GeoJSON renderer through the loaders.gl
+geometry converter. This path accepts style constants and CPU-readable Arrow
+columns. Each part of a feature uses the style of its source row. Picking
+returns the original Arrow row and its index, including across record batches.

@@ -11,7 +11,7 @@ import {
 } from '@loaders.gl/core/loader-utils';
 import {Stats} from 'probe.gl/stats';
 import type {Tileset2DAdapter} from './adapter';
-import {Matrix4, equals, NumericArray} from '@math.gl/core';
+import {Matrix4, equals, NumericArray} from '@math.gl/core/matrix';
 
 import {Tile2DHeader} from './tile-2d-header';
 

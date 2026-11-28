@@ -15,7 +15,7 @@ const defaultProps = {
 export type TerrainExtensionProps = {
   /**
    * controls whether an object is drawn over the terrain surface by its anchor (usually defined by an accessor called `getPosition`, e.g. icon, scatterplot) or by its geometry (e.g. path, polygon).
-   * If not specified, the mode is inferred from the layer. WebGPU defaults to `offset` and does not support draping.
+   * If not specified, layers with anchors or `extruded: true` use `'offset'`, and other layers use `'drape'`.
    */
   terrainDrawMode?: 'offset' | 'drape';
 };
@@ -27,7 +27,7 @@ type TerrainExtensionState = {
   terrainCoverNeedsRedraw: boolean;
 };
 
-/** Fits layer anchors or geometry to terrain. WebGPU currently supports offset mode. */
+/** Fits layer anchors or geometry to terrain. */
 export default class TerrainExtension extends LayerExtension {
   static defaultProps = defaultProps;
   static extensionName = 'TerrainExtension';
@@ -57,7 +57,6 @@ export default class TerrainExtension extends LayerExtension {
       return;
     }
 
-    const supportsDraping = this.context.device.type !== 'webgpu';
     let {terrainDrawMode} = props;
     if (!terrainDrawMode) {
       // props.extruded is used as an indication that the layer is 2.5D
@@ -65,10 +64,7 @@ export default class TerrainExtension extends LayerExtension {
       const is3d = this.props.extruded as boolean;
       const attributes = this.getAttributeManager()?.attributes;
       const hasAnchor = attributes && 'instancePositions' in attributes;
-      terrainDrawMode = !supportsDraping || is3d || hasAnchor ? 'offset' : 'drape';
-    }
-    if (!supportsDraping && terrainDrawMode === 'drape') {
-      throw new Error('TerrainExtension: WebGPU supports terrainDrawMode: "offset" only');
+      terrainDrawMode = is3d || hasAnchor ? 'offset' : 'drape';
     }
     this.setState({terrainDrawMode});
   }

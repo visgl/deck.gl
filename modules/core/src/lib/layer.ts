@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable react/no-direct-mutation-state */
+import type {ResolvedScale} from '@math.gl/core/color';
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/core/webgl';
 import {unwrapLoaderArrowResult} from '../utils/loader-utils';
@@ -17,7 +18,9 @@ import {
   ACCESSOR_QUERIES_SYMBOL,
   COMPONENT_SYMBOL,
   LIFECYCLE,
-  Lifecycle
+  Lifecycle,
+  PROP_TYPES_SYMBOL,
+  ROW_ACCESSOR_COLUMNS_SYMBOL
 } from '../lifecycle/constants';
 import {count} from '../utils/count';
 import log from '../utils/log';
@@ -35,13 +38,13 @@ import pickingModule, {
 } from '../shaderlib/picking/picking';
 
 import Component from '../lifecycle/component';
-import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection-core';
 import {areCRSEqual, resolveCRS} from '../utils/crs';
 import {supportsSourceCRS} from '../shaderlib/project/coordinate-systems';
 import LayerState, {ChangeFlags} from './layer-state';
 
-import {worldToPixels} from '@math.gl/web-mercator';
-import {vec3TransformMat4 as transformMat4} from '@math.gl/core';
+import {worldToPixels} from '@math.gl/geospatial/web-mercator';
+import {vec3TransformMat4 as transformMat4} from '@math.gl/core/matrix';
 
 import {load, loadInBatches} from '@loaders.gl/core';
 
@@ -620,7 +623,25 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Returns the table used by column-aware layers while leaving the loaded prop intact. */
   protected getColumnData(): LayerData<unknown> {
-    return unwrapLoaderArrowResult(this.props.data) as LayerData<unknown>;
+    const data = unwrapLoaderArrowResult(this.props.data) as LayerData<unknown>;
+    if (
+      Array.isArray(data) &&
+      data.length === 0 &&
+      !this.internalState?.isAsyncPropLoading('data')
+    ) {
+      const columns = this.props[ROW_ACCESSOR_COLUMNS_SYMBOL];
+      for (const [name, column] of Object.entries(columns ?? {})) {
+        const type = this.props[PROP_TYPES_SYMBOL][name];
+        if (
+          type?.type === 'accessor' &&
+          'arrowWithExtensions' in type &&
+          type.arrowWithExtensions
+        ) {
+          return {length: column.length};
+        }
+      }
+    }
+    return data;
   }
 
   /** Merges Deck and layer declarations by SQL name, with the layer taking precedence. */
@@ -644,7 +665,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       return;
     }
     const source = this.props.data;
-    if (state.isAsyncPropLoading('data') && !isArrowTable(unwrapLoaderArrowResult(source))) {
+    if (
+      source == null ||
+      (Array.isArray(source) && source.length === 0) ||
+      (state.isAsyncPropLoading('data') && !isArrowTable(unwrapLoaderArrowResult(source)))
+    ) {
       state.accessorQueries = undefined;
       return;
     }
@@ -686,6 +711,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       expressions,
       parseExpression,
       functions,
+      scales: previous?.scales,
       pending: true
     };
     state.accessorQueries = request;
@@ -700,10 +726,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         evaluateAccessorQueries(source, expressions, parseExpression, previous, functions)
       )
       .then(
-        table => {
+        ({table, scales}) => {
           const layer = currentLayer();
           if (layer) {
             request.table = table;
+            request.scales = Object.keys(scales).length ? scales : undefined;
             request.pending = false;
             request.columns = Object.fromEntries(
               Object.keys(expressions).map(name => [name, table.getChild(name)!])
@@ -716,19 +743,44 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         error => {
           const layer = currentLayer();
           if (layer) {
+            request.scales = undefined;
             request.pending = false;
             layer.setNeedsUpdate();
             layer.raiseError(error, 'evaluating SQL accessors');
+            layer.setChangeFlags({dataChanged: 'SQL accessor evaluation failed'});
           }
         }
       );
   }
 
+  /** Returns whether the caller supplied a SQL expression for this accessor. */
+  protected hasAccessorQuery(name: string): boolean {
+    return Boolean(this.props[ACCESSOR_QUERIES_SYMBOL]?.[name]);
+  }
+
+  /** Returns the current row-aligned SQL accessor results with their Arrow field metadata. */
+  protected getAccessorQueryTable() {
+    return this.internalState?.accessorQueries?.table;
+  }
+
+  /**
+   * Experimental. Returns resolved SQL color scales keyed by accessor. The result is undefined
+   * until the first evaluation completes. While updating, it describes the previously applied
+   * colors.
+   * Color samples use normalized RGBA channels in [0, 1].
+   */
+  _getResolvedColorScales(): Readonly<Record<string, ResolvedScale>> | undefined {
+    return this.internalState?.accessorQueries?.scales;
+  }
+
   /** Called once to set up the initial state. Layers can create WebGL resources here. */
   abstract initializeState(context: LayerContext): void;
 
-  /** Returns shader options and the deck.gl assembler used by layer models. */
-  getShaders(shaders: any): any {
+  /**
+   * Returns shader options and the deck.gl assembler used by layer models.
+   * Supply a subset of extensions when assembling a dedicated render pass.
+   */
+  getShaders(shaders: any, extensions = this.props.extensions): any {
     // Preprojection capability is stable for the lifetime of a layer instance.
     shaders = mergeShaders(
       {
@@ -748,7 +800,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       modules: this.context.defaultShaderModules,
       plugins: this.context.defaultShaderPlugins
     });
-    for (const extension of this.props.extensions) {
+    for (const extension of extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
     return {...shaders, shaderAssembler: this.context.shaderAssembler};

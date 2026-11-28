@@ -4,8 +4,9 @@
 
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import {DeckGL, GeoJsonLayer, ArcLayer} from 'deck.gl';
-import {CompassWidget} from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import {GeoJsonLayer, ArcLayer} from '@deck.gl/react/layers';
+import {CompassWidget} from '@deck.gl/react/widgets';
 import '@deck.gl/widgets/stylesheet.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz

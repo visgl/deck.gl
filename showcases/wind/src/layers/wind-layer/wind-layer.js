@@ -3,7 +3,6 @@
 // Copyright (c) vis.gl contributors
 
 import {Layer} from 'deck.gl';
-import {GL} from '@luma.gl/core/webgl-constants';
 import {Model, Geometry, loadTextures, Texture2D} from 'luma.gl';
 
 import {
@@ -36,10 +35,10 @@ export default class WindLayer extends Layer {
       // TODO open bug for this, refine the loadTextures interface
       parameters: {
         parameters: {
-          [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-          [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-          [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-          [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+          [gl.TEXTURE_MAG_FILTER]: gl.LINEAR,
+          [gl.TEXTURE_MIN_FILTER]: gl.LINEAR,
+          [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
+          [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
         }
       }
     }).then(textures => {
@@ -100,7 +99,7 @@ export default class WindLayer extends Layer {
 
     const {bbox, dataBounds, dataTextureArray} = this.props;
     const pixelStoreParameters = {
-      [GL.UNPACK_FLIP_Y_WEBGL]: true
+      [gl.UNPACK_FLIP_Y_WEBGL]: true
     };
 
     textureFrom.setImageData({
@@ -160,7 +159,7 @@ export default class WindLayer extends Layer {
 
     const geometry = new Geometry({
       id: this.props.id,
-      drawMode: GL.TRIANGLE_FAN,
+      drawMode: gl.TRIANGLE_FAN,
       isInstanced: true,
       instanceCount: 1,
       attributes: {

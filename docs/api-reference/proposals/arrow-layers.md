@@ -11,7 +11,7 @@ to luma.gl models.
 
 ## GPUVector-first core family
 
-Arc, Column, GridCell, Icon, Line, PointCloud, and Scatterplot follow a two-level contract:
+Icon and Scatterplot follow a two-level contract:
 
 1. `@deck.gl/proposals/layers` renders aligned, batched, caller-owned GPUVectors.
 2. This package resolves Arrow columns, uploads adapter-owned GPUVectors, and releases them when the
@@ -36,8 +36,43 @@ releasing the current set; a rejected column releases partial uploads and retain
 previous vectors. Path streams close their iterators when replaced, finalized, or
 when batch preparation fails. `ArrowTripsLayer` similarly converts aligned timestamp lists before
 delegating to the existing GPUVector path-storage model. `GeoArrowLayer` selects point,
-linestring, polygon, or multipolygon children from field extension metadata without converting to
-GeoJSON.
+linestring, polygon, or multipolygon children from field extension metadata. Encoded and mixed
+geometry uses the GeoJSON renderer and picking returns the source Arrow row.
+Polygon extrusion, outlines, and extensions also use the standard GeoJSON renderer.
+Set `getElevation` to a constant or a source column for extruded polygons.
+
+To load a GeoJSON file directly, pass its URL and `GeoJSONLoader`. The loader converts the file to
+an Arrow table with a GeoArrow geometry column. Set
+`loadOptions: {geoarrow: {encodingPreference: 'optimized'}}` to request native coordinate buffers
+when the input contains a single geometry type.
+
+If the table has multiple geometry columns, set `getGeometry` to the field name, for example
+`getGeometry: 'footprint'`. The layer uses the declared primary geometry when available,
+then the first field with GeoArrow extension metadata.
+To render multiple geometry columns, pass the same table to several layers with different
+`getGeometry` values.
+A layer `query` can also project or alias a geometry field. Select the alias with `getGeometry`
+if the projected table still has multiple geometry columns.
+
+To render a derived geometry per source row, pass a SQL accessor such as
+`getGeometry: {sql: 'ST_PointOnSurface(footprint)'}`. Supply spatial functions with
+`sqlFunctions: POSTGIS_SPATIAL_FUNCTIONS` from `@math.gl/geospatial/st-functions`.
+Styling and picking refer to the source rows. The
+[spatial SQL example](https://github.com/visgl/deck.gl/tree/master/examples-v10/proposals/geoarrow-sql)
+shows centroid, interior point, and envelope expressions.
+
+```ts
+import {GeoArrowLayer} from '@deck.gl/proposals/layers';
+import {GeoJSONLoader} from '@loaders.gl/tables/geojson';
+
+new GeoArrowLayer({
+  id: 'boundaries',
+  data: '/data/boundaries.geojson',
+  loaders: [GeoJSONLoader],
+  getFillColor: [93, 138, 82, 255],
+  pickable: true
+});
+```
 
 These Arrow layers intentionally accept only Arrow sources. Classic JavaScript arrays and legacy binary
 attributes belong in sibling adapters rather than alternate code paths here. A future unified
@@ -55,23 +90,23 @@ adapts existing GPU results to real deck.gl layers; it does not replace the unde
 
 ## Graph effects and layers
 
-`GPUGraphDeckEffect` composes topology, vertex degree, PageRank, weak components, deterministic
+The graph explorer example’s local `GraphExplorerEffect` composes topology, vertex degree, PageRank, weak components, deterministic
 communities, neighborhood search, and progressive force layout inside deck.gl's existing frame.
 Deck owns queue submission; the effect retains original source and target edge partitions,
 including empty batches, without staging or reading graph data back to the CPU.
 
 ```ts
 import {GPUGraphEdgeLayer, GPUGraphNodeLayer} from '@deck.gl/proposals/layers';
-import {GPUGraphDeckEffect, type GPUGraphDeckDataset} from '@deck.gl/proposals/effects';
+import {GraphExplorerEffect, type GraphExplorerDataset} from './graph-explorer-effect';
 
-const dataset: GPUGraphDeckDataset = {
+const dataset: GraphExplorerDataset = {
   vertexCount,
   sourceChunks,
   targetChunks,
   positions,
   velocities
 };
-const effect = new GPUGraphDeckEffect(device, dataset);
+const effect = new GraphExplorerEffect(device, dataset);
 ```
 
 `GPUGraphNodeLayer` consumes the exact progressive position allocation alongside resident community,
@@ -87,7 +122,7 @@ keeps all 1,048,576 source vertices and 2,097,343 directed edges resident while 
 vertex and bounding visible edges to 65,536.
 
 ```ts
-const sampledEffect = new GPUGraphDeckEffect(device, dataset, {
+const sampledEffect = new GraphExplorerEffect(device, dataset, {
   layoutMode: 'sampled',
   addSampledLayoutToGraph: addApplicationOwnedSampledLayout
 });
@@ -98,8 +133,7 @@ the supplied graph and existing layout; it does not transfer ownership or add an
 dependency to this package. Omitting the optional configuration retains the regular exact-layout
 constructor shown above.
 
-The graph algorithms remain in `@luma.gl/graph/gpu-graph-algorithms`; only this existing private adapter
-package depends on deck.gl. Its diagnostics report actual resident populations, visible edge
+The graph explorer uses algorithms from `@luma.gl/graph/gpu-graph-algorithms`. Its diagnostics report resident populations, visible edge
 detail, CPU encoding, and frame cadence without inventing GPU timings or claiming convergence for
 a fixed iteration budget.
 

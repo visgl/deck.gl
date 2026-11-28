@@ -4,11 +4,11 @@
 
 import {expect, test, vi} from 'vitest';
 import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
-import {LayerManager, MapView, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {LayerManager, MapView, GlobeViewport} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {device} from '@deck.gl/test-utils/vitest';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {geoJSONData} from './data/fixtures';
 import PolygonTesselator from '@deck.gl/layers/solid-polygon-layer/polygon-tesselator';
 

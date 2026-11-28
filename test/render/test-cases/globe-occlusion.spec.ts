@@ -6,7 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {_GlobeView as GlobeView} from '@deck.gl/core';
+import {GlobeView} from '@deck.gl/core';
 import {IconLayer, ScatterplotLayer, SolidPolygonLayer, TextLayer} from '@deck.gl/layers';
 import {iconAtlas as iconMapping} from 'deck.gl-test/data';
 import fontMapping from '../../data/font-atlas.json';

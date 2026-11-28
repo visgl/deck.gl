@@ -52,7 +52,7 @@ If we could represent the aggregations at the core of these layers as `GPUTable 
 Columnar Tables can be treated like data frames (e.g. Python Pandas). One approach is to enable `GPUTable`s to work as efficient "GPU-side shadows" of CPU-side Arrow DataFrames, mirroring the arrow table after CPU data frame operations:
 
 ```js
-import {ArrowLoader} from `@loaders.gl/arrow`;
+import {ArrowLoader} from `@loaders.gl/tables/arrow`;
 const table = parse(..., ArrowLoader, {});
 const gpuTable = new GPUTable(table);
 table = table.slice(1000, 3000); // can drop chunks
@@ -263,7 +263,7 @@ Columnar Tables can be treated like data frames (see Python Pandas), e.g. using 
 To support this, a function `gpuTable.setTable(table)` could update the GPU buffers associated with the table.
 
 ```js
-import {ArrowLoader} from `@loaders.gl/arrow`;
+import {ArrowLoader} from `@loaders.gl/tables/arrow`;
 const table = parse(..., ArrowLoader, {});
 const gpuTable = new GPUTable(table);
 table = table.slice(1000, 3000); // can drop chunks

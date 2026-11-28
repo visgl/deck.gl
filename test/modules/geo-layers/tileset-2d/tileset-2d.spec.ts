@@ -4,13 +4,8 @@
 
 import {test, expect, vi} from 'vitest';
 import {_Tileset2D as Tileset2D, Tile2DHeader} from '@deck.gl/geo-layers';
-import {
-  WebMercatorViewport,
-  OrthographicView,
-  Viewport,
-  _GlobeViewport as GlobeViewport
-} from '@deck.gl/core';
-import {Matrix4} from '@math.gl/core';
+import {WebMercatorViewport, OrthographicView, Viewport, GlobeViewport} from '@deck.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {Tile2DView} from '../../../../modules/geo-layers/src/tileset-2d/tile-2d-view';
 
 const testViewState = {

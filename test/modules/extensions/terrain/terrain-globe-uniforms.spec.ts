@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {GlobeViewport} from '@deck.gl/core';
 import {Buffer, type Texture} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Computation} from '@luma.gl/engine';
@@ -49,7 +49,7 @@ test('terrain globe height scale follows the projected meter-offset anchor', asy
       @compute @workgroup_size(1) fn main() {
         let anchor = project_position_vec3_f32(vec3<f32>(0.0));
         output[0] = vec4<f32>(terrain_globe_latitude_scale(anchor), 0.0, 0.0, 0.0);
-        if (terrain.mode > 100.0) { output[0] = textureLoad(terrain_map, vec2<i32>(0), 0); }
+        if (terrain.mode > 100.0) { output[0] = textureSampleLevel(terrain_map, terrain_mapSampler, vec2<f32>(0.5), 0.0); }
       }
     `,
     bindings: {output, terrain_map: texture}
